@@ -174,6 +174,8 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
     /** Points bloquants que le scénario ferait apparaître, hors présence pharmaceutique (mesurée à part). */
     nouveauxBloquants: Issue[];
     rdvSansPreneur: Mission[];
+    /** Le scénario découvre-t-il un autre jour de la semaine (poste rendu en échange) ? */
+    degradeAilleurs: boolean;
     cout: number;
   }
   const evaluer = (brut: Patch): Evalue => {
@@ -189,12 +191,20 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
         (i) => i.gravite === 'bloquant' && !idsApres.has(i.id) && !idsAvant.has(i.id) && i.regle !== 'pharmacie.presence',
       ),
       rdvSansPreneur: orphelines.filter((m) => !patch.confier.some((c) => c.missionId === m.id)),
+      degradeAilleurs: [...new Set(patch.retirer.map((id) => data.shifts.find((x) => x.id === id)?.date).filter((x): x is ISODate => !!x && x !== date))].some(
+        (autre) => {
+          const a = mesurer(data, autre);
+          const b = mesurer(d, autre);
+          return b.sansPharmacien > a.sansPharmacien || b.deficit > a.deficit;
+        },
+      ),
       cout: coutSemaine(d, monday) - coutBase,
     };
   };
   /** Le scénario améliore-t-il la couverture sans rien aggraver ? */
   const utile = (e: Evalue): boolean =>
     !e.nouveauxBloquants.length &&
+    !e.degradeAilleurs &&
     e.mesure.sansPharmacien <= m1.sansPharmacien &&
     e.mesure.deficit <= m1.deficit &&
     (e.mesure.sansPharmacien < m1.sansPharmacien || e.mesure.deficit < m1.deficit);
@@ -272,7 +282,8 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
     if (!postesDuJour.length) {
       patches.push({ patch: { ...vide(), ajouter: [nouveauShift(retire, p.id)] }, creneaux: 1 });
       // Échange de jour : la personne rend un autre poste de la semaine pour garder son volume d'heures.
-      for (const autre of semaine.filter((s) => s.personId === p.id && s.date !== date)) {
+      // Seulement un poste à venir : on ne « rend » pas une journée déjà commencée.
+      for (const autre of semaine.filter((s) => s.personId === p.id && s.date !== date && s.date > today)) {
         patches.push({ patch: { ...vide(), ajouter: [nouveauShift(retire, p.id)], retirer: [autre.id] }, creneaux: 2 });
       }
     } else {

@@ -174,7 +174,7 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
               <span key={s.date}>
                 {i > 0 ? <span className="seg-l" style={{ left: `${(avant / calcul.dureeReelle) * 100}%` }} /> : null}
                 <span className="lab" style={{ left: `${(avant / calcul.dureeReelle) * 100}%` }}>
-                  {JOURS_COURT[weekday(s.date)]} · {s.libelleJour} · {fmtDuree(s.minutes)}
+                  {s.libelleJour === 'dimanche' ? 'dimanche' : s.libelleJour === 'jour ouvrable' ? JOURS_COURT[weekday(s.date)] : `${JOURS_COURT[weekday(s.date)]} · ${s.libelleJour}`} · {fmtDuree(s.minutes)}
                 </span>
               </span>
             );

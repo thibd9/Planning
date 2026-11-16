@@ -121,7 +121,7 @@ export function Construire(): JSX.Element {
     return () => window.removeEventListener('keydown', onKey);
   }, [undo, redo]);
 
-  const colonnes = `164px ${dates.map((d) => (ouverture(data.officine, d).length || data.gardes.some((g) => g.date === d && g.personId) ? 'minmax(88px, 1fr)' : '50px')).join(' ')} 104px`;
+  const colonnes = `164px ${dates.map((d) => (ouverture(data.officine, d).length ? 'minmax(88px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '78px' : '50px')).join(' ')} ${lecture === 'equite' ? 128 : 104}px`;
   const visibles = data.personnes.filter((p) => !p.externe || postes.some((s) => s.personId === p.id));
   const lignesEquite = useMemo(
     () => (lecture === 'equite' ? equite(data, periodeAvant(semaine, 8).from, addDays(semaine, 6)) : []),
@@ -308,13 +308,13 @@ export function Construire(): JSX.Element {
                                   <span className="lbl num">
                                     {s.activite !== 'comptoir' ? <Package size={12} aria-label={ACTIVITE_LABEL[s.activite]} /> : null}
                                     {fmtHHMM(s.start)}–{fmtHHMM(s.end)}
-                                    {s.explication ? <MessageCircleQuestion size={12} className="why" aria-label="Affectation expliquée" /> : null}
                                   </span>
+                                  {s.explication ? <MessageCircleQuestion size={12} className="why" aria-label="Affectation expliquée" /> : null}
                                 </button>
                               ))}
                               {gardes.map((g) => (
                                 <span key={g.id} className="garde-chip" title={GARDE_LABEL[g.type]}>
-                                  <Moon size={11} /> {fmtHHMM(g.start)}→{fmtHHMM(g.end)}
+                                  <Moon size={11} /> {fmtHHMM(g.start).replace(':00', ' h')}→{fmtHHMM(g.end).replace(':00', ' h')}
                                 </span>
                               ))}
                               {!duJour.length && !absence && ouvert && !passee ? (
@@ -427,7 +427,7 @@ function EnTeteJour({ data, date, echelle, today, flag }: { data: AppData; date:
   const max = Math.max(4, ...creneaux.map((c) => c.present));
   return (
     <div className={`pg-h${date === today ? ' today' : ''}${!o.length ? ' closed' : ''}`} role="columnheader" style={{ position: 'sticky', boxShadow: flag ? 'inset 0 0 0 2px var(--danger)' : undefined }}>
-      <span className="d">{o.length || data.gardes.some((g) => g.date === date && g.personId) ? JOURS[wd] : JOURS[wd].slice(0, 3)}</span>
+      <span className="d">{o.length ? JOURS[wd] : JOURS[wd].slice(0, 3)}</span>
       <span className="n">{fmtJourMois(date).split(' ')[0]}</span>
       {o.length ? (
         <>

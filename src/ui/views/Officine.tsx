@@ -17,7 +17,7 @@ function Heure({ value, onChange, label }: { value: number; onChange: (v: number
         const v = parseHHMM(e.target.value);
         if (v !== null) onChange(v);
       }}
-      style={{ padding: '5px 7px', width: 104 }}
+      style={{ padding: '5px 7px', width: 124 }}
     />
   );
 }
@@ -100,7 +100,7 @@ export function Officine(): JSX.Element {
               <tbody>
                 {officine.effectifs.map((e, i) => (
                   <tr key={i}>
-                    <td>{e.jours.length === 5 && e.jours[0] === 0 ? 'Lundi à vendredi' : e.jours.map((j) => JOURS[j]).join(', ')}</td>
+                    <td style={{ textTransform: 'capitalize' }}>{e.jours.length === 5 && e.jours[0] === 0 ? 'Lundi à vendredi' : e.jours.map((j) => JOURS[j]).join(', ')}</td>
                     <td className="num">
                       {fmtHHMM(e.start)} → {fmtHHMM(e.end)}
                     </td>
@@ -187,7 +187,7 @@ export function Officine(): JSX.Element {
                     <span className="muted">Sans pause</span>
                   )}
                 </td>
-                <td className="small">{p.jours.length === 5 && p.jours[0] === 0 ? 'Lundi à vendredi' : p.jours.map((j) => JOURS[j]).join(', ')}</td>
+                <td className="small" style={{ textTransform: 'capitalize' }}>{p.jours.length === 5 && p.jours[0] === 0 ? 'Lundi à vendredi' : p.jours.map((j) => JOURS[j]).join(', ')}</td>
                 <td className="num" style={{ textAlign: 'right' }}>{fmtDuree(minutesTravail(p))}</td>
               </tr>
             ))}

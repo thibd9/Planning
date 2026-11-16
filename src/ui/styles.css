@@ -260,7 +260,7 @@ table.t tr:last-child td { border-bottom: 0; }
 .bar-back { background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.28) 3px, transparent 3px, transparent 6px); }
 .shift .lbl { display: flex; align-items: center; gap: 3px; font-size: 11.5px; font-weight: 600; margin-top: 3px; white-space: nowrap; color: var(--ink); }
 .shift .lbl svg { flex: none; color: var(--ink-3); }
-.shift .lbl .why { color: var(--sapin-3); }
+.shift .why { color: var(--sapin-3); }
 .garde-chip { display: flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 650; color: var(--nuit); background: var(--nuit-soft); border-radius: 6px; padding: 2px 6px; white-space: nowrap; overflow: hidden; }
 .pg-sum { border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 8px 10px; display: flex; flex-direction: column; justify-content: center; gap: 4px; font-size: 12.5px; }
 .meter { height: 6px; border-radius: 3px; background: #ebe6d9; overflow: hidden; position: relative; }
@@ -332,7 +332,7 @@ table.t tr:last-child td { border-bottom: 0; }
 .nightline { position: relative; height: 34px; border-radius: 10px; background: linear-gradient(90deg, #3a3f78, var(--nuit) 30%, var(--nuit) 70%, #4a5090); overflow: hidden; }
 .nightline .seg-l { position: absolute; top: 0; bottom: 0; border-left: 1.5px dashed rgba(255, 255, 255, 0.5); }
 .nightline .lab { position: absolute; top: 8px; font-size: 11.5px; color: #dfe2f7; font-weight: 600; white-space: nowrap; padding-left: 7px; }
-.nightline .itv { position: absolute; top: 5px; bottom: 5px; background: var(--miel); border-radius: 4px; min-width: 4px; }
+.nightline .itv { position: absolute; bottom: 3px; height: 6px; background: var(--miel); border-radius: 3px; min-width: 5px; }
 
 /* ----------------------------------------------------------------- Équité */
 .eq-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
@@ -408,3 +408,17 @@ details.why summary { cursor: pointer; font-size: 12px; font-weight: 650; color:
 details.why summary::-webkit-details-marker { display: none; }
 details.why summary::before { content: '+'; display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 5px; background: var(--danger-soft); font-weight: 800; }
 details.why[open] summary::before { content: '–'; }
+
+.shift .why { position: absolute; right: -3px; top: -5px; background: var(--surface); border-radius: 50%; padding: 1px; width: 15px; height: 15px; box-shadow: 0 0 0 1px var(--line); }
+.garde-chip { font-size: 10.5px; padding: 2px 4px; gap: 2px; justify-content: center; }
+.panel .card-head { flex-wrap: wrap; row-gap: 6px; }
+@media (max-width: 860px) {
+  .topbar > .grow { display: none; }
+  .viewer { margin-left: auto; }
+  .day-row > span:last-child { display: none; }
+  .hero { padding: 20px 18px; }
+}
+
+.panel .card-head h3 { flex: 1 0 auto; }
+.pg-sum { white-space: nowrap; overflow: hidden; }
+.pg-sum .pill { align-self: flex-start; }
