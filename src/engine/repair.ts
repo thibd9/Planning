@@ -1,7 +1,7 @@
 import { valeurRegle } from '../domain/rules';
 import { JOURS, fmtDuree, fmtHeure, joursOuvresEntre, mondayOf, overlaps, uid, weekday } from '../domain/time';
 import type { AppData, Changement, ISODate, Mission, Person, Shift } from '../domain/types';
-import { MISSION_LABEL, estPharmacien, nomCourt } from '../domain/types';
+import { MISSION_COMPETENCE, MISSION_LABEL, estPharmacien, nomCourt } from '../domain/types';
 import { decrireJournee, estAbsent, minutesSemaine, minutesTravail, segmentsTravail, shiftsSemaine } from './core';
 import { equite, periodeAvant } from './equity';
 import { coutSemaine } from './payroll';
@@ -25,6 +25,8 @@ export interface Patch {
   auComptoir: string[];
   /** Rendez-vous à reprogrammer : la personne en est libérée. */
   liberer: string[];
+  /** Rendez-vous de la personne absente confiés à un collègue habilité et présent. */
+  confier: { missionId: string; personId: string }[];
 }
 
 export interface RepairOption {
@@ -52,7 +54,7 @@ export interface Reparation {
   options: RepairOption[];
 }
 
-const vide = (): Patch => ({ retirer: [], ajouter: [], auComptoir: [], liberer: [] });
+const vide = (): Patch => ({ retirer: [], ajouter: [], auComptoir: [], liberer: [], confier: [] });
 
 export function appliquerPatch(data: AppData, patch: Patch): AppData {
   return {
@@ -61,7 +63,11 @@ export function appliquerPatch(data: AppData, patch: Patch): AppData {
       .filter((s) => !patch.retirer.includes(s.id))
       .map((s) => (patch.auComptoir.includes(s.id) ? { ...s, activite: 'comptoir' as const } : s))
       .concat(patch.ajouter),
-    missions: data.missions.map((m) => (patch.liberer.includes(m.id) ? { ...m, personId: null } : m)),
+    missions: data.missions.map((m) => {
+      if (patch.liberer.includes(m.id)) return { ...m, personId: null };
+      const c = patch.confier.find((x) => x.missionId === m.id);
+      return c ? { ...m, personId: c.personId } : m;
+    }),
   };
 }
 
@@ -116,7 +122,31 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
     issues: Issue[];
     data: AppData;
   }
-  const evaluer = (patch: Patch): Evalue => {
+  /** Confie les rendez-vous de l'absent à une personne formée, en poste sur tout le créneau et libre. */
+  const reprendreRendezVous = (patch: Patch): Patch => {
+    if (!orphelines.length) return patch;
+    const d = appliquerPatch(data, patch);
+    const confier: Patch['confier'] = [];
+    const prioritaires = patch.ajouter.map((x) => x.personId);
+    for (const m of orphelines) {
+      const requise = MISSION_COMPETENCE[m.type];
+      const candidat = data.personnes
+        .filter((p) => p.id !== retire.personId && (!requise || p.competences.includes(requise)))
+        .filter((p) =>
+          d.shifts
+            .filter((x) => x.personId === p.id && x.date === m.date && x.activite !== 'formation')
+            .flatMap(segmentsTravail)
+            .some((i) => i.start <= m.start && m.end <= i.end),
+        )
+        .filter((p) => !d.missions.some((o) => o.id !== m.id && o.personId === p.id && o.date === m.date && overlaps(o, m)))
+        .filter((p) => !confier.some((c) => c.personId === p.id))
+        .sort((a, b) => prioritaires.indexOf(b.id) - prioritaires.indexOf(a.id))[0];
+      if (candidat) confier.push({ missionId: m.id, personId: candidat.id });
+    }
+    return confier.length ? { ...patch, confier } : patch;
+  };
+  const evaluer = (brut: Patch): Evalue => {
+    const patch = reprendreRendezVous(brut);
     const d = appliquerPatch(data, patch);
     const issues = validateWeek(d, monday);
     const ids = new Set(issues.map((i) => i.id));
@@ -165,15 +195,22 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
     ];
   };
   const restantDe = (e: Evalue): string[] => {
-    const r = e.restants.map((i) => i.message);
-    if (orphelines.length && !e.patch.liberer.length) {
-      for (const m of orphelines) {
-        r.push(`${MISSION_LABEL[m.type]} de ${fmtHeure(m.start)} à ${fmtHeure(m.end)} : à confier à une personne habilitée ou à reprogrammer.`);
+    const r = e.restants.filter((i) => i.regle !== 'pharmacie.competence').map((i) => i.message);
+    if (orphelines.length) {
+      for (const m of orphelines.filter((x) => !e.patch.confier.some((c) => c.missionId === x.id))) {
+        r.push(`${MISSION_LABEL[m.type]} de ${fmtHeure(m.start)} à ${fmtHeure(m.end)} : personne d'habilité n'est en poste, rendez-vous à reprogrammer.`);
       }
     }
     return r;
   };
 
+  const reprises = (patch: Patch): string[] =>
+    patch.confier.map((c) => {
+      const m = data.missions.find((x) => x.id === c.missionId) as Mission;
+      const p = data.personnes.find((x) => x.id === c.personId) as Person;
+      return `${MISSION_LABEL[m.type]} de ${fmtHeure(m.start)} reprise par ${nomCourt(p)} : à lui confirmer`;
+    });
+  const seulementRendezVous = crees.length > 0 && crees.every((i) => i.regle === 'pharmacie.competence');
   const options: RepairOption[] = [];
 
   // ---- 1 et 2. Solutions internes
@@ -185,7 +222,8 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
   }
   const candidats: Candidat[] = [];
   const semaine = shiftsSemaine(data, monday);
-  for (const p of data.personnes) {
+  // Sans plage découverte, inutile de déranger qui que ce soit.
+  for (const p of crees.length && !seulementRendezVous ? data.personnes : []) {
     if (p.externe || p.id === retire.personId) continue;
     if (besoinPharmacien && !estPharmacien(p)) continue;
     if (estAbsent(data, p.id, retire.date)) continue;
@@ -238,7 +276,7 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
 
   const construireInterne = (c: Candidat, type: 'echange' | 'heures_comp'): RepairOption => {
     const changements = changementsDe(c.e.patch, c.e.data);
-    const validations = [`Accord de ${nomCourt(c.p)} à obtenir`];
+    const validations = [`Accord de ${nomCourt(c.p)} à obtenir`, ...reprises(c.e.patch)];
     if (c.p.salarie && c.p.heuresHebdo < 35 && joursOuvresEntre(today, retire.date) < delaiPartiel) {
       validations.push(`Temps partiel prévenu moins de ${delaiPartiel} jours ouvrés avant : accord à tracer`);
     }
@@ -273,7 +311,7 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
   // ---- 3. Remplaçant habituel
   const roleVoulu = besoinPharmacien || (absent ? estPharmacien(absent) : false);
   const externes = data.personnes
-    .filter((p) => p.externe && estPharmacien(p) === roleVoulu)
+    .filter((p) => crees.length > 0 && !seulementRendezVous && p.externe && estPharmacien(p) === roleVoulu)
     .map((p) => ({ p, e: evaluer({ ...vide(), ajouter: [nouveauShift(retire, p.id)] }) }))
     .filter((x) => !x.e.nouveauxBloquants.length)
     .sort((a, b) => a.e.restants.length - b.e.restants.length || a.e.cout - b.e.cout);
@@ -289,7 +327,7 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
       personnesTouchees: [],
       creneauxModifies: 0,
       coutSupp: ((p.tauxHoraire ?? 0) * minutesTravail(retire)) / 60,
-      validations: [`Disponibilité de ${nomCourt(p)} à confirmer`, 'Contrat ou bon de mission à établir'],
+      validations: [`Disponibilité de ${nomCourt(p)} à confirmer`, 'Contrat ou bon de mission à établir', ...reprises(e.patch)],
       regles: reglesControlees(e, [p.id]),
       restant: restantDe(e),
       patch: e.patch,
@@ -348,25 +386,40 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
     }
   }
 
-  // ---- 5. Ne rien changer : possible seulement si un pharmacien reste présent
+  // ---- 5. Ne rien changer aux horaires : possible seulement si un pharmacien reste présent
   if (!besoinPharmacien) {
     const e = evaluer(vide());
+    const repris = e.patch.confier.length > 0;
+    const reste = e.restants.filter((i) => i.regle !== 'pharmacie.competence');
+    const aReprogrammer = orphelines.filter((m) => !e.patch.confier.some((c) => c.missionId === m.id));
+    // Faute de personne habilitée en poste, le rendez-vous est libéré pour être reprogrammé.
+    const patch: Patch = aReprogrammer.length ? { ...e.patch, liberer: aReprogrammer.map((m) => m.id) } : e.patch;
     options.push({
       id: uid('opt'),
       type: 'accepter',
-      titre: crees.length ? 'Accepter un effectif réduit' : 'Aucun remplacement nécessaire',
-      resume: crees.length
-        ? 'Le planning reste tel quel : un pharmacien est présent, mais l’effectif attendu n’est pas atteint.'
-        : `L’absence ${absent ? `de ${nomCourt(absent)} ` : ''}ne découvre aucune plage : la couverture reste assurée.`,
-      couverture: crees.length ? 'partielle' : 'maintenue',
+      titre: reste.length
+        ? 'Accepter un effectif réduit'
+        : repris
+          ? `Confier le rendez-vous à ${nomCourt(data.personnes.find((p) => p.id === e.patch.confier[0].personId) as Person)}`
+          : aReprogrammer.length
+            ? 'Reprogrammer le rendez-vous'
+            : 'Aucun remplacement nécessaire',
+      resume: reste.length
+        ? 'Les horaires restent tels quels : un pharmacien est présent, mais l’effectif attendu n’est pas atteint.'
+        : repris
+          ? 'Aucun horaire ne change : une personne formée, déjà en poste, reprend le rendez-vous.'
+          : aReprogrammer.length
+            ? 'Aucune personne habilitée n’est en poste sur le créneau : le rendez-vous est à déplacer.'
+            : `L’absence ${absent ? `de ${nomCourt(absent)} ` : ''}ne découvre aucune plage : la couverture reste assurée.`,
+      couverture: reste.length ? 'partielle' : aReprogrammer.length ? 'sous_conditions' : 'maintenue',
       changements: [],
-      personnesTouchees: [],
+      personnesTouchees: e.patch.confier.map((c) => c.personId),
       creneauxModifies: 0,
       coutSupp: 0,
-      validations: [],
+      validations: [...reprises(e.patch), ...(aReprogrammer.length ? ['Rendez-vous à reprogrammer avec les personnes concernées'] : [])],
       regles: reglesControlees(e, []),
       restant: restantDe(e),
-      patch: vide(),
+      patch,
       recommande: false,
     });
   }

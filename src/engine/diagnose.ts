@@ -266,13 +266,13 @@ export function diagnosticResultat(data: AppData, monday: ISODate, prealable: Bl
             ? causes.map((c) => c.raison).join(' ; ')
             : enPoste.length
               ? `en poste à un autre moment (${enPoste.flatMap(segmentsTravail).map((x) => `${fmtHeure(x.start)} – ${fmtHeure(x.end)}`).join(', ')})`
-              : 'affectable, mais cela dépasserait une durée maximale ou un repos';
+              : 'sans poste ce jour-là';
         return { personId: p.id, raison };
       });
       out.push({
         cas: 'decouvert',
         titre: `${jourLong(i.date)}, ${fmtHeure(reste.start)} – ${fmtHeure(reste.end)} : créneau encore découvert`,
-        message: `Le planning proposé laisse le ${jourLong(i.date)}, de ${fmtHeure(reste.start)} à ${fmtHeure(
+        message: `Le planning laisse le ${jourLong(i.date)}, de ${fmtHeure(reste.start)} à ${fmtHeure(
           reste.end,
         )}, sans pharmacien. Ce n’est pas démontré impossible : un ajustement manuel ou un renfort peut suffire.`,
         date: i.date,

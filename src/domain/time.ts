@@ -39,6 +39,8 @@ export const MOIS = [
   'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
 ];
 
+export const MOIS_COURT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
 /** « 8 h 30 », « 14 h ». */
 export function fmtHeure(min: Minutes): string {
   const m = ((min % 1440) + 1440) % 1440;

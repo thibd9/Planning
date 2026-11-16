@@ -176,9 +176,17 @@ describe('réparation', () => {
         expect(apres.filter((i) => !avant.has(i.id))).toEqual([]);
       }
       const remplacant = rep.options.find((o) => o.type === 'remplacant');
-      expect(remplacant?.personnesTouchees).toEqual([]);
-      expect(remplacant?.coutSupp).toBeGreaterThan(0);
+      if (remplacant) {
+        expect(remplacant.creneauxModifies).toBe(0);
+        expect(remplacant.coutSupp).toBeGreaterThan(0);
+      }
+      // Sans plage découverte, on ne dérange personne.
+      if (!rep.impact.length) expect(rep.options.map((o) => o.type)).toEqual(['accepter']);
     }
+    // Au moins une journée de l'arrêt découvre une plage sans pharmacien et propose un remplaçant.
+    const avecImpact = data.trous.map((t) => optionsReparation(data, t.shift, TODAY)).filter((r) => r.impact.length);
+    expect(avecImpact.length).toBeGreaterThan(0);
+    expect(avecImpact.some((r) => r.options.some((o) => o.type === 'remplacant'))).toBe(true);
   });
 });
 
@@ -261,5 +269,38 @@ describe('équité, paie et langage courant', () => {
   it('garde un historique cohérent dans le jeu de démonstration', () => {
     expect(shiftsSemaine(data, addDays(LUNDI, -7)).length).toBeGreaterThan(30);
     expect(bloquants(validateWeek(data, addDays(LUNDI, -7)))).toEqual([]);
+  });
+});
+
+describe('rendez-vous d’un absent', () => {
+  it('confie le rendez-vous à une personne formée déjà en poste, sinon propose de le reprogrammer', () => {
+    const jeudi = addDays(SUIVANT, 3);
+    const base: AppData = {
+      ...data,
+      trous: [],
+      shifts: [
+        poste('p_helene', jeudi, 510, 1170, { pauseStart: 750, pauseEnd: 810 }),
+        poste('p_lea', jeudi, 690, 1170, { pauseStart: 810, pauseEnd: 870 }),
+        poste('p_camille', jeudi, 510, 1170, { pauseStart: 780, pauseEnd: 840 }),
+        poste('p_thomas', jeudi, 510, 1170, { pauseStart: 720, pauseEnd: 780 }),
+        poste('p_jules', jeudi, 510, 1170, { pauseStart: 840, pauseEnd: 900 }),
+      ],
+    };
+    const retire = poste('p_karim', jeudi, 690, 1170, { pauseStart: 840, pauseEnd: 900 });
+    const rep = optionsReparation(base, retire, TODAY);
+    expect(rep.impact.some((m) => m.includes('Vaccination'))).toBe(true);
+    const o = rep.options.find((x) => x.recommande);
+    expect(o?.patch.confier).toHaveLength(1);
+    expect(['p_helene', 'p_lea']).toContain(o?.patch.confier[0].personId);
+    expect(o?.titre).toContain('Confier le rendez-vous');
+    const apres = appliquerPatch(base, o!.patch);
+    expect(validateWeek(apres, SUIVANT).some((i) => i.regle === 'pharmacie.competence' && i.gravite === 'bloquant')).toBe(false);
+
+    // Sans personne formée en poste sur le créneau : le rendez-vous est à reprogrammer.
+    const sans: AppData = { ...base, shifts: base.shifts.filter((x) => x.personId !== 'p_helene' && x.personId !== 'p_lea').concat(poste('p_helene', jeudi, 510, 900, { pauseStart: 750, pauseEnd: 780 })) };
+    const rep2 = optionsReparation(sans, { ...retire, start: 900, end: 1170, pauseStart: undefined, pauseEnd: undefined }, TODAY);
+    const accepter = rep2.options.find((x) => x.type === 'accepter');
+    expect(accepter).toBeUndefined(); // un pharmacien manque : on ne peut pas « ne rien changer »
+    expect(rep2.options.some((x) => x.type === 'remplacant' && x.patch.confier.length === 1)).toBe(true);
   });
 });

@@ -73,12 +73,14 @@ interface Poids {
   etalement: number;
   fatigue: number;
   confort: number;
+  /** Coût d'un jour travaillé : à heures égales, moins de jours mais mieux remplis. */
+  jour: number;
 }
 
 const POIDS: Record<Variante, Poids> = {
-  equite: { sous: 3, sur: 4, prioritaire: 25, preference: 6, samedi: 16, fermeture: 6, etalement: 4, fatigue: 6, confort: 0.05 },
-  souhaits: { sous: 3, sur: 4, prioritaire: 90, preference: 35, samedi: 5, fermeture: 2, etalement: 1.5, fatigue: 5, confort: 0.05 },
-  cout: { sous: 2, sur: 40, prioritaire: 25, preference: 6, samedi: 5, fermeture: 2, etalement: 1.5, fatigue: 5, confort: 0 },
+  equite: { sous: 3, sur: 4, prioritaire: 25, preference: 6, samedi: 22, fermeture: 6, etalement: 4, fatigue: 6, confort: 0.05, jour: 3 },
+  souhaits: { sous: 3, sur: 4, prioritaire: 90, preference: 35, samedi: 12, fermeture: 2, etalement: 1.5, fatigue: 5, confort: 0.05, jour: 3 },
+  cout: { sous: 2, sur: 40, prioritaire: 25, preference: 6, samedi: 12, fermeture: 2, etalement: 1.5, fatigue: 5, confort: 0, jour: 3 },
 };
 
 const PAS = 15;
@@ -305,7 +307,8 @@ export function generer(data: AppData, monday: ISODate, opts: GenOptions): GenRe
       prev = s;
       prevD = d;
     }
-    if (joursTravailles >= 6) soft += W.fatigue * 2;
+    soft += W.jour * joursTravailles;
+    if (joursTravailles >= 6) soft += W.fatigue * 6;
     // Étalement des fermetures, au prorata du temps de travail.
     const charge = fermetures * (35 / Math.max(8, p.heuresHebdo));
     soft += W.etalement * charge * charge;
