@@ -1,0 +1,302 @@
+import { REGLES_INITIALES } from '../domain/rules';
+import { addDays, dayIndex, decalageParis, ferie, fromDayIndex, mondayOf, uid, weekDates } from '../domain/time';
+import type { AppData, Besoin, Garde, ISODate, Mission, Officine, Person, Shift } from '../domain/types';
+import { decrireJournee, shiftsSemaine } from '../engine/core';
+import { generer } from '../engine/generate';
+
+const H = (h: number, m = 0): number => h * 60 + m;
+const SEMAINE = [0, 1, 2, 3, 4];
+
+export const OFFICINE_DEMO: Officine = {
+  nom: 'Pharmacie des Tilleuls',
+  horaires: [
+    [{ start: H(8, 30), end: H(19, 30) }],
+    [{ start: H(8, 30), end: H(19, 30) }],
+    [{ start: H(8, 30), end: H(19, 30) }],
+    [{ start: H(8, 30), end: H(19, 30) }],
+    [{ start: H(8, 30), end: H(19, 30) }],
+    [{ start: H(9), end: H(19) }],
+    [],
+  ],
+  fermeJoursFeries: true,
+  postes: [
+    { id: 'ouverture', label: 'Ouverture', start: H(8, 30), end: H(16, 30), pauseStart: H(12, 30), pauseEnd: H(13, 30), jours: SEMAINE },
+    { id: 'fermeture', label: 'Fermeture', start: H(11, 30), end: H(19, 30), pauseStart: H(14), pauseEnd: H(15), jours: SEMAINE },
+    { id: 'matin', label: 'Matin', start: H(8, 30), end: H(13), jours: SEMAINE },
+    { id: 'aprem', label: 'Après-midi', start: H(14), end: H(19, 30), jours: SEMAINE },
+    { id: 'longue', label: 'Journée longue', start: H(8, 30), end: H(19, 30), pauseStart: H(12, 30), pauseEnd: H(14), jours: SEMAINE },
+    { id: 'sam-matin', label: 'Samedi matin', start: H(9), end: H(14), jours: [5] },
+    { id: 'sam-aprem', label: 'Samedi après-midi', start: H(14), end: H(19), jours: [5] },
+    { id: 'sam-journee', label: 'Samedi journée', start: H(9), end: H(19), pauseStart: H(13), pauseEnd: H(14), jours: [5] },
+  ],
+  effectifs: [
+    { jours: SEMAINE, start: H(8, 30), end: H(19, 30), minEquipe: 2 },
+    { jours: SEMAINE, start: H(10), end: H(12, 30), minEquipe: 3 },
+    { jours: SEMAINE, start: H(16, 30), end: H(19), minEquipe: 3 },
+    { jours: [5], start: H(9), end: H(19), minEquipe: 2 },
+    { jours: [5], start: H(10), end: H(12, 30), minEquipe: 3 },
+  ],
+  valeurPoint: null,
+  plafondPrioritaires: 2,
+  caAnnuelHT: 2_900_000,
+};
+
+const personne = (
+  id: string,
+  prenom: string,
+  nom: string,
+  qualification: Person['qualification'],
+  heuresHebdo: number,
+  tauxHoraire: number | null,
+  extra: Partial<Person> = {},
+): Person => ({
+  id,
+  prenom,
+  nom,
+  qualification,
+  salarie: qualification !== 'titulaire',
+  heuresHebdo,
+  tauxHoraire,
+  competences: [],
+  volontaireHeuresComp: false,
+  volontaireGardes: false,
+  ...extra,
+});
+
+/** Équipe fictive. Les taux horaires sont indicatifs et ne servent qu'à comparer des scénarios. */
+export const EQUIPE_DEMO: Person[] = [
+  personne('p_helene', 'Hélène', 'Marchetti', 'titulaire', 42, null, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
+  personne('p_karim', 'Karim', 'Benali', 'adjoint', 35, 24, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
+  personne('p_lea', 'Léa', 'Fontaine', 'adjoint', 28, 23.5, { competences: ['vaccination', 'entretien'], volontaireHeuresComp: true, volontaireGardes: true }),
+  personne('p_camille', 'Camille', 'Roussel', 'preparateur', 35, 15.8, { competences: ['orthopedie'] }),
+  personne('p_thomas', 'Thomas', 'Nguyen', 'preparateur', 35, 15.2, { competences: ['commandes'] }),
+  personne('p_ines', 'Inès', 'Da Silva', 'preparateur', 24, 15.2, { volontaireHeuresComp: true }),
+  personne('p_jules', 'Jules', 'Perrin', 'preparateur', 35, 14.6, { competences: ['commandes'] }),
+  personne('p_manon', 'Manon', 'Girard', 'apprenti', 21, 9.4),
+  personne('p_yanis', 'Yanis', 'Morel', 'etudiant', 16, 13.9),
+  personne('x_paul', 'Paul', 'Lemaire', 'adjoint', 0, 62, { externe: true, competences: ['vaccination', 'trod'] }),
+  personne('x_nadia', 'Nadia', 'Brun', 'preparateur', 0, 42, { externe: true }),
+];
+
+function besoin(b: Partial<Besoin> & Pick<Besoin, 'personId' | 'forme' | 'jours' | 'statut'>, quand: string): Besoin {
+  return {
+    id: uid('b'),
+    frequence: 1,
+    horsPlafond: false,
+    decision: 'acceptee',
+    decidedAt: quand,
+    createdAt: quand,
+    ...b,
+  };
+}
+
+/** Dernière nuit de changement d'heure avant une date : la garde de démonstration y est placée. */
+function dernierChangementHeure(today: ISODate): ISODate {
+  for (let i = dayIndex(today) - 1; i > dayIndex(today) - 400; i--) {
+    const d = fromDayIndex(i);
+    if (decalageParis(d, 60) !== decalageParis(d, 240)) return d;
+  }
+  return addDays(today, -30);
+}
+
+function finDeMoisSuivante(today: ISODate, minJours: number): ISODate {
+  let y = Number(today.slice(0, 4));
+  let m = Number(today.slice(5, 7));
+  for (;;) {
+    const dernier = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const d = `${y}-${String(m).padStart(2, '0')}-${String(dernier).padStart(2, '0')}`;
+    if (dayIndex(d) - dayIndex(today) >= minJours) return d;
+    m += 1;
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
+  }
+}
+
+function prochainFerie(today: ISODate, minJours: number): ISODate {
+  for (let i = dayIndex(today) + minJours; ; i++) {
+    const d = fromDayIndex(i);
+    if (ferie(d)) return d;
+  }
+}
+
+/**
+ * Jeu de démonstration : huit semaines d'historique publiées, la semaine en cours publiée
+ * avec un arrêt à traiter, la semaine suivante à construire.
+ */
+export function seed(today: ISODate): AppData {
+  const lundi = mondayOf(today);
+  const creation = new Date(`${addDays(lundi, -70)}T09:00:00`).toISOString();
+
+  const besoins: Besoin[] = [
+    besoin({ personId: 'p_manon', forme: 'indisponible', jours: [3, 4], statut: 'reconnue', horsPlafond: true }, creation),
+    besoin({ personId: 'p_yanis', forme: 'indisponible', jours: [0, 1, 3, 4], statut: 'reconnue', horsPlafond: true }, creation),
+    besoin({ personId: 'p_ines', forme: 'indisponible', jours: [2], statut: 'reconnue' }, creation),
+    besoin(
+      { personId: 'p_camille', forme: 'finir_avant', heure: H(17), jours: [2], frequence: 2, semaineRef: lundi, statut: 'prioritaire', to: addDays(lundi, 220) },
+      creation,
+    ),
+    besoin({ personId: 'p_lea', forme: 'indisponible', jours: [5], frequence: 2, semaineRef: lundi, statut: 'prioritaire' }, creation),
+    besoin({ personId: 'p_thomas', forme: 'commencer_apres', heure: H(9, 30), jours: [0], statut: 'preference' }, creation),
+    besoin({ personId: 'p_karim', forme: 'finir_avant', heure: H(17), jours: [4], statut: 'preference' }, creation),
+    {
+      ...besoin({ personId: 'p_jules', forme: 'finir_avant', heure: H(18), jours: [4], statut: 'prioritaire' }, new Date(`${addDays(today, -1)}T18:40:00`).toISOString()),
+      decision: 'en_attente',
+      decidedAt: undefined,
+      from: addDays(lundi, 7),
+    },
+  ];
+
+  const nuitChangement = dernierChangementHeure(today);
+  const finMois = finDeMoisSuivante(today, 12);
+  const noel = prochainFerie(today, 20);
+  const gardes: Garde[] = [
+    {
+      id: uid('g'),
+      date: addDays(nuitChangement, -1),
+      start: H(20),
+      end: H(8),
+      type: 'volets_fermes',
+      personId: 'p_karim',
+      communiqueLe: new Date(`${addDays(nuitChangement, -30)}T10:00:00`).toISOString(),
+      interventions: [{ id: uid('i'), offset: 250, duree: 25 }],
+    },
+    {
+      id: uid('g'),
+      date: addDays(lundi, 13),
+      start: H(9),
+      end: H(19),
+      type: 'volets_ouverts',
+      personId: 'p_lea',
+      communiqueLe: new Date(`${addDays(lundi, -14)}T10:00:00`).toISOString(),
+      interventions: [],
+    },
+    {
+      id: uid('g'),
+      date: finMois,
+      start: H(19, 30),
+      end: H(8, 30),
+      type: 'volets_fermes',
+      personId: 'p_karim',
+      communiqueLe: new Date(`${addDays(lundi, -6)}T10:00:00`).toISOString(),
+      interventions: [],
+    },
+    { id: uid('g'), date: addDays(lundi, 26), start: H(19), end: H(9), type: 'astreinte', personId: null, interventions: [] },
+    { id: uid('g'), date: noel, start: H(9), end: H(19), type: 'volets_ouverts', personId: null, interventions: [] },
+  ];
+
+  let data: AppData = {
+    officine: OFFICINE_DEMO,
+    personnes: EQUIPE_DEMO,
+    shifts: [],
+    missions: [],
+    absences: [],
+    besoins,
+    gardes,
+    semaines: {},
+    regles: REGLES_INITIALES.map((r) => ({ ...r })),
+    journal: [],
+    notifications: [],
+    trous: [],
+  };
+
+  // ---- Activités à rendez-vous, cette semaine et la suivante
+  const missions: Mission[] = [];
+  for (const monday of [lundi, addDays(lundi, 7)]) {
+    missions.push(
+      { id: uid('m'), date: addDays(monday, 1), start: H(10), end: H(10, 30), type: 'entretien', personId: 'p_lea', salle: true, reportable: true },
+      { id: uid('m'), date: addDays(monday, 1), start: H(14, 30), end: H(15, 30), type: 'rdv_labo', personId: 'p_thomas', salle: false, reportable: true },
+      { id: uid('m'), date: addDays(monday, 3), start: H(16), end: H(17), type: 'vaccination', personId: 'p_karim', salle: true, reportable: false },
+    );
+  }
+  data.missions = missions;
+
+  // ---- Historique : huit semaines passées et la semaine en cours, générées puis publiées.
+  for (let w = -8; w <= 0; w++) {
+    const monday = addDays(lundi, 7 * w);
+    const res = generer(data, monday, {
+      variante: w % 3 === 0 ? 'equite' : 'cout',
+      graine: 1000 + w * 17,
+      iterations: 14000,
+    });
+    const shifts = res.shifts.map((s) => ({ ...s, origine: 'trame' as const, explication: undefined }));
+    data = { ...data, shifts: data.shifts.concat(shifts) };
+    const publishedAt = new Date(`${addDays(monday, -12)}T17:30:00`).toISOString();
+    data.semaines[monday] = { statut: 'publie', publishedAt, snapshot: shifts.map((s) => ({ ...s })) };
+    if (w >= -1) {
+      data.journal.push({
+        id: uid('j'),
+        at: publishedAt,
+        type: 'publication',
+        titre: `Planning de la semaine du ${monday.split('-').reverse().join('/')} publié`,
+        detail: `${shifts.length} postes communiqués à l'équipe, 12 jours avant le début de la semaine.`,
+        semaine: monday,
+        regles: data.regles.map((r) => `${r.id}@${r.version}`),
+      });
+    }
+  }
+
+  // Thomas réceptionne les commandes le mardi : son poste n'est pas au comptoir.
+  data.shifts = data.shifts.map((s) =>
+    s.personId === 'p_thomas' && s.date === addDays(lundi, 1) ? { ...s, activite: 'back' as const } : s,
+  );
+  data.semaines[lundi].snapshot = shiftsSemaine(data, lundi).map((s) => ({ ...s }));
+
+  // ---- Un changement tardif absorbé la semaine dernière (alimente la mémoire d'équité)
+  const dernier = addDays(lundi, -7);
+  const posteJules = data.shifts.find((s) => s.personId === 'p_jules' && dayIndex(s.date) >= dayIndex(dernier) && dayIndex(s.date) < dayIndex(lundi));
+  if (posteJules) {
+    data.notifications.push({
+      id: uid('n'),
+      personId: 'p_jules',
+      at: new Date(`${addDays(posteJules.date, -2)}T11:00:00`).toISOString(),
+      date: posteJules.date,
+      avant: 'Repos',
+      apres: decrireJournee([posteJules]),
+      tardif: true,
+      luLe: new Date(`${addDays(posteJules.date, -2)}T12:10:00`).toISOString(),
+    });
+  }
+
+  // ---- Arrêt de Karim de mercredi à vendredi : les postes retirés deviennent des trous à résoudre.
+  const arretId = uid('a');
+  const from = addDays(lundi, 2);
+  const to = addDays(lundi, 4);
+  data.absences.push({
+    id: arretId,
+    personId: 'p_karim',
+    from,
+    to,
+    type: 'maladie',
+    statut: 'approuvee',
+    createdAt: new Date(`${today}T07:40:00`).toISOString(),
+  });
+  const retires = data.shifts.filter((s) => s.personId === 'p_karim' && s.date >= from && s.date <= to);
+  data.shifts = data.shifts.filter((s) => !retires.includes(s));
+  data.trous = retires.map((shift: Shift) => ({ id: uid('t'), absenceId: arretId, shift, statut: 'ouvert' as const }));
+  data.journal.push({
+    id: uid('j'),
+    at: new Date(`${today}T07:40:00`).toISOString(),
+    type: 'absence',
+    titre: 'Arrêt de Karim B. enregistré',
+    detail: `Du ${from.split('-').reverse().join('/')} au ${to.split('-').reverse().join('/')} : ${retires.length} poste${retires.length > 1 ? 's' : ''} à couvrir.`,
+    semaine: lundi,
+  });
+
+  // ---- Une demande de congé en attente, dans deux semaines
+  data.absences.push({
+    id: uid('a'),
+    personId: 'p_camille',
+    from: addDays(lundi, 14),
+    to: addDays(lundi, 18),
+    type: 'conge',
+    statut: 'demandee',
+    createdAt: new Date(`${addDays(today, -2)}T13:15:00`).toISOString(),
+  });
+
+  data.journal.sort((a, b) => b.at.localeCompare(a.at));
+  return data;
+}
+
+export { weekDates };
