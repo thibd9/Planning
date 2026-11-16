@@ -1,8 +1,17 @@
 import { valeurRegle } from '../domain/rules';
-import { JOURS, fmtDuree, fmtHeure, joursOuvresEntre, mondayOf, overlaps, uid, weekday } from '../domain/time';
+import { JOURS, fmtDuree, fmtHeure, joursOuvresEntre, mondayOf, overlaps, totalDuree, uid, weekday } from '../domain/time';
 import type { AppData, Changement, ISODate, Mission, Person, Shift } from '../domain/types';
 import { MISSION_COMPETENCE, MISSION_LABEL, estPharmacien, nomCourt } from '../domain/types';
-import { decrireJournee, estAbsent, minutesSemaine, minutesTravail, segmentsTravail, shiftsSemaine } from './core';
+import {
+  decrireJournee,
+  estAbsent,
+  minutesSemaine,
+  minutesTravail,
+  segmentsTravail,
+  shiftsSemaine,
+  sousEffectifs,
+  trousPharmacien,
+} from './core';
 import { equite, periodeAvant } from './equity';
 import { coutSemaine } from './payroll';
 import type { Issue } from './validate';
@@ -15,7 +24,7 @@ export const OPTION_LABEL: Record<OptionType, string> = {
   heures_comp: 'Heures complémentaires d’un temps partiel volontaire',
   remplacant: 'Faire appel à un remplaçant habituel',
   decaler: 'Décaler une activité non urgente',
-  accepter: 'Laisser le planning tel quel',
+  accepter: 'Laisser les horaires tels quels',
 };
 
 export interface Patch {
@@ -85,49 +94,60 @@ function nouveauShift(modele: Shift, personId: string): Shift {
   };
 }
 
+/** Mesure de la couverture d'une journée : c'est elle, et non une liste de messages, qui compare deux scénarios. */
+interface Mesure {
+  /** Minutes d'ouverture sans pharmacien. */
+  sansPharmacien: number;
+  /** Personnes-minutes manquantes au comptoir. */
+  deficit: number;
+}
+
+function mesurer(data: AppData, date: ISODate): Mesure {
+  return {
+    sansPharmacien: totalDuree(trousPharmacien(data, date)),
+    deficit: sousEffectifs(data, date).reduce((t, s) => t + (s.requis - s.present) * (s.end - s.start), 0),
+  };
+}
+
 /**
  * Propose des façons comparables de combler le poste laissé vacant par une absence.
  * `data` ne contient déjà plus le poste retiré (`retire`).
  *
  * Ordre de recherche : échange interne, heures complémentaires d'un temps partiel volontaire,
- * remplaçant habituel. Aucune option ne crée de nouveau point bloquant.
+ * remplaçant habituel. Aucune option ne crée de nouveau point bloquant ni n'aggrave la couverture.
  */
 export function optionsReparation(data: AppData, retire: Shift, today: ISODate): Reparation {
   const monday = mondayOf(retire.date);
+  const date = retire.date;
   const absent = data.personnes.find((p) => p.id === retire.personId);
-  const apres = validateWeek(data, monday);
-  const avant = new Set(
-    validateWeek({ ...data, shifts: data.shifts.concat(retire) }, monday)
-      .filter((i) => i.regle !== 'equipe.absence')
-      .map((i) => i.id),
-  );
-  const surLaPlage = (i: Issue): boolean =>
-    i.date === retire.date &&
-    (i.regle === 'pharmacie.presence' || i.regle === 'equipe.effectif' || i.regle === 'pharmacie.competence');
-  const crees = apres.filter((i) => !avant.has(i.id) && surLaPlage(i));
-  const idsApres = new Set(apres.map((i) => i.id));
-  const besoinPharmacien = crees.some((i) => i.regle === 'pharmacie.presence');
-  const impact = crees.map((i) => i.message);
+  const jour = JOURS[weekday(date)];
+  const duJour = (i: Issue, regle: string): boolean => i.regle === regle && i.date === date;
+
+  const dataAvant: AppData = { ...data, shifts: data.shifts.concat(retire) };
+  const m0 = mesurer(dataAvant, date); // avant l'absence
+  const m1 = mesurer(data, date); // absence constatée, rien de fait
+  const issuesApres = validateWeek(data, monday);
+  const idsAvant = new Set(validateWeek(dataAvant, monday).map((i) => i.id));
+  const idsApres = new Set(issuesApres.map((i) => i.id));
+
+  // Rendez-vous que la personne absente devait assurer ce jour-là.
+  const orphelines = data.missions.filter((m) => m.personId === retire.personId && m.date === date);
+
+  const besoinPharmacien = m1.sansPharmacien > m0.sansPharmacien;
+  const besoinEffectif = m1.deficit > m0.deficit;
+  const impact: string[] = [
+    ...(besoinPharmacien ? issuesApres.filter((i) => duJour(i, 'pharmacie.presence')).map((i) => i.message) : []),
+    ...(besoinEffectif ? issuesApres.filter((i) => duJour(i, 'equipe.effectif')).map((i) => i.message) : []),
+    ...orphelines.map((m) => `${MISSION_LABEL[m.type]} de ${fmtHeure(m.start)} à ${fmtHeure(m.end)} : ${absent ? nomCourt(absent) : 'la personne'} devait l'assurer.`),
+  ];
   const coutBase = coutSemaine(data, monday);
-  const jour = JOURS[weekday(retire.date)];
 
-  // Rendez-vous que la personne absente devait assurer.
-  const orphelines = data.missions.filter((m) => m.personId === retire.personId && m.date === retire.date);
-
-  interface Evalue {
-    patch: Patch;
-    restants: Issue[];
-    nouveauxBloquants: Issue[];
-    cout: number;
-    issues: Issue[];
-    data: AppData;
-  }
   /** Confie les rendez-vous de l'absent à une personne formée, en poste sur tout le créneau et libre. */
   const reprendreRendezVous = (patch: Patch): Patch => {
     if (!orphelines.length) return patch;
     const d = appliquerPatch(data, patch);
     const confier: Patch['confier'] = [];
-    const prioritaires = patch.ajouter.map((x) => x.personId);
+    const arrivants = patch.ajouter.map((x) => x.personId);
     for (const m of orphelines) {
       const requise = MISSION_COMPETENCE[m.type];
       const candidat = data.personnes
@@ -140,25 +160,45 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
         )
         .filter((p) => !d.missions.some((o) => o.id !== m.id && o.personId === p.id && o.date === m.date && overlaps(o, m)))
         .filter((p) => !confier.some((c) => c.personId === p.id))
-        .sort((a, b) => prioritaires.indexOf(b.id) - prioritaires.indexOf(a.id))[0];
+        .sort((a, b) => arrivants.indexOf(b.id) - arrivants.indexOf(a.id))[0];
       if (candidat) confier.push({ missionId: m.id, personId: candidat.id });
     }
     return confier.length ? { ...patch, confier } : patch;
   };
+
+  interface Evalue {
+    patch: Patch;
+    data: AppData;
+    issues: Issue[];
+    mesure: Mesure;
+    /** Points bloquants que le scénario ferait apparaître, hors présence pharmaceutique (mesurée à part). */
+    nouveauxBloquants: Issue[];
+    rdvSansPreneur: Mission[];
+    cout: number;
+  }
   const evaluer = (brut: Patch): Evalue => {
     const patch = reprendreRendezVous(brut);
     const d = appliquerPatch(data, patch);
     const issues = validateWeek(d, monday);
-    const ids = new Set(issues.map((i) => i.id));
     return {
       patch,
       data: d,
       issues,
-      restants: crees.filter((i) => ids.has(i.id) || issues.some((x) => x.regle === i.regle && x.date === i.date && surLaPlage(x) && !avant.has(x.id))),
-      nouveauxBloquants: issues.filter((i) => i.gravite === 'bloquant' && !idsApres.has(i.id) && !avant.has(i.id)),
+      mesure: mesurer(d, date),
+      nouveauxBloquants: issues.filter(
+        (i) => i.gravite === 'bloquant' && !idsApres.has(i.id) && !idsAvant.has(i.id) && i.regle !== 'pharmacie.presence',
+      ),
+      rdvSansPreneur: orphelines.filter((m) => !patch.confier.some((c) => c.missionId === m.id)),
       cout: coutSemaine(d, monday) - coutBase,
     };
   };
+  /** Le scénario améliore-t-il la couverture sans rien aggraver ? */
+  const utile = (e: Evalue): boolean =>
+    !e.nouveauxBloquants.length &&
+    e.mesure.sansPharmacien <= m1.sansPharmacien &&
+    e.mesure.deficit <= m1.deficit &&
+    (e.mesure.sansPharmacien < m1.sansPharmacien || e.mesure.deficit < m1.deficit);
+  const couvert = (e: Evalue): boolean => e.mesure.sansPharmacien <= m0.sansPharmacien && e.mesure.deficit <= m0.deficit;
 
   const changementsDe = (patch: Patch, d: AppData): Changement[] => {
     const cles = new Set<string>();
@@ -168,50 +208,50 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
     }
     for (const s of patch.ajouter) cles.add(`${s.personId}|${s.date}`);
     return [...cles].map((k) => {
-      const [personId, date] = k.split('|');
-      const a = data.shifts.filter((s) => s.personId === personId && s.date === date);
-      const b = d.shifts.filter((s) => s.personId === personId && s.date === date);
+      const [personId, d2] = k.split('|');
+      const a = data.shifts.filter((s) => s.personId === personId && s.date === d2);
+      const b = d.shifts.filter((s) => s.personId === personId && s.date === d2);
       const activite = b.some((s) => patch.auComptoir.includes(s.id)) ? ' — au comptoir' : '';
-      return { personId, date, avant: decrireJournee(a), apres: decrireJournee(b) + activite };
+      return { personId, date: d2, avant: decrireJournee(a), apres: decrireJournee(b) + activite };
     });
   };
 
-  const hist = equite(data, periodeAvant(monday, 8).from, periodeAvant(monday, 8).to);
+  const periode = periodeAvant(monday, 8);
+  const hist = equite(data, periode.from, periode.to);
   const charge = (p: Person): number => {
     const l = hist.find((x) => x.personId === p.id);
-    const cle = weekday(retire.date) === 5 ? 'samedis' : 'fermetures';
+    const cle = weekday(date) === 5 ? 'samedis' : 'fermetures';
     return l && l.attendu[cle] !== null ? l.reel[cle] - (l.attendu[cle] as number) : 0;
   };
   const delaiPartiel = valeurRegle(data.regles, 'delai.tempsPartiel', 7);
+
   const reglesControlees = (e: Evalue, ids: string[]): RepairOption['regles'] => {
-    const concerne = (regle: string): boolean =>
-      !e.issues.some((i) => i.regle === regle && i.gravite === 'bloquant' && (!i.personId || ids.includes(i.personId)) && (!i.date || i.date === retire.date || !!i.personId));
+    const respecte = (regle: string): boolean =>
+      !e.issues.some((i) => i.regle === regle && i.gravite === 'bloquant' && !!i.personId && ids.includes(i.personId) && !idsAvant.has(i.id));
     return [
-      { label: 'Pharmacien présent sur toute l’ouverture', ok: !e.issues.some((i) => i.regle === 'pharmacie.presence' && i.date === retire.date) },
-      { label: 'Repos quotidien de 11 h', ok: concerne('repos.quotidien') },
-      { label: 'Repos hebdomadaire', ok: concerne('repos.hebdo') },
-      { label: 'Durées maximales (jour, semaine, amplitude)', ok: concerne('duree.quotidienne') && concerne('duree.hebdo') && concerne('duree.amplitude') },
-      { label: 'Effectif attendu au comptoir', ok: !e.issues.some((i) => i.regle === 'equipe.effectif' && i.date === retire.date && !avant.has(i.id)) },
+      { label: 'Pharmacien présent sur toute l’ouverture', ok: e.mesure.sansPharmacien <= m0.sansPharmacien },
+      { label: 'Repos quotidien de 11 h', ok: respecte('repos.quotidien') },
+      { label: 'Repos hebdomadaire', ok: respecte('repos.hebdo') },
+      { label: 'Durées maximales (jour, semaine, amplitude)', ok: respecte('duree.quotidienne') && respecte('duree.hebdo') && respecte('duree.amplitude') && respecte('duree.pause') },
+      { label: 'Effectif attendu au comptoir', ok: e.mesure.deficit <= m0.deficit },
     ];
   };
-  const restantDe = (e: Evalue): string[] => {
-    const r = e.restants.filter((i) => i.regle !== 'pharmacie.competence').map((i) => i.message);
-    if (orphelines.length) {
-      for (const m of orphelines.filter((x) => !e.patch.confier.some((c) => c.missionId === x.id))) {
-        r.push(`${MISSION_LABEL[m.type]} de ${fmtHeure(m.start)} à ${fmtHeure(m.end)} : personne d'habilité n'est en poste, rendez-vous à reprogrammer.`);
-      }
-    }
-    return r;
-  };
-
+  const restantDe = (e: Evalue): string[] => [
+    ...(e.mesure.sansPharmacien > m0.sansPharmacien ? e.issues.filter((i) => duJour(i, 'pharmacie.presence')).map((i) => i.message) : []),
+    ...(e.mesure.deficit > m0.deficit ? e.issues.filter((i) => duJour(i, 'equipe.effectif')).map((i) => i.message) : []),
+    ...e.rdvSansPreneur.map(
+      (m) => `${MISSION_LABEL[m.type]} de ${fmtHeure(m.start)} à ${fmtHeure(m.end)} : aucune personne habilitée n'est en poste, rendez-vous à reprogrammer.`,
+    ),
+  ];
   const reprises = (patch: Patch): string[] =>
     patch.confier.map((c) => {
       const m = data.missions.find((x) => x.id === c.missionId) as Mission;
       const p = data.personnes.find((x) => x.id === c.personId) as Person;
       return `${MISSION_LABEL[m.type]} de ${fmtHeure(m.start)} reprise par ${nomCourt(p)} : à lui confirmer`;
     });
-  const seulementRendezVous = crees.length > 0 && crees.every((i) => i.regle === 'pharmacie.competence');
+
   const options: RepairOption[] = [];
+  const aCouvrir = besoinPharmacien || besoinEffectif;
 
   // ---- 1 et 2. Solutions internes
   interface Candidat {
@@ -223,26 +263,25 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
   const candidats: Candidat[] = [];
   const semaine = shiftsSemaine(data, monday);
   // Sans plage découverte, inutile de déranger qui que ce soit.
-  for (const p of crees.length && !seulementRendezVous ? data.personnes : []) {
+  for (const p of aCouvrir ? data.personnes : []) {
     if (p.externe || p.id === retire.personId) continue;
     if (besoinPharmacien && !estPharmacien(p)) continue;
-    if (estAbsent(data, p.id, retire.date)) continue;
-    const duJour = semaine.filter((s) => s.personId === p.id && s.date === retire.date);
+    if (estAbsent(data, p.id, date)) continue;
+    const postesDuJour = semaine.filter((s) => s.personId === p.id && s.date === date);
     const patches: { patch: Patch; creneaux: number }[] = [];
-    if (!duJour.length) {
-      const ajout = nouveauShift(retire, p.id);
-      patches.push({ patch: { ...vide(), ajouter: [ajout] }, creneaux: 1 });
+    if (!postesDuJour.length) {
+      patches.push({ patch: { ...vide(), ajouter: [nouveauShift(retire, p.id)] }, creneaux: 1 });
       // Échange de jour : la personne rend un autre poste de la semaine pour garder son volume d'heures.
-      for (const autre of semaine.filter((s) => s.personId === p.id && s.date !== retire.date)) {
+      for (const autre of semaine.filter((s) => s.personId === p.id && s.date !== date)) {
         patches.push({ patch: { ...vide(), ajouter: [nouveauShift(retire, p.id)], retirer: [autre.id] }, creneaux: 2 });
       }
     } else {
       // La personne travaille déjà ce jour-là : reprendre l'horaire vacant, ou allonger sa journée.
-      const ids = duJour.map((s) => s.id);
+      const ids = postesDuJour.map((s) => s.id);
       patches.push({ patch: { ...vide(), retirer: ids, ajouter: [nouveauShift(retire, p.id)] }, creneaux: 1 });
-      const debut = Math.min(retire.start, ...duJour.map((s) => s.start));
-      const fin = Math.max(retire.end, ...duJour.map((s) => s.end));
-      const pause = duJour.find((s) => s.pauseStart !== undefined) ?? (retire.pauseStart !== undefined ? retire : undefined);
+      const debut = Math.min(retire.start, ...postesDuJour.map((s) => s.start));
+      const fin = Math.max(retire.end, ...postesDuJour.map((s) => s.end));
+      const pause = postesDuJour.find((s) => s.pauseStart !== undefined) ?? (retire.pauseStart !== undefined ? retire : undefined);
       const milieu = Math.round((debut + fin) / 2 / 30) * 30;
       const long: Shift = {
         ...nouveauShift(retire, p.id),
@@ -251,35 +290,35 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
         pauseStart: pause?.pauseStart ?? milieu - 30,
         pauseEnd: pause?.pauseEnd ?? milieu + 30,
       };
-      if (long.start !== duJour[0].start || long.end !== duJour[0].end) {
+      if (long.start !== postesDuJour[0].start || long.end !== postesDuJour[0].end) {
         patches.push({ patch: { ...vide(), retirer: ids, ajouter: [long] }, creneaux: 1 });
       }
     }
     for (const { patch, creneaux } of patches) {
       const e = evaluer(patch);
-      if (e.nouveauxBloquants.length) continue;
-      if (e.restants.length >= crees.length && crees.length) continue;
-      const apresMin = minutesSemaine(e.data, p.id, monday);
+      if (!utile(e)) continue;
       candidats.push({
         e,
         p,
         creneaux,
-        heuresComp: p.salarie && p.heuresHebdo < 35 && p.volontaireHeuresComp && apresMin > p.heuresHebdo * 60,
+        heuresComp: p.salarie && p.heuresHebdo < 35 && p.volontaireHeuresComp && minutesSemaine(e.data, p.id, monday) > p.heuresHebdo * 60,
       });
     }
   }
   const tri = (a: Candidat, b: Candidat): number =>
-    a.e.restants.length - b.e.restants.length ||
+    a.e.mesure.sansPharmacien - b.e.mesure.sansPharmacien ||
+    a.e.mesure.deficit - b.e.mesure.deficit ||
     a.creneaux - b.creneaux ||
     a.e.cout - b.e.cout ||
     charge(a.p) - charge(b.p);
 
   const construireInterne = (c: Candidat, type: 'echange' | 'heures_comp'): RepairOption => {
     const changements = changementsDe(c.e.patch, c.e.data);
-    const validations = [`Accord de ${nomCourt(c.p)} à obtenir`, ...reprises(c.e.patch)];
-    if (c.p.salarie && c.p.heuresHebdo < 35 && joursOuvresEntre(today, retire.date) < delaiPartiel) {
+    const validations = [`Accord de ${nomCourt(c.p)} à obtenir`];
+    if (c.p.salarie && c.p.heuresHebdo < 35 && joursOuvresEntre(today, date) < delaiPartiel) {
       validations.push(`Temps partiel prévenu moins de ${delaiPartiel} jours ouvrés avant : accord à tracer`);
     }
+    validations.push(...reprises(c.e.patch));
     const plus = minutesSemaine(c.e.data, c.p.id, monday) - minutesSemaine(data, c.p.id, monday);
     return {
       id: uid('opt'),
@@ -291,9 +330,9 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
           : plus > 0
             ? `${nomCourt(c.p)} travaille ${fmtDuree(plus)} de plus ${jour}.`
             : `${nomCourt(c.p)} change d’horaire ${jour}, sans heure en plus.`,
-      couverture: c.e.restants.length ? 'partielle' : 'maintenue',
+      couverture: couvert(c.e) ? 'maintenue' : 'partielle',
       changements,
-      personnesTouchees: [c.p.id],
+      personnesTouchees: [...new Set([c.p.id, ...c.e.patch.confier.map((x) => x.personId)])],
       creneauxModifies: changements.length,
       coutSupp: Math.max(0, c.e.cout),
       validations,
@@ -311,10 +350,10 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
   // ---- 3. Remplaçant habituel
   const roleVoulu = besoinPharmacien || (absent ? estPharmacien(absent) : false);
   const externes = data.personnes
-    .filter((p) => crees.length > 0 && !seulementRendezVous && p.externe && estPharmacien(p) === roleVoulu)
+    .filter((p) => aCouvrir && p.externe && estPharmacien(p) === roleVoulu)
     .map((p) => ({ p, e: evaluer({ ...vide(), ajouter: [nouveauShift(retire, p.id)] }) }))
-    .filter((x) => !x.e.nouveauxBloquants.length)
-    .sort((a, b) => a.e.restants.length - b.e.restants.length || a.e.cout - b.e.cout);
+    .filter((x) => utile(x.e))
+    .sort((a, b) => a.e.mesure.sansPharmacien - b.e.mesure.sansPharmacien || a.e.mesure.deficit - b.e.mesure.deficit || a.e.cout - b.e.cout);
   if (externes.length) {
     const { p, e } = externes[0];
     options.push({
@@ -322,9 +361,9 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
       type: 'remplacant',
       titre: `Faire appel à ${nomCourt(p)}, remplaçant habituel`,
       resume: `${nomCourt(p)} reprend le poste de ${fmtHeure(retire.start)} à ${fmtHeure(retire.end)}. Aucun horaire de l’équipe ne change.`,
-      couverture: e.restants.length ? 'partielle' : 'maintenue',
+      couverture: couvert(e) ? 'maintenue' : 'partielle',
       changements: changementsDe(e.patch, e.data),
-      personnesTouchees: [],
+      personnesTouchees: e.patch.confier.map((c) => c.personId).filter((id) => id !== p.id),
       creneauxModifies: 0,
       coutSupp: ((p.tauxHoraire ?? 0) * minutesTravail(retire)) / 60,
       validations: [`Disponibilité de ${nomCourt(p)} à confirmer`, 'Contrat ou bon de mission à établir', ...reprises(e.patch)],
@@ -336,19 +375,19 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
   }
 
   // ---- 4. Décaler une activité non urgente (ne remplace jamais un pharmacien absent)
-  if (crees.length && !besoinPharmacien) {
+  if (besoinEffectif && !besoinPharmacien) {
     const plage = { start: retire.start, end: retire.end };
     const patch = vide();
     const libelles: string[] = [];
     for (const s of semaine) {
-      if (s.date !== retire.date || s.activite === 'comptoir' || s.activite === 'formation') continue;
+      if (s.date !== date || s.activite === 'comptoir' || s.activite === 'formation') continue;
       if (!segmentsTravail(s).some((seg) => overlaps(seg, plage))) continue;
       patch.auComptoir.push(s.id);
       const p = data.personnes.find((x) => x.id === s.personId);
       if (p) libelles.push(`${nomCourt(p)} passe au comptoir`);
     }
-    const reportables: Mission[] = data.missions.filter(
-      (m) => m.date === retire.date && m.reportable && m.personId && m.personId !== retire.personId && overlaps(m, plage),
+    const reportables = data.missions.filter(
+      (m) => m.date === date && m.reportable && m.personId && m.personId !== retire.personId && overlaps(m, plage),
     );
     for (const m of reportables) {
       patch.liberer.push(m.id);
@@ -356,7 +395,7 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
     }
     if (patch.auComptoir.length || patch.liberer.length) {
       const e = evaluer(patch);
-      if (!e.nouveauxBloquants.length && e.restants.length < crees.length) {
+      if (utile(e)) {
         const touchees = [
           ...new Set([
             ...patch.auComptoir.map((id) => data.shifts.find((s) => s.id === id)?.personId ?? ''),
@@ -368,18 +407,19 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
           type: 'decaler',
           titre: 'Décaler une activité non urgente',
           resume: libelles.join(' ; ') + '.',
-          couverture: e.restants.length ? 'partielle' : 'sous_conditions',
-          changements: changementsDe(patch, e.data),
+          couverture: couvert(e) ? 'sous_conditions' : 'partielle',
+          changements: changementsDe(e.patch, e.data),
           personnesTouchees: touchees,
           creneauxModifies: patch.auComptoir.length + patch.liberer.length,
           coutSupp: 0,
           validations: [
             ...(patch.auComptoir.length ? ['Tâche de réception ou d’administratif à reporter'] : []),
             ...(patch.liberer.length ? ['Rendez-vous à reprogrammer avec les personnes concernées'] : []),
+            ...reprises(e.patch),
           ],
           regles: reglesControlees(e, touchees),
           restant: restantDe(e),
-          patch,
+          patch: e.patch,
           recommande: false,
         });
       }
@@ -390,33 +430,32 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
   if (!besoinPharmacien) {
     const e = evaluer(vide());
     const repris = e.patch.confier.length > 0;
-    const reste = e.restants.filter((i) => i.regle !== 'pharmacie.competence');
-    const aReprogrammer = orphelines.filter((m) => !e.patch.confier.some((c) => c.missionId === m.id));
     // Faute de personne habilitée en poste, le rendez-vous est libéré pour être reprogrammé.
-    const patch: Patch = aReprogrammer.length ? { ...e.patch, liberer: aReprogrammer.map((m) => m.id) } : e.patch;
+    const patch: Patch = e.rdvSansPreneur.length ? { ...e.patch, liberer: e.rdvSansPreneur.map((m) => m.id) } : e.patch;
+    const reduit = e.mesure.deficit > m0.deficit;
     options.push({
       id: uid('opt'),
       type: 'accepter',
-      titre: reste.length
+      titre: reduit
         ? 'Accepter un effectif réduit'
         : repris
           ? `Confier le rendez-vous à ${nomCourt(data.personnes.find((p) => p.id === e.patch.confier[0].personId) as Person)}`
-          : aReprogrammer.length
+          : e.rdvSansPreneur.length
             ? 'Reprogrammer le rendez-vous'
             : 'Aucun remplacement nécessaire',
-      resume: reste.length
+      resume: reduit
         ? 'Les horaires restent tels quels : un pharmacien est présent, mais l’effectif attendu n’est pas atteint.'
         : repris
           ? 'Aucun horaire ne change : une personne formée, déjà en poste, reprend le rendez-vous.'
-          : aReprogrammer.length
+          : e.rdvSansPreneur.length
             ? 'Aucune personne habilitée n’est en poste sur le créneau : le rendez-vous est à déplacer.'
             : `L’absence ${absent ? `de ${nomCourt(absent)} ` : ''}ne découvre aucune plage : la couverture reste assurée.`,
-      couverture: reste.length ? 'partielle' : aReprogrammer.length ? 'sous_conditions' : 'maintenue',
+      couverture: reduit ? 'partielle' : e.rdvSansPreneur.length ? 'sous_conditions' : 'maintenue',
       changements: [],
       personnesTouchees: e.patch.confier.map((c) => c.personId),
       creneauxModifies: 0,
       coutSupp: 0,
-      validations: [...reprises(e.patch), ...(aReprogrammer.length ? ['Rendez-vous à reprogrammer avec les personnes concernées'] : [])],
+      validations: [...reprises(e.patch), ...(e.rdvSansPreneur.length ? ['Rendez-vous à reprogrammer avec les personnes concernées'] : [])],
       regles: reglesControlees(e, []),
       restant: restantDe(e),
       patch,
@@ -424,17 +463,10 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
     });
   }
 
-  // Recommandation : la couverture d'abord, puis le moins de personnes dérangées, puis l'ordre de recherche.
-  const ordre: OptionType[] = ['echange', 'heures_comp', 'remplacant', 'decaler', 'accepter'];
+  // Recommandation : la couverture d'abord, puis l'ordre de recherche (interne avant externe).
+  const ordre: OptionType[] = aCouvrir ? ['echange', 'heures_comp', 'remplacant', 'decaler', 'accepter'] : ['accepter'];
   const rang = { maintenue: 0, sous_conditions: 1, partielle: 2 };
-  const choix = options
-    .slice()
-    .sort(
-      (a, b) =>
-        rang[a.couverture] - rang[b.couverture] ||
-        (crees.length ? 0 : (a.type === 'accepter' ? -1 : 0) - (b.type === 'accepter' ? -1 : 0)) ||
-        ordre.indexOf(a.type) - ordre.indexOf(b.type),
-    )[0];
+  const choix = options.slice().sort((a, b) => rang[a.couverture] - rang[b.couverture] || ordre.indexOf(a.type) - ordre.indexOf(b.type))[0];
   if (choix) choix.recommande = true;
 
   return { impact, options };

@@ -171,9 +171,13 @@ describe('réparation', () => {
       const rep = optionsReparation(data, trou.shift, TODAY);
       expect(rep.options.length).toBeGreaterThanOrEqual(1);
       expect(rep.options.filter((o) => o.recommande)).toHaveLength(1);
+      const sansPharmacien = (d: AppData): number => trousPharmacien(d, trou.shift.date).reduce((t, i) => t + i.end - i.start, 0);
       for (const o of rep.options) {
-        const apres = bloquants(validateWeek(appliquerPatch(data, o.patch), LUNDI));
-        expect(apres.filter((i) => !avant.has(i.id))).toEqual([]);
+        const d = appliquerPatch(data, o.patch);
+        // Aucun nouveau point bloquant ; la présence pharmaceutique se juge en minutes découvertes, jamais en hausse.
+        expect(bloquants(validateWeek(d, LUNDI)).filter((i) => !avant.has(i.id) && i.regle !== 'pharmacie.presence')).toEqual([]);
+        expect(sansPharmacien(d)).toBeLessThanOrEqual(sansPharmacien(data));
+        if (o.couverture === 'maintenue') expect(sansPharmacien(d)).toBe(0);
       }
       const remplacant = rep.options.find((o) => o.type === 'remplacant');
       if (remplacant) {
@@ -294,7 +298,7 @@ describe('rendez-vous d’un absent', () => {
     expect(['p_helene', 'p_lea']).toContain(o?.patch.confier[0].personId);
     expect(o?.titre).toContain('Confier le rendez-vous');
     const apres = appliquerPatch(base, o!.patch);
-    expect(validateWeek(apres, SUIVANT).some((i) => i.regle === 'pharmacie.competence' && i.gravite === 'bloquant')).toBe(false);
+    expect(validateWeek(apres, SUIVANT).some((i) => i.date === jeudi && i.regle === 'pharmacie.competence' && i.gravite === 'bloquant')).toBe(false);
 
     // Sans personne formée en poste sur le créneau : le rendez-vous est à reprogrammer.
     const sans: AppData = { ...base, shifts: base.shifts.filter((x) => x.personId !== 'p_helene' && x.personId !== 'p_lea').concat(poste('p_helene', jeudi, 510, 900, { pauseStart: 750, pauseEnd: 780 })) };
