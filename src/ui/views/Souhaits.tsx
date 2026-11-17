@@ -97,33 +97,6 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
 
   return (
     <div className="souhaits">
-      <div className="page-head">
-        <span className="page-ico" aria-hidden="true">
-          <CalendarHeart size={26} />
-        </span>
-        <div className="grow">
-          <div className="eyebrow">Mes souhaits</div>
-          <h1>
-            Mon mois <span className="hl">idéal</span>
-          </h1>
-          <p>Une forme d’horaire par jour, sans jamais donner de raison. Le planning les suit au plus près, après les règles et l’effectif.</p>
-        </div>
-        <div className="row wrap no-print" style={{ gap: 8 }}>
-          {clos ? (
-            <Pill tone="neutral">
-              <Lock size={13} aria-hidden="true" /> Collecte close le {fmtDateCourt(limite)}
-            </Pill>
-          ) : (
-            <Pill tone={restants <= 3 ? 'warn' : 'ok'}>
-              <Hourglass size={13} aria-hidden="true" /> {restants === 0 ? 'Dernier jour' : `${restants} jour${restants > 1 ? 's' : ''} restant${restants > 1 ? 's' : ''}`}
-            </Pill>
-          )}
-          <button type="button" className="btn magic" onClick={assister} disabled={clos || remplis === ouverts.length} data-focus="assister">
-            <Sparkles size={15} aria-hidden="true" /> M’assister
-          </button>
-        </div>
-      </div>
-
       <div className="sh-grille">
         <section className="card sh-cal" aria-label={`Souhaits de ${titreMois(mois)}`}>
           <div className="sh-barre">
@@ -141,6 +114,18 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
                 </small>
               </div>
             </div>
+            {clos ? (
+              <Pill tone="neutral">
+                <Lock size={13} aria-hidden="true" /> Collecte close le {fmtDateCourt(limite)}
+              </Pill>
+            ) : (
+              <Pill tone={restants <= 3 ? 'warn' : 'ok'}>
+                <Hourglass size={13} aria-hidden="true" /> {restants === 0 ? 'Dernier jour' : `${restants} jour${restants > 1 ? 's' : ''} restant${restants > 1 ? 's' : ''}`}
+              </Pill>
+            )}
+            <button type="button" className="btn magic sm" onClick={assister} disabled={clos || remplis === ouverts.length} data-focus="assister">
+              <Sparkles size={15} aria-hidden="true" /> M’assister
+            </button>
             <span className={`sh-ok${enregistre ? ' on' : ''}`} role="status">
               {enregistre ? (
                 <>

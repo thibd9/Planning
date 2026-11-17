@@ -4,7 +4,6 @@ import type { ISODate } from '../domain/types';
 
 export type Vue =
   | 'heures'
-  | 'souhaits'
   | 'demandes'
   | 'suivi'
   | 'construire'
@@ -70,12 +69,12 @@ interface Ui {
   /** Étape du parcours de test en cours ; null quand il est fermé. */
   parcours: number | null;
   /** Parcours guidé en cours : la visite complète, ou la journée d'une pharmacie déjà en place. */
-  scenario: 'complet' | 'etabli';
+  scenario: 'complet' | 'etabli' | 'pharmacien' | 'equipe';
   /** Fenêtre de choix des tutoriels. */
   tutoriels: boolean;
   ouvrirTutoriels: (o: boolean) => void;
   /** Action demandée depuis la barre du haut, consommée par l'écran d'arrivée (ouvrir une fenêtre). */
-  intention: 'garde' | 'personne' | 'demande' | 'formation' | 'inventaire' | 'calendrier' | null;
+  intention: 'garde' | 'personne' | 'demande' | 'formation' | 'inventaire' | 'calendrier' | 'semaine' | null;
   /** Onglet de « Résoudre » à ouvrir en arrivant (par exemple depuis le parcours de test). */
   sujet: string | null;
   /** Journée ouverte en détail (toute l'équipe, pauses, retards) ; null quand la fenêtre est fermée. */
@@ -85,6 +84,15 @@ interface Ui {
   /** Demande de remplacement à mettre en avant en arrivant dans « Résoudre ». */
   demandeVisee: string | null;
   viserDemande: (id: string | null) => void;
+  /** Onglet ouvert dans « Mes demandes » ; null = celui qui convient le mieux. */
+  demandesOnglet: 'souhaits' | 'absences' | 'remplacements' | null;
+  setDemandesOnglet: (o: 'souhaits' | 'absences' | 'remplacements' | null) => void;
+  /** Assistant d'aide ouvert. */
+  assistant: boolean;
+  ouvrirAssistant: (o: boolean) => void;
+  /** Pendant une visite guidée, le bouton d'aide ne s'affiche que quand l'étape le présente. */
+  assistantEnVisite: boolean;
+  montrerAssistant: (b: boolean) => void;
   planVue: 'semaine' | 'mois';
   setPlanVue: (v: 'semaine' | 'mois') => void;
   seulementMoi: boolean;
@@ -92,7 +100,7 @@ interface Ui {
   setSujet: (s: string | null) => void;
   agir: (vue: Vue, intention: Ui['intention']) => void;
   setIntention: (i: Ui['intention']) => void;
-  setParcours: (etape: number | null, scenario?: 'complet' | 'etabli') => void;
+  setParcours: (etape: number | null, scenario?: Ui['scenario']) => void;
   aller: (vue: Vue) => void;
   setSemaine: (s: ISODate) => void;
   connecter: (personId: string, vue: Vue) => void;
@@ -128,6 +136,12 @@ export const useUi = create<Ui>((set) => ({
   voirJour: (jour) => set({ jour }),
   demandeVisee: null,
   viserDemande: (demandeVisee) => set({ demandeVisee }),
+  demandesOnglet: null,
+  setDemandesOnglet: (demandesOnglet) => set({ demandesOnglet }),
+  assistant: false,
+  ouvrirAssistant: (assistant) => set({ assistant }),
+  assistantEnVisite: false,
+  montrerAssistant: (assistantEnVisite) => set({ assistantEnVisite }),
   planVue: 'semaine',
   setPlanVue: (planVue) => set({ planVue }),
   seulementMoi: false,

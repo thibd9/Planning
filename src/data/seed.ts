@@ -78,6 +78,7 @@ export const EQUIPE_DEMO: Person[] = [
   personne('p_thomas', 'Thomas', 'Nguyen', 'preparateur', 35, 15.2, { competences: ['commandes'] }),
   personne('p_ines', 'Inès', 'Da Silva', 'preparateur', 24, 15.2, { volontaireHeuresComp: true }),
   personne('p_jules', 'Jules', 'Perrin', 'preparateur', 35, 14.6, { competences: ['commandes'] }),
+  personne('p_sarah', 'Sarah', 'Lemoine', 'animateur', 21, 13.2, { competences: ['dermo', 'beaute', 'para'] }),
   personne('p_manon', 'Manon', 'Girard', 'apprenti', 21, 9.4),
   personne('p_yanis', 'Yanis', 'Morel', 'etudiant', 16, 13.9),
   personne('x_paul', 'Paul', 'Lemaire', 'adjoint', 0, 62, { externe: true, competences: ['vaccination', 'trod'] }),

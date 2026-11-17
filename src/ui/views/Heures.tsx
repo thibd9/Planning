@@ -8,7 +8,7 @@ import { proposerRegularisations, semaineLibre, soldes } from '../../engine/heur
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { EtiquetteRole } from '../icons';
-import { Avatar, BoutonIA, Empty, Pill } from '../kit';
+import { Avatar, BoutonAuto, Empty, Pill } from '../kit';
 
 const signe = (min: number): string => `${min > 0 ? '+' : '−'}${fmtDuree(Math.abs(min))}`;
 
@@ -60,11 +60,11 @@ export function Heures(): JSX.Element {
           <h1>
             Qui a fait <span className="hl">plus ou moins</span> ?
           </h1>
-          <p>Heures planifiées et publiées, face au contrat. Vous régularisez à la main, ou vous laissez Solvéa répartir sur la prochaine semaine à construire.</p>
+          <p>Heures planifiées et publiées, face au contrat. Vous régularisez à la main, ou d’un clic sur la prochaine semaine à construire.</p>
         </div>
-        <BoutonIA onClick={laisserFaire} disabled={calcul || !propositions.length} occupe={calcul} focus="ia-heures" title="Calcul fait sur cet appareil par le moteur de Solvéa : règles impératives d’abord, puis équilibre des heures.">
-          {calcul ? 'Calcul en cours…' : 'Laisser l’IA Solvéa faire'}
-        </BoutonIA>
+        <BoutonAuto onClick={laisserFaire} disabled={calcul || !propositions.length} occupe={calcul} focus="auto-heures" title="Calcul fait sur cet appareil : règles impératives d’abord, puis équilibre des heures.">
+          {calcul ? 'Calcul en cours…' : 'Régulariser automatiquement'}
+        </BoutonAuto>
       </div>
 
       {propositions.length ? (
@@ -74,7 +74,7 @@ export function Heures(): JSX.Element {
             <b>
               {propositions.length} compteur{propositions.length > 1 ? 's' : ''} à régulariser.
             </b>{' '}
-            L’IA Solvéa les résorbe sur la semaine du {fmtSemaine(semaine)}, la première qui n’est pas publiée, par demi-heures et sans dépasser 8 h d’écart au contrat. Le brouillon de cette semaine est recalculé ; vous le relisez avant de publier.
+            « Régulariser automatiquement » les résorbe sur la semaine du {fmtSemaine(semaine)}, la première qui n’est pas publiée, par demi-heures et sans dépasser 8 h d’écart au contrat. Le brouillon de cette semaine est recalculé ; vous le relisez avant de publier.
           </span>
         </div>
       ) : (
@@ -146,7 +146,7 @@ export function Heures(): JSX.Element {
                     {fmtHorodatage(r.at)}
                   </div>
                 </div>
-                {r.auto ? <Pill tone="miel">IA Solvéa</Pill> : null}
+                {r.auto ? <Pill tone="miel">Automatique</Pill> : null}
                 <button type="button" className="btn ghost icon" onClick={() => retirerRegularisation(r.id)} aria-label={`Retirer la régularisation de ${p ? nomCourt(p) : ''}`}>
                   <Trash2 size={16} />
                 </button>

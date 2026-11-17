@@ -12,6 +12,7 @@ import {
   Handshake,
   HeartPulse,
   Medal,
+  Megaphone,
   MessagesSquare,
   PackageOpen,
   PhoneCall,
@@ -36,15 +37,17 @@ export const ROLE_ICONE: Record<Qualification, LucideIcon> = {
   etudiant: GraduationCap,
   apprenti: Sprout,
   rayonniste: Boxes,
+  animateur: Megaphone,
 };
-/** Intensité de la teinte selon le rôle : du plus soutenu (titulaire) au neutre. */
+/** Une couleur par poste, la même dans tous les thèmes : on repère qui est qui sans lire. */
 export const ROLE_COULEUR: Record<Qualification, string> = {
   titulaire: 'c-fort',
-  adjoint: 'c-moyen',
-  preparateur: 'c-clair',
-  etudiant: 'c-gris',
-  apprenti: 'c-gris',
-  rayonniste: 'c-gris',
+  adjoint: 'r-adjoint',
+  preparateur: 'r-prepa',
+  etudiant: 'r-etudiant',
+  apprenti: 'r-apprenti',
+  rayonniste: 'r-rayon',
+  animateur: 'r-anim',
 };
 
 /** Une icône par tâche : c'est elle qui figure sur chaque tuile du planning. */

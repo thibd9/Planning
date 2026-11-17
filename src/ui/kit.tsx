@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, EyeOff, X } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Sparkles, X } from 'lucide-react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { fmtHeure } from '../domain/time';
@@ -136,11 +136,14 @@ export function Dialog({
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`dialog${size ? ` ${size}` : ''}`} role="dialog" aria-modal="true" aria-label={title} ref={ref}>
         <div className="dialog-head">
+          <span className="dialog-filigrane" aria-hidden="true">
+            <Logo size={190} />
+          </span>
           <div className="grow">
             <h2>{title}</h2>
-            {subtitle ? <p className="soft" style={{ marginTop: 5 }}>{subtitle}</p> : null}
+            {subtitle ? <p style={{ marginTop: 5 }}>{subtitle}</p> : null}
           </div>
-          <button type="button" className="btn ghost icon" onClick={onClose} aria-label="Fermer">
+          <button type="button" className="dialog-fermer" onClick={onClose} aria-label="Fermer">
             <X size={18} />
           </button>
         </div>
@@ -296,11 +299,11 @@ export function Logo({ size = 38 }: { size?: number }): JSX.Element {
 }
 
 /** Le nom « Solvéa » dans son dessin d'origine ; les lettres prennent la couleur du texte. */
-/** Le bouton qui confie un calcul à Solvéa : il porte le logo, pour qu'on sache qui travaille. */
-export function BoutonIA({ onClick, disabled, occupe, children, title, focus }: { onClick: () => void; disabled?: boolean; occupe?: boolean; children: ReactNode; title?: string; focus?: string }): JSX.Element {
+/** Le bouton qui lance un calcul automatique : action principale de l'écran, avec sa baguette. */
+export function BoutonAuto({ onClick, disabled, occupe, children, title, focus }: { onClick: () => void; disabled?: boolean; occupe?: boolean; children: ReactNode; title?: string; focus?: string }): JSX.Element {
   return (
-    <button type="button" className="btn ia" onClick={onClick} disabled={disabled} title={title} data-focus={focus}>
-      {occupe ? <span className="spinner" /> : <Logo size={20} />}
+    <button type="button" className="btn magic" onClick={onClick} disabled={disabled} title={title} data-focus={focus}>
+      {occupe ? <span className="spinner" /> : <Sparkles size={16} aria-hidden="true" />}
       <span>{children}</span>
     </button>
   );

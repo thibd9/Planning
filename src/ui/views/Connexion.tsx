@@ -5,7 +5,6 @@ import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { ChoixParcours } from '../Parcours';
 import { tutorielDejaVu } from '../Tour';
-import photo from '../../assets/pharmacie.jpg';
 import { Logo, LogoNom, MotDePasse } from '../kit';
 
 type Ecran = 'connexion' | 'oubli';
@@ -58,45 +57,27 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
 
   return (
     <main className="connexion" id="contenu">
-      <section className="cx-vitrine" aria-label="Solvéa, comment ça marche">
-        <img className="cx-photo" src={photo} alt="" />
-        <span className="cx-voile" aria-hidden="true" />
-        <div className="cx-logo verre">
-          <Logo size={46} />
-          <LogoNom hauteur={28} />
+      {/* Fond : un dégradé qui dérive et le symbole de Solvéa, en grand, qui tourne lentement. */}
+      <div className="cx-fond" aria-hidden="true">
+        <span className="cx-forme f1">
+          <Logo size={620} />
+        </span>
+        <span className="cx-forme f2">
+          <Logo size={380} />
+        </span>
+        <span className="cx-forme f3">
+          <Logo size={240} />
+        </span>
+      </div>
+      <header className="cx-haut">
+        <div className="cx-marque">
+          <Logo size={40} />
+          <LogoNom hauteur={24} />
         </div>
-        <div className="cx-comment verre">
-          <h2>Comment ça marche</h2>
-          <ol className="cx-etapes">
-            <li>
-              <span className="n" aria-hidden="true">1</span>
-              <div>
-                <b>Chacun donne ses souhaits</b>
-                <span>Horaires préférés, congés, contraintes. Jamais la raison.</span>
-              </div>
-            </li>
-            <li>
-              <span className="n" aria-hidden="true">2</span>
-              <div>
-                <b>Solvéa propose, vous décidez</b>
-                <span>Un planning équilibré et conforme, que vous ajustez avant de publier.</span>
-              </div>
-            </li>
-            <li>
-              <span className="n" aria-hidden="true">3</span>
-              <div>
-                <b>L’équipe est prévenue</b>
-                <span>Prochain poste, changements, remplacements : chacun sait où il en est.</span>
-              </div>
-            </li>
-          </ol>
-          <button type="button" className="btn primary" onClick={() => ouvrirTutoriels(true)}>
-            <Play size={16} aria-hidden="true" /> Voir la démonstration
-          </button>
-        </div>
-        <p className="cx-credit">Photo : « Salvator interior », Newklear007, domaine public (CC0), Wikimedia Commons.</p>
-      </section>
-
+        <button type="button" className="btn cx-demo" onClick={() => ouvrirTutoriels(true)}>
+          <Play size={15} aria-hidden="true" /> Comment ça marche ?
+        </button>
+      </header>
       <div className="cx-panneau">
       <div className="connexion-in">
         {ecran === 'connexion' ? (
@@ -225,6 +206,19 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
         <p className="tiny muted">Sans serveur, cette connexion sépare les espaces sur cet appareil ; elle ne remplace pas de vrais comptes en ligne.</p>
       </div>
       </div>
+      <footer className="cx-etapes" aria-label="Solvéa en trois étapes">
+        <ol>
+          <li>
+            <span className="n" aria-hidden="true">1</span> Chacun donne ses souhaits
+          </li>
+          <li>
+            <span className="n" aria-hidden="true">2</span> Solvéa propose, vous décidez
+          </li>
+          <li>
+            <span className="n" aria-hidden="true">3</span> L’équipe est prévenue
+          </li>
+        </ol>
+      </footer>
       <ChoixParcours />
     </main>
   );

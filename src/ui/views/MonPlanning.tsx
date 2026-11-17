@@ -45,8 +45,8 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
       setDemande(true);
       setIntention(null);
     }
-    if (intention === 'calendrier') {
-      setAffichage('calendrier');
+    if (intention === 'calendrier' || intention === 'semaine') {
+      setAffichage(intention);
       setIntention(null);
     }
   }, [intention, setIntention]);

@@ -23,7 +23,7 @@ interface Erreur {
 }
 
 const ligne = (qualification: Qualification, heures = '35'): Ligne => ({ cle: uid('l'), prenom: '', nom: '', heures, qualification });
-const AUTRES: Qualification[] = ['apprenti', 'etudiant', 'rayonniste'];
+const AUTRES: Qualification[] = ['animateur', 'apprenti', 'etudiant', 'rayonniste'];
 const ETAPES = [
   { titre: 'La pharmacie', detail: 'Nom et horaires d’ouverture' },
   { titre: 'L’équipe', detail: 'Vous, les pharmaciens, les préparateurs' },

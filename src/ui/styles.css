@@ -1615,3 +1615,128 @@ button.mo-c:hover { transform: scale(1.14); }
 :root[data-mode='sombre'] .notice.ok { color: var(--ok-ink); border-color: transparent; }
 :root[data-mode='sombre'] .notice.warn, :root[data-mode='sombre'] .notice.danger { border-color: transparent; }
 .piece-bouton { background: var(--surface); box-shadow: var(--shadow-1); }
+
+/* ================================================================ Connexion : un dégradé qui vit et le symbole de Solvéa */
+@keyframes tourne { to { transform: rotate(360deg); } }
+@keyframes tourne-inverse { to { transform: rotate(-360deg); } }
+.connexion { position: relative; isolation: isolate; overflow-x: hidden; overflow-y: auto; min-height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; background: linear-gradient(135deg, var(--a-pastel) 0%, var(--a-tint) 28%, var(--surface) 50%, var(--a-soft) 74%, var(--a-pastel) 100%); background-size: 240% 240%; animation: derive 26s ease-in-out infinite; }
+.cx-fond { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.cx-forme { position: absolute; display: block; line-height: 0; }
+.cx-forme svg { display: block; }
+.cx-forme.f1 { left: -170px; bottom: -200px; opacity: 0.26; animation: tourne 90s linear infinite; }
+.cx-forme.f2 { right: -90px; top: -110px; opacity: 0.26; animation: tourne-inverse 70s linear infinite; filter: blur(1px); }
+.cx-forme.f3 { right: 14%; bottom: 9%; opacity: 0.16; animation: tourne 50s linear infinite; filter: blur(3px); }
+.cx-haut { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 26px 34px 0; animation: monte 0.5s var(--fluide) both; }
+.cx-marque { display: flex; align-items: center; gap: 12px; color: var(--ink); }
+.cx-demo { background: var(--verre-fort); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); color: var(--a-text); box-shadow: var(--shadow-1); }
+.cx-demo:hover { background: var(--surface); transform: translateY(-1px); }
+.cx-panneau { padding: 28px 20px; }
+.connexion .connexion-in { width: min(450px, 100%); gap: 16px; }
+.connexion .card.pad { padding: 34px 34px 30px; border-radius: 30px; background: var(--verre-fort); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); border: 1px solid var(--verre-bord); box-shadow: 0 40px 90px -46px color-mix(in srgb, var(--a-plein) 70%, transparent), 0 1px 0 rgba(255, 255, 255, 0.5) inset; }
+.connexion .connexion-in > .tiny { text-align: center; max-width: none; }
+.cx-etapes { padding: 0 20px 26px; animation: monte 0.6s var(--fluide) 0.2s both; }
+.cx-etapes ol { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 26px; }
+.cx-etapes li { display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); animation: none; }
+.cx-etapes .n { width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--on-a); background: var(--a-deep); background-image: none; animation: none; }
+@media (max-width: 900px) {
+  .connexion { grid-template-columns: minmax(0, 1fr); }
+  .cx-haut { padding: 18px 18px 0; }
+  .cx-panneau { padding: 20px 14px; place-items: start center; }
+  .connexion .card.pad { padding: 26px 20px 24px; border-radius: 24px; }
+  .cx-forme.f1 { left: -260px; bottom: -260px; }
+  .cx-forme.f3 { display: none; }
+  .cx-etapes ol { flex-direction: column; align-items: center; }
+}
+
+/* ================================================================ Boutons : trois niveaux qui se lisent d'un coup d'œil */
+/* Principal : plein. Secondaire (par défaut) : teinté, toujours visible. Discret : neutre ou sans fond. */
+.btn { background: var(--a-soft); color: var(--a-text); font-weight: 650; }
+.btn:hover { background: var(--a-pastel); }
+.btn.primary { color: var(--on-a); box-shadow: 0 10px 22px -12px color-mix(in srgb, var(--a-plein) 85%, transparent); }
+.btn.primary:hover { box-shadow: 0 14px 26px -12px color-mix(in srgb, var(--a-plein) 95%, transparent); transform: translateY(-1px); }
+.btn.calme { background: var(--n-1); color: var(--ink); font-weight: 600; }
+.btn.calme:hover { background: var(--n-3); }
+.btn.ghost { background: transparent; color: var(--ink); font-weight: 600; }
+.btn.danger { color: var(--danger-ink); background: var(--danger-soft); }
+.btn.magic { color: var(--on-vif); }
+.btn:disabled { box-shadow: none; transform: none; }
+.hero .btn:not(.primary) { font-weight: 650; }
+
+/* ================================================================ Fenêtres : une tête en dégradé, un corps aéré, un pied net */
+.dialog { border-radius: 30px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid var(--verre-bord); box-shadow: 0 50px 120px -40px rgba(var(--ink-rgb), 0.8); }
+.dialog-head { position: relative; overflow: hidden; align-items: flex-start; padding: 26px 22px 24px 30px; color: var(--on-vif); background: var(--grad-vif); background-size: 220% 220%; animation: derive 16s ease-in-out infinite; }
+.dialog-head > * { position: relative; z-index: 1; }
+.dialog-head h2 { color: inherit; font-size: clamp(21px, 2.2vw, 25px); letter-spacing: -0.035em; }
+.dialog-head p { color: inherit; font-size: 14.5px; max-width: 60ch; }
+.dialog-filigrane { position: absolute !important; right: 36px; top: -70px; z-index: 0 !important; opacity: 0.22; line-height: 0; animation: tourne 60s linear infinite; pointer-events: none; }
+.dialog-fermer { flex: none; width: 38px; height: 38px; border: 0; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--surface) 78%, transparent); color: var(--ink); transition: background 0.2s ease, transform 0.2s var(--fluide); }
+.dialog-fermer:hover { background: var(--surface); transform: rotate(90deg); }
+.dialog-body { padding: 24px 30px 26px; gap: 18px; }
+.dialog-foot { padding: 16px 24px; gap: 10px; background: color-mix(in srgb, var(--surface) 70%, transparent); }
+.dialog-foot .btn:not(.primary):not(.danger) { background: var(--n-1); color: var(--ink); }
+.dialog-foot .btn:not(.primary):not(.danger):hover { background: var(--n-3); }
+.dialog-foot .btn.primary { min-height: 44px; padding-inline: 22px; }
+@media (max-width: 640px) { .dialog { border-radius: 24px; } .dialog-head { padding: 20px 14px 18px 20px; } .dialog-body { padding: 18px 18px 20px; } .dialog-filigrane { right: -30px; } }
+
+/* ================================================================ Une couleur par poste, identique dans tous les thèmes */
+.r-adjoint { --c1: #cdeee9; --c2: #a9e1d9; --ct: #0c4f4a; }
+.r-prepa { --c1: #e6e0ff; --c2: #d0c5fb; --ct: #3f2f8f; }
+.r-anim { --c1: #ffe0ea; --c2: #ffc2d6; --ct: #8a1c47; }
+.r-apprenti { --c1: #dcf3d2; --c2: #bfe6ae; --ct: #275f16; }
+.r-etudiant { --c1: #ffecc8; --c2: #ffd995; --ct: #6f4300; }
+.r-rayon { --c1: #e2e8ee; --c2: #cbd5de; --ct: #2f3c48; }
+.role-tag[class*='r-'] .chip-i { color: var(--ct); }
+
+/* ================================================================ Découvrir Solvéa : le principe, puis une visite par rôle */
+.decouvrir { width: min(980px, 100%); }
+.dc-tete { padding: 26px 22px 24px 32px; }
+.dc-principe { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 10px; }
+.dc-principe li { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border-radius: 999px; font-size: 13.5px; font-weight: 650; color: var(--ink); background: color-mix(in srgb, var(--surface) 74%, transparent); }
+.dc-principe .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--a-deep); color: var(--on-a); }
+.dc-sous { font-size: 16px; letter-spacing: -0.015em; color: var(--ink); }
+.dc-libre h3 { margin-bottom: 12px; }
+.choix-parcours { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.cp-carte { padding: 18px; gap: 12px; border-radius: 22px; }
+.cp-carte h3 { font-size: 17.5px; }
+.cp-carte:nth-child(3) { animation-delay: 0.22s; }
+.cp-carte:nth-child(4) { animation-delay: 0.28s; }
+.cp-role { display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--a-text); }
+.cp-duree { display: block; font-size: 12.5px; }
+.cp-points li { font-size: 13.5px; }
+.cp-carte .btn { align-self: stretch; margin-top: auto; }
+
+/* ================================================================ Mes demandes : onglets expliqués */
+.onglet-intro { margin: -12px 0 20px; color: var(--ink-2); font-size: 14.5px; max-width: 78ch; }
+.une { display: grid; grid-template-columns: minmax(0, 760px); }
+.une > .card { animation: monte 0.4s var(--fluide) both; }
+
+/* ================================================================ Assistant Solvéa */
+@keyframes aide-respire { 0%, 100% { box-shadow: 0 16px 34px -14px color-mix(in srgb, var(--a-plein) 80%, transparent), 0 0 0 0 color-mix(in srgb, var(--a-plein) 28%, transparent); } 60% { box-shadow: 0 16px 34px -14px color-mix(in srgb, var(--a-plein) 80%, transparent), 0 0 0 12px transparent; } }
+.aide { position: fixed; right: 24px; bottom: 24px; z-index: 46; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; pointer-events: none; }
+.aide > * { pointer-events: auto; }
+.aide-fab { display: inline-flex; align-items: center; gap: 9px; min-height: 52px; padding: 8px 18px 8px 10px; border: 0; border-radius: 999px; font-weight: 700; font-size: 15px; color: var(--ink); background: var(--verre-fort); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); animation: aide-respire 3.4s ease-out infinite; transition: transform 0.25s var(--fluide), background 0.2s ease; }
+.aide-fab:hover { transform: translateY(-2px) scale(1.03); background: var(--surface); }
+.aide-fab svg { transition: transform 0.6s var(--fluide); }
+.aide-fab:hover svg, .aide-fab.on svg { transform: rotate(90deg); }
+.aide-panneau { width: min(400px, calc(100vw - 32px)); max-height: min(620px, calc(100vh - 130px)); display: flex; flex-direction: column; overflow: hidden; border-radius: 26px; background: var(--verre-fort); -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou); border: 1px solid var(--verre-bord); box-shadow: 0 40px 90px -34px rgba(var(--ink-rgb), 0.75); animation: rise 0.32s var(--fluide); transform-origin: bottom right; }
+.aide-tete { display: flex; align-items: center; gap: 12px; padding: 16px 14px 16px 18px; color: var(--on-vif); background: var(--grad-vif); background-size: 220% 220%; animation: derive 16s ease-in-out infinite; }
+.aide-tete h2 { font-size: 17px; color: inherit; letter-spacing: -0.02em; }
+.aide-tete p { margin: 1px 0 0; font-size: 13.5px; color: inherit; }
+.aide-logo { flex: none; width: 46px; height: 46px; border-radius: 16px; display: grid; place-items: center; background: color-mix(in srgb, var(--surface) 88%, transparent); }
+.aide-corps { padding: 16px 16px 6px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.aide-champ { display: flex; align-items: center; gap: 10px; padding: 0 14px; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--n-4); color: var(--ink-2); }
+.aide-champ:focus-within { box-shadow: inset 0 0 0 2px var(--a-deep); }
+.aide-champ input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 12px 0; font: inherit; color: var(--ink); outline: none; box-shadow: none; }
+.aide-titre { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-top: 4px; }
+.aide-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.aide-liste li { border-radius: 16px; background: var(--n-1); transition: background 0.2s ease; animation: monte 0.3s var(--fluide) both; }
+.aide-liste li.on { background: var(--a-tint); }
+.aide-question { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; padding: 12px 14px; border-radius: 16px; text-align: left; font-weight: 650; font-size: 14.5px; color: var(--ink); }
+.aide-question .chev { flex: none; color: var(--a-text); transition: transform 0.25s var(--fluide); }
+.aide-liste li.on .chev { transform: rotate(180deg); }
+.aide-reponse { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; animation: monte 0.3s var(--fluide) both; }
+.aide-reponse p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.aide-pied { display: flex; align-items: center; gap: 12px; padding: 12px 16px 14px; border-top: 1px solid var(--line); }
+.app.en-parcours ~ .aide, .en-parcours .aide { z-index: 58; }
+@media (max-width: 900px) { .aide { right: 12px; bottom: 84px; } .aide-fab .aide-mot { display: none; } .aide-fab { padding: 8px 10px; } }
+@media print { .aide { display: none !important; } }

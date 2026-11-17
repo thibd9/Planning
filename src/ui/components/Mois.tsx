@@ -9,7 +9,7 @@ import type { Correction } from '../../engine/souhaits';
 import { corrigerMois, estCollaboratif, heuresMois, joursRestants, limiteSouhaits, moisDe, moisDecale, objectifJour, reponses, souhaitDe, souhaitRespecte } from '../../engine/souhaits';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { Avatar, BoutonIA, Pill, momentDe } from '../kit';
+import { Avatar, BoutonAuto, Pill, momentDe } from '../kit';
 
 const LETTRE: Record<string, string> = { matin: 'M', journee: 'J', milieu: 'J', soir: 'A', repos: 'R' };
 const titreMois = (mois: string): string => {
@@ -105,9 +105,9 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
           </>
         ) : null}
         <div className="right row wrap no-print" style={{ gap: 8 }}>
-          <BoutonIA onClick={corriger} disabled={calcul || !brouillons.length} occupe={calcul} focus="corriger" title={brouillons.length ? 'Recalcule les semaines en brouillon en suivant les souhaits. Calcul fait sur cet appareil par le moteur de Solvéa.' : 'Toutes les semaines du mois sont publiées'}>
-            {calcul ? 'Calcul en cours…' : 'Corriger avec l’IA Solvéa'}
-          </BoutonIA>
+          <BoutonAuto onClick={corriger} disabled={calcul || !brouillons.length} occupe={calcul} focus="corriger" title={brouillons.length ? 'Recalcule les semaines en brouillon en suivant les souhaits. Calcul fait sur cet appareil.' : 'Toutes les semaines du mois sont publiées'}>
+            {calcul ? 'Calcul en cours…' : 'Corriger automatiquement'}
+          </BoutonAuto>
         </div>
       </div>
 

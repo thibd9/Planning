@@ -1,4 +1,4 @@
-import { ArrowLeftRight, CircleCheck, Gauge, Inbox, Plus } from 'lucide-react';
+import { ArrowLeftRight, CalendarHeart, CalendarOff, CircleCheck, Gauge, Inbox, Plus } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
 import { addDays, fmtDateCourt, fmtDuree, fmtHeure, fmtSemaine, mondayOf } from '../../domain/time';
@@ -9,6 +9,7 @@ import type { CompteurCle } from '../../engine/equity';
 import { COMPTEUR_LABEL, equite } from '../../engine/equity';
 import { delaiRemplacement, peutDemanderRemplacement } from '../../engine/remplacement';
 import { soldeHeures } from '../../engine/heures';
+import { estCollaboratif, moisACollecter } from '../../engine/souhaits';
 import { suiviDe } from '../../engine/suivi';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
@@ -18,6 +19,7 @@ import { DialogueRemplacement } from '../components/Remplacer';
 import { Pill } from '../kit';
 import { STATUT_BESOIN } from './Equipe';
 import { Ecart } from './Equite';
+import { Souhaits } from './Souhaits';
 import { usagePlafond } from './Resoudre';
 
 /** Mes demandes : absences, contraintes d'horaires et remplacements, au même endroit. */
@@ -25,15 +27,16 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const { cloreRemplacement } = useStore();
-  const { intention, setIntention } = useUi();
+  const { intention, setIntention, demandesOnglet, setDemandesOnglet } = useUi();
   const [demande, setDemande] = useState(false);
   const [aRemplacer, setARemplacer] = useState<Shift | null>(null);
   useEffect(() => {
     if (intention === 'demande') {
       setDemande(true);
+      setDemandesOnglet('absences');
       setIntention(null);
     }
-  }, [intention, setIntention]);
+  }, [intention, setIntention, setDemandesOnglet]);
   const gere = peutGerer(data, data.personnes.find((p) => p.id === personId));
   const delai = delaiRemplacement(data);
   const lundi = mondayOf(today);
@@ -51,6 +54,16 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
   const usage = usagePlafond(data, personId, today);
   const mesRemplacements = data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= today && r.demandeur === personId && !r.trouId);
   const enCours = (shiftId: string): boolean => mesRemplacements.some((r) => r.shiftId === shiftId);
+  const collaboratif = estCollaboratif(data.officine);
+  const moisCible = moisACollecter(data.officine, today);
+  const souhaitsPoses = (data.souhaits ?? []).filter((x) => x.personId === personId && x.date.startsWith(moisCible)).length;
+  // Trois onglets, trois natures : ce que je préfère, ce que je demande, ce que je cède.
+  const onglets: { cle: 'souhaits' | 'absences' | 'remplacements'; label: string; intro: string; nombre: number; icone: JSX.Element }[] = [
+    ...(collaboratif ? [{ cle: 'souhaits' as const, label: 'Souhaits du mois', intro: 'Ce que vous préférez pour le mois à venir. Le planning s’en inspire, sans réponse à attendre.', nombre: 0, icone: <CalendarHeart size={16} /> }] : []),
+    { cle: 'absences' as const, label: gere ? 'Absences et horaires' : 'Absences et horaires', intro: gere ? 'Vos congés, vos formations et vos contraintes d’horaires.' : 'Un congé, une formation, un horaire à tenir : votre titulaire répond à chaque demande.', nombre: absences.filter((a) => a.statut === 'demandee').length + besoins.filter((b) => b.decision === 'en_attente').length, icone: <CalendarOff size={16} /> },
+    { cle: 'remplacements' as const, label: 'Remplacements', intro: 'Un poste publié que vous ne pouvez pas tenir : un collègue volontaire le reprend, avec l’accord du titulaire.', nombre: mesRemplacements.length, icone: <ArrowLeftRight size={16} /> },
+  ];
+  const onglet = onglets.some((o) => o.cle === demandesOnglet) ? (demandesOnglet as (typeof onglets)[number]['cle']) : collaboratif && !souhaitsPoses ? 'souhaits' : 'absences';
 
   return (
     <div>
@@ -61,15 +74,33 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
         <div className="grow">
           <div className="eyebrow">Mes demandes</div>
           <h1>
-            Absences et <span className="hl">remplacements</span>
+            Ce que je <span className="hl">souhaite</span>, ce que je demande
           </h1>
-          <p>{gere ? 'Vos absences, vos contraintes d’horaires et les postes que vous confiez.' : 'Ce que vous avez demandé, et où en est chaque demande. Aucune raison n’est jamais demandée.'}</p>
+          <p>Souhaits du mois, absences, remplacements : tout au même endroit. Aucune raison n’est jamais demandée.</p>
         </div>
         <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
           <Plus size={16} aria-hidden="true" /> {gere ? 'Poser une absence' : 'Faire une demande'}
         </button>
       </div>
-      <div className="deux">
+      <div className="onglets" role="tablist" aria-label="Mes demandes">
+        {onglets.map((o) => (
+          <button key={o.cle} type="button" role="tab" id={`dem-${o.cle}`} aria-selected={onglet === o.cle} aria-controls="panneau-demandes" className={`onglet${onglet === o.cle ? ' on' : ''}`} onClick={() => setDemandesOnglet(o.cle)}>
+            <span aria-hidden="true">{o.icone}</span>
+            {o.label}
+            {o.nombre ? (
+              <span className="compte">
+                {o.nombre}
+                <span className="sr"> en cours</span>
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+      <div id="panneau-demandes" role="tabpanel" aria-labelledby={`dem-${onglet}`}>
+        <p className="onglet-intro">{onglets.find((o) => o.cle === onglet)?.intro}</p>
+        {onglet === 'souhaits' ? <Souhaits personId={personId} /> : null}
+        {onglet === 'absences' ? (
+          <div className="une">
           <div className="card">
             <div className="card-head">
               <h2 className="h3 grow">{gere ? 'Mes absences et contraintes' : 'Mes demandes'}</h2>
@@ -124,6 +155,10 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
             </div>
           </div>
 
+          </div>
+        ) : null}
+        {onglet === 'remplacements' ? (
+          <div className="une">
           <div className="card" data-focus="remplacer">
             <div className="card-head">
               <span className="ico" aria-hidden="true">
@@ -171,7 +206,8 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
               <p className="tiny muted">{gere ? 'Un collègue se propose, puis la validation se fait dans « Résoudre ».' : 'Votre titulaire répond oui ou non, puis prévient l’équipe. Vous restez en poste tant que personne n’a repris.'}</p>
             </div>
           </div>
-
+          </div>
+        ) : null}
       </div>
       {demande ? <DialogueDemande personId={personId} espace={gere ? 'responsable' : 'salarie'} onClose={() => setDemande(false)} /> : null}
       {aRemplacer ? <DialogueRemplacement shift={aRemplacer} onClose={() => setARemplacer(null)} /> : null}

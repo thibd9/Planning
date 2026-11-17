@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarDays, CalendarHeart, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users } from 'lucide-react';
+import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { ESPACE_LABEL, espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
@@ -27,11 +27,10 @@ import { MonPlanning } from './ui/views/MonPlanning';
 import { Officine } from './ui/views/Officine';
 import { MesDemandes, MonSuivi } from './ui/views/MonEspace';
 import { PlanningEquipe } from './ui/views/PlanningEquipe';
-import { Souhaits } from './ui/views/Souhaits';
 import { Heures } from './ui/views/Heures';
+import { Assistant } from './ui/Assistant';
 import { aRegulariser } from './engine/heures';
 import { URGENCE_LABEL } from './domain/types';
-import { estCollaboratif } from './engine/souhaits';
 import { Regles } from './ui/views/Regles';
 import { Resoudre } from './ui/views/Resoudre';
 import { Tableau } from './ui/views/Tableau';
@@ -46,10 +45,9 @@ interface Lien {
 }
 
 const MOI: Lien = { vue: 'moi', label: 'Mon planning', question: 'Mes horaires', icon: <CalendarDays size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
-const SOUHAITS: Lien = { vue: 'souhaits', label: 'Mes souhaits', question: 'Le mois à venir', icon: <CalendarHeart size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
-const DEMANDES: Lien = { vue: 'demandes', label: 'Mes demandes', question: 'Absences, remplacements', icon: <Inbox size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
+const DEMANDES: Lien = { vue: 'demandes', label: 'Mes demandes', question: 'Souhaits, absences, remplacements', icon: <Inbox size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const SUIVI: Lien = { vue: 'suivi', label: 'Mon suivi', question: 'Compteurs et équité', icon: <Gauge size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
-const PERSO: Lien[] = [MOI, SOUHAITS, DEMANDES, SUIVI];
+const PERSO: Lien[] = [MOI, DEMANDES, SUIVI];
 const MESSAGES: Lien = { vue: 'messages', label: 'Messages', question: 'Équipe et privé', icon: <MessageSquare size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
 // Trois groupes : ce qu'on regarde chaque jour, ce qui fabrique le planning, ce qui décrit la pharmacie.
 const GESTION: Lien[] = [
@@ -91,7 +89,7 @@ export function App(): JSX.Element {
   const moi = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''));
   const espace = espaceDe(data, moi);
   // Sans collecte des souhaits (modèle classique), l'entrée disparaît du menu.
-  const liens = NAV[espace].filter((l) => l.vue !== 'souhaits' || estCollaboratif(data.officine));
+  const liens = NAV[espace];
   const vueActive = liens.some((l) => l.vue === vue) || HORS_MENU.includes(vue) ? vue : espace === 'responsable' ? 'tableau' : 'moi';
   const aLire = moi ? data.notifications.filter((n) => n.personId === moi.id && !n.luLe).length : 0;
   const nonLus = moi ? data.messages.filter((m) => !m.luPar.includes(moi.id) && (m.a === 'equipe' || m.a === moi.id)).length : 0;
@@ -425,8 +423,6 @@ export function App(): JSX.Element {
         <main className="content" id="contenu" tabIndex={0}>
           {vueActive === 'moi' ? (
             <MonPlanning personId={moi.id} />
-          ) : vueActive === 'souhaits' ? (
-            <Souhaits personId={moi.id} />
           ) : vueActive === 'demandes' ? (
             <MesDemandes personId={moi.id} />
           ) : vueActive === 'suivi' ? (
@@ -463,6 +459,7 @@ export function App(): JSX.Element {
         </main>
       </div>
 
+      <Assistant espace={espace} prenom={moi.prenom} />
       <Tour />
       <Parcours />
       <ChoixParcours />

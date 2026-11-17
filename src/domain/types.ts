@@ -19,7 +19,8 @@ export type Qualification =
   | 'preparateur'
   | 'etudiant'
   | 'apprenti'
-  | 'rayonniste';
+  | 'rayonniste'
+  | 'animateur';
 
 export type CompetenceId =
   | 'vaccination'
@@ -453,6 +454,7 @@ export const QUALIFICATION_LABEL: Record<Qualification, string> = {
   etudiant: 'Étudiant en pharmacie',
   apprenti: 'Apprenti',
   rayonniste: 'Rayonniste',
+  animateur: 'Animateur',
 };
 
 export const QUALIFICATION_COURT: Record<Qualification, string> = {
@@ -462,6 +464,7 @@ export const QUALIFICATION_COURT: Record<Qualification, string> = {
   etudiant: 'Étudiant',
   apprenti: 'Apprenti',
   rayonniste: 'Rayonniste',
+  animateur: 'Animateur',
 };
 
 export const ACTIVITE_LABEL: Record<Activite, string> = {

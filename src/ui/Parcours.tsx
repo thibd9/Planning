@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, FlaskConical, ListTree, Map, MousePointerClick, Pause, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Crown, FlaskConical, ListTree, MousePointerClick, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -12,6 +12,7 @@ import { evaluerRemplacement, peutDemanderRemplacement, peutRemplacer } from '..
 import { useStore } from '../store/store';
 import type { Vue } from '../store/ui';
 import { useUi } from '../store/ui';
+import { Logo } from './kit';
 
 /** Les quatre regards de l'environnement de test, avec des personnes déjà créées. */
 export const ROLES_TEST: { cle: string; id: string; identifiant: string; court: string; titre: string; nom: string; detail: string }[] = [
@@ -32,6 +33,13 @@ export function voirComme(identifiant: string, vue?: Vue): void {
 }
 
 const store = (): ReturnType<typeof useStore.getState> => useStore.getState();
+/** Ouvre « Mes demandes » sur l'onglet voulu, dans la peau de la personne. */
+const versDemandes = (identifiant: string, onglet: 'souhaits' | 'absences' | 'remplacements'): void => {
+  useUi.getState().setDemandesOnglet(onglet);
+  voirComme(identifiant, 'demandes');
+};
+/** La visite clique elle-même sur un bouton de l'écran, comme le ferait l'utilisateur. */
+const cliquer = (selecteur: string): void => document.querySelector<HTMLElement>(selecteur)?.click();
 const demandeDeCamille = (d: AppData): Remplacement | undefined => d.remplacements.find((r) => r.demandeur === 'p_camille' && r.statut === 'ouverte');
 const prenom = (d: AppData, id: string | undefined): string => d.personnes.find((p) => p.id === id)?.prenom ?? 'un collègue';
 
@@ -99,7 +107,7 @@ const SOUHAITS: Etape = {
   cible: '.sh-cal',
   titre: 'Mes souhaits du mois',
   texte: () => 'Camille choisit une forme (matin, journée, après-midi, repos) et clique les jours ; « M’assister » remplit le reste d’après ses habitudes. Elle voit l’effectif annoncé par l’équipe, jamais les raisons de chacun.',
-  jouer: () => voirComme('camille.roussel', 'souhaits'),
+  jouer: () => versDemandes('camille.roussel', 'souhaits'),
 };
 
 const MOIS_ENTIER: Etape = {
@@ -117,7 +125,7 @@ const HEURES: Etape = {
   qui: 'Hélène · titulaire principale',
   cible: "[data-focus='compteurs-heures']",
   titre: 'Le compteur d’heures',
-  texte: () => 'Heures en plus ou en moins de chacun, face à son contrat. Hélène régularise à la main (payer, faire récupérer, faire rattraper) ou clique sur « Laisser l’IA Solvéa faire » : le calcul résorbe les écarts sur la prochaine semaine à construire.',
+  texte: () => 'Heures en plus ou en moins de chacun, face à son contrat. Hélène régularise à la main (payer, faire récupérer, faire rattraper) ou clique sur « Régulariser automatiquement » : le calcul résorbe les écarts sur la prochaine semaine à construire.',
   jouer: () => voirComme('helene.marchetti', 'heures'),
 };
 
@@ -404,7 +412,7 @@ const COMPLET: Etape[] = [
     cible: '.content .split > :first-child',
     pointe: "[data-focus='ajouter-personne']",
     titre: 'Ajouter l’équipe',
-    texte: (d) => (d.personnes.length > 1 ? `${d.personnes.length} personnes sont maintenant dans l’équipe : un second titulaire, deux pharmaciens adjoints, des préparateurs, une apprentie, un étudiant. Chacune a reçu son compte de connexion.` : '« Ajouter une personne » : prénom, nom, métier, heures du contrat. Regardez l’équipe arriver.'),
+    texte: (d) => (d.personnes.length > 1 ? `${d.personnes.length} personnes sont maintenant dans l’équipe : un second titulaire, deux pharmaciens adjoints, des préparateurs, une animatrice, une apprentie, un étudiant. Chaque poste a sa couleur. Chacune a reçu son compte de connexion.` : '« Ajouter une personne » : prénom, nom, métier, heures du contrat. Regardez l’équipe arriver.'),
     jouer: () => helene('equipe'),
     puis: {
       jouer: () => {
@@ -447,7 +455,7 @@ const COMPLET: Etape[] = [
     texte: (d) => ((d.souhaits ?? []).some((x) => x.personId === 'p_camille') ? 'Le mois de Camille est rempli. Sous chaque jour, « M » et « A » comptent les collègues annoncés le matin et l’après-midi, face au seuil de la pharmacie. Elle ne donne jamais de raison.' : 'Camille choisit une forme dans la barre (matin, journée, après-midi, repos) puis clique les jours. Ou elle laisse « M’assister » remplir d’après ses habitudes : regardez.'),
     jouer: () => {
       avecSouhaits(false);
-      voirComme('camille.roussel', 'souhaits');
+      versDemandes('camille.roussel', 'souhaits');
     },
     puis: { jouer: () => souhaitsPour('p_camille') },
   },
@@ -467,15 +475,42 @@ const COMPLET: Etape[] = [
     chapitre: CONSTRUIRE,
     qui: 'Hélène · titulaire',
     cible: '.content .plan',
-    pointe: "[data-tour='proposer']",
-    titre: 'Proposer un planning',
-    texte: (d) => (d.shifts.some((x) => x.date >= semaineDans(1) && x.date <= addDays(semaineDans(1), 6)) ? 'La semaine est posée en brouillon. Jaune le matin, bleu la journée, orange en milieu de journée, violet l’après-midi : on lit la semaine d’un regard. Chaque tuile se déplace ou se corrige.' : '« Proposer un planning » calcule trois propositions comparables : équité, souhaits, coût. Les règles impératives passent d’abord, l’effectif ensuite, les souhaits enfin. Regardez la grille se remplir.'),
+    pointe: '.plan-grid .add',
+    titre: 'Poser un poste à la main',
+    texte: () => 'Un clic sur un « + » ouvre le poste : horaires, pause, activité (comptoir, réception, administratif). Solvéa relit aussitôt les règles et dit ce qui bloque, avant même d’enregistrer.',
     jouer: () => {
       avecSouhaits();
       helene('construire');
       useUi.getState().setSemaine(semaineDans(1));
     },
-    puis: { jouer: () => proposerSemaine(semaineDans(1)) },
+    puis: { jouer: () => cliquer('.plan-grid .add'), cible: '.dialog' },
+  },
+  {
+    chapitre: CONSTRUIRE,
+    qui: 'Hélène · titulaire',
+    cible: '.content .plan',
+    pointe: "[data-tour='proposer']",
+    titre: 'Trois propositions à comparer',
+    texte: () => '« Proposer un planning » calcule trois semaines comparables : équité d’abord, souhaits d’abord, coût d’abord. Pour chacune, les points bloquants, les souhaits suivis, l’équité et le coût. Les règles impératives passent toujours avant le reste. Vous choisissez ; rien n’est publié.',
+    jouer: () => {
+      avecSouhaits();
+      helene('construire');
+      useUi.getState().setSemaine(semaineDans(1));
+    },
+    puis: { jouer: () => cliquer("[data-tour='proposer']"), cible: '.dialog' },
+  },
+  {
+    chapitre: CONSTRUIRE,
+    qui: 'Hélène · titulaire',
+    cible: '.content .plan',
+    titre: 'La semaine est posée',
+    texte: () => 'La proposition « équité » est en brouillon. Jaune le matin, bleu la journée, orange en milieu de journée, violet l’après-midi : on lit la semaine d’un regard. Chaque tuile se déplace ou se corrige ; la ligne « Couverture » signale un jour sans pharmacien.',
+    jouer: () => {
+      avecSouhaits();
+      proposerSemaine(semaineDans(1));
+      helene('construire');
+      useUi.getState().setSemaine(semaineDans(1));
+    },
   },
   {
     chapitre: CONSTRUIRE,
@@ -495,7 +530,7 @@ const COMPLET: Etape[] = [
     qui: 'Hélène · titulaire',
     cible: "[data-focus='mois']",
     titre: 'Le mois d’un coup d’œil',
-    texte: () => 'Une lettre par jour et par personne, l’objectif d’équipe en tête de colonne, les heures de chacun face à son contrat. Les souhaits déjà posés apparaissent en gris. « Corriger avec l’IA Solvéa » recalcule les semaines en brouillon en les suivant.',
+    texte: () => 'Une lettre par jour et par personne, l’objectif d’équipe en tête de colonne, les heures de chacun face à son contrat. Les souhaits déjà posés apparaissent en gris. « Corriger automatiquement » recalcule les semaines en brouillon en les suivant.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
@@ -523,15 +558,27 @@ const COMPLET: Etape[] = [
     qui: 'Hélène · titulaire',
     cible: '.plan-bar',
     pointe: "[data-focus='publier']",
-    titre: 'Publier',
-    texte: (d) => (d.semaines[semaineDans(1)]?.statut === 'publie' ? 'C’est publié : toute l’équipe voit maintenant cette semaine. Chaque changement ultérieur sera annoncé à la personne concernée, avant → après, avec un accusé de lecture.' : 'Tant qu’un planning est en brouillon, vous seule le voyez. « Publier » relit une dernière fois les règles et les délais, puis l’envoie à toute l’équipe. Regardez.'),
+    titre: 'Publier : le dernier contrôle',
+    texte: () => 'Tant qu’un planning est en brouillon, vous seule le voyez. « Publier » relit une dernière fois les règles et les délais de prévenance, et vous dit ce que vous assumez si un point reste ouvert.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
       helene('construire');
       useUi.getState().setSemaine(semaineDans(1));
     },
-    puis: { jouer: () => avecPlanning() },
+    puis: { jouer: () => cliquer("[data-focus='publier']"), cible: '.dialog' },
+  },
+  {
+    chapitre: CONSTRUIRE,
+    qui: 'Hélène · titulaire',
+    cible: '.plan-bar',
+    titre: 'C’est publié',
+    texte: () => 'Toute l’équipe voit maintenant cette semaine. Chaque changement ultérieur sera annoncé à la personne concernée, avant → après, avec un accusé de lecture.',
+    jouer: () => {
+      avecPlanning();
+      helene('construire');
+      useUi.getState().setSemaine(semaineDans(1));
+    },
   },
   {
     chapitre: EQUIPE,
@@ -571,6 +618,17 @@ const COMPLET: Etape[] = [
   {
     chapitre: EQUIPE,
     qui: 'Camille · préparatrice',
+    cible: '.onglets',
+    titre: 'Mes demandes : trois onglets',
+    texte: () => 'Souhaits du mois : ce que Camille préfère, sans réponse à attendre. Absences et horaires : ce qu’elle demande à sa titulaire. Remplacements : un poste qu’elle ne peut pas tenir. Chaque onglet rappelle à quoi il sert.',
+    jouer: () => {
+      avecPlanning();
+      versDemandes('camille.roussel', 'absences');
+    },
+  },
+  {
+    chapitre: EQUIPE,
+    qui: 'Camille · préparatrice',
     cible: '.dialog',
     titre: 'Une absence ou une contrainte, sans raison',
     texte: () => 'Congé, formation, horaire à tenir : un formulaire, des dates. Garde d’enfant, pratique religieuse, cours du soir : un raccourci remplit les horaires, mais aucun motif n’est demandé ni conservé.',
@@ -588,7 +646,7 @@ const COMPLET: Etape[] = [
     texte: () => 'Camille demande à être remplacée sur un poste. Prévu, urgent (à moins de 7 jours) ou urgence médicale, avec un justificatif que seuls les titulaires voient. Sa demande attend maintenant la réponse d’Hélène.',
     jouer: () => {
       avecDemande();
-      voirComme('camille.roussel', 'demandes');
+      versDemandes('camille.roussel', 'remplacements');
     },
   },
   {
@@ -771,7 +829,7 @@ const COMPLET: Etape[] = [
     qui: 'Hélène · titulaire',
     cible: "[data-focus='compteurs-heures']",
     titre: 'Le compteur d’heures',
-    texte: () => 'Heures en plus ou en moins de chacun, face à son contrat, sur les semaines publiées. Hélène régularise à la main (payer, faire récupérer, faire rattraper), ou clique sur « Laisser l’IA Solvéa faire » : les écarts sont résorbés sur la prochaine semaine à construire.',
+    texte: () => 'Heures en plus ou en moins de chacun, face à son contrat, sur les semaines publiées. Hélène régularise à la main (payer, faire récupérer, faire rattraper), ou clique sur « Régulariser automatiquement » : les écarts sont résorbés sur la prochaine semaine à construire.',
     jouer: () => {
       avecPlanning();
       helene('heures');
@@ -852,11 +910,68 @@ const COMPLET: Etape[] = [
     chapitre: PILOTER,
     qui: 'Hélène · titulaire',
     cible: '.topbar-in',
-    titre: 'La barre du haut',
-    texte: () => '« Créer » : planning, garde, formation, inventaire, personne, absence, message. La cloche rassemble ce qui vous attend et mène droit à chaque demande. À droite, votre compte ; dans le menu de gauche, le sélecteur passe d’une pharmacie à l’autre.',
+    pointe: '.top-creer',
+    titre: '« Créer », d’un clic',
+    texte: () => 'Depuis n’importe quel écran : un planning, une garde, une formation, un inventaire, une personne, une absence, un message. Chaque choix ouvre directement la bonne fenêtre.',
     jouer: () => {
       avecPlanning();
       helene('tableau');
+    },
+    puis: { jouer: () => cliquer('.top-creer'), cible: '.outils .menu' },
+  },
+  {
+    chapitre: PILOTER,
+    qui: 'Hélène · titulaire',
+    cible: '.topbar-in',
+    pointe: '.outils .top-ico',
+    titre: 'La cloche : ce qui vous attend',
+    texte: () => 'Une ligne par demande de remplacement, la plus urgente en tête : un clic mène droit à elle. Viennent ensuite les autres décisions, les compteurs d’heures à régulariser et les changements à lire.',
+    jouer: () => {
+      avecAbsenceImprevue();
+      helene('tableau');
+    },
+    puis: { jouer: () => cliquer('.outils .top-ico'), cible: '.outils .menu' },
+  },
+  {
+    chapitre: PILOTER,
+    qui: 'Hélène · titulaire',
+    cible: '#officine-choix',
+    titre: 'Plusieurs pharmacies',
+    texte: () => 'Le titulaire principal ajoute autant de pharmacies qu’il veut, chacune avec son équipe et ses plannings. Ce sélecteur passe de l’une à l’autre ; une personne qui travaille dans deux pharmacies garde le même identifiant.',
+    jouer: () => {
+      avecPlanning();
+      helene('tableau');
+    },
+  },
+  {
+    chapitre: PILOTER,
+    qui: 'Hélène · titulaire',
+    cible: "[data-focus='assistant']",
+    pointe: "[data-focus='assistant']",
+    titre: 'L’assistant Solvéa',
+    texte: () => 'Le bouton au logo de Solvéa reste à portée de main. Dites ce que vous voulez faire : il propose d’abord ce qui concerne l’écran en cours et votre rôle, répond en deux phrases et vous y emmène.',
+    jouer: () => {
+      avecPlanning();
+      helene('tableau');
+      useUi.getState().montrerAssistant(true);
+    },
+    puis: {
+      jouer: () => {
+        useUi.getState().montrerAssistant(true);
+        useUi.getState().ouvrirAssistant(true);
+      },
+      cible: '.aide-panneau',
+    },
+  },
+  {
+    chapitre: PILOTER,
+    qui: 'Hélène · titulaire',
+    cible: "[aria-labelledby='c-code']",
+    titre: 'Mot de passe et clé de secours',
+    texte: () => 'Chacun change son mot de passe ici. La clé de secours, affichée au titulaire principal, lui permet de le redéfinir en cas d’oubli ; pour un membre de l’équipe, le titulaire donne un mot de passe provisoire depuis sa fiche.',
+    jouer: () => {
+      avecPlanning();
+      helene('compte');
     },
   },
   {
@@ -872,9 +987,193 @@ const COMPLET: Etape[] = [
   },
 ];
 
+const MON_PLANNING = 'Mon planning';
+const MES_DEMANDES = 'Mes demandes';
+const AVEC_EQUIPE = 'L’équipe et moi';
+const MON_ESPACE = 'Mon espace';
+
+/** Un appel à l'équipe en cours auquel cette personne peut répondre : on le lance s'il n'existe pas. */
+function appelPour(personId: string): void {
+  const s = store();
+  if (s.data.remplacements.some((r) => r.trouId && r.statut === 'ouverte' && (r.sollicites ?? []).includes(personId))) return;
+  const peut = (d: AppData, poste: AppData['shifts'][number]): boolean => tourDeRole(d, poste, s.today).some((c) => c.personId === personId && c.ok);
+  const ouvert = s.data.trous.find((t) => t.statut === 'ouvert' && t.shift.date >= s.today && peut(s.data, t.shift));
+  if (ouvert) return s.appelerEquipe(ouvert.id);
+  // Sinon, un collègue est absent dans les prochains jours, sur un poste que cette personne peut tenir.
+  for (let j = 1; j <= 20; j++) {
+    const date = addDays(s.today, j);
+    if (s.data.semaines[mondayOf(date)]?.statut !== 'publie') continue;
+    for (const q of s.data.personnes.filter((x) => !x.externe && x.id !== personId && x.id !== 'p_helene')) {
+      const poste = s.data.shifts.find((x) => x.personId === q.id && x.date === date);
+      if (!poste || !peut({ ...s.data, shifts: s.data.shifts.filter((x) => x !== poste) }, poste)) continue;
+      s.declarerAbsence({ personId: q.id, from: date, to: date, type: 'maladie', statut: 'approuvee' });
+      const trou = store().data.trous.find((t) => t.shift.id === poste.id && t.statut === 'ouvert');
+      if (trou) store().appelerEquipe(trou.id);
+      return;
+    }
+  }
+}
+
+/** La visite d'un membre de l'équipe : son planning, ses demandes, ses collègues, son espace. Rien de la gestion. */
+function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: string; pharmacien?: boolean }): Etape[] {
+  const moi = (vue: Vue): void => voirComme(p.identifiant, vue);
+  return [
+    {
+      chapitre: MON_PLANNING,
+      qui: p.qui,
+      cible: '.prochain',
+      titre: 'Mon prochain poste, en grand',
+      texte: () => `${p.prenom} ouvre Solvéa : son prochain poste est écrit en grand, avec la pause et la durée. C’est la première chose qu’on cherche, c’est la première chose qu’on voit.`,
+      jouer: () => moi('moi'),
+    },
+    {
+      chapitre: MON_PLANNING,
+      qui: p.qui,
+      cible: '.me-grid .card',
+      titre: 'Ma semaine, jour par jour',
+      texte: () => 'Chaque jour : les horaires en clair, la pause, la durée, un rendez-vous ou une garde s’il y en a. Un clic sur un jour montre toute l’équipe ce jour-là. Seul le planning publié s’affiche, jamais un brouillon.',
+      jouer: () => moi('moi'),
+    },
+    {
+      chapitre: MON_PLANNING,
+      qui: p.qui,
+      cible: 'table.cal',
+      titre: 'Le calendrier du mois',
+      texte: () => '« Calendrier » montre le mois entier, avec les horaires dans chaque case et les mêmes couleurs que partout : jaune le matin, bleu la journée, violet l’après-midi.',
+      jouer: () => {
+        moi('moi');
+        useUi.getState().agir('moi', 'calendrier');
+      },
+    },
+    {
+      chapitre: MON_PLANNING,
+      qui: p.qui,
+      cible: '.content .plan',
+      pointe: '.plan-bar .seg button:last-child',
+      titre: 'Le planning de toute l’équipe',
+      texte: () => 'Qui travaille quand : la version publiée, une couleur par moment de la journée, une couleur par poste. « Mes postes » ne garde que votre ligne : regardez.',
+      jouer: () => {
+        moi('planning');
+        useUi.getState().setSemaine(mondayOf(store().today));
+      },
+      puis: { jouer: () => useUi.getState().setSeulementMoi(true) },
+    },
+    {
+      chapitre: MES_DEMANDES,
+      qui: p.qui,
+      cible: '.onglets',
+      titre: 'Mes demandes : trois onglets',
+      texte: () => 'Souhaits du mois : ce que vous préférez, sans réponse à attendre. Absences et horaires : ce que vous demandez à votre titulaire. Remplacements : un poste que vous ne pouvez pas tenir.',
+      jouer: () => versDemandes(p.identifiant, 'absences'),
+    },
+    {
+      chapitre: MES_DEMANDES,
+      qui: p.qui,
+      cible: '.sh-cal',
+      pointe: "[data-focus='assister']",
+      titre: 'Mes souhaits du mois',
+      texte: () => 'Une forme dans la barre (matin, journée, après-midi, repos), puis un clic par jour. « M’assister » remplit le reste d’après vos habitudes : regardez. Sous chaque jour, les collègues annoncés face au seuil de la pharmacie. Jamais de raison à donner.',
+      jouer: () => versDemandes(p.identifiant, 'souhaits'),
+      puis: { jouer: () => souhaitsPour(p.id) },
+    },
+    {
+      chapitre: MES_DEMANDES,
+      qui: p.qui,
+      cible: '.dialog',
+      titre: 'Un congé, un horaire à tenir',
+      texte: () => 'Un formulaire, des dates. Garde d’enfant, pratique religieuse, cours du soir : un raccourci remplit les horaires, mais aucun motif n’est demandé ni conservé. Votre titulaire répond à chaque demande.',
+      jouer: () => {
+        versDemandes(p.identifiant, 'absences');
+        useUi.getState().agir('demandes', 'demande');
+      },
+    },
+    {
+      chapitre: MES_DEMANDES,
+      qui: p.qui,
+      cible: "[data-focus='remplacer']",
+      pointe: "[data-focus='remplacer'] .btn",
+      titre: 'Me faire remplacer',
+      texte: () => 'Choisissez le poste, puis un niveau : prévu, urgent (à moins de 7 jours) ou urgence médicale, avec un justificatif que seuls les titulaires voient. Votre titulaire répond oui ou non, puis un collègue volontaire reprend le poste.',
+      jouer: () => versDemandes(p.identifiant, 'remplacements'),
+      puis: { jouer: () => cliquer("[data-focus='remplacer'] .btn"), cible: '.dialog' },
+    },
+    {
+      chapitre: AVEC_EQUIPE,
+      qui: p.qui,
+      cible: "[data-focus='aider']",
+      titre: 'Un collègue absent : l’appel à l’équipe',
+      texte: () => 'Quand une absence est à couvrir, tous ceux qui peuvent tenir le poste reçoivent le même message, en même temps. Vous voyez votre rang dans le tour de rôle. « Je peux » ou « Je ne peux pas » : dire non ne change pas votre rang.',
+      jouer: () => {
+        appelPour(p.id);
+        moi('moi');
+      },
+    },
+    ...(p.pharmacien
+      ? [
+          {
+            chapitre: AVEC_EQUIPE,
+            qui: p.qui,
+            cible: '.content .card',
+            titre: 'Mes gardes',
+            texte: () => 'Vos gardes et astreintes, le repos qui suit chacune, et ce qui partira en paie. Une garde confiée arrive aussi en tête de « Mon planning », avec un accusé de lecture.',
+            jouer: () => moi('mesgardes'),
+          } satisfies Etape,
+        ]
+      : []),
+    {
+      chapitre: AVEC_EQUIPE,
+      qui: p.qui,
+      cible: '.fil',
+      titre: 'Les messages',
+      texte: () => 'Un fil pour toute l’équipe, et des conversations privées. Pour une absence ou un horaire, préférez une demande : elle est suivie jusqu’à sa réponse.',
+      jouer: () => moi('messages'),
+    },
+    {
+      chapitre: MON_ESPACE,
+      qui: p.qui,
+      cible: '.content .deux',
+      titre: 'Mon suivi',
+      texte: () => 'Votre compteur d’heures, en plus ou en moins de votre contrat. Ce qui a été noté sur douze mois : des dates et des durées, jamais une raison. Et votre part des samedis, des fermetures et des dépannages, face à ce qui est attendu de vous.',
+      jouer: () => moi('suivi'),
+    },
+    {
+      chapitre: MON_ESPACE,
+      qui: p.qui,
+      cible: "[data-focus='assistant']",
+      pointe: "[data-focus='assistant']",
+      titre: 'L’assistant Solvéa',
+      texte: () => 'Le bouton au logo de Solvéa reste à portée de main. Dites ce que vous voulez faire : il ne propose que ce qui concerne votre rôle, répond en deux phrases et vous y emmène.',
+      jouer: () => {
+        moi('moi');
+        useUi.getState().montrerAssistant(true);
+      },
+      puis: {
+        jouer: () => {
+          useUi.getState().montrerAssistant(true);
+          useUi.getState().ouvrirAssistant(true);
+        },
+        cible: '.aide-panneau',
+      },
+    },
+    {
+      chapitre: MON_ESPACE,
+      qui: p.qui,
+      cible: '.choix.themes',
+      titre: 'Mon compte',
+      texte: () => 'Dix couleurs, mode clair ou sombre, taille du texte, mot de passe. La visite est terminée : tout ce que vous avez vu reste à essayer librement.',
+      jouer: () => moi('compte'),
+    },
+  ];
+}
+
+const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'Léa · pharmacienne adjointe', prenom: 'Léa', pharmacien: true });
+const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'camille.roussel', qui: 'Camille · préparatrice', prenom: 'Camille' });
+
 export const SCENARIOS = {
-  complet: { court: 'De zéro', titre: 'Tout Solvéa, de zéro', duree: `${COMPLET.length} étapes · 12 min`, detail: 'On part d’une pharmacie tout juste créée, sans équipe ni planning, et on passe par toutes les fonctions, dans l’ordre où on s’en sert.', etapes: COMPLET },
-  etabli: { court: 'Journée type', titre: 'Une journée type', duree: `${ETABLI.length} étapes · 4 min`, detail: 'La pharmacie tourne déjà : huit semaines d’historique, un arrêt à couvrir, des demandes en attente. On suit la journée de la titulaire et de son équipe.', etapes: ETABLI },
+  complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', duree: `${COMPLET.length} étapes · 15 min`, etapes: COMPLET },
+  pharmacien: { court: 'Pharmacien', role: 'Pharmacien adjoint', titre: 'Mon espace de pharmacien', duree: `${PHARMACIEN.length} étapes · 5 min`, etapes: PHARMACIEN },
+  equipe: { court: 'Équipe', role: 'Préparateur, animateur, apprenti…', titre: 'Mon espace dans l’équipe', duree: `${EQUIPIER.length} étapes · 5 min`, etapes: EQUIPIER },
+  etabli: { court: 'Journée type', role: 'Tous les rôles', titre: 'Une journée type', duree: `${ETABLI.length} étapes · 4 min`, etapes: ETABLI },
 } as const;
 export type Scenario = keyof typeof SCENARIOS;
 
@@ -882,6 +1181,7 @@ export type Scenario = keyof typeof SCENARIOS;
 export function lancerParcours(scenario: Scenario = 'etabli'): void {
   annulerMinuteries();
   store().chargerExemple(true, scenario === 'complet' ? 'zero' : 'etabli');
+  useUi.getState().montrerAssistant(false);
   // Le parcours est remis à l'étape 1 : l'écran de la première étape est posé par le composant.
   voirComme('helene.marchetti');
   useUi.getState().setParcours(0, scenario);
@@ -929,7 +1229,13 @@ export function Parcours(): JSX.Element | null {
   };
   const preparer = (): void => {
     const u = useUi.getState();
+    // Fenêtres et menus ouverts par l'étape précédente sont refermés, comme le ferait la touche Échap.
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     u.voirJour(null);
+    // « Mon planning » repart sur la semaine : une étape précédente a pu le laisser sur le calendrier.
+    u.setIntention('semaine');
+    u.ouvrirAssistant(false);
+    u.montrerAssistant(false);
     u.setPlanVue('semaine');
     u.setSeulementMoi(false);
     // Les mises en place sont des décisions de la titulaire principale : elles ne partent jamais « pour accord ».
@@ -1056,6 +1362,11 @@ export function Parcours(): JSX.Element | null {
     return () => window.clearTimeout(t);
   }, [lecture, parcours, libre, sommaire, phase, N, duree, setParcours]);
 
+  // Visite quittée : le bouton d'aide reprend sa place habituelle.
+  useEffect(() => {
+    if (parcours === null) useUi.getState().montrerAssistant(false);
+  }, [parcours]);
+
   // Flèches du clavier : étape suivante, étape précédente.
   useEffect(() => {
     if (parcours === null) return;
@@ -1166,11 +1477,19 @@ export function Parcours(): JSX.Element | null {
 }
 
 const POINTS: Record<Scenario, string[]> = {
-  complet: ['Créer la pharmacie, l’équipe, le premier planning', 'Souhaits, remplacements, absences, gardes', 'Toutes les fonctions, en six chapitres'],
+  complet: ['On part de zéro : pharmacie, équipe, premier planning', 'Toutes les fonctions de gestion, en six chapitres', 'Chaque action se fait sous vos yeux'],
+  pharmacien: ['Mon planning, mes demandes, mes gardes', 'Répondre à un appel de l’équipe', 'Rien de la gestion : seulement ce qui vous sert'],
+  equipe: ['Mon planning et celui de l’équipe', 'Souhaits, absences, remplacements', 'Mon suivi et mon compteur d’heures'],
   etabli: ['Les décisions du matin', 'Un remplacement, du besoin à la validation', 'Deux titulaires qui décident ensemble'],
 };
+const ICONE_VISITE: Record<Scenario, JSX.Element> = {
+  complet: <Crown size={22} />,
+  pharmacien: <PillIcon size={22} />,
+  equipe: <FlaskConical size={22} />,
+  etabli: <Store size={22} />,
+};
 
-/** Fenêtre « Découvrir Solvéa » : deux démonstrations guidées, ou une entrée libre dans la peau de quelqu'un. */
+/** Fenêtre « Découvrir Solvéa » : le principe en trois temps, une visite par rôle, ou une entrée libre. */
 export function ChoixParcours(): JSX.Element | null {
   const { tutoriels, ouvrirTutoriels } = useUi();
   const exemple = useMemo(() => (tutoriels ? ROLES_TEST : []), [tutoriels]);
@@ -1192,42 +1511,61 @@ export function ChoixParcours(): JSX.Element | null {
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && ouvrirTutoriels(false)}>
       <div className="decouvrir" role="dialog" aria-modal="true" aria-labelledby="decouvrir-titre">
         <div className="dc-tete">
+          <span className="dialog-filigrane" aria-hidden="true">
+            <Logo size={230} />
+          </span>
           <div>
-            <span className="eyebrow">Démonstration</span>
+            <span className="eyebrow">Comment ça marche</span>
             <h2 id="decouvrir-titre">Découvrir Solvéa</h2>
-            <p>Deux visites guidées sur une pharmacie d’exemple. Vos données ne sont pas touchées.</p>
+            <ol className="dc-principe">
+              <li>
+                <span className="n" aria-hidden="true">1</span> Chacun donne ses souhaits
+              </li>
+              <li>
+                <span className="n" aria-hidden="true">2</span> Solvéa propose, vous décidez
+              </li>
+              <li>
+                <span className="n" aria-hidden="true">3</span> L’équipe est prévenue
+              </li>
+            </ol>
           </div>
-          <button type="button" className="tour-fermer" onClick={() => ouvrirTutoriels(false)} aria-label="Fermer" autoFocus>
+          <button type="button" className="dialog-fermer" onClick={() => ouvrirTutoriels(false)} aria-label="Fermer" autoFocus>
             <X size={18} aria-hidden="true" />
           </button>
         </div>
         <div className="dc-corps">
-          <div className="choix-parcours">
-            {(Object.keys(SCENARIOS) as Scenario[]).map((cle) => (
-              <article key={cle} className={`cp-carte${cle === 'etabli' ? ' reco' : ''}`}>
-                <div className="row" style={{ gap: 12 }}>
-                  <span className="cp-ico" aria-hidden="true">
-                    {cle === 'complet' ? <Map size={22} /> : <Store size={22} />}
-                  </span>
-                  <span className="cp-duree">{SCENARIOS[cle].duree}</span>
-                  {cle === 'etabli' ? <span className="cp-reco">Pour commencer</span> : null}
-                </div>
-                <h3>{SCENARIOS[cle].titre}</h3>
-                <ul className="cp-points">
-                  {POINTS[cle].map((x) => (
-                    <li key={x}>
-                      <Check size={15} aria-hidden="true" /> {x}
-                    </li>
-                  ))}
-                </ul>
-                <button type="button" className={`btn ${cle === 'etabli' ? 'primary' : ''}`} onClick={() => lancerParcours(cle)}>
-                  <Play size={15} aria-hidden="true" /> Lancer <span className="sr">: {SCENARIOS[cle].titre}</span>
-                </button>
-              </article>
-            ))}
+          <div>
+            <h3 className="dc-sous">Une visite guidée, selon votre rôle</h3>
+            <p className="small soft" style={{ margin: '2px 0 14px' }}>Sur une pharmacie d’exemple : vos données ne sont pas touchées.</p>
+            <div className="choix-parcours">
+              {(Object.keys(SCENARIOS) as Scenario[]).map((cle) => (
+                <article key={cle} className={`cp-carte${cle === 'complet' ? ' reco' : ''}`}>
+                  <div className="row" style={{ gap: 12 }}>
+                    <span className="cp-ico" aria-hidden="true">
+                      {ICONE_VISITE[cle]}
+                    </span>
+                    <span>
+                      <span className="cp-role">{SCENARIOS[cle].role}</span>
+                      <span className="cp-duree">{SCENARIOS[cle].duree}</span>
+                    </span>
+                  </div>
+                  <h3>{SCENARIOS[cle].titre}</h3>
+                  <ul className="cp-points">
+                    {POINTS[cle].map((x) => (
+                      <li key={x}>
+                        <Check size={15} aria-hidden="true" /> {x}
+                      </li>
+                    ))}
+                  </ul>
+                  <button type="button" className={`btn${cle === 'complet' ? ' primary' : ''}`} onClick={() => lancerParcours(cle)}>
+                    <Play size={15} aria-hidden="true" /> Lancer <span className="sr">: {SCENARIOS[cle].titre}</span>
+                  </button>
+                </article>
+              ))}
+            </div>
           </div>
           <div className="dc-libre">
-            <h3>Ou entrez directement comme…</h3>
+            <h3 className="dc-sous">Ou entrez directement comme…</h3>
             <div className="dc-roles">
               {exemple.map((r) => (
                 <button key={r.cle} type="button" className="dc-role" onClick={() => entrer(r.identifiant)} title={r.detail}>

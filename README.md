@@ -35,25 +35,30 @@ puis une vérification avant de créer. Un tutoriel guidé présente ensuite cha
 
 ## Tutoriels et environnement d'exemple
 
-La page de connexion présente Solvéa en trois étapes (« Comment ça marche »). Son bouton « Voir la
-démonstration » ouvre la fenêtre « Découvrir Solvéa » : deux visites guidées, jouées sur une pharmacie
-d'exemple (la « Pharmacie des Tilleuls », fictive) posée à côté des vraies, sans rien effacer.
+La page de connexion est sobre : un dégradé qui dérive, le symbole de Solvéa en fond, le formulaire au
+centre et, en bas, le principe en trois étapes. En haut à droite, « Comment ça marche ? » ouvre la fenêtre
+« Découvrir Solvéa » : une visite guidée **par rôle**, jouée sur une pharmacie d'exemple (la « Pharmacie
+des Tilleuls », fictive) posée à côté des vraies, sans rien effacer.
 
-- **Tout Solvéa, de zéro** (39 étapes, six chapitres) : la pharmacie vient d'être créée, sans équipe ni
-  planning. On installe (création, horaires, modèle de planification, équipe, fiche, règles), on construit
-  (souhaits du mois, grille, proposition, contrôles, vue mois, journée, publication), on passe côté équipe
-  (mon planning, calendrier, planning de l'équipe, demandes, remplacement), on traite les imprévus
-  (demande triée par urgence, volontaire, validation, congés, absence imprévue, appel à l'équipe), les
-  temps forts (gardes, formation, inventaire), puis on pilote (accord entre titulaires, compteur d'heures,
-  suivi, équité, messages, journal et paie, tableau de bord, barre du haut, compte).
-- **Une journée type** (13 étapes) : huit semaines d'historique, un arrêt à couvrir, des demandes en
-  attente ; on suit la titulaire et son équipe.
+- **Titulaire — Tout Solvéa, de zéro** (47 étapes, six chapitres) : la pharmacie vient d'être créée, sans
+  équipe ni planning. On installe (création, horaires, modèle de planification, équipe, fiche, règles), on
+  construit (souhaits du mois, grille, poste posé à la main, trois propositions, contrôles, vue mois,
+  journée, publication), on passe côté équipe (mon planning, calendrier, planning de l'équipe, demandes,
+  remplacement), on traite les imprévus (demande triée par urgence, volontaire, validation, congés, absence
+  imprévue, appel à l'équipe), les temps forts (gardes, formation, inventaire), puis on pilote (accord
+  entre titulaires, compteur d'heures, suivi, équité, messages, journal et paie, tableau de bord,
+  « Créer », cloche, plusieurs pharmacies, assistant, mot de passe, compte).
+- **Pharmacien adjoint** (14 étapes) et **Préparateur, animateur, apprenti…** (13 étapes) : seulement ce
+  qui sert à la personne — son planning, celui de l'équipe, ses demandes, l'appel à l'équipe, ses gardes
+  pour un pharmacien, son suivi, les messages, l'assistant, son compte. Rien de la gestion.
+- **Une journée type** (13 étapes, tous les rôles) : huit semaines d'historique, un arrêt à couvrir, des
+  demandes en attente ; on suit la titulaire et son équipe.
 
 Pendant une visite :
 
 - un **projecteur** éclaire ce dont on parle, et l'écran défile pour l'amener au centre ;
 - quand l'étape comporte une action, un **repère de clic** se pose sur le bouton, puis l'action se fait
-  sous les yeux (l'équipe arrive personne par personne, la grille se remplit, la demande est acceptée) ;
+  sous les yeux (l'équipe arrive personne par personne, une fenêtre s'ouvre, la demande est acceptée) ;
 - la fiche d'explication se range dans le coin où elle cache le moins ;
 - le **sommaire** saute d'un chapitre à l'autre, et l'écran se met en place tout seul ;
 - **lecture automatique**, flèches du clavier, et « Revenir à l'étape » si l'on est parti explorer.
@@ -100,9 +105,19 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
 - **Barre du haut** : la date, « Créer » (planning, garde, formation, inventaire, personne, absence,
   message), la cloche, les messages, le tutoriel, puis le compte. La cloche donne une ligne par demande de
   remplacement, la plus urgente en tête : un clic mène droit à la demande, mise en avant.
-- **Menu personnel**, le même pour tous : « Mon planning » (mes horaires, rien d'autre), « Mes souhaits »
-  (le mois à venir), « Mes demandes » (absences, contraintes, remplacements), « Mon suivi » (compteur
-  d'heures, compteurs de présence, part des contraintes).
+- **Menu personnel**, le même pour tous : « Mon planning » (mes horaires, rien d'autre), « Mes demandes »
+  et « Mon suivi » (compteur d'heures, compteurs de présence, part des contraintes). « Mes demandes » a
+  trois onglets, chacun avec sa phrase d'explication : **Souhaits du mois** (ce que je préfère, sans
+  réponse à attendre), **Absences et horaires** (ce que je demande au titulaire), **Remplacements** (un
+  poste que je ne peux pas tenir).
+- **Assistant Solvéa** : un bouton flottant au logo. On tape ce qu'on veut faire, ou on choisit parmi les
+  suggestions de l'écran en cours ; il répond en deux phrases et y emmène. Il ne propose que ce qui
+  concerne le rôle de la personne. C'est une aide intégrée (fiches et recherche par mots), pas un modèle
+  de langage : rien n'est envoyé hors de l'appareil.
+- **Une couleur par poste**, la même dans tous les thèmes : titulaire, pharmacien adjoint, préparateur,
+  animateur, apprenti, étudiant, rayonniste.
+- **Trois niveaux de boutons** : principal (plein), secondaire (teinté, toujours visible), discret
+  (neutre). Une seule action principale par écran ou par fenêtre.
 - **Mon planning et le planning global.** Dans « Construire » et « Planning de l'équipe », « Mes postes »
   ne garde que ma ligne ; depuis « Mon planning », « Toute l'équipe » ouvre le planning global.
 
@@ -186,7 +201,7 @@ mois précédent, réglable) :
 Le calcul traite un souhait comme une simple préférence : il ne passe jamais devant une règle impérative
 ni devant l'effectif attendu. Côté responsable, « Construire » a une **vue mois** : une lettre par jour et
 par personne, l'objectif d'équipe par jour (au moment le plus tendu), les heures de chacun face à son
-contrat, les souhaits déjà posés, qui a répondu et combien de jours restent. « Corriger avec l'IA Solvéa »
+contrat, les souhaits déjà posés, qui a répondu et combien de jours restent. « Corriger automatiquement »
 recalcule d'un coup les semaines encore en brouillon en suivant les souhaits, et dit combien ont été
 suivis ; les semaines publiées ne bougent pas.
 
@@ -233,12 +248,12 @@ mais comme demande urgente : elle passe d'abord par le titulaire, et seul un vol
 
 « Heures » compare, pour chaque salarié, les heures planifiées et publiées à son contrat (absences
 approuvées déduites). Le titulaire régularise à la main — payer, faire récupérer, faire rattraper,
-solder — ou clique sur « Laisser l'IA Solvéa faire » : chaque écart d'au moins une heure est résorbé sur la
-première semaine non publiée, par demi-heures et sans dépasser 8 h d'écart au contrat, et le brouillon de
-cette semaine est recalculé. Chacun voit son propre compteur dans « Mon suivi ».
+solder — ou clique sur « Régulariser automatiquement » : chaque écart d'au moins une heure est résorbé sur
+la première semaine non publiée, par demi-heures et sans dépasser 8 h d'écart au contrat, et le brouillon
+de cette semaine est recalculé. Chacun voit son propre compteur dans « Mon suivi ».
 
-« IA Solvéa » désigne le moteur de calcul de l'application (règles impératives, puis optimisation) : il
-tourne sur l'appareil, n'envoie aucune donnée et n'est pas un modèle de langage. Le bouton porte le logo.
+Les calculs automatiques (proposition de planning, correction du mois, régularisation) sont faits par le
+moteur de l'application, sur l'appareil : règles impératives d'abord, optimisation ensuite.
 
 ### Besoins personnels : jamais de motif
 
@@ -289,11 +304,6 @@ Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défa
 fenêtres du parcours complet, ordinateur et téléphone, ni sur les vingt écrans principaux rejoués dans
 chacun des dix thèmes, en clair et en sombre. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
-
-## Crédits
-
-Photo de la page de connexion : « Salvator interior », par Newklear007, placée dans le domaine public
-(CC0 1.0), Wikimedia Commons — https://commons.wikimedia.org/w/index.php?curid=150126922.
 
 ## Architecture
 
