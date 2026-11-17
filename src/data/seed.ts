@@ -1,5 +1,6 @@
 import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, decalageParis, ferie, fromDayIndex, mondayOf, uid, weekDates } from '../domain/time';
+import { empreinte, identifiantPropose } from '../domain/acces';
 import type { AppData, Besoin, Garde, ISODate, Mission, Officine, Person, Shift } from '../domain/types';
 import { decrireJournee, shiftsSemaine } from '../engine/core';
 import { generer } from '../engine/generate';
@@ -145,6 +146,8 @@ export function vierge(): AppData {
     journal: [],
     notifications: [],
     trous: [],
+    messages: [],
+    remplacements: [],
   };
 }
 
@@ -213,9 +216,17 @@ export function seed(today: ISODate): AppData {
     { id: uid('g'), date: noel, start: H(9), end: H(19), type: 'volets_ouverts', personId: null, interventions: [] },
   ];
 
+  // Comptes d'exemple : identifiant prenom.nom, mot de passe « demo ».
+  const personnes = EQUIPE_DEMO.map((p) => ({ ...p, identifiant: identifiantPropose(p.prenom, p.nom, []), code: empreinte('demo'), provisoire: p.id === 'p_helene' ? undefined : 'demo' }));
   let data: AppData = {
-    officine: OFFICINE_DEMO,
-    personnes: EQUIPE_DEMO,
+    officine: { ...OFFICINE_DEMO, secours: 'TILL-2026' },
+    demo: true,
+    messages: [
+      { id: uid('msg'), de: 'p_helene', a: 'equipe', texte: 'Bonjour à tous, le planning de la semaine prochaine sera publié jeudi. Pensez à me signaler vos contraintes d’ici là.', at: new Date(`${addDays(today, -1)}T09:12:00`).toISOString(), luPar: ['p_helene'] },
+      { id: uid('msg'), de: 'p_camille', a: 'p_helene', texte: 'Bonjour Hélène, serait-il possible de me libérer mercredi prochain après 17 h ? Merci.', at: new Date(`${addDays(today, -1)}T14:40:00`).toISOString(), luPar: ['p_camille'] },
+    ],
+    remplacements: [],
+    personnes,
     shifts: [],
     missions: [],
     absences: [],
@@ -321,6 +332,12 @@ export function seed(today: ISODate): AppData {
     statut: 'demandee',
     createdAt: new Date(`${addDays(today, -2)}T13:15:00`).toISOString(),
   });
+
+  // ---- Une demande de remplacement en attente : un poste de samedi de cette semaine
+  const aRemplacer = data.shifts.find((x) => x.date === addDays(lundi, 5) && x.personId !== 'p_helene' && dayIndex(x.date) >= dayIndex(today));
+  if (aRemplacer) {
+    data.remplacements.push({ id: uid('r'), shiftId: aRemplacer.id, demandeur: aRemplacer.personId, date: aRemplacer.date, start: aRemplacer.start, end: aRemplacer.end, creeLe: new Date(`${today}T08:05:00`).toISOString(), volontaires: [], statut: 'ouverte' });
+  }
 
   data.journal.sort((a, b) => b.at.localeCompare(a.at));
   return data;

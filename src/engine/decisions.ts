@@ -23,6 +23,7 @@ export interface Decisions {
   gardesAbsence: Garde[];
   gardesAValider: Garde[];
   publications: PublicationEnAttente[];
+  remplacements: AppData['remplacements'];
   total: number;
 }
 
@@ -59,7 +60,9 @@ export function decisions(data: AppData, today: ISODate): Decisions {
       publications.push({ monday, type: 'a_publier', nombre: shiftsSemaine(data, monday).length, jours });
     }
   }
+  const remplacements = (data.remplacements ?? []).filter((r) => r.statut === 'ouverte' && dayIndex(r.date) >= t);
   const total =
+    remplacements.length +
     trous.length +
     absences.length +
     besoins.length +
@@ -68,5 +71,5 @@ export function decisions(data: AppData, today: ISODate): Decisions {
     gardesAbsence.length +
     gardesAValider.length +
     publications.length;
-  return { trous, absences, besoins, gardesAAffecter, gardesRepos, gardesAbsence, gardesAValider, publications, total };
+  return { trous, absences, besoins, gardesAAffecter, gardesRepos, gardesAbsence, gardesAValider, publications, remplacements, total };
 }

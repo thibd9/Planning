@@ -1,17 +1,25 @@
-import { AlertTriangle, CalendarOff, CircleCheck, Crown, HeartHandshake, Lock, Plus, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, CalendarOff, CircleCheck, Crown, HeartHandshake, KeyRound, Lock, Plus, RefreshCw, Trash2, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
+import type { AppData } from '../../domain/types';
 import { ABSENCE_LABEL, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, nomComplet } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
 import { quotaAdjoints, validateEquipe } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { DialogueDemande } from '../components/Demande';
-import { estResponsable, responsable } from '../../domain/acces';
+import { empreinte, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, responsable } from '../../domain/acces';
 import { EtiquetteRole } from '../icons';
 import { Avatar, Dialog, Empty, Pill } from '../kit';
 import { usagePlafond } from './Resoudre';
+
+/** Mot de passe provisoire : six chiffres, à transmettre de vive voix puis à changer. */
+const provisoire = (): string => String(Math.floor(100000 + Math.random() * 900000));
+
+/** Identifiants déjà pris, toutes pharmacies confondues : un identifiant désigne une seule personne. */
+const identifiantsPris = (data: AppData, autres: Record<string, AppData>): string[] =>
+  [data, ...Object.values(autres)].flatMap((d) => d.personnes.map((p) => p.identifiant ?? '')).filter(Boolean);
 
 export const STATUT_BESOIN: Record<Besoin['statut'], { label: string; tone: string }> = {
   reconnue: { label: 'Indisponibilité reconnue', tone: 'danger' },
@@ -32,7 +40,7 @@ export function Equipe(): JSX.Element {
   return (
     <div>
       <div className="page-head">
-        <span className="page-ico c-menthe" aria-hidden="true">
+        <span className="page-ico" aria-hidden="true">
           <Users size={26} />
         </span>
         <div className="grow">
@@ -102,7 +110,7 @@ function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: ()
         <span className="row wrap" style={{ gap: 6, marginTop: 4 }}>
           <EtiquetteRole person={p} />
           <span className="small soft">{p.externe ? `${p.tauxHoraire} € / h facturés` : `${p.heuresHebdo} h${p.heuresHebdo < 35 && p.salarie ? ' (temps partiel)' : ''}`}</span>
-          {estResponsable(data, p) ? <Pill tone="miel">Responsable</Pill> : p.gestion ? <Pill tone="iris">Accès gestion</Pill> : null}
+          {!estResponsable(data, p) && p.gestion ? <Pill tone="iris">Accès gestion</Pill> : null}
         </span>
       </span>
     </button>
@@ -112,12 +120,12 @@ function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: ()
 function Fiche({ person }: { person: Person }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
-  const { majPersonne, supprimerBesoin, deciderAbsence, supprimerPersonne } = useStore();
+  const { majPersonne, supprimerBesoin, deciderAbsence, supprimerPersonne, autres } = useStore();
   const ouvrirPersonne = useUi((s) => s.ouvrirPersonne);
   const [retrait, setRetrait] = useState(false);
   const session = useUi((s) => s.session);
   const chef = responsable(data);
-  const jeSuisResponsable = !!chef && chef.id === session;
+  const jeSuisResponsable = !!chef && memeIdentifiant(chef.identifiant, session ?? '');
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
   const besoins = data.besoins.filter((b) => b.personId === person.id && b.decision !== 'refusee' && (!b.to || b.to >= today));
@@ -132,7 +140,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
         <div className="grow">
           <h2>{nomComplet(person)}</h2>
           <div className="small soft">
-            {QUALIFICATION_LABEL[person.qualification]}
+            {libelleRole(data, person)}
             {person.externe ? ' · remplaçant habituel' : !person.salarie ? ' · hors décompte salarié' : ''}
           </div>
         </div>
@@ -197,7 +205,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
               <div className="notice ok">
                 <Crown size={17} aria-hidden="true" />
                 <span>
-                  <b>Responsable de l’officine.</b> A créé l’officine et détient tous les droits : plannings, équipe, gardes, règles et réglages. Lui seul peut donner l’accès à la gestion.
+                  <b>Titulaire principal.</b> A créé la pharmacie et détient tous les droits : plannings, équipe, gardes, règles et réglages. Lui seul peut donner l’accès à la gestion, à un titulaire secondaire comme à un adjoint.
                 </span>
               </div>
             ) : (
@@ -214,9 +222,47 @@ function Fiche({ person }: { person: Person }): JSX.Element {
                     </span>
                   </span>
                 </label>
-                {!jeSuisResponsable ? <p className="small soft">Seul {chef ? nomComplet(chef) : 'le responsable'} peut accorder ou retirer cet accès.</p> : null}
+                {!jeSuisResponsable ? <p className="small soft">Seul {chef ? nomComplet(chef) : 'le titulaire principal'} peut accorder ou retirer cet accès.</p> : null}
               </>
             )}
+          </section>
+        ) : null}
+
+        {!person.externe ? (
+          <section className="col" style={{ gap: 8 }}>
+            <h3>Compte de connexion</h3>
+            <div className="notice" style={{ alignItems: 'center' }}>
+              <KeyRound size={17} aria-hidden="true" />
+              <div className="grow">
+                <div>
+                  Identifiant : <b>{person.identifiant ?? '—'}</b>
+                </div>
+                <div className="small soft">
+                  {person.provisoire ? (
+                    <>
+                      Mot de passe provisoire : <b className="num" style={{ letterSpacing: '0.08em' }}>{person.provisoire}</b>. À transmettre à {person.prenom}, qui le remplacera dans « Mon compte ».
+                    </>
+                  ) : person.code ? (
+                    `${person.prenom} a choisi son mot de passe. Personne d’autre ne peut le lire.`
+                  ) : (
+                    'Aucun mot de passe défini.'
+                  )}
+                </div>
+              </div>
+              {jeSuisResponsable && !estResponsable(data, person) ? (
+                <button
+                  type="button"
+                  className="btn sm"
+                  onClick={() => {
+                    const mdp = provisoire();
+                    maj({ identifiant: person.identifiant ?? identifiantPropose(person.prenom, person.nom, identifiantsPris(data, autres)), code: empreinte(mdp), provisoire: mdp });
+                    dire(`Nouveau mot de passe provisoire pour ${person.prenom}.`, true);
+                  }}
+                >
+                  <RefreshCw size={14} aria-hidden="true" /> Nouveau mot de passe provisoire
+                </button>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
@@ -333,7 +379,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             </button>
           </>
         ) : (
-          <button type="button" className="btn sm ghost danger" onClick={() => setRetrait(true)} disabled={estResponsable(data, person) || person.id === session} title={estResponsable(data, person) ? 'Le responsable de l’officine ne peut pas être retiré' : undefined}>
+          <button type="button" className="btn sm ghost danger" onClick={() => setRetrait(true)} disabled={estResponsable(data, person) || memeIdentifiant(person.identifiant, session ?? '')} title={estResponsable(data, person) ? 'Le titulaire principal ne peut pas être retiré' : undefined}>
             <Trash2 size={14} /> Retirer de l’équipe
           </button>
         )}
@@ -344,7 +390,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
 }
 
 function DialoguePersonne({ onClose }: { onClose: () => void }): JSX.Element {
-  const majPersonne = useStore((s) => s.majPersonne);
+  const { majPersonne, data, autres } = useStore();
   const { dire, ouvrirPersonne } = useUi();
   const [prenom, setPrenom] = useState('');
   const [nom, setNom] = useState('');
@@ -369,6 +415,7 @@ function DialoguePersonne({ onClose }: { onClose: () => void }): JSX.Element {
             disabled={!pret}
             onClick={() => {
               const id = uid('p');
+              const mdp = provisoire();
               majPersonne({
                 id,
                 prenom: prenom.trim(),
@@ -380,10 +427,10 @@ function DialoguePersonne({ onClose }: { onClose: () => void }): JSX.Element {
                 competences: [],
                 volontaireHeuresComp: false,
                 volontaireGardes: qualification === 'titulaire',
-                ...(externe ? { externe: true } : {}),
+                ...(externe ? { externe: true } : { identifiant: identifiantPropose(prenom, nom, identifiantsPris(data, autres)), code: empreinte(mdp), provisoire: mdp }),
               });
               ouvrirPersonne(id);
-              dire(`${prenom.trim()} ${nom.trim()} ajouté à l’équipe.`, true);
+              dire(externe ? `${prenom.trim()} ${nom.trim()} ajouté à l’équipe.` : `${prenom.trim()} ${nom.trim()} ajouté. Son identifiant et son mot de passe provisoire sont dans sa fiche.`, true);
               onClose();
             }}
           >

@@ -11,17 +11,20 @@ export type Vue =
   | 'regles'
   | 'journal'
   | 'officine'
+  | 'tableau'
+  | 'messages'
+  | 'nouvelle'
   | 'moi'
   | 'planning'
   | 'mesgardes'
   | 'compte';
 
-export type Theme = 'vert' | 'bleu' | 'violet' | 'corail' | 'ardoise';
+export type Theme = 'sarcelle' | 'bleu' | 'vert' | 'ardoise';
 export interface Preferences {
   theme: Theme;
   texte: 'normal' | 'grand';
 }
-const PREFS_DEFAUT: Preferences = { theme: 'vert', texte: 'normal' };
+const PREFS_DEFAUT: Preferences = { theme: 'sarcelle', texte: 'normal' };
 const CLE_SESSION = 'releve.session';
 const CLE_PREFS = 'releve.preferences';
 
@@ -46,7 +49,7 @@ interface Ui {
   vue: Vue;
   /** Lundi de la semaine affichée dans « Construire ». */
   semaine: ISODate;
-  /** Identifiant de la personne connectée ; null quand personne n'est connecté. */
+  /** Identifiant de connexion de la personne connectée ; null quand personne n'est connecté. */
   session: string | null;
   /** Préférences d'affichage, propres à chaque personne. */
   preferences: Record<string, Preferences>;
@@ -73,7 +76,7 @@ interface Ui {
 export const prefsDe = (prefs: Record<string, Preferences>, personId: string | null): Preferences => (personId && prefs[personId]) || PREFS_DEFAUT;
 
 export const useUi = create<Ui>((set) => ({
-  vue: 'resoudre',
+  vue: 'tableau',
   semaine: addDays(mondayOf(todayISO()), 7),
   session: lire<string | null>(CLE_SESSION, null),
   preferences: lire<Record<string, Preferences>>(CLE_PREFS, {}),

@@ -1,5 +1,6 @@
 import { AlertTriangle, ArrowLeft, ArrowRight, Check, CircleAlert, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Store, Trash2, UserRound, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { empreinte, identifiantPropose } from '../../domain/acces';
 import { fmtHHMM, fmtHeure, parseHHMM, uid } from '../../domain/time';
 import type { Interval, Person, Qualification } from '../../domain/types';
 import { QUALIFICATION_COURT } from '../../domain/types';
@@ -164,7 +165,7 @@ function Groupe({
  * Premier écran : créer l'officine en trois étapes (pharmacie, équipe, vérification).
  * Chaque étape se valide seule ; les erreurs sont listées en tête, reliées à leur champ, et reçoivent le focus.
  */
-export function Accueil(): JSX.Element {
+export function Accueil({ ajout, onAnnuler }: { ajout?: Person; onAnnuler?: () => void } = {}): JSX.Element {
   const { creerOfficine, chargerExemple } = useStore();
   const { setTour, connecter } = useUi();
   const [etape, setEtape] = useState(0);
@@ -174,7 +175,9 @@ export function Accueil(): JSX.Element {
   const [midi, setMidi] = useState<Interval>({ start: 12 * 60 + 30, end: 14 * 60 });
   const [samediOuvert, setSamediOuvert] = useState(true);
   const [samedi, setSamedi] = useState<Interval>({ start: 9 * 60, end: 19 * 60 });
-  const [titulaire, setTitulaire] = useState<Ligne>(ligne('titulaire', '42'));
+  const [titulaire, setTitulaire] = useState<Ligne>(ajout ? { ...ligne('titulaire', String(ajout.heuresHebdo)), prenom: ajout.prenom, nom: ajout.nom } : ligne('titulaire', '42'));
+  const [identifiant, setIdentifiant] = useState(ajout?.identifiant ?? '');
+  const [motDePasse, setMotDePasse] = useState('');
   const [adjoints, setAdjoints] = useState<Ligne[]>([ligne('adjoint')]);
   const [preparateurs, setPreparateurs] = useState<Ligne[]>([ligne('preparateur'), ligne('preparateur')]);
   const [autres, setAutres] = useState<Ligne[]>([]);
@@ -215,6 +218,10 @@ export function Accueil(): JSX.Element {
     if (e === 1) {
       if (!titulaire.prenom.trim()) out.push({ champ: 'tit-prenom', message: 'Indiquez le prénom du titulaire.' });
       if (!titulaire.nom.trim()) out.push({ champ: 'tit-nom', message: 'Indiquez le nom du titulaire.' });
+      if (!ajout) {
+        if (identifiant.trim().length < 3) out.push({ champ: 'tit-identifiant', message: 'Choisissez un identifiant de connexion d’au moins 3 caractères.' });
+        if (motDePasse.length < 6) out.push({ champ: 'tit-mdp', message: 'Choisissez un mot de passe d’au moins 6 caractères.' });
+      }
       for (const g of groupes) {
         g.lignes.forEach((l, i) => {
           const base = `${g.id}-${l.cle}`;
@@ -250,23 +257,34 @@ export function Accueil(): JSX.Element {
       setErreurs(tout);
       return;
     }
-    const personnes: Person[] = equipe.map((l) => ({
-      id: uid('p'),
-      prenom: l.prenom.trim(),
-      nom: l.nom.trim(),
-      qualification: l.qualification,
-      salarie: l.qualification !== 'titulaire',
-      heuresHebdo: Math.max(1, Number(l.heures) || 35),
-      tauxHoraire: null,
-      competences: [],
-      volontaireHeuresComp: false,
-      volontaireGardes: l.qualification === 'titulaire',
-    }));
+    // Chaque membre reçoit un identifiant et un mot de passe provisoire, à lui transmettre.
+    const pris: string[] = [identifiant.trim().toLowerCase()];
+    const personnes: Person[] = equipe.map((l, i) => {
+      const principal = i === 0;
+      const id = principal ? identifiant.trim() : identifiantPropose(l.prenom, l.nom, pris);
+      pris.push(id);
+      const provisoire = principal ? undefined : String(Math.floor(100000 + Math.random() * 900000));
+      return {
+        id: uid('p'),
+        prenom: l.prenom.trim(),
+        nom: l.nom.trim(),
+        qualification: l.qualification,
+        salarie: l.qualification !== 'titulaire',
+        heuresHebdo: Math.max(1, Number(l.heures) || 35),
+        tauxHoraire: null,
+        competences: [],
+        volontaireHeuresComp: false,
+        volontaireGardes: l.qualification === 'titulaire',
+        identifiant: id,
+        code: principal ? (ajout?.code ?? empreinte(motDePasse)) : empreinte(provisoire as string),
+        provisoire,
+      };
+    });
     const horaires = [0, 1, 2, 3, 4].map(() => horaireSemaine.map((i) => ({ ...i }))).concat([samediOuvert ? [{ ...samedi }] : []], [[]]);
-    creerOfficine(nom.trim(), horaires, personnes);
-    // Celui qui crée l'officine en est le responsable : il est connecté d'emblée à son espace.
-    connecter(personnes[0].id, 'resoudre');
-    setTour(0);
+    creerOfficine(nom.trim(), horaires, personnes, !!ajout);
+    // Celui qui crée la pharmacie en est le titulaire principal : il est connecté d'emblée à son espace.
+    connecter(personnes[0].identifiant as string, 'tableau');
+    if (!ajout) setTour(0);
   };
 
   const errDe = (champ: string): Erreur | undefined => erreurs.find((e) => e.champ === champ);
@@ -325,7 +343,7 @@ export function Accueil(): JSX.Element {
         >
           <div>
             <p className="eyebrow">
-              Créer mon officine · étape {etape + 1} sur {ETAPES.length}
+              {ajout ? 'Ajouter une pharmacie' : 'Créer mon officine'} · étape {etape + 1} sur {ETAPES.length}
             </p>
             <h1 ref={titre} tabIndex={-1} style={{ marginTop: 6, outline: 'none' }}>
               {etape === 0 ? (
@@ -399,7 +417,7 @@ export function Accueil(): JSX.Element {
 
               <fieldset className="bloc">
                 <legend>
-                  <span className="ico sun" aria-hidden="true">
+                  <span className="ico" aria-hidden="true">
                     <Sparkles size={18} />
                   </span>
                   <span>
@@ -475,7 +493,7 @@ export function Accueil(): JSX.Element {
                     <UserRound size={18} />
                   </span>
                   <span>
-                    <b>Vous, le titulaire responsable</b>
+                    <b>Vous, le titulaire principal</b>
                     <span className="aide">Non salarié, vous détenez tous les droits. Vous seul pourrez donner à d’autres l’accès à la gestion.</span>
                   </span>
                 </legend>
@@ -508,6 +526,36 @@ export function Accueil(): JSX.Element {
                     <CircleAlert size={15} aria-hidden="true" /> {errDe('tit-nom')?.message}
                   </p>
                 ) : null}
+                {ajout ? (
+                  <p className="notice info small">Vous gardez le même identifiant et le même mot de passe pour toutes vos pharmacies.</p>
+                ) : (
+                  <div className="row wrap" style={{ alignItems: 'flex-start' }}>
+                    <label className="field grow" htmlFor="tit-identifiant" style={{ minWidth: 220 }}>
+                      <span>
+                        Identifiant de connexion <span className="oblig">(obligatoire)</span>
+                      </span>
+                      <input id="tit-identifiant" value={identifiant} onChange={(e) => setIdentifiant(e.target.value)} autoComplete="username" autoCapitalize="none" spellCheck={false} required aria-required="true" aria-invalid={!!errDe('tit-identifiant')} aria-describedby="tit-identifiant-aide" />
+                      <span className="aide" id="tit-identifiant-aide">Votre adresse électronique, par exemple.</span>
+                      {errDe('tit-identifiant') ? (
+                        <span className="erreur">
+                          <CircleAlert size={15} aria-hidden="true" /> {errDe('tit-identifiant')?.message}
+                        </span>
+                      ) : null}
+                    </label>
+                    <label className="field grow" htmlFor="tit-mdp" style={{ minWidth: 220 }}>
+                      <span>
+                        Mot de passe <span className="oblig">(obligatoire)</span>
+                      </span>
+                      <input id="tit-mdp" type="password" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} autoComplete="new-password" required aria-required="true" aria-invalid={!!errDe('tit-mdp')} aria-describedby="tit-mdp-aide" />
+                      <span className="aide" id="tit-mdp-aide">Au moins 6 caractères.</span>
+                      {errDe('tit-mdp') ? (
+                        <span className="erreur">
+                          <CircleAlert size={15} aria-hidden="true" /> {errDe('tit-mdp')?.message}
+                        </span>
+                      ) : null}
+                    </label>
+                  </div>
+                )}
               </fieldset>
               <hr className="sep" />
               <Groupe id="adj" titre="Pharmaciens adjoints" aide="Avec le titulaire, ils assurent la présence d’un pharmacien, pauses comprises." icone={<PillIcon size={18} />} ton="mint" singulier="pharmacien adjoint" lignes={adjoints} onChange={setAdjoints} ajouter={() => ligne('adjoint')} libelleAjout="Ajouter un pharmacien" erreurs={erreurs} />
@@ -579,27 +627,33 @@ export function Accueil(): JSX.Element {
 
           <div className="row wrap accueil-actions">
             <span className="grow small soft" aria-live="polite">
-              {etape === 1 ? `${equipe.length} personne${equipe.length > 1 ? 's' : ''} saisie${equipe.length > 1 ? 's' : ''}.` : etape === 0 ? 'Vous préférez explorer d’abord ?' : 'Un tutoriel d’une minute suit la création.'}
+              {etape === 1 ? `${equipe.length} personne${equipe.length > 1 ? 's' : ''} saisie${equipe.length > 1 ? 's' : ''}.` : etape === 0 ? (ajout ? 'Une pharmacie de plus, avec sa propre équipe et ses plannings.' : 'Vous préférez explorer d’abord ?') : 'Un tutoriel d’une minute suit la création.'}
             </span>
             {etape === 0 ? (
-              <button
-                type="button"
-                className="btn"
-                onClick={() => {
-                  chargerExemple();
-                  connecter('p_helene', 'resoudre');
-                  setTour(0);
-                }}
-              >
-                Découvrir avec une équipe d’exemple
-              </button>
+              ajout ? (
+                <button type="button" className="btn" onClick={onAnnuler}>
+                  Annuler
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    chargerExemple();
+                    connecter('helene.marchetti', 'tableau');
+                    setTour(0);
+                  }}
+                >
+                  Découvrir avec une équipe d’exemple
+                </button>
+              )
             ) : (
               <button type="button" className="btn" onClick={() => versEtape(etape - 1)}>
                 <ArrowLeft size={16} aria-hidden="true" /> Retour
               </button>
             )}
             <button type="submit" className="btn magic" style={{ padding: '10px 22px' }}>
-              {etape === 0 ? 'Continuer : l’équipe' : etape === 1 ? 'Continuer : vérification' : 'Créer mon officine'} <ArrowRight size={16} aria-hidden="true" />
+              {etape === 0 ? 'Continuer : l’équipe' : etape === 1 ? 'Continuer : vérification' : ajout ? 'Ajouter cette pharmacie' : 'Créer mon officine'} <ArrowRight size={16} aria-hidden="true" />
             </button>
           </div>
         </form>

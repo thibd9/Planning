@@ -1,4 +1,4 @@
-import { Ban, BellRing, CalendarClock, Check, CircleCheck, Moon, Plus, Printer, Stethoscope } from 'lucide-react';
+import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, CircleCheck, HandHelping, Moon, Plus, Printer, Stethoscope } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -18,13 +18,15 @@ import {
   weekday,
 } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
-import { ABSENCE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien } from '../../domain/types';
+import { ABSENCE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien, nomCourt } from '../../domain/types';
 import { decrireBesoin, decrireShift, minutesTravail } from '../../engine/core';
 import type { CompteurCle } from '../../engine/equity';
+import { peutRemplacer } from '../../engine/remplacement';
 import { COMPTEUR_LABEL, equite } from '../../engine/equity';
 import { HEBERGE } from '../../env';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
+import { useUi } from '../../store/ui';
 import { AvantApres, Pill, Track, roleDe } from '../kit';
 import { echelleOfficine } from './Construire';
 import { STATUT_BESOIN } from './Equipe';
@@ -35,6 +37,8 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const lire = useStore((s) => s.lireNotification);
+  const { demanderRemplacement, seProposer, cloreRemplacement } = useStore();
+  const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
   const person = data.personnes.find((p) => p.id === personId);
   const lundi = mondayOf(today);
@@ -58,6 +62,20 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
   const usage = usagePlafond(data, personId, today);
   const ligne = useMemo(() => equite(data, addDays(lundi, -56), addDays(lundi, 6)).find((l) => l.personId === personId), [data, lundi, personId]);
   const compteurs: CompteurCle[] = person && estPharmacien(person) ? ['samedis', 'fermetures', 'gardes', 'changementsTardifs'] : ['samedis', 'fermetures', 'changementsTardifs'];
+
+  // Lecture rapide : aujourd'hui, demain, puis le prochain jour travaillé.
+  const jourDe = (date: ISODate): Shift[] => aVenir.filter((s) => s.date === date);
+  const demain = addDays(today, 1);
+  const ensuite = aVenir.find((s) => s.date > demain)?.date;
+  const rapides: { titre: string; date: ISODate }[] = [
+    { titre: 'Aujourd’hui', date: today },
+    { titre: 'Demain', date: demain },
+    ...(ensuite ? [{ titre: 'Ensuite', date: ensuite }] : []),
+  ];
+  const ouvertes = data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= today);
+  const mesRemplacements = ouvertes.filter((r) => r.demandeur === personId);
+  const aAider = person ? ouvertes.filter((r) => peutRemplacer(data, r, person)) : [];
+  const enCours = (shiftId: string): boolean => mesRemplacements.some((r) => r.shiftId === shiftId);
 
   if (!person) return <div className="empty">Personne introuvable.</div>;
   const quand = (date: ISODate): string => (date === today ? 'Aujourd’hui' : date === addDays(today, 1) ? 'Demain' : fmtDateLong(date).replace(/ \d{4}$/, ''));
@@ -93,6 +111,84 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
         </div>
       </div>
 
+      <section aria-label="Mes horaires en un coup d’œil" className="bientot" style={{ marginTop: 18 }}>
+        {rapides.map(({ titre, date }) => {
+          const postes = jourDe(date);
+          const absence = absences.find((a) => a.statut === 'approuvee' && a.from <= date && date <= a.to);
+          const garde = data.gardes.find((g) => g.personId === personId && g.date === date);
+          return (
+            <div key={titre} className={`jour${date === today ? ' auj' : ''}`}>
+              <div className="eyebrow">{titre}</div>
+              <div className="small soft cap1">{fmtDateCourt(date)}</div>
+              <div className="h num">{absence ? ABSENCE_LABEL[absence.type] : postes.length ? postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(' · ') : 'Repos'}</div>
+              <div className="small soft">
+                {postes.length ? `${fmtDuree(postes.reduce((t, s) => t + minutesTravail(s), 0))} de travail` : absence ? 'Absence approuvée' : 'Aucun poste publié'}
+                {postes[0]?.pauseStart != null && postes[0]?.pauseEnd != null ? ` · pause ${fmtHeure(postes[0].pauseStart)} – ${fmtHeure(postes[0].pauseEnd)}` : ''}
+              </div>
+              {garde ? (
+                <div style={{ marginTop: 8 }}>
+                  <Pill tone="nuit">
+                    <Moon size={12} aria-hidden="true" /> {GARDE_LABEL[garde.type]} · {fmtHHMM(garde.start)} → {fmtHHMM(garde.end)}
+                  </Pill>
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </section>
+
+      {aAider.length ? (
+        <div className="card" style={{ marginTop: 18 }}>
+          <div className="card-head">
+            <span className="ico" aria-hidden="true">
+              <HandHelping size={18} />
+            </span>
+            <div className="grow">
+              <h2 className="h3">Un collègue cherche un remplaçant</h2>
+              <div className="small soft">Vous proposer n’engage à rien tant que le responsable n’a pas validé.</div>
+            </div>
+          </div>
+          {aAider.map((r) => {
+            const d = data.personnes.find((p) => p.id === r.demandeur);
+            const propose = r.volontaires.includes(personId);
+            const occupe = aVenir.some((s) => s.date === r.date && s.start < r.end && r.start < s.end);
+            return (
+              <div key={r.id} className="decision" style={{ alignItems: 'center' }}>
+                <div className="grow">
+                  <b className="cap1">{fmtDateCourt(r.date)}</b> · <span className="num">{fmtHeure(r.start)} – {fmtHeure(r.end)}</span>
+                  <div className="small soft">
+                    Demandé par {d ? nomCourt(d) : 'un collègue'}
+                    {occupe ? ' · vous travaillez déjà sur cet horaire' : ''}
+                  </div>
+                </div>
+                {propose ? (
+                  <>
+                    <Pill tone="ok">
+                      <Check size={13} aria-hidden="true" /> Vous êtes volontaire
+                    </Pill>
+                    <button type="button" className="btn sm" onClick={() => seProposer(r.id, personId, false)}>
+                      Retirer
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn primary sm"
+                    disabled={occupe}
+                    onClick={() => {
+                      seProposer(r.id, personId, true);
+                      dire('Vous êtes volontaire. Le responsable valide le remplacement.', true);
+                    }}
+                  >
+                    Je me propose
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+
       {changements.length ? (
         <div className="card" style={{ marginTop: 18 }}>
           <div className="card-head">
@@ -102,7 +198,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           {changements.map((n) => (
             <div key={n.id} className="decision" style={{ alignItems: 'center' }}>
               <div className="grow">
-                <b style={{ textTransform: 'capitalize' }}>{fmtDateCourt(n.date)}</b>
+                <b className="cap1">{fmtDateCourt(n.date)}</b>
                 <div style={{ marginTop: 2 }}>
                   <AvantApres avant={n.avant} apres={n.apres} />
                 </div>
@@ -200,6 +296,53 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
         </div>
 
         <div className="col" style={{ gap: 18 }}>
+          <div className="card">
+            <div className="card-head">
+              <span className="ico" aria-hidden="true">
+                <ArrowLeftRight size={18} />
+              </span>
+              <div className="grow">
+                <h2 className="h3">Me faire remplacer</h2>
+                <div className="small soft">Sur un poste publié à venir.</div>
+              </div>
+            </div>
+            <div className="card-body col" style={{ gap: 10 }}>
+              {!aVenir.length ? <p className="soft small">Aucun poste publié à venir.</p> : null}
+              {aVenir.slice(0, 6).map((s) => {
+                const r = mesRemplacements.find((x) => x.shiftId === s.id);
+                return (
+                  <div key={s.id} className="row wrap">
+                    <div className="grow" style={{ minWidth: 150 }}>
+                      <b className="cap1">{fmtDateCourt(s.date)}</b>
+                      <div className="small soft num">
+                        {fmtHeure(s.start)} – {fmtHeure(s.end)}
+                        {r ? ` · ${r.volontaires.length ? `${r.volontaires.length} volontaire${r.volontaires.length > 1 ? 's' : ''}` : 'en attente d’un volontaire'}` : ''}
+                      </div>
+                    </div>
+                    {r ? (
+                      <button type="button" className="btn sm" onClick={() => cloreRemplacement(r.id, 'annulee')}>
+                        Annuler la demande
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn sm"
+                        disabled={enCours(s.id)}
+                        onClick={() => {
+                          demanderRemplacement(s);
+                          dire('Demande de remplacement envoyée à l’équipe et au responsable.', true);
+                        }}
+                      >
+                        Demander un remplacement
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              <p className="tiny muted">Vous restez en poste tant qu’un collègue ne s’est pas proposé et que le responsable n’a pas validé. Aucune raison n’est demandée.</p>
+            </div>
+          </div>
+
           <div className="card">
             <div className="card-head">
               <h2 className="h3 grow">Mes demandes</h2>

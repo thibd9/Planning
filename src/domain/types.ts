@@ -42,8 +42,12 @@ export interface Person {
   externe?: boolean;
   /** Droit de modifier plannings, équipe et réglages. Seul le responsable de l'officine l'accorde. */
   gestion?: boolean;
-  /** Empreinte du code d'accès personnel (jamais le code lui-même). */
+  /** Empreinte du mot de passe (jamais le mot de passe lui-même). */
   code?: string;
+  /** Identifiant de connexion : adresse électronique ou prenom.nom. */
+  identifiant?: string;
+  /** Mot de passe provisoire à transmettre, effacé dès que la personne choisit le sien. */
+  provisoire?: string;
 }
 
 export type Activite = 'comptoir' | 'back' | 'admin' | 'formation';
@@ -182,8 +186,10 @@ export interface BesoinEffectif {
 
 export interface Officine {
   nom: string;
-  /** Titulaire qui a créé l'officine : responsable, il détient tous les droits et les délègue. */
+  /** Titulaire principal : il a créé l'officine, détient tous les droits et les délègue. */
   responsableId?: string;
+  /** Clé de secours du titulaire principal, pour redéfinir son mot de passe. */
+  secours?: string;
   /** Plages d'ouverture par jour : index 0 = lundi … 6 = dimanche. */
   horaires: Interval[][];
   fermeJoursFeries: boolean;
@@ -280,8 +286,36 @@ export interface Regle {
   active: boolean;
 }
 
+/** Message interne. `a` vaut 'equipe' pour toute l'équipe, sinon l'identifiant d'une personne. */
+export interface Message {
+  id: string;
+  de: string;
+  a: string;
+  texte: string;
+  at: string;
+  luPar: string[];
+}
+
+/** Demande de remplacement sur un poste publié : un collègue se propose, le responsable valide. */
+export interface Remplacement {
+  id: string;
+  shiftId: string;
+  demandeur: string;
+  date: ISODate;
+  start: Minutes;
+  end: Minutes;
+  creeLe: string;
+  volontaires: string[];
+  statut: 'ouverte' | 'acceptee' | 'refusee' | 'annulee';
+  remplacantId?: string;
+}
+
 export interface AppData {
   officine: Officine;
+  messages: Message[];
+  remplacements: Remplacement[];
+  /** Jeu d'exemple : les identifiants de démonstration sont affichés à la connexion. */
+  demo?: boolean;
   personnes: Person[];
   shifts: Shift[];
   missions: Mission[];

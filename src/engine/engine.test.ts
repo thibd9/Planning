@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { seed, vierge } from '../data/seed';
-import { espaceDe, estResponsable, peutGerer } from '../domain/acces';
+import { empreinte, espaceDe, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, peutGerer } from '../domain/acces';
 import { addDays, dureeReelle, ferie, joursOuvresEntre, mondayOf, subtract, weekday } from '../domain/time';
 import type { AppData, Shift } from '../domain/types';
 import { minutesSemaine, shiftsSemaine, trousPharmacien } from './core';
@@ -11,6 +11,7 @@ import { candidatsGarde, delaiGarde, parseCalendrierGardes, poidsGarde, repartir
 import { generer, genererVariantes } from './generate';
 import { lireBesoin } from './nlp';
 import { ficheNavetteCSV } from './payroll';
+import { evaluerRemplacement, peutRemplacer } from './remplacement';
 import { appliquerPatch, optionsReparation } from './repair';
 import { bloquants, validateWeek } from './validate';
 
@@ -383,5 +384,64 @@ describe('répartition des gardes', () => {
     for (const x of prop) parPersonne.set(x.personId, (parPersonne.get(x.personId) ?? 0) + 1);
     expect([...parPersonne.values()].sort()).toEqual([2, 2, 2]);
     expect(prop.every((x) => x.raison.length > 10)).toBe(true);
+  });
+});
+
+describe('connexion et rôles', () => {
+  it('propose des identifiants uniques, sans accent, et compare sans tenir compte de la casse', () => {
+    expect(identifiantPropose('Hélène', 'Marchetti', [])).toBe('helene.marchetti');
+    expect(identifiantPropose('Jean-Luc', "D'Arc", ['jeanluc.darc'])).toBe('jeanluc.darc2');
+    expect(memeIdentifiant(' Helene.Marchetti ', 'helene.marchetti')).toBe(true);
+    expect(memeIdentifiant(undefined, '')).toBe(false);
+  });
+  it('ne conserve qu’une empreinte du mot de passe, stable et distincte', () => {
+    expect(empreinte('demo')).toBe(empreinte('demo'));
+    expect(empreinte('demo')).not.toBe(empreinte('Demo'));
+    expect(empreinte('demo')).not.toContain('demo');
+  });
+  it('distingue le titulaire principal du titulaire secondaire', () => {
+    const second = { ...data.personnes[0], id: 'p_second', identifiant: 'second' };
+    const d: AppData = { ...data, personnes: data.personnes.concat(second) };
+    expect(libelleRole(d, d.personnes[0])).toBe('Titulaire principal');
+    expect(libelleRole(d, second)).toBe('Titulaire secondaire');
+    expect(peutGerer(d, second)).toBe(false);
+    expect(peutGerer(d, { ...second, gestion: true })).toBe(true);
+  });
+  it('donne un identifiant et un mot de passe à chaque membre de l’exemple', () => {
+    const internes = data.personnes.filter((p) => !p.externe);
+    expect(internes.every((p) => p.identifiant && p.code)).toBe(true);
+    expect(new Set(internes.map((p) => p.identifiant)).size).toBe(internes.length);
+  });
+});
+
+describe('demandes de remplacement', () => {
+  it('compte une demande ouverte parmi les décisions du jour', () => {
+    const d = decisions(data, TODAY);
+    expect(d.remplacements).toHaveLength(data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= TODAY).length);
+    expect(d.remplacements.length).toBeGreaterThan(0);
+  });
+  it('réserve le poste d’un pharmacien à un pharmacien', () => {
+    const karim = data.personnes.find((p) => p.id === 'p_karim');
+    const prep = data.personnes.find((p) => p.qualification === 'preparateur');
+    const helene = data.personnes.find((p) => p.id === 'p_helene');
+    if (!karim || !prep || !helene) throw new Error('jeu de démonstration incomplet');
+    const r = { id: 'r', shiftId: 'x', demandeur: karim.id, date: SUIVANT, start: 540, end: 1020, creeLe: '', volontaires: [], statut: 'ouverte' as const };
+    expect(peutRemplacer(data, r, prep)).toBe(false);
+    expect(peutRemplacer(data, r, helene)).toBe(true);
+    expect(peutRemplacer(data, r, karim)).toBe(false);
+  });
+  it('refuse un volontaire absent ou déjà en poste, sans rien modifier', () => {
+    const jour = addDays(SUIVANT, 2);
+    const a = poste('p_karim', jour, 540, 1020);
+    const b = poste('p_helene', jour, 600, 1080);
+    const d: AppData = { ...data, shifts: [a, b], absences: [], remplacements: [] };
+    const r = { id: 'r', shiftId: a.id, demandeur: 'p_karim', date: jour, start: a.start, end: a.end, creeLe: '', volontaires: ['p_helene', 'p_lea'], statut: 'ouverte' as const };
+    const occupe = evaluerRemplacement(d, r, 'p_helene');
+    expect(occupe.ok).toBe(false);
+    expect(occupe.raisons.length).toBeGreaterThan(0);
+    const absent = evaluerRemplacement({ ...d, absences: [{ id: 'z', personId: 'p_lea', from: jour, to: jour, type: 'conge', statut: 'approuvee', createdAt: '' }] }, r, 'p_lea');
+    expect(absent.ok).toBe(false);
+    expect(absent.raisons).toContain('Absence déjà prévue ce jour-là.');
+    expect(d.shifts[0].personId).toBe('p_karim');
   });
 });

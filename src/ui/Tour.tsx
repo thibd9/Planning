@@ -17,10 +17,22 @@ const ETAPES: Etape[] = [
     texte: 'Un tour d’une minute pour savoir où trouver chaque chose. Vous pourrez le relancer à tout moment avec le bouton « Tutoriel », en haut de l’écran.',
   },
   {
+    cible: 'nav-tableau',
+    vue: 'tableau',
+    titre: 'Tableau de bord : la pharmacie en un écran',
+    texte: 'Votre page d’accueil. Les décisions en attente, la couverture de la semaine, l’équipe du jour, vos prochains horaires et vos pharmacies.',
+  },
+  {
+    cible: 'nav-moi',
+    vue: 'moi',
+    titre: 'Mon planning : vos horaires d’abord',
+    texte: 'Aujourd’hui, demain, la suite : vos horaires se lisent d’un coup d’œil, sur ordinateur comme sur téléphone. C’est aussi là que chacun demande un remplacement ou un aménagement d’horaires.',
+  },
+  {
     cible: 'nav-resoudre',
     vue: 'resoudre',
     titre: 'Résoudre : que décider aujourd’hui ?',
-    texte: 'Votre page d’accueil. Absences à couvrir, demandes de l’équipe, gardes à affecter, plannings à publier : tout ce qui attend une décision, du plus urgent au moins urgent.',
+    texte: 'Absences à couvrir, remplacements, demandes de l’équipe, gardes à affecter, plannings à publier : tout ce qui attend une décision, du plus urgent au moins urgent.',
   },
   {
     cible: 'nav-construire',
@@ -56,12 +68,12 @@ const ETAPES: Etape[] = [
     cible: 'nav-equipe',
     vue: 'equipe',
     titre: 'Équipe : contrats et besoins',
-    texte: 'Ajoutez des personnes, leurs compétences et leurs besoins d’horaires. Un besoin se décrit sans jamais demander sa raison.',
+    texte: 'Ajoutez des personnes, leurs compétences et leurs besoins d’horaires. Chaque fiche donne l’identifiant et le mot de passe provisoire à transmettre. Un besoin se décrit sans jamais demander sa raison.',
   },
   {
     cible: 'compte',
     titre: 'Votre compte, et celui de chacun',
-    texte: 'Ici : votre thème de couleur, votre code d’accès et la déconnexion. Chaque membre de l’équipe se connecte à son propre espace, différent selon son rôle. Vous seul donnez l’accès à la gestion.',
+    texte: 'En haut à droite : Mon compte, Paramètres, l’ajout d’une pharmacie et la déconnexion. Chaque membre de l’équipe se connecte à son propre espace, différent selon son rôle. Vous seul donnez l’accès à la gestion.',
   },
   {
     cible: 'aide',

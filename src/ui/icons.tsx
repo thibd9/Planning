@@ -23,7 +23,8 @@ import {
   UserRoundPlus,
 } from 'lucide-react';
 import type { AbsenceType, Activite, GardeType, MissionType, Person, Qualification } from '../domain/types';
-import { QUALIFICATION_COURT } from '../domain/types';
+import { libelleRole } from '../domain/acces';
+import { useStore } from '../store/store';
 
 /** Une icône et une couleur par rôle : on reconnaît la fonction sans lire. */
 export const ROLE_ICONE: Record<Qualification, LucideIcon> = {
@@ -34,13 +35,14 @@ export const ROLE_ICONE: Record<Qualification, LucideIcon> = {
   apprenti: Sprout,
   rayonniste: Boxes,
 };
+/** Intensité de la teinte selon le rôle : du plus soutenu (titulaire) au neutre. */
 export const ROLE_COULEUR: Record<Qualification, string> = {
-  titulaire: 'c-or',
-  adjoint: 'c-menthe',
-  preparateur: 'c-ciel',
-  etudiant: 'c-lavande',
-  apprenti: 'c-corail',
-  rayonniste: 'c-rose',
+  titulaire: 'c-fort',
+  adjoint: 'c-moyen',
+  preparateur: 'c-clair',
+  etudiant: 'c-gris',
+  apprenti: 'c-gris',
+  rayonniste: 'c-gris',
 };
 
 /** Une icône par tâche : c'est elle qui figure sur chaque tuile du planning. */
@@ -51,10 +53,10 @@ export const ACTIVITE_ICONE: Record<Activite, LucideIcon> = {
   formation: Presentation,
 };
 export const ACTIVITE_COULEUR: Record<Activite, string> = {
-  comptoir: 'c-menthe',
-  back: 'c-ciel',
-  admin: 'c-lavande',
-  formation: 'c-corail',
+  comptoir: 'c-moyen',
+  back: 'c-clair',
+  admin: 'c-clair',
+  formation: 'c-gris',
 };
 export const ACTIVITE_COURT: Record<Activite, string> = {
   comptoir: 'Comptoir',
@@ -94,15 +96,16 @@ export function PastilleRole({ person, lg }: { person: Pick<Person, 'qualificati
   );
 }
 
-/** Étiquette de rôle : icône et libellé. */
-export function EtiquetteRole({ person }: { person: Pick<Person, 'qualification' | 'externe'> }): JSX.Element {
+/** Étiquette de rôle : icône et libellé, en distinguant titulaire principal et titulaire secondaire. */
+export function EtiquetteRole({ person }: { person: Person }): JSX.Element {
+  const data = useStore((s) => s.data);
   const Icone = iconeDe(person);
   return (
     <span className={`role-tag ${couleurDe(person)}`}>
       <span className="chip-i" aria-hidden="true">
         <Icone size={12} />
       </span>
-      {person.externe ? 'Remplaçant' : QUALIFICATION_COURT[person.qualification]}
+      {libelleRole(data, person)}
     </span>
   );
 }

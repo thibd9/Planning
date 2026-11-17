@@ -26,7 +26,7 @@ export function MesGardes({ personId }: { personId: string }): JSX.Element {
   return (
     <div style={{ maxWidth: 1000 }}>
       <div className="page-head">
-        <span className="page-ico c-lavande" aria-hidden="true">
+        <span className="page-ico" aria-hidden="true">
           <MoonStar size={26} />
         </span>
         <div className="grow">

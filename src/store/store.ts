@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { seed, vierge } from '../data/seed';
-import { addDays, dayIndex, fmtDateCourt, fmtSemaine, todayISO, uid, weekDates } from '../domain/time';
+import { addDays, dayIndex, fmtDateCourt, fmtSemaine, fromDayIndex, todayISO, uid, weekDates } from '../domain/time';
 import type {
   Absence,
   AppData,
@@ -24,19 +24,34 @@ import { changementsSemaine, controlePublication } from '../engine/publish';
 import type { RepairOption } from '../engine/repair';
 import { appliquerPatch } from '../engine/repair';
 
-const KEY = 'releve.v2';
+const KEY = 'releve.v3';
 
-function charger(): AppData {
+/** Ce qui est enregistré : toutes les pharmacies de l'appareil, et celle qui est ouverte. */
+interface Enregistrement {
+  courante: string;
+  officines: Record<string, AppData>;
+}
+
+function normaliser(d: AppData): AppData {
+  return { ...d, messages: d.messages ?? [], remplacements: d.remplacements ?? [] };
+}
+
+function charger(): { officineId: string; data: AppData; autres: Record<string, AppData> } {
   try {
     const brut = localStorage.getItem(KEY);
     if (brut) {
-      const d = JSON.parse(brut) as AppData;
-      if (d && d.officine && Array.isArray(d.shifts) && Array.isArray(d.regles)) return d;
+      const e = JSON.parse(brut) as Enregistrement;
+      const d = e?.officines?.[e.courante];
+      if (d && d.officine && Array.isArray(d.shifts) && Array.isArray(d.regles)) {
+        const autres: Record<string, AppData> = {};
+        for (const [id, x] of Object.entries(e.officines)) if (id !== e.courante) autres[id] = normaliser(x);
+        return { officineId: e.courante, data: normaliser(d), autres };
+      }
     }
   } catch {
     // Stockage indisponible ou illisible : on repart d'une application vierge.
   }
-  return vierge();
+  return { officineId: uid('off'), data: vierge(), autres: {} };
 }
 
 const now = (): string => new Date().toISOString();
@@ -73,7 +88,10 @@ function appliquerAbsence(d: AppData, a: Absence, today: ISODate): AppData {
 }
 
 export interface Store {
+  /** Pharmacie ouverte. Les autres pharmacies de l'appareil sont dans `autres`. */
+  officineId: string;
   data: AppData;
+  autres: Record<string, AppData>;
   today: ISODate;
   past: AppData[];
   future: AppData[];
@@ -85,7 +103,14 @@ export interface Store {
   /** Remplace les données par l'équipe d'exemple (annulable). */
   chargerExemple: () => void;
   /** Crée l'officine depuis l'écran d'accueil : nom, horaires et première équipe. */
-  creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[]) => void;
+  creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[], ajout?: boolean) => void;
+  changerOfficine: (id: string) => void;
+  envoyerMessage: (de: string, a: string, texte: string) => void;
+  lireFil: (moi: string, fil: string) => void;
+  demanderRemplacement: (shift: Shift) => void;
+  seProposer: (id: string, personId: string, oui: boolean) => void;
+  cloreRemplacement: (id: string, statut: 'refusee' | 'annulee') => void;
+  validerRemplacement: (id: string, remplacantId: string) => void;
 
   saveShift: (s: Shift) => void;
   deleteShift: (id: string) => void;
@@ -137,7 +162,7 @@ export const useStore = create<Store>((set, get) => {
   };
 
   return {
-    data: charger(),
+    ...charger(),
     today: todayISO(),
     past: [],
     future: [],
@@ -146,9 +171,9 @@ export const useStore = create<Store>((set, get) => {
     undo: () =>
       set((s) => (s.past.length ? { data: s.past[s.past.length - 1], past: s.past.slice(0, -1), future: [s.data, ...s.future] } : s)),
     redo: () => set((s) => (s.future.length ? { data: s.future[0], future: s.future.slice(1), past: [...s.past, s.data] } : s)),
-    reinitialiser: () => set({ data: vierge(), past: [], future: [] }),
-    creerOfficine: (nom, horaires, personnes) =>
-      set(() => {
+    reinitialiser: () => set({ officineId: uid('off'), data: vierge(), autres: {}, past: [], future: [] }),
+    creerOfficine: (nom, horaires, personnes, ajout) =>
+      set((etat) => {
         const base = vierge();
         const postes = base.officine.postes
           .map((x) => ({ ...x, jours: x.jours.filter((j) => horaires[j].length > 0) }))
@@ -159,6 +184,7 @@ export const useStore = create<Store>((set, get) => {
             ...base.officine,
             nom,
             responsableId: personnes.find((x) => x.qualification === 'titulaire')?.id,
+            secours: etat.data.officine.secours ?? `${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 6)}`.toUpperCase(),
             horaires,
             postes,
             effectifs: base.officine.effectifs.filter((e) => e.jours.some((j) => horaires[j].length > 0)),
@@ -171,11 +197,68 @@ export const useStore = create<Store>((set, get) => {
             titre: `Officine « ${nom} » créée`,
             detail: `${personnes.length} personne${personnes.length > 1 ? 's' : ''} dans l'équipe. Horaires, postes types et seuils sont modifiables dans « Officine ».`,
           }),
+          // Une pharmacie ajoutée s'ouvre aussitôt ; celle qu'on quitte reste enregistrée à côté.
+          ...(ajout ? { officineId: uid('off'), autres: { ...etat.autres, [etat.officineId]: etat.data } } : {}),
           past: [],
           future: [],
         };
       }),
-    chargerExemple: () => set((s) => ({ data: seed(todayISO()), past: [...s.past.slice(-40), s.data], future: [] })),
+    changerOfficine: (id) =>
+      set((s) => {
+        const cible = s.autres[id];
+        if (!cible) return s;
+        const autres = { ...s.autres, [s.officineId]: s.data };
+        delete autres[id];
+        return { officineId: id, data: cible, autres, past: [], future: [] };
+      }),
+    envoyerMessage: (de, a, texte) =>
+      commit((d) => ({ ...d, messages: d.messages.concat({ id: uid('msg'), de, a, texte: texte.trim(), at: now(), luPar: [de] }) }), false),
+    lireFil: (moi, fil) =>
+      commit((d) => {
+        const concerne = (m: AppData['messages'][number]): boolean => (fil === 'equipe' ? m.a === 'equipe' : (m.de === fil && m.a === moi) || (m.de === moi && m.a === fil));
+        if (!d.messages.some((m) => concerne(m) && !m.luPar.includes(moi))) return d;
+        return { ...d, messages: d.messages.map((m) => (concerne(m) && !m.luPar.includes(moi) ? { ...m, luPar: [...m.luPar, moi] } : m)) };
+      }, false),
+    demanderRemplacement: (shift) =>
+      commit((d) =>
+        journal(
+          { ...d, remplacements: d.remplacements.concat({ id: uid('r'), shiftId: shift.id, demandeur: shift.personId, date: shift.date, start: shift.start, end: shift.end, creeLe: now(), volontaires: [], statut: 'ouverte' }) },
+          { type: 'modification', titre: `${nom(d, shift.personId)} demande un remplacement le ${fmtDateCourt(shift.date)}` },
+        ),
+      ),
+    seProposer: (id, personId, oui) =>
+      commit((d) => ({
+        ...d,
+        remplacements: d.remplacements.map((r) => (r.id === id ? { ...r, volontaires: oui ? [...new Set([...r.volontaires, personId])] : r.volontaires.filter((x) => x !== personId) } : r)),
+      })),
+    cloreRemplacement: (id, statut) => commit((d) => ({ ...d, remplacements: d.remplacements.map((r) => (r.id === id ? { ...r, statut } : r)) })),
+    validerRemplacement: (id, remplacantId) =>
+      commit((d, today) => {
+        const r = d.remplacements.find((x) => x.id === id);
+        const poste = d.shifts.find((x) => x.id === r?.shiftId);
+        if (!r || !poste) return d;
+        const at = now();
+        const monday = fromDayIndex(dayIndex(poste.date) - ((dayIndex(poste.date) + 3) % 7));
+        const passer = (liste: Shift[]): Shift[] => liste.map((x) => (x.id === poste.id ? { ...x, personId: remplacantId, origine: 'reparation' as const, explication: `Remplace ${nom(d, r.demandeur)} à sa demande.` } : x));
+        const semaine = d.semaines[monday];
+        const horaire = `${fmtDateCourt(poste.date)}`;
+        return journal(
+          {
+            ...d,
+            shifts: passer(d.shifts),
+            // Le remplacement validé vaut publication : les deux personnes voient aussitôt leur changement.
+            semaines: semaine?.snapshot ? { ...d.semaines, [monday]: { ...semaine, snapshot: passer(semaine.snapshot) } } : d.semaines,
+            remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut: 'acceptee' as const, remplacantId } : x)),
+            notifications: [
+              { id: uid('n'), personId: r.demandeur, at, date: poste.date, avant: 'En poste', apres: `Remplacé par ${nom(d, remplacantId)}`, tardif: dayIndex(poste.date) - dayIndex(today) < 7 },
+              { id: uid('n'), personId: remplacantId, at, date: poste.date, avant: 'Repos', apres: `En poste à la place de ${nom(d, r.demandeur)}`, tardif: dayIndex(poste.date) - dayIndex(today) < 7 },
+              ...d.notifications,
+            ],
+          },
+          { type: 'reparation', titre: `Remplacement validé le ${horaire} : ${nom(d, remplacantId)} remplace ${nom(d, r.demandeur)}`, regles: true },
+        );
+      }),
+    chargerExemple: () => set((s) => ({ officineId: uid('off'), data: seed(todayISO()), autres: {}, past: [...s.past.slice(-40), s.data], future: [] })),
 
     saveShift: (shift) =>
       commit((d) => ({
@@ -473,10 +556,15 @@ export const useStore = create<Store>((set, get) => {
 });
 
 // Sauvegarde locale à chaque changement, avec l'heure de la dernière écriture réussie.
+const enregistrer = (s: Store): void => {
+  const e: Enregistrement = { courante: s.officineId, officines: { ...s.autres, [s.officineId]: s.data } };
+  localStorage.setItem(KEY, JSON.stringify(e));
+};
+// Sauvegarde locale à chaque changement, avec l'heure de la dernière écriture réussie.
 useStore.subscribe((s, prev) => {
-  if (s.data === prev.data) return;
+  if (s.data === prev.data && s.autres === prev.autres && s.officineId === prev.officineId) return;
   try {
-    localStorage.setItem(KEY, JSON.stringify(s.data));
+    enregistrer(s);
     useStore.setState({ derniereSauvegarde: now() });
   } catch {
     // Quota dépassé ou navigation privée : l'application continue en mémoire.
@@ -484,7 +572,7 @@ useStore.subscribe((s, prev) => {
 });
 if (typeof localStorage !== 'undefined') {
   try {
-    localStorage.setItem(KEY, JSON.stringify(useStore.getState().data));
+    enregistrer(useStore.getState());
   } catch {
     // idem
   }

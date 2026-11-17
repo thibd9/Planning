@@ -35,14 +35,36 @@ export const ESPACE_LABEL: Record<Espace, string> = {
   equipe: 'Espace équipe',
 };
 
-/** Empreinte d'un code d'accès. Protection de confort sur un appareil partagé, pas une sécurité de serveur. */
-export async function empreinte(code: string): Promise<string> {
-  const octets = new TextEncoder().encode(`releve:${code}`);
-  if (globalThis.crypto?.subtle) {
-    const h = await globalThis.crypto.subtle.digest('SHA-256', octets);
-    return Array.from(new Uint8Array(h), (b) => b.toString(16).padStart(2, '0')).join('');
+/**
+ * Empreinte d'un mot de passe. Protection de confort sur un appareil partagé :
+ * sans serveur, ce n'est pas une sécurité, et l'empreinte n'est pas cryptographique.
+ */
+export function empreinte(code: string): string {
+  let a = 5381;
+  let b = 52711;
+  for (const c of `releve:${code}`) {
+    const o = c.codePointAt(0) ?? 0;
+    a = ((a << 5) + a + o) >>> 0;
+    b = ((b << 5) + b) ^ o;
+    b >>>= 0;
   }
-  let x = 5381;
-  for (const o of octets) x = ((x << 5) + x + o) >>> 0;
-  return `d${x.toString(16)}`;
+  return `e${a.toString(36)}${b.toString(36)}`;
+}
+
+/** Identifiant de connexion proposé : prenom.nom, sans accent ni espace, unique dans la liste donnée. */
+export function identifiantPropose(prenom: string, nom: string, pris: string[]): string {
+  const net = (t: string): string => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const base = `${net(prenom)}.${net(nom)}`.replace(/^\.|\.$/g, '') || 'profil';
+  let id = base;
+  for (let n = 2; pris.includes(id); n++) id = `${base}${n}`;
+  return id;
+}
+
+export const memeIdentifiant = (a: string | undefined, b: string | undefined): boolean => !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/** Libellé du rôle, en distinguant le titulaire principal du titulaire secondaire. */
+export function libelleRole(data: Pick<AppData, 'officine' | 'personnes'>, p: Person): string {
+  if (p.externe) return 'Remplaçant';
+  if (p.qualification === 'titulaire') return estResponsable(data, p) ? 'Titulaire principal' : 'Titulaire secondaire';
+  return { adjoint: 'Pharmacien adjoint', preparateur: 'Préparateur', etudiant: 'Étudiant', apprenti: 'Apprenti', rayonniste: 'Rayonniste' }[p.qualification];
 }

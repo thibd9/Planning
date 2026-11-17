@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CalendarCheck, CalendarRange, Check, CircleCheck, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, CircleCheck, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -13,7 +13,7 @@ import {
   mondayOf,
   weekday,
 } from '../../domain/time';
-import type { Absence, AppData, Besoin, BesoinStatut, ISODate, Trou } from '../../domain/types';
+import type { Absence, AppData, Besoin, BesoinStatut, ISODate, Remplacement, Trou } from '../../domain/types';
 import { ABSENCE_LABEL, GARDE_LABEL, nomCourt } from '../../domain/types';
 import { decrireBesoin, decrireShift, shiftsSemaine } from '../../engine/core';
 import { decisions } from '../../engine/decisions';
@@ -21,6 +21,7 @@ import { diagnosticPrealable } from '../../engine/diagnose';
 import { congesIncompatibles } from '../../engine/gardes';
 import type { RepairOption } from '../../engine/repair';
 import { optionsReparation } from '../../engine/repair';
+import { evaluerRemplacement } from '../../engine/remplacement';
 import { validateWeek } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
@@ -57,7 +58,7 @@ export function Resoudre(): JSX.Element {
   return (
     <div style={{ maxWidth: 1180 }}>
       <div className="page-head">
-        <span className="page-ico c-corail" aria-hidden="true">
+        <span className="page-ico" aria-hidden="true">
           <ListChecks size={26} />
         </span>
         <div className="grow">
@@ -116,6 +117,23 @@ export function Resoudre(): JSX.Element {
                 </div>
               );
             })}
+          </div>
+        </>
+      ) : null}
+
+      {d.remplacements.length ? (
+        <>
+          <div className="section-title">
+            <span className="ico">
+              <ArrowLeftRight size={18} />
+            </span>
+            <h2>Demandes de remplacement</h2>
+            <span className="count">{d.remplacements.length}</span>
+          </div>
+          <div className="card">
+            {d.remplacements.map((r) => (
+              <DemandeRemplacement key={r.id} remplacement={r} />
+            ))}
           </div>
         </>
       ) : null}
@@ -654,5 +672,65 @@ function Demarrage(): JSX.Element | null {
         ))}
       </ol>
     </section>
+  );
+}
+
+/** Un poste à reprendre : chaque volontaire est relu par le moteur avant que le responsable ne valide. */
+function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }): JSX.Element {
+  const data = useStore((s) => s.data);
+  const { validerRemplacement, cloreRemplacement } = useStore();
+  const dire = useUi((s) => s.dire);
+  const demandeur = data.personnes.find((p) => p.id === r.demandeur);
+  const avis = useMemo(() => r.volontaires.map((id) => ({ id, avis: evaluerRemplacement(data, r, id) })), [data, r]);
+  return (
+    <div className="decision" style={{ alignItems: 'flex-start' }}>
+      <Avatar person={demandeur} />
+      <div className="grow col" style={{ gap: 8, minWidth: 220 }}>
+        <div>
+          <b>{demandeur ? nomCourt(demandeur) : '—'}</b> souhaite être remplacé{' '}
+          <b>
+            {fmtDateCourt(r.date)}, {fmtHeure(r.start)} – {fmtHeure(r.end)}
+          </b>
+          <div className="small soft">Aucune raison n’est demandée. Sans validation, le poste reste le sien.</div>
+        </div>
+        {!avis.length ? <div className="small soft">Aucun volontaire pour l’instant : l’équipe voit la demande dans « Mon planning ».</div> : null}
+        {avis.map(({ id, avis: a }) => {
+          const p = data.personnes.find((x) => x.id === id);
+          return (
+            <div key={id} className="row wrap" style={{ gap: 10 }}>
+              <Avatar person={p} />
+              <div className="grow" style={{ minWidth: 180 }}>
+                <b>{p ? nomCourt(p) : '—'}</b> se propose
+                <div className="small soft">{a.ok ? 'Règles respectées, couverture inchangée.' : a.raisons.join(' · ')}</div>
+              </div>
+              {a.ok ? (
+                <button
+                  type="button"
+                  className="btn primary sm"
+                  onClick={() => {
+                    validerRemplacement(r.id, id);
+                    dire(`Remplacement validé : ${p ? nomCourt(p) : ''} reprend le poste. Les deux personnes sont prévenues.`, true);
+                  }}
+                >
+                  <Check size={14} aria-hidden="true" /> Valider avec {p?.prenom}
+                </button>
+              ) : (
+                <Pill tone="warn">Impossible en l’état</Pill>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        className="btn sm"
+        onClick={() => {
+          cloreRemplacement(r.id, 'refusee');
+          dire('Demande de remplacement refusée.', true);
+        }}
+      >
+        Refuser
+      </button>
+    </div>
   );
 }

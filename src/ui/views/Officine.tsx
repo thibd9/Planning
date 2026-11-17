@@ -35,7 +35,7 @@ export function Officine(): JSX.Element {
   return (
     <div style={{ maxWidth: 1080 }}>
       <div className="page-head">
-        <span className="page-ico c-gris" aria-hidden="true">
+        <span className="page-ico" aria-hidden="true">
           <Settings2 size={26} />
         </span>
         <div className="grow">
@@ -136,7 +136,7 @@ export function Officine(): JSX.Element {
               <tbody>
                 {officine.effectifs.map((e, i) => (
                   <tr key={i}>
-                    <td style={{ textTransform: 'capitalize' }}>{e.jours.length === 5 && e.jours[0] === 0 ? 'Lundi à vendredi' : e.jours.map((j) => JOURS[j]).join(', ')}</td>
+                    <td className="cap1">{e.jours.length === 5 && e.jours[0] === 0 ? 'Lundi à vendredi' : e.jours.map((j) => JOURS[j]).join(', ')}</td>
                     <td className="num">
                       {fmtHHMM(e.start)} → {fmtHHMM(e.end)}
                     </td>
@@ -237,7 +237,7 @@ export function Officine(): JSX.Element {
                     <span className="muted">Sans pause</span>
                   )}
                 </td>
-                <td className="small" style={{ textTransform: 'capitalize' }}>{p.jours.length === 5 && p.jours[0] === 0 ? 'Lundi à vendredi' : p.jours.map((j) => JOURS[j]).join(', ')}</td>
+                <td className="small cap1">{p.jours.length === 5 && p.jours[0] === 0 ? 'Lundi à vendredi' : p.jours.map((j) => JOURS[j]).join(', ')}</td>
                 <td className="num" style={{ textAlign: 'right' }}>{fmtDuree(minutesTravail(p))}</td>
                 <td style={{ textAlign: 'right', width: 48 }}>
                   <button type="button" className="btn ghost icon" aria-label={`Retirer le poste ${p.label}`} onClick={() => majOfficine({ postes: officine.postes.filter((x) => x.id !== p.id) })}>

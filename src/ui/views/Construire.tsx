@@ -92,9 +92,9 @@ export function echelleOfficine(data: AppData): Echelle {
 }
 
 const GROUPES: { titre: string; test: (p: Person) => boolean; couleur: string; icone: JSX.Element }[] = [
-  { titre: 'Pharmaciens', test: (p) => estPharmacien(p) && !p.externe, couleur: 'c-menthe', icone: <PillIcon size={14} /> },
-  { titre: 'Préparateurs', test: (p) => p.qualification === 'preparateur' && !p.externe, couleur: 'c-ciel', icone: <FlaskConical size={14} /> },
-  { titre: 'Apprentis, étudiants et autres postes', test: (p) => !estPharmacien(p) && p.qualification !== 'preparateur' && !p.externe, couleur: 'c-corail', icone: <Sprout size={14} /> },
+  { titre: 'Pharmaciens', test: (p) => estPharmacien(p) && !p.externe, couleur: 'c-moyen', icone: <PillIcon size={14} /> },
+  { titre: 'Préparateurs', test: (p) => p.qualification === 'preparateur' && !p.externe, couleur: 'c-clair', icone: <FlaskConical size={14} /> },
+  { titre: 'Apprentis, étudiants et autres postes', test: (p) => !estPharmacien(p) && p.qualification !== 'preparateur' && !p.externe, couleur: 'c-gris', icone: <Sprout size={14} /> },
   { titre: 'Remplaçants', test: (p) => !!p.externe, couleur: 'c-gris', icone: <UserRoundPlus size={14} /> },
 ];
 
@@ -164,7 +164,7 @@ export function Construire(): JSX.Element {
   return (
     <div>
       <div className="page-head">
-        <span className="page-ico c-jaune" aria-hidden="true">
+        <span className="page-ico" aria-hidden="true">
           <CalendarRange size={26} />
         </span>
         <div className="grow">

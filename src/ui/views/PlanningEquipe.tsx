@@ -26,7 +26,7 @@ export function PlanningEquipe({ personId }: { personId: string }): JSX.Element 
   return (
     <div>
       <div className="page-head">
-        <span className="page-ico c-jaune" aria-hidden="true">
+        <span className="page-ico" aria-hidden="true">
           <CalendarRange size={26} />
         </span>
         <div className="grow">

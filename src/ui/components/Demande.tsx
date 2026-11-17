@@ -11,6 +11,15 @@ import { Dialog, Pill } from '../kit';
 import { usagePlafond } from '../views/Resoudre';
 
 type Genre = BesoinForme | 'jour' | 'absence';
+type Plage = 'journee' | 'matin' | 'aprem' | 'perso';
+
+/** Bornes d'une indisponibilité partielle, en minutes ; rien pour la journée entière. */
+function bornes(plage: Plage, de: string, a: string): { plageStart?: number; plageEnd?: number } {
+  if (plage === 'matin') return { plageStart: 0, plageEnd: 13 * 60 };
+  if (plage === 'aprem') return { plageStart: 13 * 60, plageEnd: 1440 };
+  if (plage === 'perso') return { plageStart: parseHHMM(de) ?? 0, plageEnd: parseHHMM(a) ?? 1440 };
+  return {};
+}
 
 const GENRES: { value: Genre; label: string }[] = [
   { value: 'indisponible', label: 'Ne pas travailler certains jours' },
@@ -18,6 +27,34 @@ const GENRES: { value: Genre; label: string }[] = [
   { value: 'commencer_apres', label: 'Commencer après une heure' },
   { value: 'jour', label: 'Un jour précis' },
   { value: 'absence', label: 'Une absence de plusieurs jours' },
+];
+
+/**
+ * Préréglages : un nom familier remplit le formulaire, puis disparaît.
+ * Seule la contrainte d'horaire est enregistrée ; le préréglage choisi ne l'est jamais.
+ */
+interface Prereglage {
+  nom: string;
+  detail: string;
+  /** Une ou deux contraintes : le Chabbat en demande deux (vendredi soir et samedi). */
+  lignes: { forme: BesoinForme; jours: number[]; heure?: string; plage?: Plage; de?: string; a?: string }[];
+}
+
+const PREREGLAGES: Prereglage[] = [
+  {
+    nom: 'Chabbat',
+    detail: 'Finir avant 16 h le vendredi, ne pas travailler le samedi',
+    lignes: [
+      { forme: 'finir_avant', jours: [4], heure: '16:00' },
+      { forme: 'indisponible', jours: [5], plage: 'journee' },
+    ],
+  },
+  { nom: 'Prière du vendredi', detail: 'Ne pas travailler le vendredi de 12 h à 14 h 30', lignes: [{ forme: 'indisponible', jours: [4], plage: 'perso', de: '12:00', a: '14:30' }] },
+  { nom: 'Office du dimanche', detail: 'Ne pas travailler le dimanche matin', lignes: [{ forme: 'indisponible', jours: [6], plage: 'matin' }] },
+  { nom: 'Rupture du jeûne', detail: 'Finir avant 18 h tous les jours, sur une période à préciser', lignes: [{ forme: 'finir_avant', jours: [0, 1, 2, 3, 4, 5], heure: '18:00' }] },
+  { nom: 'Sortie d’école', detail: 'Finir avant 16 h 30 les lundis, mardis, jeudis et vendredis', lignes: [{ forme: 'finir_avant', jours: [0, 1, 3, 4], heure: '16:30' }] },
+  { nom: 'Mercredi', detail: 'Ne pas travailler le mercredi', lignes: [{ forme: 'indisponible', jours: [2], plage: 'journee' }] },
+  { nom: 'Cours du soir', detail: 'Finir avant 17 h 30 certains soirs, à choisir', lignes: [{ forme: 'finir_avant', jours: [], heure: '17:30' }] },
 ];
 
 /**
@@ -34,7 +71,9 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
   const [jours, setJours] = useState<number[]>([]);
   const [frequence, setFrequence] = useState<1 | 2>(1);
   const [heure, setHeure] = useState('17:00');
-  const [plage, setPlage] = useState<'journee' | 'matin' | 'aprem'>('journee');
+  const [plage, setPlage] = useState<Plage>('journee');
+  const [plageDe, setPlageDe] = useState('12:00');
+  const [plageA, setPlageA] = useState('14:00');
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState('');
   const [statut, setStatut] = useState<BesoinStatut>('preference');
@@ -43,12 +82,17 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
   const [phrase, setPhrase] = useState('');
   const [compris, setCompris] = useState<{ ok: string[]; manque: string[] } | null>(null);
   const [calendrier, setCalendrier] = useState(false);
+  // Seconde contrainte d'un préréglage double (Chabbat) : envoyée avec la première.
+  const [suite, setSuite] = useState<Prereglage['lignes'][number] | null>(null);
+  const [choisi, setChoisi] = useState<string | null>(null);
   const usage = usagePlafond(data, personId, today);
   const reperes = useMemo(() => reperesAVenir(today), [today]);
   const plein = statut === 'prioritaire' && !horsPlafond && usage.actifs >= usage.plafond;
 
   const valide =
-    genre === 'absence' ? !!from && !!to && to >= from : genre === 'jour' ? !!from : jours.length > 0 && (genre === 'indisponible' || parseHHMM(heure) !== null);
+    genre === 'absence' ? !!from && !!to && to >= from : genre === 'jour'
+        ? !!from
+        : jours.length > 0 && (genre === 'indisponible' ? plage !== 'perso' || (parseHHMM(plageDe) ?? 0) < (parseHHMM(plageA) ?? 0) : parseHHMM(heure) !== null);
 
   const comprendre = (): void => {
     const cible = data.personnes.filter((p) => p.id === personId);
@@ -59,12 +103,29 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
       setJours(b.jours);
       setFrequence(b.frequence);
       if (b.heure !== undefined) setHeure(fmtHHMM(b.heure));
-      setPlage(b.plageStart === 0 ? 'matin' : b.plageEnd === 1440 ? 'aprem' : 'journee');
+      setPlage(b.plageStart === undefined ? 'journee' : b.plageStart === 0 ? 'matin' : b.plageEnd === 1440 ? 'aprem' : 'perso');
+      if (b.plageStart !== undefined && b.plageStart > 0 && b.plageEnd !== undefined && b.plageEnd < 1440) {
+        setPlageDe(fmtHHMM(b.plageStart));
+        setPlageA(fmtHHMM(b.plageEnd));
+      }
       if (b.from) setFrom(b.from);
       setTo(b.to ?? '');
       setStatut(b.statut);
     }
     setCompris({ ok: l.compris.filter((c) => !c.startsWith('Personne')), manque: l.manque.filter((m) => !m.startsWith('la personne')) });
+  };
+
+  const appliquer = (p: Prereglage): void => {
+    const [a, b] = p.lignes;
+    setGenre(a.forme);
+    setJours(a.jours);
+    setFrequence(1);
+    if (a.heure) setHeure(a.heure);
+    setPlage(a.plage ?? 'journee');
+    if (a.de) setPlageDe(a.de);
+    if (a.a) setPlageA(a.a);
+    setSuite(b ?? null);
+    setChoisi(p.nom);
   };
 
   const envoyer = (): void => {
@@ -83,8 +144,7 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
       frequence: jour ? 1 : frequence,
       semaineRef: !jour && frequence === 2 ? mondayOf(from || today) : undefined,
       heure: genre === 'finir_avant' || genre === 'commencer_apres' ? h : undefined,
-      plageStart: genre === 'indisponible' && plage !== 'journee' ? (plage === 'matin' ? 0 : 13 * 60) : undefined,
-      plageEnd: genre === 'indisponible' && plage !== 'journee' ? (plage === 'matin' ? 13 * 60 : 1440) : undefined,
+      ...(genre === 'indisponible' ? bornes(plage, plageDe, plageA) : {}),
       from: from || today,
       to: jour ? from : to || undefined,
       statut,
@@ -92,6 +152,23 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
       decision: responsable ? 'acceptee' : 'en_attente',
       decidedAt: responsable ? new Date().toISOString() : undefined,
     });
+    if (suite && !jour) {
+      ajouterBesoin({
+        personId,
+        forme: suite.forme,
+        jours: suite.jours,
+        frequence,
+        semaineRef: frequence === 2 ? mondayOf(from || today) : undefined,
+        heure: suite.heure ? (parseHHMM(suite.heure) ?? undefined) : undefined,
+        ...(suite.forme === 'indisponible' ? bornes(suite.plage ?? 'journee', suite.de ?? '', suite.a ?? '') : {}),
+        from: from || today,
+        to: to || undefined,
+        statut,
+        horsPlafond: responsable && horsPlafond,
+        decision: responsable ? 'acceptee' : 'en_attente',
+        decidedAt: responsable ? new Date().toISOString() : undefined,
+      });
+    }
     dire(responsable ? 'Besoin enregistré.' : 'Demande envoyée au responsable.', true);
     onClose();
   };
@@ -136,9 +213,39 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
         </div>
       ) : null}
 
+      <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+        <legend className="field" style={{ marginBottom: 6 }}>Besoins courants (facultatif)</legend>
+        <div className="row wrap" style={{ gap: 6 }}>
+          {PREREGLAGES.map((p) => (
+            <button key={p.nom} type="button" className={`btn sm${choisi === p.nom ? ' primary' : ''}`} aria-pressed={choisi === p.nom} title={p.detail} onClick={() => appliquer(p)}>
+              {p.nom}
+            </button>
+          ))}
+        </div>
+        <p className="tiny muted" style={{ marginTop: 6 }}>
+          <EyeOff size={13} aria-hidden="true" style={{ verticalAlign: '-2px' }} /> Un raccourci pour remplir le formulaire. <b>Votre choix n’est pas enregistré</b> : votre responsable ne voit que des horaires, par exemple « finir avant 16 h le vendredi ».
+        </p>
+        {choisi ? (
+          <p className="notice ok small" role="status">
+            <span>
+              {PREREGLAGES.find((p) => p.nom === choisi)?.detail}. Ajustez les jours et les heures ci-dessous si besoin.
+              {suite ? ' Deux contraintes seront envoyées ensemble.' : ''}
+            </span>
+          </p>
+        ) : null}
+      </fieldset>
+
       <label className="field">
         Type de besoin
-        <select value={genre} onChange={(e) => setGenre(e.target.value as Genre)} data-autofocus>
+        <select
+          value={genre}
+          onChange={(e) => {
+            setGenre(e.target.value as Genre);
+            setSuite(null);
+            setChoisi(null);
+          }}
+          data-autofocus
+        >
           {GENRES.map((g) => (
             <option key={g.value} value={g.value}>
               {g.label}
@@ -152,7 +259,7 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
           <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
             <legend className="field" style={{ marginBottom: 6 }}>Jours concernés</legend>
             <div className="row wrap" style={{ gap: 6 }}>
-              {JOURS.slice(0, 6).map((j, i) => (
+              {JOURS.map((j, i) => (
                 <button key={j} type="button" className={`btn sm${jours.includes(i) ? ' primary' : ''}`} aria-pressed={jours.includes(i)} onClick={() => setJours((x) => (x.includes(i) ? x.filter((y) => y !== i) : [...x, i].sort()))}>
                   {j}
                 </button>
@@ -174,14 +281,28 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
                   <option value="journee">Journée entière</option>
                   <option value="matin">Matin (jusqu'à 13 h)</option>
                   <option value="aprem">Après-midi (dès 13 h)</option>
+                  <option value="perso">Une plage horaire</option>
                 </select>
               </label>
-            ) : (
+            ) : null}
+            {genre === 'indisponible' && plage === 'perso' ? (
+              <>
+                <label className="field">
+                  De
+                  <input type="time" step={900} value={plageDe} onChange={(e) => setPlageDe(e.target.value)} />
+                </label>
+                <label className="field">
+                  À
+                  <input type="time" step={900} value={plageA} onChange={(e) => setPlageA(e.target.value)} />
+                </label>
+              </>
+            ) : null}
+            {genre !== 'indisponible' ? (
               <label className="field">
                 {genre === 'finir_avant' ? 'Finir avant' : 'Commencer après'}
                 <input type="time" step={900} value={heure} onChange={(e) => setHeure(e.target.value)} />
               </label>
-            )}
+            ) : null}
           </div>
         </>
       ) : null}
