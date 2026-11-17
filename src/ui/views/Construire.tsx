@@ -237,13 +237,13 @@ export function Construire(): JSX.Element {
               {postes.length ? (
                 <span className="ring" title="Part des minutes d'ouverture où un pharmacien est planifié">
                   <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" fill="none" stroke="#dfe8e3" strokeWidth="3.5" />
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="var(--track)" strokeWidth="3.5" />
                     <circle
                       cx="12"
                       cy="12"
                       r="9"
                       fill="none"
-                      stroke={couverture === 100 ? '#0b5d3f' : '#a86400'}
+                      stroke={couverture === 100 ? 'var(--ok)' : '#a86400'}
                       strokeWidth="3.5"
                       strokeLinecap="round"
                       strokeDasharray={`${(couverture / 100) * 56.5} 56.5`}
@@ -445,10 +445,10 @@ export function Construire(): JSX.Element {
                   </li>
                 );
               })}
-              <li><i style={{ background: 'linear-gradient(135deg, #fff3c4, #f9d75e)' }} /> Ouverture, matin</li>
-              <li><i style={{ background: 'linear-gradient(135deg, #e4dfff, #c0b6ff)' }} /> Fermeture, après-midi</li>
-              <li><i style={{ background: 'linear-gradient(120deg, #fde68a, #ffcbbd, #c9c0ff)' }} /> Journée complète</li>
-              <li><i style={{ background: 'linear-gradient(135deg, #34347a, #26265a)' }} /> Garde</li>
+              <li><i style={{ background: 'linear-gradient(135deg, var(--a-tint), var(--a-soft))' }} /> Ouverture, matin</li>
+              <li><i style={{ background: 'linear-gradient(135deg, var(--a-pastel), color-mix(in srgb, var(--a-pastel) 78%, var(--a-2)))' }} /> Fermeture, après-midi</li>
+              <li><i style={{ background: 'linear-gradient(120deg, var(--a-soft), var(--a-pastel))' }} /> Journée complète</li>
+              <li><i style={{ background: 'linear-gradient(135deg, var(--night-2), var(--night))' }} /> Garde</li>
               <li><Lock size={13} aria-hidden="true" /> Indisponibilité reconnue</li>
               <li><Sparkles size={13} aria-hidden="true" /> Affectation expliquée</li>
             </ul>

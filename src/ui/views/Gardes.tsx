@@ -89,7 +89,7 @@ export function Gardes(): JSX.Element {
             </button>
           }
         >
-          Ajoutez vos gardes une à une, ou collez le calendrier reçu du syndicat ou de l’ARS. Relève suit ensuite chaque garde jusqu’aux variables de paie.
+          Ajoutez vos gardes une à une, ou collez le calendrier reçu du syndicat ou de l’ARS. Solvéa suit ensuite chaque garde jusqu’aux variables de paie.
         </Empty>
       ) : (
         <>

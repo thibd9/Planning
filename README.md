@@ -1,6 +1,8 @@
-# Relève — planning d'équipe pour pharmacie d'officine
+# Solvéa — planning d'équipe pour pharmacie d'officine
 
-Relève aide une titulaire à construire le planning de son équipe, à comprendre chaque arbitrage
+<img src="src/assets/solvea-logo.svg" alt="Solvéa" width="220">
+
+Solvéa aide une titulaire à construire le planning de son équipe, à comprendre chaque arbitrage
 et à absorber un imprévu en dérangeant le moins de monde possible.
 
 Le cœur de l'application est un **moteur de contraintes vérifiable**, pas une IA conversationnelle :
@@ -122,12 +124,13 @@ précise (de 12 h à 14 h 30, par exemple).
 
 L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 
-- **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ, de bouton ou de
-  repère graphique au moins 3:1, dans chacun des quatre thèmes (bleu-vert par défaut, bleu, vert,
-  ardoise). L'interface tient dans une seule famille de couleurs ; l'état (urgent, validé) reste lisible
-  par un libellé.
+- **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ au moins 3:1, dans
+  chacun des cinq thèmes (violet Solvéa par défaut, bleu-vert, bleu, vert, ardoise). L'interface reprend
+  les violets du logo (#2D0D8C, #5213DD, #891EFD) dans une seule famille de couleurs.
+- **Sans contours colorés** : boutons et cartes n'ont pas de bordure de couleur. Un élément choisi se lit à
+  son fond teinté, à une coche ou à un libellé ; seuls les champs de saisie gardent un filet neutre.
 - **Jamais la couleur seule** : chaque état a aussi un pictogramme, un libellé ou une forme (coche,
-  « Sélectionnée », bordure épaissie, texte lu par les lecteurs d'écran).
+  « Sélectionnée », « aujourd'hui », texte lu par les lecteurs d'écran).
 - **Clavier** : tout est atteignable et utilisable au clavier, le focus est toujours visible, un lien
   d'évitement mène au contenu, les fenêtres et le tutoriel retiennent le focus et se ferment avec Échap.
   Le glisser-déposer a une alternative : chaque tuile s'ouvre et se modifie.
@@ -136,7 +139,7 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 33 écrans,
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 50 écrans,
 fenêtres et thèmes vérifiés, ordinateur et téléphone. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 

@@ -1,8 +1,8 @@
 {
-  "name": "releve-planning",
+  "name": "solvea-planning",
   "private": true,
   "version": "0.1.0",
-  "description": "Relève — planning d'équipe pour pharmacie d'officine",
+  "description": "Solvéa — planning d'équipe pour pharmacie d'officine",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -19,12 +19,12 @@ export type Vue =
   | 'mesgardes'
   | 'compte';
 
-export type Theme = 'sarcelle' | 'bleu' | 'vert' | 'ardoise';
+export type Theme = 'solvea' | 'sarcelle' | 'bleu' | 'vert' | 'ardoise';
 export interface Preferences {
   theme: Theme;
   texte: 'normal' | 'grand';
 }
-const PREFS_DEFAUT: Preferences = { theme: 'sarcelle', texte: 'normal' };
+const PREFS_DEFAUT: Preferences = { theme: 'solvea', texte: 'normal' };
 const CLE_SESSION = 'releve.session';
 const CLE_PREFS = 'releve.preferences';
 

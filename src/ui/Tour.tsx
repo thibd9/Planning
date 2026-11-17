@@ -13,7 +13,7 @@ interface Etape {
 
 const ETAPES: Etape[] = [
   {
-    titre: 'Bienvenue dans Relève',
+    titre: 'Bienvenue dans Solvéa',
     texte: 'Un tour d’une minute pour savoir où trouver chaque chose. Vous pourrez le relancer à tout moment avec le bouton « Tutoriel », en haut de l’écran.',
   },
   {
@@ -44,7 +44,7 @@ const ETAPES: Etape[] = [
     cible: 'proposer',
     vue: 'construire',
     titre: 'Faites-vous proposer un planning',
-    texte: 'Relève calcule trois propositions comparables : équité, souhaits, coût. Vous choisissez, vous ajustez, vous publiez. Rien n’est décidé sans vous.',
+    texte: 'Solvéa calcule trois propositions comparables : équité, souhaits, coût. Vous choisissez, vous ajustez, vous publiez. Rien n’est décidé sans vous.',
   },
   {
     cible: 'grille',
@@ -56,13 +56,13 @@ const ETAPES: Etape[] = [
     cible: 'controles',
     vue: 'construire',
     titre: 'Les contrôles',
-    texte: 'Durées, repos, présence d’un pharmacien à la minute : les écarts s’affichent ici au fil de vos modifications. Quand c’est impossible, Relève vous dit pourquoi.',
+    texte: 'Durées, repos, présence d’un pharmacien à la minute : les écarts s’affichent ici au fil de vos modifications. Quand c’est impossible, Solvéa vous dit pourquoi.',
   },
   {
     cible: 'nav-gardes',
     vue: 'gardes',
     titre: 'Gardes : de l’affectation à la paie',
-    texte: 'Ajoutez vos gardes, confiez-les, déclarez les interventions. Relève protège le repos qui suit et prépare les variables pour le comptable.',
+    texte: 'Ajoutez vos gardes, confiez-les, déclarez les interventions. Solvéa protège le repos qui suit et prépare les variables pour le comptable.',
   },
   {
     cible: 'nav-equipe',

@@ -9,7 +9,7 @@ import { useStore } from './store/store';
 import type { Vue } from './store/ui';
 import { prefsDe, useUi } from './store/ui';
 import { EtiquetteRole } from './ui/icons';
-import { Avatar, Logo } from './ui/kit';
+import { Avatar, Logo, LogoNom } from './ui/kit';
 import { Tour } from './ui/Tour';
 import { Accueil } from './ui/views/Accueil';
 import { Compte } from './ui/views/Compte';
@@ -99,7 +99,7 @@ export function App(): JSX.Element {
   // Le titre de la page suit l'écran affiché : il est annoncé à chaque changement de vue.
   const titrePage = !moi ? (creation ? 'Créer mon officine' : 'Connexion') : vueActive === 'compte' ? 'Mon compte' : vueActive === 'nouvelle' ? 'Ajouter une pharmacie' : (liens.find((l) => l.vue === vueActive)?.label ?? 'Relève');
   useEffect(() => {
-    document.title = `${titrePage} · Relève`;
+    document.title = `${titrePage} · Solvéa`;
   }, [titrePage]);
 
   // Une fois connecté, l'écran de création est refermé : la déconnexion ramène à la connexion.
@@ -137,7 +137,9 @@ export function App(): JSX.Element {
             <Logo />
           </span>
           <div style={{ minWidth: 0 }}>
-            <div className="brand-name">Relève</div>
+            <div className="brand-name">
+              <LogoNom />
+            </div>
             <div className="brand-sub">{data.officine.nom || 'Mon officine'}</div>
           </div>
         </div>

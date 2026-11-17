@@ -1,5 +1,5 @@
 /**
- * Modèle métier de Relève.
+ * Modèle métier de Solvéa.
  *
  * Conventions de temps :
  *  - une date est une chaîne ISO « AAAA-MM-JJ » (heure locale de l'officine) ;

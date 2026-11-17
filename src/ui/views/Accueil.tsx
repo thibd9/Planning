@@ -6,7 +6,7 @@ import type { Interval, Person, Qualification } from '../../domain/types';
 import { QUALIFICATION_COURT } from '../../domain/types';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { Logo } from '../kit';
+import { Logo, LogoNom } from '../kit';
 
 interface Ligne {
   cle: string;
@@ -306,7 +306,9 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
           <span className="brand-mark">
             <Logo />
           </span>
-          <div className="brand-name">Relève</div>
+          <div className="brand-name">
+              <LogoNom />
+            </div>
         </div>
         <div>
           <p className="accueil-titre">Le planning de votre officine, enfin serein.</p>

@@ -4,7 +4,7 @@ import { empreinte, espaceDe, estResponsable, memeIdentifiant } from '../../doma
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { tutorielDejaVu } from '../Tour';
-import { Logo } from '../kit';
+import { Logo, LogoNom } from '../kit';
 
 type Ecran = 'connexion' | 'oubli';
 
@@ -71,7 +71,9 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             <Logo />
           </span>
           <div>
-            <div className="brand-name">Relève</div>
+            <div className="brand-name">
+              <LogoNom />
+            </div>
             <div className="brand-sub" style={{ maxWidth: 'none' }}>Le planning de l’officine</div>
           </div>
         </div>
