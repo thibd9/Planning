@@ -107,13 +107,13 @@ export function Gardes(): JSX.Element {
         </div>
 
         <div className="split">
-          <div className="col" style={{ gap: 8 }} role="list" aria-label="Calendrier des gardes">
+          <div className="col" style={{ gap: 8 }} role="group" aria-label="Calendrier des gardes">
             {gardes.map((g) => {
               const p = data.personnes.find((x) => x.id === g.personId);
               const [, m, j] = g.date.split('-').map(Number);
               const etape = etapeGarde(data, g, today);
               return (
-                <button key={g.id} type="button" role="listitem" className={`g-item${courante?.id === g.id ? ' on' : ''}`} onClick={() => ouvrirGarde(g.id)} style={{ opacity: g.date < today && g.valideLe ? 0.65 : 1 }}>
+                <button key={g.id} type="button" className={`g-item${courante?.id === g.id ? ' on' : ''}`} onClick={() => ouvrirGarde(g.id)} style={{ opacity: g.date < today && g.valideLe ? 0.65 : 1 }}>
                   <span className="g-date">
                     <b>{j}</b>
                     <span>{MOIS_COURT[m - 1]}</span>
@@ -185,13 +185,14 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
         </button>
       </div>
       <div className="card-body col" style={{ gap: 20 }}>
-        <div className="stepper" aria-label={`Étape actuelle : ${ETAPES[rang].label}`}>
+        <ol className="stepper" aria-label="Parcours de la garde">
           {ETAPES.map((e, i) => (
-            <div key={e.cle} className={`step${i < rang || etape === 'validee' ? ' done' : i === rang ? ' now' : ''}`}>
+            <li key={e.cle} className={`step${i < rang || etape === 'validee' ? ' done' : i === rang ? ' now' : ''}`} aria-current={i === rang ? 'step' : undefined}>
               {e.label}
-            </div>
+              <span className="sr">{i < rang || etape === 'validee' ? ' (fait)' : i === rang ? ' (étape en cours)' : ' (à venir)'}</span>
+            </li>
           ))}
-        </div>
+        </ol>
 
         <div className="nightline" aria-hidden="true">
           {calcul.segments.map((s, i) => {
@@ -378,13 +379,13 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
           <section className="col" style={{ gap: 9 }}>
             <h3>4 · Variables pour le comptable</h3>
             {calcul.variables.length ? (
-              <table className="t">
+              <table className="t" aria-label="Variables de paie de la garde">
                 <thead>
                   <tr>
-                    <th>Variable</th>
-                    <th>Mois</th>
-                    <th style={{ textAlign: 'right' }}>Quantité</th>
-                    <th style={{ textAlign: 'right' }}>Montant estimé</th>
+                    <th scope="col">Variable</th>
+                    <th scope="col">Mois</th>
+                    <th scope="col" style={{ textAlign: 'right' }}>Quantité</th>
+                    <th scope="col" style={{ textAlign: 'right' }}>Montant estimé</th>
                   </tr>
                 </thead>
                 <tbody>

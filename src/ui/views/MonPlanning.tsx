@@ -82,7 +82,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
               <BellRing size={13} /> {nonLus.length} changement{nonLus.length > 1 ? 's' : ''} à lire
             </Pill>
           ) : (
-            <span className="small" style={{ color: 'rgba(255,255,255,0.85)' }}>Aucun changement en attente de lecture.</span>
+            <span className="small soft">Aucun changement en attente de lecture.</span>
           )}
         </div>
       </div>
@@ -91,7 +91,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
         <div className="card" style={{ marginTop: 18 }}>
           <div className="card-head">
             <BellRing size={18} />
-            <h3 className="grow">Ce qui a changé</h3>
+            <h2 className="h3 grow">Ce qui a changé</h2>
           </div>
           {changements.map((n) => (
             <div key={n.id} className="decision" style={{ alignItems: 'center' }}>
@@ -130,9 +130,9 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                 <div className="card-head">
                   <CalendarClock size={18} />
                   <div className="grow">
-                    <h3>
+                    <h2 className="h3">
                       {monday === lundi ? 'Cette semaine' : 'Semaine prochaine'} · {fmtSemaine(monday)}
-                    </h3>
+                    </h2>
                     <div className="small soft">
                       {postes ? `Semaine ${isoWeek(monday)} · ${fmtDuree(total)} prévues · publié le ${fmtHorodatage(statut?.publishedAt ?? '')}` : 'Planning pas encore publié'}
                     </div>
@@ -196,7 +196,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
         <div className="col" style={{ gap: 18 }}>
           <div className="card">
             <div className="card-head">
-              <h3 className="grow">Mes demandes</h3>
+              <h2 className="h3 grow">Mes demandes</h2>
               <button type="button" className="btn sm" onClick={() => setDemande(true)}>
                 <Plus size={14} /> Nouvelle
               </button>
@@ -249,7 +249,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           {ligne ? (
             <div className="card">
               <div className="card-head">
-                <h3 className="grow">Ma part des contraintes</h3>
+                <h2 className="h3 grow">Ma part des contraintes</h2>
                 <span className="small soft">8 dernières semaines</span>
               </div>
               <div className="card-body col" style={{ gap: 12 }}>

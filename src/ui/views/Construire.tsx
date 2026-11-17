@@ -141,7 +141,7 @@ export function Construire(): JSX.Element {
 
   const ouverts = dates.map((d) => ouverture(data.officine, d).length > 0);
   const avecSynthese = lecture !== 'heures';
-  const colonnes = `212px ${dates
+  const colonnes = `232px ${dates
     .map((d, i) => (ouverts[i] ? 'minmax(104px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '104px' : '44px'))
     .join(' ')}${avecSynthese ? ' 136px' : ''}`;
   const visibles = data.personnes.filter((p) => !p.externe || postes.some((s) => s.personId === p.id));
@@ -176,7 +176,7 @@ export function Construire(): JSX.Element {
         <div className="grow">
           <div className="eyebrow">Construire</div>
           <h1>
-            Comment couvrir <em>la semaine</em> ?
+            Comment couvrir <span className="hl">la semaine</span> ?
           </h1>
         </div>
         <div className="row no-print" style={{ gap: 4 }}>
@@ -243,13 +243,13 @@ export function Construire(): JSX.Element {
               {postes.length ? (
                 <span className="ring" title="Part des minutes d'ouverture où un pharmacien est planifié">
                   <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" fill="none" stroke="#e9e8f6" strokeWidth="3.5" />
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="#dfe8e3" strokeWidth="3.5" />
                     <circle
                       cx="12"
                       cy="12"
                       r="9"
                       fill="none"
-                      stroke={couverture === 100 ? '#12936a' : '#7c6cf5'}
+                      stroke={couverture === 100 ? '#0b5d3f' : '#a86400'}
                       strokeWidth="3.5"
                       strokeLinecap="round"
                       strokeDasharray={`${(couverture / 100) * 56.5} 56.5`}
@@ -298,37 +298,44 @@ export function Construire(): JSX.Element {
 
             <div className="plan-scroll" data-tour="grille">
               <div className="plan-grid" style={{ gridTemplateColumns: colonnes }} role="table" aria-label={`Planning de la semaine du ${fmtSemaine(semaine)}`}>
-                <div className="pg-h" role="columnheader">
-                  <span className="eyebrow">Équipe</span>
+                <div role="row" style={{ display: 'contents' }}>
+                  <div className="pg-h first" role="columnheader">
+                    <span className="eyebrow">Équipe</span>
+                  </div>
+                  {dates.map((date, i) => (
+                    <div key={date} className={`pg-h${date === today ? ' today' : ''}${!ouverts[i] ? ' closed' : ''}`} role="columnheader" aria-current={date === today ? 'date' : undefined}>
+                      <span className="n">{Number(date.slice(8))}</span>
+                      <span className="d">{ouverts[i] ? JOURS[weekday(date)] : JOURS_COURT[weekday(date)]}</span>
+                      {!ouverts[i] ? <span className="sr"> (fermé)</span> : null}
+                    </div>
+                  ))}
+                  {avecSynthese ? (
+                    <div className="pg-h" role="columnheader">
+                      <span className="n num" style={{ fontSize: 15 }}>{lecture === 'cout' ? fmtEuros(coutSemaine(data, semaine)) : '8 semaines'}</span>
+                      <span className="d">{lecture === 'cout' ? 'coût estimé' : 'samedis, fermetures'}</span>
+                    </div>
+                  ) : null}
                 </div>
-                {dates.map((date, i) => (
-                  <div key={date} className={`pg-h${date === today ? ' today' : ''}${!ouverts[i] ? ' closed' : ''}`} role="columnheader">
-                    <span className="n">{Number(date.slice(8))}</span>
-                    <span className="d">{ouverts[i] ? JOURS[weekday(date)] : JOURS_COURT[weekday(date)]}</span>
-                  </div>
-                ))}
-                {avecSynthese ? (
-                  <div className="pg-h" role="columnheader">
-                    <span className="n num" style={{ fontSize: 15 }}>{lecture === 'cout' ? fmtEuros(coutSemaine(data, semaine)) : '8 semaines'}</span>
-                    <span className="d">{lecture === 'cout' ? 'coût estimé' : 'samedis, fermetures'}</span>
-                  </div>
-                ) : null}
 
-                <div className="pg-o lab" role="rowheader">
-                  Couverture
+                <div role="row" style={{ display: 'contents' }}>
+                  <div className="pg-o lab" role="rowheader">
+                    Couverture
+                  </div>
+                  {dates.map((date, i) => (
+                    <Objectif key={date} data={data} date={date} echelle={echelle} ouvert={ouverts[i]} vide={!postes.some((s) => s.date === date)} flag={!!focus && focus.date === date && !focus.personId} />
+                  ))}
+                  {avecSynthese ? <div className="pg-o" role="cell" /> : null}
                 </div>
-                {dates.map((date, i) => (
-                  <Objectif key={date} data={data} date={date} echelle={echelle} ouvert={ouverts[i]} vide={!postes.some((s) => s.date === date)} flag={!!focus && focus.date === date && !focus.personId} />
-                ))}
-                {avecSynthese ? <div className="pg-o" /> : null}
 
                 {GROUPES.map((g) => {
                   const membres = visibles.filter(g.test);
                   if (!membres.length) return null;
                   return (
-                    <div key={g.titre} style={{ display: 'contents' }}>
-                      <div className="pg-group">
-                        <span className="dot" style={{ background: g.couleur }} /> {g.titre}
+                    <div key={g.titre} role="rowgroup" style={{ display: 'contents' }}>
+                      <div className="pg-group" role="row">
+                        <span role="cell" style={{ display: 'contents' }}>
+                          <span className="dot" style={{ background: g.couleur }} aria-hidden="true" /> {g.titre}
+                        </span>
                       </div>
                       {membres.map((p) => {
                         const minutes = minutesSemaine(data, p.id, semaine);
@@ -424,15 +431,15 @@ export function Construire(): JSX.Element {
                 })}
               </div>
             </div>
-            <div className="legend">
-              <span><i style={{ background: 'linear-gradient(135deg, #fff0b0, #f9d75e)' }} /> Ouverture, matin</span>
-              <span><i style={{ background: 'linear-gradient(135deg, #e4dfff, #c0b6ff)' }} /> Fermeture, après-midi</span>
-              <span><i style={{ background: 'linear-gradient(120deg, #fde68a, #c9bfff)' }} /> Journée complète</span>
-              <span><i style={{ background: 'linear-gradient(135deg, #34347a, #26265a)' }} /> Garde</span>
-              <span><i style={{ background: 'linear-gradient(135deg, #e4f3fb, #cfe9f8)' }} /> Congé</span>
-              <span><Lock size={12} /> Indisponibilité reconnue</span>
-              <span><Sparkles size={12} /> Affectation expliquée</span>
-            </div>
+            <ul className="legend" aria-label="Légende">
+              <li><i style={{ background: 'linear-gradient(135deg, #f1f7c8, #dcea9c)' }} /> Ouverture, matin</li>
+              <li><i style={{ background: 'linear-gradient(135deg, #cdefe6, #a9ddd0)' }} /> Fermeture, après-midi</li>
+              <li><i style={{ background: 'linear-gradient(120deg, #e6f2b4, #aadfd2)' }} /> Journée complète</li>
+              <li><i style={{ background: 'linear-gradient(135deg, #17533e, #0f3d2e)' }} /> Garde</li>
+              <li><i style={{ background: 'linear-gradient(135deg, #e4f3fb, #cfe9f8)' }} /> Congé</li>
+              <li><Lock size={13} aria-hidden="true" /> Indisponibilité reconnue</li>
+              <li><Sparkles size={13} aria-hidden="true" /> Affectation expliquée</li>
+            </ul>
           </div>
 
           {!postes.length && !passee ? (
@@ -442,7 +449,7 @@ export function Construire(): JSX.Element {
                   <Sparkles size={18} />
                 </span>
                 <div className="grow">
-                  <h3>Cette semaine est vide</h3>
+                  <h2 className="h3">Cette semaine est vide</h2>
                   <p className="soft" style={{ marginTop: 4 }}>
                     Demandez trois propositions comparables, recopiez la semaine précédente, ou cliquez sur un « + » pour poser un poste à la main.
                   </p>
@@ -460,7 +467,7 @@ export function Construire(): JSX.Element {
                 <ShieldAlert size={18} />
               </span>
               <div className="grow">
-                <h3>Contrôles</h3>
+                <h2 className="h3">Contrôles</h2>
                 <div className="small soft">Aide à la conformité : ces contrôles signalent des écarts, ils ne valent pas certification.</div>
               </div>
               {!postes.length ? (
@@ -496,7 +503,7 @@ export function Construire(): JSX.Element {
               {blocages.length || visiblesIssues.length ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
                   {blocages.map((b, i) => (
-                    <CarteBlocage key={i} b={b} data={data} onFocus={() => setFocus(b.date ? { date: b.date } : null)} />
+                    <CarteBlocage key={i} b={b} data={data} />
                   ))}
                   {visiblesIssues.map((i) => (
                     <CarteIssue key={i.id} issue={i} data={data} onClick={() => setFocus(i.personId || i.date ? { personId: i.personId, date: i.date } : null)} />
@@ -552,10 +559,9 @@ function Tuile({
       draggable={glissable}
       onDragStart={(e) => e.dataTransfer.setData('text/plain', s.id)}
       onClick={onClick}
-      aria-label={`${nomCourt(person)}, ${JOURS[weekday(s.date)]} : ${decrireShift(s)}, ${ACTIVITE_LABEL[s.activite]}. Modifier.`}
       title={s.explication ?? `${decrireShift(s)} · ${ACTIVITE_LABEL[s.activite]}`}
     >
-      <span className="ti">
+      <span className="ti" aria-hidden="true">
         <Icone size={14} />
       </span>
       <span className="tt num">
@@ -563,6 +569,11 @@ function Tuile({
         <span className="ts">
           {fmtDuree(minutesTravail(s))}
           {activite ? ` · ${activite}` : ''}
+        </span>
+        {/* Le nom accessible reprend le texte visible, puis le complète. */}
+        <span className="sr">
+          , {nomCourt(person)}, {JOURS[weekday(s.date)]}, {ACTIVITE_LABEL[s.activite]}
+          {s.pauseStart !== undefined && s.pauseEnd !== undefined ? `, pause de ${fmtHeure(s.pauseStart)} à ${fmtHeure(s.pauseEnd)}` : ''}. Modifier le poste.
         </span>
       </span>
       <span className="tline" aria-hidden="true">
@@ -573,7 +584,7 @@ function Tuile({
         ))}
       </span>
       {s.explication ? (
-        <span className="why" aria-label="Affectation expliquée">
+        <span className="why" aria-hidden="true">
           <Sparkles size={9} />
         </span>
       ) : null}
@@ -626,9 +637,9 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
   if (lecture === 'equite') {
     const l = lignes.find((x) => x.personId === person.id);
     const f = fatigue(data, person.id, semaine);
-    if (!l) return <div className="pg-sum muted">—</div>;
+    if (!l) return <div className="pg-sum muted" role="cell">—</div>;
     return (
-      <div className="pg-sum" title={f.facteurs.map((x) => `${x.label} (+${x.points})`).join('\n') || 'Aucun facteur de fatigue relevé'}>
+      <div className="pg-sum" role="cell" title={f.facteurs.map((x) => `${x.label} (+${x.points})`).join('\n') || 'Aucun facteur de fatigue relevé'}>
         <span className="num">
           Sam. <b>{l.reel.samedis}</b>
           {l.attendu.samedis !== null ? <span className="muted"> / {fmtDecimal(l.attendu.samedis, 1)}</span> : null} · Ferm. <b>{l.reel.fermetures}</b>
@@ -639,7 +650,7 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
   }
   if (person.externe) {
     return (
-      <div className="pg-sum">
+      <div className="pg-sum" role="cell">
         <b className="num">{fmtEuros(((person.tauxHoraire ?? 0) * minutes) / 60)}</b>
         <span className="muted tiny">facturé</span>
       </div>
@@ -647,7 +658,7 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
   }
   const d = decompteSemaine(data, person, minutes);
   return (
-    <div className="pg-sum">
+    <div className="pg-sum" role="cell">
       <b className="num">{d.cout !== null ? fmtEuros(d.cout) : '—'}</b>
       <span className="muted tiny">{!person.salarie ? 'titulaire' : person.tauxHoraire === null ? 'taux non saisi' : d.auDela ? `dont ${fmtDuree(d.auDela)} en plus` : 'sans dépassement'}</span>
     </div>
@@ -674,9 +685,9 @@ function CarteIssue({ issue, data, onClick }: { issue: Issue; data: AppData; onC
   );
 }
 
-export function CarteBlocage({ b, data, onFocus, ouvert }: { b: Blocage; data: AppData; onFocus?: () => void; ouvert?: boolean }): JSX.Element {
+export function CarteBlocage({ b, data, ouvert }: { b: Blocage; data: AppData; ouvert?: boolean }): JSX.Element {
   return (
-    <div className="issue diag" onClick={onFocus} role={onFocus ? 'button' : undefined} tabIndex={onFocus ? 0 : undefined} onKeyDown={(e) => e.key === 'Enter' && onFocus?.()}>
+    <div className="issue diag">
       <span className="ico">
         <Ban size={14} />
       </span>
@@ -684,7 +695,7 @@ export function CarteBlocage({ b, data, onFocus, ouvert }: { b: Blocage; data: A
         <b style={{ display: 'block', fontSize: 11.5, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--danger)' }}>{CAS_LABEL[b.cas]}</b>
         {b.message}
         {b.raisons.length || b.leviers.length ? (
-          <details className="why" open={ouvert} onClick={(e) => e.stopPropagation()}>
+          <details className="why" open={ouvert}>
             <summary>Pourquoi, et que faire ?</summary>
             {b.raisons.map((r, i) => {
               const p = data.personnes.find((x) => x.id === r.personId);
@@ -1011,23 +1022,28 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
               const k = r.indicateurs;
               return (
                 <button key={r.variante} type="button" className={`variant${i === choix ? ' on' : ''}`} onClick={() => setChoix(i)} aria-pressed={i === choix}>
-                  <div>
-                    <div className="row">
-                      <h3 className="grow">{VARIANTE_LABEL[r.variante].titre}</h3>
+                  <span style={{ display: 'block' }}>
+                    <span className="row wrap" style={{ gap: 8 }}>
+                      <b className="grow" style={{ fontSize: 16, letterSpacing: '-0.02em' }}>{VARIANTE_LABEL[r.variante].titre}</b>
+                      {i === choix ? (
+                        <Pill tone="iris">
+                          <Check size={12} aria-hidden="true" /> Sélectionnée
+                        </Pill>
+                      ) : null}
                       {k.bloquants ? <Pill tone="danger">{k.bloquants} bloquant{k.bloquants > 1 ? 's' : ''}</Pill> : <Pill tone="ok">Règles respectées</Pill>}
-                    </div>
-                    <p className="soft small" style={{ marginTop: 4 }}>{VARIANTE_LABEL[r.variante].phrase}</p>
-                  </div>
-                  <div className="mini" aria-hidden="true">
+                    </span>
+                    <span className="soft small" style={{ marginTop: 4, display: 'block' }}>{VARIANTE_LABEL[r.variante].phrase}</span>
+                  </span>
+                  <span className="mini" aria-hidden="true">
                     {personnes.map((p) => (
-                      <div className="mini-row" key={p.id}>
+                      <span className="mini-row" key={p.id}>
                         {weekDates(semaine).slice(0, 6).map((d) => (
                           <Track key={d} shifts={r.shifts.filter((s) => s.personId === p.id && s.date === d)} echelle={echelle} role={roleDe(p)} />
                         ))}
-                      </div>
+                      </span>
                     ))}
-                  </div>
-                  <div className="kpi">
+                  </span>
+                  <span className="kpi">
                     <span>Souhaits satisfaits</span>
                     <b className={meilleur('souhaits', i) ? 'best' : ''}>{k.souhaits === null ? '—' : `${Math.round(k.souhaits * 100)} %`}</b>
                     <span title="Écart type entre samedis réels et attendus sur 8 semaines : plus il est bas, plus la répartition est équilibrée">Écart d'équité (samedis)</span>
@@ -1038,7 +1054,7 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
                     <b className={meilleur('coutEstime', i) ? 'best' : ''}>{fmtEuros(k.coutEstime)}</b>
                     <span>Sous l'effectif attendu</span>
                     <b className={meilleur('sousEffectif', i) ? 'best' : ''}>{k.sousEffectif ? fmtDuree(k.sousEffectif) : 'Jamais'}</b>
-                  </div>
+                  </span>
                 </button>
               );
             })}

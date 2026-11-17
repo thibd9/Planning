@@ -28,9 +28,6 @@ export function Officine(): JSX.Element {
   const { majOfficine, reinitialiser } = useStore();
   const [confirmation, setConfirmation] = useState(false);
   const dire = useUi((s) => s.dire);
-  const setHoraire = (jour: number, plage: Interval | null): void => {
-    majOfficine({ horaires: officine.horaires.map((h, i) => (i === jour ? (plage ? [plage] : []) : h)) });
-  };
   const setPoste = (id: string, patch: Partial<PosteType>): void => {
     majOfficine({ postes: officine.postes.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
   };
@@ -61,30 +58,54 @@ export function Officine(): JSX.Element {
       <div className="split" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
         <div className="card">
           <div className="card-head">
-            <h3>Horaires d'ouverture</h3>
+            <h2 className="h3">Horaires d'ouverture</h2>
           </div>
-          <table className="t">
+          <table className="t" aria-label="Horaires d’ouverture par jour">
             <tbody>
               {JOURS.map((j, i) => {
-                const h = officine.horaires[i][0];
+                const plages = officine.horaires[i];
+                const setPlages = (p: Interval[]): void => majOfficine({ horaires: officine.horaires.map((h, k) => (k === i ? p : h)) });
                 return (
                   <tr key={j}>
-                    <td style={{ textTransform: 'capitalize', fontWeight: 650 }}>{j}</td>
+                    <th scope="row" style={{ textTransform: 'capitalize', fontWeight: 650, fontSize: 14.5, letterSpacing: 0, color: 'var(--ink)', borderBottom: '1px solid var(--line)' }}>
+                      {j}
+                    </th>
                     <td>
-                      {h ? (
-                        <div className="row" style={{ gap: 6 }}>
-                          <Heure label={`Ouverture le ${j}`} value={h.start} onChange={(v) => setHoraire(i, { ...h, start: v })} />
-                          <span className="muted">→</span>
-                          <Heure label={`Fermeture le ${j}`} value={h.end} onChange={(v) => setHoraire(i, { ...h, end: v })} />
+                      {plages.length ? (
+                        <div className="col" style={{ gap: 6 }}>
+                          {plages.map((h, k) => (
+                            <div key={k} className="row" style={{ gap: 6 }}>
+                              <Heure label={`${k === 0 ? 'Ouverture' : 'Réouverture'} le ${j}`} value={h.start} onChange={(v) => setPlages(plages.map((x, n) => (n === k ? { ...x, start: v } : x)))} />
+                              <span className="muted" aria-hidden="true">→</span>
+                              <Heure label={`${k === plages.length - 1 ? 'Fermeture' : 'Fermeture du midi'} le ${j}`} value={h.end} onChange={(v) => setPlages(plages.map((x, n) => (n === k ? { ...x, end: v } : x)))} />
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <span className="muted">Fermé</span>
                       )}
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <button type="button" className="btn sm ghost" onClick={() => setHoraire(i, h ? null : { start: 9 * 60, end: 19 * 60 })}>
-                        {h ? 'Fermer ce jour' : 'Ouvrir'}
-                      </button>
+                      <div className="row wrap" style={{ justifyContent: 'flex-end', gap: 4 }}>
+                        {plages.length === 1 && plages[0].end - plages[0].start > 240 ? (
+                          <button
+                            type="button"
+                            className="btn sm ghost"
+                            aria-label={`Coupure le midi : ${j}`}
+                            onClick={() => setPlages([{ start: plages[0].start, end: Math.max(plages[0].start + 60, Math.min(750, plages[0].end - 120)) }, { start: Math.max(plages[0].start + 120, Math.min(840, plages[0].end - 60)), end: plages[0].end }])}
+                          >
+                            Coupure le midi
+                          </button>
+                        ) : null}
+                        {plages.length === 2 ? (
+                          <button type="button" className="btn sm ghost" aria-label={`Sans coupure : ${j}`} onClick={() => setPlages([{ start: plages[0].start, end: plages[1].end }])}>
+                            Sans coupure
+                          </button>
+                        ) : null}
+                        <button type="button" className="btn sm ghost" aria-label={plages.length ? `Fermer ce jour : ${j}` : `Ouvrir : ${j}`} onClick={() => setPlages(plages.length ? [] : [{ start: 9 * 60, end: 19 * 60 }])}>
+                          {plages.length ? 'Fermer ce jour' : 'Ouvrir'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -102,14 +123,14 @@ export function Officine(): JSX.Element {
         <div className="col" style={{ gap: 18 }}>
           <div className="card">
             <div className="card-head">
-              <h3>Effectif attendu au comptoir</h3>
+              <h2 className="h3">Effectif attendu au comptoir</h2>
             </div>
             <table className="t">
               <thead>
                 <tr>
-                  <th>Jours</th>
-                  <th>Tranche</th>
-                  <th style={{ textAlign: 'right' }}>Minimum</th>
+                  <th scope="col">Jours</th>
+                  <th scope="col">Tranche</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Minimum</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,7 +162,7 @@ export function Officine(): JSX.Element {
           </div>
 
           <div className="card pad col">
-            <h3>Paramètres</h3>
+            <h2 className="h3">Paramètres</h2>
             <div className="row wrap" style={{ alignItems: 'flex-end' }}>
               <label className="field">
                 Valeur du point conventionnel (€)
@@ -166,7 +187,7 @@ export function Officine(): JSX.Element {
       <div className="card" style={{ marginTop: 18, overflowX: 'auto' }}>
         <div className="card-head">
           <div className="grow">
-            <h3>Postes types</h3>
+            <h2 className="h3">Postes types</h2>
             <span className="small soft">Utilisés par les propositions de planning et la saisie rapide</span>
           </div>
           <button
@@ -184,12 +205,12 @@ export function Officine(): JSX.Element {
         <table className="t" style={{ minWidth: 760 }}>
           <thead>
             <tr>
-              <th>Poste</th>
-              <th>Horaires</th>
-              <th>Pause</th>
-              <th>Jours</th>
-              <th style={{ textAlign: 'right' }}>Travail effectif</th>
-              <th />
+              <th scope="col">Poste</th>
+              <th scope="col">Horaires</th>
+              <th scope="col">Pause</th>
+              <th scope="col">Jours</th>
+              <th scope="col" style={{ textAlign: 'right' }}>Travail effectif</th>
+              <td />
             </tr>
           </thead>
           <tbody>
@@ -231,7 +252,7 @@ export function Officine(): JSX.Element {
 
       <div className="card pad row wrap" style={{ marginTop: 18 }}>
         <div className="grow">
-          <h3>Repartir de zéro</h3>
+          <h2 className="h3">Repartir de zéro</h2>
           <p className="soft small" style={{ marginTop: 3 }}>
             Réinitialiser efface l’officine, l’équipe et les plannings enregistrés sur cet appareil, et ramène à l’écran de création.
           </p>

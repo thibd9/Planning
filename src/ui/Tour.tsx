@@ -126,6 +126,19 @@ export function Tour(): JSX.Element | null {
     if (tour === null) return;
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') fermer();
+      // Le focus reste dans la carte tant que le tutoriel est ouvert.
+      if (e.key === 'Tab') {
+        const f = Array.from(document.querySelectorAll<HTMLElement>('.tour-card button'));
+        if (!f.length) return;
+        const dans = f.includes(document.activeElement as HTMLElement);
+        if (e.shiftKey && (!dans || document.activeElement === f[0])) {
+          e.preventDefault();
+          f[f.length - 1].focus();
+        } else if (!e.shiftKey && (!dans || document.activeElement === f[f.length - 1])) {
+          e.preventDefault();
+          f[0].focus();
+        }
+      }
       if (e.key === 'ArrowRight') tour < ETAPES.length - 1 ? setTour(tour + 1) : fermer();
       if (e.key === 'ArrowLeft' && tour > 0) setTour(tour - 1);
     };
@@ -174,7 +187,7 @@ export function Tour(): JSX.Element | null {
             <X size={16} />
           </button>
         </div>
-        <h3>{etape.titre}</h3>
+        <h2>{etape.titre}</h2>
         <p>{etape.texte}</p>
         <div className="row" style={{ marginTop: 4 }}>
           <span className="tour-dots grow" aria-hidden="true">

@@ -24,10 +24,11 @@ npm test
 npm run build
 ```
 
-Node 20 ou plus récent. L'application démarre **vierge**, sur l'écran « Créer mon officine » : nom de la
-pharmacie, horaires, titulaire, pharmaciens adjoints, préparateurs et autres postes. Un tutoriel guidé
-présente ensuite chaque espace ; il se relance depuis le bouton « Tutoriel ». Une équipe d'exemple
-(« Pharmacie des Tilleuls », fictive) peut être chargée depuis l'accueil pour explorer sans rien saisir.
+Node 20 ou plus récent. L'application démarre **vierge**, sur l'écran « Créer mon officine », en trois
+étapes : la pharmacie (nom, horaires, fermeture le midi éventuelle), l'équipe (titulaire, pharmaciens
+adjoints, préparateurs, autres postes), puis une vérification avant de créer. Un tutoriel guidé présente
+ensuite chaque espace ; il se relance depuis le bouton « Tutoriel ». Une équipe d'exemple (« Pharmacie des
+Tilleuls », fictive) peut être chargée depuis l'accueil pour explorer sans rien saisir.
 
 ## Ce que fait cette première version
 
@@ -60,6 +61,26 @@ d'horaire, sans raison. Trois statuts ne sont jamais confondus — indisponibili
 préférence prioritaire (plafonnée de la même façon pour tous), simple préférence. Un droit ou un
 aménagement validé n'entre pas dans le plafond. Un calendrier de repères de toutes traditions aide le
 salarié à retrouver une date ; son choix n'est pas enregistré.
+
+## Accessibilité
+
+L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
+
+- **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ, de bouton ou de
+  repère graphique au moins 3:1. Les dégradés vert pastel ne portent que du texte foncé.
+- **Jamais la couleur seule** : chaque état a aussi un pictogramme, un libellé ou une forme (coche,
+  « Sélectionnée », bordure épaissie, texte lu par les lecteurs d'écran).
+- **Clavier** : tout est atteignable et utilisable au clavier, le focus est toujours visible, un lien
+  d'évitement mène au contenu, les fenêtres et le tutoriel retiennent le focus et se ferment avec Échap.
+  Le glisser-déposer a une alternative : chaque tuile s'ouvre et se modifie.
+- **Formulaires** : libellés reliés aux champs, champs obligatoires annoncés, erreurs listées en tête,
+  reliées à leur champ et recevant le focus.
+- **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
+  contenu repérées, grille du planning exposée comme un tableau.
+
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 21 écrans et
+fenêtres vérifiés. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
+contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 
 ## Architecture
 

@@ -70,14 +70,14 @@ export function Equite(): JSX.Element {
       </div>
 
       <div className="card" style={{ overflowX: 'auto' }}>
-        <table className="t" style={{ minWidth: 980 }}>
+        <table className="t" aria-label="Compteurs d’équité par personne" style={{ minWidth: 980 }}>
           <thead>
             <tr>
-              <th>Du {fmtDateCourt(from)} au {fmtDateCourt(to)}</th>
+              <th scope="col">Du {fmtDateCourt(from)} au {fmtDateCourt(to)}</th>
               {COMPTEUR_CLES.map((c) => (
-                <th key={c}>{COMPTEUR_LABEL[c]}</th>
+                <th scope="col" key={c}>{COMPTEUR_LABEL[c]}</th>
               ))}
-              <th>Fatigue · semaine en cours</th>
+              <th scope="col">Fatigue · semaine en cours</th>
             </tr>
           </thead>
           <tbody>

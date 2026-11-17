@@ -1,6 +1,6 @@
-import { ArrowRight, CalendarRange, Clock3, HeartHandshake, MoonStar, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Store, Trash2, UserRound, Users } from 'lucide-react';
-import { useState } from 'react';
-import { fmtHHMM, parseHHMM, uid } from '../../domain/time';
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, CircleAlert, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Store, Trash2, UserRound, Users } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { fmtHHMM, fmtHeure, parseHHMM, uid } from '../../domain/time';
 import type { Interval, Person, Qualification } from '../../domain/types';
 import { QUALIFICATION_COURT } from '../../domain/types';
 import { useStore } from '../../store/store';
@@ -15,103 +15,241 @@ interface Ligne {
   qualification: Qualification;
 }
 
+interface Erreur {
+  /** Identifiant du champ fautif : sert à y ramener le focus. */
+  champ: string;
+  message: string;
+}
+
 const ligne = (qualification: Qualification, heures = '35'): Ligne => ({ cle: uid('l'), prenom: '', nom: '', heures, qualification });
-
 const AUTRES: Qualification[] = ['apprenti', 'etudiant', 'rayonniste'];
+const ETAPES = [
+  { titre: 'La pharmacie', detail: 'Nom et horaires d’ouverture' },
+  { titre: 'L’équipe', detail: 'Titulaire, pharmaciens, préparateurs' },
+  { titre: 'Vérification', detail: 'Relire avant de créer' },
+];
+const vide = (l: Ligne): boolean => !l.prenom.trim() && !l.nom.trim();
+const complet = (l: Ligne): boolean => !!l.prenom.trim() && !!l.nom.trim();
 
-function Lignes({
+/** Champ d'heure accessible : libellé visible, format natif du navigateur. */
+function Heure({ id, label, value, onChange }: { id: string; label: string; value: number; onChange: (n: number) => void }): JSX.Element {
+  return (
+    <label className="field" htmlFor={id}>
+      {label}
+      <input
+        id={id}
+        type="time"
+        step={900}
+        className="num"
+        value={fmtHHMM(value)}
+        onChange={(e) => {
+          const n = parseHHMM(e.target.value);
+          if (n !== null) onChange(n);
+        }}
+        style={{ width: 132 }}
+      />
+    </label>
+  );
+}
+
+function Groupe({
+  id,
   titre,
   aide,
   icone,
   ton,
+  singulier,
   lignes,
   onChange,
   ajouter,
   libelleAjout,
   avecFonction,
+  erreurs,
 }: {
+  id: string;
   titre: string;
   aide: string;
   icone: JSX.Element;
   ton: string;
+  singulier: string;
   lignes: Ligne[];
   onChange: (l: Ligne[]) => void;
   ajouter: () => Ligne;
   libelleAjout: string;
   avecFonction?: boolean;
+  erreurs: Erreur[];
 }): JSX.Element {
   const maj = (cle: string, patch: Partial<Ligne>): void => onChange(lignes.map((l) => (l.cle === cle ? { ...l, ...patch } : l)));
+  const dernier = useRef<string | null>(null);
+  useEffect(() => {
+    // Après un ajout, le focus va sur le prénom de la nouvelle ligne.
+    if (dernier.current) {
+      document.getElementById(`${dernier.current}-prenom`)?.focus();
+      dernier.current = null;
+    }
+  });
   return (
-    <section className="col" style={{ gap: 10 }}>
-      <div className="row">
-        <span className={`ico ${ton}`}>{icone}</span>
-        <div className="grow">
-          <h3>{titre}</h3>
-          <div className="small soft">{aide}</div>
-        </div>
-      </div>
-      {lignes.map((l, i) => (
-        <div key={l.cle} className="row wrap" style={{ gap: 8, alignItems: 'flex-end' }}>
-          <label className="field grow" style={{ minWidth: 120 }}>
-            {i === 0 ? 'Prénom' : <span className="sr">Prénom</span>}
-            <input value={l.prenom} onChange={(e) => maj(l.cle, { prenom: e.target.value })} placeholder="Prénom" autoComplete="off" />
-          </label>
-          <label className="field grow" style={{ minWidth: 120 }}>
-            {i === 0 ? 'Nom' : <span className="sr">Nom</span>}
-            <input value={l.nom} onChange={(e) => maj(l.cle, { nom: e.target.value })} placeholder="Nom" autoComplete="off" />
-          </label>
-          {avecFonction ? (
-            <label className="field" style={{ width: 150 }}>
-              {i === 0 ? 'Fonction' : <span className="sr">Fonction</span>}
-              <select value={l.qualification} onChange={(e) => maj(l.cle, { qualification: e.target.value as Qualification })}>
-                {AUTRES.map((q) => (
-                  <option key={q} value={q}>
-                    {QUALIFICATION_COURT[q]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-          <label className="field" style={{ width: 104 }}>
-            {i === 0 ? 'Heures / sem.' : <span className="sr">Heures par semaine</span>}
-            <input type="number" min={1} max={48} step={0.5} value={l.heures} onChange={(e) => maj(l.cle, { heures: e.target.value })} className="num" />
-          </label>
-          <button type="button" className="btn ghost icon" aria-label={`Retirer ${l.prenom || 'cette ligne'}`} onClick={() => onChange(lignes.filter((x) => x.cle !== l.cle))}>
-            <Trash2 size={16} />
-          </button>
-        </div>
-      ))}
+    <fieldset className="bloc">
+      <legend>
+        <span className={`ico ${ton}`} aria-hidden="true">
+          {icone}
+        </span>
+        <span>
+          <b>{titre}</b>
+          <span className="aide">{aide}</span>
+        </span>
+      </legend>
+      {lignes.length === 0 ? <p className="small soft">Aucune ligne pour l’instant.</p> : null}
+      {lignes.map((l, i) => {
+        const qui = `${singulier} ${i + 1}`;
+        const idL = `${id}-${l.cle}`;
+        const err = erreurs.find((e) => e.champ.startsWith(idL));
+        return (
+          <div key={l.cle} className="col" style={{ gap: 6 }}>
+            <div className={`ligne${avecFonction ? ' fn' : ''}`}>
+              <label className="field" htmlFor={`${idL}-prenom`}>
+                <span className={i === 0 ? undefined : 'sr'}>Prénom{i === 0 ? '' : `, ${qui}`}</span>
+                <input id={`${idL}-prenom`} value={l.prenom} onChange={(e) => maj(l.cle, { prenom: e.target.value })} autoComplete="off" aria-invalid={!!err && !l.prenom.trim()} aria-describedby={err ? `${idL}-err` : undefined} />
+              </label>
+              <label className="field" htmlFor={`${idL}-nom`}>
+                <span className={i === 0 ? undefined : 'sr'}>Nom{i === 0 ? '' : `, ${qui}`}</span>
+                <input id={`${idL}-nom`} value={l.nom} onChange={(e) => maj(l.cle, { nom: e.target.value })} autoComplete="off" aria-invalid={!!err && !l.nom.trim()} aria-describedby={err ? `${idL}-err` : undefined} />
+              </label>
+              {avecFonction ? (
+                <label className="field" htmlFor={`${idL}-fonction`}>
+                  <span className={i === 0 ? undefined : 'sr'}>Fonction{i === 0 ? '' : `, ${qui}`}</span>
+                  <select id={`${idL}-fonction`} value={l.qualification} onChange={(e) => maj(l.cle, { qualification: e.target.value as Qualification })}>
+                    {AUTRES.map((q) => (
+                      <option key={q} value={q}>
+                        {QUALIFICATION_COURT[q]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              <label className="field" htmlFor={`${idL}-heures`}>
+                <span className={i === 0 ? undefined : 'sr'}>Heures par semaine{i === 0 ? '' : `, ${qui}`}</span>
+                <input id={`${idL}-heures`} type="number" inputMode="decimal" min={1} max={48} step={0.5} value={l.heures} onChange={(e) => maj(l.cle, { heures: e.target.value })} className="num" />
+              </label>
+              <button type="button" className="btn ghost icon" aria-label={`Retirer ${complet(l) ? `${l.prenom} ${l.nom}` : qui}`} onClick={() => onChange(lignes.filter((x) => x.cle !== l.cle))}>
+                <Trash2 size={17} />
+              </button>
+            </div>
+            {err ? (
+              <p className="erreur" id={`${idL}-err`}>
+                <CircleAlert size={15} aria-hidden="true" /> {err.message}
+              </p>
+            ) : null}
+          </div>
+        );
+      })}
       <div>
-        <button type="button" className="btn sm" onClick={() => onChange([...lignes, ajouter()])}>
-          <Plus size={14} /> {libelleAjout}
+        <button
+          type="button"
+          className="btn sm"
+          onClick={() => {
+            const n = ajouter();
+            dernier.current = `${id}-${n.cle}`;
+            onChange([...lignes, n]);
+          }}
+        >
+          <Plus size={15} aria-hidden="true" /> {libelleAjout}
         </button>
       </div>
-    </section>
+    </fieldset>
   );
 }
 
-/** Premier écran : créer l'officine et saisir d'emblée son équipe. */
+/**
+ * Premier écran : créer l'officine en trois étapes (pharmacie, équipe, vérification).
+ * Chaque étape se valide seule ; les erreurs sont listées en tête, reliées à leur champ, et reçoivent le focus.
+ */
 export function Accueil(): JSX.Element {
   const { creerOfficine, chargerExemple } = useStore();
   const { setTour, aller } = useUi();
+  const [etape, setEtape] = useState(0);
   const [nom, setNom] = useState('');
   const [semaine, setSemaine] = useState<Interval>({ start: 8 * 60 + 30, end: 19 * 60 + 30 });
+  const [coupure, setCoupure] = useState(false);
+  const [midi, setMidi] = useState<Interval>({ start: 12 * 60 + 30, end: 14 * 60 });
   const [samediOuvert, setSamediOuvert] = useState(true);
   const [samedi, setSamedi] = useState<Interval>({ start: 9 * 60, end: 19 * 60 });
   const [titulaire, setTitulaire] = useState<Ligne>(ligne('titulaire', '42'));
   const [adjoints, setAdjoints] = useState<Ligne[]>([ligne('adjoint')]);
   const [preparateurs, setPreparateurs] = useState<Ligne[]>([ligne('preparateur'), ligne('preparateur')]);
   const [autres, setAutres] = useState<Ligne[]>([]);
-  const [essaye, setEssaye] = useState(false);
+  const [erreurs, setErreurs] = useState<Erreur[]>([]);
+  const titre = useRef<HTMLHeadingElement>(null);
+  const resume = useRef<HTMLDivElement>(null);
+  const premiere = useRef(true);
 
-  const complet = (l: Ligne): boolean => l.prenom.trim() !== '' && l.nom.trim() !== '';
-  const horairesOk = semaine.end > semaine.start && (!samediOuvert || samedi.end > samedi.start);
-  const pret = nom.trim() !== '' && complet(titulaire) && horairesOk;
+  // À chaque changement d'étape, le focus va sur son titre : le lecteur d'écran annonce où l'on est.
+  useEffect(() => {
+    if (premiere.current) {
+      premiere.current = false;
+      return;
+    }
+    titre.current?.focus();
+    document.querySelector('.accueil-form')?.scrollTo({ top: 0 });
+  }, [etape]);
+  useEffect(() => {
+    if (erreurs.length) resume.current?.focus();
+  }, [erreurs]);
+
+  const groupes: { id: string; lignes: Ligne[]; singulier: string }[] = [
+    { id: 'adj', lignes: adjoints, singulier: 'pharmacien adjoint' },
+    { id: 'prep', lignes: preparateurs, singulier: 'préparateur' },
+    { id: 'autre', lignes: autres, singulier: 'personne' },
+  ];
+
+  const valider = (e: number): Erreur[] => {
+    const out: Erreur[] = [];
+    if (e === 0) {
+      if (!nom.trim()) out.push({ champ: 'officine-nom', message: 'Indiquez le nom de la pharmacie.' });
+      if (semaine.end <= semaine.start) out.push({ champ: 'sem-fin', message: 'En semaine, la fermeture doit suivre l’ouverture.' });
+      if (coupure && !(semaine.start < midi.start && midi.start < midi.end && midi.end < semaine.end)) {
+        out.push({ champ: 'midi-debut', message: 'La coupure du midi doit se situer entre l’ouverture et la fermeture.' });
+      }
+      if (samediOuvert && samedi.end <= samedi.start) out.push({ champ: 'sam-fin', message: 'Le samedi, la fermeture doit suivre l’ouverture.' });
+    }
+    if (e === 1) {
+      if (!titulaire.prenom.trim()) out.push({ champ: 'tit-prenom', message: 'Indiquez le prénom du titulaire.' });
+      if (!titulaire.nom.trim()) out.push({ champ: 'tit-nom', message: 'Indiquez le nom du titulaire.' });
+      for (const g of groupes) {
+        g.lignes.forEach((l, i) => {
+          const base = `${g.id}-${l.cle}`;
+          if (!vide(l) && !complet(l)) {
+            out.push({ champ: `${base}-${l.prenom.trim() ? 'nom' : 'prenom'}`, message: `${g.singulier.charAt(0).toUpperCase() + g.singulier.slice(1)} ${i + 1} : indiquez le prénom et le nom, ou retirez la ligne.` });
+          } else if (complet(l) && !(Number(l.heures) >= 1 && Number(l.heures) <= 48)) {
+            out.push({ champ: `${base}-heures`, message: `${l.prenom} ${l.nom} : les heures par semaine doivent être comprises entre 1 et 48.` });
+          }
+        });
+      }
+    }
+    return out;
+  };
+
+  const suivant = (): void => {
+    const e = valider(etape);
+    setErreurs(e);
+    if (!e.length) setEtape(etape + 1);
+  };
+  const versEtape = (n: number): void => {
+    setErreurs([]);
+    setEtape(n);
+  };
+
   const equipe = [titulaire, ...adjoints, ...preparateurs, ...autres].filter(complet);
+  const horaireSemaine: Interval[] = coupure ? [{ start: semaine.start, end: midi.start }, { start: midi.end, end: semaine.end }] : [{ ...semaine }];
+  const nbPharmaciens = 1 + adjoints.filter(complet).length;
 
   const creer = (): void => {
-    setEssaye(true);
-    if (!pret) return;
+    const tout = [...valider(0), ...valider(1)];
+    if (tout.length) {
+      setEtape(valider(0).length ? 0 : 1);
+      setErreurs(tout);
+      return;
+    }
     const personnes: Person[] = equipe.map((l) => ({
       id: uid('p'),
       prenom: l.prenom.trim(),
@@ -124,214 +262,346 @@ export function Accueil(): JSX.Element {
       volontaireHeuresComp: false,
       volontaireGardes: l.qualification === 'titulaire',
     }));
-    const horaires = [0, 1, 2, 3, 4].map(() => [{ ...semaine }]).concat([samediOuvert ? [{ ...samedi }] : []], [[]]);
+    const horaires = [0, 1, 2, 3, 4].map(() => horaireSemaine.map((i) => ({ ...i }))).concat([samediOuvert ? [{ ...samedi }] : []], [[]]);
     creerOfficine(nom.trim(), horaires, personnes);
     aller('resoudre');
     setTour(0);
   };
 
-  const heure = (v: number, set: (n: number) => void, label: string): JSX.Element => (
-    <input
-      type="time"
-      step={900}
-      className="input num"
-      aria-label={label}
-      value={fmtHHMM(v)}
-      onChange={(e) => {
-        const n = parseHHMM(e.target.value);
-        if (n !== null) set(n);
-      }}
-      style={{ width: 122 }}
-    />
-  );
+  const errDe = (champ: string): Erreur | undefined => erreurs.find((e) => e.champ === champ);
+  const plage = (i: Interval): string => `${fmtHeure(i.start)} – ${fmtHeure(i.end)}`;
 
   return (
     <div className="accueil">
-      <aside className="accueil-hero">
+      <a className="skip" href="#creation">
+        Aller au formulaire
+      </a>
+      <aside className="accueil-hero" aria-label="Présentation et étapes">
         <div className="brand" style={{ padding: 0 }}>
-          <span className="brand-mark" style={{ background: 'rgba(255,255,255,0.22)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.45)' }}>
+          <span className="brand-mark">
             <Logo />
           </span>
-          <div className="brand-name" style={{ color: '#fff' }}>Relève</div>
+          <div className="brand-name">Relève</div>
         </div>
         <div>
-          <h1>Le planning de votre officine, enfin serein.</h1>
-          <p>Créez votre pharmacie en deux minutes : son nom, ses horaires, son équipe. Vous pourrez tout ajuster ensuite.</p>
+          <p className="accueil-titre">Le planning de votre officine, enfin serein.</p>
+          <p className="sous">Trois étapes, deux minutes. Tout reste modifiable ensuite.</p>
         </div>
-        <ul className="accueil-points">
-          <li>
-            <span className="ico"><CalendarRange size={18} /></span>
-            <div>
-              <b>Des semaines construites pour vous</b>
-              <span>Trois propositions comparables, que vous ajustez à la main.</span>
-            </div>
-          </li>
-          <li>
-            <span className="ico"><ShieldCheck size={18} /></span>
-            <div>
-              <b>Un pharmacien présent à chaque minute</b>
-              <span>Repos, durées et couverture contrôlés au fil de l’eau.</span>
-            </div>
-          </li>
-          <li>
-            <span className="ico"><HeartHandshake size={18} /></span>
-            <div>
-              <b>Les imprévus sans tout désorganiser</b>
-              <span>Chaque solution annonce qui elle touche et ce qu’elle coûte.</span>
-            </div>
-          </li>
-          <li>
-            <span className="ico"><MoonStar size={18} /></span>
-            <div>
-              <b>Les gardes, jusqu’à la paie</b>
-              <span>Affectation, repos à protéger, variables pour le comptable.</span>
-            </div>
-          </li>
-        </ul>
+        <ol className="parcours" aria-label="Étapes de création">
+          {ETAPES.map((e, i) => (
+            <li key={e.titre} className={i === etape ? 'now' : i < etape ? 'done' : ''} aria-current={i === etape ? 'step' : undefined}>
+              <span className="n" aria-hidden="true">
+                {i < etape ? <Check size={17} /> : i + 1}
+              </span>
+              <span>
+                <b>
+                  <span className="sr">
+                    Étape {i + 1} sur {ETAPES.length}
+                    {i < etape ? ', terminée' : i === etape ? ', en cours' : ''} :{' '}
+                  </span>
+                  {e.titre}
+                </b>
+                <span className="d">{e.detail}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="accueil-note">
+          <ShieldCheck size={20} aria-hidden="true" style={{ flex: 'none', color: 'var(--green-deep)' }} />
+          <span>Vos données restent sur cet appareil. Aucune information de santé, de religion ou de vie privée n’est demandée.</span>
+        </p>
       </aside>
 
-      <main className="accueil-form">
-        <div className="accueil-in">
+      <main className="accueil-form" id="creation">
+        <form
+          className="accueil-in"
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (etape < 2) suivant();
+            else creer();
+          }}
+        >
           <div>
-            <div className="eyebrow">Bienvenue</div>
-            <h1 style={{ marginTop: 6 }}>
-              Créer <em>mon officine</em>
+            <p className="eyebrow">
+              Créer mon officine · étape {etape + 1} sur {ETAPES.length}
+            </p>
+            <h1 ref={titre} tabIndex={-1} style={{ marginTop: 6, outline: 'none' }}>
+              {etape === 0 ? (
+                <>
+                  Votre <span className="hl">pharmacie</span>
+                </>
+              ) : etape === 1 ? (
+                <>
+                  Votre <span className="hl">équipe</span>
+                </>
+              ) : (
+                <>
+                  Tout est <span className="hl">prêt</span> ?
+                </>
+              )}
             </h1>
             <p className="soft" style={{ marginTop: 10, fontSize: 15 }}>
-              Seuls le nom de la pharmacie et le titulaire sont nécessaires. Les lignes laissées vides sont ignorées.
+              {etape === 0
+                ? 'Seul le nom est obligatoire. Les horaires proposés sont les plus courants : ajustez-les.'
+                : etape === 1
+                  ? 'Seul le titulaire est obligatoire. Les lignes laissées vides sont ignorées, et vous pourrez ajouter des personnes plus tard.'
+                  : 'Relisez l’essentiel. Rien n’est figé : chaque élément se modifie ensuite dans l’application.'}
             </p>
           </div>
 
-          <div className="card pad col" style={{ gap: 22 }}>
-            <section className="col" style={{ gap: 12 }}>
-              <div className="row">
-                <span className="ico grad"><Store size={18} /></span>
-                <div className="grow">
-                  <h3>La pharmacie</h3>
-                  <div className="small soft">Son nom et ses horaires d’ouverture habituels.</div>
-                </div>
-              </div>
-              <label className="field">
-                Nom de la pharmacie
-                <input id="officine-nom" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Pharmacie du Marché" autoFocus autoComplete="organization" aria-invalid={essaye && !nom.trim()} />
-                {essaye && !nom.trim() ? <span className="erreur">Indiquez le nom de la pharmacie.</span> : null}
-              </label>
-              <div className="row wrap" style={{ gap: 18 }}>
-                <div className="field">
-                  <span className="row" style={{ gap: 6 }}>
-                    <Clock3 size={14} /> Du lundi au vendredi
+          {erreurs.length ? (
+            <div className="resume-erreurs" role="alert" tabIndex={-1} ref={resume}>
+              <h2 className="h3">
+                <AlertTriangle size={18} aria-hidden="true" />
+                {erreurs.length === 1 ? 'Un point à corriger' : `${erreurs.length} points à corriger`}
+              </h2>
+              <ul>
+                {erreurs.map((e) => (
+                  <li key={e.champ}>
+                    <button type="button" onClick={() => document.getElementById(e.champ)?.focus()}>
+                      {e.message}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {etape === 0 ? (
+            <div className="card pad col" style={{ gap: 24 }}>
+              <fieldset className="bloc">
+                <legend>
+                  <span className="ico grad" aria-hidden="true">
+                    <Store size={18} />
                   </span>
-                  <div className="row" style={{ gap: 8 }}>
-                    {heure(semaine.start, (n) => setSemaine({ ...semaine, start: n }), 'Ouverture en semaine')}
-                    <span className="muted">→</span>
-                    {heure(semaine.end, (n) => setSemaine({ ...semaine, end: n }), 'Fermeture en semaine')}
+                  <span>
+                    <b>Identité</b>
+                    <span className="aide">Le nom s’affiche en haut de l’application et sur les exports.</span>
+                  </span>
+                </legend>
+                <label className="field" htmlFor="officine-nom">
+                  <span>
+                    Nom de la pharmacie <span className="oblig">(obligatoire)</span>
+                  </span>
+                  <input id="officine-nom" value={nom} onChange={(e) => setNom(e.target.value)} autoFocus autoComplete="organization" required aria-required="true" aria-invalid={!!errDe('officine-nom')} aria-describedby={errDe('officine-nom') ? 'officine-nom-err' : 'officine-nom-aide'} />
+                  <span className="aide" id="officine-nom-aide">Par exemple : Pharmacie du Marché.</span>
+                  {errDe('officine-nom') ? (
+                    <span className="erreur" id="officine-nom-err">
+                      <CircleAlert size={15} aria-hidden="true" /> {errDe('officine-nom')?.message}
+                    </span>
+                  ) : null}
+                </label>
+              </fieldset>
+
+              <hr className="sep" />
+
+              <fieldset className="bloc">
+                <legend>
+                  <span className="ico sun" aria-hidden="true">
+                    <Sparkles size={18} />
+                  </span>
+                  <span>
+                    <b>Du lundi au vendredi</b>
+                    <span className="aide">Un pharmacien devra être planifié sur chaque minute d’ouverture.</span>
+                  </span>
+                </legend>
+                <div className="row wrap" style={{ alignItems: 'flex-end', gap: 14 }}>
+                  <Heure id="sem-debut" label="Ouverture" value={semaine.start} onChange={(n) => setSemaine({ ...semaine, start: n })} />
+                  <Heure id="sem-fin" label="Fermeture" value={semaine.end} onChange={(n) => setSemaine({ ...semaine, end: n })} />
+                </div>
+                {errDe('sem-fin') ? (
+                  <p className="erreur">
+                    <CircleAlert size={15} aria-hidden="true" /> {errDe('sem-fin')?.message}
+                  </p>
+                ) : null}
+                <label className="check" htmlFor="coupure">
+                  <input id="coupure" type="checkbox" checked={coupure} onChange={(e) => setCoupure(e.target.checked)} />
+                  <span>
+                    La pharmacie ferme le midi
+                    <span className="soft small" style={{ display: 'block' }}>Sinon, elle est considérée comme ouverte en continu.</span>
+                  </span>
+                </label>
+                {coupure ? (
+                  <div className="row wrap" style={{ alignItems: 'flex-end', gap: 14 }}>
+                    <Heure id="midi-debut" label="Fermeture du midi" value={midi.start} onChange={(n) => setMidi({ ...midi, start: n })} />
+                    <Heure id="midi-fin" label="Réouverture" value={midi.end} onChange={(n) => setMidi({ ...midi, end: n })} />
                   </div>
-                </div>
-                <div className="field">
-                  <label className="check" style={{ fontWeight: 600, color: 'var(--ink-2)' }}>
-                    <input type="checkbox" checked={samediOuvert} onChange={(e) => setSamediOuvert(e.target.checked)} style={{ marginTop: 2 }} /> Ouvert le samedi
+                ) : null}
+                {errDe('midi-debut') ? (
+                  <p className="erreur">
+                    <CircleAlert size={15} aria-hidden="true" /> {errDe('midi-debut')?.message}
+                  </p>
+                ) : null}
+              </fieldset>
+
+              <hr className="sep" />
+
+              <fieldset className="bloc">
+                <legend>
+                  <span className="ico sky" aria-hidden="true">
+                    <Sparkles size={18} />
+                  </span>
+                  <span>
+                    <b>Le samedi</b>
+                    <span className="aide">Le dimanche est fermé par défaut ; les gardes se gèrent à part.</span>
+                  </span>
+                </legend>
+                <label className="check" htmlFor="samedi-ouvert">
+                  <input id="samedi-ouvert" type="checkbox" checked={samediOuvert} onChange={(e) => setSamediOuvert(e.target.checked)} />
+                  <span>La pharmacie ouvre le samedi</span>
+                </label>
+                {samediOuvert ? (
+                  <div className="row wrap" style={{ alignItems: 'flex-end', gap: 14 }}>
+                    <Heure id="sam-debut" label="Ouverture le samedi" value={samedi.start} onChange={(n) => setSamedi({ ...samedi, start: n })} />
+                    <Heure id="sam-fin" label="Fermeture le samedi" value={samedi.end} onChange={(n) => setSamedi({ ...samedi, end: n })} />
+                  </div>
+                ) : null}
+                {errDe('sam-fin') ? (
+                  <p className="erreur">
+                    <CircleAlert size={15} aria-hidden="true" /> {errDe('sam-fin')?.message}
+                  </p>
+                ) : null}
+              </fieldset>
+            </div>
+          ) : null}
+
+          {etape === 1 ? (
+            <div className="card pad col" style={{ gap: 24 }}>
+              <fieldset className="bloc">
+                <legend>
+                  <span className="ico grad" aria-hidden="true">
+                    <UserRound size={18} />
+                  </span>
+                  <span>
+                    <b>Le titulaire</b>
+                    <span className="aide">Hors décompte salarié : ses heures sont un objectif, pas un contrat.</span>
+                  </span>
+                </legend>
+                <div className="ligne">
+                  <label className="field" htmlFor="tit-prenom">
+                    <span>
+                      Prénom <span className="oblig">(obligatoire)</span>
+                    </span>
+                    <input id="tit-prenom" value={titulaire.prenom} onChange={(e) => setTitulaire({ ...titulaire, prenom: e.target.value })} autoComplete="off" required aria-required="true" aria-invalid={!!errDe('tit-prenom')} aria-describedby={errDe('tit-prenom') ? 'tit-prenom-err' : undefined} />
                   </label>
-                  {samediOuvert ? (
-                    <div className="row" style={{ gap: 8 }}>
-                      {heure(samedi.start, (n) => setSamedi({ ...samedi, start: n }), 'Ouverture le samedi')}
-                      <span className="muted">→</span>
-                      {heure(samedi.end, (n) => setSamedi({ ...samedi, end: n }), 'Fermeture le samedi')}
-                    </div>
-                  ) : (
-                    <span className="small muted" style={{ fontWeight: 500, padding: '10px 0' }}>Fermé le samedi</span>
-                  )}
+                  <label className="field" htmlFor="tit-nom">
+                    <span>
+                      Nom <span className="oblig">(obligatoire)</span>
+                    </span>
+                    <input id="tit-nom" value={titulaire.nom} onChange={(e) => setTitulaire({ ...titulaire, nom: e.target.value })} autoComplete="off" required aria-required="true" aria-invalid={!!errDe('tit-nom')} aria-describedby={errDe('tit-nom') ? 'tit-nom-err' : undefined} />
+                  </label>
+                  <label className="field" htmlFor="tit-heures">
+                    Heures par semaine
+                    <input id="tit-heures" type="number" inputMode="decimal" min={1} max={70} step={0.5} value={titulaire.heures} onChange={(e) => setTitulaire({ ...titulaire, heures: e.target.value })} className="num" />
+                  </label>
+                  <span />
                 </div>
-              </div>
-              {essaye && !horairesOk ? <span className="erreur">L’heure de fermeture doit suivre l’heure d’ouverture.</span> : null}
-            </section>
+                {errDe('tit-prenom') ? (
+                  <p className="erreur" id="tit-prenom-err">
+                    <CircleAlert size={15} aria-hidden="true" /> {errDe('tit-prenom')?.message}
+                  </p>
+                ) : null}
+                {errDe('tit-nom') ? (
+                  <p className="erreur" id="tit-nom-err">
+                    <CircleAlert size={15} aria-hidden="true" /> {errDe('tit-nom')?.message}
+                  </p>
+                ) : null}
+              </fieldset>
+              <hr className="sep" />
+              <Groupe id="adj" titre="Pharmaciens adjoints" aide="Avec le titulaire, ils assurent la présence d’un pharmacien, pauses comprises." icone={<PillIcon size={18} />} ton="mint" singulier="pharmacien adjoint" lignes={adjoints} onChange={setAdjoints} ajouter={() => ligne('adjoint')} libelleAjout="Ajouter un pharmacien" erreurs={erreurs} />
+              <hr className="sep" />
+              <Groupe id="prep" titre="Préparateurs" aide="Indiquez les heures du contrat : un temps partiel est comparé au prorata." icone={<Users size={18} />} ton="sky" singulier="préparateur" lignes={preparateurs} onChange={setPreparateurs} ajouter={() => ligne('preparateur')} libelleAjout="Ajouter un préparateur" erreurs={erreurs} />
+              <hr className="sep" />
+              <Groupe id="autre" titre="Autres postes" aide="Apprentis, étudiants en pharmacie, rayonnistes." icone={<Sparkles size={18} />} ton="sun" singulier="personne" lignes={autres} onChange={setAutres} ajouter={() => ligne('apprenti', '21')} libelleAjout="Ajouter une personne" avecFonction erreurs={erreurs} />
+            </div>
+          ) : null}
 
-            <hr className="sep" />
-
-            <section className="col" style={{ gap: 10 }}>
-              <div className="row">
-                <span className="ico mint"><UserRound size={18} /></span>
-                <div className="grow">
-                  <h3>Le titulaire</h3>
-                  <div className="small soft">Hors décompte salarié : ses heures sont un objectif, pas un contrat.</div>
+          {etape === 2 ? (
+            <div className="col" style={{ gap: 16 }}>
+              <section className="card pad col" aria-labelledby="recap-pharmacie">
+                <div className="row">
+                  <span className="ico grad" aria-hidden="true">
+                    <Store size={18} />
+                  </span>
+                  <h2 id="recap-pharmacie" className="grow" style={{ fontSize: 18 }}>
+                    {nom.trim() || 'Pharmacie sans nom'}
+                  </h2>
+                  <button type="button" className="btn sm" onClick={() => versEtape(0)}>
+                    Modifier <span className="sr">la pharmacie</span>
+                  </button>
                 </div>
-              </div>
-              <div className="row wrap" style={{ gap: 8, alignItems: 'flex-end' }}>
-                <label className="field grow" style={{ minWidth: 120 }}>
-                  Prénom
-                  <input value={titulaire.prenom} onChange={(e) => setTitulaire({ ...titulaire, prenom: e.target.value })} placeholder="Prénom" autoComplete="off" aria-invalid={essaye && !titulaire.prenom.trim()} />
-                </label>
-                <label className="field grow" style={{ minWidth: 120 }}>
-                  Nom
-                  <input value={titulaire.nom} onChange={(e) => setTitulaire({ ...titulaire, nom: e.target.value })} placeholder="Nom" autoComplete="off" aria-invalid={essaye && !titulaire.nom.trim()} />
-                </label>
-                <label className="field" style={{ width: 104 }}>
-                  Heures / sem.
-                  <input type="number" min={1} max={70} step={0.5} value={titulaire.heures} onChange={(e) => setTitulaire({ ...titulaire, heures: e.target.value })} className="num" />
-                </label>
-                <span style={{ width: 36 }} />
-              </div>
-              {essaye && !complet(titulaire) ? <span className="erreur">Indiquez le prénom et le nom du titulaire.</span> : null}
-            </section>
-
-            <hr className="sep" />
-            <Lignes
-              titre="Pharmaciens adjoints"
-              aide="Un pharmacien doit être présent sur toute l’ouverture, pauses comprises."
-              icone={<PillIcon size={18} />}
-              ton="mint"
-              lignes={adjoints}
-              onChange={setAdjoints}
-              ajouter={() => ligne('adjoint')}
-              libelleAjout="Ajouter un pharmacien"
-            />
-            <hr className="sep" />
-            <Lignes
-              titre="Préparateurs"
-              aide="Indiquez les heures du contrat : un temps partiel est comparé au prorata."
-              icone={<Users size={18} />}
-              ton="sky"
-              lignes={preparateurs}
-              onChange={setPreparateurs}
-              ajouter={() => ligne('preparateur')}
-              libelleAjout="Ajouter un préparateur"
-            />
-            <hr className="sep" />
-            <Lignes
-              titre="Autres postes"
-              aide="Apprentis, étudiants en pharmacie, rayonnistes."
-              icone={<Sparkles size={18} />}
-              ton="peach"
-              lignes={autres}
-              onChange={setAutres}
-              ajouter={() => ligne('apprenti', '21')}
-              libelleAjout="Ajouter une personne"
-              avecFonction
-            />
-          </div>
+                <dl className="recap">
+                  <dt>Lundi au vendredi</dt>
+                  <dd>{horaireSemaine.map(plage).join(' puis ')}</dd>
+                  <dt>Samedi</dt>
+                  <dd>{samediOuvert ? plage(samedi) : 'Fermé'}</dd>
+                  <dt>Dimanche</dt>
+                  <dd>Fermé (hors gardes)</dd>
+                </dl>
+              </section>
+              <section className="card pad col" aria-labelledby="recap-equipe">
+                <div className="row">
+                  <span className="ico mint" aria-hidden="true">
+                    <Users size={18} />
+                  </span>
+                  <h2 id="recap-equipe" className="grow" style={{ fontSize: 18 }}>
+                    {equipe.length} personne{equipe.length > 1 ? 's' : ''} dans l’équipe
+                  </h2>
+                  <button type="button" className="btn sm" onClick={() => versEtape(1)}>
+                    Modifier <span className="sr">l’équipe</span>
+                  </button>
+                </div>
+                <ul className="chips">
+                  {equipe.map((l) => (
+                    <li key={l.cle} className="pill" style={{ padding: '5px 12px', fontSize: 13 }}>
+                      {l.prenom} {l.nom} · {QUALIFICATION_COURT[l.qualification]} · {l.heures} h
+                    </li>
+                  ))}
+                </ul>
+                {nbPharmaciens < 2 ? (
+                  <div className="notice warn">
+                    <AlertTriangle size={17} aria-hidden="true" />
+                    <span>
+                      Un seul pharmacien pour l’instant : chacune de ses pauses laissera l’ouverture sans pharmacien{coupure ? ', sauf pendant la coupure du midi' : ''}. Prévoyez un adjoint ou un remplaçant.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="notice ok">
+                    <Check size={17} aria-hidden="true" />
+                    <span>{nbPharmaciens} pharmaciens : ils pourront se relayer pendant les pauses.</span>
+                  </div>
+                )}
+              </section>
+            </div>
+          ) : null}
 
           <div className="row wrap accueil-actions">
-            <div className="grow small soft">
-              {equipe.length ? `${equipe.length} personne${equipe.length > 1 ? 's' : ''} prête${equipe.length > 1 ? 's' : ''} à être ajoutée${equipe.length > 1 ? 's' : ''}.` : 'Aucune personne saisie pour l’instant.'} Tout reste modifiable ensuite.
-            </div>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => {
-                chargerExemple();
-                aller('resoudre');
-                setTour(0);
-              }}
-            >
-              Découvrir avec une équipe d’exemple
-            </button>
-            <button type="button" className="btn magic" onClick={creer} style={{ padding: '11px 22px' }}>
-              Créer mon officine <ArrowRight size={16} />
+            <span className="grow small soft" aria-live="polite">
+              {etape === 1 ? `${equipe.length} personne${equipe.length > 1 ? 's' : ''} saisie${equipe.length > 1 ? 's' : ''}.` : etape === 0 ? 'Vous préférez explorer d’abord ?' : 'Un tutoriel d’une minute suit la création.'}
+            </span>
+            {etape === 0 ? (
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  chargerExemple();
+                  aller('resoudre');
+                  setTour(0);
+                }}
+              >
+                Découvrir avec une équipe d’exemple
+              </button>
+            ) : (
+              <button type="button" className="btn" onClick={() => versEtape(etape - 1)}>
+                <ArrowLeft size={16} aria-hidden="true" /> Retour
+              </button>
+            )}
+            <button type="submit" className="btn magic" style={{ padding: '10px 22px' }}>
+              {etape === 0 ? 'Continuer : l’équipe' : etape === 1 ? 'Continuer : vérification' : 'Créer mon officine'} <ArrowRight size={16} aria-hidden="true" />
             </button>
           </div>
-          <p className="tiny muted">
-            Vos données restent sur cet appareil. Aucune information de santé, de religion ou de vie privée n’est demandée, ni ici ni ailleurs dans l’application.
-          </p>
-        </div>
+        </form>
       </main>
     </div>
   );

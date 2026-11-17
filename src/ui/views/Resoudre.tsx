@@ -63,7 +63,7 @@ export function Resoudre(): JSX.Element {
         <div className="grow">
           <div className="eyebrow">Résoudre · {fmtDateLong(today)}</div>
           <h1>
-            Que décider <em>aujourd'hui</em> ?
+            Que décider <span className="hl">aujourd'hui</span> ?
           </h1>
           <p>
             {d.total
@@ -624,28 +624,35 @@ function Demarrage(): JSX.Element | null {
   return (
     <section className="col" style={{ gap: 14, marginBottom: 26 }} aria-label="Bien démarrer">
       <div className="welcome">
-        <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.85)' }}>Bien démarrer</div>
-        <h1 style={{ marginTop: 8 }}>{data.officine.nom || 'Votre officine'} est prête.</h1>
+        <p className="eyebrow">Bien démarrer</p>
+        <h2 style={{ marginTop: 8 }}>{data.officine.nom || 'Votre officine'} est prête.</h2>
         <p>Trois étapes pour arriver à votre premier planning publié. Le tutoriel vous montre où tout se trouve en une minute.</p>
         <div className="row wrap" style={{ marginTop: 20 }}>
-          <button type="button" className="btn" onClick={() => aller(etapes[prochaine].vers)}>
+          <button type="button" className="btn primary" onClick={() => aller(etapes[prochaine].vers)}>
             {etapes[prochaine].titre} <ArrowRight size={15} />
           </button>
-          <button type="button" className="btn glass" onClick={() => setTour(0)}>
+          <button type="button" className="btn" onClick={() => setTour(0)}>
             <CircleHelp size={15} /> Suivre le tutoriel
           </button>
         </div>
       </div>
-      <div className="steps">
+      <ol className="steps">
         {etapes.map((e, i) => (
-          <button key={e.titre} type="button" className={`stepcard${e.fait ? ' done' : i === prochaine ? ' next' : ''}`} onClick={() => aller(e.vers)}>
-            <span className="no">{e.fait ? 'Fait' : `Étape ${i + 1}`}</span>
-            <span className={`ico ${e.fait ? 'mint' : e.ton}`}>{e.fait ? <Check size={18} /> : e.icone}</span>
-            <b>{e.titre}</b>
-            <span className="small">{e.texte}</span>
-          </button>
+          <li key={e.titre}>
+            <button type="button" className={`stepcard${e.fait ? ' done' : i === prochaine ? ' next' : ''}`} onClick={() => aller(e.vers)}>
+              <span className="no">
+                Étape {i + 1}
+                {e.fait ? ' · faite' : i === prochaine ? ' · à faire maintenant' : ''}
+              </span>
+              <span className={`ico ${e.fait ? 'mint' : e.ton}`} aria-hidden="true">
+                {e.fait ? <Check size={18} /> : e.icone}
+              </span>
+              <b>{e.titre}</b>
+              <span className="small">{e.texte}</span>
+            </button>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   );
 }

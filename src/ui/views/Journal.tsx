@@ -140,16 +140,16 @@ export function Journal(): JSX.Element {
             </button>
           </div>
           <div className="card" style={{ overflowX: 'auto' }}>
-            <table className="t" style={{ minWidth: 860 }}>
+            <table className="t" aria-label="Fiche navette du mois" style={{ minWidth: 860 }}>
               <thead>
                 <tr>
-                  <th>Salarié · {MOIS[Number(mois.slice(5)) - 1]} {mois.slice(0, 4)}</th>
-                  <th style={{ textAlign: 'right' }}>Heures prévues</th>
-                  <th style={{ textAlign: 'right' }}>Compl.</th>
-                  <th style={{ textAlign: 'right' }}>Supp. 25 %</th>
-                  <th style={{ textAlign: 'right' }}>Supp. 50 %</th>
-                  <th>Absences</th>
-                  <th>Variables de garde</th>
+                  <th scope="col">Salarié · {MOIS[Number(mois.slice(5)) - 1]} {mois.slice(0, 4)}</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Heures prévues</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Compl.</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Supp. 25 %</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Supp. 50 %</th>
+                  <th scope="col">Absences</th>
+                  <th scope="col">Variables de garde</th>
                 </tr>
               </thead>
               <tbody>

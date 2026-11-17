@@ -47,6 +47,12 @@ export function App(): JSX.Element {
     return () => window.clearTimeout(t);
   }, [toast, taire]);
 
+  // Le titre de la page suit l'écran affiché : il est annoncé à chaque changement de vue.
+  const titrePage = aCreer ? 'Créer mon officine' : salarie ? 'Mon planning' : (NAV.find((n) => n.vue === vue)?.label ?? 'Relève');
+  useEffect(() => {
+    document.title = `${titrePage} · Relève`;
+  }, [titrePage]);
+
   if (aCreer) return <Accueil />;
 
   const heure = new Date(sauvegarde);
@@ -67,6 +73,9 @@ export function App(): JSX.Element {
 
   return (
     <div className="app">
+      <a className="skip" href="#contenu">
+        Aller au contenu
+      </a>
       <nav className="side" aria-label="Navigation principale">
         <div className="brand">
           <span className="brand-mark">
@@ -95,13 +104,13 @@ export function App(): JSX.Element {
           </>
         )}
         <div className="side-foot">
-          <i />
+          <i aria-hidden="true" />
           <span>Enregistré sur cet appareil à {fmtHeure(heure.getHours() * 60 + heure.getMinutes())}</span>
         </div>
       </nav>
 
       <div className="main">
-        <header className="topbar no-print">
+        <header className="topbar no-print" aria-label="Barre d’outils">
           <div className="topbar-in">
             <span className="small soft grow">
               {salarie ? 'Espace salarié : le planning publié, ses changements et ses propres demandes.' : `Espace responsable · ${data.officine.nom || 'Mon officine'}`}
@@ -128,7 +137,7 @@ export function App(): JSX.Element {
             </label>
           </div>
         </header>
-        <main className="content" id="contenu">
+        <main className="content" id="contenu" tabIndex={-1}>
           {salarie ? (
             <MonPlanning personId={spectateur} />
           ) : vue === 'construire' ? (

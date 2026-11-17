@@ -192,7 +192,7 @@ export function Logo({ size = 22 }: { size?: number }): JSX.Element {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
       <path d="M6 21.5c3.6 0 5-11 10-11s6.4 11 10 11" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" />
-      <circle cx="16" cy="10.5" r="2.7" fill="#FFE58A" />
+      <circle cx="16" cy="10.5" r="2.7" fill="#e3f3c6" />
     </svg>
   );
 }
@@ -201,8 +201,8 @@ export function Logo({ size = 22 }: { size?: number }): JSX.Element {
 export function Empty({ icon, title, children, action }: { icon: ReactNode; title: string; children?: ReactNode; action?: ReactNode }): JSX.Element {
   return (
     <div className="card empty">
-      <span className="blob">{icon}</span>
-      <h3>{title}</h3>
+      <span className="blob" aria-hidden="true">{icon}</span>
+      <h2>{title}</h2>
       {children ? <p>{children}</p> : null}
       {action}
     </div>
