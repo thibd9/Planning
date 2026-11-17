@@ -19,12 +19,15 @@ export type Vue =
   | 'mesgardes'
   | 'compte';
 
-export type Theme = 'ciel' | 'solvea' | 'sarcelle' | 'bleu' | 'ardoise';
+export type Theme = 'ciel' | 'solvea' | 'indigo' | 'bleu' | 'sarcelle' | 'emeraude' | 'ambre' | 'corail' | 'rose' | 'ardoise';
+export type Mode = 'clair' | 'sombre' | 'auto';
 export interface Preferences {
   theme: Theme;
   texte: 'normal' | 'grand';
+  /** Clair, sombre, ou comme l'appareil. */
+  mode: Mode;
 }
-const PREFS_DEFAUT: Preferences = { theme: 'ciel', texte: 'normal' };
+const PREFS_DEFAUT: Preferences = { theme: 'ciel', texte: 'normal', mode: 'clair' };
 const CLE_SESSION = 'releve.session';
 const CLE_PREFS = 'releve.preferences';
 
@@ -68,7 +71,7 @@ interface Ui {
   tutoriels: boolean;
   ouvrirTutoriels: (o: boolean) => void;
   /** Action demandée depuis la barre du haut, consommée par l'écran d'arrivée (ouvrir une fenêtre). */
-  intention: 'garde' | 'personne' | 'demande' | 'formation' | 'calendrier' | null;
+  intention: 'garde' | 'personne' | 'demande' | 'formation' | 'inventaire' | 'calendrier' | null;
   /** Onglet de « Résoudre » à ouvrir en arrivant (par exemple depuis le parcours de test). */
   sujet: string | null;
   /** Journée ouverte en détail (toute l'équipe, pauses, retards) ; null quand la fenêtre est fermée. */
@@ -93,7 +96,8 @@ interface Ui {
   setTour: (etape: number | null) => void;
 }
 
-export const prefsDe = (prefs: Record<string, Preferences>, personId: string | null): Preferences => (personId && prefs[personId]) || PREFS_DEFAUT;
+// Les préférences enregistrées avant l'arrivée d'un réglage reçoivent sa valeur par défaut.
+export const prefsDe = (prefs: Record<string, Preferences>, personId: string | null): Preferences => ({ ...PREFS_DEFAUT, ...(personId ? prefs[personId] : undefined) });
 
 export const useUi = create<Ui>((set) => ({
   vue: 'tableau',

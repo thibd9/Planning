@@ -1,19 +1,30 @@
-import { Check, CircleHelp, KeyRound, LogOut, Palette, Type, UserRound } from 'lucide-react';
+import { Check, CircleHelp, KeyRound, LogOut, Moon, Palette, Type, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { ESPACE_LABEL, empreinte, espaceDe, estResponsable, libelleRole, responsable } from '../../domain/acces';
 import { nomComplet, nomCourt } from '../../domain/types';
 import { useStore } from '../../store/store';
-import type { Theme } from '../../store/ui';
+import type { Mode, Theme } from '../../store/ui';
 import { prefsDe, useUi } from '../../store/ui';
 import { EtiquetteRole } from '../icons';
 import { Avatar, MotDePasse, Pill } from '../kit';
 
-const THEMES: { cle: Theme; nom: string; couleur: string }[] = [
-  { cle: 'ciel', nom: 'Bleu ciel', couleur: 'linear-gradient(120deg, #d6ebff, #9ccbf5 55%, #2474c4)' },
-  { cle: 'solvea', nom: 'Violet', couleur: 'linear-gradient(135deg, #2d0d8c, #5213dd 45%, #891efd)' },
-  { cle: 'sarcelle', nom: 'Bleu-vert', couleur: 'linear-gradient(135deg, #0a5a63, #127680)' },
-  { cle: 'bleu', nom: 'Bleu marine', couleur: 'linear-gradient(135deg, #1b4f7f, #2a6aa3)' },
-  { cle: 'ardoise', nom: 'Ardoise', couleur: 'linear-gradient(135deg, #2f4858, #446579)' },
+// Chaque thème tient en deux couleurs ; les mêmes que dans la feuille de style.
+const THEMES: { cle: Theme; nom: string; a: string; b: string }[] = [
+  { cle: 'ciel', nom: 'Bleu ciel', a: '#1f6bb8', b: '#2474c4' },
+  { cle: 'bleu', nom: 'Bleu marine', a: '#1b4f7f', b: '#2a6aa3' },
+  { cle: 'indigo', nom: 'Indigo', a: '#3730a3', b: '#4338ca' },
+  { cle: 'solvea', nom: 'Violet', a: '#5213dd', b: '#7a1cf5' },
+  { cle: 'rose', nom: 'Framboise', a: '#a61e5c', b: '#bf2a6e' },
+  { cle: 'corail', nom: 'Terracotta', a: '#a6401f', b: '#b84a26' },
+  { cle: 'ambre', nom: 'Ambre', a: '#8a5a00', b: '#9a6500' },
+  { cle: 'emeraude', nom: 'Émeraude', a: '#17694a', b: '#1e7d59' },
+  { cle: 'sarcelle', nom: 'Bleu-vert', a: '#0a5a63', b: '#127680' },
+  { cle: 'ardoise', nom: 'Ardoise', a: '#2f4858', b: '#446579' },
+];
+const MODES: { cle: Mode; nom: string }[] = [
+  { cle: 'clair', nom: 'Clair' },
+  { cle: 'sombre', nom: 'Sombre' },
+  { cle: 'auto', nom: 'Comme l’appareil' },
 ];
 
 /** Mon compte : profil, apparence, code d'accès, déconnexion. Accessible à tous les rôles. */
@@ -87,18 +98,34 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
           </div>
           <div className="card-body col" style={{ gap: 20 }}>
             <fieldset>
+              <legend className="field" style={{ marginBottom: 8 }}>
+                <span className="row" style={{ gap: 6 }}>
+                  <Moon size={15} aria-hidden="true" /> Mode
+                </span>
+              </legend>
+              <div className="choix" style={{ maxWidth: 560 }}>
+                {MODES.map((m) => (
+                  <label key={m.cle} htmlFor={`mode-${m.cle}`}>
+                    <input id={`mode-${m.cle}`} type="radio" name="mode" checked={prefs.mode === m.cle} onChange={() => setPreferences(cle, { mode: m.cle })} />
+                    {m.nom}
+                    <Check size={16} className="coche" aria-hidden="true" />
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
               <legend className="field" style={{ marginBottom: 8 }}>Couleur du thème</legend>
-              <div className="choix">
+              <div className="choix themes">
                 {THEMES.map((t) => (
                   <label key={t.cle} htmlFor={`theme-${t.cle}`}>
                     <input id={`theme-${t.cle}`} type="radio" name="theme" checked={prefs.theme === t.cle} onChange={() => setPreferences(cle, { theme: t.cle })} />
-                    <span className="pastille" style={{ background: t.couleur }} aria-hidden="true" />
+                    <span className="pastille" style={{ background: `linear-gradient(135deg, ${t.a}, ${t.b})` }} aria-hidden="true" />
                     {t.nom}
                     <Check size={16} className="coche" aria-hidden="true" />
                   </label>
                 ))}
               </div>
-              <p className="tiny muted" style={{ marginTop: 8 }}>Chaque couleur a été vérifiée pour rester lisible (contraste d’au moins 4,5:1 sur le texte).</p>
+              <p className="tiny muted" style={{ marginTop: 8 }}>Le logo, les boutons et les bannières suivent la couleur choisie. Chaque thème reste lisible, en clair comme en sombre.</p>
             </fieldset>
             <fieldset>
               <legend className="field" style={{ marginBottom: 8 }}>

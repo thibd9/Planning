@@ -93,7 +93,7 @@ export function Calendrier({ data, personId, today, mois, setMois, onJour }: { d
                               <span key={s.id} className={`cal-poste ${moment}`}>
                                 <span className="cp-haut">
                                   {moment === 'soir' ? <Sunset size={14} aria-hidden="true" /> : <Sun size={14} aria-hidden="true" />}
-                                  <span className="cp-nom">{MOMENT_LABEL[moment]}</span>
+                                  <span className="cp-nom">{s.activite === 'inventaire' ? 'Inventaire' : MOMENT_LABEL[moment]}</span>
                                 </span>
                                 <b className="cp-h">
                                   <span>{fmtHeure(s.start)}</span>

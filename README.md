@@ -33,26 +33,28 @@ principal, avec votre identifiant et votre mot de passe ; les autres titulaires 
 adjoints ; les préparateurs ; les autres postes,
 puis une vérification avant de créer. Un tutoriel guidé présente ensuite chaque espace.
 
-## Environnement de test
+## Tutoriels et environnement d'exemple
 
-Une pharmacie d'exemple, la « Pharmacie des Tilleuls » (fictive), avec onze personnes déjà créées. Elle se
-pose à côté des vraies pharmacies de l'appareil, sans rien effacer.
+Sur la page de connexion, « Voir les tutoriels » ouvre une fenêtre avec deux parcours guidés, joués sur une
+pharmacie d'exemple (la « Pharmacie des Tilleuls », fictive) posée à côté des vraies, sans rien effacer :
+
+- **Visite complète** (23 étapes) : on part d'une pharmacie tout juste créée et on construit tout, pas à
+  pas — équipe, réglages, planning proposé, journée et pauses, publication, espace d'une préparatrice,
+  calendrier, remplacement, demande d'horaires, absence imprévue, gardes, formation, accord entre
+  titulaires, retards et suivi, messages, équité, règles, journal et paie, compte.
+- **Une journée dans une pharmacie en place** (9 étapes) : huit semaines d'historique, un arrêt à couvrir,
+  des demandes en attente ; on suit la titulaire et son équipe.
+
+La même fenêtre permet d'entrer librement dans la peau de quatre personnes :
 
 | Regard | Personne | Identifiant | Ce qu'elle voit |
 | --- | --- | --- | --- |
-| Titulaire 1 | Hélène Marchetti, titulaire principale | `helene.marchetti` | Toute la gestion |
-| Titulaire 2 | Antoine Mercier, titulaire secondaire | `antoine.mercier` | Son espace ; la gestion si la titulaire principale l'accorde |
+| Titulaire 1 | Hélène Marchetti, titulaire principale | `helene.marchetti` | Toute la gestion, et les accords à donner |
+| Titulaire 2 | Antoine Mercier, titulaire secondaire | `antoine.mercier` | Les mêmes écrans ; ses décisions attendent l'accord d'Hélène |
 | Pharmacien | Karim Benali, adjoint | `karim.benali` | Son planning, le planning publié, ses gardes, ses messages |
 | Préparateur | Camille Roussel, préparatrice | `camille.roussel` | Ses horaires, ses demandes, les remplacements, ses messages |
 
-Mot de passe commun : `demo`. Depuis la page de connexion, une carte par regard ouvre directement
-l'espace de la personne ; une fois dedans, le bandeau « Environnement de test » permet de passer d'un
-regard à l'autre en un clic et de tout remettre à neuf.
-
-**Parcours de test** (bouton « Lancer le parcours de test ») : neuf étapes qui changent de personne à
-chaque fois — tableau de bord de la titulaire, horaires d'une préparatrice et demande de remplacement,
-collègue qui se propose, validation, gardes d'un pharmacien, titulaire secondaire sans puis avec accès à
-la gestion, construction de la semaine suivante. Chaque étape explique ce qu'on regarde.
+Mot de passe commun : `demo`. Une fois dans l'exemple, un bandeau permet de changer de regard en un clic.
 
 ## Connexion, rôles et pharmacies
 
@@ -60,14 +62,17 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
 
 | Espace | Qui | Ce qu'on y voit |
 | --- | --- | --- |
-| **Responsable** | Le titulaire principal, et les personnes à qui il donne l'accès | Mon planning, tableau de bord, résoudre, construire, gardes, messages, équipe, équité, règles, journal, réglages |
-| **Pharmacien** | Titulaires secondaires et adjoints sans droit de gestion | Mon planning, planning publié de l'équipe, mes gardes, messages |
+| **Responsable** | Les titulaires, et les adjoints à qui le titulaire principal donne l'accès | Mon planning, tableau de bord, résoudre, messages, construire, gardes, équité, équipe, réglages, règles, journal |
+| **Pharmacien** | Adjoints sans droit de gestion | Mon planning, planning publié de l'équipe, mes gardes, messages |
 | **Équipe** | Préparateurs, apprentis, étudiants, rayonnistes | Mon planning, planning publié de l'équipe, messages |
 
 - **Deux icônes.** Le titulaire principal porte la couronne, le titulaire secondaire la médaille.
 - **Titulaire principal ou secondaire.** Celui qui crée la pharmacie en est le titulaire principal, non
-  salarié. Un titulaire secondaire n'a aucun droit de gestion tant que le principal ne le lui accorde pas,
-  dans la fiche de la personne (« Droits d'accès »).
+  salarié. Un titulaire secondaire a les mêmes écrans, mais chacune de ses décisions (publier, régler une
+  absence, valider un remplacement, confier une garde, planifier une formation ou un inventaire, ajouter ou
+  retirer une personne) attend l'accord du titulaire principal, dans « Résoudre », onglet « Accords ». Tant
+  que l'accord n'est pas donné, rien n'est appliqué ; un refus n'applique rien. Les brouillons de planning
+  et la saisie des fiches restent libres.
 - **Comptes de l'équipe.** Chaque fiche donne l'identifiant de la personne et un mot de passe provisoire à
   lui transmettre ; elle le remplace dans « Mon compte ». Le titulaire principal peut en régénérer un.
 - **Plusieurs titulaires sur un même appareil.** Depuis la page de connexion, un autre titulaire crée sa
@@ -123,11 +128,24 @@ journée : toute l'équipe sur une même frise, de l'ouverture à la fermeture. 
 déjeuner de chacun, voit aussitôt si un pharmacien manque pendant une pause, et note un retard, un départ
 anticipé ou une absence non prévue. Les autres lisent la journée publiée.
 
+### Compétences et diplômes
+
+Chaque fiche coche ce que la personne sait faire, par famille : actes et diplômes (vaccination, tests,
+entretiens, orthopédie, contention, préparations, gestes d'urgence), conseil (phytothérapie, aromathérapie,
+homéopathie, micronutrition, dermatologie, beauté, parapharmacie, puériculture, vétérinaire, maintien à
+domicile, diabète, sevrage tabagique) et organisation (commandes, tiers payant, merchandising).
+
 ### Suivi de présence
 
 Chaque fiche porte ses compteurs sur douze mois : retards (nombre et minutes), départs anticipés, absences
 non prévues, jours de congé, d'arrêt et de formation, remplacements assurés. La personne voit les siens
 dans « Mon suivi ». Ce sont des dates et des durées : aucune raison n'est demandée ni conservée.
+
+### Inventaires
+
+Depuis « Créer », un inventaire se fixe en trois champs : date, heures, participants. Chacun reçoit un
+poste « Inventaire » dans son planning, visible aussitôt même sur une semaine déjà publiée, et un avis dans
+son espace. Au-delà de six heures, une pause est posée d'office.
 
 ### Formations
 
@@ -174,7 +192,8 @@ précise (de 12 h à 14 h 30, par exemple).
 L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 
 - **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ au moins 3:1, dans
-  chacun des cinq thèmes (bleu ciel par défaut, violet, bleu-vert, bleu marine, ardoise).
+  chacun des dix thèmes (bleu ciel par défaut, bleu marine, indigo, violet, framboise, terracotta, ambre,
+  émeraude, bleu-vert, ardoise), en **mode clair comme en mode sombre**. Le logo suit la couleur du thème.
 - **Repères de couleur dans les plannings**, les mêmes dans la grille, la frise et le calendrier : jaune
   pour le matin, orange pour la journée, bleu pour la journée longue, violet pour le soir, indigo pour la
   garde, vert d'eau pour le congé, rouge doux pour l'arrêt, turquoise pour la formation. L'horaire est toujours écrit dans la tuile : la couleur aide, elle n'est jamais seule.
@@ -192,8 +211,9 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 74 écrans,
-fenêtres et thèmes vérifiés, ordinateur et téléphone. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 105 écrans et
+fenêtres du parcours complet, ordinateur et téléphone, ni sur les vingt écrans principaux rejoués dans
+chacun des dix thèmes, en clair et en sombre. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 
 ## Architecture

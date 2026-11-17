@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Boxes,
   CalendarOff,
+  ClipboardCheck,
   ClipboardList,
   Crown,
   DoorClosed,
@@ -52,18 +53,21 @@ export const ACTIVITE_ICONE: Record<Activite, LucideIcon> = {
   back: PackageOpen,
   admin: ClipboardList,
   formation: Presentation,
+  inventaire: ClipboardCheck,
 };
 export const ACTIVITE_COULEUR: Record<Activite, string> = {
   comptoir: 'c-moyen',
   back: 'c-clair',
   admin: 'c-clair',
   formation: 'c-gris',
+  inventaire: 'c-clair',
 };
 export const ACTIVITE_COURT: Record<Activite, string> = {
   comptoir: 'Comptoir',
   back: 'Réception',
   admin: 'Administratif',
   formation: 'Formation',
+  inventaire: 'Inventaire',
 };
 
 export const MISSION_ICONE: Record<MissionType, LucideIcon> = {

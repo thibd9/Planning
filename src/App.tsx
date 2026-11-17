@@ -1,4 +1,4 @@
-import { Bell, BookOpenCheck, Building2, CalendarDays, GraduationCap, CalendarRange, ChevronDown, CircleHelp, LayoutDashboard, ListChecks, LogOut, MessageSquare, MoonStar, Scale, Plus, ScrollText, Settings, Settings2, Store, UserRound, Users } from 'lucide-react';
+import { Bell, BookOpenCheck, ClipboardCheck, Moon, Sun, Building2, CalendarDays, GraduationCap, CalendarRange, ChevronDown, CircleHelp, LayoutDashboard, ListChecks, LogOut, MessageSquare, MoonStar, Scale, Plus, ScrollText, Settings, Settings2, Store, UserRound, Users } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { ESPACE_LABEL, espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
@@ -70,7 +70,7 @@ export function App(): JSX.Element {
   const today = useStore((s) => s.today);
   const sauvegarde = useStore((s) => s.derniereSauvegarde);
   const undo = useStore((s) => s.undo);
-  const { vue, aller, agir, session, deconnecter, preferences, toast, taire, setTour, parcours, jour, voirJour, dire } = useUi();
+  const { vue, aller, agir, session, deconnecter, preferences, toast, taire, setTour, parcours, jour, voirJour, dire, setPreferences } = useUi();
   const [menu, setMenu] = useState(false);
   // Sans session, l'application s'ouvre sur la connexion ; la création d'une pharmacie se lance depuis là.
   const [creation, setCreation] = useState(false);
@@ -115,6 +115,7 @@ export function App(): JSX.Element {
   // Tant que ni le nom ni l'équipe ne sont saisis, l'application s'ouvre sur l'écran de création.
   const aCreer = !data.officine.nom.trim() && !data.personnes.length;
   const prefs = prefsDe(preferences, session);
+  const sombre = prefs.mode === 'sombre' || (prefs.mode === 'auto' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
     if (!toast) return;
@@ -127,6 +128,16 @@ export function App(): JSX.Element {
     document.documentElement.dataset.theme = prefs.theme;
     document.documentElement.dataset.texte = prefs.texte;
   }, [prefs.theme, prefs.texte]);
+  // Mode clair ou sombre ; « auto » suit le réglage de l'appareil, et son changement en direct.
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const appliquer = (): void => {
+      document.documentElement.dataset.mode = prefs.mode === 'auto' ? (media.matches ? 'sombre' : 'clair') : prefs.mode;
+    };
+    appliquer();
+    media.addEventListener('change', appliquer);
+    return () => media.removeEventListener('change', appliquer);
+  }, [prefs.mode]);
 
   // Le titre de la page suit l'écran affiché : il est annoncé à chaque changement de vue.
   const titrePage = !moi ? (creation ? 'Créer mon officine' : 'Connexion') : vueActive === 'compte' ? 'Mon compte' : vueActive === 'nouvelle' ? 'Ajouter une pharmacie' : (liens.find((l) => l.vue === vueActive)?.label ?? 'Relève');
@@ -261,11 +272,14 @@ export function App(): JSX.Element {
                       <button type="button" onClick={() => { setPanneau(null); agir('equipe', 'formation'); }}>
                         <GraduationCap size={17} aria-hidden="true" /> Une formation
                       </button>
+                      <button type="button" onClick={() => { setPanneau(null); agir('equipe', 'inventaire'); }}>
+                        <ClipboardCheck size={17} aria-hidden="true" /> Un inventaire
+                      </button>
                       <button type="button" onClick={() => { setPanneau(null); agir('equipe', 'personne'); }}>
                         <Users size={17} aria-hidden="true" /> Une personne dans l’équipe
                       </button>
                       <button type="button" onClick={() => { setPanneau(null); agir('moi', 'demande'); }}>
-                        <CalendarDays size={17} aria-hidden="true" /> Une absence ou une demande pour moi
+                        <CalendarDays size={17} aria-hidden="true" /> Une absence pour moi
                       </button>
                       <button type="button" onClick={() => { setPanneau(null); aller('messages'); }}>
                         <MessageSquare size={17} aria-hidden="true" /> Un message à l’équipe
@@ -338,6 +352,10 @@ export function App(): JSX.Element {
                   </div>
                   <button type="button" onClick={() => { setMenu(false); aller('compte'); }}>
                     <UserRound size={17} aria-hidden="true" /> Mon compte
+                  </button>
+                  <button type="button" role="switch" aria-checked={sombre} onClick={() => setPreferences(session ?? '', { mode: sombre ? 'clair' : 'sombre' })}>
+                    {sombre ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />} Mode sombre
+                    <span className={`bascule${sombre ? ' on' : ''}`} aria-hidden="true" />
                   </button>
                   <button type="button" onClick={() => { setMenu(false); aller('compte'); window.setTimeout(() => document.getElementById('c-apparence')?.scrollIntoView({ block: 'start' }), 60); }}>
                     <Settings size={17} aria-hidden="true" /> Paramètres

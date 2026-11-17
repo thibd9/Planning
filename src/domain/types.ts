@@ -21,7 +21,29 @@ export type Qualification =
   | 'apprenti'
   | 'rayonniste';
 
-export type CompetenceId = 'vaccination' | 'trod' | 'entretien' | 'orthopedie' | 'commandes';
+export type CompetenceId =
+  | 'vaccination'
+  | 'trod'
+  | 'entretien'
+  | 'orthopedie'
+  | 'contention'
+  | 'preparations'
+  | 'secours'
+  | 'phyto'
+  | 'aroma'
+  | 'homeo'
+  | 'micronutrition'
+  | 'dermo'
+  | 'beaute'
+  | 'para'
+  | 'puericulture'
+  | 'veterinaire'
+  | 'mad'
+  | 'diabete'
+  | 'tabac'
+  | 'commandes'
+  | 'tierspayant'
+  | 'merchandising';
 
 export interface Person {
   id: string;
@@ -50,7 +72,7 @@ export interface Person {
   provisoire?: string;
 }
 
-export type Activite = 'comptoir' | 'back' | 'admin' | 'formation';
+export type Activite = 'comptoir' | 'back' | 'admin' | 'formation' | 'inventaire';
 
 export type Origine = 'manuel' | 'genere' | 'reparation' | 'trame';
 
@@ -389,15 +411,41 @@ export const ACTIVITE_LABEL: Record<Activite, string> = {
   back: 'Réception et préparation',
   admin: 'Administratif',
   formation: 'Formation (hors officine)',
+  inventaire: 'Inventaire',
 };
 
 export const COMPETENCE_LABEL: Record<CompetenceId, string> = {
   vaccination: 'Vaccination',
   trod: 'Tests angine et cystite',
   entretien: 'Entretiens pharmaceutiques',
-  orthopedie: 'Orthopédie',
-  commandes: 'Commandes',
+  orthopedie: 'Orthopédie (DU)',
+  contention: 'Contention et compression',
+  preparations: 'Préparations magistrales',
+  secours: 'Gestes d’urgence (AFGSU)',
+  phyto: 'Phytothérapie',
+  aroma: 'Aromathérapie',
+  homeo: 'Homéopathie',
+  micronutrition: 'Micronutrition',
+  dermo: 'Dermatologie et dermocosmétique',
+  beaute: 'Beauté et maquillage',
+  para: 'Parapharmacie',
+  puericulture: 'Puériculture',
+  veterinaire: 'Conseil vétérinaire',
+  mad: 'Maintien à domicile',
+  diabete: 'Diabète et autosurveillance',
+  tabac: 'Sevrage tabagique',
+  commandes: 'Commandes et réception',
+  tierspayant: 'Tiers payant et rejets',
+  merchandising: 'Merchandising',
 };
+
+/** Les compétences par famille : actes et diplômes, conseil au comptoir, organisation. */
+export const COMPETENCE_FAMILLES: { titre: string; cles: CompetenceId[] }[] = [
+  { titre: 'Actes, diplômes et habilitations', cles: ['vaccination', 'trod', 'entretien', 'orthopedie', 'contention', 'preparations', 'secours'] },
+  { titre: 'Conseil', cles: ['phyto', 'aroma', 'homeo', 'micronutrition', 'dermo', 'beaute', 'para', 'puericulture', 'veterinaire', 'mad', 'diabete', 'tabac'] },
+  { titre: 'Organisation', cles: ['commandes', 'tierspayant', 'merchandising'] },
+];
+
 
 export const MISSION_LABEL: Record<MissionType, string> = {
   vaccination: 'Vaccination',

@@ -146,6 +146,8 @@ export interface Store {
   signalerEcart: (e: { personId: string; date: ISODate; type: EcartType; minutes?: number }) => void;
   retirerEcart: (id: string) => void;
   planifierFormation: (f: { intitule: string; personnes: string[]; from: ISODate; to: ISODate }) => void;
+  /** Inventaire : un poste « inventaire » par participant, visible aussitôt et notifié. */
+  planifierInventaire: (i: { date: ISODate; start: number; end: number; personnes: string[] }) => void;
   deciderAbsence: (id: string, approuver: boolean) => void;
   resoudreTrou: (id: string, option: RepairOption) => void;
   /** Applique, jour après jour, l'option conseillée à chaque poste découvert par une absence. */
@@ -185,7 +187,7 @@ function avisGarde(g: Pick<Garde, 'date' | 'start' | 'end' | 'type'>, personId: 
  * Décisions qui engagent l'équipe : venant d'un titulaire secondaire, elles attendent l'accord du principal.
  * Les brouillons de planning et la saisie des fiches restent libres.
  */
-const SOUMISES = ['publier', 'resoudreTrou', 'resoudreAbsence', 'deciderAbsence', 'deciderBesoin', 'validerRemplacement', 'affecterGarde', 'affecterGardes', 'ajouterGardes', 'planifierFormation', 'declarerAbsence', 'supprimerPersonne', 'signalerEcart', 'majPersonne'] as const;
+const SOUMISES = ['publier', 'resoudreTrou', 'resoudreAbsence', 'deciderAbsence', 'deciderBesoin', 'validerRemplacement', 'affecterGarde', 'affecterGardes', 'ajouterGardes', 'planifierFormation', 'planifierInventaire', 'declarerAbsence', 'supprimerPersonne', 'signalerEcart', 'majPersonne'] as const;
 
 function titreAccord(d: AppData, action: string, args: unknown[]): string {
   const a = args as never[];
@@ -219,6 +221,8 @@ function titreAccord(d: AppData, action: string, args: unknown[]): string {
       return `Ajouter ${(a[0] as unknown[]).length} garde${(a[0] as unknown[]).length > 1 ? 's' : ''} au calendrier`;
     case 'planifierFormation':
       return `Formation « ${String((a[0] as { intitule?: string })?.intitule ?? '')} »`;
+    case 'planifierInventaire':
+      return `Inventaire le ${fmtDateCourt((a[0] as { date: ISODate }).date)}`;
     case 'declarerAbsence':
       return `Enregistrer : ${ABSENCE_LABEL[(a[0] as Absence).type].toLowerCase()} de ${qui((a[0] as Absence).personId)}`;
     case 'supprimerPersonne':
@@ -527,6 +531,26 @@ export const useStore = create<Store>((set, get) => {
         return journal(
           { ...next, notifications: [...personnes.map((personId) => ({ id: uid('n'), personId, at, date: from, avant: 'Planning habituel', apres: `Formation « ${intitule} » ${quand}`, tardif: dayIndex(from) - dayIndex(today) < 7 })), ...next.notifications] },
           { type: 'absence', titre: `Formation « ${intitule} » planifiée ${quand}`, detail: `Participants : ${personnes.map((id) => nom(d, id)).join(', ')}. Chacun a été prévenu dans son espace.` },
+        );
+      }),
+    planifierInventaire: ({ date, start, end, personnes }) =>
+      commit((d, today) => {
+        const at = now();
+        // Au-delà de six heures, une pause de trente minutes est posée au milieu.
+        const pause = end - start > 360 ? { pauseStart: Math.round((start + end) / 2 / 15) * 15 - 15, pauseEnd: Math.round((start + end) / 2 / 15) * 15 + 15 } : {};
+        const postes: Shift[] = personnes.map((personId) => ({ id: uid('s'), personId, date, start, end, ...pause, activite: 'inventaire' as const, origine: 'manuel' as const, explication: 'Inventaire de la pharmacie.' }));
+        const monday = fromDayIndex(dayIndex(date) - ((dayIndex(date) + 3) % 7));
+        const semaine = d.semaines[monday];
+        const horaire = `${fmtHHMM(start)} → ${fmtHHMM(end)}`;
+        return journal(
+          {
+            ...d,
+            shifts: d.shifts.concat(postes),
+            // Sur une semaine déjà publiée, l'inventaire rejoint aussitôt la version vue par l'équipe.
+            semaines: semaine?.snapshot ? { ...d.semaines, [monday]: { ...semaine, snapshot: semaine.snapshot.concat(postes.map((x) => ({ ...x }))) } } : d.semaines,
+            notifications: [...personnes.map((personId) => ({ id: uid('n'), personId, at, date, avant: 'Planning habituel', apres: `Inventaire, ${horaire}`, tardif: dayIndex(date) - dayIndex(today) < 7 })), ...d.notifications],
+          },
+          { type: 'modification', titre: `Inventaire planifié le ${fmtDateCourt(date)}, ${horaire}`, detail: `Participants : ${personnes.map((id) => nom(d, id)).join(', ')}. Chacun a été prévenu dans son espace.`, regles: true },
         );
       }),
     deciderAbsence: (id, approuver) =>

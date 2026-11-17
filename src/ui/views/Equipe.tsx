@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
 import type { AppData } from '../../domain/types';
-import { ABSENCE_LABEL, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, nomComplet } from '../../domain/types';
+import { ABSENCE_LABEL, COMPETENCE_FAMILLES, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, nomComplet } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
 import { suiviDe } from '../../engine/suivi';
 import { quotaAdjoints, validateEquipe } from '../../engine/validate';
@@ -12,6 +12,7 @@ import { useUi } from '../../store/ui';
 import { Compteurs } from '../components/Compteurs';
 import { DialogueDemande } from '../components/Demande';
 import { DialogueFormation } from '../components/Formation';
+import { DialogueInventaire } from '../components/Inventaire';
 import { empreinte, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, responsable } from '../../domain/acces';
 import { EtiquetteRole } from '../icons';
 import { Avatar, Dialog, Empty, Pill } from '../kit';
@@ -36,6 +37,7 @@ export function Equipe(): JSX.Element {
   const alertes = useMemo(() => validateEquipe(data), [data]);
   const [ajout, setAjout] = useState(false);
   const [formation, setFormation] = useState(false);
+  const [inventaire, setInventaire] = useState(false);
   const { intention, setIntention } = useUi();
   useEffect(() => {
     if (intention === 'personne') {
@@ -44,6 +46,10 @@ export function Equipe(): JSX.Element {
     }
     if (intention === 'formation') {
       setFormation(true);
+      setIntention(null);
+    }
+    if (intention === 'inventaire') {
+      setInventaire(true);
       setIntention(null);
     }
   }, [intention, setIntention]);
@@ -112,6 +118,7 @@ export function Equipe(): JSX.Element {
       </div>
       {ajout ? <DialoguePersonne onClose={() => setAjout(false)} /> : null}
       {formation ? <DialogueFormation onClose={() => setFormation(false)} /> : null}
+      {inventaire ? <DialogueInventaire onClose={() => setInventaire(false)} /> : null}
     </div>
   );
 }
@@ -194,23 +201,28 @@ function Fiche({ person }: { person: Person }): JSX.Element {
         {person.salarie ? <p className="tiny muted" style={{ marginTop: -12 }}>Le taux horaire ne sert qu'à comparer le coût de deux scénarios. Il n'est jamais visible dans l'espace salarié.</p> : null}
 
         <section className="col" style={{ gap: 8 }}>
-          <h3>Compétences</h3>
-          <div className="row wrap" style={{ gap: 6 }}>
-            {(Object.keys(COMPETENCE_LABEL) as CompetenceId[]).map((c) => {
-              const on = person.competences.includes(c);
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  className={`btn sm${on ? ' primary' : ''}`}
-                  aria-pressed={on}
-                  onClick={() => maj({ competences: on ? person.competences.filter((x) => x !== c) : [...person.competences, c] })}
-                >
-                  {on ? <CircleCheck size={14} /> : null} {COMPETENCE_LABEL[c]}
-                </button>
-              );
-            })}
-          </div>
+          <h3>Compétences et diplômes</h3>
+          {COMPETENCE_FAMILLES.map((fam) => (
+            <div key={fam.titre} className="col" style={{ gap: 6 }}>
+              <span className="small soft" style={{ fontWeight: 600 }}>{fam.titre}</span>
+              <div className="row wrap" style={{ gap: 6 }}>
+                {fam.cles.map((c: CompetenceId) => {
+                  const on = person.competences.includes(c);
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`btn sm${on ? ' primary' : ''}`}
+                      aria-pressed={on}
+                      onClick={() => maj({ competences: on ? person.competences.filter((x) => x !== c) : [...person.competences, c] })}
+                    >
+                      {on ? <CircleCheck size={14} aria-hidden="true" /> : null} {COMPETENCE_LABEL[c]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
           <p className="tiny muted">Une activité à rendez-vous n'est planifiable que si une personne formée est en poste et que la salle est libre.</p>
         </section>
 

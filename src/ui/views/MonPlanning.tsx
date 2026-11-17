@@ -1,5 +1,6 @@
 import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, ChevronDown, CircleCheck, Clock3, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { peutGerer } from '../../domain/acces';
 import {
   JOURS,
   addDays,
@@ -44,6 +45,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
   const { intention, setIntention, voirJour, aller } = useUi();
+  const gere = peutGerer(data, data.personnes.find((p) => p.id === personId));
   const delai = delaiRemplacement(data);
   const suivi = suiviDe(data, personId, today);
   useEffect(() => {
@@ -94,7 +96,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           <h1>Bonjour {person.prenom}</h1>
           <div className="row wrap" style={{ marginTop: 14 }}>
             <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
-              <Plus size={16} aria-hidden="true" /> Faire une demande
+              <Plus size={16} aria-hidden="true" /> {gere ? 'Poser une absence' : 'Faire une demande'}
             </button>
             {!HEBERGE ? (
               <button type="button" className="btn no-print" onClick={() => window.print()}>
@@ -304,7 +306,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                       })}
                     </div>
                   ) : (
-                    <div className="card-body soft">Votre responsable prépare encore cette semaine. Vous serez prévenu dès la publication.</div>
+                    <div className="card-body soft">{gere ? 'Cette semaine n’est pas encore publiée : construisez-la, puis publiez-la.' : 'Votre responsable prépare encore cette semaine. Vous serez prévenu dès la publication.'}</div>
                   )}
                 </div>
               );
@@ -319,7 +321,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                 <ArrowLeftRight size={18} />
               </span>
               <div className="grow">
-                <h2 className="h3">Me faire remplacer</h2>
+                <h2 className="h3">{gere ? 'Confier un de mes postes' : 'Me faire remplacer'}</h2>
                 <div className="small soft">Possible jusqu’à {delai} jours avant le poste.</div>
               </div>
             </div>
@@ -372,19 +374,19 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                   </span>
                 </div>
               ) : null}
-              <p className="tiny muted">Vous restez en poste tant que le responsable n’a pas validé. Aucune raison n’est demandée.</p>
+              <p className="tiny muted">{gere ? 'Un collègue se propose, puis la validation se fait dans « Résoudre ».' : 'Vous restez en poste tant que le responsable n’a pas validé. Aucune raison n’est demandée.'}</p>
             </div>
           </div>
 
           <div className="card">
             <div className="card-head">
-              <h2 className="h3 grow">Mes demandes</h2>
+              <h2 className="h3 grow">{gere ? 'Mes absences et contraintes' : 'Mes demandes'}</h2>
               <button type="button" className="btn sm" onClick={() => setDemande(true)}>
                 <Plus size={14} /> Nouvelle
               </button>
             </div>
             <div className="card-body col" style={{ gap: 10 }}>
-              {!besoins.length && !absences.length ? <p className="soft small">Aucune demande en cours.</p> : null}
+              {!besoins.length && !absences.length ? <p className="soft small">{gere ? 'Rien de prévu.' : 'Aucune demande en cours.'}</p> : null}
               {absences.map((a) => (
                 <div key={a.id} className="row wrap">
                   <div className="grow">
@@ -419,12 +421,14 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                   )}
                 </div>
               ))}
-              <div className="notice small">
-                <CircleCheck size={15} />
-                <div>
-                  Souhaits prioritaires utilisés : <b>{usage.actifs} sur {usage.plafond}</b>, comme pour tous vos collègues. On ne vous demande jamais la raison d'une demande.
+              {!gere ? (
+                <div className="notice small">
+                  <CircleCheck size={15} />
+                  <div>
+                    Souhaits prioritaires utilisés : <b>{usage.actifs} sur {usage.plafond}</b>, comme pour tous vos collègues. On ne vous demande jamais la raison d'une demande.
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
 
@@ -462,7 +466,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           ) : null}
         </div>
       </div>
-      {demande ? <DialogueDemande personId={personId} espace="salarie" onClose={() => setDemande(false)} /> : null}
+      {demande ? <DialogueDemande personId={personId} espace={gere ? 'responsable' : 'salarie'} onClose={() => setDemande(false)} /> : null}
     </div>
   );
 }
