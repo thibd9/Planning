@@ -35,7 +35,7 @@ export function Officine(): JSX.Element {
   return (
     <div style={{ maxWidth: 1080 }}>
       <div className="page-head">
-        <span className="page-ico">
+        <span className="page-ico c-gris" aria-hidden="true">
           <Settings2 size={26} />
         </span>
         <div className="grow">

@@ -57,7 +57,7 @@ export function Resoudre(): JSX.Element {
   return (
     <div style={{ maxWidth: 1180 }}>
       <div className="page-head">
-        <span className="page-ico">
+        <span className="page-ico c-corail" aria-hidden="true">
           <ListChecks size={26} />
         </span>
         <div className="grow">

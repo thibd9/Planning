@@ -25,7 +25,7 @@ const ligne = (qualification: Qualification, heures = '35'): Ligne => ({ cle: ui
 const AUTRES: Qualification[] = ['apprenti', 'etudiant', 'rayonniste'];
 const ETAPES = [
   { titre: 'La pharmacie', detail: 'Nom et horaires d’ouverture' },
-  { titre: 'L’équipe', detail: 'Titulaire, pharmaciens, préparateurs' },
+  { titre: 'L’équipe', detail: 'Vous, les pharmaciens, les préparateurs' },
   { titre: 'Vérification', detail: 'Relire avant de créer' },
 ];
 const vide = (l: Ligne): boolean => !l.prenom.trim() && !l.nom.trim();
@@ -166,7 +166,7 @@ function Groupe({
  */
 export function Accueil(): JSX.Element {
   const { creerOfficine, chargerExemple } = useStore();
-  const { setTour, aller } = useUi();
+  const { setTour, connecter } = useUi();
   const [etape, setEtape] = useState(0);
   const [nom, setNom] = useState('');
   const [semaine, setSemaine] = useState<Interval>({ start: 8 * 60 + 30, end: 19 * 60 + 30 });
@@ -264,7 +264,8 @@ export function Accueil(): JSX.Element {
     }));
     const horaires = [0, 1, 2, 3, 4].map(() => horaireSemaine.map((i) => ({ ...i }))).concat([samediOuvert ? [{ ...samedi }] : []], [[]]);
     creerOfficine(nom.trim(), horaires, personnes);
-    aller('resoudre');
+    // Celui qui crée l'officine en est le responsable : il est connecté d'emblée à son espace.
+    connecter(personnes[0].id, 'resoudre');
     setTour(0);
   };
 
@@ -307,7 +308,7 @@ export function Accueil(): JSX.Element {
           ))}
         </ol>
         <p className="accueil-note">
-          <ShieldCheck size={20} aria-hidden="true" style={{ flex: 'none', color: 'var(--green-deep)' }} />
+          <ShieldCheck size={20} aria-hidden="true" style={{ flex: 'none', color: 'var(--a-deep)' }} />
           <span>Vos données restent sur cet appareil. Aucune information de santé, de religion ou de vie privée n’est demandée.</span>
         </p>
       </aside>
@@ -474,8 +475,8 @@ export function Accueil(): JSX.Element {
                     <UserRound size={18} />
                   </span>
                   <span>
-                    <b>Le titulaire</b>
-                    <span className="aide">Hors décompte salarié : ses heures sont un objectif, pas un contrat.</span>
+                    <b>Vous, le titulaire responsable</b>
+                    <span className="aide">Non salarié, vous détenez tous les droits. Vous seul pourrez donner à d’autres l’accès à la gestion.</span>
                   </span>
                 </legend>
                 <div className="ligne">
@@ -586,7 +587,7 @@ export function Accueil(): JSX.Element {
                 className="btn"
                 onClick={() => {
                   chargerExemple();
-                  aller('resoudre');
+                  connecter('p_helene', 'resoudre');
                   setTour(0);
                 }}
               >

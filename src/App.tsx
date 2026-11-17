@@ -1,45 +1,78 @@
-import { BookOpenCheck, CalendarRange, CircleHelp, ListChecks, MoonStar, Scale, ScrollText, Settings2, UserRound, Users } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { BookOpenCheck, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ListChecks, LogOut, MoonStar, Scale, ScrollText, Settings2, UserRound, Users } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Espace } from './domain/acces';
+import { ESPACE_LABEL, espaceDe } from './domain/acces';
 import { fmtHeure } from './domain/time';
-import { nomComplet } from './domain/types';
+import { nomComplet, nomCourt } from './domain/types';
 import { decisions } from './engine/decisions';
 import { useStore } from './store/store';
 import type { Vue } from './store/ui';
-import { useUi } from './store/ui';
-import { Logo } from './ui/kit';
+import { prefsDe, useUi } from './store/ui';
+import { EtiquetteRole } from './ui/icons';
+import { Avatar, Logo } from './ui/kit';
 import { Tour } from './ui/Tour';
 import { Accueil } from './ui/views/Accueil';
+import { Compte } from './ui/views/Compte';
+import { Connexion } from './ui/views/Connexion';
 import { Construire } from './ui/views/Construire';
 import { Equipe } from './ui/views/Equipe';
 import { Equite } from './ui/views/Equite';
 import { Gardes } from './ui/views/Gardes';
 import { Journal } from './ui/views/Journal';
+import { MesGardes } from './ui/views/MesGardes';
 import { MonPlanning } from './ui/views/MonPlanning';
 import { Officine } from './ui/views/Officine';
+import { PlanningEquipe } from './ui/views/PlanningEquipe';
 import { Regles } from './ui/views/Regles';
 import { Resoudre } from './ui/views/Resoudre';
 
-const NAV: { vue: Vue; label: string; question: string; icon: JSX.Element; groupe: 1 | 2 }[] = [
-  { vue: 'resoudre', label: 'Résoudre', question: 'À décider aujourd’hui', icon: <ListChecks size={18} />, groupe: 1 },
-  { vue: 'construire', label: 'Construire', question: 'Le planning de la semaine', icon: <CalendarRange size={18} />, groupe: 1 },
-  { vue: 'gardes', label: 'Gardes', question: 'De la garde à la paie', icon: <MoonStar size={18} />, groupe: 1 },
-  { vue: 'equipe', label: 'Équipe', question: 'Contrats et besoins', icon: <Users size={18} />, groupe: 2 },
-  { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, groupe: 2 },
-  { vue: 'regles', label: 'Règles', question: 'Sources et versions', icon: <BookOpenCheck size={18} />, groupe: 2 },
-  { vue: 'journal', label: 'Journal et paie', question: 'Preuves, fiche navette', icon: <ScrollText size={18} />, groupe: 2 },
-  { vue: 'officine', label: 'Officine', question: 'Horaires, postes types', icon: <Settings2 size={18} />, groupe: 2 },
+interface Lien {
+  vue: Vue;
+  label: string;
+  question: string;
+  icon: JSX.Element;
+  couleur: string;
+  groupe: string;
+}
+
+const GESTION: Lien[] = [
+  { vue: 'resoudre', label: 'Résoudre', question: 'À décider aujourd’hui', icon: <ListChecks size={18} />, couleur: 'c-corail', groupe: 'Au quotidien' },
+  { vue: 'construire', label: 'Construire', question: 'Le planning de la semaine', icon: <CalendarRange size={18} />, couleur: 'c-jaune', groupe: 'Au quotidien' },
+  { vue: 'gardes', label: 'Gardes', question: 'De la garde à la paie', icon: <MoonStar size={18} />, couleur: 'c-lavande', groupe: 'Au quotidien' },
+  { vue: 'equipe', label: 'Équipe', question: 'Contrats, droits, besoins', icon: <Users size={18} />, couleur: 'c-menthe', groupe: 'Référentiel' },
+  { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-ciel', groupe: 'Référentiel' },
+  { vue: 'regles', label: 'Règles', question: 'Sources et versions', icon: <BookOpenCheck size={18} />, couleur: 'c-rose', groupe: 'Référentiel' },
+  { vue: 'journal', label: 'Journal et paie', question: 'Preuves, fiche navette', icon: <ScrollText size={18} />, couleur: 'c-or', groupe: 'Référentiel' },
+  { vue: 'officine', label: 'Officine', question: 'Horaires, postes types', icon: <Settings2 size={18} />, couleur: 'c-gris', groupe: 'Référentiel' },
 ];
+const MOI: Lien = { vue: 'moi', label: 'Mon planning', question: 'Mes horaires, mes demandes', icon: <CalendarDays size={18} />, couleur: 'c-menthe', groupe: 'Mon espace' };
+const PLANNING: Lien = { vue: 'planning', label: 'Planning de l’équipe', question: 'La version publiée', icon: <CalendarRange size={18} />, couleur: 'c-jaune', groupe: 'Mon espace' };
+const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gardes et astreintes', icon: <MoonStar size={18} />, couleur: 'c-lavande', groupe: 'Mon espace' };
+const COMPTE: Lien = { vue: 'compte', label: 'Mon compte', question: 'Thème, code, déconnexion', icon: <UserRound size={18} />, couleur: 'c-gris', groupe: 'Mon espace' };
+
+/** Chaque rôle a sa propre navigation : on ne voit que ce qu'on peut faire. */
+const NAV: Record<Espace, Lien[]> = {
+  responsable: [...GESTION, MOI, COMPTE],
+  pharmacien: [MOI, PLANNING, MESGARDES, COMPTE],
+  equipe: [MOI, PLANNING, COMPTE],
+};
 
 export function App(): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const sauvegarde = useStore((s) => s.derniereSauvegarde);
   const undo = useStore((s) => s.undo);
-  const { vue, aller, spectateur, setSpectateur, toast, taire, setTour } = useUi();
-  const aDecider = useMemo(() => decisions(data, today).total, [data, today]);
-  const salarie = spectateur !== 'responsable' && data.personnes.some((p) => p.id === spectateur);
+  const { vue, aller, session, deconnecter, preferences, toast, taire, setTour } = useUi();
+  const [menu, setMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const moi = data.personnes.find((p) => p.id === session && !p.externe);
+  const espace = espaceDe(data, moi);
+  const liens = NAV[espace];
+  const vueActive = liens.some((l) => l.vue === vue) ? vue : liens[0].vue;
+  const aDecider = useMemo(() => (espace === 'responsable' ? decisions(data, today).total : 0), [data, today, espace]);
   // Tant que ni le nom ni l'équipe ne sont saisis, l'application s'ouvre sur l'écran de création.
   const aCreer = !data.officine.nom.trim() && !data.personnes.length;
+  const prefs = prefsDe(preferences, moi?.id ?? null);
 
   useEffect(() => {
     if (!toast) return;
@@ -47,29 +80,36 @@ export function App(): JSX.Element {
     return () => window.clearTimeout(t);
   }, [toast, taire]);
 
+  // Thème et taille du texte de la personne connectée ; réglages par défaut hors connexion.
+  useEffect(() => {
+    document.documentElement.dataset.theme = prefs.theme;
+    document.documentElement.dataset.texte = prefs.texte;
+  }, [prefs.theme, prefs.texte]);
+
   // Le titre de la page suit l'écran affiché : il est annoncé à chaque changement de vue.
-  const titrePage = aCreer ? 'Créer mon officine' : salarie ? 'Mon planning' : (NAV.find((n) => n.vue === vue)?.label ?? 'Relève');
+  const titrePage = aCreer ? 'Créer mon officine' : !moi ? 'Connexion' : (liens.find((l) => l.vue === vueActive)?.label ?? 'Relève');
   useEffect(() => {
     document.title = `${titrePage} · Relève`;
   }, [titrePage]);
 
+  useEffect(() => {
+    if (!menu) return;
+    const fermer = (e: MouseEvent | KeyboardEvent): void => {
+      if (e instanceof KeyboardEvent ? e.key === 'Escape' : !menuRef.current?.contains(e.target as Node)) setMenu(false);
+    };
+    document.addEventListener('mousedown', fermer);
+    document.addEventListener('keydown', fermer);
+    return () => {
+      document.removeEventListener('mousedown', fermer);
+      document.removeEventListener('keydown', fermer);
+    };
+  }, [menu]);
+
   if (aCreer) return <Accueil />;
+  if (!moi) return <Connexion />;
 
   const heure = new Date(sauvegarde);
-  const lien = (n: (typeof NAV)[number]): JSX.Element => (
-    <button key={n.vue} type="button" data-tour={`nav-${n.vue}`} className={`nav-item${vue === n.vue ? ' on' : ''}`} onClick={() => aller(n.vue)} aria-current={vue === n.vue ? 'page' : undefined}>
-      <span className="ni">{n.icon}</span>
-      <span>
-        {n.label}
-        <span className="q">{n.question}</span>
-      </span>
-      {n.vue === 'resoudre' && aDecider ? (
-        <span className="nav-badge" aria-label={`${aDecider} décisions en attente`}>
-          {aDecider}
-        </span>
-      ) : null}
-    </button>
-  );
+  const groupes = [...new Set(liens.map((l) => l.groupe))];
 
   return (
     <div className="app">
@@ -86,23 +126,30 @@ export function App(): JSX.Element {
             <div className="brand-sub">{data.officine.nom || 'Mon officine'}</div>
           </div>
         </div>
-        {salarie ? (
-          <button type="button" className="nav-item on" aria-current="page">
-            <span className="ni">
-              <UserRound size={18} />
-            </span>
-            <span>
-              Mon planning<span className="q">Quand est-ce que je travaille ?</span>
-            </span>
-          </button>
-        ) : (
-          <>
-            <div className="nav-label">Au quotidien</div>
-            {NAV.filter((n) => n.groupe === 1).map(lien)}
-            <div className="nav-label">Référentiel</div>
-            {NAV.filter((n) => n.groupe === 2).map(lien)}
-          </>
-        )}
+        {groupes.map((g) => (
+          <div key={g} style={{ display: 'contents' }}>
+            <div className="nav-label">{g}</div>
+            {liens
+              .filter((l) => l.groupe === g)
+              .map((n) => (
+                <button key={n.vue} type="button" data-tour={`nav-${n.vue}`} className={`nav-item${vueActive === n.vue ? ' on' : ''}`} onClick={() => aller(n.vue)} aria-current={vueActive === n.vue ? 'page' : undefined}>
+                  <span className={`ni ${n.couleur}`} aria-hidden="true">
+                    {n.icon}
+                  </span>
+                  <span>
+                    {n.label}
+                    <span className="q">{n.question}</span>
+                  </span>
+                  {n.vue === 'resoudre' && aDecider ? (
+                    <span className="nav-badge">
+                      {aDecider}
+                      <span className="sr"> décisions en attente</span>
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+          </div>
+        ))}
         <div className="side-foot">
           <i aria-hidden="true" />
           <span>Enregistré sur cet appareil à {fmtHeure(heure.getHours() * 60 + heure.getMinutes())}</span>
@@ -113,46 +160,81 @@ export function App(): JSX.Element {
         <header className="topbar no-print" aria-label="Barre d’outils">
           <div className="topbar-in">
             <span className="small soft grow">
-              {salarie ? 'Espace salarié : le planning publié, ses changements et ses propres demandes.' : `Espace responsable · ${data.officine.nom || 'Mon officine'}`}
+              {ESPACE_LABEL[espace]} · {data.officine.nom || 'Mon officine'}
             </span>
-            <button type="button" className="btn ghost sm" data-tour="aide" onClick={() => setTour(0)}>
-              <CircleHelp size={16} /> Tutoriel
-            </button>
-            <label className="viewer" data-tour="viewer">
-              <span className="small soft">Voir en tant que</span>
-              <select value={salarie ? spectateur : 'responsable'} onChange={(e) => setSpectateur(e.target.value)} aria-label="Changer d'espace">
-                <option value="responsable">Responsable</option>
-                {data.personnes.some((p) => !p.externe) ? (
-                  <optgroup label="Espace salarié">
-                    {data.personnes
-                      .filter((p) => !p.externe)
-                      .map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {nomComplet(p)}
-                        </option>
-                      ))}
-                  </optgroup>
-                ) : null}
-              </select>
-            </label>
+            {espace === 'responsable' ? (
+              <button
+                type="button"
+                className="btn ghost sm"
+                data-tour="aide"
+                onClick={() => {
+                  aller('resoudre');
+                  setTour(0);
+                }}
+              >
+                <CircleHelp size={16} aria-hidden="true" /> Tutoriel
+              </button>
+            ) : null}
+            <div style={{ position: 'relative' }} ref={menuRef}>
+              <button type="button" className="compte-btn" data-tour="compte" aria-haspopup="true" aria-expanded={menu} onClick={() => setMenu((m) => !m)}>
+                <Avatar person={moi} />
+                <span className="nomc">{nomCourt(moi)}</span>
+                <span className="sr">, ouvrir le menu du compte</span>
+                <ChevronDown size={15} aria-hidden="true" />
+              </button>
+              {menu ? (
+                <div className="menu">
+                  <div className="qui">
+                    <b>{nomComplet(moi)}</b>
+                    <div style={{ marginTop: 6 }}>
+                      <EtiquetteRole person={moi} />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenu(false);
+                      aller('compte');
+                    }}
+                  >
+                    <UserRound size={17} aria-hidden="true" /> Mon compte et paramètres
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenu(false);
+                      deconnecter();
+                    }}
+                  >
+                    <LogOut size={17} aria-hidden="true" /> Se déconnecter
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
         </header>
         <main className="content" id="contenu" tabIndex={-1}>
-          {salarie ? (
-            <MonPlanning personId={spectateur} />
-          ) : vue === 'construire' ? (
+          {vueActive === 'moi' ? (
+            <MonPlanning personId={moi.id} />
+          ) : vueActive === 'planning' ? (
+            <PlanningEquipe personId={moi.id} />
+          ) : vueActive === 'mesgardes' ? (
+            <MesGardes personId={moi.id} />
+          ) : vueActive === 'compte' ? (
+            <Compte personId={moi.id} />
+          ) : vueActive === 'construire' ? (
             <Construire />
-          ) : vue === 'resoudre' ? (
+          ) : vueActive === 'resoudre' ? (
             <Resoudre />
-          ) : vue === 'gardes' ? (
+          ) : vueActive === 'gardes' ? (
             <Gardes />
-          ) : vue === 'equipe' ? (
+          ) : vueActive === 'equipe' ? (
             <Equipe />
-          ) : vue === 'equite' ? (
+          ) : vueActive === 'equite' ? (
             <Equite />
-          ) : vue === 'regles' ? (
+          ) : vueActive === 'regles' ? (
             <Regles />
-          ) : vue === 'journal' ? (
+          ) : vueActive === 'journal' ? (
             <Journal />
           ) : (
             <Officine />

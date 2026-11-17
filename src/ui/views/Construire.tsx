@@ -7,28 +7,23 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleCheck,
-  CloudSun,
   Copy,
-  GraduationCap,
+  FlaskConical,
   Info,
   Lock,
   MessageCircleQuestion,
   Minus,
-  Moon,
-  Package,
+  Pill as PillIcon,
   Pencil,
   Plus,
   Printer,
   Redo2,
   ShieldAlert,
   Sparkles,
-  Sun,
-  Sunrise,
-  Sunset,
-  Thermometer,
+  Sprout,
   Trash2,
-  TreePalm,
   Undo2,
+  UserRoundPlus,
   Users,
   X,
 } from 'lucide-react';
@@ -60,9 +55,6 @@ import { ABSENCE_LABEL, ACTIVITE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacie
 import {
   besoinsDe,
   decrireBesoin,
-  decrireShift,
-  estFermeture,
-  estOuverture,
   minutesSemaine,
   minutesTravail,
   ouverture,
@@ -84,6 +76,8 @@ import { validateWeek } from '../../engine/validate';
 import { modificationsEnAttente, useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import type { Echelle } from '../kit';
+import { Tuile } from '../components/Tuile';
+import { ABSENCE_ICONE, ACTIVITE_COULEUR, ACTIVITE_COURT, ACTIVITE_ICONE, GARDE_ICONE } from '../icons';
 import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, Strip, Track, roleDe } from '../kit';
 
 type Lecture = 'heures' | 'cout' | 'equite';
@@ -97,11 +91,11 @@ export function echelleOfficine(data: AppData): Echelle {
   };
 }
 
-const GROUPES: { titre: string; test: (p: Person) => boolean; couleur: string }[] = [
-  { titre: 'Pharmaciens', test: (p) => estPharmacien(p) && !p.externe, couleur: 'var(--pharma)' },
-  { titre: 'Préparateurs', test: (p) => p.qualification === 'preparateur' && !p.externe, couleur: 'var(--prepa)' },
-  { titre: 'Apprentis, étudiants et autres postes', test: (p) => !estPharmacien(p) && p.qualification !== 'preparateur' && !p.externe, couleur: 'var(--autre)' },
-  { titre: 'Remplaçants', test: (p) => !!p.externe, couleur: 'var(--externe)' },
+const GROUPES: { titre: string; test: (p: Person) => boolean; couleur: string; icone: JSX.Element }[] = [
+  { titre: 'Pharmaciens', test: (p) => estPharmacien(p) && !p.externe, couleur: 'c-menthe', icone: <PillIcon size={14} /> },
+  { titre: 'Préparateurs', test: (p) => p.qualification === 'preparateur' && !p.externe, couleur: 'c-ciel', icone: <FlaskConical size={14} /> },
+  { titre: 'Apprentis, étudiants et autres postes', test: (p) => !estPharmacien(p) && p.qualification !== 'preparateur' && !p.externe, couleur: 'c-corail', icone: <Sprout size={14} /> },
+  { titre: 'Remplaçants', test: (p) => !!p.externe, couleur: 'c-gris', icone: <UserRoundPlus size={14} /> },
 ];
 
 export function Construire(): JSX.Element {
@@ -170,7 +164,7 @@ export function Construire(): JSX.Element {
   return (
     <div>
       <div className="page-head">
-        <span className="page-ico">
+        <span className="page-ico c-jaune" aria-hidden="true">
           <CalendarRange size={26} />
         </span>
         <div className="grow">
@@ -334,7 +328,10 @@ export function Construire(): JSX.Element {
                     <div key={g.titre} role="rowgroup" style={{ display: 'contents' }}>
                       <div className="pg-group" role="row">
                         <span role="cell" style={{ display: 'contents' }}>
-                          <span className="dot" style={{ background: g.couleur }} aria-hidden="true" /> {g.titre}
+                          <span className={`chip-i ${g.couleur}`} aria-hidden="true" style={{ width: 22, height: 22, borderRadius: 7 }}>
+                            {g.icone}
+                          </span>{' '}
+                          {g.titre}
                         </span>
                       </div>
                       {membres.map((p) => {
@@ -396,7 +393,12 @@ export function Construire(): JSX.Element {
                                   ) : null}
                                   {absence ? (
                                     <span className={`tile ${absence.type === 'conge' ? 'conge' : absence.type === 'maladie' ? 'arret' : 'absence'}`}>
-                                      <span className="ti">{absence.type === 'conge' ? <TreePalm size={14} /> : absence.type === 'maladie' ? <Thermometer size={14} /> : absence.type === 'formation' ? <GraduationCap size={14} /> : <Ban size={14} />}</span>
+                                      <span className="ti" aria-hidden="true">
+                                        {(() => {
+                                          const I = ABSENCE_ICONE[absence.type];
+                                          return <I size={14} />;
+                                        })()}
+                                      </span>
                                       <span className="tt">{ABSENCE_LABEL[absence.type]}</span>
                                     </span>
                                   ) : null}
@@ -405,8 +407,11 @@ export function Construire(): JSX.Element {
                                   ))}
                                   {gardes.map((g) => (
                                     <span key={g.id} className="tile garde" title={GARDE_LABEL[g.type]}>
-                                      <span className="ti">
-                                        <Moon size={14} />
+                                      <span className="ti" aria-hidden="true">
+                                        {(() => {
+                                          const I = GARDE_ICONE[g.type];
+                                          return <I size={14} />;
+                                        })()}
                                       </span>
                                       <span className="tt num">
                                         {fmtHHMM(g.start)}→{fmtHHMM(g.end)}
@@ -432,11 +437,18 @@ export function Construire(): JSX.Element {
               </div>
             </div>
             <ul className="legend" aria-label="Légende">
-              <li><i style={{ background: 'linear-gradient(135deg, #f1f7c8, #dcea9c)' }} /> Ouverture, matin</li>
-              <li><i style={{ background: 'linear-gradient(135deg, #cdefe6, #a9ddd0)' }} /> Fermeture, après-midi</li>
-              <li><i style={{ background: 'linear-gradient(120deg, #e6f2b4, #aadfd2)' }} /> Journée complète</li>
-              <li><i style={{ background: 'linear-gradient(135deg, #17533e, #0f3d2e)' }} /> Garde</li>
-              <li><i style={{ background: 'linear-gradient(135deg, #e4f3fb, #cfe9f8)' }} /> Congé</li>
+              {(Object.keys(ACTIVITE_ICONE) as Activite[]).map((a) => {
+                const I = ACTIVITE_ICONE[a];
+                return (
+                  <li key={a}>
+                    <I size={14} aria-hidden="true" /> {ACTIVITE_COURT[a]}
+                  </li>
+                );
+              })}
+              <li><i style={{ background: 'linear-gradient(135deg, #fff3c4, #f9d75e)' }} /> Ouverture, matin</li>
+              <li><i style={{ background: 'linear-gradient(135deg, #e4dfff, #c0b6ff)' }} /> Fermeture, après-midi</li>
+              <li><i style={{ background: 'linear-gradient(120deg, #fde68a, #ffcbbd, #c9c0ff)' }} /> Journée complète</li>
+              <li><i style={{ background: 'linear-gradient(135deg, #34347a, #26265a)' }} /> Garde</li>
               <li><Lock size={13} aria-hidden="true" /> Indisponibilité reconnue</li>
               <li><Sparkles size={13} aria-hidden="true" /> Affectation expliquée</li>
             </ul>
@@ -523,72 +535,6 @@ export function Construire(): JSX.Element {
       {generation ? <DialogueGeneration semaine={semaine} onClose={() => setGeneration(false)} /> : null}
       {publication ? <DialoguePublication semaine={semaine} onClose={() => setPublication(false)} /> : null}
     </div>
-  );
-}
-
-const pct = (e: Echelle, m: number): number => Math.max(0, Math.min(100, ((m - e.start) / (e.end - e.start)) * 100));
-
-/** Tuile d'un poste : pictogramme du moment de la journée, horaires, et position dans la journée. */
-function Tuile({
-  data,
-  s,
-  person,
-  echelle,
-  missions,
-  glissable,
-  onClick,
-}: {
-  data: AppData;
-  s: Shift;
-  person: Person;
-  echelle: Echelle;
-  missions: { start: number; end: number }[];
-  glissable: boolean;
-  onClick: () => void;
-}): JSX.Element {
-  const ouvre = estOuverture(data.officine, s);
-  const ferme = estFermeture(data.officine, s);
-  const categorie = ouvre && ferme ? 'journee' : ouvre ? 'matin' : ferme ? 'soir' : 'milieu';
-  const Icone =
-    s.activite === 'formation' ? GraduationCap : s.activite !== 'comptoir' ? Package : categorie === 'matin' ? (s.end - s.start <= 330 ? Sunrise : Sun) : categorie === 'soir' ? Sunset : categorie === 'journee' ? Sun : CloudSun;
-  const activite = s.activite === 'back' ? 'réception' : s.activite === 'admin' ? 'administratif' : s.activite === 'formation' ? 'formation' : '';
-  return (
-    <button
-      type="button"
-      className={`tile ${categorie}${s.activite !== 'comptoir' ? ' back' : ''}${person.externe ? ' ext' : ''}`}
-      draggable={glissable}
-      onDragStart={(e) => e.dataTransfer.setData('text/plain', s.id)}
-      onClick={onClick}
-      title={s.explication ?? `${decrireShift(s)} · ${ACTIVITE_LABEL[s.activite]}`}
-    >
-      <span className="ti" aria-hidden="true">
-        <Icone size={14} />
-      </span>
-      <span className="tt num">
-        {fmtHHMM(s.start)}–{fmtHHMM(s.end)}
-        <span className="ts">
-          {fmtDuree(minutesTravail(s))}
-          {activite ? ` · ${activite}` : ''}
-        </span>
-        {/* Le nom accessible reprend le texte visible, puis le complète. */}
-        <span className="sr">
-          , {nomCourt(person)}, {JOURS[weekday(s.date)]}, {ACTIVITE_LABEL[s.activite]}
-          {s.pauseStart !== undefined && s.pauseEnd !== undefined ? `, pause de ${fmtHeure(s.pauseStart)} à ${fmtHeure(s.pauseEnd)}` : ''}. Modifier le poste.
-        </span>
-      </span>
-      <span className="tline" aria-hidden="true">
-        <i style={{ left: `${pct(echelle, s.start)}%`, width: `${pct(echelle, s.end) - pct(echelle, s.start)}%` }} />
-        {s.pauseStart !== undefined && s.pauseEnd !== undefined ? <i className="p" style={{ left: `${pct(echelle, s.pauseStart)}%`, width: `${pct(echelle, s.pauseEnd) - pct(echelle, s.pauseStart)}%` }} /> : null}
-        {missions.map((m, i) => (
-          <i key={i} className="m" style={{ left: `${pct(echelle, m.start)}%`, width: `${pct(echelle, m.end) - pct(echelle, m.start)}%` }} />
-        ))}
-      </span>
-      {s.explication ? (
-        <span className="why" aria-hidden="true">
-          <Sparkles size={9} />
-        </span>
-      ) : null}
-    </button>
   );
 }
 
@@ -851,17 +797,25 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           Fin
           <input type="time" step={900} value={fin} onChange={(e) => setFin(e.target.value)} />
         </label>
-        <label className="field grow">
-          Activité
-          <select value={activite} onChange={(e) => setActivite(e.target.value as Activite)}>
-            {(Object.keys(ACTIVITE_LABEL) as Activite[]).map((a) => (
-              <option key={a} value={a}>
-                {ACTIVITE_LABEL[a]}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
+      <fieldset>
+        <legend className="field" style={{ marginBottom: 8 }}>Tâche</legend>
+        <div className="choix">
+          {(Object.keys(ACTIVITE_LABEL) as Activite[]).map((a) => {
+            const I = ACTIVITE_ICONE[a];
+            return (
+              <label key={a} htmlFor={`tache-${a}`} title={ACTIVITE_LABEL[a]}>
+                <input id={`tache-${a}`} type="radio" name="tache" checked={activite === a} onChange={() => setActivite(a)} />
+                <span className={`chip-i ${ACTIVITE_COULEUR[a]}`} aria-hidden="true">
+                  <I size={15} />
+                </span>
+                {ACTIVITE_COURT[a]}
+                <Check size={16} className="coche" aria-hidden="true" />
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
       <label className="check">
         <input type="checkbox" checked={avecPause} onChange={(e) => setAvecPause(e.target.checked)} />
         Pause planifiée (non comptée en temps de travail)

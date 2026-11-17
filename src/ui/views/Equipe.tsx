@@ -1,13 +1,15 @@
-import { AlertTriangle, CalendarOff, CircleCheck, HeartHandshake, Lock, Plus, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, CalendarOff, CircleCheck, Crown, HeartHandshake, Lock, Plus, Trash2, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
-import { ABSENCE_LABEL, COMPETENCE_LABEL, QUALIFICATION_COURT, QUALIFICATION_LABEL, estPharmacien, nomComplet } from '../../domain/types';
+import { ABSENCE_LABEL, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, nomComplet } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
 import { quotaAdjoints, validateEquipe } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { DialogueDemande } from '../components/Demande';
+import { estResponsable, responsable } from '../../domain/acces';
+import { EtiquetteRole } from '../icons';
 import { Avatar, Dialog, Empty, Pill } from '../kit';
 import { usagePlafond } from './Resoudre';
 
@@ -30,7 +32,7 @@ export function Equipe(): JSX.Element {
   return (
     <div>
       <div className="page-head">
-        <span className="page-ico">
+        <span className="page-ico c-menthe" aria-hidden="true">
           <Users size={26} />
         </span>
         <div className="grow">
@@ -91,14 +93,16 @@ export function Equipe(): JSX.Element {
 }
 
 function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: () => void }): JSX.Element {
+  const data = useStore((s) => s.data);
   return (
     <button type="button" className={`g-item${on ? ' on' : ''}`} onClick={onClick} aria-pressed={on}>
       <Avatar person={p} lg />
       <span className="grow">
         <b>{nomComplet(p)}</b>
-        <span className="small soft" style={{ display: 'block' }}>
-          {QUALIFICATION_COURT[p.qualification]}
-          {p.externe ? ` · ${p.tauxHoraire} € / h facturés` : ` · ${p.heuresHebdo} h${p.heuresHebdo < 35 && p.salarie ? ' (temps partiel)' : ''}`}
+        <span className="row wrap" style={{ gap: 6, marginTop: 4 }}>
+          <EtiquetteRole person={p} />
+          <span className="small soft">{p.externe ? `${p.tauxHoraire} € / h facturés` : `${p.heuresHebdo} h${p.heuresHebdo < 35 && p.salarie ? ' (temps partiel)' : ''}`}</span>
+          {estResponsable(data, p) ? <Pill tone="miel">Responsable</Pill> : p.gestion ? <Pill tone="iris">Accès gestion</Pill> : null}
         </span>
       </span>
     </button>
@@ -111,6 +115,9 @@ function Fiche({ person }: { person: Person }): JSX.Element {
   const { majPersonne, supprimerBesoin, deciderAbsence, supprimerPersonne } = useStore();
   const ouvrirPersonne = useUi((s) => s.ouvrirPersonne);
   const [retrait, setRetrait] = useState(false);
+  const session = useUi((s) => s.session);
+  const chef = responsable(data);
+  const jeSuisResponsable = !!chef && chef.id === session;
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
   const besoins = data.besoins.filter((b) => b.personId === person.id && b.decision !== 'refusee' && (!b.to || b.to >= today));
@@ -182,6 +189,36 @@ function Fiche({ person }: { person: Person }): JSX.Element {
           </div>
           <p className="tiny muted">Une activité à rendez-vous n'est planifiable que si une personne formée est en poste et que la salle est libre.</p>
         </section>
+
+        {!person.externe ? (
+          <section className="col" style={{ gap: 8 }}>
+            <h3>Droits d’accès</h3>
+            {estResponsable(data, person) ? (
+              <div className="notice ok">
+                <Crown size={17} aria-hidden="true" />
+                <span>
+                  <b>Responsable de l’officine.</b> A créé l’officine et détient tous les droits : plannings, équipe, gardes, règles et réglages. Lui seul peut donner l’accès à la gestion.
+                </span>
+              </div>
+            ) : (
+              <>
+                <label className="check" htmlFor={`gestion-${person.id}`}>
+                  <input id={`gestion-${person.id}`} type="checkbox" checked={!!person.gestion} disabled={!jeSuisResponsable} onChange={(e) => {
+                    maj({ gestion: e.target.checked });
+                    dire(e.target.checked ? `${person.prenom} peut désormais gérer l’officine.` : `${person.prenom} n’a plus accès à la gestion.`, true);
+                  }} />
+                  <span>
+                    Peut modifier les plannings, l’équipe, les gardes et les réglages
+                    <span className="soft small" style={{ display: 'block' }}>
+                      {person.gestion ? 'Cette personne se connecte à l’espace responsable.' : `Sans cet accès, ${person.prenom} n’a que son espace ${estPharmacien(person) ? 'pharmacien' : 'équipe'} : son planning, le planning publié${estPharmacien(person) ? ', ses gardes' : ''} et ses demandes.`}
+                    </span>
+                  </span>
+                </label>
+                {!jeSuisResponsable ? <p className="small soft">Seul {chef ? nomComplet(chef) : 'le responsable'} peut accorder ou retirer cet accès.</p> : null}
+              </>
+            )}
+          </section>
+        ) : null}
 
         {!person.externe ? (
           <section className="col" style={{ gap: 8 }}>
@@ -296,7 +333,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             </button>
           </>
         ) : (
-          <button type="button" className="btn sm ghost danger" onClick={() => setRetrait(true)}>
+          <button type="button" className="btn sm ghost danger" onClick={() => setRetrait(true)} disabled={estResponsable(data, person) || person.id === session} title={estResponsable(data, person) ? 'Le responsable de l’officine ne peut pas être retiré' : undefined}>
             <Trash2 size={14} /> Retirer de l’équipe
           </button>
         )}

@@ -105,6 +105,8 @@ export interface Store {
 
   ajouterGardes: (g: Omit<Garde, 'id'>[]) => void;
   affecterGarde: (id: string, personId: string | null, exceptionnel: boolean) => void;
+  /** Applique d'un coup une répartition proposée, tracée au journal avec ses raisons. */
+  affecterGardes: (liste: { gardeId: string; personId: string; raison: string }[]) => void;
   majGarde: (id: string, patch: Partial<Garde>) => void;
   supprimerGarde: (id: string) => void;
   ajouterIntervention: (id: string, offset: number, duree: number) => void;
@@ -156,6 +158,7 @@ export const useStore = create<Store>((set, get) => {
           officine: {
             ...base.officine,
             nom,
+            responsableId: personnes.find((x) => x.qualification === 'titulaire')?.id,
             horaires,
             postes,
             effectifs: base.officine.effectifs.filter((e) => e.jours.some((j) => horaires[j].length > 0)),
@@ -348,6 +351,20 @@ export const useStore = create<Store>((set, get) => {
               ? `${GARDE_LABEL[g.type]} du ${fmtDateCourt(g.date)} confiée à ${nom(d, personId)}`
               : `${GARDE_LABEL[g.type]} du ${fmtDateCourt(g.date)} : affectation retirée`,
             detail: personId ? `Programmation communiquée ${dayIndex(g.date) - dayIndex(get().today)} jours avant la garde.` : undefined,
+            regles: true,
+          },
+        );
+      }),
+    affecterGardes: (liste) =>
+      commit((d) => {
+        if (!liste.length) return d;
+        const at = now();
+        return journal(
+          { ...d, gardes: d.gardes.map((g) => { const a = liste.find((x) => x.gardeId === g.id); return a ? { ...g, personId: a.personId, communiqueLe: at } : g; }) },
+          {
+            type: 'garde',
+            titre: `${liste.length} garde${liste.length > 1 ? 's' : ''} répartie${liste.length > 1 ? 's' : ''} équitablement`,
+            detail: liste.map((a) => { const g = d.gardes.find((x) => x.id === a.gardeId); return `${g ? fmtDateCourt(g.date) : ''} : ${nom(d, a.personId)} (${a.raison})`; }).join(' · '),
             regles: true,
           },
         );

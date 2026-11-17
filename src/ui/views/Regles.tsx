@@ -21,7 +21,7 @@ export function Regles(): JSX.Element {
   return (
     <div style={{ maxWidth: 1040 }}>
       <div className="page-head">
-        <span className="page-ico">
+        <span className="page-ico c-rose" aria-hidden="true">
           <BookOpenCheck size={26} />
         </span>
         <div className="grow">

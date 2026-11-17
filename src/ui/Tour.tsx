@@ -59,9 +59,9 @@ const ETAPES: Etape[] = [
     texte: 'Ajoutez des personnes, leurs compétences et leurs besoins d’horaires. Un besoin se décrit sans jamais demander sa raison.',
   },
   {
-    cible: 'viewer',
-    titre: 'L’espace de chaque salarié',
-    texte: 'Ce sélecteur montre ce que voit une personne de l’équipe : son planning publié, ses changements et ses demandes.',
+    cible: 'compte',
+    titre: 'Votre compte, et celui de chacun',
+    texte: 'Ici : votre thème de couleur, votre code d’accès et la déconnexion. Chaque membre de l’équipe se connecte à son propre espace, différent selon son rôle. Vous seul donnez l’accès à la gestion.',
   },
   {
     cible: 'aide',
@@ -82,7 +82,7 @@ export function tutorielDejaVu(): boolean {
 
 /** Tutoriel guidé : met en lumière un élément à la fois, avec une explication courte. */
 export function Tour(): JSX.Element | null {
-  const { tour, setTour, aller, spectateur, setSpectateur } = useUi();
+  const { tour, setTour, aller } = useUi();
   const [rect, setRect] = useState<DOMRect | null>(null);
   const etape = tour !== null ? ETAPES[tour] : null;
 
@@ -104,10 +104,8 @@ export function Tour(): JSX.Element | null {
   }, [etape]);
 
   useEffect(() => {
-    if (!etape) return;
-    if (spectateur !== 'responsable') setSpectateur('responsable');
-    if (etape.vue) aller(etape.vue);
-  }, [etape, aller, spectateur, setSpectateur]);
+    if (etape?.vue) aller(etape.vue);
+  }, [etape, aller]);
 
   useLayoutEffect(() => {
     if (!etape) return;

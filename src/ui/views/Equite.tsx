@@ -47,7 +47,7 @@ export function Equite(): JSX.Element {
   return (
     <div>
       <div className="page-head">
-        <span className="page-ico">
+        <span className="page-ico c-ciel" aria-hidden="true">
           <Scale size={26} />
         </span>
         <div className="grow">

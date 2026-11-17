@@ -1,4 +1,4 @@
-import { AlertTriangle, CircleCheck, ClipboardPaste, Clock3, Info, MoonStar, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Check, CircleCheck, ClipboardPaste, Clock3, Info, MoonStar, Plus, Repeat, Scale, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -22,9 +22,10 @@ import type { Garde, GardeType } from '../../domain/types';
 import { GARDE_LABEL, estPharmacien, nomCourt } from '../../domain/types';
 import { decrireShift, gardeDuree } from '../../engine/core';
 import type { EtapeGarde } from '../../engine/gardes';
-import { congesIncompatibles, delaiGarde, etapeGarde, parseCalendrierGardes, reposApresGarde, variablesGarde } from '../../engine/gardes';
+import { candidatsGarde, congesIncompatibles, delaiGarde, etapeGarde, parseCalendrierGardes, poidsGarde, repartirGardes, reposApresGarde, serieGardes, variablesGarde } from '../../engine/gardes';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
+import { EtiquetteRole, GARDE_ICONE } from '../icons';
 import { Avatar, Dialog, Empty, Pill } from '../kit';
 
 const ETAPES: { cle: EtapeGarde; label: string }[] = [
@@ -41,6 +42,8 @@ export function Gardes(): JSX.Element {
   const { gardeId, ouvrirGarde } = useUi();
   const [importer, setImporter] = useState(false);
   const [ajout, setAjout] = useState(false);
+  const [repartition, setRepartition] = useState(false);
+  const aRepartir = data.gardes.filter((g) => !g.personId && g.date >= today).length;
   const gardes = useMemo(() => data.gardes.slice().sort((a, b) => a.date.localeCompare(b.date)), [data.gardes]);
   const prochaine = gardes.find((g) => g.date >= today) ?? gardes[gardes.length - 1];
   const courante = gardes.find((g) => g.id === gardeId) ?? prochaine;
@@ -51,7 +54,7 @@ export function Gardes(): JSX.Element {
   return (
     <div>
       <div className="page-head">
-        <span className="page-ico">
+        <span className="page-ico c-lavande" aria-hidden="true">
           <MoonStar size={26} />
         </span>
         <div className="grow">
@@ -65,6 +68,11 @@ export function Gardes(): JSX.Element {
           <button type="button" className="btn" onClick={() => setImporter(true)}>
             <ClipboardPaste size={15} /> Importer un calendrier
           </button>
+          {aRepartir ? (
+            <button type="button" className="btn magic" onClick={() => setRepartition(true)}>
+              <Scale size={15} aria-hidden="true" /> Répartir {aRepartir} garde{aRepartir > 1 ? 's' : ''}
+            </button>
+          ) : null}
           <button type="button" className="btn primary" onClick={() => setAjout(true)}>
             <Plus size={15} /> Ajouter une garde
           </button>
@@ -106,6 +114,8 @@ export function Gardes(): JSX.Element {
           </div>
         </div>
 
+        <CalendrierGardes />
+
         <div className="split">
           <div className="col" style={{ gap: 8 }} role="group" aria-label="Calendrier des gardes">
             {gardes.map((g) => {
@@ -114,7 +124,7 @@ export function Gardes(): JSX.Element {
               const etape = etapeGarde(data, g, today);
               return (
                 <button key={g.id} type="button" className={`g-item${courante?.id === g.id ? ' on' : ''}`} onClick={() => ouvrirGarde(g.id)} style={{ opacity: g.date < today && g.valideLe ? 0.65 : 1 }}>
-                  <span className="g-date">
+                  <span className="g-date" aria-hidden="true">
                     <b>{j}</b>
                     <span>{MOIS_COURT[m - 1]}</span>
                   </span>
@@ -136,6 +146,7 @@ export function Gardes(): JSX.Element {
       )}
       {importer ? <DialogueImport onClose={() => setImporter(false)} /> : null}
       {ajout ? <DialogueGarde onClose={() => setAjout(false)} /> : null}
+      {repartition ? <DialogueRepartition onClose={() => setRepartition(false)} /> : null}
     </div>
   );
 }
@@ -152,7 +163,7 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
   const repos = useMemo(() => reposApresGarde(data, garde), [data, garde]);
   const delai = delaiGarde(data, garde, person, today);
   const incompatible = congesIncompatibles(data, garde);
-  const pharmaciens = data.personnes.filter((p) => estPharmacien(p) && !p.externe);
+  const candidats = useMemo(() => candidatsGarde(data, garde, today), [data, garde, today]);
   const annee = garde.date.slice(0, 4);
   const [heureItv, setHeureItv] = useState(fmtHHMM((garde.start + 180) % 1440));
   const [dureeItv, setDureeItv] = useState(20);
@@ -163,6 +174,12 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
   return (
     <div className="card">
       <div className="card-head">
+        <span className="ico night" aria-hidden="true">
+          {(() => {
+            const I = GARDE_ICONE[garde.type];
+            return <I size={18} />;
+          })()}
+        </span>
         <div className="grow">
           <h2>{GARDE_LABEL[garde.type]}</h2>
           <div className="soft small" style={{ marginTop: 3 }}>
@@ -219,29 +236,46 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
         {/* 1. Affectation */}
         <section className="col" style={{ gap: 9 }}>
           <h3>1 · Qui assure la garde ?</h3>
-          <div className="row wrap">
-            {pharmaciens.map((p) => {
-              const n = data.gardes.filter((g) => g.personId === p.id && g.date.startsWith(annee)).length;
-              const on = garde.personId === p.id;
+          <p className="small soft">Les pharmaciens sont comparés sur leur disponibilité, la charge de gardes déjà portée cette année, le repos à protéger et le coût.</p>
+          <div className="col" style={{ gap: 8 }}>
+            {candidats.map((c) => {
+              const on = garde.personId === c.person.id;
               return (
                 <button
-                  key={p.id}
+                  key={c.person.id}
                   type="button"
                   className={`g-item${on ? ' on' : ''}`}
-                  style={{ width: 'auto', padding: '8px 12px' }}
                   aria-pressed={on}
                   onClick={() => {
-                    affecterGarde(garde.id, on ? null : p.id, !!garde.exceptionnel);
-                    dire(on ? 'Affectation retirée.' : `Garde confiée à ${nomCourt(p)}.`, true);
+                    affecterGarde(garde.id, on ? null : c.person.id, !!garde.exceptionnel);
+                    dire(on ? 'Affectation retirée.' : `Garde confiée à ${nomCourt(c.person)}.`, true);
                   }}
                 >
-                  <Avatar person={p} />
-                  <span>
-                    <b>{nomCourt(p)}</b>
-                    <span className="small soft" style={{ display: 'block' }}>
-                      {n} garde{n > 1 ? 's' : ''} en {annee}
-                      {p.volontaireGardes ? ' · volontaire' : ''}
+                  <Avatar person={c.person} lg />
+                  <span className="grow">
+                    <span className="row wrap" style={{ gap: 6 }}>
+                      <b>{nomCourt(c.person)}</b>
+                      <EtiquetteRole person={c.person} />
+                      {on ? (
+                        <Pill tone="iris">
+                          <Check size={12} aria-hidden="true" /> Affectée
+                        </Pill>
+                      ) : c.recommande ? (
+                        <Pill tone="ok">Recommandé</Pill>
+                      ) : null}
+                      {!c.disponible ? <Pill tone="danger">Indisponible</Pill> : null}
                     </span>
+                    <span className="small soft" style={{ display: 'block', marginTop: 4 }}>
+                      {c.nombre} garde{c.nombre > 1 ? 's' : ''} en {annee} · charge {fmtDecimal(c.charge, 1)}
+                      {c.person.volontaireGardes ? ' · volontaire' : ''}
+                      {' · '}
+                      {!c.person.salarie ? 'titulaire, hors paie' : c.cout === null ? 'coût à valoriser' : `coût estimé ${fmtEuros(c.cout)}`}
+                    </span>
+                    {c.obstacles.length || c.postesADeplacer || !c.delaiOk ? (
+                      <span className="small" style={{ display: 'block', marginTop: 3, color: 'var(--warn)', fontWeight: 600 }}>
+                        {[...c.obstacles, c.postesADeplacer ? `${c.postesADeplacer} poste${c.postesADeplacer > 1 ? 's' : ''} à déplacer pour le repos` : '', !c.delaiOk ? 'délai de prévenance non tenu : accord à recueillir' : ''].filter(Boolean).join(' · ')}
+                      </span>
+                    ) : null}
                   </span>
                 </button>
               );
@@ -526,6 +560,9 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
   const [debut, setDebut] = useState('19:30');
   const [fin, setFin] = useState('08:30');
   const [type, setType] = useState<GardeType>('volets_fermes');
+  const [repeter, setRepeter] = useState(false);
+  const [toutesLes, setToutesLes] = useState(4);
+  const [nombre, setNombre] = useState(6);
   const d = parseHHMM(debut);
   const f = parseHHMM(fin);
   const pret = !!date && d !== null && f !== null && d !== f;
@@ -544,8 +581,10 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
             className="btn primary"
             disabled={!pret}
             onClick={() => {
-              ajouter([{ date, start: d as number, end: f as number, type, personId: null, interventions: [] }]);
-              dire('Garde ajoutée. Reste à l’affecter.', true);
+              const modele = { date, start: d as number, end: f as number, type, personId: null, interventions: [] };
+              const liste = repeter ? serieGardes(modele, toutesLes, nombre) : [modele];
+              ajouter(liste);
+              dire(liste.length > 1 ? `${liste.length} gardes ajoutées. Reste à les affecter.` : 'Garde ajoutée. Reste à l’affecter.', true);
               onClose();
             }}
           >
@@ -578,10 +617,184 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
           <input id="garde-fin" type="time" value={fin} onChange={(e) => setFin(e.target.value)} />
         </label>
       </div>
+      <label className="check" htmlFor="garde-repeter">
+        <input id="garde-repeter" type="checkbox" checked={repeter} onChange={(e) => setRepeter(e.target.checked)} />
+        <span>
+          Créer une série régulière
+          <span className="soft small" style={{ display: 'block' }}>Pour un tour de garde qui revient à intervalle fixe.</span>
+        </span>
+      </label>
+      {repeter ? (
+        <div className="row wrap" style={{ alignItems: 'flex-end' }}>
+          <label className="field" htmlFor="garde-intervalle">
+            Toutes les (semaines)
+            <input id="garde-intervalle" type="number" min={1} max={26} value={toutesLes} onChange={(e) => setToutesLes(Number(e.target.value))} style={{ width: 170 }} />
+          </label>
+          <label className="field" htmlFor="garde-nombre">
+            Nombre de gardes
+            <input id="garde-nombre" type="number" min={2} max={52} value={nombre} onChange={(e) => setNombre(Number(e.target.value))} style={{ width: 170 }} />
+          </label>
+          <span className="small soft" style={{ paddingBottom: 12 }}>
+            <Repeat size={14} aria-hidden="true" /> Dernière garde le {fmtDateCourt(addDays(date, 7 * Math.max(1, toutesLes) * (Math.max(2, nombre) - 1)))}
+          </span>
+        </div>
+      ) : null}
       {d !== null && f !== null && f <= d ? <div className="notice info small">La garde se termine le lendemain à {fmtHeure(f)}.</div> : null}
       {dayIndex(date) - dayIndex(today) < 15 ? (
         <div className="notice warn small">Cette garde commence dans moins de 15 jours : si elle est confiée à un salarié, son accord sera à recueillir.</div>
       ) : null}
     </Dialog>
+  );
+}
+
+/** Répartition équitable des gardes à affecter : une proposition à relire, jamais appliquée d'office. */
+function DialogueRepartition({ onClose }: { onClose: () => void }): JSX.Element {
+  const data = useStore((s) => s.data);
+  const today = useStore((s) => s.today);
+  const affecter = useStore((s) => s.affecterGardes);
+  const dire = useUi((s) => s.dire);
+  const propositions = useMemo(() => repartirGardes(data, today), [data, today]);
+  const restantes = data.gardes.filter((g) => !g.personId && g.date >= today).length - propositions.length;
+  const total = new Map<string, number>();
+  for (const x of propositions) {
+    const g = data.gardes.find((y) => y.id === x.gardeId);
+    total.set(x.personId, (total.get(x.personId) ?? 0) + (g ? poidsGarde(g) : 0));
+  }
+  return (
+    <Dialog
+      size="mid"
+      title="Répartir les gardes à affecter"
+      subtitle="Chaque garde va au pharmacien disponible le moins chargé cette année. Relisez, puis appliquez : vous pourrez modifier chaque affectation ensuite."
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="btn" onClick={onClose}>
+            Annuler
+          </button>
+          <button
+            type="button"
+            className="btn primary"
+            disabled={!propositions.length}
+            onClick={() => {
+              affecter(propositions);
+              dire(`${propositions.length} garde${propositions.length > 1 ? 's' : ''} affectée${propositions.length > 1 ? 's' : ''}.`, true);
+              onClose();
+            }}
+          >
+            <Check size={15} aria-hidden="true" /> Appliquer la répartition
+          </button>
+        </>
+      }
+    >
+      {propositions.length ? (
+        <table className="t" aria-label="Répartition proposée">
+          <thead>
+            <tr>
+              <th scope="col">Garde</th>
+              <th scope="col">Confiée à</th>
+              <th scope="col">Pourquoi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {propositions.map((x) => {
+              const g = data.gardes.find((y) => y.id === x.gardeId);
+              const p = data.personnes.find((y) => y.id === x.personId);
+              if (!g || !p) return null;
+              return (
+                <tr key={x.gardeId}>
+                  <td>
+                    <b>{fmtDateCourt(g.date)}</b>
+                    <div className="small soft">{GARDE_LABEL[g.type]}</div>
+                  </td>
+                  <td>
+                    <span className="row" style={{ gap: 8 }}>
+                      <Avatar person={p} /> {nomCourt(p)}
+                    </span>
+                  </td>
+                  <td className="small">{x.raison}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <p className="soft">Aucune garde ne peut être répartie automatiquement.</p>
+      )}
+      {restantes > 0 ? (
+        <div className="notice warn small">
+          <AlertTriangle size={16} aria-hidden="true" />
+          <span>
+            {restantes} garde{restantes > 1 ? 's restent' : ' reste'} sans proposition : aucun pharmacien n’est disponible à ces dates.
+          </span>
+        </div>
+      ) : null}
+      {propositions.length ? (
+        <p className="small soft">
+          Charge ajoutée par cette répartition :{' '}
+          {[...total.entries()]
+            .map(([id, v]) => {
+              const p = data.personnes.find((y) => y.id === id);
+              return `${p ? nomCourt(p) : ''} + ${fmtDecimal(v, 1)}`;
+            })
+            .join(' · ')}
+          . Une nuit de 12 h compte pour 1, un dimanche ou un jour férié pour moitié plus, une astreinte pour moitié moins.
+        </p>
+      ) : null}
+    </Dialog>
+  );
+}
+
+/** Calendrier des douze prochains mois : chaque garde y figure, affectée ou non. */
+function CalendrierGardes(): JSX.Element {
+  const data = useStore((s) => s.data);
+  const today = useStore((s) => s.today);
+  const ouvrir = useUi((s) => s.ouvrirGarde);
+  const [y0, m0] = today.split('-').map(Number);
+  const mois = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(Date.UTC(y0, m0 - 1 + i, 1));
+    return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1 };
+  });
+  return (
+    <section className="card" style={{ marginBottom: 20 }} aria-labelledby="cal-gardes">
+      <div className="card-head">
+        <div className="grow">
+          <h2 id="cal-gardes" className="h3">Calendrier sur douze mois</h2>
+          <div className="small soft">Chaque pastille est une garde : pleine si elle est affectée, cerclée si elle reste à affecter.</div>
+        </div>
+      </div>
+      <div className="cal-an">
+        {mois.map(({ y, m }) => {
+          const cle = `${y}-${String(m).padStart(2, '0')}`;
+          const du = data.gardes.filter((g) => g.date.startsWith(cle)).sort((a, b) => a.date.localeCompare(b.date));
+          return (
+            <div key={cle} className="cal-mois">
+              <div className="small" style={{ fontWeight: 650, textTransform: 'capitalize' }}>
+                {MOIS[m - 1]} <span className="muted">{y}</span>
+              </div>
+              {du.length ? (
+                <ul className="chips" style={{ marginTop: 6 }}>
+                  {du.map((g) => {
+                    const p = data.personnes.find((x) => x.id === g.personId);
+                    return (
+                      <li key={g.id}>
+                        <button type="button" className={`cal-g${p ? ' pleine' : ''}`} onClick={() => ouvrir(g.id)} title={`${GARDE_LABEL[g.type]} · ${p ? nomCourt(p) : 'à affecter'}`}>
+                          {Number(g.date.slice(8))}
+                          <span className="sr">
+                            {' '}
+                            {MOIS[m - 1]}, {GARDE_LABEL[g.type]}, {p ? `confiée à ${nomCourt(p)}` : 'à affecter'}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="tiny muted" style={{ marginTop: 8 }}>Aucune garde</div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

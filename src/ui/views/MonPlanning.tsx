@@ -1,4 +1,4 @@
-import { Ban, BellRing, CalendarClock, Check, CircleCheck, Moon, Plus, Stethoscope } from 'lucide-react';
+import { Ban, BellRing, CalendarClock, Check, CircleCheck, Moon, Plus, Printer, Stethoscope } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -22,6 +22,7 @@ import { ABSENCE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien } from '../../
 import { decrireBesoin, decrireShift, minutesTravail } from '../../engine/core';
 import type { CompteurCle } from '../../engine/equity';
 import { COMPTEUR_LABEL, equite } from '../../engine/equity';
+import { HEBERGE } from '../../env';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { AvantApres, Pill, Track, roleDe } from '../kit';
@@ -74,7 +75,12 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           <p style={{ fontSize: 17 }}>Aucun poste publié à venir pour l'instant.</p>
         )}
         <div className="row wrap" style={{ marginTop: 14, position: 'relative', zIndex: 1 }}>
-          <button type="button" className="btn" onClick={() => setDemande(true)}>
+          {!HEBERGE ? (
+            <button type="button" className="btn no-print" onClick={() => window.print()}>
+              <Printer size={15} aria-hidden="true" /> Imprimer mon planning
+            </button>
+          ) : null}
+          <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
             <Plus size={15} /> Faire une demande
           </button>
           {nonLus.length ? (

@@ -30,6 +30,24 @@ adjoints, préparateurs, autres postes), puis une vérification avant de créer.
 ensuite chaque espace ; il se relance depuis le bouton « Tutoriel ». Une équipe d'exemple (« Pharmacie des
 Tilleuls », fictive) peut être chargée depuis l'accueil pour explorer sans rien saisir.
 
+## Connexion et espaces par rôle
+
+Chaque personne se connecte à son profil et arrive dans un espace différent :
+
+| Espace | Qui | Ce qu'on y voit |
+| --- | --- | --- |
+| **Responsable** | Le titulaire qui a créé l'officine, et les personnes à qui il donne l'accès | Toute la gestion : résoudre, construire, gardes, équipe, équité, règles, journal, réglages |
+| **Pharmacien** | Cotitulaires et adjoints sans droit de gestion | Mon planning, planning publié de l'équipe, mes gardes |
+| **Équipe** | Préparateurs, apprentis, étudiants, rayonnistes | Mon planning, planning publié de l'équipe |
+
+Le créateur de l'officine en est le **responsable**, non salarié. Un second titulaire n'a aucun droit de
+gestion tant que le responsable ne le lui accorde pas, dans la fiche de la personne (« Droits d'accès »).
+Chacun peut imprimer son planning, choisir la couleur de son thème et la taille du texte, et définir un
+code d'accès dans « Mon compte ».
+
+**Limite importante** : sans serveur, cette connexion sépare les espaces sur un appareil partagé ; ce n'est
+pas une protection des données. Un vrai contrôle d'accès demande des comptes côté serveur.
+
 ## Ce que fait cette première version
 
 | Espace | Question | Contenu |
@@ -51,7 +69,10 @@ fiche navette, réglages de l'officine.
    démontrée, données manquantes, solution non trouvée dans le temps de calcul, créneau encore découvert.
    Aucun levier proposé ne consiste à assouplir une obligation légale.
 3. **Parcours complet de la garde.** Ventilation par jour et par mois, nuit de changement d'heure,
-   temps plein ou temps partiel, titulaire hors décompte, repos après la garde.
+   temps plein ou temps partiel, titulaire hors décompte, repos après la garde. Pour chaque garde, les
+   pharmaciens sont comparés (disponibilité, charge déjà portée, postes à déplacer, coût) ; les gardes
+   libres se répartissent équitablement en un clic, avec la raison de chaque choix ; un tour de garde
+   régulier se crée en série ; un calendrier sur douze mois et un récapitulatif mensuel complètent le tout.
 
 ### Besoins personnels : jamais de motif
 
@@ -67,7 +88,8 @@ salarié à retrouver une date ; son choix n'est pas enregistré.
 L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 
 - **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ, de bouton ou de
-  repère graphique au moins 3:1. Les dégradés vert pastel ne portent que du texte foncé.
+  repère graphique au moins 3:1, dans chacun des cinq thèmes de couleur. Les dégradés pastel ne portent
+  que du texte foncé.
 - **Jamais la couleur seule** : chaque état a aussi un pictogramme, un libellé ou une forme (coche,
   « Sélectionnée », bordure épaissie, texte lu par les lecteurs d'écran).
 - **Clavier** : tout est atteignable et utilisable au clavier, le focus est toujours visible, un lien
@@ -78,8 +100,8 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 21 écrans et
-fenêtres vérifiés. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 29 écrans,
+fenêtres et thèmes vérifiés. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 
 ## Architecture

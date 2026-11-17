@@ -40,6 +40,10 @@ export interface Person {
   volontaireGardes: boolean;
   /** Remplaçant habituel, extérieur à l'équipe. */
   externe?: boolean;
+  /** Droit de modifier plannings, équipe et réglages. Seul le responsable de l'officine l'accorde. */
+  gestion?: boolean;
+  /** Empreinte du code d'accès personnel (jamais le code lui-même). */
+  code?: string;
 }
 
 export type Activite = 'comptoir' | 'back' | 'admin' | 'formation';
@@ -178,6 +182,8 @@ export interface BesoinEffectif {
 
 export interface Officine {
   nom: string;
+  /** Titulaire qui a créé l'officine : responsable, il détient tous les droits et les délègue. */
+  responsableId?: string;
   /** Plages d'ouverture par jour : index 0 = lundi … 6 = dimanche. */
   horaires: Interval[][];
   fermeJoursFeries: boolean;

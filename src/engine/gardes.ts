@@ -428,3 +428,113 @@ export function parseCalendrierGardes(texte: string): { gardes: Omit<Garde, 'id'
     });
   return { gardes, erreurs };
 }
+
+// --------------------------------------------- Choisir qui assure une garde
+
+/** Charge relative d'une garde : une nuit de 12 h vaut 1 ; dimanches et jours fériés pèsent moitié plus. */
+export function poidsGarde(g: Pick<Garde, 'date' | 'start' | 'end' | 'type'>): number {
+  const total = segmentsGarde(g).reduce((t, s) => t + (s.minutes / 720) * (s.typeJour === 'ouvrable' ? 1 : 1.5), 0);
+  return Math.round(total * (g.type === 'astreinte' ? 0.5 : 1) * 100) / 100;
+}
+
+export interface CandidatGarde {
+  person: Person;
+  /** Charge de gardes déjà portée sur l'année civile de la garde, hors celle-ci. */
+  charge: number;
+  nombre: number;
+  disponible: boolean;
+  /** Ce qui empêche ou complique l'affectation, en clair. */
+  obstacles: string[];
+  /** Postes déjà planifiés qui empiéteraient sur le repos. */
+  postesADeplacer: number;
+  delaiOk: boolean;
+  /** Coût estimé des variables de paie ; null s'il manque un taux ou la valeur du point, 0 pour un titulaire. */
+  cout: number | null;
+  recommande: boolean;
+}
+
+/** Compare les pharmaciens pour une garde : disponibilité, charge déjà portée, repos, délai, coût. */
+export function candidatsGarde(data: AppData, garde: Garde, today: ISODate): CandidatGarde[] {
+  const annee = garde.date.slice(0, 4);
+  const fin = garde.end > garde.start ? garde.date : addDays(garde.date, 1);
+  const out: CandidatGarde[] = [];
+  for (const person of data.personnes) {
+    if (person.externe || (person.qualification !== 'titulaire' && person.qualification !== 'adjoint')) continue;
+    const autres = data.gardes.filter((g) => g.personId === person.id && g.id !== garde.id && g.date.startsWith(annee));
+    const essai: Garde = { ...garde, personId: person.id, communiqueLe: undefined };
+    const obstacles: string[] = [];
+    const absence = data.absences.find((a) => a.personId === person.id && a.statut !== 'refusee' && a.from <= fin && garde.date <= a.to);
+    if (absence) obstacles.push(absence.statut === 'approuvee' ? 'absence approuvée sur la période' : 'congé demandé sur la période');
+    const jour = weekday(garde.date);
+    const reconnu = data.besoins.some(
+      (b) => b.personId === person.id && b.decision === 'acceptee' && b.statut === 'reconnue' && b.forme === 'indisponible' && b.plageStart === undefined && b.frequence === 1 && b.jours.includes(jour),
+    );
+    if (reconnu) obstacles.push(`indisponibilité reconnue le ${['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'][jour]}`);
+    const veille = data.gardes.some((g) => g.personId === person.id && g.id !== garde.id && Math.abs(dayIndex(g.date) - dayIndex(garde.date)) <= 1);
+    if (veille) obstacles.push('déjà de garde la veille ou le lendemain');
+    const repos = reposApresGarde({ ...data, gardes: data.gardes.map((g) => (g.id === garde.id ? essai : g)) }, essai);
+    const delai = delaiGarde(data, essai, person, today);
+    const vars = variablesGarde(data, essai).variables;
+    const cout = !person.salarie ? 0 : vars.some((v) => v.montant === null && v.unite !== 'h') || vars.some((v) => v.montant === null) ? null : vars.reduce((t, v) => t + (v.montant ?? 0), 0);
+    out.push({
+      person,
+      charge: Math.round(autres.reduce((t, g) => t + poidsGarde(g), 0) * 100) / 100,
+      nombre: autres.length,
+      disponible: !absence && !reconnu && !veille,
+      obstacles,
+      postesADeplacer: repos?.conflits.length ?? 0,
+      delaiOk: delai.ok,
+      cout,
+      recommande: false,
+    });
+  }
+  out.sort(
+    (a, b) =>
+      Number(b.disponible) - Number(a.disponible) ||
+      a.charge - b.charge ||
+      a.postesADeplacer - b.postesADeplacer ||
+      Number(b.person.volontaireGardes) - Number(a.person.volontaireGardes) ||
+      (a.cout ?? 0) - (b.cout ?? 0),
+  );
+  if (out[0]?.disponible) out[0].recommande = true;
+  return out;
+}
+
+export interface PropositionGarde {
+  gardeId: string;
+  personId: string;
+  raison: string;
+}
+
+/**
+ * Répartit les gardes à venir non affectées, de la plus proche à la plus lointaine :
+ * chaque garde va au pharmacien disponible le moins chargé, la charge étant recalculée au fil de l'eau.
+ */
+export function repartirGardes(data: AppData, today: ISODate): PropositionGarde[] {
+  let courant = data;
+  const out: PropositionGarde[] = [];
+  const aFaire = data.gardes.filter((g) => !g.personId && dayIndex(g.date) >= dayIndex(today)).sort((a, b) => a.date.localeCompare(b.date));
+  for (const g of aFaire) {
+    const candidats = candidatsGarde(courant, g, today);
+    const choix = candidats.find((c) => c.recommande);
+    if (!choix) continue;
+    const dispo = candidats.filter((c) => c.disponible);
+    const moyenne = dispo.reduce((t, c) => t + c.charge, 0) / Math.max(1, dispo.length);
+    const fmt = (n: number): string => n.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+    out.push({
+      gardeId: g.id,
+      personId: choix.person.id,
+      raison:
+        dispo.length === 1
+          ? 'seul pharmacien disponible sur cette garde'
+          : `charge de gardes la plus faible parmi ${dispo.length} pharmaciens disponibles (${fmt(choix.charge)} contre ${fmt(moyenne)} en moyenne)${choix.postesADeplacer ? `, ${choix.postesADeplacer} poste à déplacer pour le repos` : ''}`,
+    });
+    courant = { ...courant, gardes: courant.gardes.map((x) => (x.id === g.id ? { ...x, personId: choix.person.id } : x)) };
+  }
+  return out;
+}
+
+/** Crée une série de gardes régulières : même horaire, toutes les N semaines. */
+export function serieGardes(modele: Omit<Garde, 'id'>, toutesLes: number, nombre: number): Omit<Garde, 'id'>[] {
+  return Array.from({ length: Math.max(1, Math.min(52, nombre)) }, (_, i) => ({ ...modele, date: addDays(modele.date, 7 * Math.max(1, toutesLes) * i), interventions: [] }));
+}

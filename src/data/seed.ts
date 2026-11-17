@@ -9,6 +9,7 @@ const SEMAINE = [0, 1, 2, 3, 4];
 
 export const OFFICINE_DEMO: Officine = {
   nom: 'Pharmacie des Tilleuls',
+  responsableId: 'p_helene',
   horaires: [
     [{ start: H(8, 30), end: H(19, 30) }],
     [{ start: H(8, 30), end: H(19, 30) }],
@@ -125,6 +126,7 @@ function prochainFerie(today: ISODate, minJours: number): ISODate {
 const OFFICINE_VIERGE: Officine = {
   ...OFFICINE_DEMO,
   nom: '',
+  responsableId: undefined,
   caAnnuelHT: null,
 };
 

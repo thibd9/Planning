@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import type { Interval, Mission, Person, Shift } from '../domain/types';
 import { estPharmacien } from '../domain/types';
+import { couleurDe } from './icons';
 
 export type Role = 'pharma' | 'prepa' | 'autre' | 'externe';
 
@@ -17,7 +18,7 @@ export function roleDe(p: Person | undefined): Role {
 export function Avatar({ person, lg }: { person: Person | undefined; lg?: boolean }): JSX.Element {
   const initiales = person ? `${person.prenom.charAt(0)}${person.nom.charAt(0)}` : '?';
   return (
-    <span className={`avatar role-${roleDe(person)}${lg ? ' lg' : ''}`} aria-hidden="true">
+    <span className={`avatar c ${couleurDe(person)}${lg ? ' lg' : ''}`} aria-hidden="true">
       {initiales}
     </span>
   );

@@ -1,12 +1,13 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { seed, vierge } from '../data/seed';
+import { espaceDe, estResponsable, peutGerer } from '../domain/acces';
 import { addDays, dureeReelle, ferie, joursOuvresEntre, mondayOf, subtract, weekday } from '../domain/time';
 import type { AppData, Shift } from '../domain/types';
 import { minutesSemaine, shiftsSemaine, trousPharmacien } from './core';
 import { decisions } from './decisions';
 import { diagnosticPrealable } from './diagnose';
 import { equite } from './equity';
-import { delaiGarde, parseCalendrierGardes, reposApresGarde, segmentsGarde, variablesGarde } from './gardes';
+import { candidatsGarde, delaiGarde, parseCalendrierGardes, poidsGarde, repartirGardes, reposApresGarde, segmentsGarde, serieGardes, variablesGarde } from './gardes';
 import { generer, genererVariantes } from './generate';
 import { lireBesoin } from './nlp';
 import { ficheNavetteCSV } from './payroll';
@@ -333,5 +334,54 @@ describe('démarrage à vide', () => {
     const res = generer(d, SUIVANT, { variante: 'equite', graine: 3, iterations: 20000 });
     expect(res.indicateurs.bloquants).toBe(0);
     expect(res.shifts.length).toBeGreaterThan(15);
+  });
+});
+
+describe('droits d’accès', () => {
+  it('fait du créateur le responsable et réserve la gestion à ceux qu’il autorise', () => {
+    const helene = data.personnes.find((p) => p.id === 'p_helene');
+    const karim = data.personnes.find((p) => p.id === 'p_karim');
+    const camille = data.personnes.find((p) => p.id === 'p_camille');
+    expect(estResponsable(data, helene)).toBe(true);
+    expect(espaceDe(data, helene)).toBe('responsable');
+    expect(espaceDe(data, karim)).toBe('pharmacien');
+    expect(espaceDe(data, camille)).toBe('equipe');
+    // Un second titulaire n'a aucun droit de gestion tant que le responsable ne le lui donne pas.
+    const second = { ...karim!, id: 'p_second', qualification: 'titulaire' as const, salarie: false };
+    const d2: AppData = { ...data, personnes: data.personnes.concat(second) };
+    expect(peutGerer(d2, second)).toBe(false);
+    expect(espaceDe(d2, second)).toBe('pharmacien');
+    expect(espaceDe(d2, { ...second, gestion: true })).toBe('responsable');
+    expect(estResponsable(d2, { ...second, gestion: true })).toBe(false);
+  });
+});
+
+describe('répartition des gardes', () => {
+  it('pèse une garde selon sa durée, le dimanche et son type', () => {
+    expect(poidsGarde({ date: '2026-11-17', start: 1200, end: 480, type: 'volets_fermes' })).toBe(1);
+    expect(poidsGarde({ date: '2026-11-22', start: 540, end: 1140, type: 'volets_ouverts' })).toBe(1.25);
+    expect(poidsGarde({ date: '2026-11-17', start: 1200, end: 480, type: 'astreinte' })).toBe(0.5);
+  });
+  it('compare les candidats et écarte une personne absente', () => {
+    const g = data.gardes[3];
+    const c = candidatsGarde(data, g, TODAY);
+    expect(c.map((x) => x.person.id).sort()).toEqual(['p_helene', 'p_karim', 'p_lea']);
+    expect(c.filter((x) => x.recommande)).toHaveLength(1);
+    expect(c[0].charge).toBeLessThanOrEqual(c[c.length - 1].charge);
+    const absent: AppData = { ...data, absences: data.absences.concat({ id: 'z', personId: c[0].person.id, from: g.date, to: g.date, type: 'conge', statut: 'approuvee', createdAt: '' }) };
+    const c2 = candidatsGarde(absent, g, TODAY);
+    expect(c2.find((x) => x.person.id === c[0].person.id)?.disponible).toBe(false);
+    expect(c2.find((x) => x.recommande)?.person.id).not.toBe(c[0].person.id);
+  });
+  it('répartit les gardes libres en équilibrant la charge, et crée des séries', () => {
+    const serie = serieGardes({ date: '2027-01-09', start: 1170, end: 510, type: 'volets_fermes', personId: null, interventions: [] }, 2, 6);
+    expect(serie.map((x) => x.date)).toEqual(['2027-01-09', '2027-01-23', '2027-02-06', '2027-02-20', '2027-03-06', '2027-03-20']);
+    const d: AppData = { ...data, gardes: serie.map((x, i) => ({ ...x, id: `s${i}` })) };
+    const prop = repartirGardes(d, TODAY);
+    expect(prop).toHaveLength(6);
+    const parPersonne = new Map<string, number>();
+    for (const x of prop) parPersonne.set(x.personId, (parPersonne.get(x.personId) ?? 0) + 1);
+    expect([...parPersonne.values()].sort()).toEqual([2, 2, 2]);
+    expect(prop.every((x) => x.raison.length > 10)).toBe(true);
   });
 });

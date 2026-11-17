@@ -52,7 +52,7 @@ export function Journal(): JSX.Element {
   return (
     <div style={{ maxWidth: 1100 }}>
       <div className="page-head">
-        <span className="page-ico">
+        <span className="page-ico c-or" aria-hidden="true">
           <ScrollText size={26} />
         </span>
         <div className="grow">
