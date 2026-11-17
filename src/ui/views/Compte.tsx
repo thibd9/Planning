@@ -9,10 +9,10 @@ import { EtiquetteRole } from '../icons';
 import { Avatar, Pill } from '../kit';
 
 const THEMES: { cle: Theme; nom: string; couleur: string }[] = [
-  { cle: 'solvea', nom: 'Violet Solvéa', couleur: 'linear-gradient(135deg, #2d0d8c, #5213dd 45%, #891efd)' },
+  { cle: 'ciel', nom: 'Bleu ciel', couleur: 'linear-gradient(120deg, #d6ebff, #9ccbf5 55%, #2474c4)' },
+  { cle: 'solvea', nom: 'Violet', couleur: 'linear-gradient(135deg, #2d0d8c, #5213dd 45%, #891efd)' },
   { cle: 'sarcelle', nom: 'Bleu-vert', couleur: 'linear-gradient(135deg, #0a5a63, #127680)' },
-  { cle: 'bleu', nom: 'Bleu', couleur: 'linear-gradient(135deg, #1b4f7f, #2a6aa3)' },
-  { cle: 'vert', nom: 'Vert', couleur: 'linear-gradient(135deg, #0b5d3f, #157a55)' },
+  { cle: 'bleu', nom: 'Bleu marine', couleur: 'linear-gradient(135deg, #1b4f7f, #2a6aa3)' },
   { cle: 'ardoise', nom: 'Ardoise', couleur: 'linear-gradient(135deg, #2f4858, #446579)' },
 ];
 

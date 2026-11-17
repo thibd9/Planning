@@ -1,6 +1,6 @@
 # Solvéa — planning d'équipe pour pharmacie d'officine
 
-<img src="src/assets/solvea-logo.svg" alt="Solvéa" width="220">
+<img src="src/assets/solvea-logo-ciel.svg" alt="Solvéa" width="220">
 
 Solvéa aide une titulaire à construire le planning de son équipe, à comprendre chaque arbitrage
 et à absorber un imprévu en dérangeant le moins de monde possible.
@@ -27,13 +27,31 @@ npm run build
 ```
 
 Node 20 ou plus récent. L'application s'ouvre sur la **page de connexion** : identifiant et mot de passe
-à gauche, « Première visite ? » à droite. « Créer ma pharmacie » lance trois étapes : la pharmacie (nom,
-horaires, fermeture le midi éventuelle), l'équipe (titulaire principal avec son identifiant et son mot de
-passe, pharmaciens adjoints, préparateurs, autres postes), puis une vérification avant de créer. Un
-tutoriel guidé présente ensuite chaque espace ; il se relance depuis le bouton « Tutoriel ». Sur un
-appareil vierge, « Découvrir avec une équipe d'exemple » charge la « Pharmacie des Tilleuls » (fictive) et
-préremplit la connexion : identifiants `helene.marchetti`, `karim.benali` ou `camille.roussel`, mot de
-passe `demo`.
+à gauche, « Première visite ? » à droite, et l'**environnement de test** en dessous. « Créer ma pharmacie »
+lance trois étapes : la pharmacie (nom, horaires, fermeture le midi éventuelle), l'équipe (titulaire
+principal avec son identifiant et son mot de passe, pharmaciens adjoints, préparateurs, autres postes),
+puis une vérification avant de créer. Un tutoriel guidé présente ensuite chaque espace.
+
+## Environnement de test
+
+Une pharmacie d'exemple, la « Pharmacie des Tilleuls » (fictive), avec onze personnes déjà créées. Elle se
+pose à côté des vraies pharmacies de l'appareil, sans rien effacer.
+
+| Regard | Personne | Identifiant | Ce qu'elle voit |
+| --- | --- | --- | --- |
+| Titulaire 1 | Hélène Marchetti, titulaire principale | `helene.marchetti` | Toute la gestion |
+| Titulaire 2 | Antoine Mercier, titulaire secondaire | `antoine.mercier` | Son espace ; la gestion si la titulaire principale l'accorde |
+| Pharmacien | Karim Benali, adjoint | `karim.benali` | Son planning, le planning publié, ses gardes, ses messages |
+| Préparateur | Camille Roussel, préparatrice | `camille.roussel` | Ses horaires, ses demandes, les remplacements, ses messages |
+
+Mot de passe commun : `demo`. Depuis la page de connexion, une carte par regard ouvre directement
+l'espace de la personne ; une fois dedans, le bandeau « Environnement de test » permet de passer d'un
+regard à l'autre en un clic et de tout remettre à neuf.
+
+**Parcours de test** (bouton « Lancer le parcours de test ») : neuf étapes qui changent de personne à
+chaque fois — tableau de bord de la titulaire, horaires d'une préparatrice et demande de remplacement,
+collègue qui se propose, validation, gardes d'un pharmacien, titulaire secondaire sans puis avec accès à
+la gestion, construction de la semaine suivante. Chaque étape explique ce qu'on regarde.
 
 ## Connexion, rôles et pharmacies
 
@@ -74,7 +92,7 @@ Un vrai contrôle d'accès et une vraie messagerie demandent un serveur.
 | **Tableau de bord** | Où en est la pharmacie ? | Décisions en attente, couverture pharmacien de la semaine, équipe du jour, prochains horaires, messages, mes pharmacies |
 | **Résoudre** | Que décider aujourd'hui ? | Absences à couvrir avec options comparées, demandes de remplacement, demandes à arbitrer, gardes, plannings à publier |
 | **Construire** | Comment couvrir la semaine ? | Grille à l'échelle du temps, contrôles immédiats, trois propositions (équité, souhaits, coût), brouillon puis publication |
-| **Gardes** | De la garde à la paie | Affectation, délai de 15 jours, interventions, repos à protéger, variables pour le comptable |
+| **Gardes** | Affecter, prévenir, payer | Ajout d'une garde avec le pharmacien à qui la confier et sa notification immédiate, délai de 15 jours, interventions, repos à protéger, variables pour le comptable |
 | **Mon planning** | Quand est-ce que je travaille ? | Aujourd'hui, demain et la suite en un coup d'œil (ordinateur et téléphone), planning publié, changements avant → après, demandes, remplacements, part des contraintes |
 | **Messages** | Qui prévenir ? | Fil de toute l'équipe et conversations privées |
 
@@ -125,10 +143,14 @@ précise (de 12 h à 14 h 30, par exemple).
 L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 
 - **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ au moins 3:1, dans
-  chacun des cinq thèmes (violet Solvéa par défaut, bleu-vert, bleu, vert, ardoise). L'interface reprend
-  les violets du logo (#2D0D8C, #5213DD, #891EFD) dans une seule famille de couleurs.
+  chacun des cinq thèmes (bleu ciel par défaut, violet, bleu-vert, bleu marine, ardoise).
+- **Repères de couleur dans les plannings** : jaune pour le matin, bleu pour la journée complète, orange
+  pour le milieu de journée, violet pour le soir, indigo pour la garde, vert d'eau pour le congé, rouge
+  doux pour l'arrêt. L'horaire est toujours écrit dans la tuile : la couleur aide, elle n'est jamais seule.
 - **Sans contours colorés** : boutons et cartes n'ont pas de bordure de couleur. Un élément choisi se lit à
   son fond teinté, à une coche ou à un libellé ; seuls les champs de saisie gardent un filet neutre.
+- **Aides au survol** : un jour à problème dans la ligne « Couverture » porte une pastille pleine ; au
+  survol ou au clavier, une bulle sombre dit le problème, les plages concernées et quoi faire.
 - **Jamais la couleur seule** : chaque état a aussi un pictogramme, un libellé ou une forme (coche,
   « Sélectionnée », « aujourd'hui », texte lu par les lecteurs d'écran).
 - **Clavier** : tout est atteignable et utilisable au clavier, le focus est toujours visible, un lien
@@ -139,7 +161,7 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 50 écrans,
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 63 écrans,
 fenêtres et thèmes vérifiés, ordinateur et téléphone. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 
@@ -165,6 +187,8 @@ src/
 - **Aide à la conformité, pas une garantie.** Les fiches marquées « à valider » viennent de sources
   secondaires. À faire relire par un avocat en droit social et un spécialiste de la paie officinale
   avant tout usage réel. Les montants des indemnités de garde ne sont pas renseignés.
+- **Notifications dans l'application.** Prévenir un pharmacien d'une garde dépose un avis dans son espace,
+  avec accusé de lecture ; aucun courriel ni SMS ne part, faute de serveur.
 - **Données sur l'appareil.** Cette version enregistre dans le navigateur (`localStorage`) : pas de
   serveur, donc pas de partage entre postes. Connexion, messages et demandes de remplacement fonctionnent
   entre les personnes qui utilisent le même appareil ; ils ne sont ni envoyés ni synchronisés ailleurs.

@@ -19,12 +19,12 @@ export type Vue =
   | 'mesgardes'
   | 'compte';
 
-export type Theme = 'solvea' | 'sarcelle' | 'bleu' | 'vert' | 'ardoise';
+export type Theme = 'ciel' | 'solvea' | 'sarcelle' | 'bleu' | 'ardoise';
 export interface Preferences {
   theme: Theme;
   texte: 'normal' | 'grand';
 }
-const PREFS_DEFAUT: Preferences = { theme: 'solvea', texte: 'normal' };
+const PREFS_DEFAUT: Preferences = { theme: 'ciel', texte: 'normal' };
 const CLE_SESSION = 'releve.session';
 const CLE_PREFS = 'releve.preferences';
 
@@ -60,6 +60,9 @@ interface Ui {
   personneId: string | null;
   /** Étape du tutoriel en cours ; null quand il est fermé. */
   tour: number | null;
+  /** Étape du parcours de test en cours ; null quand il est fermé. */
+  parcours: number | null;
+  setParcours: (etape: number | null) => void;
   aller: (vue: Vue) => void;
   setSemaine: (s: ISODate) => void;
   connecter: (personId: string, vue: Vue) => void;
@@ -87,6 +90,8 @@ export const useUi = create<Ui>((set) => ({
   gardeId: null,
   personneId: null,
   tour: null,
+  parcours: null,
+  setParcours: (parcours) => set({ parcours, tour: null }),
   aller: (vue) => set({ vue, focus: null }),
   setSemaine: (semaine) => set({ semaine, focus: null }),
   connecter: (session, vue) => {
@@ -95,12 +100,12 @@ export const useUi = create<Ui>((set) => ({
   },
   deconnecter: () => {
     ecrire(CLE_SESSION, null);
-    set({ session: null, tour: null, toast: null });
+    set({ session: null, tour: null, parcours: null, toast: null });
   },
   toutOublier: () => {
     ecrire(CLE_SESSION, null);
     ecrire(CLE_PREFS, {});
-    set({ session: null, preferences: {}, tour: null, toast: null });
+    set({ session: null, preferences: {}, tour: null, parcours: null, toast: null });
   },
   setPreferences: (personId, p) =>
     set((s) => {

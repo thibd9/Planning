@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { seed, vierge } from '../data/seed';
-import { addDays, dayIndex, fmtDateCourt, fmtSemaine, fromDayIndex, todayISO, uid, weekDates } from '../domain/time';
+import { addDays, dayIndex, fmtDateCourt, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates } from '../domain/time';
 import type {
   Absence,
   AppData,
@@ -101,7 +101,8 @@ export interface Store {
   redo: () => void;
   reinitialiser: () => void;
   /** Remplace les données par l'équipe d'exemple (annulable). */
-  chargerExemple: () => void;
+  /** Ouvre l'environnement de test à côté des vraies pharmacies ; `neuf` repart de données d'exemple fraîches. */
+  chargerExemple: (neuf?: boolean) => void;
   /** Crée l'officine depuis l'écran d'accueil : nom, horaires et première équipe. */
   /** `ajout` garde les pharmacies existantes ; `nouvelleCle` vaut pour un autre titulaire, qui reçoit sa propre clé de secours. */
   creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[], ajout?: boolean, nouvelleCle?: boolean) => void;
@@ -131,7 +132,8 @@ export interface Store {
   deciderBesoin: (id: string, accepter: boolean, statut?: BesoinStatut) => void;
   supprimerBesoin: (id: string) => void;
 
-  ajouterGardes: (g: Omit<Garde, 'id'>[]) => void;
+  /** Les gardes déjà confiées sont notifiées à la personne quand `prevenir` est vrai. */
+  ajouterGardes: (g: Omit<Garde, 'id'>[], prevenir?: boolean) => void;
   affecterGarde: (id: string, personId: string | null, exceptionnel: boolean) => void;
   /** Applique d'un coup une répartition proposée, tracée au journal avec ses raisons. */
   affecterGardes: (liste: { gardeId: string; personId: string; raison: string }[]) => void;
@@ -148,6 +150,12 @@ export interface Store {
   majRegle: (id: string, patch: Partial<Pick<Regle, 'valeur' | 'active'>>) => void;
   majMission: (id: string, patch: Partial<Mission>) => void;
   lireNotification: (id: string) => void;
+}
+
+/** Avis déposé dans l'espace d'une personne quand une garde lui est confiée ou retirée. */
+function avisGarde(g: Pick<Garde, 'date' | 'start' | 'end' | 'type'>, personId: string, confiee: boolean, at: string, today: ISODate): AppData['notifications'][number] {
+  const libelle = `${GARDE_LABEL[g.type]}, ${fmtHHMM(g.start)} → ${fmtHHMM(g.end)}`;
+  return { id: uid('n'), personId, at, date: g.date, avant: confiee ? 'Pas de garde' : libelle, apres: confiee ? libelle : 'Garde retirée', tardif: dayIndex(g.date) - dayIndex(today) < 15 };
 }
 
 export const useStore = create<Store>((set, get) => {
@@ -270,7 +278,16 @@ export const useStore = create<Store>((set, get) => {
           { type: 'reparation', titre: `Remplacement validé le ${horaire} : ${nom(d, remplacantId)} remplace ${nom(d, r.demandeur)}`, regles: true },
         );
       }),
-    chargerExemple: () => set((s) => ({ officineId: uid('off'), data: seed(todayISO()), autres: {}, past: [...s.past.slice(-40), s.data], future: [] })),
+    chargerExemple: (neuf = true) =>
+      set((s) => {
+        const existant = Object.entries(s.autres).find(([, d]) => d.demo);
+        if (!neuf && s.data.demo) return s;
+        const autres = Object.fromEntries(Object.entries(s.autres).filter(([, d]) => !d.demo));
+        // Une vraie pharmacie ouverte est mise de côté, jamais effacée.
+        if (!s.data.demo && (s.data.officine.nom.trim() || s.data.personnes.length)) autres[s.officineId] = s.data;
+        if (!neuf && existant) return { officineId: existant[0], data: existant[1], autres, past: [], future: [] };
+        return { officineId: uid('off'), data: seed(todayISO()), autres, past: [], future: [] };
+      }),
 
     saveShift: (shift) =>
       commit((d) => ({
@@ -426,26 +443,40 @@ export const useStore = create<Store>((set, get) => {
       }),
     supprimerBesoin: (id) => commit((d) => ({ ...d, besoins: d.besoins.filter((b) => b.id !== id) })),
 
-    ajouterGardes: (list) =>
-      commit((d) =>
-        journal(
-          { ...d, gardes: d.gardes.concat(list.map((g) => ({ ...g, id: uid('g') }))).sort((a, b) => a.date.localeCompare(b.date)) },
-          { type: 'garde', titre: `${list.length} garde${list.length > 1 ? 's' : ''} ajoutée${list.length > 1 ? 's' : ''} au calendrier` },
-        ),
-      ),
+    ajouterGardes: (list, prevenir) =>
+      commit((d, today) => {
+        const at = now();
+        const nouvelles: Garde[] = list.map((g) => ({ ...g, id: uid('g'), communiqueLe: g.personId && prevenir ? at : g.communiqueLe }));
+        const confiees = nouvelles.filter((g) => g.personId);
+        return journal(
+          {
+            ...d,
+            gardes: d.gardes.concat(nouvelles).sort((a, b) => a.date.localeCompare(b.date)),
+            notifications: prevenir ? [...confiees.map((g) => avisGarde(g, g.personId as string, true, at, today)), ...d.notifications] : d.notifications,
+          },
+          {
+            type: 'garde',
+            titre: `${list.length} garde${list.length > 1 ? 's' : ''} ajoutée${list.length > 1 ? 's' : ''} au calendrier${confiees.length ? `, confiée${confiees.length > 1 ? 's' : ''} à ${nom(d, confiees[0].personId)}` : ''}`,
+            detail: confiees.length && prevenir ? `${nom(d, confiees[0].personId)} a été prévenu dans son espace.` : undefined,
+          },
+        );
+      }),
     affecterGarde: (id, personId, exceptionnel) =>
-      commit((d) => {
+      commit((d, today) => {
         const g = d.gardes.find((x) => x.id === id);
         if (!g) return d;
-        const maj: Garde = { ...g, personId, exceptionnel, communiqueLe: personId ? now() : undefined };
+        const at = now();
+        const maj: Garde = { ...g, personId, exceptionnel, communiqueLe: personId ? at : undefined };
+        // La personne qui reçoit la garde, et celle qui la perd, sont prévenues dans leur espace.
+        const avis = [...(personId && personId !== g.personId ? [avisGarde(maj, personId, true, at, today)] : []), ...(g.personId && g.personId !== personId ? [avisGarde(g, g.personId, false, at, today)] : [])];
         return journal(
-          { ...d, gardes: d.gardes.map((x) => (x.id === id ? maj : x)) },
+          { ...d, gardes: d.gardes.map((x) => (x.id === id ? maj : x)), notifications: [...avis, ...d.notifications] },
           {
             type: 'garde',
             titre: personId
               ? `${GARDE_LABEL[g.type]} du ${fmtDateCourt(g.date)} confiée à ${nom(d, personId)}`
               : `${GARDE_LABEL[g.type]} du ${fmtDateCourt(g.date)} : affectation retirée`,
-            detail: personId ? `Programmation communiquée ${dayIndex(g.date) - dayIndex(get().today)} jours avant la garde.` : undefined,
+            detail: personId ? `Programmation communiquée ${dayIndex(g.date) - dayIndex(get().today)} jours avant la garde. ${nom(d, personId)} a été prévenu dans son espace.` : undefined,
             regles: true,
           },
         );
@@ -455,7 +486,11 @@ export const useStore = create<Store>((set, get) => {
         if (!liste.length) return d;
         const at = now();
         return journal(
-          { ...d, gardes: d.gardes.map((g) => { const a = liste.find((x) => x.gardeId === g.id); return a ? { ...g, personId: a.personId, communiqueLe: at } : g; }) },
+          {
+            ...d,
+            gardes: d.gardes.map((g) => { const a = liste.find((x) => x.gardeId === g.id); return a ? { ...g, personId: a.personId, communiqueLe: at } : g; }),
+            notifications: [...liste.flatMap((a) => { const g = d.gardes.find((x) => x.id === a.gardeId); return g ? [avisGarde(g, a.personId, true, at, get().today)] : []; }), ...d.notifications],
+          },
           {
             type: 'garde',
             titre: `${liste.length} garde${liste.length > 1 ? 's' : ''} répartie${liste.length > 1 ? 's' : ''} équitablement`,

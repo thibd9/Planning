@@ -1,41 +1,41 @@
 @import '@fontsource-variable/onest';
 
 /*
- * Mise en page : barre latérale claire, contenu aéré, cartes blanches arrondies, aux couleurs du logo Solvéa.
+ * Mise en page : barre latérale claire, contenu aéré, cartes blanches arrondies, dans un bleu ciel doux.
  * Accessibilité (RGAA / WCAG 2.1 AA) : tout texte tient 4,5:1 sur son fond, tout contour de champ ou de
  * bouton 3:1. Les fonds clairs ne portent que du texte foncé ; le blanc n'est posé que sur les violets profonds du logo.
  */
 :root {
-  /* Les couleurs de Solvéa : les violets du logo (#2D0D8C, #5213DD, #891EFD), du très clair au profond. Les neutres en sont teintés. */
-  --bg: #f7f6fc;
+  /* Le bleu ciel de Solvéa : doux et clair pour les grandes surfaces, un bleu plus soutenu pour agir. Les neutres sont à peine bleutés. */
+  --bg: #f5f8fb;
   --surface: #ffffff;
-  --surface-2: #fbfaff;
-  --line: #e6e1f3;
-  --ctl: #7b7394;
-  --ink: #17122b;
-  --ink-2: #3d3757;
-  --ink-3: #5a5473;
-  --ink-rgb: 23, 18, 43;
-  --track: #e2ddf0;
-  --n-1: #e9e6f2;
-  --n-2: #f3f1f9;
-  --n-3: #eceaf5;
-  --n-4: #dcd7ea;
-  --hair: #ece9f4;
-  --n-hover: #f1eefa;
-  --on-deep: #e4d9ff;
-  --a-deep: #5213dd;
-  --a-2: #7a1cf5;
-  --a-text: #5213dd;
-  --a-soft: #ece5ff;
-  --a-pastel: #d8c9ff;
-  --a-tint: #f6f2ff;
-  --a-hover: #2d0d8c;
-  --a-wash: rgba(82, 19, 221, 0.1);
-  --glow: 0 8px 20px -10px rgba(82, 19, 221, 0.6);
-  --night: #2d0d8c;
-  --night-2: #4513b8;
-  --night-soft: #e7e0fb;
+  --surface-2: #f9fbfd;
+  --line: #e1e8ee;
+  --ctl: #6b7986;
+  --ink: #111c27;
+  --ink-2: #36434f;
+  --ink-3: #52606c;
+  --ink-rgb: 17, 28, 39;
+  --track: #dde5ec;
+  --n-1: #e6ecf1;
+  --n-2: #f0f4f7;
+  --n-3: #e9eff3;
+  --n-4: #d5dee5;
+  --hair: #e8eef2;
+  --n-hover: #edf2f6;
+  --on-deep: #ffffff;
+  --a-deep: #1f6bb8;
+  --a-2: #2474c4;
+  --a-text: #1c5fa3;
+  --a-soft: #e3f1fd;
+  --a-pastel: #c7e3fb;
+  --a-tint: #f1f8fe;
+  --a-hover: #174f87;
+  --a-wash: rgba(31, 107, 184, 0.1);
+  --glow: 0 10px 22px -14px rgba(31, 107, 184, 0.55);
+  --night: #251f73;
+  --night-2: #3b2f9e;
+  --night-soft: #e6e4fb;
   /* Couleurs de sens, réservées aux états : validé, attention, bloquant, information. */
   --ok: #0b6b47;
   --ok-soft: #dff6ec;
@@ -46,29 +46,48 @@
   --info: #165a86;
   --info-soft: #e1f1fb;
   --sun-soft: #fff1d6;
-  --pastel-line: #d3c7f0;
-  /* Le dégradé du logo, arrêté avant son rose clair : le blanc y reste lisible partout. */
-  --grad-deep: linear-gradient(135deg, #2d0d8c 0%, #5213dd 45%, #891efd 100%);
+  --pastel-line: #c5dcf0;
+  --grad-deep: linear-gradient(135deg, #1f6bb8 0%, #2474c4 100%);
+  /* Le ciel : un dégradé très doux, qui ne porte que du texte foncé. */
+  --grad-vif: linear-gradient(120deg, #d6ebff 0%, #bfe0fd 52%, #dbe7ff 100%);
+  --on-vif: var(--ink);
+  --hero-cta: var(--a-deep);
   --grad-pastel: linear-gradient(125deg, var(--a-soft) 0%, var(--a-pastel) 100%);
   --grad-soft: linear-gradient(135deg, var(--a-tint) 0%, var(--a-soft) 100%);
+  /* Repères du planning, identiques dans tous les thèmes : chaque moment de la journée a sa couleur. */
+  --p-matin: linear-gradient(135deg, #fff6cf, #ffe58a);
+  --p-journee: linear-gradient(135deg, #dcedff, #a9d4fb);
+  --p-soir: linear-gradient(135deg, #ece5ff, #cdbfff);
+  --p-milieu: linear-gradient(135deg, #ffeeda, #ffcf9e);
+  --p-garde: linear-gradient(135deg, #3b2f9e, #251f73);
+  --p-conge: linear-gradient(135deg, #dff6ea, #b5e8cf);
+  --p-arret: linear-gradient(135deg, #ffe9e9, #ffb8b8);
+  --b-matin: #f0b429;
+  --b-journee: #3f8fdd;
+  --b-soir: #8b6cf0;
+  --b-milieu: #f08c3a;
   --r-s: 10px;
   --r-m: 18px;
   --r-l: 26px;
-  --shadow-1: 0 1px 2px rgba(var(--ink-rgb), 0.05), 0 14px 34px -18px rgba(45, 13, 140, 0.22);
-  --shadow-2: 0 24px 70px -22px rgba(45, 13, 140, 0.4);
+  --shadow-1: 0 1px 2px rgba(var(--ink-rgb), 0.04), 0 14px 34px -20px rgba(23, 79, 135, 0.22);
+  --shadow-2: 0 24px 70px -24px rgba(23, 79, 135, 0.36);
   --font: 'Onest Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
+:root[data-theme='solvea'] {
+  /* Les violets du logo Solvéa (#2D0D8C, #5213DD, #891EFD). */
+  --bg: #f7f6fc; --surface-2: #fbfaff; --line: #e6e1f3; --ctl: #7b7394; --ink: #17122b; --ink-2: #3d3757; --ink-3: #5a5473; --ink-rgb: 23, 18, 43; --track: #e2ddf0; --n-1: #e9e6f2; --n-2: #f3f1f9; --n-3: #eceaf5; --n-4: #dcd7ea; --hair: #ece9f4; --n-hover: #f1eefa; --on-deep: #e4d9ff; --a-deep: #5213dd; --a-2: #7a1cf5; --a-text: #5213dd; --a-soft: #ece5ff; --a-pastel: #d8c9ff; --a-tint: #f6f2ff; --a-hover: #2d0d8c; --a-wash: rgba(82, 19, 221, 0.1); --glow: 0 8px 20px -10px rgba(82, 19, 221, 0.6); --night: #2d0d8c; --night-2: #4513b8; --night-soft: #e7e0fb; --pastel-line: #d3c7f0; --grad-deep: linear-gradient(135deg, #2d0d8c 0%, #5213dd 45%, #891efd 100%); --shadow-1: 0 1px 2px rgba(var(--ink-rgb), 0.05), 0 14px 34px -18px rgba(45, 13, 140, 0.22); --shadow-2: 0 24px 70px -22px rgba(45, 13, 140, 0.4);
+  --grad-vif: var(--grad-deep); --on-vif: #fff; --hero-cta: #17122b;
+}
 /* Autres thèmes au choix : mêmes règles, autre famille. Leurs neutres sont teintés de bleu-vert. */
-:root[data-theme='sarcelle'], :root[data-theme='bleu'], :root[data-theme='vert'], :root[data-theme='ardoise'] {
+:root[data-theme='sarcelle'], :root[data-theme='bleu'], :root[data-theme='ardoise'] {
   --bg: #f4f8f9; --surface-2: #f7fafb; --line: #dfe8ea; --ctl: #6e8187; --ink: #12252b; --ink-2: #3a4b51; --ink-3: #56676d; --ink-rgb: 18, 37, 43; --track: #dde6e8;
   --n-1: #e6ecee; --n-2: #f1f5f6; --n-3: #e9f0f1; --n-4: #d5dfe2; --hair: #e9eff1; --n-hover: #eef4f5; --on-deep: #d5ecef;
-  --grad-deep: linear-gradient(135deg, var(--a-deep) 0%, var(--a-2) 100%);
+  --grad-deep: linear-gradient(135deg, var(--a-deep) 0%, var(--a-2) 100%); --grad-vif: var(--grad-deep); --on-vif: #fff; --hero-cta: #12252b;
   --shadow-1: 0 1px 2px rgba(18, 37, 43, 0.05), 0 14px 34px -18px rgba(10, 70, 80, 0.24);
   --shadow-2: 0 24px 70px -22px rgba(8, 50, 58, 0.42);
 }
 :root[data-theme='sarcelle'] { --a-deep: #0a5a63; --a-2: #127680; --a-text: #0b646d; --a-soft: #dff2f3; --a-pastel: #bfe4e6; --a-tint: #eef8f8; --a-hover: #08474e; --a-wash: rgba(10, 90, 99, 0.1); --glow: 0 8px 20px -10px rgba(10, 90, 99, 0.65); --night: #0f3b47; --night-2: #17505f; --night-soft: #dcecef; --pastel-line: #c5dfe3; }
 :root[data-theme='bleu'] { --night-soft: #dfe9f3; --a-deep: #1b4f7f; --a-2: #2a6aa3; --a-text: #1c5a92; --a-soft: #e3eef8; --a-pastel: #c6dcf0; --a-tint: #f0f5fb; --a-hover: #153f66; --a-wash: rgba(27, 79, 127, 0.1); --glow: 0 8px 20px -10px rgba(27, 79, 127, 0.65); --night: #14324f; --night-2: #1f4a72; --pastel-line: #c6d9ea; }
-:root[data-theme='vert'] { --night-soft: #dcefe5; --a-deep: #0b5d3f; --a-2: #157a55; --a-text: #0b6b47; --a-soft: #e0f4ea; --a-pastel: #c0e8d3; --a-tint: #eef9f3; --a-hover: #084a32; --a-wash: rgba(11, 93, 63, 0.1); --glow: 0 8px 20px -10px rgba(11, 93, 63, 0.65); --night: #0f3d2e; --night-2: #17533e; --pastel-line: #c2e0d1; }
 :root[data-theme='ardoise'] { --night-soft: #e2eaee; --a-deep: #2f4858; --a-2: #446579; --a-text: #36566a; --a-soft: #e8eff3; --a-pastel: #d2dfe7; --a-tint: #f2f6f8; --a-hover: #243844; --a-wash: rgba(47, 72, 88, 0.1); --glow: 0 8px 20px -10px rgba(47, 72, 88, 0.65); --night: #1f313c; --night-2: #2f4858; --pastel-line: #cfdbe2; }
 /* Texte agrandi : tout l'écran grossit d'un cran, proportions conservées. */
 :root[data-texte='grand'] #root { zoom: 1.12; }
@@ -114,7 +133,7 @@ button { cursor: pointer; }
 .app { display: grid; grid-template-columns: 264px minmax(0, 1fr); height: 100%; }
 .side { background: rgba(255, 255, 255, 0.86); border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 22px 16px 16px; gap: 4px; overflow-y: auto; }
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 20px; }
-.brand-mark { width: 38px; height: 38px; display: grid; place-items: center; flex: none; filter: drop-shadow(0 6px 10px rgba(82, 19, 221, 0.28)); }
+.brand-mark { width: 38px; height: 38px; display: grid; place-items: center; flex: none; filter: drop-shadow(0 6px 10px rgba(31, 107, 184, 0.25)); }
 .brand-name { color: var(--ink); padding: 2px 0 5px; }
 .brand-sub { font-size: 12px; color: var(--ink-3); margin-top: -3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
 .nav-label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); padding: 16px 12px 6px; font-weight: 650; }
@@ -122,7 +141,7 @@ button { cursor: pointer; }
 .nav-item .ni { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--n-3); color: var(--ink-2); flex: none; transition: background 0.15s ease, color 0.15s ease; }
 .nav-item:hover { background: var(--n-hover); color: var(--ink); }
 .nav-item.on { background: var(--a-soft); color: var(--ink); font-weight: 650; }
-.nav-item.on .ni { background: var(--grad-deep); color: #fff; box-shadow: var(--glow); }
+.nav-item.on .ni { background: var(--grad-vif); color: var(--on-vif); box-shadow: var(--glow); }
 .nav-item .q { display: block; font-size: 12px; font-weight: 450; color: var(--ink-3); margin-top: -2px; }
 .nav-badge { margin-left: auto; background: var(--ink); color: #fff; font-weight: 650; font-size: 11.5px; border-radius: 999px; min-width: 22px; height: 22px; display: grid; place-items: center; padding: 0 7px; }
 .side-foot { margin-top: auto; padding: 14px 12px 4px; font-size: 12px; color: var(--ink-3); display: flex; gap: 8px; align-items: center; }
@@ -143,7 +162,7 @@ button { cursor: pointer; }
 .content { flex: 1; overflow: auto; padding: 30px 32px 72px; }
 .page-head { display: flex; align-items: flex-end; gap: 18px; margin-bottom: 26px; flex-wrap: wrap; }
 .page-head p { color: var(--ink-2); margin-top: 9px; max-width: 66ch; font-size: 15px; }
-.page-ico { width: 54px; height: 54px; border-radius: 18px; background: var(--grad-deep); color: #fff; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), var(--shadow-1); flex: none; align-self: flex-start; }
+.page-ico { width: 54px; height: 54px; border-radius: 18px; background: var(--grad-vif); color: var(--on-vif); display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), var(--shadow-1); flex: none; align-self: flex-start; }
 
 /* -------------------------------------------------------------- Éléments */
 .btn {
@@ -156,8 +175,8 @@ button { cursor: pointer; }
 .btn:active { transform: translateY(1px); }
 .btn.primary { background: var(--a-deep); color: #fff; }
 .btn.primary:hover { background: var(--a-hover); }
-.btn.magic { background: var(--grad-deep); color: #fff; box-shadow: var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
-.btn.magic:hover { background: var(--a-hover); }
+.btn.magic { background: var(--grad-vif); color: var(--on-vif); font-weight: 650; box-shadow: var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.btn.magic:hover { background: var(--grad-vif); filter: brightness(0.96); }
 .btn.ghost { background: transparent; }
 .btn.ghost:hover { background: var(--a-wash); }
 .btn.danger { color: #a1261f; background: var(--danger-soft); }
@@ -295,7 +314,7 @@ table.t tr:last-child td { border-bottom: 0; }
 .pg-c .unavail { position: absolute; top: 7px; right: 8px; color: var(--ink-3); z-index: 1; }
 
 /* Tuile de poste : pictogramme du moment de la journée, horaires, et position dans la journée en bas de tuile. */
-.tile { border: 0; padding: 7px 8px 9px; width: 100%; text-align: left; display: flex; align-items: center; gap: 7px; border-radius: 12px; position: relative; overflow: hidden; color: var(--ink); min-height: 46px; transition: transform 0.1s ease, box-shadow 0.15s ease; }
+.tile { border: 0; --tile-ink: #111c27; padding: 7px 8px 9px; width: 100%; text-align: left; display: flex; align-items: center; gap: 7px; border-radius: 12px; position: relative; overflow: hidden; color: var(--ink); min-height: 46px; transition: transform 0.1s ease, box-shadow 0.15s ease; }
 button.tile:hover { transform: translateY(-1px); box-shadow: 0 6px 14px -6px rgba(var(--ink-rgb), 0.4); }
 .tile[draggable='true'] { cursor: grab; }
 .tile .ti { width: 24px; height: 24px; border-radius: 8px; background: rgba(255, 255, 255, 0.7); display: grid; place-items: center; flex: none; }
@@ -306,18 +325,18 @@ button.tile:hover { transform: translateY(-1px); box-shadow: 0 6px 14px -6px rgb
 .tile .tline i.p { background: rgba(255, 255, 255, 0.95); border-radius: 0; }
 .tile .tline i.m { background: #fff; box-shadow: 0 0 0 1.5px var(--a-deep); height: 5px; top: -1px; border-radius: 3px; }
 .tile .why { position: absolute; top: 4px; right: 4px; width: 15px; height: 15px; border-radius: 50%; background: #fff; color: var(--a-deep); display: grid; place-items: center; box-shadow: 0 1px 3px rgba(var(--ink-rgb), 0.25); }
-.tile.matin { background: linear-gradient(135deg, var(--a-tint), var(--a-soft)); box-shadow: inset 0 0 0 1px var(--pastel-line); }
-.tile.soir { background: linear-gradient(135deg, var(--a-pastel), color-mix(in srgb, var(--a-pastel) 78%, var(--a-2))); }
-.tile.journee { background: linear-gradient(120deg, var(--a-soft) 0%, var(--a-pastel) 100%); }
-.tile.milieu { background: linear-gradient(135deg, var(--n-2), var(--track)); }
-.tile.garde { background: linear-gradient(135deg, var(--night-2), var(--night)); color: #fff; }
+.tile.matin { background: var(--p-matin); }
+.tile.soir { background: var(--p-soir); }
+.tile.journee { background: var(--p-journee); }
+.tile.milieu { background: var(--p-milieu); }
+.tile.garde { background: var(--p-garde); color: #fff; }
 .tile.garde .ti { background: rgba(255, 255, 255, 0.18); }
 .tile.garde .ts { color: var(--on-deep); }
 .tile.absence { background: repeating-linear-gradient(135deg, var(--n-2), var(--n-2) 6px, var(--n-1) 6px, var(--n-1) 12px); color: var(--ink-2); }
-.tile.conge { background: repeating-linear-gradient(135deg, var(--n-2), var(--n-2) 6px, var(--n-1) 6px, var(--n-1) 12px); color: var(--ink-2); }
-.tile.arret { background: repeating-linear-gradient(135deg, var(--n-2), var(--n-2) 6px, var(--n-1) 6px, var(--n-1) 12px); color: var(--ink-2); }
+.tile.conge { background: var(--p-conge); color: #111c27; }
+.tile.arret { background: var(--p-arret); color: #111c27; }
 /* L'activité se lit à l'icône et au libellé de la tuile, pas à un contour. */
-.tile.ext { background: repeating-linear-gradient(135deg, var(--a-tint), var(--a-tint) 7px, var(--a-soft) 7px, var(--a-soft) 14px); }
+.tile.ext { background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.55) 6px, transparent 6px, transparent 12px), var(--p-journee); }
 
 /* Barre de temps simple, pour les aperçus et l'espace salarié. */
 .track { display: block; position: relative; height: 12px; border-radius: 6px; background: var(--track); }
@@ -326,13 +345,19 @@ button.tile:hover { transform: translateY(-1px); box-shadow: 0 6px 14px -6px rgb
 .track .rdvm { background: #a86400; height: 5px; top: auto; bottom: -1px; border-radius: 2px; box-shadow: 0 0 0 1.5px var(--surface); }
 .bar-pharma { background: var(--a-deep); }
 .bar-prepa { background: var(--a-2); }
+.bar-matin { background: var(--b-matin); }
+.bar-journee { background: var(--b-journee); }
+.bar-soir { background: var(--b-soir); }
+.bar-milieu { background: var(--b-milieu); }
 .bar-autre { background: #56676d; }
 .bar-externe { background: #6e8187; }
 .bar-nuit { background: var(--night); }
 .bar-back { background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3) 3px, transparent 3px, transparent 6px); }
 
-.pg-sum { padding: 8px 14px 8px 8px; display: flex; flex-direction: column; justify-content: center; gap: 4px; font-size: 12.5px; white-space: nowrap; overflow: hidden; border-bottom: 1px solid var(--hair); }
-.pg-sum .pill { align-self: flex-start; }
+.pg-sum { padding: 10px 18px 10px 14px; display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 12.5px; white-space: nowrap; border-bottom: 1px solid var(--hair); }
+.pg-sum .pill { align-self: flex-start; margin-top: 4px; }
+.pg-sum .sum-l { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); }
+.pg-sum .sum-l b { color: var(--ink); }
 .meter { height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; position: relative; }
 .meter i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--a-2); border-radius: 3px; }
 .meter i.over { background: #a86400; }
@@ -437,11 +462,17 @@ button.stepcard:hover { transform: translateY(-2px); box-shadow: var(--shadow-2)
 
 /* ------------------------------------------------------------ Mon planning */
 .me { max-width: 1000px; margin: 0 auto; }
-.hero { background: var(--grad-pastel); color: var(--ink); border-radius: var(--r-l); padding: 30px 32px; position: relative; overflow: hidden; box-shadow: var(--shadow-1); border: 1px solid var(--pastel-line); }
-.hero::after { content: ''; position: absolute; right: -80px; top: -150px; width: 360px; height: 360px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.72), transparent 64%); }
+.hero { background: var(--grad-vif); color: var(--on-vif); border-radius: var(--r-l); padding: 30px 32px; position: relative; overflow: hidden; box-shadow: var(--shadow-1); border: 0; }
+.hero::after { content: ''; position: absolute; right: -60px; top: -170px; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent 64%); }
+.hero::before { content: ''; position: absolute; left: 34%; bottom: -220px; width: 380px; height: 380px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.28), transparent 62%); }
 .hero > * { position: relative; z-index: 1; }
-.hero h1 { color: var(--ink); font-size: 36px; margin: 8px 0 6px; }
-.hero .eyebrow { color: var(--a-deep); }
+.hero h1 { color: inherit; font-size: 36px; margin: 8px 0 6px; }
+.hero .eyebrow, .hero .hl, .hero .soft, .hero p { color: inherit; }
+.hero .btn:not(.primary) { background: rgba(255, 255, 255, 0.92); color: var(--ink); }
+.hero .btn:not(.primary):hover { background: #fff; }
+.hero .btn.primary { background: var(--hero-cta); color: #fff; }
+.hero .btn.primary:hover { filter: brightness(0.9); }
+.hero .pill { background: rgba(255, 255, 255, 0.92); color: var(--ink); }
 .day-list { display: flex; flex-direction: column; list-style: none; margin: 0; padding: 0; }
 .day-row { display: grid; grid-template-columns: 124px 1fr auto; gap: 14px; align-items: center; padding: 14px 22px; border-bottom: 1px solid var(--line); }
 .day-row:last-child { border-bottom: 0; }
@@ -686,6 +717,7 @@ button.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2)
 .cap1 { display: inline-block; }
 .cap1::first-letter { text-transform: uppercase; }
 div.cap1 { display: block; }
+td.cap1, th.cap1 { display: table-cell; }
 .menu .titre-menu { padding: 8px 14px 2px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
 
 /* Sur la page de connexion, le nom de l'application reste affiché, même sur téléphone. */
@@ -695,3 +727,93 @@ div.cap1 { display: block; }
 .input:focus-visible, .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible, .officine-sel select:focus-visible { outline: 2px solid var(--ink); outline-offset: -1px; box-shadow: 0 0 0 5px var(--a-soft); border-color: var(--ink); border-radius: 12px; }
 .premiere .btn:not(.ghost) { background: var(--surface); box-shadow: var(--shadow-1); }
 .premiere .btn:not(.ghost):hover { background: var(--a-soft); }
+
+/* Tuiles du planning : texte toujours sombre sur les couleurs claires, quel que soit le thème. */
+.tile.matin, .tile.soir, .tile.journee, .tile.milieu, .tile.conge, .tile.arret { color: #111c27; }
+.tile.matin .ts, .tile.soir .ts, .tile.journee .ts, .tile.milieu .ts, .tile.conge .ts, .tile.arret .ts { color: #2e3b47; }
+.tile.matin .ti, .tile.soir .ti, .tile.journee .ti, .tile.milieu .ti { color: #111c27; background: rgba(255, 255, 255, 0.72); }
+.tile .tline { background: rgba(17, 28, 39, 0.14); }
+.tile .tline i { background: rgba(17, 28, 39, 0.75); }
+.tile.garde .tline { background: rgba(255, 255, 255, 0.25); }
+.tile.garde .tline i { background: #fff; }
+.legend i.matin { background: var(--p-matin); }
+.legend i.journee { background: var(--p-journee); }
+.legend i.soir { background: var(--p-soir); }
+.legend i.milieu { background: var(--p-milieu); }
+.legend i.garde { background: var(--p-garde); }
+.legend i.conge { background: var(--p-conge); }
+.legend i.arret { background: var(--p-arret); }
+.legend i { box-shadow: none; width: 22px; height: 14px; }
+/* Pastille de moment : soleil, soleil couchant, lune… à côté d'un horaire. */
+.moment { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; color: #111c27; flex: none; }
+.moment.matin { background: var(--p-matin); }
+.moment.journee { background: var(--p-journee); }
+.moment.soir { background: var(--p-soir); }
+.moment.milieu { background: var(--p-milieu); }
+.moment.garde { background: var(--p-garde); color: #fff; }
+.moment.conge { background: var(--p-conge); }
+.moment.arret { background: var(--p-arret); }
+.moment.repos { background: var(--n-1); color: var(--ink-2); }
+
+/* Bulles d'aide : au survol ou au clavier, le problème s'explique en clair, sur fond sombre. */
+[data-aide] { position: relative; }
+[data-aide]:hover::after, [data-aide]:focus-visible::after {
+  content: attr(data-aide); position: absolute; top: calc(100% + 9px); left: 50%; transform: translateX(-50%); z-index: 45;
+  width: max-content; max-width: 270px; white-space: pre-line; text-align: left; text-transform: none; letter-spacing: 0;
+  background: #111c27; color: #fff; font-size: 13.5px; font-weight: 550; line-height: 1.5; padding: 11px 14px; border-radius: 14px;
+  box-shadow: 0 18px 40px -12px rgba(17, 28, 39, 0.55); pointer-events: none; animation: rise 0.12s ease;
+}
+[data-aide]:hover::before, [data-aide]:focus-visible::before {
+  content: ''; position: absolute; top: calc(100% - 2px); left: 50%; transform: translateX(-50%); z-index: 46;
+  border: 6px solid transparent; border-bottom-color: #111c27; pointer-events: none;
+}
+[data-aide][data-aide-pos='fin']:hover::after, [data-aide][data-aide-pos='fin']:focus-visible::after { left: auto; right: 0; transform: none; }
+[data-aide][data-aide-ton='bad']:hover::after, [data-aide][data-aide-ton='bad']:focus-visible::after { background: #7a1712; }
+[data-aide][data-aide-ton='bad']:hover::before, [data-aide][data-aide-ton='bad']:focus-visible::before { border-bottom-color: #7a1712; }
+[data-aide][data-aide-ton='warn']:hover::after, [data-aide][data-aide-ton='warn']:focus-visible::after { background: #5c3200; }
+[data-aide][data-aide-ton='warn']:hover::before, [data-aide][data-aide-ton='warn']:focus-visible::before { border-bottom-color: #5c3200; }
+/* Les jours à problème se repèrent sans survol : pastille plus grande, et curseur d'aide. */
+.pg-o[data-aide-ton] { cursor: help; }
+.pg-o[data-aide-ton] .mark { width: 30px; height: 30px; }
+.pg-o[data-aide-ton] .mark svg { width: 17px; height: 17px; }
+.pg-o[data-aide-ton='bad'] .mark { background: var(--danger); color: #fff; }
+.pg-o[data-aide-ton='warn'] .mark { background: #ffd43b; color: #5c3200; }
+.pg-o[data-aide-ton]:hover { background: var(--n-2); border-radius: 12px; }
+
+/* Réglages : une ligne par jour, les actions sous les horaires ; rien n'est coupé, quelle que soit la largeur. */
+.jour-ligne { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 10px 16px; align-items: center; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+.jour-ligne:last-child { border-bottom: 0; }
+.jl-nom { font-weight: 650; }
+.jl-heures { min-width: 0; }
+.jl-actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 560px) { .jour-ligne { grid-template-columns: 1fr; padding-inline: 16px; } .jl-actions { grid-column: 1; } }
+
+/* Environnement de test : bandeau discret mais toujours présent, et parcours pas à pas. */
+.bandeau-test { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; margin: 12px 32px 0; padding: 8px 10px 8px 16px; border-radius: 18px; background: var(--n-1); color: var(--ink); }
+.bandeau-test .bt-titre { display: inline-flex; align-items: center; gap: 7px; font-weight: 650; font-size: 13px; }
+.bandeau-test .seg { background: rgba(255, 255, 255, 0.85); }
+.bandeau-test .btn:not(.primary) { background: rgba(255, 255, 255, 0.85); }
+.parcours-test { position: fixed; right: 24px; bottom: 24px; z-index: 48; width: min(400px, calc(100vw - 32px)); background: var(--surface); border-radius: 22px; box-shadow: 0 30px 80px -24px rgba(var(--ink-rgb), 0.55), 0 0 0 1px var(--line); padding: 18px; display: flex; flex-direction: column; gap: 12px; animation: rise 0.2s ease; }
+.parcours-test .pt-n { width: 38px; height: 38px; border-radius: 13px; display: grid; place-items: center; font-weight: 700; background: var(--grad-vif); color: var(--on-vif); flex: none; }
+.parcours-test .pt-barre { height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
+.parcours-test .pt-barre i { display: block; height: 100%; border-radius: 3px; background: var(--grad-vif); transition: width 0.25s ease; }
+.test-env { background: var(--surface); }
+.test-roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.test-role { display: flex; flex-direction: column; gap: 4px; text-align: left; border: 0; border-radius: 18px; padding: 16px; background: var(--n-2); transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease; }
+.test-role:hover { background: var(--a-soft); transform: translateY(-2px); box-shadow: var(--shadow-1); }
+.test-role .tr-titre { font-size: 11.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--a-text); }
+.test-role b { font-size: 16px; letter-spacing: -0.02em; }
+.test-role .tr-go { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 650; font-size: 13px; color: var(--ink); }
+@media (max-width: 900px) {
+  .bandeau-test { margin: 10px 16px 0; }
+  .bandeau-test .bt-titre { width: 100%; }
+  .bandeau-test .seg { overflow-x: auto; max-width: 100%; }
+  .parcours-test { right: 12px; left: 12px; bottom: 86px; width: auto; }
+}
+
+/* Aucun texte coupé dans la grille : quand la colonne se resserre, la tuile retire son icône puis sa seconde ligne. */
+.pg-c { container-type: inline-size; }
+@container (max-width: 128px) { .tile .ti { display: none; } .tile { padding-left: 10px; } }
+@container (max-width: 92px) { .tile .ts { display: none; } .tile .tt { font-size: 11px; } }
+.pg-p .meta { white-space: normal; overflow: visible; line-height: 1.35; }
+.app.en-parcours .content { padding-bottom: 300px; }

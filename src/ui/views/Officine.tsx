@@ -18,7 +18,7 @@ function Heure({ value, onChange, label }: { value: number; onChange: (v: number
         const v = parseHHMM(e.target.value);
         if (v !== null) onChange(v);
       }}
-      style={{ padding: '5px 7px', width: 124 }}
+      style={{ padding: '5px 8px', width: 112 }}
     />
   );
 }
@@ -60,17 +60,14 @@ export function Officine(): JSX.Element {
           <div className="card-head">
             <h2 className="h3">Horaires d'ouverture</h2>
           </div>
-          <table className="t" aria-label="Horaires d’ouverture par jour">
-            <tbody>
+          <div role="list" aria-label="Horaires d’ouverture par jour">
               {JOURS.map((j, i) => {
                 const plages = officine.horaires[i];
                 const setPlages = (p: Interval[]): void => majOfficine({ horaires: officine.horaires.map((h, k) => (k === i ? p : h)) });
                 return (
-                  <tr key={j}>
-                    <th scope="row" style={{ textTransform: 'capitalize', fontWeight: 650, fontSize: 14.5, letterSpacing: 0, color: 'var(--ink)', borderBottom: '1px solid var(--line)' }}>
-                      {j}
-                    </th>
-                    <td>
+                  <div key={j} className="jour-ligne" role="listitem">
+                    <div className="jl-nom cap1">{j}</div>
+                    <div className="jl-heures">
                       {plages.length ? (
                         <div className="col" style={{ gap: 6 }}>
                           {plages.map((h, k) => (
@@ -84,13 +81,12 @@ export function Officine(): JSX.Element {
                       ) : (
                         <span className="muted">Fermé</span>
                       )}
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="row wrap" style={{ justifyContent: 'flex-end', gap: 4 }}>
+                    </div>
+                    <div className="jl-actions">
                         {plages.length === 1 && plages[0].end - plages[0].start > 240 ? (
                           <button
                             type="button"
-                            className="btn sm ghost"
+                            className="btn sm"
                             aria-label={`Coupure le midi : ${j}`}
                             onClick={() => setPlages([{ start: plages[0].start, end: Math.max(plages[0].start + 60, Math.min(750, plages[0].end - 120)) }, { start: Math.max(plages[0].start + 120, Math.min(840, plages[0].end - 60)), end: plages[0].end }])}
                           >
@@ -98,20 +94,18 @@ export function Officine(): JSX.Element {
                           </button>
                         ) : null}
                         {plages.length === 2 ? (
-                          <button type="button" className="btn sm ghost" aria-label={`Sans coupure : ${j}`} onClick={() => setPlages([{ start: plages[0].start, end: plages[1].end }])}>
+                          <button type="button" className="btn sm" aria-label={`Sans coupure : ${j}`} onClick={() => setPlages([{ start: plages[0].start, end: plages[1].end }])}>
                             Sans coupure
                           </button>
                         ) : null}
-                        <button type="button" className="btn sm ghost" aria-label={plages.length ? `Fermer ce jour : ${j}` : `Ouvrir : ${j}`} onClick={() => setPlages(plages.length ? [] : [{ start: 9 * 60, end: 19 * 60 }])}>
+                        <button type="button" className="btn sm" aria-label={plages.length ? `Fermer ce jour : ${j}` : `Ouvrir : ${j}`} onClick={() => setPlages(plages.length ? [] : [{ start: 9 * 60, end: 19 * 60 }])}>
                           {plages.length ? 'Fermer ce jour' : 'Ouvrir'}
                         </button>
-                      </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+          </div>
           <div className="card-body" style={{ borderTop: '1px solid var(--line)' }}>
             <label className="check">
               <input type="checkbox" checked={officine.fermeJoursFeries} onChange={(e) => majOfficine({ fermeJoursFeries: e.target.checked })} />

@@ -26,7 +26,7 @@ export function Avatar({ person, lg }: { person: Person | undefined; lg?: boolea
 
 export function Pill({ tone, children, title }: { tone?: string; children: ReactNode; title?: string }): JSX.Element {
   return (
-    <span className={`pill${tone ? ` ${tone}` : ''}`} title={title}>
+    <span className={`pill${tone ? ` ${tone}` : ''}`} data-aide={title}>
       {children}
     </span>
   );
@@ -145,6 +145,13 @@ export interface Echelle {
 const pct = (e: Echelle, m: number): number => Math.max(0, Math.min(100, ((m - e.start) / (e.end - e.start)) * 100));
 
 /** Barre de poste dessinée à l'échelle du temps, pause visible. */
+/** Moment d'un poste, pour sa couleur : matin (jaune), journée (vert), milieu (orange), soir (violet). */
+export function momentDe(s: { start: number; end: number }): 'matin' | 'journee' | 'milieu' | 'soir' {
+  if (s.end <= 14 * 60 + 30) return 'matin';
+  if (s.start >= 11 * 60 + 30) return 'soir';
+  return s.start <= 9 * 60 + 30 && s.end < 18 * 60 ? 'milieu' : 'journee';
+}
+
 export function Track({
   shifts,
   echelle,
@@ -161,7 +168,7 @@ export function Track({
       {shifts.map((s, i) => (
         <i
           key={i}
-          className={`bar-${role}${s.activite !== 'comptoir' ? ' bar-back' : ''}`}
+          className={`bar-${role === 'nuit' ? 'nuit' : momentDe(s)}${s.activite !== 'comptoir' ? ' bar-back' : ''}`}
           style={{ left: `${pct(echelle, s.start)}%`, width: `${pct(echelle, s.end) - pct(echelle, s.start)}%` }}
         />
       ))}
@@ -200,17 +207,17 @@ const LETTRES = [
 ];
 const ACCENT = 'M1082.21 78.1572C1080.34 80.2541 1077.33 81.4173 1074.55 81.4173L1044.72 81.4403C1042.83 81.4403 1041.48 79.9021 1040.85 78.8995C1039.92 77.4225 1039.89 74.6598 1041.19 73.1369L1068.32 41.408C1071.07 38.1785 1073.72 35.4847 1078.37 35.5L1108.18 35.5765C1110.36 35.5765 1112.04 36.625 1112.97 37.9566C1113.83 39.1887 1114.52 41.959 1113.2 43.4361L1082.21 78.1496V78.1572Z';
 
-/** Symbole Solvéa, avec son dégradé violet. Décoratif : le nom est porté par le texte voisin. */
+/** Symbole Solvéa, dans un dégradé bleu ciel (le dessin est celui du logo fourni). Décoratif : le nom est porté par le texte voisin. */
 export function Logo({ size = 38 }: { size?: number }): JSX.Element {
   const id = useId();
   return (
     <svg width={size} height={(size * 298) / 302} viewBox="0 0 302 298" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={id} x1="23.8" y1="177.2" x2="285.3" y2="244.2" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#2D0D8C" />
-          <stop offset="0.303" stopColor="#5213DD" />
-          <stop offset="0.74" stopColor="#891EFD" />
-          <stop offset="1" stopColor="#CC70FB" />
+          <stop stopColor="#1F6BB8" />
+          <stop offset="0.34" stopColor="#3F8FDD" />
+          <stop offset="0.74" stopColor="#7DBDF3" />
+          <stop offset="1" stopColor="#BFE0FD" />
         </linearGradient>
       </defs>
       <path d={SYMBOLE} fill={`url(#${id})`} />
@@ -225,7 +232,7 @@ export function LogoNom({ hauteur = 22 }: { hauteur?: number }): JSX.Element {
       {LETTRES.map((d, i) => (
         <path key={i} d={d} fill="currentColor" />
       ))}
-      <path d={ACCENT} fill="#6D18ED" />
+      <path d={ACCENT} fill="#2474C4" />
     </svg>
   );
 }

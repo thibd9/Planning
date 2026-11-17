@@ -135,9 +135,9 @@ export function Construire(): JSX.Element {
 
   const ouverts = dates.map((d) => ouverture(data.officine, d).length > 0);
   const avecSynthese = lecture !== 'heures';
-  const colonnes = `232px ${dates
-    .map((d, i) => (ouverts[i] ? 'minmax(104px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '104px' : '44px'))
-    .join(' ')}${avecSynthese ? ' 136px' : ''}`;
+  const colonnes = `${avecSynthese ? 208 : 232}px ${dates
+    .map((d, i) => (ouverts[i] ? 'minmax(108px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '104px' : '44px'))
+    .join(' ')}${avecSynthese ? ' 172px' : ''}`;
   const visibles = data.personnes.filter((p) => !p.externe || postes.some((s) => s.personId === p.id));
   const lignesEquite = useMemo(
     () => (lecture === 'equite' ? equite(data, periodeAvant(semaine, 8).from, addDays(semaine, 6)) : []),
@@ -235,7 +235,7 @@ export function Construire(): JSX.Element {
                 </Pill>
               )}
               {postes.length ? (
-                <span className="ring" title="Part des minutes d'ouverture où un pharmacien est planifié">
+                <span className="ring" data-aide="Part des minutes d’ouverture où un pharmacien est planifié">
                   <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                     <circle cx="12" cy="12" r="9" fill="none" stroke="var(--track)" strokeWidth="3.5" />
                     <circle
@@ -387,7 +387,7 @@ export function Construire(): JSX.Element {
                                   }}
                                 >
                                   {reconnus.length && !duJour.length && !absence ? (
-                                    <span className="unavail" title={reconnus.map(decrireBesoin).join('\n')}>
+                                    <span className="unavail" data-aide={`Indisponibilité reconnue :\n${reconnus.map(decrireBesoin).join('\n')}`}>
                                       <Lock size={12} aria-label="Indisponibilité reconnue" />
                                     </span>
                                   ) : null}
@@ -445,10 +445,13 @@ export function Construire(): JSX.Element {
                   </li>
                 );
               })}
-              <li><i style={{ background: 'linear-gradient(135deg, var(--a-tint), var(--a-soft))' }} /> Ouverture, matin</li>
-              <li><i style={{ background: 'linear-gradient(135deg, var(--a-pastel), color-mix(in srgb, var(--a-pastel) 78%, var(--a-2)))' }} /> Fermeture, après-midi</li>
-              <li><i style={{ background: 'linear-gradient(120deg, var(--a-soft), var(--a-pastel))' }} /> Journée complète</li>
-              <li><i style={{ background: 'linear-gradient(135deg, var(--night-2), var(--night))' }} /> Garde</li>
+              <li><i className="matin" /> Matin (ouverture)</li>
+              <li><i className="journee" /> Journée complète</li>
+              <li><i className="milieu" /> Milieu de journée</li>
+              <li><i className="soir" /> Soir (fermeture)</li>
+              <li><i className="garde" /> Garde</li>
+              <li><i className="conge" /> Congé</li>
+              <li><i className="arret" /> Arrêt</li>
               <li><Lock size={13} aria-hidden="true" /> Indisponibilité reconnue</li>
               <li><Sparkles size={13} aria-hidden="true" /> Affectation expliquée</li>
             </ul>
@@ -543,7 +546,7 @@ function Objectif({ data, date, echelle, ouvert, vide, flag }: { data: AppData; 
   if (!ouvert) {
     return (
       <div className="pg-o" role="cell">
-        <span className="mark off" title="Officine fermée">
+        <span className="mark off" data-aide="Officine fermée">
           <Minus size={14} />
         </span>
       </div>
@@ -559,8 +562,17 @@ function Objectif({ data, date, echelle, ouvert, vide, flag }: { data: AppData; 
       : sous.length
         ? `Sous l'effectif attendu : ${sous.map((t) => `${fmtHeure(t.start)} – ${fmtHeure(t.end)}`).join(', ')}`
         : 'Pharmacien présent sur toute l’ouverture, effectif atteint';
+  const plages = (l: { start: number; end: number }[]): string => l.map((t) => `• ${fmtHeure(t.start)} – ${fmtHeure(t.end)}`).join('\n');
+  // La bulle d'aide dit le problème, les plages concernées et quoi faire.
+  const aide = vide
+    ? 'Aucun poste posé ce jour-là.'
+    : trous.length
+      ? `Aucun pharmacien sur :\n${plages(trous)}\nPosez ou allongez le poste d’un pharmacien.`
+      : sous.length
+        ? `Sous l’effectif attendu sur :\n${plages(sous)}\nAjoutez une personne au comptoir.`
+        : 'Pharmacien présent sur toute l’ouverture, effectif atteint.';
   return (
-    <div className={`pg-o${flag ? ' flag' : ''}`} role="cell" title={texte}>
+    <div className={`pg-o${flag ? ' flag' : ''}`} role="cell" data-aide={aide} data-aide-ton={etat === 'bad' || etat === 'warn' ? etat : undefined} data-aide-pos={weekday(date) >= 5 ? 'fin' : undefined} tabIndex={etat === 'bad' || etat === 'warn' ? 0 : undefined}>
       <span className={`mark ${etat}`}>{etat === 'ok' ? <Check size={15} /> : etat === 'bad' ? <X size={14} /> : etat === 'warn' ? <AlertTriangle size={13} /> : <Minus size={14} />}</span>
       <span className="sr">{texte}</span>
       {vide ? null : (
@@ -585,10 +597,17 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
     const f = fatigue(data, person.id, semaine);
     if (!l) return <div className="pg-sum muted" role="cell">—</div>;
     return (
-      <div className="pg-sum" role="cell" title={f.facteurs.map((x) => `${x.label} (+${x.points})`).join('\n') || 'Aucun facteur de fatigue relevé'}>
-        <span className="num">
-          Sam. <b>{l.reel.samedis}</b>
-          {l.attendu.samedis !== null ? <span className="muted"> / {fmtDecimal(l.attendu.samedis, 1)}</span> : null} · Ferm. <b>{l.reel.fermetures}</b>
+      <div className="pg-sum" role="cell" tabIndex={0} data-aide-pos="fin" data-aide={f.facteurs.length ? `Fatigue ${f.niveau} :\n${f.facteurs.map((x) => `• ${x.label}`).join('\n')}` : 'Aucun facteur de fatigue relevé.'}>
+        <span className="num sum-l">
+          <span>Samedis</span>
+          <span>
+            <b>{l.reel.samedis}</b>
+            {l.attendu.samedis !== null ? <span className="muted"> / {fmtDecimal(l.attendu.samedis, 1)}</span> : null}
+          </span>
+        </span>
+        <span className="num sum-l">
+          <span>Fermetures</span>
+          <b>{l.reel.fermetures}</b>
         </span>
         <Pill tone={f.niveau === 'élevée' ? 'danger' : f.niveau === 'modérée' ? 'warn' : 'ok'}>Fatigue {f.niveau}</Pill>
       </div>

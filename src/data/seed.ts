@@ -68,6 +68,8 @@ const personne = (
 /** Équipe fictive. Les taux horaires sont indicatifs et ne servent qu'à comparer des scénarios. */
 export const EQUIPE_DEMO: Person[] = [
   personne('p_helene', 'Hélène', 'Marchetti', 'titulaire', 42, null, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
+  // Titulaire secondaire, associé à temps réduit : sans droit de gestion tant que la titulaire principale ne le lui donne pas.
+  personne('p_antoine', 'Antoine', 'Mercier', 'titulaire', 24, null, { competences: ['vaccination'], volontaireGardes: true }),
   personne('p_karim', 'Karim', 'Benali', 'adjoint', 35, 24, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
   personne('p_lea', 'Léa', 'Fontaine', 'adjoint', 28, 23.5, { competences: ['vaccination', 'entretien'], volontaireHeuresComp: true, volontaireGardes: true }),
   personne('p_camille', 'Camille', 'Roussel', 'preparateur', 35, 15.8, { competences: ['orthopedie'] }),

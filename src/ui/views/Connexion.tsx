@@ -1,8 +1,9 @@
-import { ArrowLeft, ArrowRight, CalendarClock, CircleAlert, Info, LogIn, MessageSquare, RotateCcw, ShieldCheck, Sparkles, Store } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarClock, CircleAlert, FlaskConical, Info, LogIn, MessageSquare, Play, RotateCcw, ShieldCheck, Sparkles, Store } from 'lucide-react';
 import { useState } from 'react';
 import { empreinte, espaceDe, estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
+import { ROLES_TEST, lancerParcours, voirComme } from '../Parcours';
 import { tutorielDejaVu } from '../Tour';
 import { Logo, LogoNom } from '../kit';
 
@@ -54,13 +55,10 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
     setInfo('Mot de passe redéfini. Vous pouvez vous connecter.');
   };
 
-  // L'exemple se charge, puis on se connecte comme tout le monde : identifiants préremplis.
-  const exemple = (): void => {
-    chargerExemple();
-    setIdentifiant('helene.marchetti');
-    setMotDePasse('demo');
-    setErreur('');
-    setInfo('Équipe d’exemple chargée. Les identifiants sont préremplis : il reste à vous connecter.');
+  // Environnement de test : une pharmacie d'exemple posée à côté des vraies, sans rien effacer.
+  const entrerComme = (id: string): void => {
+    chargerExemple(false);
+    voirComme(id);
   };
 
   return (
@@ -126,7 +124,7 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
               <p className="notice info small">
                 <Info size={16} aria-hidden="true" />
                 <span>
-                  Équipe d’exemple : identifiant <b>helene.marchetti</b> (titulaire principale), <b>karim.benali</b> (pharmacien) ou <b>camille.roussel</b> (préparatrice), mot de passe <b>demo</b>.
+                  Équipe d’exemple : identifiant <b>helene.marchetti</b> (titulaire principale), <b>antoine.mercier</b> (titulaire secondaire), <b>karim.benali</b> (pharmacien) ou <b>camille.roussel</b> (préparatrice), mot de passe <b>demo</b>.
                 </span>
               </p>
             ) : null}
@@ -152,11 +150,6 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             <button type="button" className="btn" onClick={onCreer} style={{ minHeight: 46 }}>
               <Store size={17} aria-hidden="true" /> Créer ma pharmacie <ArrowRight size={16} aria-hidden="true" />
             </button>
-            {vide ? (
-              <button type="button" className="btn ghost sm" onClick={exemple}>
-                Découvrir avec une équipe d’exemple
-              </button>
-            ) : null}
           </aside>
         ) : null}
         {ecran === 'oubli' ? (
@@ -224,6 +217,35 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
           </div>
         ) : null}
         </div>
+        {ecran === 'connexion' ? (
+          <section className="card pad col test-env" aria-labelledby="test-titre" style={{ gap: 16 }}>
+            <div className="row wrap" style={{ gap: 12 }}>
+              <span className="ico" aria-hidden="true">
+                <FlaskConical size={18} />
+              </span>
+              <div className="grow" style={{ minWidth: 220 }}>
+                <h2 id="test-titre" className="h3">Environnement de test</h2>
+                <p className="soft small">Une pharmacie d’exemple, la « Pharmacie des Tilleuls », avec une équipe de onze personnes déjà créée. Entrez en un clic dans la peau de chacun.</p>
+              </div>
+              <button type="button" className="btn magic" onClick={lancerParcours}>
+                <Play size={16} aria-hidden="true" /> Lancer le parcours de test
+              </button>
+            </div>
+            <div className="test-roles">
+              {ROLES_TEST.map((r) => (
+                <button key={r.cle} type="button" className="test-role" onClick={() => entrerComme(r.identifiant)}>
+                  <span className="tr-titre">{r.titre}</span>
+                  <b>{r.nom}</b>
+                  <span className="small soft">{r.detail}</span>
+                  <span className="tr-go">
+                    Voir son espace <ArrowRight size={14} aria-hidden="true" />
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="tiny muted">Vos vraies pharmacies ne sont pas touchées. Chaque personne d’exemple se connecte aussi par le formulaire : identifiant prenom.nom, mot de passe « demo ».</p>
+          </section>
+        ) : null}
         <p className="tiny muted">Sans serveur, cette connexion sépare les espaces sur cet appareil ; elle ne remplace pas de vrais comptes en ligne.</p>
       </div>
     </main>

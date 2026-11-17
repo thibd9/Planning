@@ -554,8 +554,11 @@ function DialogueImport({ onClose }: { onClose: () => void }): JSX.Element {
 
 function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
   const ajouter = useStore((s) => s.ajouterGardes);
+  const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const dire = useUi((s) => s.dire);
+  const [personId, setPersonId] = useState('');
+  const [prevenir, setPrevenir] = useState(true);
   const [date, setDate] = useState(addDays(today, 21));
   const [debut, setDebut] = useState('19:30');
   const [fin, setFin] = useState('08:30');
@@ -566,10 +569,16 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
   const d = parseHHMM(debut);
   const f = parseHHMM(fin);
   const pret = !!date && d !== null && f !== null && d !== f;
+  // Les pharmaciens sont comparés pour cette garde précise : disponibilité, charge déjà portée, obstacles.
+  const candidats = useMemo(
+    () => (pret ? candidatsGarde(data, { id: 'nouvelle', date, start: d as number, end: f as number, type, personId: null, interventions: [] }, today) : []),
+    [data, date, d, f, type, today, pret],
+  );
+  const choisi = candidats.find((c) => c.person.id === personId);
   return (
     <Dialog
       title="Ajouter une garde"
-      subtitle="Le calendrier de garde est fixé hors de l’officine : saisissez ici l’obligation, vous l’affecterez ensuite."
+      subtitle="Saisissez la garde, confiez-la à un pharmacien et prévenez-le dans la foulée. Vous pouvez aussi l’affecter plus tard."
       onClose={onClose}
       footer={
         <>
@@ -581,14 +590,15 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
             className="btn primary"
             disabled={!pret}
             onClick={() => {
-              const modele = { date, start: d as number, end: f as number, type, personId: null, interventions: [] };
+              const modele = { date, start: d as number, end: f as number, type, personId: personId || null, interventions: [] };
               const liste = repeter ? serieGardes(modele, toutesLes, nombre) : [modele];
-              ajouter(liste);
-              dire(liste.length > 1 ? `${liste.length} gardes ajoutées. Reste à les affecter.` : 'Garde ajoutée. Reste à l’affecter.', true);
+              ajouter(liste, !!personId && prevenir);
+              const quoi = liste.length > 1 ? `${liste.length} gardes ajoutées` : 'Garde ajoutée';
+              dire(choisi ? `${quoi} et confiée${liste.length > 1 ? 's' : ''} à ${choisi.person.prenom}.${prevenir ? ' Notification envoyée dans son espace.' : ''}` : `${quoi}. Reste à ${liste.length > 1 ? 'les' : 'l’'}affecter.`, true);
               onClose();
             }}
           >
-            <Plus size={15} /> Ajouter
+            <Plus size={15} /> {personId ? (prevenir ? 'Ajouter et prévenir' : 'Ajouter et confier') : 'Ajouter'}
           </button>
         </>
       }
@@ -617,11 +627,40 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
           <input id="garde-fin" type="time" value={fin} onChange={(e) => setFin(e.target.value)} />
         </label>
       </div>
+      <label className="field" htmlFor="garde-personne">
+        Confier à
+        <select id="garde-personne" value={personId} onChange={(e) => setPersonId(e.target.value)} aria-describedby="garde-personne-aide">
+          <option value="">Affecter plus tard</option>
+          {candidats.map((c) => (
+            <option key={c.person.id} value={c.person.id}>
+              {nomCourt(c.person)}
+              {c.recommande ? ' · conseillé' : ''}
+              {!c.disponible && c.obstacles[0] ? ` · ${c.obstacles[0]}` : ` · ${c.nombre} garde${c.nombre > 1 ? 's' : ''} cette année`}
+            </option>
+          ))}
+        </select>
+        <span className="aide" id="garde-personne-aide">Titulaires et pharmaciens adjoints. « Conseillé » : disponible et le moins chargé en gardes cette année.</span>
+      </label>
+      {choisi && !choisi.disponible ? (
+        <div className="notice warn small">
+          <AlertTriangle size={15} aria-hidden="true" />
+          <span>{choisi.person.prenom} : {choisi.obstacles.join(' ; ')}. Vous pouvez tout de même lui confier la garde.</span>
+        </div>
+      ) : null}
+      {personId ? (
+        <label className="check" htmlFor="garde-prevenir">
+          <input id="garde-prevenir" type="checkbox" checked={prevenir} onChange={(e) => setPrevenir(e.target.checked)} />
+          <span>
+            Prévenir {choisi?.person.prenom ?? 'la personne'} tout de suite
+            <span className="soft small" style={{ display: 'block' }}>Une notification apparaît dans son espace, en tête de « Mon planning », avec un accusé de lecture. La date de communication est notée pour le délai de 15 jours.</span>
+          </span>
+        </label>
+      ) : null}
       <label className="check" htmlFor="garde-repeter">
         <input id="garde-repeter" type="checkbox" checked={repeter} onChange={(e) => setRepeter(e.target.checked)} />
         <span>
           Créer une série régulière
-          <span className="soft small" style={{ display: 'block' }}>Pour un tour de garde qui revient à intervalle fixe.</span>
+          <span className="soft small" style={{ display: 'block' }}>Pour un tour de garde qui revient à intervalle fixe.{personId ? ' Toute la série sera confiée à la même personne.' : ''}</span>
         </span>
       </label>
       {repeter ? (

@@ -1,4 +1,4 @@
-import { ArrowRight, Building2, CalendarRange, LayoutDashboard, ListChecks, MessageSquare, MoonStar, Plus, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Building2, CalendarRange, ListChecks, MessageSquare, MoonStar, Plus, ShieldCheck } from 'lucide-react';
 import { useMemo } from 'react';
 import { memeIdentifiant } from '../../domain/acces';
 import { addDays, dayIndex, fmtDateCourt, fmtDateLong, fmtDuree, fmtHeure, mondayOf, totalDuree, weekDates } from '../../domain/time';
@@ -45,16 +45,17 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
 
   return (
     <div>
-      <div className="page-head">
-        <span className="page-ico" aria-hidden="true">
-          <LayoutDashboard size={26} />
-        </span>
-        <div className="grow">
-          <div className="eyebrow">Tableau de bord · {fmtDateLong(today)}</div>
-          <h1>
-            Bonjour <span className="hl">{moi?.prenom}</span>
-          </h1>
-          <p>{data.officine.nom} en un coup d’œil : ce qui attend une décision, la couverture de la semaine, l’équipe du jour.</p>
+      <div className="hero" style={{ marginBottom: 20 }}>
+        <div className="eyebrow">Tableau de bord · {fmtDateLong(today)}</div>
+        <h1>Bonjour {moi?.prenom}</h1>
+        <p style={{ fontSize: 16, maxWidth: '62ch' }}>{data.officine.nom} en un coup d’œil : ce qui attend une décision, la couverture de la semaine, l’équipe du jour.</p>
+        <div className="row wrap" style={{ marginTop: 16 }}>
+          <button type="button" className="btn primary" onClick={() => aller('resoudre')}>
+            <ListChecks size={16} aria-hidden="true" /> {d.total ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre` : 'Rien à décider'}
+          </button>
+          <button type="button" className="btn" onClick={() => aller('construire')}>
+            <CalendarRange size={16} aria-hidden="true" /> Construire la semaine
+          </button>
         </div>
       </div>
 

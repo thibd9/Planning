@@ -10,6 +10,7 @@ import type { Vue } from './store/ui';
 import { prefsDe, useUi } from './store/ui';
 import { EtiquetteRole } from './ui/icons';
 import { Avatar, Logo, LogoNom } from './ui/kit';
+import { BandeauTest, Parcours } from './ui/Parcours';
 import { Tour } from './ui/Tour';
 import { Accueil } from './ui/views/Accueil';
 import { Compte } from './ui/views/Compte';
@@ -39,17 +40,18 @@ interface Lien {
 
 const MOI: Lien = { vue: 'moi', label: 'Mon planning', question: 'Mes horaires, mes demandes', icon: <CalendarDays size={18} />, couleur: 'c-clair', groupe: '' };
 const MESSAGES: Lien = { vue: 'messages', label: 'Messages', question: 'Échanger avec l’équipe', icon: <MessageSquare size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
+// Trois groupes : ce qu'on regarde chaque jour, ce qui fabrique le planning, ce qui décrit la pharmacie.
 const GESTION: Lien[] = [
-  { vue: 'tableau', label: 'Tableau de bord', question: 'L’officine en un coup d’œil', icon: <LayoutDashboard size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
+  { vue: 'tableau', label: 'Tableau de bord', question: 'Vue d’ensemble du jour', icon: <LayoutDashboard size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
   { vue: 'resoudre', label: 'Résoudre', question: 'À décider aujourd’hui', icon: <ListChecks size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
-  { vue: 'construire', label: 'Construire', question: 'Le planning de la semaine', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
-  { vue: 'gardes', label: 'Gardes', question: 'De la garde à la paie', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
   MESSAGES,
-  { vue: 'equipe', label: 'Équipe', question: 'Contrats, droits, besoins', icon: <Users size={18} />, couleur: 'c-clair', groupe: 'Référentiel' },
-  { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-clair', groupe: 'Référentiel' },
-  { vue: 'regles', label: 'Règles', question: 'Sources et versions', icon: <BookOpenCheck size={18} />, couleur: 'c-clair', groupe: 'Référentiel' },
-  { vue: 'journal', label: 'Journal et paie', question: 'Preuves, fiche navette', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Référentiel' },
-  { vue: 'officine', label: 'Officine', question: 'Horaires, postes types', icon: <Settings2 size={18} />, couleur: 'c-clair', groupe: 'Référentiel' },
+  { vue: 'construire', label: 'Construire', question: 'Le planning de la semaine', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
+  { vue: 'gardes', label: 'Gardes', question: 'Affecter, prévenir, payer', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
+  { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
+  { vue: 'equipe', label: 'Équipe', question: 'Contrats, droits, besoins', icon: <Users size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
+  { vue: 'officine', label: 'Réglages', question: 'Horaires, postes types', icon: <Settings2 size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
+  { vue: 'regles', label: 'Règles', question: 'Sources et versions', icon: <BookOpenCheck size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
+  { vue: 'journal', label: 'Journal et paie', question: 'Preuves, fiche navette', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
 ];
 const PLANNING: Lien = { vue: 'planning', label: 'Planning de l’équipe', question: 'La version publiée', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
 const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gardes et astreintes', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
@@ -67,7 +69,7 @@ export function App(): JSX.Element {
   const today = useStore((s) => s.today);
   const sauvegarde = useStore((s) => s.derniereSauvegarde);
   const undo = useStore((s) => s.undo);
-  const { vue, aller, session, deconnecter, preferences, toast, taire, setTour } = useUi();
+  const { vue, aller, session, deconnecter, preferences, toast, taire, setTour, parcours } = useUi();
   const [menu, setMenu] = useState(false);
   // Sans session, l'application s'ouvre sur la connexion ; la création d'une pharmacie se lance depuis là.
   const [creation, setCreation] = useState(false);
@@ -76,6 +78,7 @@ export function App(): JSX.Element {
   const espace = espaceDe(data, moi);
   const liens = NAV[espace];
   const vueActive = liens.some((l) => l.vue === vue) || HORS_MENU.includes(vue) ? vue : espace === 'responsable' ? 'tableau' : 'moi';
+  const aLire = moi ? data.notifications.filter((n) => n.personId === moi.id && !n.luLe).length : 0;
   const nonLus = moi ? data.messages.filter((m) => !m.luPar.includes(moi.id) && (m.a === 'equipe' || m.a === moi.id)).length : 0;
   // Les pharmacies de l'appareil où la personne connectée a un compte.
   const mesPharmacies = [{ id: officineId, nom: data.officine.nom }, ...Object.entries(autres).filter(([, d]) => d.personnes.some((p) => memeIdentifiant(p.identifiant, session ?? ''))).map(([id, d]) => ({ id, nom: d.officine.nom }))];
@@ -127,7 +130,7 @@ export function App(): JSX.Element {
   const groupes = [...new Set(liens.map((l) => l.groupe))];
 
   return (
-    <div className="app">
+    <div className={`app${parcours !== null && data.demo ? ' en-parcours' : ''}`}>
       <a className="skip" href="#contenu">
         Aller au contenu
       </a>
@@ -179,10 +182,10 @@ export function App(): JSX.Element {
                     {n.label}
                     <span className="q">{n.question}</span>
                   </span>
-                  {(n.vue === 'resoudre' && aDecider) || (n.vue === 'messages' && nonLus) ? (
+                  {(n.vue === 'resoudre' && aDecider) || (n.vue === 'messages' && nonLus) || (n.vue === 'moi' && aLire) ? (
                     <span className="nav-badge">
-                      {n.vue === 'resoudre' ? aDecider : nonLus}
-                      <span className="sr">{n.vue === 'resoudre' ? ' décisions en attente' : ' messages non lus'}</span>
+                      {n.vue === 'resoudre' ? aDecider : n.vue === 'messages' ? nonLus : aLire}
+                      <span className="sr">{n.vue === 'resoudre' ? ' décisions en attente' : n.vue === 'messages' ? ' messages non lus' : ' changements à lire'}</span>
                     </span>
                   ) : null}
                 </button>
@@ -259,6 +262,7 @@ export function App(): JSX.Element {
             </div>
           </div>
         </header>
+        {data.demo ? <BandeauTest moi={moi.id} /> : null}
         <main className="content" id="contenu" tabIndex={-1}>
           {vueActive === 'moi' ? (
             <MonPlanning personId={moi.id} />
@@ -293,6 +297,7 @@ export function App(): JSX.Element {
       </div>
 
       <Tour />
+      <Parcours />
       {toast ? (
         <div className="toast" role="status">
           {toast.message}

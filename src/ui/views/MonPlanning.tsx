@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, CircleCheck, HandHelping, Moon, Plus, Printer, Stethoscope } from 'lucide-react';
+import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, CircleCheck, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -27,7 +27,7 @@ import { HEBERGE } from '../../env';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
-import { AvantApres, Pill, Track, roleDe } from '../kit';
+import { AvantApres, Pill, Track, momentDe, roleDe } from '../kit';
 import { echelleOfficine } from './Construire';
 import { STATUT_BESOIN } from './Equipe';
 import { Ecart } from './Equite';
@@ -118,6 +118,9 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           const garde = data.gardes.find((g) => g.personId === personId && g.date === date);
           return (
             <div key={titre} className={`jour${date === today ? ' auj' : ''}`}>
+              <span className={`moment ${absence ? (absence.type === 'conge' ? 'conge' : 'arret') : postes.length ? momentDe({ start: postes[0].start, end: postes[postes.length - 1].end }) : 'repos'}`} aria-hidden="true" style={{ float: 'right' }}>
+                {absence ? <Ban size={17} /> : !postes.length ? <Coffee size={17} /> : momentDe({ start: postes[0].start, end: postes[postes.length - 1].end }) === 'soir' ? <Sunset size={17} /> : <Sun size={17} />}
+              </span>
               <div className="eyebrow">{titre}</div>
               <div className="small soft cap1">{fmtDateCourt(date)}</div>
               <div className="h num">{absence ? ABSENCE_LABEL[absence.type] : postes.length ? postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(' · ') : 'Repos'}</div>

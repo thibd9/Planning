@@ -144,6 +144,7 @@ describe('diagnostic', () => {
       absences: data.absences.concat(
         { id: 'a1', personId: 'p_helene', from: jeudi, to: jeudi, type: 'formation', statut: 'approuvee', createdAt: '' },
         { id: 'a2', personId: 'p_karim', from: jeudi, to: jeudi, type: 'conge', statut: 'approuvee', createdAt: '' },
+        { id: 'a3', personId: 'p_antoine', from: jeudi, to: jeudi, type: 'conge', statut: 'approuvee', createdAt: '' },
       ),
       besoins: data.besoins.concat({
         id: 'b1', personId: 'p_lea', forme: 'commencer_apres', heure: 16 * 60, jours: [3], frequence: 1,
@@ -155,7 +156,7 @@ describe('diagnostic', () => {
     expect(b?.date).toBe(jeudi);
     expect(b?.start).toBe(510);
     expect(b?.end).toBe(960);
-    expect(b?.raisons.map((r) => r.personId).sort()).toEqual(['p_helene', 'p_karim', 'p_lea']);
+    expect(b?.raisons.map((r) => r.personId).sort()).toEqual(['p_antoine', 'p_helene', 'p_karim', 'p_lea']);
     expect(b?.leviers.join(' ')).not.toMatch(/repos|durée maximale|11 h/i);
     const res = generer(d, SUIVANT, { variante: 'equite', graine: 1, iterations: 6000 });
     expect(res.blocages.some((x) => x.cas === 'impossible')).toBe(true);
@@ -366,7 +367,7 @@ describe('répartition des gardes', () => {
   it('compare les candidats et écarte une personne absente', () => {
     const g = data.gardes[3];
     const c = candidatsGarde(data, g, TODAY);
-    expect(c.map((x) => x.person.id).sort()).toEqual(['p_helene', 'p_karim', 'p_lea']);
+    expect(c.map((x) => x.person.id).sort()).toEqual(['p_antoine', 'p_helene', 'p_karim', 'p_lea']);
     expect(c.filter((x) => x.recommande)).toHaveLength(1);
     expect(c[0].charge).toBeLessThanOrEqual(c[c.length - 1].charge);
     const absent: AppData = { ...data, absences: data.absences.concat({ id: 'z', personId: c[0].person.id, from: g.date, to: g.date, type: 'conge', statut: 'approuvee', createdAt: '' }) };
@@ -382,7 +383,7 @@ describe('répartition des gardes', () => {
     expect(prop).toHaveLength(6);
     const parPersonne = new Map<string, number>();
     for (const x of prop) parPersonne.set(x.personId, (parPersonne.get(x.personId) ?? 0) + 1);
-    expect([...parPersonne.values()].sort()).toEqual([2, 2, 2]);
+    expect([...parPersonne.values()].sort()).toEqual([1, 1, 2, 2]);
     expect(prop.every((x) => x.raison.length > 10)).toBe(true);
   });
 });
@@ -400,10 +401,13 @@ describe('connexion et rôles', () => {
     expect(empreinte('demo')).not.toContain('demo');
   });
   it('distingue le titulaire principal du titulaire secondaire', () => {
-    const second = { ...data.personnes[0], id: 'p_second', identifiant: 'second' };
-    const d: AppData = { ...data, personnes: data.personnes.concat(second) };
+    const second = data.personnes.find((p) => p.id === 'p_antoine');
+    if (!second) throw new Error('titulaire secondaire absent du jeu de démonstration');
+    const d = data;
     expect(libelleRole(d, d.personnes[0])).toBe('Titulaire principal');
     expect(libelleRole(d, second)).toBe('Titulaire secondaire');
+    expect(espaceDe(d, second)).toBe('pharmacien');
+    expect(espaceDe(d, { ...second, gestion: true })).toBe('responsable');
     expect(peutGerer(d, second)).toBe(false);
     expect(peutGerer(d, { ...second, gestion: true })).toBe(true);
   });
