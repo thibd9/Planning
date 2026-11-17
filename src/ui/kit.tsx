@@ -1,6 +1,7 @@
 import { ArrowRight, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useId, useRef } from 'react';
+import { fmtHeure } from '../domain/time';
 import type { Interval, Mission, Person, Shift } from '../domain/types';
 import { estPharmacien } from '../domain/types';
 import { couleurDe } from './icons';
@@ -150,6 +151,57 @@ export function momentDe(s: { start: number; end: number }): 'matin' | 'journee'
   if (s.end <= 14 * 60 + 30) return 'matin';
   if (s.start >= 11 * 60 + 30) return 'soir';
   return s.start <= 9 * 60 + 30 && s.end < 18 * 60 ? 'milieu' : 'journee';
+}
+
+/** Heures rondes affichées sous une frise : toutes les deux heures, de l'ouverture à la fermeture. */
+const graduations = (e: Echelle): number[] => {
+  const out: number[] = [];
+  for (let h = Math.ceil(e.start / 120) * 120; h <= e.end; h += 120) out.push(h);
+  return out;
+};
+
+/** Règle graduée, posée une fois au-dessus d'une liste de frises : « 8 h · 10 h · 12 h… ». */
+export function Graduations({ echelle }: { echelle: Echelle }): JSX.Element {
+  return (
+    <span className="graduations" aria-hidden="true">
+      {graduations(echelle).map((h) => (
+        <i key={h} style={{ left: `${pct(echelle, h)}%` }}>
+          {fmtHeure(h)}
+        </i>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * Frise d'une journée : chaque poste est un bloc posé sur des repères horaires, avec son heure
+ * de début et de fin écrites dedans ; la pause est hachurée. L'horaire complet est toujours écrit à côté.
+ */
+export function Frise({ shifts, echelle, missions = [], nuit }: { shifts: Pick<Shift, 'start' | 'end' | 'pauseStart' | 'pauseEnd'>[]; echelle: Echelle; missions?: Pick<Mission, 'start' | 'end'>[]; nuit?: boolean }): JSX.Element {
+  return (
+    <span className="frise" aria-hidden="true">
+      {graduations(echelle).map((h) => (
+        <i key={h} className="trait" style={{ left: `${pct(echelle, h)}%` }} />
+      ))}
+      {shifts.map((s, i) => (
+        <span key={i} className={`bloc ${nuit ? 'garde' : momentDe(s)}`} style={{ left: `${pct(echelle, s.start)}%`, width: `${pct(echelle, s.end) - pct(echelle, s.start)}%` }}>
+          {/* Les heures ne s'écrivent dans le bloc que s'il est assez large pour les deux. */}
+          {(s.end - s.start) / (echelle.end - echelle.start) >= 0.3 ? (
+            <>
+              <em className="deb">{fmtHeure(s.start)}</em>
+              <em className="fin">{fmtHeure(s.end)}</em>
+            </>
+          ) : null}
+          {s.pauseStart !== undefined && s.pauseEnd !== undefined ? (
+            <i className="pause" style={{ left: `${((s.pauseStart - s.start) / (s.end - s.start)) * 100}%`, width: `${((s.pauseEnd - s.pauseStart) / (s.end - s.start)) * 100}%` }} />
+          ) : null}
+        </span>
+      ))}
+      {missions.map((m, i) => (
+        <i key={`m${i}`} className="rdv" style={{ left: `${pct(echelle, m.start)}%`, width: `${pct(echelle, m.end) - pct(echelle, m.start)}%` }} />
+      ))}
+    </span>
+  );
 }
 
 export function Track({

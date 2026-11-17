@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, CircleCheck, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -35,6 +35,8 @@ const COUVERTURE: Record<RepairOption['couverture'], { label: string; tone: stri
   partielle: { label: 'Couverture partielle', tone: 'danger' },
 };
 
+type Onglet = 'absences' | 'remplacements' | 'demandes' | 'gardes' | 'publications';
+
 export function Resoudre(): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
@@ -53,7 +55,22 @@ export function Resoudre(): JSX.Element {
     for (const t of d.trous) m.set(t.absenceId, [...(m.get(t.absenceId) ?? []), t]);
     return [...m.entries()];
   }, [d.trous]);
+  // Seul le premier jour qui demande un vrai choix est déplié : les autres attendent leur tour.
+  const premierADecider = useMemo(() => d.trous.find((t) => optionsReparation(data, t.shift, today).impact.length)?.id ?? d.trous[0]?.id, [d.trous, data, today]);
   const nbGardes = d.gardesAAffecter.length + d.gardesRepos.length + d.gardesAbsence.length + d.gardesAValider.length;
+  // Une famille de décisions par onglet : on ne lit qu'un sujet à la fois.
+  const onglets: { cle: Onglet; label: string; nombre: number; icone: JSX.Element }[] = [
+    { cle: 'absences', label: 'Absences à couvrir', nombre: d.trous.length, icone: <UserMinus size={16} /> },
+    { cle: 'remplacements', label: 'Remplacements', nombre: d.remplacements.length, icone: <ArrowLeftRight size={16} /> },
+    { cle: 'demandes', label: 'Demandes', nombre: d.absences.length + d.besoins.length, icone: <Check size={16} /> },
+    { cle: 'gardes', label: 'Gardes', nombre: nbGardes, icone: <MoonStar size={16} /> },
+    { cle: 'publications', label: 'À publier', nombre: d.publications.length, icone: <CalendarCheck size={16} /> },
+  ];
+  const [choix, setChoix] = useState<Onglet | null>(null);
+  const sujet = useUi((s) => s.sujet);
+  const voulu = choix ?? (onglets.some((o) => o.cle === sujet) ? (sujet as Onglet) : null);
+  const onglet = voulu ?? onglets.find((o) => o.nombre > 0)?.cle ?? 'absences';
+  const courant = onglets.find((o) => o.cle === onglet);
 
   return (
     <div style={{ maxWidth: 1180 }}>
@@ -68,7 +85,7 @@ export function Resoudre(): JSX.Element {
           </h1>
           <p>
             {d.total
-              ? `${d.total} décision${d.total > 1 ? 's' : ''} vous attend${d.total > 1 ? 'ent' : ''}, de la plus urgente à la moins urgente. Chaque option annonce ses conséquences avant que vous ne choisissiez.`
+              ? `${d.total} décision${d.total > 1 ? 's' : ''} vous attend${d.total > 1 ? 'ent' : ''}, rangée${d.total > 1 ? 's' : ''} par sujet. Chaque option annonce ses conséquences avant que vous ne choisissiez.`
               : 'Aucune décision en attente.'}
           </p>
         </div>
@@ -82,7 +99,29 @@ export function Resoudre(): JSX.Element {
         </Empty>
       ) : null}
 
-      {parAbsence.length ? (
+      {d.total ? (
+        <div className="onglets" role="tablist" aria-label="Familles de décisions">
+          {onglets.map((o) => (
+            <button key={o.cle} type="button" role="tab" id={`onglet-${o.cle}`} aria-selected={onglet === o.cle} aria-controls="panneau-decisions" className={`onglet${onglet === o.cle ? ' on' : ''}`} onClick={() => setChoix(o.cle)}>
+              <span aria-hidden="true">{o.icone}</span>
+              {o.label}
+              <span className={`compte${o.nombre ? '' : ' zero'}`}>
+                {o.nombre}
+                <span className="sr"> à traiter</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      <div id="panneau-decisions" role="tabpanel" aria-labelledby={`onglet-${onglet}`} className="panneau">
+      {d.total && courant && !courant.nombre ? (
+        <Empty icon={<CircleCheck size={30} />} title="Rien à traiter ici">
+          Aucune décision en attente dans « {courant.label} ».
+        </Empty>
+      ) : null}
+
+      {onglet === 'absences' && parAbsence.length ? (
         <>
           <div className="section-title">
             <span className="ico">
@@ -112,7 +151,7 @@ export function Resoudre(): JSX.Element {
                     </Pill>
                   </div>
                   {trous.map((t) => (
-                    <CarteTrou key={t.id} trou={t} />
+                    <CarteTrou key={t.id} trou={t} ouvert={t.id === premierADecider} />
                   ))}
                 </div>
               );
@@ -121,7 +160,7 @@ export function Resoudre(): JSX.Element {
         </>
       ) : null}
 
-      {d.remplacements.length ? (
+      {onglet === 'remplacements' && d.remplacements.length ? (
         <>
           <div className="section-title">
             <span className="ico">
@@ -138,7 +177,7 @@ export function Resoudre(): JSX.Element {
         </>
       ) : null}
 
-      {d.absences.length || d.besoins.length ? (
+      {onglet === 'demandes' && (d.absences.length || d.besoins.length) ? (
         <>
           <div className="section-title">
             <span className="ico">
@@ -158,7 +197,7 @@ export function Resoudre(): JSX.Element {
         </>
       ) : null}
 
-      {nbGardes ? (
+      {onglet === 'gardes' && nbGardes ? (
         <>
           <div className="section-title">
             <span className="ico">
@@ -253,7 +292,7 @@ export function Resoudre(): JSX.Element {
         </>
       ) : null}
 
-      {d.publications.length ? (
+      {onglet === 'publications' && d.publications.length ? (
         <>
           <div className="section-title">
             <span className="ico">
@@ -294,13 +333,14 @@ export function Resoudre(): JSX.Element {
           </div>
         </>
       ) : null}
+      </div>
     </div>
   );
 }
 
 // ---------------------------------------------------------------- Réparation
 
-function CarteTrou({ trou }: { trou: Trou }): JSX.Element {
+function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const resoudre = useStore((s) => s.resoudreTrou);
@@ -336,11 +376,14 @@ function CarteTrou({ trou }: { trou: Trou }): JSX.Element {
     );
   }
   return (
-    <div className="card-body" style={{ borderTop: '1px solid var(--line)' }}>
-      <div className="row wrap" style={{ marginBottom: 10 }}>
-        <h3>{capitale(fmtDateLong(trou.shift.date).replace(/ \d{4}$/, ''))}</h3>
-        <Pill>Poste vacant : {decrireShift(trou.shift)}</Pill>
-      </div>
+    <details className="volet" open={ouvert}>
+      <summary>
+        <ChevronDown size={18} className="chev" aria-hidden="true" />
+        <h3 className="grow">{capitale(fmtDateLong(trou.shift.date).replace(/ \d{4}$/, ''))}</h3>
+        <span className="small soft">Poste vacant : {decrireShift(trou.shift)}</span>
+        <Pill tone={rep.impact.length ? 'danger' : 'ok'}>{rep.impact.length ? `${rep.options.length} option${rep.options.length > 1 ? 's' : ''} à comparer` : 'Rien n’est découvert'}</Pill>
+      </summary>
+      <div className="volet-corps">
       {rep.impact.length ? (
         <div className="notice danger" style={{ marginBottom: 14 }}>
           <AlertTriangle size={16} />
@@ -388,24 +431,30 @@ function CarteTrou({ trou }: { trou: Trou }): JSX.Element {
                 ))}
               </div>
             ) : null}
-            {o.validations.length ? (
-              <div className="small">
-                <span className="eyebrow">À valider</span>
-                <ul style={{ margin: '3px 0 0', paddingLeft: 18 }}>
-                  {o.validations.map((v) => (
-                    <li key={v}>{v}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            <ul className="checks" aria-label="Règles contrôlées">
-              {o.regles.map((r) => (
-                <li key={r.label}>
-                  {r.ok ? <Check size={14} className="y" aria-label="Respecté" /> : <X size={14} className="n" aria-label="Non respecté" />}
-                  {r.label}
-                </li>
-              ))}
-            </ul>
+            <details className="plus">
+              <summary>
+                <ChevronDown size={15} className="chev" aria-hidden="true" />
+                {o.validations.length ? `${o.validations.length} point${o.validations.length > 1 ? 's' : ''} à valider` : 'Rien à valider'} · {o.regles.every((r) => r.ok) ? 'règles respectées' : 'une règle n’est pas respectée'}
+              </summary>
+              {o.validations.length ? (
+                <div className="small">
+                  <span className="eyebrow">À valider</span>
+                  <ul style={{ margin: '3px 0 0', paddingLeft: 18 }}>
+                    {o.validations.map((v) => (
+                      <li key={v}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              <ul className="checks" aria-label="Règles contrôlées">
+                {o.regles.map((r) => (
+                  <li key={r.label}>
+                    {r.ok ? <Check size={14} className="y" aria-label="Respecté" /> : <X size={14} className="n" aria-label="Non respecté" />}
+                    {r.label}
+                  </li>
+                ))}
+              </ul>
+            </details>
             {o.restant.length ? (
               <div className="notice warn small">
                 <AlertTriangle size={15} />
@@ -431,7 +480,8 @@ function CarteTrou({ trou }: { trou: Trou }): JSX.Element {
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </details>
   );
 }
 

@@ -77,8 +77,9 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
   préférences et session sont effacés.
 - **Plusieurs pharmacies.** Le titulaire principal ajoute autant de pharmacies qu'il veut, chacune avec son
   équipe, ses plannings et ses règles, et passe de l'une à l'autre depuis le menu latéral ou le menu du compte.
-- **En haut à droite** : Mon compte, Paramètres (couleur du thème, taille du texte), ajout d'une pharmacie
-  et déconnexion. « Mon planning » est toujours le premier lien du menu.
+- **Barre du haut** : la date, « Créer » (planning, garde, personne, demande, message), la cloche de ce
+  qui attend, les messages, le tutoriel, puis le compte : Mon compte, Paramètres (couleur du thème, taille
+  du texte), ajout d'une pharmacie et déconnexion. « Mon planning » est toujours le premier lien du menu.
 
 **Limite importante** : sans serveur, cette connexion sépare les espaces sur un appareil partagé ; ce n'est
 pas une protection des données, et seule une empreinte non cryptographique du mot de passe est conservée.
@@ -90,10 +91,10 @@ Un vrai contrôle d'accès et une vraie messagerie demandent un serveur.
 | Espace | Question | Contenu |
 | --- | --- | --- |
 | **Tableau de bord** | Où en est la pharmacie ? | Décisions en attente, couverture pharmacien de la semaine, équipe du jour, prochains horaires, messages, mes pharmacies |
-| **Résoudre** | Que décider aujourd'hui ? | Absences à couvrir avec options comparées, demandes de remplacement, demandes à arbitrer, gardes, plannings à publier |
+| **Résoudre** | Que décider aujourd'hui ? | Cinq onglets, un sujet à la fois : absences à couvrir (un volet par jour, options comparées, détails à la demande), remplacements, demandes, gardes, plannings à publier |
 | **Construire** | Comment couvrir la semaine ? | Grille à l'échelle du temps, contrôles immédiats, trois propositions (équité, souhaits, coût), brouillon puis publication |
 | **Gardes** | Affecter, prévenir, payer | Ajout d'une garde avec le pharmacien à qui la confier et sa notification immédiate, délai de 15 jours, interventions, repos à protéger, variables pour le comptable |
-| **Mon planning** | Quand est-ce que je travaille ? | Aujourd'hui, demain et la suite en un coup d'œil (ordinateur et téléphone), planning publié, changements avant → après, demandes, remplacements, part des contraintes |
+| **Mon planning** | Quand est-ce que je travaille ? | Aujourd'hui, demain et la suite en un coup d'œil ; vue **Semaine** (horaire écrit en grand, puis frise graduée de 8 h à 20 h avec la pause hachurée) ou vue **Calendrier** du mois ; changements avant → après, demandes, remplacements, part des contraintes |
 | **Messages** | Qui prévenir ? | Fil de toute l'équipe et conversations privées |
 
 Et en référentiel : équipe et compétences, mémoire d'équité, fiches de règles, journal de preuve,
@@ -161,7 +162,7 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 63 écrans,
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 70 écrans,
 fenêtres et thèmes vérifiés, ordinateur et téléphone. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 

@@ -1,5 +1,5 @@
 import { AlertTriangle, Check, CircleCheck, ClipboardPaste, Clock3, Info, MoonStar, Plus, Repeat, Scale, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
   JOURS_COURT,
@@ -43,6 +43,14 @@ export function Gardes(): JSX.Element {
   const [importer, setImporter] = useState(false);
   const [ajout, setAjout] = useState(false);
   const [repartition, setRepartition] = useState(false);
+  const { intention, setIntention } = useUi();
+  // « Ajouter une garde » depuis la barre du haut ouvre directement la fenêtre.
+  useEffect(() => {
+    if (intention === 'garde') {
+      setAjout(true);
+      setIntention(null);
+    }
+  }, [intention, setIntention]);
   const aRepartir = data.gardes.filter((g) => !g.personId && g.date >= today).length;
   const gardes = useMemo(() => data.gardes.slice().sort((a, b) => a.date.localeCompare(b.date)), [data.gardes]);
   const prochaine = gardes.find((g) => g.date >= today) ?? gardes[gardes.length - 1];

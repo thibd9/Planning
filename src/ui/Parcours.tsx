@@ -96,9 +96,12 @@ const ETAPES: Etape[] = [
     titre: 'La titulaire valide le remplacement',
     texte: (d) => {
       const r = demandeDeCamille(d);
-      return r?.volontaires.length ? `Dans « Résoudre », section « Demandes de remplacement » : le moteur a relu les règles pour ${prenom(d, r.volontaires[0])}. Cliquez sur « Valider avec ${prenom(d, r.volontaires[0])} » : les deux personnes sont prévenues.` : 'Dans « Résoudre », chaque décision annonce ses conséquences avant d’être prise : absences à couvrir, remplacements, demandes, gardes.';
+      return r?.volontaires.length ? `Dans « Résoudre », onglet « Remplacements » : le moteur a relu les règles pour ${prenom(d, r.volontaires[0])}. Cliquez sur « Valider avec ${prenom(d, r.volontaires[0])} » : les deux personnes sont prévenues.` : 'Dans « Résoudre », chaque décision annonce ses conséquences avant d’être prise : absences à couvrir, remplacements, demandes, gardes.';
     },
-    jouer: () => voirComme('helene.marchetti', 'resoudre'),
+    jouer: () => {
+      useUi.getState().setSujet('remplacements');
+      voirComme('helene.marchetti', 'resoudre');
+    },
   },
   {
     qui: 'Karim · pharmacien adjoint',
@@ -212,7 +215,7 @@ export function BandeauTest({ moi }: { moi: string }): JSX.Element {
   const { parcours, setParcours } = useUi();
   return (
     <div className="bandeau-test no-print" role="region" aria-label="Environnement de test">
-      <span className="bt-titre">
+      <span className="bt-titre" title="Environnement de test">
         <FlaskConical size={16} aria-hidden="true" /> Environnement de test
       </span>
       <div className="seg" role="group" aria-label="Voir l’application comme">

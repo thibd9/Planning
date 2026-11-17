@@ -62,6 +62,13 @@ interface Ui {
   tour: number | null;
   /** Étape du parcours de test en cours ; null quand il est fermé. */
   parcours: number | null;
+  /** Action demandée depuis la barre du haut, consommée par l'écran d'arrivée (ouvrir une fenêtre). */
+  intention: 'garde' | 'personne' | 'demande' | null;
+  /** Onglet de « Résoudre » à ouvrir en arrivant (par exemple depuis le parcours de test). */
+  sujet: string | null;
+  setSujet: (s: string | null) => void;
+  agir: (vue: Vue, intention: Ui['intention']) => void;
+  setIntention: (i: Ui['intention']) => void;
   setParcours: (etape: number | null) => void;
   aller: (vue: Vue) => void;
   setSemaine: (s: ISODate) => void;
@@ -91,6 +98,11 @@ export const useUi = create<Ui>((set) => ({
   personneId: null,
   tour: null,
   parcours: null,
+  intention: null,
+  sujet: null,
+  setSujet: (sujet) => set({ sujet }),
+  agir: (vue, intention) => set({ vue, intention, focus: null }),
+  setIntention: (intention) => set({ intention }),
   setParcours: (parcours) => set({ parcours, tour: null }),
   aller: (vue) => set({ vue, focus: null }),
   setSemaine: (semaine) => set({ semaine, focus: null }),

@@ -1,5 +1,5 @@
 import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, CircleCheck, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
   addDays,
@@ -27,7 +27,8 @@ import { HEBERGE } from '../../env';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
-import { AvantApres, Pill, Track, momentDe, roleDe } from '../kit';
+import { AvantApres, Frise, Graduations, Pill, Seg, momentDe } from '../kit';
+import { Calendrier } from '../components/Calendrier';
 import { echelleOfficine } from './Construire';
 import { STATUT_BESOIN } from './Equipe';
 import { Ecart } from './Equite';
@@ -40,6 +41,15 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
   const { demanderRemplacement, seProposer, cloreRemplacement } = useStore();
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
+  const { intention, setIntention } = useUi();
+  useEffect(() => {
+    if (intention === 'demande') {
+      setDemande(true);
+      setIntention(null);
+    }
+  }, [intention, setIntention]);
+  const [affichage, setAffichage] = useState<'semaine' | 'calendrier'>('semaine');
+  const [mois, setMois] = useState(today.slice(0, 7));
   const person = data.personnes.find((p) => p.id === personId);
   const lundi = mondayOf(today);
   const echelle = echelleOfficine(data);
@@ -226,76 +236,121 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
 
       <div className="me-grid">
         <div className="col" style={{ gap: 18 }}>
-          {semaines.slice(0, 2).map((monday) => {
-            const postes = publies(monday);
-            const total = (postes ?? []).reduce((t, s) => t + minutesTravail(s), 0);
-            const statut = data.semaines[monday];
-            return (
-              <div key={monday} className="card">
-                <div className="card-head">
-                  <CalendarClock size={18} />
-                  <div className="grow">
-                    <h2 className="h3">
-                      {monday === lundi ? 'Cette semaine' : 'Semaine prochaine'} · {fmtSemaine(monday)}
-                    </h2>
-                    <div className="small soft">
-                      {postes ? `Semaine ${isoWeek(monday)} · ${fmtDuree(total)} prévues · publié le ${fmtHorodatage(statut?.publishedAt ?? '')}` : 'Planning pas encore publié'}
+          <div className="row wrap">
+            <h2 className="grow">{affichage === 'semaine' ? 'Mes semaines' : 'Mon calendrier'}</h2>
+            <Seg
+              label="Affichage du planning"
+              value={affichage}
+              onChange={setAffichage}
+              options={[
+                { value: 'semaine', label: 'Semaine' },
+                { value: 'calendrier', label: 'Calendrier' },
+              ]}
+            />
+          </div>
+
+          {affichage === 'calendrier' ? (
+            <Calendrier data={data} personId={personId} today={today} mois={mois} setMois={setMois} />
+          ) : (
+            semaines.slice(0, 2).map((monday) => {
+              const postes = publies(monday);
+              const absentLe = (date: ISODate): boolean => absences.some((x) => x.statut === 'approuvee' && x.from <= date && date <= x.to);
+              const total = (postes ?? []).filter((x) => !absentLe(x.date)).reduce((t, x) => t + minutesTravail(x), 0);
+              const statut = data.semaines[monday];
+              return (
+                <div key={monday} className="card">
+                  <div className="card-head">
+                    <CalendarClock size={18} aria-hidden="true" />
+                    <div className="grow">
+                      <h3 style={{ fontSize: 17 }}>
+                        {monday === lundi ? 'Cette semaine' : 'Semaine prochaine'} · {fmtSemaine(monday)}
+                      </h3>
+                      <div className="small soft">
+                        {postes ? `Semaine ${isoWeek(monday)} · ${fmtDuree(total)} prévues · publié le ${fmtHorodatage(statut?.publishedAt ?? '')}` : 'Planning pas encore publié'}
+                      </div>
                     </div>
                   </div>
-                </div>
-                {postes ? (
-                  <div className="day-list">
-                    {weekDates(monday).map((date) => {
-                      const duJour = postes.filter((s) => s.date === date).sort((a, b) => a.start - b.start);
-                      const absence = absences.find((a) => a.statut === 'approuvee' && a.from <= date && date <= a.to);
-                      const gardes = data.gardes.filter((g) => g.personId === personId && g.date === date);
-                      const missions = data.missions.filter((m) => m.personId === personId && m.date === date);
-                      if (weekday(date) === 6 && !duJour.length && !gardes.length) return null;
-                      return (
-                        <div key={date} className={`day-row${date === today ? ' today' : ''}`}>
-                          <div>
-                            <div className="dn">{JOURS[weekday(date)]}</div>
-                            <div className="small soft">{fmtJourMois(date)}</div>
-                          </div>
-                          <div className="col" style={{ gap: 5 }}>
-                            {duJour.length ? <Track shifts={duJour} echelle={echelle} role={roleDe(person)} missions={missions} /> : null}
-                            <div className="row wrap" style={{ gap: 8 }}>
-                              {absence ? (
-                                <Pill>
-                                  <Ban size={12} /> {ABSENCE_LABEL[absence.type]}
-                                </Pill>
-                              ) : duJour.length ? (
-                                duJour.map((s) => (
-                                  <b key={s.id} className="num">
-                                    {decrireShift(s)}
-                                  </b>
-                                ))
+                  {postes ? (
+                    <div className="jours-h">
+                      <div className="jour-h regle" aria-hidden="true">
+                        <span />
+                        <Graduations echelle={echelle} />
+                      </div>
+                      {weekDates(monday).map((date) => {
+                        const absence = absences.find((x) => x.statut === 'approuvee' && x.from <= date && date <= x.to);
+                        // Un jour d'absence approuvée ne montre plus le poste prévu : il a été retiré.
+                        const duJour = absence ? [] : postes.filter((x) => x.date === date).sort((x, y) => x.start - y.start);
+                        const gardes = data.gardes.filter((g) => g.personId === personId && g.date === date);
+                        const missions = absence ? [] : data.missions.filter((m) => m.personId === personId && m.date === date);
+                        if (weekday(date) === 6 && !duJour.length && !gardes.length) return null;
+                        const moment = duJour.length ? momentDe({ start: duJour[0].start, end: duJour[duJour.length - 1].end }) : null;
+                        return (
+                          <div key={date} className={`jour-h${date === today ? ' today' : ''}`}>
+                            <div className="jh-date">
+                              <b className="cap1">{JOURS[weekday(date)]}</b>
+                              <span className="small soft">
+                                {fmtJourMois(date)}
+                                {date === today ? ' · aujourd’hui' : ''}
+                              </span>
+                            </div>
+                            <div className="jh-corps">
+                              {duJour.length ? (
+                                <>
+                                  <div className="jh-titre">
+                                    <span className={`moment ${moment}`} aria-hidden="true">
+                                      {moment === 'soir' ? <Sunset size={17} /> : <Sun size={17} />}
+                                    </span>
+                                    <div>
+                                      {duJour.map((x) => (
+                                        <div key={x.id}>
+                                          <b className="jh-heures num">
+                                            {fmtHeure(x.start)} – {fmtHeure(x.end)}
+                                          </b>
+                                          <span className="small soft">
+                                            {' '}
+                                            {fmtDuree(minutesTravail(x))} de travail
+                                            {x.pauseStart !== undefined && x.pauseEnd !== undefined ? ` · pause de ${fmtHeure(x.pauseStart)} à ${fmtHeure(x.pauseEnd)}` : ''}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <Frise shifts={duJour} echelle={echelle} missions={missions} />
+                                </>
                               ) : (
-                                <span className="muted">Repos</span>
+                                <div className="jh-titre">
+                                  <span className={`moment ${absence ? (absence.type === 'conge' ? 'conge' : 'arret') : 'repos'}`} aria-hidden="true">
+                                    {absence ? <Ban size={17} /> : <Coffee size={17} />}
+                                  </span>
+                                  <b className="jh-heures" style={{ color: 'var(--ink-2)' }}>{absence ? ABSENCE_LABEL[absence.type] : 'Repos'}</b>
+                                </div>
                               )}
-                              {missions.map((m) => (
-                                <Pill key={m.id} tone="miel">
-                                  <Stethoscope size={12} /> {MISSION_LABEL[m.type]} · {fmtHeure(m.start)}
-                                </Pill>
-                              ))}
-                              {gardes.map((g) => (
-                                <Pill key={g.id} tone="nuit">
-                                  <Moon size={12} /> {GARDE_LABEL[g.type]} · {fmtHHMM(g.start)} → {fmtHHMM(g.end)}
-                                </Pill>
-                              ))}
+                              {missions.length || gardes.length ? (
+                                <div className="row wrap" style={{ gap: 8 }}>
+                                  {missions.map((m) => (
+                                    <Pill key={m.id} tone="miel">
+                                      <Stethoscope size={12} aria-hidden="true" /> {MISSION_LABEL[m.type]} · {fmtHeure(m.start)}
+                                    </Pill>
+                                  ))}
+                                  {gardes.map((g) => (
+                                    <Pill key={g.id} tone="nuit">
+                                      <Moon size={12} aria-hidden="true" /> {GARDE_LABEL[g.type]} · {fmtHHMM(g.start)} → {fmtHHMM(g.end)}
+                                    </Pill>
+                                  ))}
+                                </div>
+                              ) : null}
                             </div>
                           </div>
-                          <span className="small soft num">{duJour.length ? fmtDuree(duJour.reduce((t, s) => t + minutesTravail(s), 0)) : ''}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="card-body soft">Votre responsable prépare encore cette semaine. Vous serez prévenu dès la publication.</div>
-                )}
-              </div>
-            );
-          })}
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="card-body soft">Votre responsable prépare encore cette semaine. Vous serez prévenu dès la publication.</div>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
 
         <div className="col" style={{ gap: 18 }}>

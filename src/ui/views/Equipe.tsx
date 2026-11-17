@@ -1,5 +1,5 @@
 import { AlertTriangle, CalendarOff, CircleCheck, Crown, HeartHandshake, KeyRound, Lock, Plus, RefreshCw, Trash2, Users } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
 import type { AppData } from '../../domain/types';
@@ -32,6 +32,13 @@ export function Equipe(): JSX.Element {
   const { personneId, ouvrirPersonne } = useUi();
   const alertes = useMemo(() => validateEquipe(data), [data]);
   const [ajout, setAjout] = useState(false);
+  const { intention, setIntention } = useUi();
+  useEffect(() => {
+    if (intention === 'personne') {
+      setAjout(true);
+      setIntention(null);
+    }
+  }, [intention, setIntention]);
   const quota = quotaAdjoints(data);
   const internes = data.personnes.filter((p) => !p.externe);
   const externes = data.personnes.filter((p) => p.externe);

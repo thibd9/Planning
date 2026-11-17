@@ -461,7 +461,7 @@ button.stepcard:hover { transform: translateY(-2px); box-shadow: var(--shadow-2)
 .div-bar i.minus { background: #1f6fa3; }
 
 /* ------------------------------------------------------------ Mon planning */
-.me { max-width: 1000px; margin: 0 auto; }
+.me { max-width: 1360px; margin: 0 auto; }
 .hero { background: var(--grad-vif); color: var(--on-vif); border-radius: var(--r-l); padding: 30px 32px; position: relative; overflow: hidden; box-shadow: var(--shadow-1); border: 0; }
 .hero::after { content: ''; position: absolute; right: -60px; top: -170px; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent 64%); }
 .hero::before { content: ''; position: absolute; left: 34%; bottom: -220px; width: 380px; height: 380px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.28), transparent 62%); }
@@ -480,7 +480,7 @@ button.stepcard:hover { transform: translateY(-2px); box-shadow: var(--shadow-2)
 .day-row.today .dn { color: var(--a-text); }
 .day-row.today .dn::after { content: ' · aujourd’hui'; font-weight: 500; font-size: 12px; }
 .day-row .dn { font-weight: 650; text-transform: capitalize; letter-spacing: -0.01em; }
-.me-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 20px; }
+.me-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(300px, 1fr); gap: 26px; align-items: start; margin-top: 28px; }
 
 /* ------------------------------------------------------------------ Règles */
 .rule { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 20px; padding: 18px 22px; border-bottom: 1px solid var(--line); }
@@ -806,8 +806,12 @@ td.cap1, th.cap1 { display: table-cell; }
 .test-role .tr-go { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 650; font-size: 13px; color: var(--ink); }
 @media (max-width: 900px) {
   .bandeau-test { margin: 10px 16px 0; }
-  .bandeau-test .bt-titre { width: 100%; }
-  .bandeau-test .seg { overflow-x: auto; max-width: 100%; }
+  .bandeau-test { padding: 6px 8px; gap: 6px; flex-wrap: nowrap; }
+  .bandeau-test .bt-titre { font-size: 0; gap: 0; padding-left: 4px; }
+  .bandeau-test .seg { overflow-x: auto; flex: 1; min-width: 0; }
+  .bandeau-test .seg button { white-space: nowrap; padding: 6px 10px; }
+  .bandeau-test .grow { display: none; }
+  .bandeau-test .btn { font-size: 0; gap: 0; padding: 0; width: 36px; min-height: 36px; flex: none; }
   .parcours-test { right: 12px; left: 12px; bottom: 86px; width: auto; }
 }
 
@@ -817,3 +821,103 @@ td.cap1, th.cap1 { display: table-cell; }
 @container (max-width: 92px) { .tile .ts { display: none; } .tile .tt { font-size: 11px; } }
 .pg-p .meta { white-space: normal; overflow: visible; line-height: 1.35; }
 .app.en-parcours .content { padding-bottom: 300px; }
+
+/* Résoudre : onglets par sujet, volets repliables, détails à la demande. */
+.onglets { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 26px; }
+.onglet { display: inline-flex; align-items: center; gap: 9px; border: 0; border-radius: 999px; padding: 10px 16px; background: var(--surface); color: var(--ink-2); font-weight: 600; box-shadow: var(--shadow-1); min-height: 44px; }
+.onglet:hover { background: var(--a-tint); color: var(--ink); }
+.onglet.on { background: var(--a-deep); color: #fff; }
+.onglet .compte { min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 12.5px; font-weight: 700; display: inline-grid; place-items: center; }
+.onglet .compte.zero { background: var(--n-1); color: var(--ink-2); }
+.onglet.on .compte { background: #fff; color: var(--a-hover); }
+.panneau .section-title:first-child { margin-top: 0; }
+.panneau .section-title { margin-bottom: 18px; }
+.panneau .decision { padding: 22px 26px; }
+.volet { border-top: 1px solid var(--line); }
+.volet > summary { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 20px 26px; cursor: pointer; list-style: none; }
+.volet > summary::-webkit-details-marker, .plus > summary::-webkit-details-marker { display: none; }
+.volet > summary:hover { background: var(--n-2); }
+.volet .chev, .plus .chev { transition: transform 0.15s ease; flex: none; color: var(--ink-3); }
+.volet[open] > summary .chev, .plus[open] > summary .chev { transform: rotate(180deg); }
+.volet-corps { padding: 6px 26px 30px; display: flex; flex-direction: column; gap: 22px; }
+.volet-corps .notice { margin: 0 !important; }
+.options { gap: 20px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+.option { padding: 24px; gap: 16px; }
+.plus { border-radius: 14px; background: var(--n-2); }
+.plus > summary { display: flex; align-items: center; gap: 8px; padding: 10px 14px; cursor: pointer; list-style: none; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.plus[open] { padding-bottom: 12px; }
+.plus[open] > *:not(summary) { margin: 6px 14px 0; }
+
+/* Mon planning : une journée = un horaire écrit en grand, puis sa frise sur des repères horaires. */
+.jours-h { display: flex; flex-direction: column; }
+.jour-h { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 8px 20px; align-items: center; padding: 18px 26px; border-bottom: 1px solid var(--line); }
+.jour-h:last-child { border-bottom: 0; }
+.jour-h.today { background: var(--a-tint); }
+.jour-h.regle { padding-block: 12px 4px; border-bottom: 0; }
+.jh-date { display: flex; flex-direction: column; }
+.jh-date b { font-size: 15px; }
+.jh-corps { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.jh-titre { display: flex; align-items: center; gap: 12px; }
+.jh-heures { font-size: 17px; letter-spacing: -0.02em; font-variant-numeric: normal; margin-right: 10px; }
+.graduations { display: block; position: relative; height: 16px; margin-inline: 2px; }
+.graduations i { position: absolute; top: 0; transform: translateX(-50%); font-style: normal; font-size: 11px; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+.frise { display: block; position: relative; height: 30px; border-radius: 10px; background: var(--n-2); margin-inline: 2px; }
+.frise .trait { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--n-4); }
+.frise .bloc { position: absolute; top: 3px; bottom: 3px; border-radius: 8px; color: #111c27; overflow: hidden; }
+.frise .bloc em { position: absolute; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 11.5px; font-weight: 700; white-space: nowrap; z-index: 1; }
+.frise .bloc em.deb { left: 9px; }
+.frise .bloc em.fin { right: 9px; }
+.frise .bloc.matin { background: var(--p-matin); }
+.frise .bloc.journee { background: var(--p-journee); }
+.frise .bloc.soir { background: var(--p-soir); }
+.frise .bloc.milieu { background: var(--p-milieu); }
+.frise .bloc.garde { background: var(--p-garde); color: #fff; }
+.frise .pause { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95) 3px, rgba(255, 255, 255, 0.45) 3px, rgba(255, 255, 255, 0.45) 6px); }
+.frise .rdv { position: absolute; bottom: -3px; height: 5px; border-radius: 3px; background: #a86400; box-shadow: 0 0 0 1.5px var(--surface); }
+
+/* Calendrier mensuel. */
+.cal-scroll { overflow-x: auto; }
+table.cal { width: 100%; border-collapse: separate; border-spacing: 6px; padding: 10px 16px 6px; table-layout: fixed; }
+table.cal th { font-size: 12px; font-weight: 650; color: var(--ink-3); text-transform: capitalize; padding: 6px 4px; text-align: left; }
+table.cal .cal-jc { display: none; }
+table.cal td { vertical-align: top; height: 92px; padding: 8px; border-radius: 14px; background: var(--n-2); }
+table.cal td.hors { background: transparent; }
+table.cal td.hors .cal-n { color: var(--ink-3); }
+table.cal td.auj { background: var(--a-soft); }
+.cal-n { display: flex; align-items: center; gap: 6px; font-weight: 650; font-size: 13.5px; margin-bottom: 6px; }
+.cal-auj { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--a-text); }
+.cal-poste { display: flex; align-items: center; gap: 7px; border-radius: 10px; padding: 6px 8px; font-size: 12.5px; font-weight: 650; color: #111c27; margin-top: 4px; line-height: 1.3; }
+.cal-h { display: grid; white-space: nowrap; min-width: 0; }
+.cal-poste svg { flex: none; }
+.cal-poste.matin { background: var(--p-matin); }
+.cal-poste.journee { background: var(--p-journee); }
+.cal-poste.soir { background: var(--p-soir); }
+.cal-poste.milieu { background: var(--p-milieu); }
+.cal-poste.conge { background: var(--p-conge); }
+.cal-poste.arret { background: var(--p-arret); }
+.cal-poste.garde { background: var(--p-garde); color: #fff; }
+.cal-vide { font-size: 12px; color: var(--ink-3); }
+@media (max-width: 1100px) { .me-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .jour-h { grid-template-columns: 1fr; padding: 16px; }
+  .jour-h.regle { display: none; }
+  .jh-date { flex-direction: row; gap: 8px; align-items: baseline; }
+  table.cal { min-width: 0; border-spacing: 3px; padding: 8px 6px; }
+  table.cal .cal-jl { display: none; }
+  table.cal .cal-jc { display: inline; }
+  table.cal td { padding: 5px 3px; height: 78px; border-radius: 10px; }
+  .cal-auj, .cal-poste svg { display: none; }
+  .cal-poste { padding: 4px 3px; font-size: 10.5px; justify-content: center; text-align: center; }
+  .cal-vide { font-size: 10px; }
+}
+
+/* Barre du haut : date, création rapide, cloche, messages, aide, compte. */
+.outils { display: flex; align-items: center; gap: 4px; }
+.top-date { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; color: var(--ink-2); padding: 0 10px; white-space: nowrap; }
+.top-ico { position: relative; width: 42px; height: 42px; padding: 0; border-radius: 50%; }
+.top-ico:hover { background: var(--a-soft); }
+.pastille-n { position: absolute; top: 2px; right: 0; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 0 0 2px #fff; }
+.top-creer { margin-right: 4px; }
+.menu .nav-badge { position: static; margin: 0; }
+.brand-sub { white-space: normal; overflow: visible; max-width: 170px; line-height: 1.3; margin-top: 0; }
+@media (max-width: 900px) { .top-date, .top-creer .lib { display: none; } .top-creer { padding: 0; width: 40px; min-height: 40px; } .outils .menu { right: -60px; } }

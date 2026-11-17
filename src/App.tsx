@@ -1,8 +1,8 @@
-import { BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, LayoutDashboard, ListChecks, LogOut, MessageSquare, MoonStar, Scale, ScrollText, Settings, Settings2, Store, UserRound, Users } from 'lucide-react';
+import { Bell, BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, LayoutDashboard, ListChecks, LogOut, MessageSquare, MoonStar, Scale, Plus, ScrollText, Settings, Settings2, Store, UserRound, Users } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { ESPACE_LABEL, espaceDe, estResponsable, memeIdentifiant } from './domain/acces';
-import { fmtHeure } from './domain/time';
+import { fmtDateCourt, fmtHeure } from './domain/time';
 import { nomComplet, nomCourt } from './domain/types';
 import { decisions } from './engine/decisions';
 import { useStore } from './store/store';
@@ -69,11 +69,13 @@ export function App(): JSX.Element {
   const today = useStore((s) => s.today);
   const sauvegarde = useStore((s) => s.derniereSauvegarde);
   const undo = useStore((s) => s.undo);
-  const { vue, aller, session, deconnecter, preferences, toast, taire, setTour, parcours } = useUi();
+  const { vue, aller, agir, session, deconnecter, preferences, toast, taire, setTour, parcours } = useUi();
   const [menu, setMenu] = useState(false);
   // Sans session, l'application s'ouvre sur la connexion ; la création d'une pharmacie se lance depuis là.
   const [creation, setCreation] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const outilsRef = useRef<HTMLDivElement>(null);
+  const [panneau, setPanneau] = useState<'creer' | 'alertes' | null>(null);
   const moi = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''));
   const espace = espaceDe(data, moi);
   const liens = NAV[espace];
@@ -83,6 +85,13 @@ export function App(): JSX.Element {
   // Les pharmacies de l'appareil où la personne connectée a un compte.
   const mesPharmacies = [{ id: officineId, nom: data.officine.nom }, ...Object.entries(autres).filter(([, d]) => d.personnes.some((p) => memeIdentifiant(p.identifiant, session ?? ''))).map(([id, d]) => ({ id, nom: d.officine.nom }))];
   const aDecider = useMemo(() => (espace === 'responsable' ? decisions(data, today).total : 0), [data, today, espace]);
+  // Ce qui attend la personne connectée, rassemblé sous la cloche de la barre du haut.
+  const aAider = moi ? data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= today && r.demandeur !== moi.id && !r.volontaires.includes(moi.id)).length : 0;
+  const alertes: { vue: Vue; texte: string; nombre: number; icone: JSX.Element }[] = [
+    ...(aDecider ? [{ vue: 'resoudre' as Vue, texte: `Décision${aDecider > 1 ? 's' : ''} à prendre`, nombre: aDecider, icone: <ListChecks size={17} aria-hidden="true" /> }] : []),
+    ...(aLire ? [{ vue: 'moi' as Vue, texte: `Changement${aLire > 1 ? 's' : ''} de mon planning à lire`, nombre: aLire, icone: <CalendarDays size={17} aria-hidden="true" /> }] : []),
+    ...(espace !== 'responsable' && aAider ? [{ vue: 'moi' as Vue, texte: 'Collègue qui cherche un remplaçant', nombre: aAider, icone: <Users size={17} aria-hidden="true" /> }] : []),
+  ];
   // Tant que ni le nom ni l'équipe ne sont saisis, l'application s'ouvre sur l'écran de création.
   const aCreer = !data.officine.nom.trim() && !data.personnes.length;
   const prefs = prefsDe(preferences, session);
@@ -111,9 +120,17 @@ export function App(): JSX.Element {
   }, [moi]);
 
   useEffect(() => {
-    if (!menu) return;
+    if (!menu && !panneau) return;
     const fermer = (e: MouseEvent | KeyboardEvent): void => {
-      if (e instanceof KeyboardEvent ? e.key === 'Escape' : !menuRef.current?.contains(e.target as Node)) setMenu(false);
+      const dehors = (r: HTMLDivElement | null): boolean => !r?.contains(e.target as Node);
+      if (e instanceof KeyboardEvent ? e.key === 'Escape' : dehors(menuRef.current) && dehors(outilsRef.current)) {
+        setMenu(false);
+        setPanneau(null);
+      } else if (!(e instanceof KeyboardEvent)) {
+        // Un clic dans l'un des deux groupes referme l'autre.
+        if (!dehors(menuRef.current)) setPanneau(null);
+        else setMenu(false);
+      }
     };
     document.addEventListener('mousedown', fermer);
     document.addEventListener('keydown', fermer);
@@ -121,7 +138,7 @@ export function App(): JSX.Element {
       document.removeEventListener('mousedown', fermer);
       document.removeEventListener('keydown', fermer);
     };
-  }, [menu]);
+  }, [menu, panneau]);
 
   if (!moi) return creation ? <Accueil garder={!aCreer} onAnnuler={() => setCreation(false)} /> : <Connexion onCreer={() => setCreation(true)} />;
   if (vueActive === 'nouvelle' && estResponsable(data, moi)) return <Accueil ajout={moi} onAnnuler={() => aller('tableau')} />;
@@ -205,19 +222,85 @@ export function App(): JSX.Element {
               <span className="esp">{ESPACE_LABEL[espace]} · </span>
               {data.officine.nom || 'Mon officine'}
             </span>
-            {espace === 'responsable' ? (
-              <button
-                type="button"
-                className="btn ghost sm"
-                data-tour="aide"
-                onClick={() => {
-                  aller('tableau');
-                  setTour(0);
-                }}
-              >
-                <CircleHelp size={16} aria-hidden="true" /> Tutoriel
+            <span className="top-date cap1" aria-hidden="true">
+              <CalendarDays size={15} /> {fmtDateCourt(today)}
+            </span>
+            <div className="outils" ref={outilsRef}>
+              {espace === 'responsable' ? (
+                <div style={{ position: 'relative' }}>
+                  <button type="button" className="btn sm primary top-creer" aria-haspopup="true" aria-expanded={panneau === 'creer'} onClick={() => setPanneau((x) => (x === 'creer' ? null : 'creer'))}>
+                    <Plus size={16} aria-hidden="true" /> <span className="lib">Créer</span>
+                    <span className="sr">, ouvrir le menu de création</span>
+                  </button>
+                  {panneau === 'creer' ? (
+                    <div className="menu">
+                      <div className="titre-menu">Créer</div>
+                      <button type="button" onClick={() => { setPanneau(null); aller('construire'); }}>
+                        <CalendarRange size={17} aria-hidden="true" /> Un planning de semaine
+                      </button>
+                      <button type="button" onClick={() => { setPanneau(null); agir('gardes', 'garde'); }}>
+                        <MoonStar size={17} aria-hidden="true" /> Une garde
+                      </button>
+                      <button type="button" onClick={() => { setPanneau(null); agir('equipe', 'personne'); }}>
+                        <Users size={17} aria-hidden="true" /> Une personne dans l’équipe
+                      </button>
+                      <button type="button" onClick={() => { setPanneau(null); agir('moi', 'demande'); }}>
+                        <CalendarDays size={17} aria-hidden="true" /> Une absence ou une demande pour moi
+                      </button>
+                      <button type="button" onClick={() => { setPanneau(null); aller('messages'); }}>
+                        <MessageSquare size={17} aria-hidden="true" /> Un message à l’équipe
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <button type="button" className="btn sm primary top-creer" onClick={() => agir('moi', 'demande')}>
+                  <Plus size={16} aria-hidden="true" /> <span className="lib">Faire une demande</span>
+                </button>
+              )}
+              <div style={{ position: 'relative' }}>
+                <button type="button" className="btn ghost icon top-ico" aria-haspopup="true" aria-expanded={panneau === 'alertes'} onClick={() => setPanneau((x) => (x === 'alertes' ? null : 'alertes'))}>
+                  <Bell size={18} aria-hidden="true" />
+                  {alertes.length ? <span className="pastille-n">{alertes.reduce((t, a) => t + a.nombre, 0)}</span> : null}
+                  <span className="sr">{alertes.length ? ' notifications, ouvrir la liste' : 'Aucune notification'}</span>
+                </button>
+                {panneau === 'alertes' ? (
+                  <div className="menu" style={{ minWidth: 300 }}>
+                    <div className="titre-menu">À voir</div>
+                    {alertes.length ? (
+                      alertes.map((a) => (
+                        <button key={a.vue} type="button" onClick={() => { setPanneau(null); aller(a.vue); }}>
+                          {a.icone}
+                          <span className="grow">{a.texte}</span>
+                          <span className="nav-badge" aria-hidden="true">{a.nombre}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="small soft" style={{ padding: '8px 14px 12px' }}>Vous êtes à jour : rien à lire, rien à décider.</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+              <button type="button" className="btn ghost icon top-ico" onClick={() => aller('messages')} aria-label={nonLus ? `Messages, ${nonLus} non lu${nonLus > 1 ? 's' : ''}` : 'Messages'}>
+                <MessageSquare size={18} aria-hidden="true" />
+                {nonLus ? <span className="pastille-n" aria-hidden="true">{nonLus}</span> : null}
               </button>
-            ) : null}
+              {espace === 'responsable' ? (
+                <button
+                  type="button"
+                  className="btn ghost icon top-ico"
+                  data-tour="aide"
+                  aria-label="Tutoriel"
+                  title="Tutoriel"
+                  onClick={() => {
+                    aller('tableau');
+                    setTour(0);
+                  }}
+                >
+                  <CircleHelp size={18} aria-hidden="true" />
+                </button>
+              ) : null}
+            </div>
             <div style={{ position: 'relative' }} ref={menuRef}>
               <button type="button" className="compte-btn" data-tour="compte" aria-haspopup="true" aria-expanded={menu} onClick={() => setMenu((m) => !m)}>
                 <Avatar person={moi} />
