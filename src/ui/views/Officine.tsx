@@ -1,6 +1,6 @@
-import { RotateCcw } from 'lucide-react';
+import { Plus, RotateCcw, Settings2, Store, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { JOURS, fmtDuree, fmtHHMM, parseHHMM } from '../../domain/time';
+import { JOURS, fmtDuree, fmtHHMM, parseHHMM, uid } from '../../domain/time';
 import type { Interval, PosteType } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
 import { useStore } from '../../store/store';
@@ -38,11 +38,24 @@ export function Officine(): JSX.Element {
   return (
     <div style={{ maxWidth: 1080 }}>
       <div className="page-head">
+        <span className="page-ico">
+          <Settings2 size={26} />
+        </span>
         <div className="grow">
           <div className="eyebrow">Officine</div>
-          <h1>{officine.nom}</h1>
+          <h1>{officine.nom || 'Mon officine'}</h1>
           <p>Horaires d'ouverture, effectif attendu et postes types. Ces réglages sont des choix d'organisation : ils se modifient librement.</p>
         </div>
+      </div>
+
+      <div className="card pad row wrap" style={{ marginBottom: 20, alignItems: 'flex-end' }}>
+        <span className="ico grad" style={{ alignSelf: 'center' }}>
+          <Store size={18} />
+        </span>
+        <label className="field grow" style={{ minWidth: 240 }}>
+          Nom de la pharmacie
+          <input id="officine-nom" value={officine.nom} onChange={(e) => majOfficine({ nom: e.target.value })} placeholder="Pharmacie du Marché" />
+        </label>
       </div>
 
       <div className="split" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
@@ -152,8 +165,21 @@ export function Officine(): JSX.Element {
 
       <div className="card" style={{ marginTop: 18, overflowX: 'auto' }}>
         <div className="card-head">
-          <h3 className="grow">Postes types</h3>
-          <span className="small soft">Utilisés par les propositions de planning et la saisie rapide</span>
+          <div className="grow">
+            <h3>Postes types</h3>
+            <span className="small soft">Utilisés par les propositions de planning et la saisie rapide</span>
+          </div>
+          <button
+            type="button"
+            className="btn sm"
+            onClick={() =>
+              majOfficine({
+                postes: officine.postes.concat({ id: uid('poste'), label: 'Nouveau poste', start: 9 * 60, end: 17 * 60, pauseStart: 12 * 60 + 30, pauseEnd: 13 * 60 + 30, jours: [0, 1, 2, 3, 4] }),
+              })
+            }
+          >
+            <Plus size={14} /> Ajouter un poste type
+          </button>
         </div>
         <table className="t" style={{ minWidth: 760 }}>
           <thead>
@@ -163,13 +189,14 @@ export function Officine(): JSX.Element {
               <th>Pause</th>
               <th>Jours</th>
               <th style={{ textAlign: 'right' }}>Travail effectif</th>
+              <th />
             </tr>
           </thead>
           <tbody>
             {officine.postes.map((p) => (
               <tr key={p.id}>
                 <td>
-                  <b>{p.label}</b>
+                  <input className="input" aria-label="Nom du poste" value={p.label} onChange={(e) => setPoste(p.id, { label: e.target.value })} style={{ fontWeight: 650, width: 170, padding: '6px 9px' }} />
                 </td>
                 <td>
                   <div className="row" style={{ gap: 6 }}>
@@ -191,6 +218,11 @@ export function Officine(): JSX.Element {
                 </td>
                 <td className="small" style={{ textTransform: 'capitalize' }}>{p.jours.length === 5 && p.jours[0] === 0 ? 'Lundi à vendredi' : p.jours.map((j) => JOURS[j]).join(', ')}</td>
                 <td className="num" style={{ textAlign: 'right' }}>{fmtDuree(minutesTravail(p))}</td>
+                <td style={{ textAlign: 'right', width: 48 }}>
+                  <button type="button" className="btn ghost icon" aria-label={`Retirer le poste ${p.label}`} onClick={() => majOfficine({ postes: officine.postes.filter((x) => x.id !== p.id) })}>
+                    <Trash2 size={15} />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -199,14 +231,14 @@ export function Officine(): JSX.Element {
 
       <div className="card pad row wrap" style={{ marginTop: 18 }}>
         <div className="grow">
-          <h3>Données de démonstration</h3>
+          <h3>Repartir de zéro</h3>
           <p className="soft small" style={{ marginTop: 3 }}>
-            L'application fonctionne aujourd'hui sur cet appareil, avec une équipe fictive. Réinitialiser efface vos essais et recrée le jeu de départ.
+            Réinitialiser efface l’officine, l’équipe et les plannings enregistrés sur cet appareil, et ramène à l’écran de création.
           </p>
         </div>
         {confirmation ? (
           <div className="row wrap">
-            <span className="small">Effacer vos essais et revenir au jeu de départ ?</span>
+            <span className="small">Tout effacer et revenir à l’écran de création ?</span>
             <button type="button" className="btn" onClick={() => setConfirmation(false)}>
               Annuler
             </button>
@@ -216,7 +248,7 @@ export function Officine(): JSX.Element {
               onClick={() => {
                 reinitialiser();
                 setConfirmation(false);
-                dire('Jeu de démonstration rétabli.');
+                dire('Application remise à zéro.');
               }}
             >
               <RotateCcw size={15} /> Oui, réinitialiser

@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react';
+import { Info, Scale } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { addDays, fmtDateCourt, fmtDecimal, fmtSemaine, mondayOf } from '../../domain/time';
 import { QUALIFICATION_COURT, nomCourt } from '../../domain/types';
@@ -47,6 +47,9 @@ export function Equite(): JSX.Element {
   return (
     <div>
       <div className="page-head">
+        <span className="page-ico">
+          <Scale size={26} />
+        </span>
         <div className="grow">
           <div className="eyebrow">Équité</div>
           <h1>Qui a porté quoi</h1>
@@ -115,14 +118,14 @@ export function Equite(): JSX.Element {
         <div className="card pad grow" style={{ minWidth: 280 }}>
           <div className="eyebrow">Dispersion des samedis</div>
           <div className="row" style={{ alignItems: 'baseline', marginTop: 4 }}>
-            <b className="num" style={{ fontFamily: 'var(--display)', fontSize: 26 }}>{fmtDecimal(ecartEquite(lignes, 'samedis'), 2)}</b>
+            <b className="num" style={{ fontSize: 26, letterSpacing: '-0.03em' }}>{fmtDecimal(ecartEquite(lignes, 'samedis'), 2)}</b>
             <span className="soft small">écart type entre réalisé et part attendue</span>
           </div>
         </div>
         <div className="card pad grow" style={{ minWidth: 280 }}>
           <div className="eyebrow">Dispersion des fermetures</div>
           <div className="row" style={{ alignItems: 'baseline', marginTop: 4 }}>
-            <b className="num" style={{ fontFamily: 'var(--display)', fontSize: 26 }}>{fmtDecimal(ecartEquite(lignes, 'fermetures'), 2)}</b>
+            <b className="num" style={{ fontSize: 26, letterSpacing: '-0.03em' }}>{fmtDecimal(ecartEquite(lignes, 'fermetures'), 2)}</b>
             <span className="soft small">plus c'est bas, plus c'est équilibré</span>
           </div>
         </div>

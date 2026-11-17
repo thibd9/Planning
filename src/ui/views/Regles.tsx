@@ -1,4 +1,4 @@
-import { BadgeCheck, FileWarning, ShieldCheck } from 'lucide-react';
+import { BadgeCheck, BookOpenCheck, FileWarning, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { fmtDateCourt } from '../../domain/time';
 import type { Regle, RegleFamille } from '../../domain/types';
@@ -21,6 +21,9 @@ export function Regles(): JSX.Element {
   return (
     <div style={{ maxWidth: 1040 }}>
       <div className="page-head">
+        <span className="page-ico">
+          <BookOpenCheck size={26} />
+        </span>
         <div className="grow">
           <div className="eyebrow">Règles</div>
           <h1>Ce que le moteur contrôle, et d'où ça vient</h1>

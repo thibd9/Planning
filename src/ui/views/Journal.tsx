@@ -1,4 +1,4 @@
-import { BookOpenCheck, CalendarCheck, Copy, Download, FileSpreadsheet, HeartHandshake, MoonStar, Pencil, Sparkles, UserMinus, Wrench } from 'lucide-react';
+import { BookOpenCheck, CalendarCheck, Copy, Download, FileSpreadsheet, HeartHandshake, MoonStar, Pencil, ScrollText, Sparkles, UserMinus, Wrench } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { JOURS, MOIS, fmtDecimal, fmtHorodatage, weekday } from '../../domain/time';
 import type { JournalType } from '../../domain/types';
@@ -52,6 +52,9 @@ export function Journal(): JSX.Element {
   return (
     <div style={{ maxWidth: 1100 }}>
       <div className="page-head">
+        <span className="page-ico">
+          <ScrollText size={26} />
+        </span>
         <div className="grow">
           <div className="eyebrow">Journal et paie</div>
           <h1>{onglet === 'journal' ? 'Dossier de preuve' : 'Fiche navette'}</h1>

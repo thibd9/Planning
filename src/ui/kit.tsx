@@ -191,8 +191,20 @@ export function Strip({ echelle, parts }: { echelle: Echelle; parts: { cls: stri
 export function Logo({ size = 22 }: { size?: number }): JSX.Element {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <path d="M6 21c3.6 0 5-10 10-10s6.4 10 10 10" fill="none" stroke="#F3C969" strokeWidth="3.2" strokeLinecap="round" />
-      <circle cx="16" cy="11" r="2.6" fill="#FFFDF8" />
+      <path d="M6 21.5c3.6 0 5-11 10-11s6.4 11 10 11" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" />
+      <circle cx="16" cy="10.5" r="2.7" fill="#FFE58A" />
     </svg>
+  );
+}
+
+/** État vide illustré : dit ce qui apparaîtra ici et comment commencer. */
+export function Empty({ icon, title, children, action }: { icon: ReactNode; title: string; children?: ReactNode; action?: ReactNode }): JSX.Element {
+  return (
+    <div className="card empty">
+      <span className="blob">{icon}</span>
+      <h3>{title}</h3>
+      {children ? <p>{children}</p> : null}
+      {action}
+    </div>
   );
 }

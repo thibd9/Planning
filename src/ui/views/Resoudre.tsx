@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CalendarCheck, Check, CircleCheck, Clock3, MoonStar, PartyPopper, UserMinus, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarCheck, CalendarRange, Check, CircleCheck, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -24,7 +24,7 @@ import { optionsReparation } from '../../engine/repair';
 import { validateWeek } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { AvantApres, Avatar, Pill } from '../kit';
+import { AvantApres, Avatar, Empty, Pill } from '../kit';
 
 const capitale = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
@@ -57,9 +57,14 @@ export function Resoudre(): JSX.Element {
   return (
     <div style={{ maxWidth: 1180 }}>
       <div className="page-head">
+        <span className="page-ico">
+          <ListChecks size={26} />
+        </span>
         <div className="grow">
           <div className="eyebrow">Résoudre · {fmtDateLong(today)}</div>
-          <h1>Que décider aujourd'hui ?</h1>
+          <h1>
+            Que décider <em>aujourd'hui</em> ?
+          </h1>
           <p>
             {d.total
               ? `${d.total} décision${d.total > 1 ? 's' : ''} vous attend${d.total > 1 ? 'ent' : ''}, de la plus urgente à la moins urgente. Chaque option annonce ses conséquences avant que vous ne choisissiez.`
@@ -68,18 +73,20 @@ export function Resoudre(): JSX.Element {
         </div>
       </div>
 
-      {!d.total ? (
-        <div className="card empty">
-          <PartyPopper size={28} />
-          <h3 style={{ marginTop: 8 }}>Rien à décider aujourd'hui</h3>
-          <p>Les absences sont couvertes, les demandes arbitrées et les plannings à jour.</p>
-        </div>
+      <Demarrage />
+
+      {!d.total && data.personnes.length ? (
+        <Empty icon={<PartyPopper size={30} />} title="Rien à décider aujourd'hui">
+          Les absences sont couvertes, les demandes arbitrées et les plannings à jour.
+        </Empty>
       ) : null}
 
       {parAbsence.length ? (
         <>
           <div className="section-title">
-            <UserMinus size={19} />
+            <span className="ico">
+              <UserMinus size={18} />
+            </span>
             <h2>Absences à couvrir</h2>
             <span className="count">{d.trous.length}</span>
           </div>
@@ -116,7 +123,9 @@ export function Resoudre(): JSX.Element {
       {d.absences.length || d.besoins.length ? (
         <>
           <div className="section-title">
-            <Check size={19} />
+            <span className="ico">
+              <Check size={18} />
+            </span>
             <h2>Demandes à arbitrer</h2>
             <span className="count">{d.absences.length + d.besoins.length}</span>
           </div>
@@ -134,7 +143,9 @@ export function Resoudre(): JSX.Element {
       {nbGardes ? (
         <>
           <div className="section-title">
-            <MoonStar size={19} />
+            <span className="ico">
+              <MoonStar size={18} />
+            </span>
             <h2>Gardes</h2>
             <span className="count">{nbGardes}</span>
           </div>
@@ -227,7 +238,9 @@ export function Resoudre(): JSX.Element {
       {d.publications.length ? (
         <>
           <div className="section-title">
-            <CalendarCheck size={19} />
+            <span className="ico">
+              <CalendarCheck size={18} />
+            </span>
             <h2>Plannings à publier</h2>
             <span className="count">{d.publications.length}</span>
           </div>
@@ -572,5 +585,67 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
         </button>
       </div>
     </div>
+  );
+}
+
+/** Étapes de démarrage : visibles tant que la première semaine n'est pas publiée. */
+function Demarrage(): JSX.Element | null {
+  const data = useStore((s) => s.data);
+  const { aller, setTour } = useUi();
+  const internes = data.personnes.filter((p) => !p.externe);
+  const etapes = [
+    {
+      titre: 'Compléter l’équipe',
+      texte: internes.length ? `${internes.length} personne${internes.length > 1 ? 's' : ''} dans l’équipe. Ajoutez contrats, compétences et besoins.` : 'Ajoutez le titulaire, les pharmaciens et les préparateurs.',
+      fait: internes.length >= 2 && internes.some((p) => p.qualification === 'titulaire' || p.qualification === 'adjoint'),
+      icone: <Users size={18} />,
+      ton: 'mint',
+      vers: 'equipe' as const,
+    },
+    {
+      titre: 'Construire une première semaine',
+      texte: 'Faites-vous proposer trois plannings, ou posez les postes à la main.',
+      fait: data.shifts.length > 0,
+      icone: <CalendarRange size={18} />,
+      ton: 'sun',
+      vers: 'construire' as const,
+    },
+    {
+      titre: 'Publier le planning',
+      texte: 'Une fois publié, il devient la version officielle que voit l’équipe.',
+      fait: Object.values(data.semaines).some((x) => x.statut === 'publie'),
+      icone: <Send size={18} />,
+      ton: 'sky',
+      vers: 'construire' as const,
+    },
+  ];
+  if (etapes.every((e) => e.fait)) return null;
+  const prochaine = etapes.findIndex((e) => !e.fait);
+  return (
+    <section className="col" style={{ gap: 14, marginBottom: 26 }} aria-label="Bien démarrer">
+      <div className="welcome">
+        <div className="eyebrow" style={{ color: 'rgba(255,255,255,0.85)' }}>Bien démarrer</div>
+        <h1 style={{ marginTop: 8 }}>{data.officine.nom || 'Votre officine'} est prête.</h1>
+        <p>Trois étapes pour arriver à votre premier planning publié. Le tutoriel vous montre où tout se trouve en une minute.</p>
+        <div className="row wrap" style={{ marginTop: 20 }}>
+          <button type="button" className="btn" onClick={() => aller(etapes[prochaine].vers)}>
+            {etapes[prochaine].titre} <ArrowRight size={15} />
+          </button>
+          <button type="button" className="btn glass" onClick={() => setTour(0)}>
+            <CircleHelp size={15} /> Suivre le tutoriel
+          </button>
+        </div>
+      </div>
+      <div className="steps">
+        {etapes.map((e, i) => (
+          <button key={e.titre} type="button" className={`stepcard${e.fait ? ' done' : i === prochaine ? ' next' : ''}`} onClick={() => aller(e.vers)}>
+            <span className="no">{e.fait ? 'Fait' : `Étape ${i + 1}`}</span>
+            <span className={`ico ${e.fait ? 'mint' : e.ton}`}>{e.fait ? <Check size={18} /> : e.icone}</span>
+            <b>{e.titre}</b>
+            <span className="small">{e.texte}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }

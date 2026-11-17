@@ -2,27 +2,42 @@ import {
   AlertTriangle,
   Ban,
   CalendarCheck,
+  CalendarRange,
+  Check,
   ChevronLeft,
   ChevronRight,
   CircleCheck,
+  CloudSun,
   Copy,
+  GraduationCap,
   Info,
   Lock,
   MessageCircleQuestion,
+  Minus,
   Moon,
   Package,
+  Pencil,
   Plus,
   Printer,
   Redo2,
   ShieldAlert,
   Sparkles,
+  Sun,
+  Sunrise,
+  Sunset,
+  Thermometer,
   Trash2,
+  TreePalm,
   Undo2,
+  Users,
+  X,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
+  JOURS_COURT,
   addDays,
+  dayIndex,
   fmtDecimal,
   fmtDuree,
   fmtEuros,
@@ -34,25 +49,27 @@ import {
   isoWeek,
   mondayOf,
   parseHHMM,
+  totalDuree,
   uid,
   weekDates,
   weekday,
 } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
 import { HEBERGE } from '../../env';
-import { ABSENCE_LABEL, ACTIVITE_LABEL, GARDE_LABEL, MISSION_LABEL, QUALIFICATION_COURT, estPharmacien, nomComplet, nomCourt } from '../../domain/types';
+import { ABSENCE_LABEL, ACTIVITE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt } from '../../domain/types';
 import {
   besoinsDe,
   decrireBesoin,
   decrireShift,
-  effectifComptoir,
-  effectifRequis,
+  estFermeture,
+  estOuverture,
   minutesSemaine,
   minutesTravail,
   ouverture,
   pharmacienSeulEnRendezVous,
   presencePharmaciens,
   shiftsSemaine,
+  sousEffectifs,
   trousPharmacien,
 } from '../../engine/core';
 import type { Blocage } from '../../engine/diagnose';
@@ -67,7 +84,7 @@ import { validateWeek } from '../../engine/validate';
 import { modificationsEnAttente, useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import type { Echelle } from '../kit';
-import { AvantApres, Avatar, Dialog, Pill, Seg, Strip, Track, roleDe } from '../kit';
+import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, Strip, Track, roleDe } from '../kit';
 
 type Lecture = 'heures' | 'cout' | 'equite';
 
@@ -122,23 +139,47 @@ export function Construire(): JSX.Element {
     return () => window.removeEventListener('keydown', onKey);
   }, [undo, redo]);
 
-  const colonnes = `164px ${dates.map((d) => (ouverture(data.officine, d).length ? 'minmax(88px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '78px' : '50px')).join(' ')} ${lecture === 'equite' ? 128 : 104}px`;
+  const ouverts = dates.map((d) => ouverture(data.officine, d).length > 0);
+  const avecSynthese = lecture !== 'heures';
+  const colonnes = `212px ${dates
+    .map((d, i) => (ouverts[i] ? 'minmax(104px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '104px' : '44px'))
+    .join(' ')}${avecSynthese ? ' 136px' : ''}`;
   const visibles = data.personnes.filter((p) => !p.externe || postes.some((s) => s.personId === p.id));
   const lignesEquite = useMemo(
     () => (lecture === 'equite' ? equite(data, periodeAvant(semaine, 8).from, addDays(semaine, 6)) : []),
     [data, semaine, lecture],
   );
-
   const nb = { bloquant: issues.filter((i) => i.gravite === 'bloquant').length, alerte: issues.filter((i) => i.gravite === 'alerte').length };
+  // Part des minutes d'ouverture où un pharmacien est planifié.
+  const couverture = useMemo(() => {
+    let total = 0;
+    let sans = 0;
+    for (const d of dates) {
+      total += totalDuree(ouverture(data.officine, d));
+      sans += totalDuree(trousPharmacien(data, d));
+    }
+    return total ? Math.round(((total - sans) / total) * 100) : 0;
+  }, [data, dates]);
+  const joursAvant = dayIndex(semaine) - dayIndex(today);
+  const sansEquipe = !data.personnes.some((p) => !p.externe);
+  const aller = useUi((s) => s.aller);
+  const visiblesIssues = (postes.length ? issues : []).filter(
+    (i) => !(i.regle === 'pharmacie.presence' && blocages.some((b) => b.date === i.date && b.start !== undefined && b.start <= (i.start ?? 0) && (i.end ?? 0) <= (b.end ?? 0))),
+  );
 
   return (
     <div>
       <div className="page-head">
+        <span className="page-ico">
+          <CalendarRange size={26} />
+        </span>
         <div className="grow">
           <div className="eyebrow">Construire</div>
-          <h1>Comment couvrir la semaine ?</h1>
+          <h1>
+            Comment couvrir <em>la semaine</em> ?
+          </h1>
         </div>
-        <div className="row no-print">
+        <div className="row no-print" style={{ gap: 4 }}>
           <button type="button" className="btn ghost icon" onClick={undo} disabled={!past.length} aria-label="Annuler la dernière manipulation" title="Annuler (Ctrl + Z)">
             <Undo2 size={17} />
           </button>
@@ -153,266 +194,323 @@ export function Construire(): JSX.Element {
         </div>
       </div>
 
-      <div className="plan-bar">
-        <div className="week-nav">
-          <button type="button" className="btn ghost icon" onClick={() => setSemaine(addDays(semaine, -7))} aria-label="Semaine précédente">
-            <ChevronLeft size={18} />
-          </button>
-          <div className="label" aria-live="polite">
-            Semaine {isoWeek(semaine)} · {fmtSemaine(semaine)}
-            <small>{semaine === mondayOf(today) ? 'Semaine en cours' : semaine === addDays(mondayOf(today), 7) ? 'Semaine prochaine' : passee ? 'Semaine passée' : `Dans ${Math.round((Date.parse(semaine) - Date.parse(mondayOf(today))) / 604_800_000)} semaines`}</small>
-          </div>
-          <button type="button" className="btn ghost icon" onClick={() => setSemaine(addDays(semaine, 7))} aria-label="Semaine suivante">
-            <ChevronRight size={18} />
-          </button>
-        </div>
-        {statut?.statut === 'publie' ? (
-          enAttente ? (
-            <Pill tone="warn" title="Les salariés voient encore la version publiée">
-              <AlertTriangle size={13} /> Publié · {enAttente} modification{enAttente > 1 ? 's' : ''} en attente
-            </Pill>
-          ) : (
-            <Pill tone="ok">
-              <CircleCheck size={13} /> Publié le {fmtHorodatage(statut.publishedAt ?? '')}
-            </Pill>
-          )
-        ) : (
-          <Pill tone="miel" title="Un brouillon n'est visible que par le responsable">
-            Brouillon · non visible par l'équipe
-          </Pill>
-        )}
-        <div className="right row wrap">
-          <Seg<Lecture>
-            label="Lecture du planning"
-            value={lecture}
-            onChange={setLecture}
-            options={[
-              { value: 'heures', label: 'Heures' },
-              { value: 'cout', label: 'Coût' },
-              { value: 'equite', label: 'Équité et fatigue' },
-            ]}
-          />
-          {!passee ? (
-            <>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => {
-                  copierSemaine(addDays(semaine, -7), semaine);
-                  dire('Semaine précédente recopiée dans le brouillon.', true);
-                }}
-                title="Recopier les postes de la semaine précédente"
-              >
-                <Copy size={15} /> Recopier
-              </button>
-              <button type="button" className="btn honey" onClick={() => setGeneration(true)}>
-                <Sparkles size={15} /> Proposer un planning
-              </button>
-              <button type="button" className="btn primary" onClick={() => setPublication(true)} disabled={statut?.statut === 'publie' && !enAttente}>
-                <CalendarCheck size={15} /> {statut?.statut === 'publie' ? 'Publier les modifications' : 'Publier'}
-              </button>
-            </>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="plan-wrap">
-        <div>
+      {sansEquipe ? (
+        <Empty
+          icon={<Users size={30} />}
+          title="Ajoutez d’abord votre équipe"
+          action={
+            <button type="button" className="btn primary" onClick={() => aller('equipe')}>
+              <Plus size={15} /> Ajouter une personne
+            </button>
+          }
+        >
+          Le planning se construit autour des personnes : au moins un pharmacien, puis les préparateurs et les autres postes.
+        </Empty>
+      ) : (
+        <>
           <div className="plan">
-            <div className="plan-grid" style={{ gridTemplateColumns: colonnes }} role="table" aria-label={`Planning de la semaine du ${fmtSemaine(semaine)}`}>
-              <div className="pg-h" role="columnheader">
-                <span className="eyebrow">Équipe</span>
-                <div className="tiny muted" style={{ marginTop: 9 }}>
-                  Présence d'un pharmacien
-                  <br />
-                  Effectif au comptoir
+            <div className="plan-bar">
+              <div className="week-nav">
+                <button type="button" className="btn ghost icon" onClick={() => setSemaine(addDays(semaine, -7))} aria-label="Semaine précédente">
+                  <ChevronLeft size={18} />
+                </button>
+                <button type="button" className="btn ghost icon" onClick={() => setSemaine(addDays(semaine, 7))} aria-label="Semaine suivante">
+                  <ChevronRight size={18} />
+                </button>
+                <div className="label" aria-live="polite">
+                  {fmtSemaine(semaine)}
+                  <small>
+                    Semaine {isoWeek(semaine)} ·{' '}
+                    {semaine === mondayOf(today) ? 'en cours' : semaine === addDays(mondayOf(today), 7) ? 'la semaine prochaine' : passee ? 'passée' : `dans ${Math.round(joursAvant / 7)} semaines`}
+                  </small>
                 </div>
               </div>
-              {dates.map((date) => (
-                <EnTeteJour key={date} data={data} date={date} echelle={echelle} today={today} flag={!!focus && focus.date === date && !focus.personId} />
-              ))}
-              <div className="pg-h" role="columnheader">
-                <span className="eyebrow">{lecture === 'heures' ? 'Heures / contrat' : lecture === 'cout' ? 'Coût estimé' : '8 semaines'}</span>
-                {lecture === 'cout' ? <div style={{ fontWeight: 700, marginTop: 6 }} className="num">{fmtEuros(coutSemaine(data, semaine))}</div> : null}
+              {statut?.statut === 'publie' ? (
+                enAttente ? (
+                  <Pill tone="warn" title="Les salariés voient encore la version publiée">
+                    <AlertTriangle size={13} /> Publié · {enAttente} modification{enAttente > 1 ? 's' : ''} en attente
+                  </Pill>
+                ) : (
+                  <Pill tone="ok">
+                    <CircleCheck size={13} /> Publié le {fmtHorodatage(statut.publishedAt ?? '')}
+                  </Pill>
+                )
+              ) : (
+                <Pill tone="iris" title="Un brouillon n'est visible que par le responsable">
+                  <Pencil size={12} /> Brouillon
+                </Pill>
+              )}
+              {postes.length ? (
+                <span className="ring" title="Part des minutes d'ouverture où un pharmacien est planifié">
+                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" fill="none" stroke="#e9e8f6" strokeWidth="3.5" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      fill="none"
+                      stroke={couverture === 100 ? '#12936a' : '#7c6cf5'}
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeDasharray={`${(couverture / 100) * 56.5} 56.5`}
+                    />
+                  </svg>
+                  <span className="num">{couverture} %</span>
+                  <small>
+                    pharmacien présent{joursAvant > 0 && statut?.statut !== 'publie' ? ` · J − ${joursAvant}` : ''}
+                  </small>
+                </span>
+              ) : null}
+              <div className="right row wrap no-print" style={{ gap: 8 }}>
+                <Seg<Lecture>
+                  label="Lecture du planning"
+                  value={lecture}
+                  onChange={setLecture}
+                  options={[
+                    { value: 'heures', label: 'Heures' },
+                    { value: 'cout', label: 'Coût' },
+                    { value: 'equite', label: 'Équité' },
+                  ]}
+                />
+                {!passee ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => {
+                        copierSemaine(addDays(semaine, -7), semaine);
+                        dire('Semaine précédente recopiée dans le brouillon.', true);
+                      }}
+                      title="Recopier les postes de la semaine précédente"
+                    >
+                      <Copy size={15} /> Recopier
+                    </button>
+                    <button type="button" className="btn magic" data-tour="proposer" onClick={() => setGeneration(true)}>
+                      <Sparkles size={15} /> Proposer un planning
+                    </button>
+                    <button type="button" className="btn primary" onClick={() => setPublication(true)} disabled={!postes.length || (statut?.statut === 'publie' && !enAttente)}>
+                      <CalendarCheck size={15} /> {statut?.statut === 'publie' ? 'Publier les modifications' : 'Publier'}
+                    </button>
+                  </>
+                ) : null}
               </div>
+            </div>
 
-              {GROUPES.map((g) => {
-                const membres = visibles.filter(g.test);
-                if (!membres.length) return null;
-                return (
-                  <div key={g.titre} style={{ display: 'contents' }}>
-                    <div className="pg-group">
-                      <span className="dot" style={{ background: g.couleur }} /> {g.titre}
-                    </div>
-                    {membres.map((p) => (
-                      <div key={p.id} style={{ display: 'contents' }} role="row">
-                        <div className="pg-p" role="rowheader">
-                          <Avatar person={p} />
-                          <div className="grow">
-                            <div className="nm">{nomCourt(p)}</div>
-                            <div className="meta">
-                              {QUALIFICATION_COURT[p.qualification]}
-                              {p.externe ? ' · remplaçant' : ` · ${p.heuresHebdo} h`}
-                            </div>
-                          </div>
-                        </div>
-                        {dates.map((date) => {
-                          const cle = `${p.id}|${date}`;
-                          const duJour = postes.filter((s) => s.personId === p.id && s.date === date).sort((a, b) => a.start - b.start);
-                          const absence = data.absences.find((a) => a.personId === p.id && a.statut === 'approuvee' && a.from <= date && date <= a.to);
-                          const ouvert = ouverture(data.officine, date).length > 0;
-                          const reconnus = besoinsDe(data, p.id, date).filter((b) => b.statut === 'reconnue');
-                          const gardes = data.gardes.filter((g) => g.personId === p.id && g.date === date);
-                          const missions = data.missions.filter((m) => m.personId === p.id && m.date === date);
-                          const signale = !!focus && focus.personId === p.id && (!focus.date || focus.date === date);
-                          return (
-                            <div
-                              key={date}
-                              role="cell"
-                              className={`pg-c${!ouvert ? ' closed' : ''}${absence ? ' absent' : ''}${survol === cle ? ' over' : ''}${signale ? ' flag' : ''}`}
-                              onDragOver={(e) => {
-                                if (passee) return;
-                                e.preventDefault();
-                                setSurvol(cle);
-                              }}
-                              onDragLeave={() => setSurvol((s) => (s === cle ? null : s))}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                setSurvol(null);
-                                const id = e.dataTransfer.getData('text/plain');
-                                if (id) {
-                                  moveShift(id, p.id, date);
-                                  dire('Poste déplacé.', true);
-                                }
-                              }}
-                            >
-                              {reconnus.length && !duJour.length && !absence ? (
-                                <span className="unavail" title={reconnus.map(decrireBesoin).join('\n')}>
-                                  <Lock size={12} aria-label="Indisponibilité reconnue" />
-                                </span>
-                              ) : null}
-                              {absence ? (
-                                <span className="tag">
-                                  <Ban size={12} /> {ABSENCE_LABEL[absence.type]}
-                                </span>
-                              ) : null}
-                              {duJour.map((s) => (
-                                <button
-                                  key={s.id}
-                                  type="button"
-                                  className="shift"
-                                  draggable={!passee}
-                                  onDragStart={(e) => e.dataTransfer.setData('text/plain', s.id)}
-                                  onClick={() => setEdition({ personId: p.id, date, shift: s })}
-                                  aria-label={`${nomCourt(p)}, ${JOURS[weekday(date)]} : ${decrireShift(s)}, ${ACTIVITE_LABEL[s.activite]}. Modifier.`}
-                                  title={s.explication}
-                                >
-                                  <Track shifts={[s]} echelle={echelle} role={roleDe(p)} missions={missions} />
-                                  <span className="lbl num">
-                                    {s.activite !== 'comptoir' ? <Package size={12} aria-label={ACTIVITE_LABEL[s.activite]} /> : null}
-                                    {fmtHHMM(s.start)}–{fmtHHMM(s.end)}
-                                  </span>
-                                  {s.explication ? <MessageCircleQuestion size={12} className="why" aria-label="Affectation expliquée" /> : null}
-                                </button>
-                              ))}
-                              {gardes.map((g) => (
-                                <span key={g.id} className="garde-chip" title={GARDE_LABEL[g.type]}>
-                                  <Moon size={11} /> {fmtHHMM(g.start).replace(':00', ' h')}→{fmtHHMM(g.end).replace(':00', ' h')}
-                                </span>
-                              ))}
-                              {!duJour.length && !absence && ouvert && !passee ? (
-                                <button type="button" className="add" onClick={() => setEdition({ personId: p.id, date })} aria-label={`Ajouter un poste à ${nomCourt(p)} ${JOURS[weekday(date)]}`}>
-                                  <Plus size={16} />
-                                </button>
-                              ) : null}
-                            </div>
-                          );
-                        })}
-                        <Resume data={data} person={p} semaine={semaine} lecture={lecture} lignes={lignesEquite} />
-                      </div>
-                    ))}
+            <div className="plan-scroll" data-tour="grille">
+              <div className="plan-grid" style={{ gridTemplateColumns: colonnes }} role="table" aria-label={`Planning de la semaine du ${fmtSemaine(semaine)}`}>
+                <div className="pg-h" role="columnheader">
+                  <span className="eyebrow">Équipe</span>
+                </div>
+                {dates.map((date, i) => (
+                  <div key={date} className={`pg-h${date === today ? ' today' : ''}${!ouverts[i] ? ' closed' : ''}`} role="columnheader">
+                    <span className="n">{Number(date.slice(8))}</span>
+                    <span className="d">{ouverts[i] ? JOURS[weekday(date)] : JOURS_COURT[weekday(date)]}</span>
                   </div>
-                );
-              })}
+                ))}
+                {avecSynthese ? (
+                  <div className="pg-h" role="columnheader">
+                    <span className="n num" style={{ fontSize: 15 }}>{lecture === 'cout' ? fmtEuros(coutSemaine(data, semaine)) : '8 semaines'}</span>
+                    <span className="d">{lecture === 'cout' ? 'coût estimé' : 'samedis, fermetures'}</span>
+                  </div>
+                ) : null}
+
+                <div className="pg-o lab" role="rowheader">
+                  Couverture
+                </div>
+                {dates.map((date, i) => (
+                  <Objectif key={date} data={data} date={date} echelle={echelle} ouvert={ouverts[i]} vide={!postes.some((s) => s.date === date)} flag={!!focus && focus.date === date && !focus.personId} />
+                ))}
+                {avecSynthese ? <div className="pg-o" /> : null}
+
+                {GROUPES.map((g) => {
+                  const membres = visibles.filter(g.test);
+                  if (!membres.length) return null;
+                  return (
+                    <div key={g.titre} style={{ display: 'contents' }}>
+                      <div className="pg-group">
+                        <span className="dot" style={{ background: g.couleur }} /> {g.titre}
+                      </div>
+                      {membres.map((p) => {
+                        const minutes = minutesSemaine(data, p.id, semaine);
+                        const ecart = minutes - p.heuresHebdo * 60;
+                        return (
+                          <div key={p.id} style={{ display: 'contents' }} role="row">
+                            <div className="pg-p" role="rowheader">
+                              <Avatar person={p} />
+                              <div className="grow">
+                                <div className="nm">{nomCourt(p)}</div>
+                                <div className="meta num">
+                                  {p.externe ? (
+                                    <>Remplaçant · {fmtDuree(minutes)}</>
+                                  ) : (
+                                    <>
+                                      <b>{fmtDuree(minutes)}</b> / {p.heuresHebdo} h
+                                      {postes.length ? (
+                                        <span className={ecart === 0 ? 'egal' : ecart > 0 ? 'plus' : 'moins'}> · {ecart === 0 ? 'atteint' : `${ecart > 0 ? '+' : '−'} ${fmtDuree(Math.abs(ecart))}`}</span>
+                                      ) : null}
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            {dates.map((date, i) => {
+                              const cle = `${p.id}|${date}`;
+                              const duJour = postes.filter((s) => s.personId === p.id && s.date === date).sort((a, b) => a.start - b.start);
+                              const absence = data.absences.find((a) => a.personId === p.id && a.statut === 'approuvee' && a.from <= date && date <= a.to);
+                              const reconnus = besoinsDe(data, p.id, date).filter((b) => b.statut === 'reconnue');
+                              const gardes = data.gardes.filter((g) => g.personId === p.id && g.date === date);
+                              const missions = data.missions.filter((m) => m.personId === p.id && m.date === date);
+                              const signale = !!focus && focus.personId === p.id && (!focus.date || focus.date === date);
+                              return (
+                                <div
+                                  key={date}
+                                  role="cell"
+                                  className={`pg-c${!ouverts[i] ? ' closed' : ''}${survol === cle ? ' over' : ''}${signale ? ' flag' : ''}`}
+                                  onDragOver={(e) => {
+                                    if (passee || !ouverts[i]) return;
+                                    e.preventDefault();
+                                    setSurvol(cle);
+                                  }}
+                                  onDragLeave={() => setSurvol((s) => (s === cle ? null : s))}
+                                  onDrop={(e) => {
+                                    e.preventDefault();
+                                    setSurvol(null);
+                                    const id = e.dataTransfer.getData('text/plain');
+                                    if (id) {
+                                      moveShift(id, p.id, date);
+                                      dire('Poste déplacé.', true);
+                                    }
+                                  }}
+                                >
+                                  {reconnus.length && !duJour.length && !absence ? (
+                                    <span className="unavail" title={reconnus.map(decrireBesoin).join('\n')}>
+                                      <Lock size={12} aria-label="Indisponibilité reconnue" />
+                                    </span>
+                                  ) : null}
+                                  {absence ? (
+                                    <span className={`tile ${absence.type === 'conge' ? 'conge' : absence.type === 'maladie' ? 'arret' : 'absence'}`}>
+                                      <span className="ti">{absence.type === 'conge' ? <TreePalm size={14} /> : absence.type === 'maladie' ? <Thermometer size={14} /> : absence.type === 'formation' ? <GraduationCap size={14} /> : <Ban size={14} />}</span>
+                                      <span className="tt">{ABSENCE_LABEL[absence.type]}</span>
+                                    </span>
+                                  ) : null}
+                                  {duJour.map((s) => (
+                                    <Tuile key={s.id} data={data} s={s} person={p} echelle={echelle} missions={missions} glissable={!passee} onClick={() => setEdition({ personId: p.id, date, shift: s })} />
+                                  ))}
+                                  {gardes.map((g) => (
+                                    <span key={g.id} className="tile garde" title={GARDE_LABEL[g.type]}>
+                                      <span className="ti">
+                                        <Moon size={14} />
+                                      </span>
+                                      <span className="tt num">
+                                        {fmtHHMM(g.start)}→{fmtHHMM(g.end)}
+                                        <span className="ts">{g.type === 'astreinte' ? 'Astreinte' : 'Garde'}</span>
+                                      </span>
+                                    </span>
+                                  ))}
+                                  {!duJour.length && !absence && !gardes.length && ouverts[i] && !passee ? (
+                                    <button type="button" className="add" onClick={() => setEdition({ personId: p.id, date })} aria-label={`Ajouter un poste à ${nomCourt(p)} ${JOURS[weekday(date)]}`}>
+                                      <Plus size={15} />
+                                    </button>
+                                  ) : null}
+                                </div>
+                              );
+                            })}
+                            {avecSynthese ? <Resume data={data} person={p} semaine={semaine} lecture={lecture} lignes={lignesEquite} /> : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <div className="legend">
-              <span><i style={{ background: 'var(--pharma)' }} /> Pharmacien</span>
-              <span><i style={{ background: 'var(--prepa)' }} /> Préparateur</span>
-              <span><i style={{ background: 'var(--autre)' }} /> Apprenti, étudiant</span>
-              <span><i style={{ background: 'repeating-linear-gradient(135deg, var(--danger), var(--danger) 3px, #e58a7f 3px, #e58a7f 6px)' }} /> Ouverture sans pharmacien</span>
-              <span><i style={{ background: 'var(--miel)' }} /> Rendez-vous</span>
-              <span><Moon size={12} /> Garde</span>
+              <span><i style={{ background: 'linear-gradient(135deg, #fff0b0, #f9d75e)' }} /> Ouverture, matin</span>
+              <span><i style={{ background: 'linear-gradient(135deg, #e4dfff, #c0b6ff)' }} /> Fermeture, après-midi</span>
+              <span><i style={{ background: 'linear-gradient(120deg, #fde68a, #c9bfff)' }} /> Journée complète</span>
+              <span><i style={{ background: 'linear-gradient(135deg, #34347a, #26265a)' }} /> Garde</span>
+              <span><i style={{ background: 'linear-gradient(135deg, #e4f3fb, #cfe9f8)' }} /> Congé</span>
               <span><Lock size={12} /> Indisponibilité reconnue</span>
-              <span><MessageCircleQuestion size={12} /> Affectation expliquée</span>
+              <span><Sparkles size={12} /> Affectation expliquée</span>
             </div>
           </div>
+
           {!postes.length && !passee ? (
-            <div className="card pad" style={{ marginTop: 14 }}>
+            <div className="card pad" style={{ marginTop: 16, background: 'var(--grad-soft)' }}>
               <div className="row wrap">
+                <span className="ico grad">
+                  <Sparkles size={18} />
+                </span>
                 <div className="grow">
                   <h3>Cette semaine est vide</h3>
                   <p className="soft" style={{ marginTop: 4 }}>
-                    Demandez trois propositions comparables, recopiez la semaine précédente, ou cliquez dans une case pour poser un poste à la main.
+                    Demandez trois propositions comparables, recopiez la semaine précédente, ou cliquez sur un « + » pour poser un poste à la main.
                   </p>
                 </div>
-                <button type="button" className="btn honey" onClick={() => setGeneration(true)}>
+                <button type="button" className="btn magic" onClick={() => setGeneration(true)}>
                   <Sparkles size={15} /> Proposer un planning
                 </button>
               </div>
             </div>
           ) : null}
-        </div>
 
-        <aside className="panel no-print" aria-label="Contrôles de la semaine">
-          <div className="card">
+          <section className="card no-print" style={{ marginTop: 20 }} data-tour="controles" aria-label="Contrôles de la semaine">
             <div className="card-head">
-              <ShieldAlert size={18} />
-              <h3 className="grow">Contrôles</h3>
+              <span className="ico">
+                <ShieldAlert size={18} />
+              </span>
+              <div className="grow">
+                <h3>Contrôles</h3>
+                <div className="small soft">Aide à la conformité : ces contrôles signalent des écarts, ils ne valent pas certification.</div>
+              </div>
               {!postes.length ? (
                 <Pill>Semaine vide</Pill>
               ) : nb.bloquant ? (
-                <Pill tone="danger">{nb.bloquant} bloquant{nb.bloquant > 1 ? 's' : ''}</Pill>
+                <Pill tone="danger">
+                  {nb.bloquant} bloquant{nb.bloquant > 1 ? 's' : ''}
+                </Pill>
               ) : (
-                <Pill tone="ok">Aucun bloquant</Pill>
+                <Pill tone="ok">
+                  <CircleCheck size={13} /> Aucun bloquant
+                </Pill>
               )}
-              {postes.length && nb.alerte ? <Pill tone="warn" title="Alertes d'organisation">{nb.alerte} alerte{nb.alerte > 1 ? 's' : ''}</Pill> : null}
-            </div>
-            <div className="card-body col" style={{ gap: 8, maxHeight: '62vh', overflow: 'auto' }}>
-              {blocages.map((b, i) => (
-                <CarteBlocage key={i} b={b} data={data} onFocus={() => setFocus(b.date ? { date: b.date } : null)} />
-              ))}
-              {(postes.length ? issues : [])
-                .filter((i) => !(i.regle === 'pharmacie.presence' && blocages.some((b) => b.date === i.date && b.start !== undefined && b.start <= (i.start ?? 0) && (i.end ?? 0) <= (b.end ?? 0))))
-                .map((i) => (
-                  <CarteIssue key={i.id} issue={i} data={data} onClick={() => setFocus(i.personId || i.date ? { personId: i.personId, date: i.date } : null)} />
-                ))}
-              {!postes.length ? (
-                <p className="soft small">
-                  {blocages.length ? 'Ces points existent avant même de poser un poste.' : 'Aucune impossibilité détectée avec les contraintes connues.'} Les contrôles détaillés démarrent au premier poste posé.
-                </p>
-              ) : !issues.length && !blocages.length ? (
-                <p className="soft small">Aucun point à signaler sur cette semaine.</p>
+              {postes.length && nb.alerte ? (
+                <Pill tone="warn" title="Alertes d'organisation">
+                  {nb.alerte} alerte{nb.alerte > 1 ? 's' : ''}
+                </Pill>
               ) : null}
-              <p className="tiny muted" style={{ marginTop: 4 }}>
-                Aide à la conformité : ces contrôles signalent des écarts, ils ne valent pas certification.
-              </p>
+              {postes.length && !passee ? (
+                <button
+                  type="button"
+                  className="btn ghost sm danger"
+                  onClick={() => {
+                    viderSemaine(semaine);
+                    dire('Semaine vidée.', true);
+                  }}
+                >
+                  <Trash2 size={14} /> Vider la semaine
+                </button>
+              ) : null}
             </div>
-          </div>
-          {postes.length && !passee ? (
-            <button
-              type="button"
-              className="btn ghost sm danger"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={() => {
-                viderSemaine(semaine);
-                dire('Semaine vidée.', true);
-              }}
-            >
-              <Trash2 size={14} /> Vider la semaine
-            </button>
-          ) : null}
-        </aside>
-      </div>
+            <div className="card-body">
+              {blocages.length || visiblesIssues.length ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
+                  {blocages.map((b, i) => (
+                    <CarteBlocage key={i} b={b} data={data} onFocus={() => setFocus(b.date ? { date: b.date } : null)} />
+                  ))}
+                  {visiblesIssues.map((i) => (
+                    <CarteIssue key={i.id} issue={i} data={data} onClick={() => setFocus(i.personId || i.date ? { personId: i.personId, date: i.date } : null)} />
+                  ))}
+                </div>
+              ) : (
+                <p className="soft small">
+                  {postes.length ? 'Aucun point à signaler sur cette semaine.' : 'Aucune impossibilité détectée avec les contraintes connues. Les contrôles détaillés démarrent au premier poste posé.'}
+                </p>
+              )}
+            </div>
+          </section>
+        </>
+      )}
 
       {edition ? <DialoguePoste {...edition} onClose={() => setEdition(null)} /> : null}
       {generation ? <DialogueGeneration semaine={semaine} onClose={() => setGeneration(false)} /> : null}
@@ -421,39 +519,103 @@ export function Construire(): JSX.Element {
   );
 }
 
-function EnTeteJour({ data, date, echelle, today, flag }: { data: AppData; date: ISODate; echelle: Echelle; today: ISODate; flag: boolean }): JSX.Element {
-  const o = ouverture(data.officine, date);
-  const wd = weekday(date);
-  const trous = trousPharmacien(data, date);
-  const creneaux: { present: number; requis: number }[] = [];
-  for (let t = echelle.start; t < echelle.end; t += 30) creneaux.push({ present: effectifComptoir(data, date, t), requis: effectifRequis(data.officine, date, t) });
-  const max = Math.max(4, ...creneaux.map((c) => c.present));
+const pct = (e: Echelle, m: number): number => Math.max(0, Math.min(100, ((m - e.start) / (e.end - e.start)) * 100));
+
+/** Tuile d'un poste : pictogramme du moment de la journée, horaires, et position dans la journée. */
+function Tuile({
+  data,
+  s,
+  person,
+  echelle,
+  missions,
+  glissable,
+  onClick,
+}: {
+  data: AppData;
+  s: Shift;
+  person: Person;
+  echelle: Echelle;
+  missions: { start: number; end: number }[];
+  glissable: boolean;
+  onClick: () => void;
+}): JSX.Element {
+  const ouvre = estOuverture(data.officine, s);
+  const ferme = estFermeture(data.officine, s);
+  const categorie = ouvre && ferme ? 'journee' : ouvre ? 'matin' : ferme ? 'soir' : 'milieu';
+  const Icone =
+    s.activite === 'formation' ? GraduationCap : s.activite !== 'comptoir' ? Package : categorie === 'matin' ? (s.end - s.start <= 330 ? Sunrise : Sun) : categorie === 'soir' ? Sunset : categorie === 'journee' ? Sun : CloudSun;
+  const activite = s.activite === 'back' ? 'réception' : s.activite === 'admin' ? 'administratif' : s.activite === 'formation' ? 'formation' : '';
   return (
-    <div className={`pg-h${date === today ? ' today' : ''}${!o.length ? ' closed' : ''}`} role="columnheader" style={{ position: 'sticky', boxShadow: flag ? 'inset 0 0 0 2px var(--danger)' : undefined }}>
-      <span className="d">{o.length ? JOURS[wd] : JOURS[wd].slice(0, 3)}</span>
-      <span className="n">{fmtJourMois(date).split(' ')[0]}</span>
-      {o.length ? (
-        <>
-          <Strip
-            echelle={echelle}
-            parts={[
-              { cls: 'open', list: o },
-              { cls: 'ph', list: presencePharmaciens(data, date) },
-              { cls: 'rdv', list: pharmacienSeulEnRendezVous(data, date) },
-              { cls: 'gap', list: trous },
-            ]}
-          />
-          <span className="staff" aria-hidden="true">
-            {creneaux.map((c, i) => (
-              <i key={i} className={c.requis === 0 ? 'off' : c.present < c.requis ? 'low' : ''} style={{ height: `${(c.present / max) * 100}%` }} />
-            ))}
-          </span>
-          <span className="sr">
-            {trous.length ? `${trous.length} plage(s) sans pharmacien` : 'Pharmacien présent sur toute l’ouverture'}
-          </span>
-        </>
-      ) : (
-        <div className="tiny muted" style={{ marginTop: 6 }}>Fermé</div>
+    <button
+      type="button"
+      className={`tile ${categorie}${s.activite !== 'comptoir' ? ' back' : ''}${person.externe ? ' ext' : ''}`}
+      draggable={glissable}
+      onDragStart={(e) => e.dataTransfer.setData('text/plain', s.id)}
+      onClick={onClick}
+      aria-label={`${nomCourt(person)}, ${JOURS[weekday(s.date)]} : ${decrireShift(s)}, ${ACTIVITE_LABEL[s.activite]}. Modifier.`}
+      title={s.explication ?? `${decrireShift(s)} · ${ACTIVITE_LABEL[s.activite]}`}
+    >
+      <span className="ti">
+        <Icone size={14} />
+      </span>
+      <span className="tt num">
+        {fmtHHMM(s.start)}–{fmtHHMM(s.end)}
+        <span className="ts">
+          {fmtDuree(minutesTravail(s))}
+          {activite ? ` · ${activite}` : ''}
+        </span>
+      </span>
+      <span className="tline" aria-hidden="true">
+        <i style={{ left: `${pct(echelle, s.start)}%`, width: `${pct(echelle, s.end) - pct(echelle, s.start)}%` }} />
+        {s.pauseStart !== undefined && s.pauseEnd !== undefined ? <i className="p" style={{ left: `${pct(echelle, s.pauseStart)}%`, width: `${pct(echelle, s.pauseEnd) - pct(echelle, s.pauseStart)}%` }} /> : null}
+        {missions.map((m, i) => (
+          <i key={i} className="m" style={{ left: `${pct(echelle, m.start)}%`, width: `${pct(echelle, m.end) - pct(echelle, m.start)}%` }} />
+        ))}
+      </span>
+      {s.explication ? (
+        <span className="why" aria-label="Affectation expliquée">
+          <Sparkles size={9} />
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
+/** Ligne « Couverture » : un coup d'œil par jour sur la présence d'un pharmacien et l'effectif. */
+function Objectif({ data, date, echelle, ouvert, vide, flag }: { data: AppData; date: ISODate; echelle: Echelle; ouvert: boolean; vide: boolean; flag: boolean }): JSX.Element {
+  if (!ouvert) {
+    return (
+      <div className="pg-o" role="cell">
+        <span className="mark off" title="Officine fermée">
+          <Minus size={14} />
+        </span>
+      </div>
+    );
+  }
+  const trous = trousPharmacien(data, date);
+  const sous = vide ? [] : sousEffectifs(data, date);
+  const etat = vide ? 'off' : trous.length ? 'bad' : sous.length ? 'warn' : 'ok';
+  const texte = vide
+    ? 'Aucun poste posé ce jour-là'
+    : trous.length
+      ? `Sans pharmacien : ${trous.map((t) => `${fmtHeure(t.start)} – ${fmtHeure(t.end)}`).join(', ')}`
+      : sous.length
+        ? `Sous l'effectif attendu : ${sous.map((t) => `${fmtHeure(t.start)} – ${fmtHeure(t.end)}`).join(', ')}`
+        : 'Pharmacien présent sur toute l’ouverture, effectif atteint';
+  return (
+    <div className={`pg-o${flag ? ' flag' : ''}`} role="cell" title={texte}>
+      <span className={`mark ${etat}`}>{etat === 'ok' ? <Check size={15} /> : etat === 'bad' ? <X size={14} /> : etat === 'warn' ? <AlertTriangle size={13} /> : <Minus size={14} />}</span>
+      <span className="sr">{texte}</span>
+      {vide ? null : (
+        <Strip
+          echelle={echelle}
+          parts={[
+            { cls: 'open', list: ouverture(data.officine, date) },
+            { cls: 'ph', list: presencePharmaciens(data, date) },
+            { cls: 'rdv', list: pharmacienSeulEnRendezVous(data, date) },
+            { cls: 'gap', list: trous },
+          ]}
+        />
       )}
     </div>
   );
@@ -469,11 +631,7 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
       <div className="pg-sum" title={f.facteurs.map((x) => `${x.label} (+${x.points})`).join('\n') || 'Aucun facteur de fatigue relevé'}>
         <span className="num">
           Sam. <b>{l.reel.samedis}</b>
-          {l.attendu.samedis !== null ? <span className="muted"> / {fmtDecimal(l.attendu.samedis, 1)}</span> : null}
-        </span>
-        <span className="num">
-          Ferm. <b>{l.reel.fermetures}</b>
-          {l.attendu.fermetures !== null ? <span className="muted"> / {fmtDecimal(l.attendu.fermetures, 1)}</span> : null}
+          {l.attendu.samedis !== null ? <span className="muted"> / {fmtDecimal(l.attendu.samedis, 1)}</span> : null} · Ferm. <b>{l.reel.fermetures}</b>
         </span>
         <Pill tone={f.niveau === 'élevée' ? 'danger' : f.niveau === 'modérée' ? 'warn' : 'ok'}>Fatigue {f.niveau}</Pill>
       </div>
@@ -482,31 +640,16 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
   if (person.externe) {
     return (
       <div className="pg-sum">
-        <b className="num">{fmtDuree(minutes)}</b>
-        <span className="muted num">{fmtEuros(((person.tauxHoraire ?? 0) * minutes) / 60)}</span>
+        <b className="num">{fmtEuros(((person.tauxHoraire ?? 0) * minutes) / 60)}</b>
+        <span className="muted tiny">facturé</span>
       </div>
     );
   }
   const d = decompteSemaine(data, person, minutes);
-  if (lecture === 'cout') {
-    return (
-      <div className="pg-sum">
-        <b className="num">{d.cout !== null ? fmtEuros(d.cout) : '—'}</b>
-        <span className="muted tiny">{!person.salarie ? 'Titulaire, hors coût salarial' : d.auDela ? `dont ${fmtDuree(d.auDela)} au-delà du contrat` : 'Contrat sans dépassement'}</span>
-      </div>
-    );
-  }
-  const contrat = person.heuresHebdo * 60;
-  const ecart = minutes - contrat;
   return (
     <div className="pg-sum">
-      <span className="num">
-        <b>{fmtDuree(minutes)}</b> <span className="muted">/ {person.heuresHebdo} h</span>
-      </span>
-      <span className="meter">
-        <i className={ecart > 0 && person.salarie ? 'over' : ''} style={{ width: `${Math.min(100, (minutes / Math.max(1, contrat)) * 100)}%` }} />
-      </span>
-      <span className="tiny muted num">{ecart === 0 ? 'Contrat atteint' : ecart > 0 ? `+ ${fmtDuree(ecart)}` : `${fmtDuree(ecart)}`}</span>
+      <b className="num">{d.cout !== null ? fmtEuros(d.cout) : '—'}</b>
+      <span className="muted tiny">{!person.salarie ? 'titulaire' : person.tauxHoraire === null ? 'taux non saisi' : d.auDela ? `dont ${fmtDuree(d.auDela)} en plus` : 'sans dépassement'}</span>
     </div>
   );
 }
@@ -850,7 +993,7 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
             </span>
           </label>
           <div>
-            <button type="button" className="btn honey" onClick={() => lancer(graine)} data-autofocus>
+            <button type="button" className="btn magic" onClick={() => lancer(graine)} data-autofocus>
               <Sparkles size={15} /> Calculer trois propositions
             </button>
           </div>

@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { seed } from '../data/seed';
+import { seed, vierge } from '../data/seed';
 import { addDays, dureeReelle, ferie, joursOuvresEntre, mondayOf, subtract, weekday } from '../domain/time';
 import type { AppData, Shift } from '../domain/types';
 import { minutesSemaine, shiftsSemaine, trousPharmacien } from './core';
+import { decisions } from './decisions';
 import { diagnosticPrealable } from './diagnose';
 import { equite } from './equity';
 import { delaiGarde, parseCalendrierGardes, reposApresGarde, segmentsGarde, variablesGarde } from './gardes';
@@ -306,5 +307,31 @@ describe('rendez-vous d’un absent', () => {
     const accepter = rep2.options.find((x) => x.type === 'accepter');
     expect(accepter).toBeUndefined(); // un pharmacien manque : on ne peut pas « ne rien changer »
     expect(rep2.options.some((x) => x.type === 'remplacant' && x.patch.confier.length === 1)).toBe(true);
+  });
+});
+
+describe('démarrage à vide', () => {
+  it('ouvre une application sans équipe, sans planning et sans décision en attente', () => {
+    const d = vierge();
+    expect(d.personnes).toEqual([]);
+    expect(d.shifts).toEqual([]);
+    expect(d.officine.nom).toBe('');
+    expect(decisions(d, TODAY).total).toBe(0);
+    expect(diagnosticPrealable(d, SUIVANT).some((b) => b.cas === 'donnees_manquantes')).toBe(true);
+    // Deux applications vierges ne partagent aucun objet modifiable.
+    const autre = vierge();
+    autre.officine.horaires[0][0].start = 0;
+    expect(d.officine.horaires[0][0].start).toBe(510);
+  });
+  it('génère une première semaine pour une petite équipe saisie à l’accueil', () => {
+    const base = vierge();
+    const p = (id: string, qualification: 'titulaire' | 'adjoint' | 'preparateur', heures: number) => ({
+      id, prenom: id, nom: 'Test', qualification, salarie: qualification !== 'titulaire', heuresHebdo: heures,
+      tauxHoraire: null, competences: [], volontaireHeuresComp: false, volontaireGardes: false,
+    });
+    const d: AppData = { ...base, officine: { ...base.officine, nom: 'Test' }, personnes: [p('t', 'titulaire', 42), p('a1', 'adjoint', 35), p('a2', 'adjoint', 35), p('p1', 'preparateur', 35), p('p2', 'preparateur', 35)] };
+    const res = generer(d, SUIVANT, { variante: 'equite', graine: 3, iterations: 20000 });
+    expect(res.indicateurs.bloquants).toBe(0);
+    expect(res.shifts.length).toBeGreaterThan(15);
   });
 });

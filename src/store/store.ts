@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { seed } from '../data/seed';
+import { seed, vierge } from '../data/seed';
 import { addDays, dayIndex, fmtDateCourt, fmtSemaine, todayISO, uid, weekDates } from '../domain/time';
 import type {
   Absence,
@@ -24,7 +24,7 @@ import { changementsSemaine, controlePublication } from '../engine/publish';
 import type { RepairOption } from '../engine/repair';
 import { appliquerPatch } from '../engine/repair';
 
-const KEY = 'releve.v1';
+const KEY = 'releve.v2';
 
 function charger(): AppData {
   try {
@@ -34,9 +34,9 @@ function charger(): AppData {
       if (d && d.officine && Array.isArray(d.shifts) && Array.isArray(d.regles)) return d;
     }
   } catch {
-    // Stockage indisponible ou illisible : on repart du jeu de démonstration.
+    // Stockage indisponible ou illisible : on repart d'une application vierge.
   }
-  return seed(todayISO());
+  return vierge();
 }
 
 const now = (): string => new Date().toISOString();
@@ -82,6 +82,10 @@ export interface Store {
   undo: () => void;
   redo: () => void;
   reinitialiser: () => void;
+  /** Remplace les données par l'équipe d'exemple (annulable). */
+  chargerExemple: () => void;
+  /** Crée l'officine depuis l'écran d'accueil : nom, horaires et première équipe. */
+  creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[]) => void;
 
   saveShift: (s: Shift) => void;
   deleteShift: (id: string) => void;
@@ -109,6 +113,7 @@ export interface Store {
   validerGarde: (id: string) => void;
 
   majPersonne: (p: Person) => void;
+  supprimerPersonne: (id: string) => void;
   majOfficine: (patch: Partial<Officine>) => void;
   majRegle: (id: string, patch: Partial<Pick<Regle, 'valeur' | 'active'>>) => void;
   majMission: (id: string, patch: Partial<Mission>) => void;
@@ -139,7 +144,35 @@ export const useStore = create<Store>((set, get) => {
     undo: () =>
       set((s) => (s.past.length ? { data: s.past[s.past.length - 1], past: s.past.slice(0, -1), future: [s.data, ...s.future] } : s)),
     redo: () => set((s) => (s.future.length ? { data: s.future[0], future: s.future.slice(1), past: [...s.past, s.data] } : s)),
-    reinitialiser: () => set({ data: seed(todayISO()), past: [], future: [] }),
+    reinitialiser: () => set({ data: vierge(), past: [], future: [] }),
+    creerOfficine: (nom, horaires, personnes) =>
+      set(() => {
+        const base = vierge();
+        const postes = base.officine.postes
+          .map((x) => ({ ...x, jours: x.jours.filter((j) => horaires[j].length > 0) }))
+          .filter((x) => x.jours.length > 0);
+        const data: AppData = {
+          ...base,
+          officine: {
+            ...base.officine,
+            nom,
+            horaires,
+            postes,
+            effectifs: base.officine.effectifs.filter((e) => e.jours.some((j) => horaires[j].length > 0)),
+          },
+          personnes,
+        };
+        return {
+          data: journal(data, {
+            type: 'regle',
+            titre: `Officine « ${nom} » créée`,
+            detail: `${personnes.length} personne${personnes.length > 1 ? 's' : ''} dans l'équipe. Horaires, postes types et seuils sont modifiables dans « Officine ».`,
+          }),
+          past: [],
+          future: [],
+        };
+      }),
+    chargerExemple: () => set((s) => ({ data: seed(todayISO()), past: [...s.past.slice(-40), s.data], future: [] })),
 
     saveShift: (shift) =>
       commit((d) => ({
@@ -382,6 +415,18 @@ export const useStore = create<Store>((set, get) => {
       commit((d) => ({
         ...d,
         personnes: d.personnes.some((x) => x.id === p.id) ? d.personnes.map((x) => (x.id === p.id ? p : x)) : d.personnes.concat(p),
+      })),
+    supprimerPersonne: (id) =>
+      commit((d) => ({
+        ...d,
+        personnes: d.personnes.filter((p) => p.id !== id),
+        shifts: d.shifts.filter((s) => s.personId !== id),
+        besoins: d.besoins.filter((b) => b.personId !== id),
+        absences: d.absences.filter((a) => a.personId !== id),
+        notifications: d.notifications.filter((n) => n.personId !== id),
+        trous: d.trous.filter((t) => t.shift.personId !== id),
+        missions: d.missions.map((m) => (m.personId === id ? { ...m, personId: null } : m)),
+        gardes: d.gardes.map((g) => (g.personId === id ? { ...g, personId: null, communiqueLe: undefined } : g)),
       })),
     majOfficine: (patch) => commit((d) => ({ ...d, officine: { ...d.officine, ...patch } })),
     majRegle: (id, patch) =>

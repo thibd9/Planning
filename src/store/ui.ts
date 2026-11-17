@@ -23,6 +23,9 @@ interface Ui {
   setFocus: (f: Ui['focus']) => void;
   ouvrirGarde: (id: string | null) => void;
   ouvrirPersonne: (id: string | null) => void;
+  /** Étape du tutoriel en cours ; null quand il est fermé. */
+  tour: number | null;
+  setTour: (etape: number | null) => void;
 }
 
 export const useUi = create<Ui>((set) => ({
@@ -41,4 +44,6 @@ export const useUi = create<Ui>((set) => ({
   setFocus: (focus) => set({ focus }),
   ouvrirGarde: (gardeId) => set({ gardeId, vue: 'gardes' }),
   ouvrirPersonne: (personneId) => set({ personneId, vue: 'equipe' }),
+  tour: null,
+  setTour: (tour) => set({ tour }),
 }));

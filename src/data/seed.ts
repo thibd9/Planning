@@ -121,6 +121,31 @@ function prochainFerie(today: ISODate, minJours: number): ISODate {
   }
 }
 
+/** Horaires, postes types et seuils proposés au départ : un point de départ à ajuster, pas une équipe. */
+const OFFICINE_VIERGE: Officine = {
+  ...OFFICINE_DEMO,
+  nom: '',
+  caAnnuelHT: null,
+};
+
+/** Application vierge : aucune personne, aucun planning, aucune garde. Seuls les réglages de départ sont proposés. */
+export function vierge(): AppData {
+  return {
+    officine: { ...OFFICINE_VIERGE, horaires: OFFICINE_VIERGE.horaires.map((h) => h.map((i) => ({ ...i }))), postes: OFFICINE_VIERGE.postes.map((x) => ({ ...x })), effectifs: OFFICINE_VIERGE.effectifs.map((x) => ({ ...x })) },
+    personnes: [],
+    shifts: [],
+    missions: [],
+    absences: [],
+    besoins: [],
+    gardes: [],
+    semaines: {},
+    regles: REGLES_INITIALES.map((r) => ({ ...r })),
+    journal: [],
+    notifications: [],
+    trous: [],
+  };
+}
+
 /**
  * Jeu de démonstration : huit semaines d'historique publiées, la semaine en cours publiée
  * avec un arrêt à traiter, la semaine suivante à construire.

@@ -24,8 +24,10 @@ npm test
 npm run build
 ```
 
-Node 20 ou plus récent. L'application s'ouvre sur un jeu de démonstration (« Pharmacie des Tilleuls »,
-équipe fictive) calé sur la date du jour.
+Node 20 ou plus récent. L'application démarre **vierge**, sur l'écran « Créer mon officine » : nom de la
+pharmacie, horaires, titulaire, pharmaciens adjoints, préparateurs et autres postes. Un tutoriel guidé
+présente ensuite chaque espace ; il se relance depuis le bouton « Tutoriel ». Une équipe d'exemple
+(« Pharmacie des Tilleuls », fictive) peut être chargée depuis l'accueil pour explorer sans rien saisir.
 
 ## Ce que fait cette première version
 
@@ -82,7 +84,7 @@ src/
   secondaires. À faire relire par un avocat en droit social et un spécialiste de la paie officinale
   avant tout usage réel. Les montants des indemnités de garde ne sont pas renseignés.
 - **Données sur l'appareil.** Cette version enregistre dans le navigateur (`localStorage`) : pas de
-  compte, pas de serveur, pas de partage entre postes. L'« espace salarié » est une vue de démonstration,
+  compte, pas de serveur, pas de partage entre postes, une seule officine. L'« espace salarié » est une vue de démonstration,
   pas un accès sécurisé.
 - **Heures prévues seulement.** Pas de pointage : la fiche navette exporte du prévu, pas du réalisé.
 - **Générateur heuristique.** La recherche locale donne de bonnes semaines en moins de deux secondes

@@ -55,7 +55,7 @@ export function decisions(data: AppData, today: ISODate): Decisions {
     if (data.semaines[monday]?.statut === 'publie') {
       const n = changementsSemaine(data, monday).length;
       if (n) publications.push({ monday, type: 'modifications', nombre: n, jours });
-    } else if (w >= 1 && w <= 2) {
+    } else if (w >= 1 && w <= 2 && data.personnes.some((p) => !p.externe)) {
       publications.push({ monday, type: 'a_publier', nombre: shiftsSemaine(data, monday).length, jours });
     }
   }

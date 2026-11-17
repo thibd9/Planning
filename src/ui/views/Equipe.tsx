@@ -1,6 +1,6 @@
-import { AlertTriangle, CalendarOff, CircleCheck, HeartHandshake, Lock, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, CalendarOff, CircleCheck, HeartHandshake, Lock, Plus, Trash2, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { fmtDateCourt } from '../../domain/time';
+import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
 import { ABSENCE_LABEL, COMPETENCE_LABEL, QUALIFICATION_COURT, QUALIFICATION_LABEL, estPharmacien, nomComplet } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
@@ -8,7 +8,7 @@ import { quotaAdjoints, validateEquipe } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { DialogueDemande } from '../components/Demande';
-import { Avatar, Pill } from '../kit';
+import { Avatar, Dialog, Empty, Pill } from '../kit';
 import { usagePlafond } from './Resoudre';
 
 export const STATUT_BESOIN: Record<Besoin['statut'], { label: string; tone: string }> = {
@@ -21,6 +21,7 @@ export function Equipe(): JSX.Element {
   const data = useStore((s) => s.data);
   const { personneId, ouvrirPersonne } = useUi();
   const alertes = useMemo(() => validateEquipe(data), [data]);
+  const [ajout, setAjout] = useState(false);
   const quota = quotaAdjoints(data);
   const internes = data.personnes.filter((p) => !p.externe);
   const externes = data.personnes.filter((p) => p.externe);
@@ -29,6 +30,9 @@ export function Equipe(): JSX.Element {
   return (
     <div>
       <div className="page-head">
+        <span className="page-ico">
+          <Users size={26} />
+        </span>
         <div className="grow">
           <div className="eyebrow">Équipe</div>
           <h1>Qui peut faire quoi, et quand</h1>
@@ -38,7 +42,7 @@ export function Equipe(): JSX.Element {
           <div className="card pad" style={{ padding: '10px 16px' }}>
             <div className="eyebrow">Pharmaciens adjoints</div>
             <div className="row" style={{ marginTop: 2 }}>
-              <b className="num" style={{ fontSize: 20, fontFamily: 'var(--display)' }}>
+              <b className="num" style={{ fontSize: 20 }}>
                 {quota.etpActuel.toLocaleString('fr-FR')} / {quota.etpRequis}
               </b>
               <span className="small soft">équivalent temps plein</span>
@@ -53,25 +57,42 @@ export function Equipe(): JSX.Element {
         </div>
       ))}
 
-      <div className="split" style={{ gridTemplateColumns: '340px minmax(0, 1fr)' }}>
-        <div className="col" style={{ gap: 6 }}>
+      {!data.personnes.length ? (
+        <Empty
+          icon={<Users size={30} />}
+          title="Aucune personne dans l’équipe"
+          action={
+            <button type="button" className="btn primary" onClick={() => setAjout(true)}>
+              <Plus size={15} /> Ajouter une personne
+            </button>
+          }
+        >
+          Commencez par le titulaire et les pharmaciens adjoints, puis les préparateurs et les autres postes.
+        </Empty>
+      ) : null}
+      <div className="split" style={{ gridTemplateColumns: '340px minmax(0, 1fr)', display: data.personnes.length ? undefined : 'none' }}>
+        <div className="col" style={{ gap: 8 }}>
+          <button type="button" className="btn primary" onClick={() => setAjout(true)} style={{ alignSelf: 'stretch' }}>
+            <Plus size={15} /> Ajouter une personne
+          </button>
           {internes.map((p) => (
             <LignePersonne key={p.id} p={p} on={courant?.id === p.id} onClick={() => ouvrirPersonne(p.id)} />
           ))}
-          <div className="eyebrow" style={{ margin: '12px 4px 2px' }}>Remplaçants habituels</div>
+          {externes.length ? <div className="eyebrow" style={{ margin: '12px 4px 2px' }}>Remplaçants habituels</div> : null}
           {externes.map((p) => (
             <LignePersonne key={p.id} p={p} on={courant?.id === p.id} onClick={() => ouvrirPersonne(p.id)} />
           ))}
         </div>
         {courant ? <Fiche key={courant.id} person={courant} /> : null}
       </div>
+      {ajout ? <DialoguePersonne onClose={() => setAjout(false)} /> : null}
     </div>
   );
 }
 
 function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: () => void }): JSX.Element {
   return (
-    <button type="button" className="g-item" style={{ borderColor: on ? 'var(--sapin)' : undefined, boxShadow: on ? '0 0 0 3px rgba(18,55,43,0.1)' : undefined }} onClick={onClick} aria-pressed={on}>
+    <button type="button" className={`g-item${on ? ' on' : ''}`} onClick={onClick} aria-pressed={on}>
       <Avatar person={p} lg />
       <span className="grow">
         <b>{nomComplet(p)}</b>
@@ -87,7 +108,9 @@ function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: ()
 function Fiche({ person }: { person: Person }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
-  const { majPersonne, supprimerBesoin, deciderAbsence } = useStore();
+  const { majPersonne, supprimerBesoin, deciderAbsence, supprimerPersonne } = useStore();
+  const ouvrirPersonne = useUi((s) => s.ouvrirPersonne);
+  const [retrait, setRetrait] = useState(false);
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
   const besoins = data.besoins.filter((b) => b.personId === person.id && b.decision !== 'refusee' && (!b.to || b.to >= today));
@@ -253,7 +276,130 @@ function Fiche({ person }: { person: Person }): JSX.Element {
           </section>
         ) : null}
       </div>
+      <div className="card-body row wrap" style={{ borderTop: '1px solid var(--line)' }}>
+        <span className="small soft grow">Retirer une personne supprime aussi ses postes, ses besoins et ses absences.</span>
+        {retrait ? (
+          <>
+            <button type="button" className="btn sm" onClick={() => setRetrait(false)}>
+              Annuler
+            </button>
+            <button
+              type="button"
+              className="btn sm danger"
+              onClick={() => {
+                supprimerPersonne(person.id);
+                ouvrirPersonne(null);
+                dire(`${nomComplet(person)} retiré de l’équipe.`, true);
+              }}
+            >
+              <Trash2 size={14} /> Oui, retirer {person.prenom}
+            </button>
+          </>
+        ) : (
+          <button type="button" className="btn sm ghost danger" onClick={() => setRetrait(true)}>
+            <Trash2 size={14} /> Retirer de l’équipe
+          </button>
+        )}
+      </div>
       {demande ? <DialogueDemande personId={person.id} espace="responsable" onClose={() => setDemande(false)} /> : null}
     </div>
+  );
+}
+
+function DialoguePersonne({ onClose }: { onClose: () => void }): JSX.Element {
+  const majPersonne = useStore((s) => s.majPersonne);
+  const { dire, ouvrirPersonne } = useUi();
+  const [prenom, setPrenom] = useState('');
+  const [nom, setNom] = useState('');
+  const [qualification, setQualification] = useState<Qualification>('preparateur');
+  const [heures, setHeures] = useState('35');
+  const [externe, setExterne] = useState(false);
+  const [taux, setTaux] = useState('');
+  const pret = prenom.trim() !== '' && nom.trim() !== '';
+  return (
+    <Dialog
+      title="Ajouter une personne"
+      subtitle="L’essentiel suffit pour commencer : compétences, besoins et absences se complètent ensuite dans sa fiche."
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="btn" onClick={onClose}>
+            Annuler
+          </button>
+          <button
+            type="button"
+            className="btn primary"
+            disabled={!pret}
+            onClick={() => {
+              const id = uid('p');
+              majPersonne({
+                id,
+                prenom: prenom.trim(),
+                nom: nom.trim(),
+                qualification,
+                salarie: qualification !== 'titulaire',
+                heuresHebdo: externe ? 0 : Math.max(1, Number(heures) || 35),
+                tauxHoraire: taux === '' ? null : Number(taux),
+                competences: [],
+                volontaireHeuresComp: false,
+                volontaireGardes: qualification === 'titulaire',
+                ...(externe ? { externe: true } : {}),
+              });
+              ouvrirPersonne(id);
+              dire(`${prenom.trim()} ${nom.trim()} ajouté à l’équipe.`, true);
+              onClose();
+            }}
+          >
+            <Plus size={15} /> Ajouter
+          </button>
+        </>
+      }
+    >
+      <div className="row wrap" style={{ alignItems: 'flex-end' }}>
+        <label className="field grow" style={{ minWidth: 150 }}>
+          Prénom
+          <input id="personne-prenom" value={prenom} onChange={(e) => setPrenom(e.target.value)} data-autofocus autoComplete="off" />
+        </label>
+        <label className="field grow" style={{ minWidth: 150 }}>
+          Nom
+          <input id="personne-nom" value={nom} onChange={(e) => setNom(e.target.value)} autoComplete="off" />
+        </label>
+      </div>
+      <div className="row wrap" style={{ alignItems: 'flex-end' }}>
+        <label className="field grow" style={{ minWidth: 200 }}>
+          Fonction
+          <select id="personne-fonction" value={qualification} onChange={(e) => setQualification(e.target.value as Qualification)}>
+            {(Object.keys(QUALIFICATION_LABEL) as Qualification[]).map((q) => (
+              <option key={q} value={q}>
+                {QUALIFICATION_LABEL[q]}
+              </option>
+            ))}
+          </select>
+        </label>
+        {!externe ? (
+          <label className="field" style={{ width: 130 }}>
+            Heures / semaine
+            <input id="personne-heures" type="number" min={1} max={70} step={0.5} value={heures} onChange={(e) => setHeures(e.target.value)} className="num" />
+          </label>
+        ) : null}
+        {qualification !== 'titulaire' ? (
+          <label className="field" style={{ width: 170 }}>
+            Taux horaire indicatif (€)
+            <input id="personne-taux" type="number" min={0} step={0.1} value={taux} onChange={(e) => setTaux(e.target.value)} placeholder="facultatif" className="num" />
+          </label>
+        ) : null}
+      </div>
+      {qualification !== 'titulaire' ? (
+        <label className="check">
+          <input type="checkbox" checked={externe} onChange={(e) => setExterne(e.target.checked)} />
+          <span>
+            Remplaçant habituel, extérieur à l’équipe
+            <span className="soft small" style={{ display: 'block' }}>Proposé quand une absence découvre une plage. Son taux sert à chiffrer le remplacement.</span>
+          </span>
+        </label>
+      ) : (
+        <div className="notice info small">Le titulaire est hors décompte salarié : ses heures sont un objectif, pas un contrat.</div>
+      )}
+    </Dialog>
   );
 }

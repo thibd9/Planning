@@ -74,7 +74,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           <p style={{ fontSize: 17 }}>Aucun poste publié à venir pour l'instant.</p>
         )}
         <div className="row wrap" style={{ marginTop: 14, position: 'relative', zIndex: 1 }}>
-          <button type="button" className="btn honey" onClick={() => setDemande(true)}>
+          <button type="button" className="btn" onClick={() => setDemande(true)}>
             <Plus size={15} /> Faire une demande
           </button>
           {nonLus.length ? (
@@ -82,7 +82,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
               <BellRing size={13} /> {nonLus.length} changement{nonLus.length > 1 ? 's' : ''} à lire
             </Pill>
           ) : (
-            <span className="small" style={{ color: '#a9c2b4' }}>Aucun changement en attente de lecture.</span>
+            <span className="small" style={{ color: 'rgba(255,255,255,0.85)' }}>Aucun changement en attente de lecture.</span>
           )}
         </div>
       </div>
