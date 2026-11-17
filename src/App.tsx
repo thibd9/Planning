@@ -10,6 +10,7 @@ import type { Vue } from './store/ui';
 import { prefsDe, useUi } from './store/ui';
 import { EtiquetteRole } from './ui/icons';
 import { Avatar, Logo, LogoNom } from './ui/kit';
+import { DialogueJour } from './ui/components/Jour';
 import { BandeauTest, Parcours } from './ui/Parcours';
 import { Tour } from './ui/Tour';
 import { Accueil } from './ui/views/Accueil';
@@ -38,20 +39,20 @@ interface Lien {
   groupe: string;
 }
 
-const MOI: Lien = { vue: 'moi', label: 'Mon planning', question: 'Mes horaires, mes demandes', icon: <CalendarDays size={18} />, couleur: 'c-clair', groupe: '' };
-const MESSAGES: Lien = { vue: 'messages', label: 'Messages', question: 'Échanger avec l’équipe', icon: <MessageSquare size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
+const MOI: Lien = { vue: 'moi', label: 'Mon planning', question: 'Horaires et demandes', icon: <CalendarDays size={18} />, couleur: 'c-clair', groupe: '' };
+const MESSAGES: Lien = { vue: 'messages', label: 'Messages', question: 'Équipe et privé', icon: <MessageSquare size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
 // Trois groupes : ce qu'on regarde chaque jour, ce qui fabrique le planning, ce qui décrit la pharmacie.
 const GESTION: Lien[] = [
-  { vue: 'tableau', label: 'Tableau de bord', question: 'Vue d’ensemble du jour', icon: <LayoutDashboard size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
-  { vue: 'resoudre', label: 'Résoudre', question: 'À décider aujourd’hui', icon: <ListChecks size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
+  { vue: 'tableau', label: 'Tableau de bord', question: 'Vue d’ensemble', icon: <LayoutDashboard size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
+  { vue: 'resoudre', label: 'Résoudre', question: 'À décider', icon: <ListChecks size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
   MESSAGES,
-  { vue: 'construire', label: 'Construire', question: 'Le planning de la semaine', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
-  { vue: 'gardes', label: 'Gardes', question: 'Affecter, prévenir, payer', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
+  { vue: 'construire', label: 'Construire', question: 'La semaine', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
+  { vue: 'gardes', label: 'Gardes', question: 'Tours de garde', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
   { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
-  { vue: 'equipe', label: 'Équipe', question: 'Contrats, droits, besoins', icon: <Users size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
-  { vue: 'officine', label: 'Réglages', question: 'Horaires, postes types', icon: <Settings2 size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
-  { vue: 'regles', label: 'Règles', question: 'Sources et versions', icon: <BookOpenCheck size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
-  { vue: 'journal', label: 'Journal et paie', question: 'Preuves, fiche navette', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
+  { vue: 'equipe', label: 'Équipe', question: 'Fiches et accès', icon: <Users size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
+  { vue: 'officine', label: 'Réglages', question: 'Horaires, seuils', icon: <Settings2 size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
+  { vue: 'regles', label: 'Règles', question: 'Textes appliqués', icon: <BookOpenCheck size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
+  { vue: 'journal', label: 'Journal et paie', question: 'Historique, export', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
 ];
 const PLANNING: Lien = { vue: 'planning', label: 'Planning de l’équipe', question: 'La version publiée', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
 const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gardes et astreintes', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
@@ -69,7 +70,7 @@ export function App(): JSX.Element {
   const today = useStore((s) => s.today);
   const sauvegarde = useStore((s) => s.derniereSauvegarde);
   const undo = useStore((s) => s.undo);
-  const { vue, aller, agir, session, deconnecter, preferences, toast, taire, setTour, parcours } = useUi();
+  const { vue, aller, agir, session, deconnecter, preferences, toast, taire, setTour, parcours, jour, voirJour } = useUi();
   const [menu, setMenu] = useState(false);
   // Sans session, l'application s'ouvre sur la connexion ; la création d'une pharmacie se lance depuis là.
   const [creation, setCreation] = useState(false);
@@ -156,11 +157,8 @@ export function App(): JSX.Element {
           <span className="brand-mark">
             <Logo />
           </span>
-          <div style={{ minWidth: 0 }}>
-            <div className="brand-name">
-              <LogoNom />
-            </div>
-            <div className="brand-sub">{data.officine.nom || 'Mon officine'}</div>
+          <div className="brand-name">
+            <LogoNom />
           </div>
         </div>
         {mesPharmacies.length > 1 || estResponsable(data, moi) ? (
@@ -384,6 +382,7 @@ export function App(): JSX.Element {
 
       <Tour />
       <Parcours />
+      {jour ? <DialogueJour date={jour} moi={moi.id} onClose={() => voirJour(null)} /> : null}
       {toast ? (
         <div className="toast" role="status">
           {toast.message}

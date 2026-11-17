@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, CalendarClock, CircleAlert, FlaskConical, Info, LogIn, MessageSquare, Play, RotateCcw, ShieldCheck, Sparkles, Store } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarClock, CircleAlert, FlaskConical, Info, LogIn, MessageSquare, Play, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { empreinte, espaceDe, estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
@@ -63,20 +63,37 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
 
   return (
     <main className="connexion" id="contenu">
-      <div className="connexion-in">
+      <section className="cx-vitrine" aria-label="Solvéa">
+        <span className="cx-halo h1" aria-hidden="true" />
+        <span className="cx-halo h2" aria-hidden="true" />
+        <span className="cx-halo h3" aria-hidden="true" />
         <div className="brand" style={{ padding: 0 }}>
           <span className="brand-mark">
-            <Logo />
+            <Logo size={44} />
           </span>
-          <div>
-            <div className="brand-name">
-              <LogoNom />
-            </div>
-            <div className="brand-sub" style={{ maxWidth: 'none' }}>Le planning de l’officine</div>
+          <div className="brand-name">
+            <LogoNom hauteur={26} />
           </div>
         </div>
+        <div className="cx-accroche">
+          <p className="cx-titre">Le planning de votre pharmacie, sans prise de tête.</p>
+          <ul className="atouts">
+            <li>
+              <CalendarClock size={18} aria-hidden="true" /> Vos horaires en un coup d’œil
+            </li>
+            <li>
+              <Sparkles size={18} aria-hidden="true" /> Un planning proposé et vérifié
+            </li>
+            <li>
+              <MessageSquare size={18} aria-hidden="true" /> Remplacements, gardes, messages
+            </li>
+          </ul>
+        </div>
+        <p className="cx-pied">Vos données restent sur cet appareil.</p>
+      </section>
 
-        <div className={ecran === 'connexion' ? 'connexion-grille' : undefined}>
+      <div className="cx-panneau">
+      <div className="connexion-in">
         {ecran === 'connexion' ? (
           <form
             className="card pad col"
@@ -88,10 +105,8 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             }}
           >
             <div>
-              <h1 style={{ fontSize: 28 }}>
-                Se <span className="hl">connecter</span>
-              </h1>
-              <p className="soft" style={{ marginTop: 8 }}>Titulaire, pharmacien, préparateur ou autre poste : chacun retrouve son espace.</p>
+              <h1 style={{ fontSize: 30 }}>Bon retour</h1>
+              <p className="soft" style={{ marginTop: 6 }}>Connectez-vous pour retrouver votre espace.</p>
             </div>
             {info ? (
               <p className="notice ok small" role="status">
@@ -101,7 +116,7 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             <label className="field" htmlFor="cx-identifiant">
               Identifiant
               <input id="cx-identifiant" value={identifiant} onChange={(e) => { setIdentifiant(e.target.value); setErreur(''); }} autoComplete="username" autoCapitalize="none" spellCheck={false} autoFocus aria-describedby="cx-aide" aria-invalid={!!erreur} />
-              <span className="aide" id="cx-aide">Votre adresse électronique, ou prenom.nom.</span>
+              <span className="aide" id="cx-aide">Adresse électronique ou prenom.nom</span>
             </label>
             <label className="field" htmlFor="cx-mdp">
               Mot de passe
@@ -117,7 +132,7 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             </button>
             {!vide ? (
               <button type="button" className="btn ghost sm" onClick={() => { setEcran('oubli'); setErreur(''); setInfo(''); }}>
-                Mot de passe oublié ou remise à zéro
+                Mot de passe oublié ?
               </button>
             ) : null}
             {data.demo ? (
@@ -131,26 +146,12 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
           </form>
         ) : null}
         {ecran === 'connexion' ? (
-          <aside className="card pad col premiere" aria-labelledby="premiere-titre" style={{ gap: 16 }}>
-            <div>
-              <h2 id="premiere-titre" className="h3">Première visite ?</h2>
-              <p className="soft small" style={{ marginTop: 6 }}>Créez votre pharmacie en trois étapes. Vous choisissez votre identifiant et votre mot de passe, puis l’équipe reçoit les siens.</p>
-            </div>
-            <ul className="atouts">
-              <li>
-                <CalendarClock size={17} aria-hidden="true" /> Vos horaires en un coup d’œil, sur ordinateur et téléphone
-              </li>
-              <li>
-                <Sparkles size={17} aria-hidden="true" /> Un planning proposé, contrôlé et expliqué
-              </li>
-              <li>
-                <MessageSquare size={17} aria-hidden="true" /> Messages, remplacements et demandes d’horaires
-              </li>
-            </ul>
-            <button type="button" className="btn" onClick={onCreer} style={{ minHeight: 46 }}>
-              <Store size={17} aria-hidden="true" /> Créer ma pharmacie <ArrowRight size={16} aria-hidden="true" />
+          <p className="cx-nouveau">
+            Première visite ?{' '}
+            <button type="button" className="lien" onClick={onCreer}>
+              Créer ma pharmacie <ArrowRight size={15} aria-hidden="true" />
             </button>
-          </aside>
+          </p>
         ) : null}
         {ecran === 'oubli' ? (
           <div className="card pad col" style={{ gap: 20 }}>
@@ -216,37 +217,29 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             </button>
           </div>
         ) : null}
-        </div>
         {ecran === 'connexion' ? (
-          <section className="card pad col test-env" aria-labelledby="test-titre" style={{ gap: 16 }}>
-            <div className="row wrap" style={{ gap: 12 }}>
-              <span className="ico" aria-hidden="true">
-                <FlaskConical size={18} />
-              </span>
-              <div className="grow" style={{ minWidth: 220 }}>
-                <h2 id="test-titre" className="h3">Environnement de test</h2>
-                <p className="soft small">Une pharmacie d’exemple, la « Pharmacie des Tilleuls », avec une équipe de onze personnes déjà créée. Entrez en un clic dans la peau de chacun.</p>
-              </div>
-              <button type="button" className="btn magic" onClick={lancerParcours}>
-                <Play size={16} aria-hidden="true" /> Lancer le parcours de test
+          <section className="col test-env" aria-labelledby="test-titre" style={{ gap: 12 }}>
+            <div className="row wrap" style={{ gap: 10 }}>
+              <h2 id="test-titre" className="h3 grow">
+                <FlaskConical size={16} aria-hidden="true" style={{ verticalAlign: '-3px', marginRight: 6 }} />
+                Essayer avec une équipe d’exemple
+              </h2>
+              <button type="button" className="btn sm" onClick={lancerParcours}>
+                <Play size={14} aria-hidden="true" /> Parcours guidé
               </button>
             </div>
             <div className="test-roles">
               {ROLES_TEST.map((r) => (
-                <button key={r.cle} type="button" className="test-role" onClick={() => entrerComme(r.identifiant)}>
+                <button key={r.cle} type="button" className="test-role" onClick={() => entrerComme(r.identifiant)} title={r.detail}>
                   <span className="tr-titre">{r.titre}</span>
                   <b>{r.nom}</b>
-                  <span className="small soft">{r.detail}</span>
-                  <span className="tr-go">
-                    Voir son espace <ArrowRight size={14} aria-hidden="true" />
-                  </span>
                 </button>
               ))}
             </div>
-            <p className="tiny muted">Vos vraies pharmacies ne sont pas touchées. Chaque personne d’exemple se connecte aussi par le formulaire : identifiant prenom.nom, mot de passe « demo ».</p>
           </section>
         ) : null}
         <p className="tiny muted">Sans serveur, cette connexion sépare les espaces sur cet appareil ; elle ne remplace pas de vrais comptes en ligne.</p>
+      </div>
       </div>
     </main>
   );

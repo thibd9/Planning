@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, CircleCheck, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
+import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, CircleCheck, Clock3, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
@@ -21,7 +21,8 @@ import type { ISODate, Shift } from '../../domain/types';
 import { GARDE_LABEL, MISSION_LABEL, classeAbsence, estPharmacien, libelleAbsence, nomCourt } from '../../domain/types';
 import { decrireBesoin, decrireShift, minutesTravail } from '../../engine/core';
 import type { CompteurCle } from '../../engine/equity';
-import { peutRemplacer } from '../../engine/remplacement';
+import { delaiRemplacement, peutDemanderRemplacement, peutRemplacer } from '../../engine/remplacement';
+import { suiviDe } from '../../engine/suivi';
 import { COMPTEUR_LABEL, equite } from '../../engine/equity';
 import { HEBERGE } from '../../env';
 import { useStore } from '../../store/store';
@@ -29,6 +30,7 @@ import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
 import { AvantApres, Frise, Graduations, Pill, Seg, momentDe } from '../kit';
 import { Calendrier } from '../components/Calendrier';
+import { Compteurs } from '../components/Compteurs';
 import { echelleOfficine } from './Construire';
 import { STATUT_BESOIN } from './Equipe';
 import { Ecart } from './Equite';
@@ -41,7 +43,9 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
   const { demanderRemplacement, seProposer, cloreRemplacement } = useStore();
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
-  const { intention, setIntention } = useUi();
+  const { intention, setIntention, voirJour, aller } = useUi();
+  const delai = delaiRemplacement(data);
+  const suivi = suiviDe(data, personId, today);
   useEffect(() => {
     if (intention === 'demande') {
       setDemande(true);
@@ -105,7 +109,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
         <div className="row wrap" style={{ marginTop: 14, position: 'relative', zIndex: 1 }}>
           {!HEBERGE ? (
             <button type="button" className="btn no-print" onClick={() => window.print()}>
-              <Printer size={15} aria-hidden="true" /> Imprimer mon planning
+              <Printer size={15} aria-hidden="true" /> Imprimer
             </button>
           ) : null}
           <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
@@ -250,7 +254,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           </div>
 
           {affichage === 'calendrier' ? (
-            <Calendrier data={data} personId={personId} today={today} mois={mois} setMois={setMois} />
+            <Calendrier data={data} personId={personId} today={today} mois={mois} setMois={setMois} onJour={voirJour} />
           ) : (
             semaines.slice(0, 2).map((monday) => {
               const postes = publies(monday);
@@ -287,7 +291,10 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                         return (
                           <div key={date} className={`jour-h${date === today ? ' today' : ''}`}>
                             <div className="jh-date">
-                              <b className="cap1">{JOURS[weekday(date)]}</b>
+                              <button type="button" className="lien-jour cap1" onClick={() => voirJour(date)} title="Voir toute l’équipe ce jour-là">
+                                {JOURS[weekday(date)]}
+                                <span className="sr">, voir la journée</span>
+                              </button>
                               <span className="small soft">
                                 {fmtJourMois(date)}
                                 {date === today ? ' · aujourd’hui' : ''}
@@ -361,13 +368,14 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
               </span>
               <div className="grow">
                 <h2 className="h3">Me faire remplacer</h2>
-                <div className="small soft">Sur un poste publié à venir.</div>
+                <div className="small soft">Possible jusqu’à {delai} jours avant le poste.</div>
               </div>
             </div>
             <div className="card-body col" style={{ gap: 10 }}>
               {!aVenir.length ? <p className="soft small">Aucun poste publié à venir.</p> : null}
-              {aVenir.slice(0, 6).map((s) => {
+              {aVenir.slice(0, 8).map((s) => {
                 const r = mesRemplacements.find((x) => x.shiftId === s.id);
+                const possible = peutDemanderRemplacement(data, s.date, today);
                 return (
                   <div key={s.id} className="row wrap">
                     <div className="grow" style={{ minWidth: 150 }}>
@@ -379,25 +387,40 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                     </div>
                     {r ? (
                       <button type="button" className="btn sm" onClick={() => cloreRemplacement(r.id, 'annulee')}>
-                        Annuler la demande
+                        Annuler
                       </button>
-                    ) : (
+                    ) : possible ? (
                       <button
                         type="button"
-                        className="btn sm"
+                        className="btn sm primary"
                         disabled={enCours(s.id)}
                         onClick={() => {
                           demanderRemplacement(s);
-                          dire('Demande de remplacement envoyée à l’équipe et au responsable.', true);
+                          dire('Demande envoyée à l’équipe et au responsable.', true);
                         }}
                       >
-                        Demander un remplacement
+                        Me faire remplacer
                       </button>
+                    ) : (
+                      <Pill title={`Poste dans moins de ${delai} jours : le collègue ne serait pas prévenu à temps`}>
+                        <Clock3 size={12} aria-hidden="true" /> Trop proche
+                      </Pill>
                     )}
                   </div>
                 );
               })}
-              <p className="tiny muted">Vous restez en poste tant qu’un collègue ne s’est pas proposé et que le responsable n’a pas validé. Aucune raison n’est demandée.</p>
+              {aVenir.some((s) => !peutDemanderRemplacement(data, s.date, today)) ? (
+                <div className="notice info small">
+                  <Clock3 size={15} aria-hidden="true" />
+                  <span>
+                    Un poste à moins de {delai} jours ne peut plus être proposé à un collègue : ses horaires doivent lui être annoncés {delai} jours avant. En cas d’empêchement, prévenez votre responsable.
+                    <button type="button" className="btn sm" style={{ marginTop: 8, display: 'flex' }} onClick={() => aller('messages')}>
+                      Écrire au responsable
+                    </button>
+                  </span>
+                </div>
+              ) : null}
+              <p className="tiny muted">Vous restez en poste tant que le responsable n’a pas validé. Aucune raison n’est demandée.</p>
             </div>
           </div>
 
@@ -450,6 +473,17 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                   Souhaits prioritaires utilisés : <b>{usage.actifs} sur {usage.plafond}</b>, comme pour tous vos collègues. On ne vous demande jamais la raison d'une demande.
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-head">
+              <h2 className="h3 grow">Mon suivi</h2>
+              <span className="small soft">12 derniers mois</span>
+            </div>
+            <div className="card-body">
+              <Compteurs suivi={suivi} />
+              <p className="tiny muted" style={{ marginTop: 12 }}>Ce que votre responsable a noté, et rien d’autre : des dates et des durées, jamais une raison.</p>
             </div>
           </div>
 

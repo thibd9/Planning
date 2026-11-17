@@ -298,6 +298,22 @@ export interface Message {
   luPar: string[];
 }
 
+/**
+ * Écart constaté par le responsable : retard, départ anticipé ou absence non prévue.
+ * Un fait daté et une durée, jamais de commentaire ni de raison.
+ */
+export type EcartType = 'retard' | 'depart' | 'absence';
+export interface Ecart {
+  id: string;
+  personId: string;
+  date: ISODate;
+  type: EcartType;
+  /** Durée de l'écart ; absente pour une absence d'une journée. */
+  minutes?: number;
+  at: string;
+}
+export const ECART_LABEL: Record<EcartType, string> = { retard: 'Retard', depart: 'Départ anticipé', absence: 'Absence non prévue' };
+
 /** Demande de remplacement sur un poste publié : un collègue se propose, le responsable valide. */
 export interface Remplacement {
   id: string;
@@ -316,6 +332,7 @@ export interface AppData {
   officine: Officine;
   messages: Message[];
   remplacements: Remplacement[];
+  ecarts: Ecart[];
   /** Jeu d'exemple : les identifiants de démonstration sont affichés à la connexion. */
   demo?: boolean;
   personnes: Person[];

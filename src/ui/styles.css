@@ -626,7 +626,7 @@ hr.sep { border: 0; border-top: 1px solid var(--line); margin: 0; width: 100%; }
 .pastille { width: 26px; height: 26px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 1px rgba(var(--ink-rgb), 0.25); }
 
 /* ---------------------------------------------------------------- Connexion */
-.connexion { min-height: 100%; display: grid; place-items: center; padding: 32px max(16px, env(safe-area-inset-right, 0px)) 32px max(16px, env(safe-area-inset-left, 0px)); background: radial-gradient(760px 380px at 20% -80px, var(--a-pastel), transparent 70%), radial-gradient(620px 340px at 90% 110%, var(--a-soft), transparent 70%), var(--bg); }
+.connexion { min-height: 100%; display: grid; grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr); background: var(--surface); }
 .connexion-in { width: min(900px, 100%); display: flex; flex-direction: column; gap: 22px; }
 .connexion-grille { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .connexion-grille + .tiny, .connexion-in > .tiny { max-width: 60ch; }
@@ -961,3 +961,79 @@ table.cal td.dim .cp-h { display: flex; flex-direction: column; font-size: 13px;
 .participant:hover { background: var(--a-tint); }
 .participant.on { background: var(--a-soft); }
 .participant input { width: 18px; height: 18px; flex: none; accent-color: var(--a-deep); }
+
+/* ---------------------------------------------------------------- Fonds vivants : le ciel bouge doucement */
+@keyframes derive { 0% { background-position: 0% 40%; } 50% { background-position: 100% 60%; } 100% { background-position: 0% 40%; } }
+@keyframes flotte-a { 0% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(9%, 7%, 0) scale(1.14); } 100% { transform: translate3d(-5%, 3%, 0) scale(0.96); } }
+@keyframes flotte-b { 0% { transform: translate3d(0, 0, 0) scale(1.05); } 50% { transform: translate3d(-10%, -6%, 0) scale(0.92); } 100% { transform: translate3d(6%, 4%, 0) scale(1.1); } }
+/* Le fond de l'application : deux halos qui glissent lentement, sans calque supplémentaire. */
+@keyframes ciel { 0% { background-position: 60% -140px, 8% -120px, 0 0; } 50% { background-position: 30% -60px, 40% -160px, 0 0; } 100% { background-position: 85% -180px, -10% -60px, 0 0; } }
+.main { background-repeat: no-repeat; background-size: 1400px 620px, 1100px 560px, auto; background-image: radial-gradient(closest-side, var(--a-pastel), transparent), radial-gradient(closest-side, color-mix(in srgb, var(--a-soft) 60%, #e6e0ff), transparent), linear-gradient(var(--bg), var(--bg)); animation: ciel 34s ease-in-out infinite alternate; }
+.hero { background-size: 240% 240%; animation: derive 20s ease-in-out infinite; }
+.hero::after { animation: flotte-a 18s ease-in-out infinite alternate; }
+.hero::before { animation: flotte-b 22s ease-in-out infinite alternate; }
+.btn.magic { background-size: 220% 220%; animation: derive 12s ease-in-out infinite; }
+
+/* ---------------------------------------------------------------- Connexion : vitrine et formulaire */
+.cx-vitrine { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; padding: 44px 48px; color: var(--ink); background: linear-gradient(140deg, #d6ebff 0%, #bfe0fd 45%, #dbe7ff 100%); background-size: 220% 220%; animation: derive 22s ease-in-out infinite; }
+.cx-vitrine > * { position: relative; z-index: 1; }
+.cx-halo { position: absolute !important; border-radius: 50%; filter: blur(60px); z-index: 0 !important; pointer-events: none; will-change: transform; }
+.cx-halo.h1 { width: 420px; height: 420px; left: -120px; top: -140px; background: rgba(255, 255, 255, 0.75); animation: flotte-a 20s ease-in-out infinite alternate; }
+.cx-halo.h2 { width: 380px; height: 380px; right: -140px; top: 28%; background: #b3c8ff; opacity: 0.6; animation: flotte-b 26s ease-in-out infinite alternate; }
+.cx-halo.h3 { width: 460px; height: 360px; left: 10%; bottom: -200px; background: #9fd6ff; opacity: 0.65; animation: flotte-a 30s ease-in-out infinite alternate-reverse; }
+.cx-titre { font-size: clamp(30px, 3.4vw, 46px); font-weight: 650; letter-spacing: -0.045em; line-height: 1.06; max-width: 13ch; text-wrap: balance; }
+.cx-accroche { display: flex; flex-direction: column; gap: 26px; }
+.cx-vitrine .atouts { font-size: 16px; gap: 14px; color: var(--ink); }
+.cx-vitrine .atouts svg { color: var(--a-hover); margin-top: 3px; }
+.cx-pied { font-size: 13px; color: var(--ink-2); }
+.cx-panneau { display: grid; place-items: center; padding: 40px 24px; overflow-y: auto; }
+.connexion-in { width: min(440px, 100%); gap: 20px; }
+.connexion .card.pad { box-shadow: none; border: 0; padding: 0; background: transparent; }
+.cx-nouveau { text-align: center; color: var(--ink-2); }
+.lien { border: 0; background: transparent; padding: 4px 2px; color: var(--a-text); font-weight: 650; display: inline-flex; align-items: center; gap: 5px; text-decoration: underline; text-underline-offset: 3px; }
+.lien:hover { color: var(--a-hover); }
+.test-env { border-top: 1px solid var(--line); padding-top: 22px; margin-top: 4px; }
+.test-roles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.test-role { padding: 12px 14px; border-radius: 14px; }
+.test-role b { font-size: 14.5px; }
+.test-role .tr-titre { font-size: 10.5px; }
+@media (max-width: 900px) {
+  .connexion { grid-template-columns: 1fr; }
+  .cx-vitrine { padding: 26px 22px; gap: 18px; }
+  .cx-vitrine .atouts, .cx-pied { display: none; }
+  .cx-titre { font-size: 26px; max-width: none; }
+  .cx-panneau { padding: 26px 18px 40px; place-items: start center; }
+}
+
+/* ---------------------------------------------------------------- Journée, suivi, liens de jour */
+.jour-btn { border: 0; background: transparent; padding: 4px 10px 6px; border-radius: 14px; display: inline-flex; flex-direction: column; align-items: center; color: inherit; }
+.jour-btn:hover { background: var(--a-soft); }
+.pg-h.today .jour-btn .n { margin: 0 auto 1px; }
+.lien-jour { border: 0; background: transparent; padding: 0; font-weight: 650; font-size: 15px; text-align: left; color: var(--ink); text-decoration: underline; text-decoration-color: var(--n-4); text-underline-offset: 4px; }
+.lien-jour:hover { color: var(--a-text); text-decoration-color: currentColor; }
+button.cal-n { border: 0; background: transparent; padding: 0; display: block; color: inherit; }
+button.cal-n:hover .n { background: var(--a-pastel); }
+table.cal td.auj button.cal-n:hover .n { background: var(--a-hover); }
+.jour-equipe { display: flex; flex-direction: column; }
+.je-ligne { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 10px 22px; align-items: start; padding: 16px 4px; border-bottom: 1px solid var(--line); }
+.je-ligne:last-child { border-bottom: 0; }
+.je-ligne.regle { padding-block: 0 2px; border-bottom: 0; }
+.je-ligne.moi { background: var(--a-tint); border-radius: 16px; padding-inline: 12px; margin-inline: -8px; }
+.je-qui { display: flex; align-items: center; gap: 12px; }
+.je-corps { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.je-outils { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.je-pause, .je-ecart { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--ink-2); }
+.je-pause .input { width: 126px; padding: 5px 8px; min-height: 36px; }
+.je-ecart select { border: 1px solid var(--ctl); border-radius: 10px; padding: 6px 8px; background: #fff; min-height: 36px; }
+.pill-x { border: 0; background: transparent; padding: 0 0 0 4px; color: inherit; display: inline-grid; place-items: center; }
+.compteurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 0; }
+.compteur { background: var(--n-2); border-radius: 14px; padding: 12px 14px; }
+.compteur dt { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+.compteur dd { margin: 2px 0 0; font-size: 20px; font-weight: 650; letter-spacing: -0.02em; }
+.compteur dd .small { font-size: 12px; font-weight: 500; letter-spacing: 0; }
+.compteur.alerte { background: var(--warn-soft); }
+.compteur.alerte dt, .compteur.alerte dd { color: #5c3200; }
+@media (max-width: 900px) { .je-ligne { grid-template-columns: 1fr; } .je-ligne.regle { display: none; } }
+
+/* Dans « Résoudre », l'onglet dit déjà le sujet : le titre du panneau reste pour les lecteurs d'écran seulement. */
+.panneau .section-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }

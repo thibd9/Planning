@@ -48,7 +48,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
       <div className="hero" style={{ marginBottom: 20 }}>
         <div className="eyebrow">Tableau de bord · {fmtDateLong(today)}</div>
         <h1>Bonjour {moi?.prenom}</h1>
-        <p style={{ fontSize: 16, maxWidth: '62ch' }}>{data.officine.nom} en un coup d’œil : ce qui attend une décision, la couverture de la semaine, l’équipe du jour.</p>
+        <p style={{ fontSize: 16, maxWidth: '62ch' }}>{data.officine.nom} : vos décisions, la couverture de la semaine, l’équipe du jour.</p>
         <div className="row wrap" style={{ marginTop: 16 }}>
           <button type="button" className="btn primary" onClick={() => aller('resoudre')}>
             <ListChecks size={16} aria-hidden="true" /> {d.total ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre` : 'Rien à décider'}

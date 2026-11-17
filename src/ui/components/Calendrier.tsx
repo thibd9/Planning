@@ -11,7 +11,7 @@ const cle = (annee: number, mois: number): string => `${annee}-${String(mois).pa
  * Calendrier mensuel d'une personne : chaque jour porte ses horaires en clair, dans la couleur
  * du moment de la journée. Seules les semaines publiées sont montrées, comme partout dans son espace.
  */
-export function Calendrier({ data, personId, today, mois, setMois }: { data: AppData; personId: string; today: ISODate; mois: string; setMois: (m: string) => void }): JSX.Element {
+export function Calendrier({ data, personId, today, mois, setMois, onJour }: { data: AppData; personId: string; today: ISODate; mois: string; setMois: (m: string) => void; onJour: (d: ISODate) => void }): JSX.Element {
   const [annee, m] = mois.split('-').map(Number);
   const premier = `${mois}-01`;
   const debut = mondayOf(premier);
@@ -81,10 +81,10 @@ export function Calendrier({ data, personId, today, mois, setMois }: { data: App
                   return (
                     <td key={date} className={`${hors ? 'hors' : ''}${date === today ? ' auj' : ''}${weekday(date) === 6 ? ' dim' : ''}`}>
                       <div className="cal-case">
-                      <span className="cal-n num">
+                      <button type="button" className="cal-n num" onClick={() => onJour(date)}>
                         <span className="n">{Number(date.slice(8))}</span>
-                        <span className="sr"> {fmtDateLong(date)}{date === today ? ', aujourd’hui' : ''}</span>
-                      </span>
+                        <span className="sr"> {fmtDateLong(date)}{date === today ? ', aujourd’hui' : ''}, voir la journée</span>
+                      </button>
                       {hors ? null : (
                         <>
                           {postes.map((s) => {
@@ -148,7 +148,7 @@ export function Calendrier({ data, personId, today, mois, setMois }: { data: App
         <li><i className="conge" /> Congé</li>
         <li><i className="arret" /> Arrêt</li>
         <li><i className="formation" /> Formation</li>
-        <li className="soft">Une case vide : semaine pas encore publiée.</li>
+        <li className="soft">Cliquez sur un jour pour voir toute l’équipe.</li>
       </ul>
     </div>
   );

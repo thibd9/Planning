@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Handshake,
   HeartPulse,
+  Medal,
   MessagesSquare,
   PackageOpen,
   PhoneCall,
@@ -23,7 +24,7 @@ import {
   UserRoundPlus,
 } from 'lucide-react';
 import type { AbsenceType, Activite, GardeType, MissionType, Person, Qualification } from '../domain/types';
-import { libelleRole } from '../domain/acces';
+import { estResponsable, libelleRole } from '../domain/acces';
 import { useStore } from '../store/store';
 
 /** Une icône et une couleur par rôle : on reconnaît la fonction sans lire. */
@@ -96,12 +97,13 @@ export function PastilleRole({ person, lg }: { person: Pick<Person, 'qualificati
   );
 }
 
-/** Étiquette de rôle : icône et libellé, en distinguant titulaire principal et titulaire secondaire. */
+/** Étiquette de rôle : icône et libellé. Le titulaire principal porte la couronne, le titulaire secondaire la médaille. */
 export function EtiquetteRole({ person }: { person: Person }): JSX.Element {
   const data = useStore((s) => s.data);
-  const Icone = iconeDe(person);
+  const secondaire = person.qualification === 'titulaire' && !person.externe && !estResponsable(data, person);
+  const Icone = secondaire ? Medal : iconeDe(person);
   return (
-    <span className={`role-tag ${couleurDe(person)}`}>
+    <span className={`role-tag ${secondaire ? 'c-moyen' : couleurDe(person)}`}>
       <span className="chip-i" aria-hidden="true">
         <Icone size={12} />
       </span>

@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, FlaskConical, Play, RotateCcw, X } from 'lucide-
 import { useEffect } from 'react';
 import { addDays, mondayOf } from '../domain/time';
 import type { AppData, Remplacement } from '../domain/types';
-import { evaluerRemplacement, peutRemplacer } from '../engine/remplacement';
+import { evaluerRemplacement, peutDemanderRemplacement, peutRemplacer } from '../engine/remplacement';
 import { useStore } from '../store/store';
 import type { Vue } from '../store/ui';
 import { useUi } from '../store/ui';
@@ -37,7 +37,7 @@ function volontairePour(d: AppData, r: Remplacement): string | undefined {
 
 /** Premier poste publié à venir de Camille qu'un autre préparateur, de préférence, peut reprendre. */
 function posteARemplacer(d: AppData, today: string): string | null {
-  const postes = d.shifts.filter((s) => s.personId === 'p_camille' && s.date > today && d.semaines[mondayOf(s.date)]?.statut === 'publie').sort((a, b) => a.date.localeCompare(b.date));
+  const postes = d.shifts.filter((s) => s.personId === 'p_camille' && peutDemanderRemplacement(d, s.date, today) && d.semaines[mondayOf(s.date)]?.statut === 'publie').sort((a, b) => a.date.localeCompare(b.date));
   const essai = (s: (typeof postes)[number]): Remplacement => ({ id: 'essai', shiftId: s.id, demandeur: 'p_camille', date: s.date, start: s.start, end: s.end, creeLe: '', volontaires: [], statut: 'ouverte' });
   const prepa = postes.find((s) => d.personnes.find((p) => p.id === volontairePour(d, essai(s)))?.qualification === 'preparateur');
   return (prepa ?? postes.find((s) => volontairePour(d, essai(s))))?.id ?? null;
@@ -62,7 +62,7 @@ const ETAPES: Etape[] = [
     titre: 'Une préparatrice consulte ses horaires',
     texte: (d) => {
       const r = demandeDeCamille(d);
-      return r ? 'Aujourd’hui, demain, la suite : tout est en haut de « Mon planning ». Camille vient de demander à être remplacée sur un de ses postes, sans donner de raison (carte « Me faire remplacer »).' : 'Aujourd’hui, demain, la suite : tout est en haut de « Mon planning », avec la carte « Me faire remplacer ».';
+      return r ? 'Aujourd’hui, demain, la suite : tout est en haut de « Mon planning ». Camille vient de demander à être remplacée sur un poste à plus de 7 jours, sans donner de raison. Plus près, la demande est bloquée : le collègue doit être prévenu dans les délais.' : 'Aujourd’hui, demain, la suite : tout est en haut de « Mon planning », avec la carte « Me faire remplacer ».';
     },
     jouer: () => {
       const s = store();
@@ -144,7 +144,8 @@ const ETAPES: Etape[] = [
     texte: () => 'Cliquez sur « Proposer un planning » : trois propositions comparables (équité, souhaits, coût). Les couleurs situent chaque poste dans la journée ; survolez un jour signalé dans « Couverture » pour lire le problème.',
     jouer: () => {
       voirComme('helene.marchetti', 'construire');
-      useUi.getState().setSemaine(addDays(mondayOf(store().today), 7));
+      // L'exemple a deux semaines publiées d'avance : la semaine à construire est la troisième.
+      useUi.getState().setSemaine(addDays(mondayOf(store().today), 21));
     },
   },
 ];
@@ -228,7 +229,7 @@ export function BandeauTest({ moi }: { moi: string }): JSX.Element {
       <span className="grow" />
       {parcours === null ? (
         <button type="button" className="btn sm primary" onClick={() => setParcours(0)}>
-          <Play size={14} aria-hidden="true" /> Lancer le parcours de test
+          <Play size={14} aria-hidden="true" /> Parcours guidé
         </button>
       ) : null}
       <button type="button" className="btn sm" onClick={lancerParcours} title="Remet les données d’exemple à neuf et reprend à l’étape 1">

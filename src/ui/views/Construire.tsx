@@ -102,7 +102,7 @@ export function Construire(): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const { undo, redo, past, future, moveShift, copierSemaine, viderSemaine } = useStore();
-  const { semaine, setSemaine, focus, setFocus, dire } = useUi();
+  const { semaine, setSemaine, focus, setFocus, dire, voirJour } = useUi();
   const [lecture, setLecture] = useState<Lecture>('heures');
   const [edition, setEdition] = useState<{ personId: string; date: ISODate; shift?: Shift } | null>(null);
   const [generation, setGeneration] = useState(false);
@@ -298,8 +298,11 @@ export function Construire(): JSX.Element {
                   </div>
                   {dates.map((date, i) => (
                     <div key={date} className={`pg-h${date === today ? ' today' : ''}${!ouverts[i] ? ' closed' : ''}`} role="columnheader" aria-current={date === today ? 'date' : undefined}>
-                      <span className="n">{Number(date.slice(8))}</span>
-                      <span className="d">{ouverts[i] ? JOURS[weekday(date)] : JOURS_COURT[weekday(date)]}</span>
+                      <button type="button" className="jour-btn" onClick={() => voirJour(date)} title="Voir la journée : équipe, pauses, retards">
+                        <span className="n">{Number(date.slice(8))}</span>
+                        <span className="d">{ouverts[i] ? JOURS[weekday(date)] : JOURS_COURT[weekday(date)]}</span>
+                        <span className="sr">, voir la journée</span>
+                      </button>
                       {!ouverts[i] ? <span className="sr"> (fermé)</span> : null}
                     </div>
                   ))}

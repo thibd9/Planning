@@ -66,6 +66,9 @@ interface Ui {
   intention: 'garde' | 'personne' | 'demande' | 'formation' | null;
   /** Onglet de « Résoudre » à ouvrir en arrivant (par exemple depuis le parcours de test). */
   sujet: string | null;
+  /** Journée ouverte en détail (toute l'équipe, pauses, retards) ; null quand la fenêtre est fermée. */
+  jour: ISODate | null;
+  voirJour: (d: ISODate | null) => void;
   setSujet: (s: string | null) => void;
   agir: (vue: Vue, intention: Ui['intention']) => void;
   setIntention: (i: Ui['intention']) => void;
@@ -100,6 +103,8 @@ export const useUi = create<Ui>((set) => ({
   parcours: null,
   intention: null,
   sujet: null,
+  jour: null,
+  voirJour: (jour) => set({ jour }),
   setSujet: (sujet) => set({ sujet }),
   agir: (vue, intention) => set({ vue, intention, focus: null }),
   setIntention: (intention) => set({ intention }),

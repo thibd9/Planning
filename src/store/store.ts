@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import { seed, vierge } from '../data/seed';
+import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, fmtDateCourt, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates } from '../domain/time';
 import type {
   Absence,
   AppData,
   Besoin,
   BesoinStatut,
+  EcartType,
   Garde,
   ISODate,
   JournalEntry,
@@ -15,14 +17,14 @@ import type {
   Regle,
   Shift,
 } from '../domain/types';
-import { ABSENCE_LABEL, GARDE_LABEL, nomCourt } from '../domain/types';
+import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, nomCourt } from '../domain/types';
 import { decrireBesoin, shiftsSemaine } from '../engine/core';
 import { reposApresGarde } from '../engine/gardes';
 import type { GenResult } from '../engine/generate';
 import { VARIANTE_LABEL } from '../engine/generate';
 import { changementsSemaine, controlePublication } from '../engine/publish';
 import type { RepairOption } from '../engine/repair';
-import { appliquerPatch } from '../engine/repair';
+import { appliquerPatch, optionsReparation } from '../engine/repair';
 
 const KEY = 'releve.v3';
 
@@ -33,7 +35,9 @@ interface Enregistrement {
 }
 
 function normaliser(d: AppData): AppData {
-  return { ...d, messages: d.messages ?? [], remplacements: d.remplacements ?? [] };
+  // Les données enregistrées avant une mise à jour reçoivent les nouveautés : listes vides, fiches de règles ajoutées.
+  const manquantes = REGLES_INITIALES.filter((r) => !d.regles.some((x) => x.id === r.id)).map((r) => ({ ...r }));
+  return { ...d, messages: d.messages ?? [], remplacements: d.remplacements ?? [], ecarts: d.ecarts ?? [], regles: manquantes.length ? d.regles.concat(manquantes) : d.regles };
 }
 
 function charger(): { officineId: string; data: AppData; autres: Record<string, AppData> } {
@@ -126,9 +130,14 @@ export interface Store {
 
   declarerAbsence: (a: Omit<Absence, 'id' | 'createdAt'>) => void;
   /** Formation planifiée par le responsable : une absence approuvée par participant, chacun prévenu. */
+  /** Écart de présence constaté par le responsable (retard, départ anticipé, absence non prévue). */
+  signalerEcart: (e: { personId: string; date: ISODate; type: EcartType; minutes?: number }) => void;
+  retirerEcart: (id: string) => void;
   planifierFormation: (f: { intitule: string; personnes: string[]; from: ISODate; to: ISODate }) => void;
   deciderAbsence: (id: string, approuver: boolean) => void;
   resoudreTrou: (id: string, option: RepairOption) => void;
+  /** Applique, jour après jour, l'option conseillée à chaque poste découvert par une absence. */
+  resoudreAbsence: (absenceId: string) => void;
 
   ajouterBesoin: (b: Omit<Besoin, 'id' | 'createdAt'>) => void;
   deciderBesoin: (id: string, accepter: boolean, statut?: BesoinStatut) => void;
@@ -288,7 +297,7 @@ export const useStore = create<Store>((set, get) => {
         // Une vraie pharmacie ouverte est mise de côté, jamais effacée.
         if (!s.data.demo && (s.data.officine.nom.trim() || s.data.personnes.length)) autres[s.officineId] = s.data;
         if (!neuf && existant) return { officineId: existant[0], data: existant[1], autres, past: [], future: [] };
-        return { officineId: uid('off'), data: seed(todayISO()), autres, past: [], future: [] };
+        return { officineId: uid('off'), data: seed(todayISO(), 2), autres, past: [], future: [] };
       }),
 
     saveShift: (shift) =>
@@ -389,6 +398,14 @@ export const useStore = create<Store>((set, get) => {
           detail: `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}.`,
         });
       }),
+    signalerEcart: (e) =>
+      commit((d) =>
+        journal(
+          { ...d, ecarts: (d.ecarts ?? []).concat({ ...e, id: uid('e'), at: now() }) },
+          { type: 'absence', titre: `${ECART_LABEL[e.type]} de ${nom(d, e.personId)} le ${fmtDateCourt(e.date)}${e.minutes ? ` (${e.minutes} min)` : ''}` },
+        ),
+      ),
+    retirerEcart: (id) => commit((d) => ({ ...d, ecarts: (d.ecarts ?? []).filter((e) => e.id !== id) })),
     planifierFormation: ({ intitule, personnes, from, to }) =>
       commit((d, today) => {
         const at = now();
@@ -415,6 +432,22 @@ export const useStore = create<Store>((set, get) => {
           titre: `${ABSENCE_LABEL[a.type]} de ${nom(d, a.personId)} ${approuver ? 'approuvé' : 'refusé'}`,
           detail: `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}.`,
         });
+      }),
+    resoudreAbsence: (absenceId) =>
+      commit((d, today) => {
+        let next = d;
+        const titres: string[] = [];
+        for (const t of d.trous.filter((x) => x.absenceId === absenceId && x.statut === 'ouvert')) {
+          // Chaque jour est recalculé sur le planning déjà corrigé : une option ne défait pas la précédente.
+          const rep = optionsReparation(next, t.shift, today);
+          const o = rep.options.find((x) => x.recommande) ?? rep.options[0];
+          if (!o) continue;
+          next = appliquerPatch(next, o.patch);
+          next = { ...next, trous: next.trous.map((x) => (x.id === t.id ? { ...x, statut: 'resolu' as const, resolution: o.titre } : x)) };
+          titres.push(`${fmtDateCourt(t.shift.date)} : ${o.titre.toLowerCase()}`);
+        }
+        if (!titres.length) return d;
+        return journal(next, { type: 'reparation', titre: `Absence réglée avec les options conseillées (${titres.length} jour${titres.length > 1 ? 's' : ''})`, detail: titres.join(' ; '), regles: true });
       }),
     resoudreTrou: (id, option) =>
       commit((d) => {

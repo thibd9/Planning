@@ -150,6 +150,7 @@ export function vierge(): AppData {
     trous: [],
     messages: [],
     remplacements: [],
+    ecarts: [],
   };
 }
 
@@ -157,7 +158,7 @@ export function vierge(): AppData {
  * Jeu de démonstration : huit semaines d'historique publiées, la semaine en cours publiée
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
-export function seed(today: ISODate): AppData {
+export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);
   const creation = new Date(`${addDays(lundi, -70)}T09:00:00`).toISOString();
 
@@ -228,6 +229,13 @@ export function seed(today: ISODate): AppData {
       { id: uid('msg'), de: 'p_camille', a: 'p_helene', texte: 'Bonjour Hélène, serait-il possible de me libérer mercredi prochain après 17 h ? Merci.', at: new Date(`${addDays(today, -1)}T14:40:00`).toISOString(), luPar: ['p_camille'] },
     ],
     remplacements: [],
+    // Quelques écarts déjà constatés, pour que le suivi ne soit pas vide.
+    ecarts: [
+      { id: uid('e'), personId: 'p_jules', date: addDays(lundi, -20), type: 'retard', minutes: 15, at: creation },
+      { id: uid('e'), personId: 'p_jules', date: addDays(lundi, -6), type: 'retard', minutes: 10, at: creation },
+      { id: uid('e'), personId: 'p_manon', date: addDays(lundi, -13), type: 'retard', minutes: 20, at: creation },
+      { id: uid('e'), personId: 'p_thomas', date: addDays(lundi, -9), type: 'depart', minutes: 30, at: creation },
+    ],
     personnes,
     shifts: [],
     missions: [],
@@ -253,7 +261,8 @@ export function seed(today: ISODate): AppData {
   data.missions = missions;
 
   // ---- Historique : huit semaines passées et la semaine en cours, générées puis publiées.
-  for (let w = -8; w <= 0; w++) {
+  // `avance` : nombre de semaines déjà publiées au-delà de la semaine en cours (l'environnement de test en publie deux).
+  for (let w = -8; w <= avance; w++) {
     const monday = addDays(lundi, 7 * w);
     const res = generer(data, monday, {
       variante: w % 3 === 0 ? 'equite' : 'cout',
@@ -338,7 +347,7 @@ export function seed(today: ISODate): AppData {
   // ---- Une demande de remplacement en attente : un poste de samedi de cette semaine
   const aRemplacer = data.shifts.find((x) => x.date === addDays(lundi, 5) && x.personId !== 'p_helene' && dayIndex(x.date) >= dayIndex(today));
   if (aRemplacer) {
-    data.remplacements.push({ id: uid('r'), shiftId: aRemplacer.id, demandeur: aRemplacer.personId, date: aRemplacer.date, start: aRemplacer.start, end: aRemplacer.end, creeLe: new Date(`${today}T08:05:00`).toISOString(), volontaires: [], statut: 'ouverte' });
+    data.remplacements.push({ id: uid('r'), shiftId: aRemplacer.id, demandeur: aRemplacer.personId, date: aRemplacer.date, start: aRemplacer.start, end: aRemplacer.end, creeLe: new Date(`${addDays(today, -8)}T08:05:00`).toISOString(), volontaires: [], statut: 'ouverte' });
   }
 
   data.journal.sort((a, b) => b.at.localeCompare(a.at));

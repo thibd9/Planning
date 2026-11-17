@@ -5,9 +5,11 @@ import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/t
 import type { AppData } from '../../domain/types';
 import { ABSENCE_LABEL, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, nomComplet } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
+import { suiviDe } from '../../engine/suivi';
 import { quotaAdjoints, validateEquipe } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
+import { Compteurs } from '../components/Compteurs';
 import { DialogueDemande } from '../components/Demande';
 import { DialogueFormation } from '../components/Formation';
 import { empreinte, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, responsable } from '../../domain/acces';
@@ -239,6 +241,14 @@ function Fiche({ person }: { person: Person }): JSX.Element {
                 {!jeSuisResponsable ? <p className="small soft">Seul {chef ? nomComplet(chef) : 'le titulaire principal'} peut accorder ou retirer cet accès.</p> : null}
               </>
             )}
+          </section>
+        ) : null}
+
+        {!person.externe ? (
+          <section className="col" style={{ gap: 10 }}>
+            <h3>Suivi sur 12 mois</h3>
+            <Compteurs suivi={suiviDe(data, person.id, today)} />
+            <p className="tiny muted">Retards et départs se notent depuis la vue d’une journée (dans « Construire », cliquez sur un jour). Des dates et des durées, jamais une raison.</p>
           </section>
         ) : null}
 

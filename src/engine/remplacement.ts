@@ -1,5 +1,6 @@
-import { mondayOf } from '../domain/time';
-import type { AppData, Person, Remplacement } from '../domain/types';
+import { valeurRegle } from '../domain/rules';
+import { dayIndex, mondayOf } from '../domain/time';
+import type { AppData, ISODate, Person, Remplacement } from '../domain/types';
 import { estPharmacien } from '../domain/types';
 import { estAbsent } from './core';
 import { bloquants, validateWeek } from './validate';
@@ -39,4 +40,12 @@ export function evaluerRemplacement(data: AppData, r: Remplacement, candidatId: 
     if (!avant.has(`${i.regle}|${i.personId ?? ''}|${i.date ?? ''}`) && !raisons.includes(i.message)) raisons.push(i.message);
   }
   return { ok: raisons.length === 0, raisons };
+}
+
+/** Nombre de jours entre la demande de remplacement et le poste (fiche « delai.remplacement ») ; jamais moins de trois. */
+export const delaiRemplacement = (data: Pick<AppData, 'regles'>): number => Math.max(3, valeurRegle(data.regles, 'delai.remplacement', 7));
+
+/** Un salarié ne demande un remplacement que si le poste est assez loin pour prévenir un collègue dans les règles. */
+export function peutDemanderRemplacement(data: Pick<AppData, 'regles'>, date: ISODate, today: ISODate): boolean {
+  return dayIndex(date) - dayIndex(today) >= delaiRemplacement(data);
 }

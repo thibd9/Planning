@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Sparkles, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -43,6 +43,7 @@ export function Resoudre(): JSX.Element {
   const d = useMemo(() => decisions(data, today), [data, today]);
   const { aller, setSemaine, ouvrirGarde } = useUi();
   const corrigerRepos = useStore((s) => s.corrigerRepos);
+  const resoudreAbsence = useStore((s) => s.resoudreAbsence);
   const dire = useUi((s) => s.dire);
   const nom = (id: string | null): string => {
     const p = data.personnes.find((x) => x.id === id);
@@ -60,7 +61,7 @@ export function Resoudre(): JSX.Element {
   const nbGardes = d.gardesAAffecter.length + d.gardesRepos.length + d.gardesAbsence.length + d.gardesAValider.length;
   // Une famille de décisions par onglet : on ne lit qu'un sujet à la fois.
   const onglets: { cle: Onglet; label: string; nombre: number; icone: JSX.Element }[] = [
-    { cle: 'absences', label: 'Absences à couvrir', nombre: d.trous.length, icone: <UserMinus size={16} /> },
+    { cle: 'absences', label: 'Absences', nombre: d.trous.length, icone: <UserMinus size={16} /> },
     { cle: 'remplacements', label: 'Remplacements', nombre: d.remplacements.length, icone: <ArrowLeftRight size={16} /> },
     { cle: 'demandes', label: 'Demandes', nombre: d.absences.length + d.besoins.length, icone: <Check size={16} /> },
     { cle: 'gardes', label: 'Gardes', nombre: nbGardes, icone: <MoonStar size={16} /> },
@@ -85,7 +86,7 @@ export function Resoudre(): JSX.Element {
           </h1>
           <p>
             {d.total
-              ? `${d.total} décision${d.total > 1 ? 's' : ''} vous attend${d.total > 1 ? 'ent' : ''}, rangée${d.total > 1 ? 's' : ''} par sujet. Chaque option annonce ses conséquences avant que vous ne choisissiez.`
+              ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre. Chaque option dit ce qu’elle change avant que vous ne choisissiez.`
               : 'Aucune décision en attente.'}
           </p>
         </div>
@@ -149,6 +150,16 @@ export function Resoudre(): JSX.Element {
                     <Pill tone="danger">
                       <Clock3 size={12} /> {dayIndex(trous[0].shift.date) - dayIndex(today) <= 1 ? 'Urgent' : `Dans ${dayIndex(trous[0].shift.date) - dayIndex(today)} jours`}
                     </Pill>
+                    <button
+                      type="button"
+                      className="btn primary"
+                      onClick={() => {
+                        resoudreAbsence(absenceId);
+                        dire(`${trous.length} jour${trous.length > 1 ? 's' : ''} réglé${trous.length > 1 ? 's' : ''} avec les options conseillées.`, true);
+                      }}
+                    >
+                      <Sparkles size={16} aria-hidden="true" /> Tout régler
+                    </button>
                   </div>
                   {trous.map((t) => (
                     <CarteTrou key={t.id} trou={t} ouvert={t.id === premierADecider} />
@@ -370,7 +381,7 @@ function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Eleme
             dire('Journée classée sans remplacement.', true);
           }}
         >
-          Classer sans remplacement
+          Classer
         </button>
       </div>
     );
@@ -388,7 +399,7 @@ function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Eleme
         <div className="notice danger" style={{ marginBottom: 14 }}>
           <AlertTriangle size={16} />
           <div>
-            <b>Ce que l'absence découvre</b>
+            <b>À couvrir</b>
             <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>
               {rep.impact.map((m) => (
                 <li key={m}>{m}</li>
@@ -404,7 +415,7 @@ function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Eleme
       <div className="options">
         {rep.options.map((o) => (
           <div key={o.id} className={`option${o.recommande ? ' reco' : ''}`}>
-            {o.recommande ? <span className="reco-tag">Le moins perturbant</span> : null}
+            {o.recommande ? <span className="reco-tag">Conseillé</span> : null}
             <div>
               <h3>{o.titre}</h3>
               <p className="soft small" style={{ marginTop: 4 }}>{o.resume}</p>
@@ -475,7 +486,7 @@ function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Eleme
                 dire(publie && (o.changements.length || o.patch.liberer.length) ? 'Option retenue. Pensez à publier la modification pour prévenir l’équipe.' : 'Option retenue.', true);
               }}
             >
-              Retenir cette option
+              Choisir
             </button>
           </div>
         ))}

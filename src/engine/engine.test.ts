@@ -11,7 +11,8 @@ import { candidatsGarde, delaiGarde, parseCalendrierGardes, poidsGarde, repartir
 import { generer, genererVariantes } from './generate';
 import { lireBesoin } from './nlp';
 import { ficheNavetteCSV } from './payroll';
-import { evaluerRemplacement, peutRemplacer } from './remplacement';
+import { delaiRemplacement, evaluerRemplacement, peutDemanderRemplacement, peutRemplacer } from './remplacement';
+import { suiviDe } from './suivi';
 import { appliquerPatch, optionsReparation } from './repair';
 import { bloquants, validateWeek } from './validate';
 
@@ -447,5 +448,38 @@ describe('demandes de remplacement', () => {
     expect(absent.ok).toBe(false);
     expect(absent.raisons).toContain('Absence déjà prévue ce jour-là.');
     expect(d.shifts[0].personId).toBe('p_karim');
+  });
+});
+
+describe('délai de prévenance et suivi de présence', () => {
+  it('refuse une demande de remplacement pour le lendemain, l’accepte à sept jours', () => {
+    expect(delaiRemplacement(data)).toBe(7);
+    expect(peutDemanderRemplacement(data, addDays(TODAY, 1), TODAY)).toBe(false);
+    expect(peutDemanderRemplacement(data, addDays(TODAY, 6), TODAY)).toBe(false);
+    expect(peutDemanderRemplacement(data, addDays(TODAY, 7), TODAY)).toBe(true);
+  });
+  it('ne descend jamais sous trois jours, même si la fiche est abaissée', () => {
+    const d: AppData = { ...data, regles: data.regles.map((r) => (r.id === 'delai.remplacement' ? { ...r, valeur: 1 } : r)) };
+    expect(delaiRemplacement(d)).toBe(3);
+    expect(peutDemanderRemplacement(d, addDays(TODAY, 2), TODAY)).toBe(false);
+  });
+  it('compte retards, départs et jours d’absence sur douze mois, sans rien d’autre', () => {
+    const jules = suiviDe(data, 'p_jules', TODAY);
+    expect(jules.retards).toBe(2);
+    expect(jules.minutesRetard).toBe(25);
+    const d: AppData = {
+      ...data,
+      ecarts: data.ecarts.concat({ id: 'x', personId: 'p_jules', date: addDays(TODAY, -400), type: 'retard', minutes: 60, at: '' }),
+      absences: data.absences.concat({ id: 'f', personId: 'p_jules', from: addDays(TODAY, -10), to: addDays(TODAY, -9), type: 'formation', statut: 'approuvee', createdAt: '', libelle: 'Test' }),
+    };
+    const s = suiviDe(d, 'p_jules', TODAY);
+    expect(s.retards).toBe(2);
+    expect(s.formations).toBe(2);
+    expect(Object.keys(s).sort()).toEqual(['absencesImprevues', 'arrets', 'conges', 'departs', 'formations', 'minutesRetard', 'personId', 'remplacementsAssures', 'retards']);
+  });
+  it('publie deux semaines d’avance dans l’environnement de test, sans changer le jeu des tests', () => {
+    const test = seed(TODAY, 2);
+    expect(test.semaines[addDays(LUNDI, 14)]?.statut).toBe('publie');
+    expect(data.semaines[SUIVANT]).toBeUndefined();
   });
 });

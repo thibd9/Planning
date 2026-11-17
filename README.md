@@ -26,8 +26,8 @@ npm test
 npm run build
 ```
 
-Node 20 ou plus récent. L'application s'ouvre sur la **page de connexion** : identifiant et mot de passe
-à gauche, « Première visite ? » à droite, et l'**environnement de test** en dessous. « Créer ma pharmacie »
+Node 20 ou plus récent. L'application s'ouvre sur la **page de connexion** : une vitrine animée à gauche, le formulaire
+à droite, puis « Créer ma pharmacie » et l'**environnement de test** juste dessous. « Créer ma pharmacie »
 lance trois étapes : la pharmacie (nom, horaires, fermeture le midi éventuelle), l'équipe, dans l'ordre : vous, titulaire
 principal, avec votre identifiant et votre mot de passe ; les autres titulaires s'il y en a ; les pharmaciens
 adjoints ; les préparateurs ; les autres postes,
@@ -64,6 +64,7 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
 | **Pharmacien** | Titulaires secondaires et adjoints sans droit de gestion | Mon planning, planning publié de l'équipe, mes gardes, messages |
 | **Équipe** | Préparateurs, apprentis, étudiants, rayonnistes | Mon planning, planning publié de l'équipe, messages |
 
+- **Deux icônes.** Le titulaire principal porte la couronne, le titulaire secondaire la médaille.
 - **Titulaire principal ou secondaire.** Celui qui crée la pharmacie en est le titulaire principal, non
   salarié. Un titulaire secondaire n'a aucun droit de gestion tant que le principal ne le lui accorde pas,
   dans la fiche de la personne (« Droits d'accès »).
@@ -92,7 +93,7 @@ Un vrai contrôle d'accès et une vraie messagerie demandent un serveur.
 | Espace | Question | Contenu |
 | --- | --- | --- |
 | **Tableau de bord** | Où en est la pharmacie ? | Décisions en attente, couverture pharmacien de la semaine, équipe du jour, prochains horaires, messages, mes pharmacies |
-| **Résoudre** | Que décider aujourd'hui ? | Cinq onglets, un sujet à la fois : absences à couvrir (un volet par jour, options comparées, détails à la demande), remplacements, demandes, gardes, plannings à publier |
+| **Résoudre** | Que décider aujourd'hui ? | Cinq onglets, un sujet à la fois : absences (bouton « Tout régler » avec les options conseillées, ou un volet par jour avec options comparées), remplacements, demandes, gardes, plannings à publier |
 | **Construire** | Comment couvrir la semaine ? | Grille à l'échelle du temps, contrôles immédiats, trois propositions (équité, souhaits, coût), brouillon puis publication |
 | **Gardes** | Affecter, prévenir, payer | Ajout d'une garde avec le pharmacien à qui la confier et sa notification immédiate, délai de 15 jours, interventions, repos à protéger, variables pour le comptable |
 | **Mon planning** | Quand est-ce que je travaille ? | Aujourd'hui, demain et la suite en un coup d'œil ; vue **Semaine** (horaire écrit en grand, puis frise graduée de 8 h à 20 h avec la pause hachurée) ou vue **Calendrier** du mois, en grandes cases sur toute la largeur ; changements avant → après, demandes, remplacements, part des contraintes |
@@ -115,6 +116,19 @@ fiche navette, réglages de l'officine.
    libres se répartissent équitablement en un clic, avec la raison de chaque choix ; un tour de garde
    régulier se crée en série ; un calendrier sur douze mois et un récapitulatif mensuel complètent le tout.
 
+### Une journée en détail : pauses et retards
+
+Un clic sur un jour (en-tête de « Construire », case du calendrier, ligne de « Mon planning ») ouvre la
+journée : toute l'équipe sur une même frise, de l'ouverture à la fermeture. Le responsable y règle la pause
+déjeuner de chacun, voit aussitôt si un pharmacien manque pendant une pause, et note un retard, un départ
+anticipé ou une absence non prévue. Les autres lisent la journée publiée.
+
+### Suivi de présence
+
+Chaque fiche porte ses compteurs sur douze mois : retards (nombre et minutes), départs anticipés, absences
+non prévues, jours de congé, d'arrêt et de formation, remplacements assurés. La personne voit les siens
+dans « Mon suivi ». Ce sont des dates et des durées : aucune raison n'est demandée ni conservée.
+
 ### Formations
 
 Le responsable planifie une formation depuis « Créer » dans la barre du haut : un intitulé, des dates, des
@@ -129,6 +143,14 @@ collègues qui ont la qualification voulue voient la demande et se proposent ; u
 que par un pharmacien. Le responsable valide dans « Résoudre », où chaque volontaire est relu par le moteur
 (repos, durées, chevauchement, absence) avant que le bouton de validation n'apparaisse. Tant que rien
 n'est validé, le poste reste celui du demandeur ; à la validation, les deux personnes sont prévenues.
+
+Une demande n'est possible que si le poste commence **dans au moins 7 jours**. Le collègue qui reprend le
+poste voit ses horaires changer, et la loi fixe pour cela un délai de prévenance : « sept jours » (Code du
+travail, art. L3121-47), « au moins sept jours ouvrés » à temps partiel (art. L3123-31), jamais moins de
+trois jours ouvrés par accord (art. L3123-24). Ces articles ont été lus sur code.travail.gouv.fr. Ils
+encadrent ce que l'employeur doit au salarié ; ils n'interdisent pas un échange accepté par tous, si bien
+que ce seuil de 7 jours est un choix d'organisation, réglable dans « Règles » sans descendre sous 3. Plus
+près de la date, le salarié prévient le responsable, qui traite l'absence dans « Résoudre ».
 
 ### Besoins personnels : jamais de motif
 
@@ -170,7 +192,7 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 72 écrans,
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 74 écrans,
 fenêtres et thèmes vérifiés, ordinateur et téléphone. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 
@@ -201,7 +223,9 @@ src/
 - **Données sur l'appareil.** Cette version enregistre dans le navigateur (`localStorage`) : pas de
   serveur, donc pas de partage entre postes. Connexion, messages et demandes de remplacement fonctionnent
   entre les personnes qui utilisent le même appareil ; ils ne sont ni envoyés ni synchronisés ailleurs.
-- **Heures prévues seulement.** Pas de pointage : la fiche navette exporte du prévu, pas du réalisé.
+- **Heures prévues seulement.** Pas de pointage : la fiche navette exporte du prévu, pas du réalisé. Les
+  retards sont notés à la main par le responsable ; ils ne modifient pas les heures payées.
+- **Mouvement.** Les fonds animés s'arrêtent si l'appareil demande de réduire les animations.
 - **Générateur heuristique.** La recherche locale donne de bonnes semaines en moins de deux secondes
   pour une dizaine de personnes ; elle ne prouve pas l'optimalité.
 
