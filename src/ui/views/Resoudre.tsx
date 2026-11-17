@@ -1,11 +1,12 @@
-import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Handshake, Sparkles, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Handshake, Sparkles, CircleHelp, Clock3, ListChecks, MoonStar, Paperclip, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   JOURS,
   addDays,
   dayIndex,
   fmtDateCourt,
   fmtDateLong,
+  fmtDuree,
   fmtEuros,
   fmtHeure,
   fmtSemaine,
@@ -14,17 +15,19 @@ import {
   weekday,
 } from '../../domain/time';
 import type { Absence, AppData, Besoin, BesoinStatut, ISODate, Remplacement, Trou } from '../../domain/types';
-import { ABSENCE_LABEL, GARDE_LABEL, nomCourt } from '../../domain/types';
-import { decrireBesoin, decrireShift, shiftsSemaine } from '../../engine/core';
+import { ABSENCE_LABEL, GARDE_LABEL, URGENCE_LABEL, nomCourt } from '../../domain/types';
+import { decrireBesoin, decrireShift, minutesSemaine, shiftsSemaine } from '../../engine/core';
 import { decisions } from '../../engine/decisions';
 import { diagnosticPrealable } from '../../engine/diagnose';
 import { congesIncompatibles } from '../../engine/gardes';
 import type { RepairOption } from '../../engine/repair';
 import { optionsReparation } from '../../engine/repair';
-import { evaluerRemplacement } from '../../engine/remplacement';
 import { validateWeek } from '../../engine/validate';
 import { estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
+import { TourDeRole } from '../components/Appel';
+import { aSonTour, tourRemplacement } from '../../engine/appel';
+import { cibleSemaine } from '../../engine/heures';
 import { useUi } from '../../store/ui';
 import { AvantApres, Avatar, Empty, Pill } from '../kit';
 
@@ -472,6 +475,8 @@ function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Eleme
           <CircleCheck size={16} /> Cette absence ne découvre aucune plage : le reste de l'équipe suffit.
         </div>
       )}
+      <TourDeRole trou={trou} />
+      <h4 className="appel-ou">Ou réglez-le vous-même</h4>
       <div className="options">
         {rep.options.map((o) => (
           <div key={o.id} className={`option${o.recommande ? ' reco' : ''}`}>
@@ -799,42 +804,83 @@ function Demarrage(): JSX.Element | null {
 /** Un poste à reprendre : chaque volontaire est relu par le moteur avant que le responsable ne valide. */
 function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }): JSX.Element {
   const data = useStore((s) => s.data);
-  const { validerRemplacement, cloreRemplacement } = useStore();
-  const dire = useUi((s) => s.dire);
+  const today = useStore((s) => s.today);
+  const { validerRemplacement, cloreRemplacement, deciderDemande } = useStore();
+  const { dire, demandeVisee, viserDemande } = useUi();
   const demandeur = data.personnes.find((p) => p.id === r.demandeur);
-  const avis = useMemo(() => r.volontaires.map((id) => ({ id, avis: evaluerRemplacement(data, r, id) })), [data, r]);
+  const attente = r.accord === 'attente';
+  const tour = useMemo(() => (attente ? [] : tourRemplacement(data, r, today)), [data, r, today, attente]);
+  const volontaires = tour.filter((c) => c.volontaire);
+  const premier = aSonTour(tour);
+  const urgence = r.urgence ?? 'prevu';
+  const ref = useRef<HTMLDivElement>(null);
+  const visee = demandeVisee === r.id;
+  useEffect(() => {
+    if (!visee) return;
+    ref.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const t = window.setTimeout(() => viserDemande(null), 2600);
+    return () => window.clearTimeout(t);
+  }, [visee, viserDemande]);
+  /** Ce que le poste ajouterait au compteur du volontaire cette semaine. */
+  const enPlus = (id: string): string => {
+    const p = data.personnes.find((x) => x.id === id);
+    if (!p || !p.salarie) return '';
+    const monday = mondayOf(r.date);
+    const ecart = minutesSemaine(data, id, monday) + (r.end - r.start) - cibleSemaine(data, p, monday);
+    return ecart > 0 ? ` · +${fmtDuree(ecart)} sur son contrat` : '';
+  };
   return (
-    <div className="decision" style={{ alignItems: 'flex-start' }}>
+    <div ref={ref} className={`decision demande-r${visee ? ' visee' : ''}`} style={{ alignItems: 'flex-start' }} data-focus="demande-remplacement">
       <Avatar person={demandeur} />
-      <div className="grow col" style={{ gap: 8, minWidth: 220 }}>
+      <div className="grow col" style={{ gap: 10, minWidth: 220 }}>
         <div>
+          <Pill tone={urgence === 'medical' ? 'danger' : urgence === 'urgent' ? 'warn' : undefined}>{URGENCE_LABEL[urgence]}</Pill>{' '}
           <b>{demandeur ? nomCourt(demandeur) : '—'}</b> souhaite être remplacé{' '}
           <b>
             {fmtDateCourt(r.date)}, {fmtHeure(r.start)} – {fmtHeure(r.end)}
           </b>
-          <div className="small soft">Aucune raison n’est demandée. Sans validation, le poste reste le sien.</div>
+          <div className="small soft">{attente ? 'Répondez à la demande : si vous acceptez, tous ceux qui peuvent tenir le poste sont prévenus en même temps.' : 'Demande acceptée. Sans remplaçant confirmé, le poste reste le sien.'}</div>
         </div>
-        {!avis.length ? <div className="small soft">Aucun volontaire pour l’instant : l’équipe voit la demande dans « Mon planning ».</div> : null}
-        {avis.map(({ id, avis: a }) => {
-          const p = data.personnes.find((x) => x.id === id);
+        {r.justificatif ? (
+          r.justificatif.data ? (
+            <a className="btn sm piece-lien" href={r.justificatif.data} download={r.justificatif.nom}>
+              <Paperclip size={14} aria-hidden="true" /> Justificatif : {r.justificatif.nom}
+            </a>
+          ) : (
+            <span className="small soft">Justificatif transmis, effacé après décision.</span>
+          )
+        ) : null}
+        {!attente && !volontaires.length ? (
+          <div className="small soft">
+            {tour.filter((c) => c.ok).length} personne{tour.filter((c) => c.ok).length > 1 ? 's' : ''} prévenue{tour.filter((c) => c.ok).length > 1 ? 's' : ''}, aucun volontaire pour l’instant.
+          </div>
+        ) : null}
+        {volontaires.map((c) => {
+          const p = data.personnes.find((x) => x.id === c.personId);
+          const sonTour = premier?.personId === c.personId;
           return (
-            <div key={id} className="row wrap" style={{ gap: 10 }}>
+            <div key={c.personId} className="row wrap" style={{ gap: 10 }}>
               <Avatar person={p} />
               <div className="grow" style={{ minWidth: 180 }}>
                 <b>{p ? nomCourt(p) : '—'}</b> se propose
-                <div className="small soft">{a.ok ? 'Règles respectées, couverture inchangée.' : a.raisons.join(' · ')}</div>
+                <div className="small soft">
+                  {c.ok ? `Règles respectées${enPlus(c.personId)} · ${c.depannages ? `${c.depannages} dépannage${c.depannages > 1 ? 's' : ''} sur 3 mois` : 'aucun dépannage sur 3 mois'}` : c.raisons.join(' · ')}
+                </div>
               </div>
-              {a.ok ? (
-                <button
-                  type="button"
-                  className="btn primary sm"
-                  onClick={() => {
-                    validerRemplacement(r.id, id);
-                    dire(`Remplacement validé : ${p ? nomCourt(p) : ''} reprend le poste. Les deux personnes sont prévenues.`, true);
-                  }}
-                >
-                  <Check size={14} aria-hidden="true" /> Valider avec {p?.prenom}
-                </button>
+              {c.ok ? (
+                <>
+                  {sonTour && volontaires.filter((x) => x.ok).length > 1 ? <Pill tone="ok">À son tour</Pill> : null}
+                  <button
+                    type="button"
+                    className={`btn sm${sonTour ? ' primary' : ''}`}
+                    onClick={() => {
+                      validerRemplacement(r.id, c.personId);
+                      dire(`Remplacement validé : ${p ? nomCourt(p) : ''} reprend le poste${enPlus(c.personId)}. Les deux personnes sont prévenues.`, true);
+                    }}
+                  >
+                    <Check size={14} aria-hidden="true" /> Valider avec {p?.prenom}
+                  </button>
+                </>
               ) : (
                 <Pill tone="warn">Impossible en l’état</Pill>
               )}
@@ -842,11 +888,24 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
           );
         })}
       </div>
+      {attente ? (
+        <button
+          type="button"
+          className="btn primary sm"
+          onClick={() => {
+            deciderDemande(r.id, true);
+            dire('Demande acceptée : l’équipe disponible est prévenue.', true);
+          }}
+        >
+          <Check size={14} aria-hidden="true" /> Accepter
+        </button>
+      ) : null}
       <button
         type="button"
         className="btn sm"
         onClick={() => {
-          cloreRemplacement(r.id, 'refusee');
+          if (attente) deciderDemande(r.id, false);
+          else cloreRemplacement(r.id, 'refusee');
           dire('Demande de remplacement refusée.', true);
         }}
       >

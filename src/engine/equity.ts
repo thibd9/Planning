@@ -3,12 +3,13 @@ import type { AppData, ISODate, Person } from '../domain/types';
 import { estPharmacien } from '../domain/types';
 import { estFermeture, estOuverture, minutesTravail } from './core';
 
-export type CompteurCle = 'samedis' | 'fermetures' | 'gardes' | 'changementsTardifs' | 'souhaitsRefuses';
+export type CompteurCle = 'samedis' | 'fermetures' | 'gardes' | 'depannages' | 'changementsTardifs' | 'souhaitsRefuses';
 
 export const COMPTEUR_LABEL: Record<CompteurCle, string> = {
   samedis: 'Samedis travaillés',
   fermetures: 'Fermetures en semaine',
   gardes: 'Gardes et astreintes',
+  depannages: 'Dépannages assurés',
   changementsTardifs: 'Changements tardifs absorbés',
   souhaitsRefuses: 'Souhaits refusés',
 };
@@ -25,7 +26,7 @@ export interface LigneEquite {
   semainesTravaillees: number;
 }
 
-const CLES: CompteurCle[] = ['samedis', 'fermetures', 'gardes', 'changementsTardifs', 'souhaitsRefuses'];
+const CLES: CompteurCle[] = ['samedis', 'fermetures', 'gardes', 'depannages', 'changementsTardifs', 'souhaitsRefuses'];
 
 /** Une personne est-elle éligible à ce type de créneau ? */
 function eligible(data: AppData, p: Person, cle: CompteurCle): boolean {
@@ -59,8 +60,8 @@ export function equite(data: AppData, from: ISODate, to: ISODate): LigneEquite[]
   for (const p of personnes) {
     lignes.set(p.id, {
       personId: p.id,
-      reel: { samedis: 0, fermetures: 0, gardes: 0, changementsTardifs: 0, souhaitsRefuses: 0 },
-      attendu: { samedis: 0, fermetures: 0, gardes: 0, changementsTardifs: null, souhaitsRefuses: null },
+      reel: { samedis: 0, fermetures: 0, gardes: 0, depannages: 0, changementsTardifs: 0, souhaitsRefuses: 0 },
+      attendu: { samedis: 0, fermetures: 0, gardes: 0, depannages: 0, changementsTardifs: null, souhaitsRefuses: null },
       semainesTravaillees: 0,
     });
     semaines.set(p.id, new Set());
@@ -73,6 +74,8 @@ export function equite(data: AppData, from: ISODate, to: ISODate): LigneEquite[]
     const l = lignes.get(s.personId);
     if (!l) continue;
     semaines.get(s.personId)!.add(mondayOf(s.date));
+    // Un poste repris au pied levé (absence couverte, remplacement) compte pour un dépannage.
+    if (s.origine === 'reparation') l.reel.depannages += 1;
     const wd = weekday(s.date);
     if (wd === 5) {
       const k = `${s.personId}|${s.date}`;
@@ -106,7 +109,7 @@ export function equite(data: AppData, from: ISODate, to: ISODate): LigneEquite[]
 
   for (const p of personnes) lignes.get(p.id)!.semainesTravaillees = semaines.get(p.id)!.size;
 
-  for (const cle of ['samedis', 'fermetures', 'gardes'] as const) {
+  for (const cle of ['samedis', 'fermetures', 'gardes', 'depannages'] as const) {
     const eligibles = personnes.filter((p) => eligible(data, p, cle));
     const poids = (p: Person): number =>
       cle === 'gardes' ? 1 : p.heuresHebdo * Math.max(1, lignes.get(p.id)!.semainesTravaillees);

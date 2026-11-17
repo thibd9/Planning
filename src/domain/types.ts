@@ -208,8 +208,14 @@ export interface BesoinEffectif {
   minEquipe: number;
 }
 
+/** collaboratif : chacun pose ses souhaits du mois avant la date limite ; classique : le responsable construit seul. */
+export type ModelePlanning = 'collaboratif' | 'classique';
+
 export interface Officine {
   nom: string;
+  modele?: ModelePlanning;
+  /** Jour du mois précédent où la collecte des souhaits se ferme (20 par défaut). */
+  souhaitsLimite?: number;
   /** Titulaire principal : il a créé l'officine, détient tous les droits et les délègue. */
   responsableId?: string;
   /** Clé de secours du titulaire principal, pour redéfinir son mot de passe. */
@@ -349,7 +355,37 @@ export interface Accord {
   titre: string;
 }
 
-/** Demande de remplacement sur un poste publié : un collègue se propose, le responsable valide. */
+/** Niveau d'urgence d'une demande de remplacement : une catégorie, jamais une raison détaillée. */
+export type Urgence = 'prevu' | 'urgent' | 'medical';
+export const URGENCE_LABEL: Record<Urgence, string> = { prevu: 'Prévu', urgent: 'Urgent', medical: 'Urgence médicale' };
+/** Ordre de traitement : l'urgence médicale d'abord. */
+export const URGENCE_RANG: Record<Urgence, number> = { medical: 0, urgent: 1, prevu: 2 };
+
+/** Justificatif joint à une demande urgente : vu des seuls titulaires, effacé dès que la demande est tranchée. */
+export interface Justificatif {
+  nom: string;
+  type: string;
+  taille: number;
+  /** Contenu (URL de données) ; vide une fois la demande tranchée. */
+  data: string;
+}
+
+/** Régularisation du compteur d'heures d'une personne. minutes < 0 réduit un solde positif, > 0 comble un solde négatif. */
+export type RegulType = 'paiement' | 'recuperation' | 'rattrapage' | 'solde';
+export const REGUL_LABEL: Record<RegulType, string> = { paiement: 'Heures payées', recuperation: 'Récupération', rattrapage: 'Rattrapage', solde: 'Compteur soldé' };
+export interface Regularisation {
+  id: string;
+  personId: string;
+  minutes: number;
+  type: RegulType;
+  /** Semaine où la récupération ou le rattrapage est planifié. */
+  semaine?: ISODate;
+  at: string;
+  /** Proposée par le calcul automatique. */
+  auto?: boolean;
+}
+
+/** Demande de remplacement sur un poste publié : le titulaire l'accepte, un collègue se propose, le titulaire confie le poste. */
 export interface Remplacement {
   id: string;
   shiftId: string;
@@ -361,10 +397,32 @@ export interface Remplacement {
   volontaires: string[];
   statut: 'ouverte' | 'acceptee' | 'refusee' | 'annulee';
   remplacantId?: string;
+  urgence?: Urgence;
+  /** Réponse du titulaire à la demande elle-même ; absente pour un appel lancé par le titulaire. */
+  accord?: 'attente' | 'accepte';
+  justificatif?: Justificatif;
+  /** Appel à l'équipe pour une absence à couvrir : le poste n'est plus au planning, il est dans le trou. */
+  trouId?: string;
+  /** Personnes prévenues par l'appel : toutes celles qui peuvent légalement tenir le poste. */
+  sollicites?: string[];
+  /** Personnes qui ont répondu qu'elles ne pouvaient pas ; sans effet sur leur rang. */
+  indisponibles?: string[];
 }
+
+/** Souhait d'une personne pour un jour précis : une forme d'horaire, jamais une raison. */
+export type SouhaitChoix = 'matin' | 'journee' | 'soir' | 'repos';
+export interface Souhait {
+  personId: string;
+  date: ISODate;
+  choix: SouhaitChoix;
+}
+export const SOUHAIT_LABEL: Record<SouhaitChoix, string> = { matin: 'Matin', journee: 'Journée', soir: 'Après-midi', repos: 'Repos' };
 
 export interface AppData {
   officine: Officine;
+  /** Souhaits du mois, posés jour par jour dans le modèle collaboratif. */
+  souhaits?: Souhait[];
+  regularisations?: Regularisation[];
   messages: Message[];
   remplacements: Remplacement[];
   ecarts: Ecart[];

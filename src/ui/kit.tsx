@@ -296,6 +296,16 @@ export function Logo({ size = 38 }: { size?: number }): JSX.Element {
 }
 
 /** Le nom « Solvéa » dans son dessin d'origine ; les lettres prennent la couleur du texte. */
+/** Le bouton qui confie un calcul à Solvéa : il porte le logo, pour qu'on sache qui travaille. */
+export function BoutonIA({ onClick, disabled, occupe, children, title, focus }: { onClick: () => void; disabled?: boolean; occupe?: boolean; children: ReactNode; title?: string; focus?: string }): JSX.Element {
+  return (
+    <button type="button" className="btn ia" onClick={onClick} disabled={disabled} title={title} data-focus={focus}>
+      {occupe ? <span className="spinner" /> : <Logo size={20} />}
+      <span>{children}</span>
+    </button>
+  );
+}
+
 export function LogoNom({ hauteur = 22 }: { hauteur?: number }): JSX.Element {
   return (
     <svg height={hauteur} width={(hauteur * 988) / 228} viewBox="352 35 988 228" role="img" aria-label="Solvéa" focusable="false" style={{ display: 'block' }}>

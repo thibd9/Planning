@@ -3,7 +3,9 @@ import { addDays, dayIndex, decalageParis, ferie, fromDayIndex, mondayOf, uid, w
 import { empreinte, identifiantPropose } from '../domain/acces';
 import type { AppData, Besoin, Garde, ISODate, Mission, Officine, Person, Shift } from '../domain/types';
 import { decrireJournee, shiftsSemaine } from '../engine/core';
+import { absenceDecouvre, tourDeRole } from '../engine/appel';
 import { generer } from '../engine/generate';
+import { moisACollecter, proposerSouhaits } from '../engine/souhaits';
 
 const H = (h: number, m = 0): number => h * 60 + m;
 const SEMAINE = [0, 1, 2, 3, 4];
@@ -152,6 +154,7 @@ export function vierge(): AppData {
     remplacements: [],
     ecarts: [],
     accords: [],
+    souhaits: [],
   };
 }
 
@@ -352,6 +355,40 @@ export function seed(today: ISODate, avance = 0): AppData {
   const aRemplacer = data.shifts.find((x) => x.date === addDays(lundi, 5) && x.personId !== 'p_helene' && dayIndex(x.date) >= dayIndex(today));
   if (aRemplacer) {
     data.remplacements.push({ id: uid('r'), shiftId: aRemplacer.id, demandeur: aRemplacer.personId, date: aRemplacer.date, start: aRemplacer.start, end: aRemplacer.end, creeLe: new Date(`${addDays(today, -8)}T08:05:00`).toISOString(), volontaires: [], statut: 'ouverte' });
+  }
+
+  // ---- Souhaits du mois à venir : sept personnes ont déjà répondu, trois n'ont encore rien posé.
+  const moisCible = moisACollecter(data.officine, today);
+  const ontRepondu = ['p_camille', 'p_lea', 'p_thomas', 'p_manon', 'p_ines', 'p_jules', 'p_antoine'];
+  data.souhaits = data.personnes
+    .filter((p) => ontRepondu.includes(p.id))
+    .flatMap((p) => proposerSouhaits(data, p, moisCible, today))
+    // Quelques écarts aux habitudes, pour que le mois ne soit pas une copie du précédent.
+    .map((x, i) => (i % 11 === 5 ? { ...x, choix: 'repos' as const } : i % 13 === 7 ? { ...x, choix: 'matin' as const } : x));
+
+  // ---- Un appel à l'équipe déjà lancé pour le premier poste à couvrir : deux volontaires ont répondu.
+  // On prend le poste que le plus de monde peut tenir : c'est là que le tour de rôle se voit.
+  const premier = data.trous
+    .map((t) => ({ t, n: tourDeRole(data, t.shift, today).filter((c) => c.ok && c.personId !== 'p_helene').length, visible: absenceDecouvre(data, t.shift) }))
+    .filter((x) => x.n > 0)
+    // Un poste dont l'absence se voit d'abord : c'est lui que « Résoudre » détaille.
+    .sort((a, b) => Number(b.visible) - Number(a.visible) || b.n - a.n)[0]?.t;
+  if (premier) {
+    const peuvent = tourDeRole(data, premier.shift, today).filter((c) => c.ok).map((c) => c.personId);
+    data.remplacements.push({
+      id: uid('r'),
+      shiftId: premier.shift.id,
+      trouId: premier.id,
+      demandeur: premier.shift.personId,
+      date: premier.shift.date,
+      start: premier.shift.start,
+      end: premier.shift.end,
+      creeLe: new Date(`${today}T07:55:00`).toISOString(),
+      sollicites: peuvent,
+      volontaires: peuvent.filter((id) => id !== 'p_helene').slice(0, 2),
+      indisponibles: [],
+      statut: 'ouverte',
+    });
   }
 
   data.journal.sort((a, b) => b.at.localeCompare(a.at));

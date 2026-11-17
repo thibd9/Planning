@@ -69,7 +69,7 @@ export function Equite(): JSX.Element {
         />
       </div>
 
-      <div className="card" style={{ overflowX: 'auto' }}>
+      <div className="card" style={{ overflowX: 'auto' }} tabIndex={0} role="region" aria-label="Compteurs d’équité, tableau défilant">
         <table className="t" aria-label="Compteurs d’équité par personne" style={{ minWidth: 980 }}>
           <thead>
             <tr>

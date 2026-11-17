@@ -21,6 +21,7 @@ import type { Blocage } from './diagnose';
 import { diagnosticPrealable, diagnosticResultat } from './diagnose';
 import { ecartEquite, equite, fatigue, periodeAvant } from './equity';
 import { coutSemaine, decompteSemaine } from './payroll';
+import { cibleSemaine } from './heures';
 import { validateWeek } from './validate';
 
 export type Variante = 'equite' | 'souhaits' | 'cout';
@@ -313,7 +314,8 @@ export function generer(data: AppData, monday: ISODate, opts: GenOptions): GenRe
     const charge = fermetures * (35 / Math.max(8, p.heuresHebdo));
     soft += W.etalement * charge * charge;
 
-    const contrat = p.heuresHebdo * 60;
+    // Le contrat de la semaine tient compte des récupérations et rattrapages planifiés.
+    const contrat = cibleSemaine(data, p, monday);
     const ecart = (minutes - contrat) / 60;
     // Un petit écart au contrat coûte peu, un gros écart coûte très cher : personne n'est laissé loin de son contrat.
     const e = Math.abs(ecart);

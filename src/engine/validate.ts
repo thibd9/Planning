@@ -20,6 +20,7 @@ import {
   estAbsent,
   minutesTravail,
   occupations,
+  ouverture,
   pharmacienSeulEnRendezVous,
   segmentsTravail,
   sousEffectifs,
@@ -290,6 +291,34 @@ export function validateWeek(data: AppData, monday: ISODate): Issue[] {
           maxHebdo,
         )} au plus.`,
       });
+    }
+
+    // Seuils de confort choisis par l'officine : signalés, jamais bloquants.
+    const confort = valeurRegle(R, 'equipe.heuresMax', 42) * 60;
+    if (regleActive(R, 'equipe.heuresMax') && totalSemaine > confort && totalSemaine <= maxHebdo) {
+      add({
+        regle: 'equipe.heuresMax',
+        gravite: 'alerte',
+        personId: p.id,
+        message: `${nomCourt(p)} : ${fmtDuree(totalSemaine)} cette semaine, au-dessus du plafond de l’officine (${fmtDuree(confort)}).`,
+      });
+    }
+    const samedi = addDays(monday, 5);
+    if (regleActive(R, 'equipe.samedisLibres') && mine.some((s) => s.date === samedi)) {
+      const mois = samedi.slice(0, 7);
+      const samedis: ISODate[] = [];
+      for (let d = addDays(samedi, -28); d <= addDays(samedi, 28); d = addDays(d, 7)) if (d.slice(0, 7) === mois && ouverture(data.officine, d).length) samedis.push(d);
+      const libres = samedis.filter((d) => !data.shifts.some((s) => s.personId === p.id && s.date === d)).length;
+      const voulu = valeurRegle(R, 'equipe.samedisLibres', 1);
+      if (samedis.length > 1 && libres < voulu) {
+        add({
+          regle: 'equipe.samedisLibres',
+          gravite: 'alerte',
+          personId: p.id,
+          date: samedi,
+          message: `${nomCourt(p)} travaille tous les samedis du mois : l’officine en garde ${voulu} libre${voulu > 1 ? 's' : ''}.`,
+        });
+      }
     }
 
     // Repos : on regarde aussi la veille et le lendemain de la semaine.

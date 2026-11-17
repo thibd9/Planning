@@ -9,17 +9,7 @@ import {
   union,
   weekday,
 } from '../domain/time';
-import type {
-  AppData,
-  Besoin,
-  Garde,
-  ISODate,
-  Interval,
-  Mission,
-  Officine,
-  Person,
-  Shift,
-} from '../domain/types';
+import type { AppData, Besoin, Garde, ISODate, Interval, Mission, Officine, Person, Shift, Souhait } from '../domain/types';
 import { estPharmacien } from '../domain/types';
 
 /** Segments réellement travaillés d'un poste : le poste moins sa pause. */
@@ -163,8 +153,19 @@ export function contreditBesoin(b: Besoin, s: Pick<Shift, 'start' | 'end'>): boo
   }
 }
 
-export function besoinsDe(data: Pick<AppData, 'besoins'>, personId: string, date: ISODate): Besoin[] {
-  return data.besoins.filter((b) => b.personId === personId && besoinApplicable(b, date));
+/** Un souhait du mois vu comme une simple préférence : « matin » = finir tôt, « après-midi » = commencer tard, « repos » = ne pas venir. */
+export function besoinDeSouhait(s: Souhait): Besoin | null {
+  if (s.choix === 'journee') return null;
+  const base = { id: `souhait:${s.personId}:${s.date}`, personId: s.personId, jours: [weekday(s.date)], frequence: 1 as const, from: s.date, to: s.date, statut: 'preference' as const, horsPlafond: false, decision: 'acceptee' as const, createdAt: s.date };
+  if (s.choix === 'repos') return { ...base, forme: 'indisponible' };
+  return s.choix === 'matin' ? { ...base, forme: 'finir_avant', heure: 14 * 60 + 30 } : { ...base, forme: 'commencer_apres', heure: 11 * 60 + 30 };
+}
+
+export function besoinsDe(data: Pick<AppData, 'besoins' | 'souhaits'>, personId: string, date: ISODate): Besoin[] {
+  const liste = data.besoins.filter((b) => b.personId === personId && besoinApplicable(b, date));
+  const souhait = data.souhaits?.find((s) => s.personId === personId && s.date === date);
+  const b = souhait ? besoinDeSouhait(souhait) : null;
+  return b ? liste.concat(b) : liste;
 }
 
 export function decrireBesoin(b: Besoin): string {

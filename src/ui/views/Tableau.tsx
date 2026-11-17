@@ -1,4 +1,4 @@
-import { ArrowLeftRight, ArrowRight, Building2, CalendarRange, Check, Handshake, MoonStar, ShieldCheck, UserMinus } from 'lucide-react';
+import { ArrowLeftRight, ArrowRight, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus } from 'lucide-react';
 import { useMemo } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
 import { addDays, fmtDateCourt, fmtDateLong, fmtHeure, mondayOf, totalDuree, weekDates } from '../../domain/time';
@@ -6,6 +6,7 @@ import type { AppData } from '../../domain/types';
 import { nomCourt } from '../../domain/types';
 import { ouverture, shiftsSemaine, trousPharmacien } from '../../engine/core';
 import { decisions } from '../../engine/decisions';
+import { aRegulariser } from '../../engine/heures';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { ProchainPoste } from '../components/ProchainPoste';
@@ -31,6 +32,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   const lundi = mondayOf(today);
   const d = useMemo(() => decisions(data, today), [data, today]);
   const cetteSemaine = couverture(data, lundi);
+  const heures = useMemo(() => aRegulariser(data, today).length, [data, today]);
   const suivante = addDays(lundi, 7);
   const etatSuivante = data.semaines[suivante]?.statut === 'publie' ? 'Publiée' : shiftsSemaine(data, suivante).length ? 'Brouillon' : 'À construire';
   const prochaineGarde = data.gardes.filter((g) => g.date >= today).sort((a, b) => a.date.localeCompare(b.date))[0];
@@ -107,6 +109,13 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <span className="grow">
               <span className="l">Semaine prochaine</span>
               <span className="v">{etatSuivante}</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => aller('heures')}>
+            <span className="ico" aria-hidden="true"><Hourglass size={18} /></span>
+            <span className="grow">
+              <span className="l">Compteurs d’heures</span>
+              <span className="v">{heures ? `${heures} à régulariser` : 'À jour'}</span>
             </span>
           </button>
           <button type="button" className="tb-chiffre" onClick={() => aller('gardes')}>

@@ -1,5 +1,6 @@
 import { addDays, dayIndex, mondayOf } from '../domain/time';
 import type { Absence, AppData, Besoin, Garde, ISODate, Trou } from '../domain/types';
+import { URGENCE_RANG } from '../domain/types';
 import { shiftsSemaine } from './core';
 import type { ReposGarde } from './gardes';
 import { congesIncompatibles, reposApresGarde } from './gardes';
@@ -62,7 +63,11 @@ export function decisions(data: AppData, today: ISODate): Decisions {
       publications.push({ monday, type: 'a_publier', nombre: shiftsSemaine(data, monday).length, jours });
     }
   }
-  const remplacements = (data.remplacements ?? []).filter((r) => r.statut === 'ouverte' && dayIndex(r.date) >= t);
+  // Un appel à l'équipe pour une absence se décide dans la carte de l'absence : il n'est pas compté deux fois.
+  const remplacements = (data.remplacements ?? [])
+    .filter((r) => r.statut === 'ouverte' && !r.trouId && dayIndex(r.date) >= t)
+    // L'urgence médicale d'abord, puis l'urgent, puis le prévu ; à urgence égale, le poste le plus proche.
+    .sort((a, b) => URGENCE_RANG[a.urgence ?? 'prevu'] - URGENCE_RANG[b.urgence ?? 'prevu'] || a.date.localeCompare(b.date) || a.start - b.start);
   const accords = data.accords ?? [];
   const total =
     accords.length +

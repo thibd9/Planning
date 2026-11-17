@@ -8,20 +8,20 @@ import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { Tuile } from '../components/Tuile';
 import { EtiquetteRole } from '../icons';
-import { Avatar, Empty, Pill } from '../kit';
+import { Avatar, Empty, Pill, Seg } from '../kit';
 import { echelleOfficine } from './Construire';
 
 /** Planning publié de toute l'équipe, en lecture seule : ni brouillon, ni coût, ni motif d'absence. */
 export function PlanningEquipe({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
-  const { semaine, setSemaine } = useUi();
+  const { semaine, setSemaine, seulementMoi, setSeulementMoi } = useUi();
   const etat = data.semaines[semaine];
   const publie = etat?.statut === 'publie';
   const postes = publie ? (etat.snapshot ?? []) : [];
   const dates = useMemo(() => weekDates(semaine).filter((d) => ouverture(data.officine, d).length > 0), [semaine, data.officine]);
   const echelle = echelleOfficine(data);
-  const personnes = data.personnes.filter((p) => !p.externe || postes.some((s) => s.personId === p.id));
+  const personnes = data.personnes.filter((p) => (seulementMoi ? p.id === personId : !p.externe || postes.some((s) => s.personId === p.id)));
 
   return (
     <div>
@@ -58,9 +58,20 @@ export function PlanningEquipe({ personId }: { personId: string }): JSX.Element 
             </div>
           </div>
           {publie ? <Pill tone="ok">Publié le {fmtHorodatage(etat.publishedAt ?? '')}</Pill> : <Pill>Pas encore publié</Pill>}
+          <div className="right no-print">
+            <Seg<'equipe' | 'moi'>
+              label="Personnes affichées"
+              value={seulementMoi ? 'moi' : 'equipe'}
+              onChange={(v) => setSeulementMoi(v === 'moi')}
+              options={[
+                { value: 'equipe', label: 'Toute l’équipe' },
+                { value: 'moi', label: 'Mes postes' },
+              ]}
+            />
+          </div>
         </div>
         {publie ? (
-          <div className="plan-scroll">
+          <div className="plan-scroll" tabIndex={0} role="region" aria-label="Planning de l’équipe, tableau défilant">
             <table className="t lecture" aria-label={`Planning de l'équipe, semaine du ${fmtSemaine(semaine)}`}>
               <thead>
                 <tr>

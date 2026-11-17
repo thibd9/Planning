@@ -73,7 +73,9 @@ import { coutSemaine, decompteSemaine } from '../../engine/payroll';
 import { controlePublication } from '../../engine/publish';
 import type { Issue } from '../../engine/validate';
 import { validateWeek } from '../../engine/validate';
+import { memeIdentifiant } from '../../domain/acces';
 import { modificationsEnAttente, useStore } from '../../store/store';
+import { VueMois } from '../components/Mois';
 import { useUi } from '../../store/ui';
 import type { Echelle } from '../kit';
 import { Tuile } from '../components/Tuile';
@@ -102,7 +104,8 @@ export function Construire(): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const { undo, redo, past, future, moveShift, copierSemaine, viderSemaine } = useStore();
-  const { semaine, setSemaine, focus, setFocus, dire, voirJour } = useUi();
+  const { semaine, setSemaine, focus, setFocus, dire, voirJour, planVue, setPlanVue, seulementMoi, setSeulementMoi, session } = useUi();
+  const moiId = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''))?.id;
   const [lecture, setLecture] = useState<Lecture>('heures');
   const [edition, setEdition] = useState<{ personId: string; date: ISODate; shift?: Shift } | null>(null);
   const [generation, setGeneration] = useState(false);
@@ -138,7 +141,7 @@ export function Construire(): JSX.Element {
   const colonnes = `${avecSynthese ? 200 : 212}px ${dates
     .map((d, i) => (ouverts[i] ? 'minmax(100px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '104px' : '40px'))
     .join(' ')}${avecSynthese ? ' 172px' : ''}`;
-  const visibles = data.personnes.filter((p) => !p.externe || postes.some((s) => s.personId === p.id));
+  const visibles = data.personnes.filter((p) => (seulementMoi ? p.id === moiId : !p.externe || postes.some((s) => s.personId === p.id)));
   const lignesEquite = useMemo(
     () => (lecture === 'equite' ? equite(data, periodeAvant(semaine, 8).from, addDays(semaine, 6)) : []),
     [data, semaine, lecture],
@@ -170,10 +173,28 @@ export function Construire(): JSX.Element {
         <div className="grow">
           <div className="eyebrow">Construire</div>
           <h1>
-            Comment couvrir <span className="hl">la semaine</span> ?
+            Comment couvrir <span className="hl">{planVue === 'mois' ? 'le mois' : 'la semaine'}</span> ?
           </h1>
         </div>
-        <div className="row no-print" style={{ gap: 4 }}>
+        <div className="row wrap no-print" style={{ gap: 8 }}>
+          <Seg<'equipe' | 'moi'>
+            label="Personnes affichées"
+            value={seulementMoi ? 'moi' : 'equipe'}
+            onChange={(v) => setSeulementMoi(v === 'moi')}
+            options={[
+              { value: 'equipe', label: 'Toute l’équipe' },
+              { value: 'moi', label: 'Mes postes' },
+            ]}
+          />
+          <Seg<'semaine' | 'mois'>
+            label="Période affichée"
+            value={planVue}
+            onChange={setPlanVue}
+            options={[
+              { value: 'semaine', label: 'Semaine' },
+              { value: 'mois', label: 'Mois' },
+            ]}
+          />
           <button type="button" className="btn ghost icon" onClick={undo} disabled={!past.length} aria-label="Annuler la dernière manipulation" title="Annuler (Ctrl + Z)">
             <Undo2 size={17} />
           </button>
@@ -201,6 +222,9 @@ export function Construire(): JSX.Element {
           Le planning se construit autour des personnes : au moins un pharmacien, puis les préparateurs et les autres postes.
         </Empty>
       ) : (
+        planVue === 'mois' ? (
+          <VueMois moiId={moiId} />
+        ) : (
         <>
           <div className="plan">
             <div className="plan-bar">
@@ -282,7 +306,7 @@ export function Construire(): JSX.Element {
                     <button type="button" className="btn magic" data-tour="proposer" onClick={() => setGeneration(true)}>
                       <Sparkles size={15} /> Proposer un planning
                     </button>
-                    <button type="button" className="btn primary" onClick={() => setPublication(true)} disabled={!postes.length || (statut?.statut === 'publie' && !enAttente)}>
+                    <button type="button" className="btn primary" data-focus="publier" onClick={() => setPublication(true)} disabled={!postes.length || (statut?.statut === 'publie' && !enAttente)}>
                       <CalendarCheck size={15} /> {statut?.statut === 'publie' ? 'Publier les modifications' : 'Publier'}
                     </button>
                   </>
@@ -536,6 +560,7 @@ export function Construire(): JSX.Element {
             </div>
           </section>
         </>
+        )
       )}
 
       {edition ? <DialoguePoste {...edition} onClose={() => setEdition(null)} /> : null}

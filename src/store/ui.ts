@@ -3,6 +3,10 @@ import { addDays, mondayOf, todayISO } from '../domain/time';
 import type { ISODate } from '../domain/types';
 
 export type Vue =
+  | 'heures'
+  | 'souhaits'
+  | 'demandes'
+  | 'suivi'
   | 'construire'
   | 'resoudre'
   | 'gardes'
@@ -77,6 +81,14 @@ interface Ui {
   /** Journée ouverte en détail (toute l'équipe, pauses, retards) ; null quand la fenêtre est fermée. */
   jour: ISODate | null;
   voirJour: (d: ISODate | null) => void;
+  /** Planning global : à la semaine ou au mois ; toute l'équipe ou seulement mes postes. */
+  /** Demande de remplacement à mettre en avant en arrivant dans « Résoudre ». */
+  demandeVisee: string | null;
+  viserDemande: (id: string | null) => void;
+  planVue: 'semaine' | 'mois';
+  setPlanVue: (v: 'semaine' | 'mois') => void;
+  seulementMoi: boolean;
+  setSeulementMoi: (b: boolean) => void;
   setSujet: (s: string | null) => void;
   agir: (vue: Vue, intention: Ui['intention']) => void;
   setIntention: (i: Ui['intention']) => void;
@@ -114,6 +126,12 @@ export const useUi = create<Ui>((set) => ({
   sujet: null,
   jour: null,
   voirJour: (jour) => set({ jour }),
+  demandeVisee: null,
+  viserDemande: (demandeVisee) => set({ demandeVisee }),
+  planVue: 'semaine',
+  setPlanVue: (planVue) => set({ planVue }),
+  seulementMoi: false,
+  setSeulementMoi: (seulementMoi) => set({ seulementMoi }),
   setSujet: (sujet) => set({ sujet }),
   agir: (vue, intention) => set({ vue, intention, focus: null }),
   setIntention: (intention) => set({ intention }),

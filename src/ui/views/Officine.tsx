@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { JOURS, fmtDuree, fmtHHMM, parseHHMM, uid } from '../../domain/time';
 import type { Interval, PosteType } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
+import { estCollaboratif } from '../../engine/souhaits';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 
@@ -26,6 +27,7 @@ function Heure({ value, onChange, label }: { value: number; onChange: (v: number
 export function Officine(): JSX.Element {
   const officine = useStore((s) => s.data.officine);
   const { majOfficine, reinitialiser } = useStore();
+  const collaboratif = estCollaboratif(useStore((s) => s.data.officine));
   const [confirmation, setConfirmation] = useState(false);
   const dire = useUi((s) => s.dire);
   const setPoste = (id: string, patch: Partial<PosteType>): void => {
@@ -153,6 +155,34 @@ export function Officine(): JSX.Element {
             <div className="card-body tiny muted" style={{ borderTop: '1px solid var(--line)' }}>
               La présence d'un pharmacien sur chaque minute d'ouverture est contrôlée à part : elle ne dépend pas de ces seuils.
             </div>
+          </div>
+
+          <div className="card pad col" data-focus="modele">
+            <h2 className="h3">Façon de construire le planning</h2>
+            <fieldset className="choix modele">
+              <legend className="sr">Modèle de planification</legend>
+              <label>
+                <input type="radio" name="modele" checked={collaboratif} onChange={() => majOfficine({ modele: 'collaboratif' })} />
+                <span>
+                  Collaboratif
+                  <small>Chacun pose ses souhaits du mois, puis vous ajustez.</small>
+                </span>
+              </label>
+              <label>
+                <input type="radio" name="modele" checked={!collaboratif} onChange={() => majOfficine({ modele: 'classique' })} />
+                <span>
+                  Classique
+                  <small>Vous construisez seul ; l’équipe consulte.</small>
+                </span>
+              </label>
+            </fieldset>
+            {collaboratif ? (
+              <label className="field">
+                Souhaits à poser avant le… du mois précédent
+                <input type="number" min={1} max={28} value={officine.souhaitsLimite ?? 20} onChange={(e) => majOfficine({ souhaitsLimite: Math.min(28, Math.max(1, Number(e.target.value) || 20)) })} style={{ width: 110 }} />
+              </label>
+            ) : null}
+            <p className="tiny muted">Dans les deux cas, les règles impératives et l’effectif passent avant tout souhait.</p>
           </div>
 
           <div className="card pad col">

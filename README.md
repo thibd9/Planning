@@ -35,15 +35,28 @@ puis une vérification avant de créer. Un tutoriel guidé présente ensuite cha
 
 ## Tutoriels et environnement d'exemple
 
-Sur la page de connexion, « Voir les tutoriels » ouvre une fenêtre avec deux parcours guidés, joués sur une
-pharmacie d'exemple (la « Pharmacie des Tilleuls », fictive) posée à côté des vraies, sans rien effacer :
+La page de connexion présente Solvéa en trois étapes (« Comment ça marche »). Son bouton « Voir la
+démonstration » ouvre la fenêtre « Découvrir Solvéa » : deux visites guidées, jouées sur une pharmacie
+d'exemple (la « Pharmacie des Tilleuls », fictive) posée à côté des vraies, sans rien effacer.
 
-- **Visite complète** (23 étapes) : on part d'une pharmacie tout juste créée et on construit tout, pas à
-  pas — équipe, réglages, planning proposé, journée et pauses, publication, espace d'une préparatrice,
-  calendrier, remplacement, demande d'horaires, absence imprévue, gardes, formation, accord entre
-  titulaires, retards et suivi, messages, équité, règles, journal et paie, compte.
-- **Une journée dans une pharmacie en place** (9 étapes) : huit semaines d'historique, un arrêt à couvrir,
-  des demandes en attente ; on suit la titulaire et son équipe.
+- **Tout Solvéa, de zéro** (39 étapes, six chapitres) : la pharmacie vient d'être créée, sans équipe ni
+  planning. On installe (création, horaires, modèle de planification, équipe, fiche, règles), on construit
+  (souhaits du mois, grille, proposition, contrôles, vue mois, journée, publication), on passe côté équipe
+  (mon planning, calendrier, planning de l'équipe, demandes, remplacement), on traite les imprévus
+  (demande triée par urgence, volontaire, validation, congés, absence imprévue, appel à l'équipe), les
+  temps forts (gardes, formation, inventaire), puis on pilote (accord entre titulaires, compteur d'heures,
+  suivi, équité, messages, journal et paie, tableau de bord, barre du haut, compte).
+- **Une journée type** (13 étapes) : huit semaines d'historique, un arrêt à couvrir, des demandes en
+  attente ; on suit la titulaire et son équipe.
+
+Pendant une visite :
+
+- un **projecteur** éclaire ce dont on parle, et l'écran défile pour l'amener au centre ;
+- quand l'étape comporte une action, un **repère de clic** se pose sur le bouton, puis l'action se fait
+  sous les yeux (l'équipe arrive personne par personne, la grille se remplit, la demande est acceptée) ;
+- la fiche d'explication se range dans le coin où elle cache le moins ;
+- le **sommaire** saute d'un chapitre à l'autre, et l'écran se met en place tout seul ;
+- **lecture automatique**, flèches du clavier, et « Revenir à l'étape » si l'on est parti explorer.
 
 La même fenêtre permet d'entrer librement dans la peau de quatre personnes :
 
@@ -84,9 +97,14 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
   préférences et session sont effacés.
 - **Plusieurs pharmacies.** Le titulaire principal ajoute autant de pharmacies qu'il veut, chacune avec son
   équipe, ses plannings et ses règles, et passe de l'une à l'autre depuis le menu latéral ou le menu du compte.
-- **Barre du haut** : la date, « Créer » (planning, garde, personne, demande, message), la cloche de ce
-  qui attend, les messages, le tutoriel, puis le compte : Mon compte, Paramètres (couleur du thème, taille
-  du texte), ajout d'une pharmacie et déconnexion. « Mon planning » est toujours le premier lien du menu.
+- **Barre du haut** : la date, « Créer » (planning, garde, formation, inventaire, personne, absence,
+  message), la cloche, les messages, le tutoriel, puis le compte. La cloche donne une ligne par demande de
+  remplacement, la plus urgente en tête : un clic mène droit à la demande, mise en avant.
+- **Menu personnel**, le même pour tous : « Mon planning » (mes horaires, rien d'autre), « Mes souhaits »
+  (le mois à venir), « Mes demandes » (absences, contraintes, remplacements), « Mon suivi » (compteur
+  d'heures, compteurs de présence, part des contraintes).
+- **Mon planning et le planning global.** Dans « Construire » et « Planning de l'équipe », « Mes postes »
+  ne garde que ma ligne ; depuis « Mon planning », « Toute l'équipe » ouvre le planning global.
 
 **Limite importante** : sans serveur, cette connexion sépare les espaces sur un appareil partagé ; ce n'est
 pas une protection des données, et seule une empreinte non cryptographique du mot de passe est conservée.
@@ -154,21 +172,73 @@ participants. Chacun est prévenu dans son espace et retrouve la formation dans 
 calendrier ; les postes prévus ces jours-là passent dans « Résoudre », avec des options de remplacement.
 Pour quelques heures de formation pendant un poste, la tâche « Formation » se choisit sur le poste.
 
-### Demandes de remplacement
+### Souhaits du mois et vue mois
 
-Depuis « Mon planning », chacun demande à être remplacé sur un poste publié, sans donner de raison. Les
-collègues qui ont la qualification voulue voient la demande et se proposent ; un pharmacien ne se remplace
-que par un pharmacien. Le responsable valide dans « Résoudre », où chaque volontaire est relu par le moteur
-(repos, durées, chevauchement, absence) avant que le bouton de validation n'apparaisse. Tant que rien
-n'est validé, le poste reste celui du demandeur ; à la validation, les deux personnes sont prévenues.
+Dans le modèle **collaboratif** (réglable dans « Réglages », l'autre modèle étant le **classique**, où le
+responsable construit seul), chacun pose ses souhaits pour le mois à venir avant une date limite (le 20 du
+mois précédent, réglable) :
 
-Une demande n'est possible que si le poste commence **dans au moins 7 jours**. Le collègue qui reprend le
-poste voit ses horaires changer, et la loi fixe pour cela un délai de prévenance : « sept jours » (Code du
-travail, art. L3121-47), « au moins sept jours ouvrés » à temps partiel (art. L3123-31), jamais moins de
-trois jours ouvrés par accord (art. L3123-24). Ces articles ont été lus sur code.travail.gouv.fr. Ils
-encadrent ce que l'employeur doit au salarié ; ils n'interdisent pas un échange accepté par tous, si bien
-que ce seuil de 7 jours est un choix d'organisation, réglable dans « Règles » sans descendre sous 3. Plus
-près de la date, le salarié prévient le responsable, qui traite l'absence dans « Résoudre ».
+- une forme par jour — matin, journée, après-midi ou repos — posée d'un clic, sans jamais de raison ;
+- « M'assister » remplit les jours vides d'après les habitudes des huit dernières semaines ;
+- sous chaque jour, l'effectif annoncé par l'équipe (matin et après-midi) face au seuil de la pharmacie ;
+  s'il manque quelqu'un, « Je peux venir » comble le créneau.
+
+Le calcul traite un souhait comme une simple préférence : il ne passe jamais devant une règle impérative
+ni devant l'effectif attendu. Côté responsable, « Construire » a une **vue mois** : une lettre par jour et
+par personne, l'objectif d'équipe par jour (au moment le plus tendu), les heures de chacun face à son
+contrat, les souhaits déjà posés, qui a répondu et combien de jours restent. « Corriger avec l'IA Solvéa »
+recalcule d'un coup les semaines encore en brouillon en suivant les souhaits, et dit combien ont été
+suivis ; les semaines publiées ne bougent pas.
+
+### Absence à couvrir : l'appel à l'équipe et le tour de rôle
+
+Pour qu'une absence urgente ne retombe pas toujours sur les mêmes et que personne ne soit mis à l'écart :
+
+1. **tous** ceux qui peuvent tenir le poste sans enfreindre une règle sont prévenus en même temps, avec le
+   même message ;
+2. entre volontaires, le poste revient à celui qui a **le moins dépanné** sur trois mois, au prorata de son
+   contrat (« À son tour ») ; le responsable peut choisir un autre volontaire, c'est alors tracé « hors
+   tour » au journal ;
+3. répondre « je ne peux pas » ne coûte rien : seuls les dépannages réellement assurés comptent ;
+4. ceux qui ne sont pas sollicités le sont pour une raison de règle (repos, absence, qualification),
+   affichée au responsable ; chaque personne voit son propre rang ;
+5. les volontaires non retenus reçoivent un message qui dit pourquoi, et gardent leur rang.
+
+À moins de sept jours, un changement d'horaire demande l'accord de la personne : seul un volontaire peut
+être désigné. Les dépannages assurés ont leur compteur dans « Équité » et dans « Mon suivi ».
+
+### Demandes de remplacement, par niveau d'urgence
+
+Depuis « Mes demandes », chacun demande à être remplacé sur un poste publié et choisit un niveau :
+**prévu** (poste à 7 jours ou plus), **urgent** (moins de 7 jours) ou **urgence médicale**. Aucune raison
+n'est à écrire. Pour une urgence médicale, un **justificatif** peut être joint (photo réduite sur
+l'appareil, ou PDF de 600 Ko au plus) : seuls les titulaires le voient, et son contenu est effacé dès que
+la demande est réglée. La consigne affichée demande le volet destiné à l'employeur, qui ne mentionne pas
+le diagnostic.
+
+1. Le titulaire reçoit la demande, triée par urgence, et répond **oui ou non**.
+2. S'il accepte, tous les collègues qui peuvent tenir le poste sont prévenus ; un pharmacien ne se
+   remplace que par un pharmacien.
+3. Un collègue se propose ; le moteur relit les règles (repos, durées, chevauchement, absence) et annonce
+   les **heures en plus** sur son contrat.
+4. Le titulaire valide ; les deux personnes sont prévenues, et le compteur d'heures du remplaçant suit.
+
+Le seuil de 7 jours vient du délai de prévenance : « sept jours » (Code du travail, art. L3121-47), « au
+moins sept jours ouvrés » à temps partiel (art. L3123-31), jamais moins de trois jours ouvrés par accord
+(art. L3123-24), lus sur code.travail.gouv.fr. Ces articles encadrent ce que l'employeur doit au salarié ;
+ils n'interdisent pas un échange accepté par tous. C'est pourquoi une demande plus proche reste possible,
+mais comme demande urgente : elle passe d'abord par le titulaire, et seul un volontaire reprend le poste.
+
+### Compteur d'heures et régularisation
+
+« Heures » compare, pour chaque salarié, les heures planifiées et publiées à son contrat (absences
+approuvées déduites). Le titulaire régularise à la main — payer, faire récupérer, faire rattraper,
+solder — ou clique sur « Laisser l'IA Solvéa faire » : chaque écart d'au moins une heure est résorbé sur la
+première semaine non publiée, par demi-heures et sans dépasser 8 h d'écart au contrat, et le brouillon de
+cette semaine est recalculé. Chacun voit son propre compteur dans « Mon suivi ».
+
+« IA Solvéa » désigne le moteur de calcul de l'application (règles impératives, puis optimisation) : il
+tourne sur l'appareil, n'envoie aucune donnée et n'est pas un modèle de langage. Le bouton porte le logo.
 
 ### Besoins personnels : jamais de motif
 
@@ -194,6 +264,10 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ au moins 3:1, dans
   chacun des dix thèmes (bleu ciel par défaut, bleu marine, indigo, violet, framboise, terracotta, ambre,
   émeraude, bleu-vert, ardoise), en **mode clair comme en mode sombre**. Le logo suit la couleur du thème.
+- **Surfaces translucides** : cartes à 76 %, menu latéral à 68 %, fenêtres à 90 % d'opacité. Les contrôles
+  automatiques ne savent pas mesurer un texte posé sur un fond translucide ; le contraste des couleurs de
+  texte a donc été calculé à part, sur le fond le plus défavorable, pour les dix thèmes et les deux modes :
+  5,6:1 au minimum.
 - **Repères de couleur dans les plannings**, les mêmes dans la grille, la frise et le calendrier : jaune
   pour le matin, orange pour la journée, bleu pour la journée longue, violet pour le soir, indigo pour la
   garde, vert d'eau pour le congé, rouge doux pour l'arrêt, turquoise pour la formation. L'horaire est toujours écrit dans la tuile : la couleur aide, elle n'est jamais seule.
@@ -215,6 +289,11 @@ Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défa
 fenêtres du parcours complet, ordinateur et téléphone, ni sur les vingt écrans principaux rejoués dans
 chacun des dix thèmes, en clair et en sombre. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
+
+## Crédits
+
+Photo de la page de connexion : « Salvator interior », par Newklear007, placée dans le domaine public
+(CC0 1.0), Wikimedia Commons — https://commons.wikimedia.org/w/index.php?curid=150126922.
 
 ## Architecture
 
@@ -245,7 +324,16 @@ src/
   entre les personnes qui utilisent le même appareil ; ils ne sont ni envoyés ni synchronisés ailleurs.
 - **Heures prévues seulement.** Pas de pointage : la fiche navette exporte du prévu, pas du réalisé. Les
   retards sont notés à la main par le responsable ; ils ne modifient pas les heures payées.
-- **Mouvement.** Les fonds animés s'arrêtent si l'appareil demande de réduire les animations.
+- **Compteur d'heures indicatif.** Il ne calcule ni majoration ni repos compensateur, et part du premier
+  planning publié dans l'application. Le choix entre paiement et récupération relève de la convention
+  collective : à faire valider par l'expert-comptable.
+- **Justificatifs sur l'appareil.** Faute de serveur, un justificatif joint reste dans le navigateur où il
+  a été déposé : il n'est pas transmis à un autre poste. Un vrai dépôt de documents de santé demande un
+  hébergement adapté.
+- **Surfaces translucides.** Les cartes laissent passer le fond animé. Les couleurs de texte n'ont pas
+  changé, et le contraste a été recalculé sur le fond le plus défavorable (voir « Accessibilité »).
+- **Mouvement.** Les fonds animés, les entrées d'écran et les visites guidées s'arrêtent de bouger si
+  l'appareil demande de réduire les animations.
 - **Générateur heuristique.** La recherche locale donne de bonnes semaines en moins de deux secondes
   pour une dizaine de personnes ; elle ne prouve pas l'optimalité.
 

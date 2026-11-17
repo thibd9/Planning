@@ -103,7 +103,7 @@ export function Equipe(): JSX.Element {
       ) : null}
       <div className="split" style={{ gridTemplateColumns: '340px minmax(0, 1fr)', display: data.personnes.length ? undefined : 'none' }}>
         <div className="col" style={{ gap: 8 }}>
-          <button type="button" className="btn primary" onClick={() => setAjout(true)} style={{ alignSelf: 'stretch' }}>
+          <button data-focus="ajouter-personne" type="button" className="btn primary" onClick={() => setAjout(true)} style={{ alignSelf: 'stretch' }}>
             <Plus size={15} /> Ajouter une personne
           </button>
           {internes.map((p) => (

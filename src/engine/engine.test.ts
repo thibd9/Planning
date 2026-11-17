@@ -15,6 +15,10 @@ import { delaiRemplacement, evaluerRemplacement, peutDemanderRemplacement, peutR
 import { suiviDe } from './suivi';
 import { appliquerPatch, optionsReparation } from './repair';
 import { bloquants, validateWeek } from './validate';
+import { aSonTour, absenceDecouvre, depannagesDe, posteDe, tourDeRole, tourRemplacement } from './appel';
+import { aRegulariser, cibleSemaine, contratSemaine, proposerRegularisations, semaineLibre, soldeHeures } from './heures';
+import { besoinsDe } from './core';
+import { corrigerMois, effectifSouhaite, heuresMois, joursRestants, limiteSouhaits, moisACollecter, proposerSouhaits, reponses, souhaitRespecte } from './souhaits';
 
 const TODAY = '2026-11-16';
 const LUNDI = mondayOf(TODAY);
@@ -426,7 +430,7 @@ describe('connexion et rôles', () => {
 describe('demandes de remplacement', () => {
   it('compte une demande ouverte parmi les décisions du jour', () => {
     const d = decisions(data, TODAY);
-    expect(d.remplacements).toHaveLength(data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= TODAY).length);
+    expect(d.remplacements).toHaveLength(data.remplacements.filter((r) => !r.trouId && r.statut === 'ouverte' && r.date >= TODAY).length);
     expect(d.remplacements.length).toBeGreaterThan(0);
   });
   it('réserve le poste d’un pharmacien à un pharmacien', () => {
@@ -486,4 +490,212 @@ describe('délai de prévenance et suivi de présence', () => {
     expect(test.semaines[addDays(LUNDI, 14)]?.statut).toBe('publie');
     expect(data.semaines[SUIVANT]).toBeUndefined();
   });
+});
+
+describe('souhaits du mois', () => {
+  it('ferme la collecte le 20 du mois précédent, réglable par l’officine', () => {
+    expect(limiteSouhaits({}, '2026-12')).toBe('2026-11-20');
+    expect(limiteSouhaits({ souhaitsLimite: 25 }, '2026-12')).toBe('2026-11-25');
+    expect(joursRestants({}, '2026-12', '2026-11-17')).toBe(3);
+    expect(moisACollecter({}, '2026-11-17')).toBe('2026-12');
+    expect(moisACollecter({}, '2026-11-21')).toBe('2027-01');
+  });
+
+  it('traite un souhait comme une simple préférence, jamais comme une règle', () => {
+    const d: AppData = { ...data, souhaits: [{ personId: 'p_camille', date: '2026-12-01', choix: 'matin' }, { personId: 'p_lea', date: '2026-12-01', choix: 'repos' }, { personId: 'p_thomas', date: '2026-12-01', choix: 'journee' }] };
+    const b = besoinsDe(d, 'p_camille', '2026-12-01').find((x) => x.id.startsWith('souhait:'));
+    expect(b?.statut).toBe('preference');
+    expect(b?.forme).toBe('finir_avant');
+    expect(besoinsDe(d, 'p_lea', '2026-12-01').some((x) => x.forme === 'indisponible' && x.statut === 'preference')).toBe(true);
+    expect(besoinsDe(d, 'p_thomas', '2026-12-01').some((x) => x.id.startsWith('souhait:'))).toBe(false);
+  });
+
+  it('dit si un poste suit le souhait', () => {
+    const matin = { personId: 'p', date: '2026-12-01', choix: 'matin' as const };
+    expect(souhaitRespecte(matin, [{ start: 510, end: 780 }])).toBe(true);
+    expect(souhaitRespecte(matin, [{ start: 690, end: 1170 }])).toBe(false);
+    expect(souhaitRespecte(matin, [])).toBe(false);
+    expect(souhaitRespecte({ ...matin, choix: 'repos' }, [])).toBe(true);
+    expect(souhaitRespecte({ ...matin, choix: 'repos' }, [{ start: 510, end: 780 }])).toBe(false);
+  });
+
+  it('remplit les jours vides d’après les habitudes, sans toucher aux choix déjà posés', () => {
+    const camille = data.personnes.find((p) => p.id === 'p_camille')!;
+    const d: AppData = { ...data, souhaits: [{ personId: 'p_camille', date: '2026-12-01', choix: 'repos' }] };
+    const liste = proposerSouhaits(d, camille, '2026-12', TODAY);
+    expect(liste.length).toBeGreaterThan(15);
+    expect(liste.some((x) => x.date === '2026-12-01')).toBe(false);
+    expect(liste.every((x) => x.date.startsWith('2026-12') && weekday(x.date) !== 6)).toBe(true);
+  });
+
+  it('compte l’effectif annoncé par demi-journée et qui a répondu', () => {
+    const d: AppData = { ...data, souhaits: [{ personId: 'p_camille', date: '2026-12-01', choix: 'journee' }, { personId: 'p_lea', date: '2026-12-01', choix: 'matin' }] };
+    const e = effectifSouhaite(d, '2026-12-01')!;
+    expect(e.matin.present).toBe(2);
+    expect(e.soir.present).toBe(1);
+    expect(e.matin.requis).toBeGreaterThan(0);
+    expect(reponses(d, '2026-12').repondu.sort()).toEqual(['p_camille', 'p_lea']);
+    expect(effectifSouhaite(d, '2026-12-06')).toBeNull();
+  });
+
+  it('recalcule les semaines en brouillon du mois sans toucher aux semaines publiées ni enfreindre une règle', () => {
+    const base = seed(TODAY, 2);
+    const publiee = shiftsSemaine(base, '2026-11-30').map((s) => s.id).sort();
+    const c = corrigerMois(base, '2026-12');
+    expect(c.publiees).toContain('2026-11-30');
+    expect(c.corrigees.length).toBeGreaterThanOrEqual(3);
+    expect(shiftsSemaine(c.data, '2026-11-30').map((s) => s.id).sort()).toEqual(publiee);
+    expect(c.bloquants).toBe(0);
+    expect(c.souhaitsSuivis / c.souhaitsTotal).toBeGreaterThan(0.7);
+    for (const m of c.corrigees) expect(shiftsSemaine(c.data, m).length).toBeGreaterThan(20);
+    const camille = base.personnes.find((p) => p.id === 'p_camille')!;
+    const h = heuresMois(c.data, camille, '2026-12');
+    expect(h.cible).toBeGreaterThan(0);
+    expect(Math.abs(h.minutes - h.cible)).toBeLessThan(h.cible * 0.35);
+  }, 30000);
+});
+
+describe('absence à couvrir : tour de rôle', () => {
+  const absent = (): Shift => ({ id: 'vacant', personId: 'p_camille', date: addDays(SUIVANT, 1), start: 510, end: 780, activite: 'comptoir', origine: 'manuel' });
+
+  it('prévient tous ceux qui peuvent, et dit pourquoi les autres ne sont pas sollicités', () => {
+    const d: AppData = { ...data, shifts: data.shifts.filter((s) => !(s.personId === 'p_camille' && s.date === addDays(SUIVANT, 1))) };
+    const tour = tourDeRole(d, absent(), TODAY);
+    expect(tour.some((c) => c.personId === 'p_camille')).toBe(false);
+    expect(tour.filter((c) => c.ok).length).toBeGreaterThan(0);
+    for (const c of tour) {
+      if (c.ok) expect(c.rang).toBeGreaterThan(0);
+      else expect(c.raisons.length).toBeGreaterThan(0);
+    }
+    const rangs = tour.filter((c) => c.ok).map((c) => c.rang);
+    expect(rangs).toEqual(rangs.map((_, i) => i + 1));
+  });
+
+  it('fait passer d’abord celui qui a le moins dépanné, au prorata de son contrat', () => {
+    const d0: AppData = { ...data, shifts: data.shifts.filter((s) => !(s.personId === 'p_camille' && s.date === addDays(SUIVANT, 1))) };
+    const libres = tourDeRole(d0, absent(), TODAY).filter((c) => c.ok);
+    expect(libres.length).toBeGreaterThan(1);
+    const premier = libres[0].personId;
+    // Le premier du tour vient de dépanner deux fois : il passe derrière les autres.
+    const d1: AppData = {
+      ...d0,
+      shifts: d0.shifts.concat([1, 2].map((n) => ({ id: `dep${n}`, personId: premier, date: addDays(TODAY, -7 * n - 6), start: 600, end: 720, activite: 'comptoir' as const, origine: 'reparation' as const }))),
+    };
+    expect(depannagesDe(d1, premier, TODAY).nombre).toBe(2);
+    const apres = tourDeRole(d1, absent(), TODAY).filter((c) => c.ok);
+    expect(apres[0].personId).not.toBe(premier);
+    // Dire non ne change rien : seuls les dépannages assurés comptent.
+    const avecRefus = tourDeRole(d0, absent(), TODAY, { volontaires: [], indisponibles: [premier] }).filter((c) => c.ok);
+    expect(avecRefus[0].personId).toBe(premier);
+    expect(aSonTour(avecRefus)).toBeNull();
+    const volontaires = tourDeRole(d1, absent(), TODAY, { volontaires: [premier, apres[0].personId], indisponibles: [] });
+    expect(aSonTour(volontaires)?.personId).toBe(apres[0].personId);
+  });
+
+  it('réserve le poste d’un pharmacien à un pharmacien', () => {
+    const trou = data.trous.find((t) => data.remplacements.some((r) => r.trouId === t.id))!;
+    expect(trou.shift.personId).toBe('p_karim');
+    const tour = tourDeRole(data, trou.shift, TODAY);
+    for (const c of tour.filter((x) => x.ok)) expect(['titulaire', 'adjoint']).toContain(data.personnes.find((p) => p.id === c.personId)?.qualification);
+    const appel = data.remplacements.find((r) => r.trouId === trou.id)!;
+    expect(posteDe(data, appel)?.id).toBe(trou.shift.id);
+    expect(decisions(data, TODAY).remplacements.some((r) => r.trouId)).toBe(false);
+  });
+
+  it('signale sans bloquer le plafond d’heures et les samedis libres choisis par l’officine', () => {
+    const vide: AppData = { ...data, shifts: [] };
+    const jours = [0, 1, 2, 3, 4].map((i) => poste('p_camille', addDays(SUIVANT, i), 510, 1080, { pauseStart: 720, pauseEnd: 750 }));
+    const issues = validateWeek({ ...vide, shifts: jours }, SUIVANT);
+    const plafond = issues.find((i) => i.regle === 'equipe.heuresMax');
+    expect(plafond?.gravite).toBe('alerte');
+    const samedis = ['2026-12-05', '2026-12-12', '2026-12-19', '2026-12-26'].map((d) => poste('p_lea', d, 540, 780));
+    const s = validateWeek({ ...vide, shifts: samedis }, '2026-12-07').find((i) => i.regle === 'equipe.samedisLibres');
+    expect(s?.gravite).toBe('alerte');
+    expect(validateWeek({ ...vide, shifts: samedis.slice(0, 3) }, '2026-12-07').some((i) => i.regle === 'equipe.samedisLibres')).toBe(false);
+  });
+});
+
+describe('demandes de remplacement par urgence', () => {
+  it('trie les demandes : urgence médicale, urgent, prévu, puis par date', () => {
+    const postes = data.shifts.filter((s) => s.personId === 'p_camille' && s.date >= TODAY).sort((a, b) => a.date.localeCompare(b.date));
+    expect(postes.length).toBeGreaterThanOrEqual(3);
+    const demande = (i: number, urgence: 'prevu' | 'urgent' | 'medical') => ({ id: `d${i}`, shiftId: postes[i].id, demandeur: 'p_camille', date: postes[i].date, start: postes[i].start, end: postes[i].end, creeLe: '', volontaires: [], statut: 'ouverte' as const, urgence, accord: 'attente' as const });
+    const d: AppData = { ...data, remplacements: [demande(0, 'prevu'), demande(1, 'urgent'), demande(2, 'medical')] };
+    expect(decisions(d, TODAY).remplacements.map((r) => r.urgence)).toEqual(['medical', 'urgent', 'prevu']);
+  });
+
+  it('classe les volontaires d’un remplacement selon le même tour de rôle', () => {
+    const vise = data.shifts.filter((s) => s.personId === 'p_camille' && s.date > TODAY).sort((a, b) => a.date.localeCompare(b.date))[0];
+    const r = { id: 'x', shiftId: vise.id, demandeur: 'p_camille', date: vise.date, start: vise.start, end: vise.end, creeLe: '', volontaires: [] as string[], statut: 'ouverte' as const };
+    const tour = tourRemplacement(data, r, TODAY);
+    expect(tour.some((c) => c.personId === 'p_camille')).toBe(false);
+    const libres = tour.filter((c) => c.ok);
+    expect(libres.length).toBeGreaterThan(0);
+    expect(libres.map((c) => c.rang)).toEqual(libres.map((_, i) => i + 1));
+    const avec = tourRemplacement(data, { ...r, volontaires: [libres[libres.length - 1].personId] }, TODAY);
+    expect(aSonTour(avec)?.personId).toBe(libres[libres.length - 1].personId);
+  });
+
+  it('sait si une absence découvre quelque chose', () => {
+    const trou = data.trous.find((t) => data.remplacements.some((r) => r.trouId === t.id))!;
+    expect(absenceDecouvre(data, trou.shift)).toBe(true);
+  });
+});
+
+describe('compteur d’heures', () => {
+  const camille = (d: AppData) => d.personnes.find((p) => p.id === 'p_camille')!;
+
+  it('compare les heures publiées au contrat, absences déduites', () => {
+    const s = soldeHeures(data, camille(data), TODAY);
+    expect(s.contrat).toBeGreaterThan(0);
+    expect(s.solde).toBe(s.realise - s.contrat);
+    const absente: AppData = { ...data, absences: data.absences.concat({ id: 'abs', personId: 'p_camille', from: LUNDI, to: addDays(LUNDI, 4), type: 'conge', statut: 'approuvee', createdAt: '' }) };
+    expect(contratSemaine(absente, camille(data), LUNDI)).toBe(0);
+    expect(contratSemaine(data, camille(data), LUNDI)).toBe(35 * 60);
+  });
+
+  it('ajoute au compteur un poste repris en plus', () => {
+    const avant = soldeHeures(data, camille(data), TODAY).solde;
+    const d: AppData = { ...data, shifts: data.shifts.concat(poste('p_camille', addDays(LUNDI, 6), 600, 840, { origine: 'reparation' })) };
+    expect(soldeHeures(d, camille(d), TODAY).solde).toBe(avant + 240);
+  });
+
+  it('régularise : payer solde tout de suite, récupérer corrige l’objectif de la semaine visée', () => {
+    const d0: AppData = { ...data, shifts: data.shifts.concat(poste('p_camille', addDays(LUNDI, 6), 600, 840)) };
+    const s0 = soldeHeures(d0, camille(d0), TODAY).solde;
+    const paye: AppData = { ...d0, regularisations: [{ id: 'r1', personId: 'p_camille', minutes: -s0, type: 'paiement', at: '' }] };
+    expect(soldeHeures(paye, camille(paye), TODAY).solde).toBe(0);
+    const libre = semaineLibre(d0, TODAY);
+    expect(d0.semaines[libre]?.statut).not.toBe('publie');
+    const recup: AppData = { ...d0, regularisations: [{ id: 'r2', personId: 'p_camille', minutes: -120, type: 'recuperation', semaine: libre, at: '' }] };
+    expect(cibleSemaine(recup, camille(recup), libre)).toBe(35 * 60 - 120);
+    expect(cibleSemaine(recup, camille(recup), addDays(libre, 7))).toBe(35 * 60);
+    expect(soldeHeures(recup, camille(recup), TODAY).solde).toBe(s0 - 120);
+    expect(soldeHeures(recup, camille(recup), TODAY).prevues).toHaveLength(1);
+  });
+
+  it('propose de résorber chaque écart d’au moins une heure, par demi-heures, sans dépasser huit heures', () => {
+    const propositions = proposerRegularisations(data, TODAY);
+    const ecarts = aRegulariser(data, TODAY);
+    expect(propositions).toHaveLength(ecarts.length);
+    for (const r of propositions) {
+      const s = ecarts.find((x) => x.personId === r.personId)!;
+      expect(Math.sign(r.minutes)).toBe(-Math.sign(s.solde));
+      expect(Math.abs(r.minutes)).toBeLessThanOrEqual(480);
+      expect(r.minutes % 30).toBe(0);
+      expect(r.semaine).toBe(semaineLibre(data, TODAY));
+      expect(r.type).toBe(r.minutes < 0 ? 'recuperation' : 'rattrapage');
+    }
+    // Le titulaire, non salarié, n'a pas de compteur.
+    expect(ecarts.some((x) => x.personId === 'p_helene')).toBe(false);
+  });
+
+  it('fait tenir compte au calcul du planning d’une récupération planifiée', () => {
+    const libre = semaineLibre(data, TODAY);
+    const sans = generer(data, libre, { variante: 'equite', graine: 7 });
+    const d: AppData = { ...data, regularisations: [{ id: 'r3', personId: 'p_camille', minutes: -420, type: 'recuperation', semaine: libre, at: '' }] };
+    const avec = generer(d, libre, { variante: 'equite', graine: 7 });
+    const minutes = (shifts: Shift[]): number => shifts.filter((s) => s.personId === 'p_camille').reduce((t, s) => t + (s.end - s.start) - ((s.pauseEnd ?? 0) - (s.pauseStart ?? 0)), 0);
+    expect(minutes(avec.shifts)).toBeLessThan(minutes(sans.shifts));
+  }, 30000);
 });

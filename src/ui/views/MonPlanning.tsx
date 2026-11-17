@@ -1,5 +1,5 @@
-import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, ChevronDown, CircleCheck, Clock3, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
 import {
   JOURS,
@@ -19,35 +19,27 @@ import {
   weekday,
 } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
-import { GARDE_LABEL, MISSION_LABEL, classeAbsence, estPharmacien, libelleAbsence, nomCourt } from '../../domain/types';
-import { decrireBesoin, minutesTravail } from '../../engine/core';
-import type { CompteurCle } from '../../engine/equity';
-import { delaiRemplacement, peutDemanderRemplacement, peutRemplacer } from '../../engine/remplacement';
-import { suiviDe } from '../../engine/suivi';
-import { COMPTEUR_LABEL, equite } from '../../engine/equity';
+import { GARDE_LABEL, MISSION_LABEL, classeAbsence, libelleAbsence, nomCourt } from '../../domain/types';
+import { minutesTravail } from '../../engine/core';
+import { peutRemplacer } from '../../engine/remplacement';
 import { HEBERGE } from '../../env';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
 import { AvantApres, Pill, Seg, momentDe } from '../kit';
 import { Calendrier } from '../components/Calendrier';
-import { Compteurs } from '../components/Compteurs';
 import { ProchainPoste } from '../components/ProchainPoste';
-import { STATUT_BESOIN } from './Equipe';
-import { Ecart } from './Equite';
-import { usagePlafond } from './Resoudre';
+import { AppelRecu } from '../components/Appel';
 
 export function MonPlanning({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const lire = useStore((s) => s.lireNotification);
-  const { demanderRemplacement, seProposer, cloreRemplacement } = useStore();
+  const { seProposer } = useStore();
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
-  const { intention, setIntention, voirJour, aller } = useUi();
+  const { intention, setIntention, voirJour, aller, setSeulementMoi } = useUi();
   const gere = peutGerer(data, data.personnes.find((p) => p.id === personId));
-  const delai = delaiRemplacement(data);
-  const suivi = suiviDe(data, personId, today);
   useEffect(() => {
     if (intention === 'demande') {
       setDemande(true);
@@ -75,16 +67,11 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
     .sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start);
   const changements = data.notifications.filter((n) => n.personId === personId && dayIndex(n.date) >= dayIndex(today) - 7);
   const nonLus = changements.filter((n) => !n.luLe);
-  const besoins = data.besoins.filter((b) => b.personId === personId && (!b.to || b.to >= today));
   const absences = data.absences.filter((a) => a.personId === personId && a.to >= today);
-  const usage = usagePlafond(data, personId, today);
-  const ligne = useMemo(() => equite(data, addDays(lundi, -56), addDays(lundi, 6)).find((l) => l.personId === personId), [data, lundi, personId]);
-  const compteurs: CompteurCle[] = person && estPharmacien(person) ? ['samedis', 'fermetures', 'gardes', 'changementsTardifs'] : ['samedis', 'fermetures', 'changementsTardifs'];
 
   const ouvertes = data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= today);
-  const mesRemplacements = ouvertes.filter((r) => r.demandeur === personId);
-  const aAider = person ? ouvertes.filter((r) => peutRemplacer(data, r, person)) : [];
-  const enCours = (shiftId: string): boolean => mesRemplacements.some((r) => r.shiftId === shiftId);
+  // Un appel à l'équipe s'adresse à tous ceux qui ont été prévenus ; une demande de remplacement, à ceux qui ont la qualification.
+  const aAider = person ? ouvertes.filter((r) => (r.trouId ? (r.sollicites ?? []).includes(personId) : r.accord !== 'attente' && peutRemplacer(data, r, person))) : [];
 
   if (!person) return <div className="empty">Personne introuvable.</div>;
 
@@ -114,17 +101,18 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
       </div>
 
       {aAider.length ? (
-        <div className="card" style={{ marginTop: 18 }}>
+        <div className="card" data-focus="aider" style={{ marginTop: 18 }}>
           <div className="card-head">
             <span className="ico" aria-hidden="true">
               <HandHelping size={18} />
             </span>
             <div className="grow">
-              <h2 className="h3">Un collègue cherche un remplaçant</h2>
+              <h2 className="h3">{aAider.some((r) => r.trouId) ? 'L’équipe a besoin d’un coup de main' : 'Un collègue cherche un remplaçant'}</h2>
               <div className="small soft">Vous proposer n’engage à rien tant que le responsable n’a pas validé.</div>
             </div>
           </div>
           {aAider.map((r) => {
+            if (r.trouId) return <AppelRecu key={r.id} appel={r} personId={personId} />;
             const d = data.personnes.find((p) => p.id === r.demandeur);
             const propose = r.volontaires.includes(personId);
             const occupe = aVenir.some((s) => s.date === r.date && s.start < r.end && r.start < s.end);
@@ -166,7 +154,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
       ) : null}
 
       {changements.length ? (
-        <div className="card" style={{ marginTop: 18 }}>
+        <div className="card" data-focus="changements" style={{ marginTop: 18 }}>
           <div className="card-head">
             <BellRing size={18} />
             <h2 className="h3 grow">Ce qui a changé</h2>
@@ -197,17 +185,24 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
         </div>
       ) : null}
 
-      <div className={`me-grid${affichage === 'calendrier' ? ' large' : ''}`}>
+      <div className="me-grid large">
         <div className="col" style={{ gap: 18 }}>
           <div className="row wrap">
             <h2 className="grow">{affichage === 'semaine' ? 'Mes semaines' : 'Mon calendrier'}</h2>
-            <Seg
+            <Seg<'semaine' | 'calendrier' | 'equipe'>
               label="Affichage du planning"
               value={affichage}
-              onChange={setAffichage}
+              onChange={(v) => {
+                // Le planning de toute l'équipe a son écran : on y va, sans filtre sur mes postes.
+                if (v === 'equipe') {
+                  setSeulementMoi(false);
+                  aller(gere ? 'construire' : 'planning');
+                } else setAffichage(v);
+              }}
               options={[
                 { value: 'semaine', label: 'Semaine' },
                 { value: 'calendrier', label: 'Calendrier' },
+                { value: 'equipe', label: 'Toute l’équipe' },
               ]}
             />
           </div>
@@ -314,157 +309,6 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           )}
         </div>
 
-        <div className="col" style={{ gap: 18 }}>
-          <div className="card">
-            <div className="card-head">
-              <span className="ico" aria-hidden="true">
-                <ArrowLeftRight size={18} />
-              </span>
-              <div className="grow">
-                <h2 className="h3">{gere ? 'Confier un de mes postes' : 'Me faire remplacer'}</h2>
-                <div className="small soft">Possible jusqu’à {delai} jours avant le poste.</div>
-              </div>
-            </div>
-            <div className="card-body col" style={{ gap: 10 }}>
-              {!aVenir.length ? <p className="soft small">Aucun poste publié à venir.</p> : null}
-              {aVenir.slice(0, 8).map((s) => {
-                const r = mesRemplacements.find((x) => x.shiftId === s.id);
-                const possible = peutDemanderRemplacement(data, s.date, today);
-                return (
-                  <div key={s.id} className="row wrap">
-                    <div className="grow" style={{ minWidth: 150 }}>
-                      <b className="cap1">{fmtDateCourt(s.date)}</b>
-                      <div className="small soft num">
-                        {fmtHeure(s.start)} – {fmtHeure(s.end)}
-                        {r ? ` · ${r.volontaires.length ? `${r.volontaires.length} volontaire${r.volontaires.length > 1 ? 's' : ''}` : 'en attente d’un volontaire'}` : ''}
-                      </div>
-                    </div>
-                    {r ? (
-                      <button type="button" className="btn sm" onClick={() => cloreRemplacement(r.id, 'annulee')}>
-                        Annuler
-                      </button>
-                    ) : possible ? (
-                      <button
-                        type="button"
-                        className="btn sm primary"
-                        disabled={enCours(s.id)}
-                        onClick={() => {
-                          demanderRemplacement(s);
-                          dire('Demande envoyée à l’équipe et au responsable.', true);
-                        }}
-                      >
-                        Me faire remplacer
-                      </button>
-                    ) : (
-                      <Pill title={`Poste dans moins de ${delai} jours : le collègue ne serait pas prévenu à temps`}>
-                        <Clock3 size={12} aria-hidden="true" /> Trop proche
-                      </Pill>
-                    )}
-                  </div>
-                );
-              })}
-              {aVenir.some((s) => !peutDemanderRemplacement(data, s.date, today)) ? (
-                <div className="notice info small">
-                  <Clock3 size={15} aria-hidden="true" />
-                  <span>
-                    Un poste à moins de {delai} jours ne peut plus être proposé à un collègue : ses horaires doivent lui être annoncés {delai} jours avant. En cas d’empêchement, prévenez votre responsable.
-                    <button type="button" className="btn sm" style={{ marginTop: 8, display: 'flex' }} onClick={() => aller('messages')}>
-                      Écrire au responsable
-                    </button>
-                  </span>
-                </div>
-              ) : null}
-              <p className="tiny muted">{gere ? 'Un collègue se propose, puis la validation se fait dans « Résoudre ».' : 'Vous restez en poste tant que le responsable n’a pas validé. Aucune raison n’est demandée.'}</p>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-head">
-              <h2 className="h3 grow">{gere ? 'Mes absences et contraintes' : 'Mes demandes'}</h2>
-              <button type="button" className="btn sm" onClick={() => setDemande(true)}>
-                <Plus size={14} /> Nouvelle
-              </button>
-            </div>
-            <div className="card-body col" style={{ gap: 10 }}>
-              {!besoins.length && !absences.length ? <p className="soft small">{gere ? 'Rien de prévu.' : 'Aucune demande en cours.'}</p> : null}
-              {absences.map((a) => (
-                <div key={a.id} className="row wrap">
-                  <div className="grow">
-                    <b>{libelleAbsence(a)}</b>
-                    <div className="small soft">
-                      Du {fmtDateCourt(a.from)} au {fmtDateCourt(a.to)}
-                    </div>
-                  </div>
-                  <Pill tone={a.statut === 'approuvee' ? 'ok' : a.statut === 'refusee' ? 'danger' : 'warn'}>{a.statut === 'approuvee' ? 'Approuvée' : a.statut === 'refusee' ? 'Refusée' : 'En attente'}</Pill>
-                </div>
-              ))}
-              {besoins.map((b) => (
-                <div key={b.id} className="row wrap">
-                  <div className="grow" style={{ minWidth: 180 }}>
-                    <b>{decrireBesoin(b)}</b>
-                    <div className="small soft">
-                      {b.decision === 'acceptee'
-                        ? b.statut === 'reconnue'
-                          ? 'Votre planning en tient compte à coup sûr.'
-                          : b.statut === 'prioritaire'
-                            ? 'Servie avant les autres souhaits, sans être garantie.'
-                            : 'Un souhait : satisfait quand c’est possible.'
-                        : b.decision === 'refusee'
-                          ? 'Demande refusée par votre responsable.'
-                          : 'En attente de la décision de votre responsable.'}
-                    </div>
-                  </div>
-                  {b.decision === 'acceptee' ? (
-                    <Pill tone={STATUT_BESOIN[b.statut].tone}>{STATUT_BESOIN[b.statut].label}</Pill>
-                  ) : (
-                    <Pill tone={b.decision === 'refusee' ? 'danger' : 'warn'}>{b.decision === 'refusee' ? 'Refusée' : 'En attente'}</Pill>
-                  )}
-                </div>
-              ))}
-              {!gere ? (
-                <div className="notice small">
-                  <CircleCheck size={15} />
-                  <div>
-                    Souhaits prioritaires utilisés : <b>{usage.actifs} sur {usage.plafond}</b>, comme pour tous vos collègues. On ne vous demande jamais la raison d'une demande.
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <details className="card repli">
-            <summary className="card-head">
-              <h2 className="h3 grow">Mon suivi</h2>
-              <span className="small soft">12 mois</span>
-              <ChevronDown size={18} className="chev" aria-hidden="true" />
-            </summary>
-            <div className="card-body">
-              <Compteurs suivi={suivi} />
-              <p className="tiny muted" style={{ marginTop: 12 }}>Ce que votre responsable a noté, et rien d’autre : des dates et des durées, jamais une raison.</p>
-            </div>
-          </details>
-
-          {ligne ? (
-            <details className="card repli">
-              <summary className="card-head">
-                <h2 className="h3 grow">Ma part des contraintes</h2>
-                <span className="small soft">8 semaines</span>
-                <ChevronDown size={18} className="chev" aria-hidden="true" />
-              </summary>
-              <div className="card-body col" style={{ gap: 12 }}>
-                {compteurs.map((c) => (
-                  <div key={c}>
-                    <div className="small soft" style={{ marginBottom: 3 }}>{COMPTEUR_LABEL[c]}</div>
-                    <Ecart ligne={ligne} cle={c} max={3} />
-                  </div>
-                ))}
-                <p className="tiny muted">
-                  Comparé à votre part attendue, au prorata de votre temps de travail. Vous ne voyez que votre position : il n'existe aucun classement de l'équipe.
-                </p>
-              </div>
-            </details>
-          ) : null}
-        </div>
       </div>
       {demande ? <DialogueDemande personId={personId} espace={gere ? 'responsable' : 'salarie'} onClose={() => setDemande(false)} /> : null}
     </div>
