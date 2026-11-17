@@ -1,4 +1,5 @@
 import { RotateCcw } from 'lucide-react';
+import { useState } from 'react';
 import { JOURS, fmtDuree, fmtHHMM, parseHHMM } from '../../domain/time';
 import type { Interval, PosteType } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
@@ -25,6 +26,7 @@ function Heure({ value, onChange, label }: { value: number; onChange: (v: number
 export function Officine(): JSX.Element {
   const officine = useStore((s) => s.data.officine);
   const { majOfficine, reinitialiser } = useStore();
+  const [confirmation, setConfirmation] = useState(false);
   const dire = useUi((s) => s.dire);
   const setHoraire = (jour: number, plage: Interval | null): void => {
     majOfficine({ horaires: officine.horaires.map((h, i) => (i === jour ? (plage ? [plage] : []) : h)) });
@@ -202,18 +204,29 @@ export function Officine(): JSX.Element {
             L'application fonctionne aujourd'hui sur cet appareil, avec une équipe fictive. Réinitialiser efface vos essais et recrée le jeu de départ.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn danger"
-          onClick={() => {
-            if (window.confirm('Effacer vos essais et revenir au jeu de démonstration ?')) {
-              reinitialiser();
-              dire('Jeu de démonstration rétabli.');
-            }
-          }}
-        >
-          <RotateCcw size={15} /> Réinitialiser
-        </button>
+        {confirmation ? (
+          <div className="row wrap">
+            <span className="small">Effacer vos essais et revenir au jeu de départ ?</span>
+            <button type="button" className="btn" onClick={() => setConfirmation(false)}>
+              Annuler
+            </button>
+            <button
+              type="button"
+              className="btn danger"
+              onClick={() => {
+                reinitialiser();
+                setConfirmation(false);
+                dire('Jeu de démonstration rétabli.');
+              }}
+            >
+              <RotateCcw size={15} /> Oui, réinitialiser
+            </button>
+          </div>
+        ) : (
+          <button type="button" className="btn danger" onClick={() => setConfirmation(true)}>
+            <RotateCcw size={15} /> Réinitialiser
+          </button>
+        )}
       </div>
     </div>
   );

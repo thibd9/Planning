@@ -1,11 +1,12 @@
-import { BookOpenCheck, CalendarCheck, Download, FileSpreadsheet, HeartHandshake, MoonStar, Pencil, Sparkles, UserMinus, Wrench } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { BookOpenCheck, CalendarCheck, Copy, Download, FileSpreadsheet, HeartHandshake, MoonStar, Pencil, Sparkles, UserMinus, Wrench } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
 import { JOURS, MOIS, fmtDecimal, fmtHorodatage, weekday } from '../../domain/time';
 import type { JournalType } from '../../domain/types';
 import { QUALIFICATION_COURT, nomComplet, nomCourt } from '../../domain/types';
 import { ficheNavette, ficheNavetteCSV } from '../../engine/payroll';
 import { useStore } from '../../store/store';
-import { AvantApres, Pill, Seg } from '../kit';
+import { HEBERGE } from '../../env';
+import { AvantApres, Dialog, Pill, Seg } from '../kit';
 
 const ICONES: Record<JournalType, JSX.Element> = {
   publication: <CalendarCheck size={16} />,
@@ -32,6 +33,15 @@ export function Journal(): JSX.Element {
   const today = useStore((s) => s.today);
   const [onglet, setOnglet] = useState<'journal' | 'paie'>('journal');
   const [mois, setMois] = useState(today.slice(0, 7));
+  const [apercu, setApercu] = useState<{ nom: string; contenu: string } | null>(null);
+  const [copie, setCopie] = useState(false);
+  const zone = useRef<HTMLTextAreaElement>(null);
+  /** Télécharge le fichier, ou l'affiche à copier quand la page hébergée bloque les téléchargements. */
+  const exporter = (nomFichier: string, contenu: string, type: string): void => {
+    if (!HEBERGE) return telecharger(nomFichier, contenu, type);
+    setCopie(false);
+    setApercu({ nom: nomFichier, contenu: contenu.replace(/^\uFEFF/, '') });
+  };
   const lignes = useMemo(() => ficheNavette(data, mois), [data, mois]);
   const nom = (id: string): string => {
     const p = data.personnes.find((x) => x.id === id);
@@ -65,7 +75,7 @@ export function Journal(): JSX.Element {
               type="button"
               className="btn right"
               onClick={() =>
-                telecharger(
+                exporter(
                   `dossier-de-preuve-${today}.json`,
                   JSON.stringify({ officine: data.officine.nom, exporteLe: new Date().toISOString(), regles: data.regles, journal: data.journal, accusesDeLecture: data.notifications }, null, 2),
                   'application/json',
@@ -122,7 +132,7 @@ export function Journal(): JSX.Element {
               <input type="month" className="input" value={mois} onChange={(e) => setMois(e.target.value)} />
             </label>
             <Pill tone="warn">Heures prévues, non pointées</Pill>
-            <button type="button" className="btn primary right" onClick={() => telecharger(`fiche-navette-${mois}.csv`, ficheNavetteCSV(data, mois), 'text/csv;charset=utf-8')}>
+            <button type="button" className="btn primary right" onClick={() => exporter(`fiche-navette-${mois}.csv`, ficheNavetteCSV(data, mois), 'text/csv;charset=utf-8')}>
               <FileSpreadsheet size={15} /> Exporter pour le comptable
             </button>
           </div>
@@ -172,6 +182,40 @@ export function Journal(): JSX.Element {
           </p>
         </>
       )}
+      {apercu ? (
+        <Dialog
+          size="mid"
+          title={apercu.nom}
+          subtitle="Cette page hébergée ne peut pas enregistrer de fichier sur votre appareil : copiez le contenu, puis collez-le dans un fichier ou un tableur."
+          onClose={() => setApercu(null)}
+          footer={
+            <>
+              <button type="button" className="btn" onClick={() => setApercu(null)}>
+                Fermer
+              </button>
+              <button
+                type="button"
+                className="btn primary"
+                onClick={() => {
+                  const selectionner = (): void => {
+                    zone.current?.focus();
+                    zone.current?.select();
+                  };
+                  if (!navigator.clipboard) return selectionner();
+                  navigator.clipboard.writeText(apercu.contenu).then(() => setCopie(true), selectionner);
+                }}
+              >
+                <Copy size={15} /> {copie ? 'Copié' : 'Copier le contenu'}
+              </button>
+            </>
+          }
+        >
+          <label className="field">
+            Contenu du fichier
+            <textarea id="export-contenu" ref={zone} readOnly value={apercu.contenu} rows={14} style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12.5, whiteSpace: 'pre' }} />
+          </label>
+        </Dialog>
+      ) : null}
     </div>
   );
 }

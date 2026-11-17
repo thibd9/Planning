@@ -39,6 +39,7 @@ import {
   weekday,
 } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
+import { HEBERGE } from '../../env';
 import { ABSENCE_LABEL, ACTIVITE_LABEL, GARDE_LABEL, MISSION_LABEL, QUALIFICATION_COURT, estPharmacien, nomComplet, nomCourt } from '../../domain/types';
 import {
   besoinsDe,
@@ -144,9 +145,11 @@ export function Construire(): JSX.Element {
           <button type="button" className="btn ghost icon" onClick={redo} disabled={!future.length} aria-label="Rétablir" title="Rétablir (Ctrl + Maj + Z)">
             <Redo2 size={17} />
           </button>
-          <button type="button" className="btn ghost icon" onClick={() => window.print()} aria-label="Imprimer le planning" title="Imprimer">
-            <Printer size={17} />
-          </button>
+          {!HEBERGE ? (
+            <button type="button" className="btn ghost icon" onClick={() => window.print()} aria-label="Imprimer le planning" title="Imprimer">
+              <Printer size={17} />
+            </button>
+          ) : null}
         </div>
       </div>
 

@@ -422,3 +422,8 @@ details.why[open] summary::before { content: '–'; }
 .panel .card-head h3 { flex: 1 0 auto; }
 .pg-sum { white-space: nowrap; overflow: hidden; }
 .pg-sum .pill { align-self: flex-start; }
+
+/* Marge latérale minimale sur téléphone, système de barres latérales compris. */
+@media (max-width: 860px) {
+  .content, .topbar, .side { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
