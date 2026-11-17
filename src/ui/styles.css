@@ -576,7 +576,14 @@ hr.sep { border: 0; border-top: 1px solid var(--line); margin: 0; width: 100%; }
 
 /* ---------------------------------------------------------------- Connexion */
 .connexion { min-height: 100%; display: grid; place-items: center; padding: 32px max(16px, env(safe-area-inset-right, 0px)) 32px max(16px, env(safe-area-inset-left, 0px)); background: radial-gradient(760px 380px at 20% -80px, var(--a-pastel), transparent 70%), radial-gradient(620px 340px at 90% 110%, var(--a-soft), transparent 70%), var(--bg); }
-.connexion-in { width: min(760px, 100%); display: flex; flex-direction: column; gap: 22px; }
+.connexion-in { width: min(900px, 100%); display: flex; flex-direction: column; gap: 22px; }
+.connexion-grille { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.connexion-grille + .tiny, .connexion-in > .tiny { max-width: 60ch; }
+.premiere { background: var(--a-tint); border-color: var(--a-pastel); }
+.atouts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--ink-2); }
+.atouts li { display: flex; gap: 10px; align-items: flex-start; }
+.atouts svg { color: var(--a-deep); flex: none; margin-top: 2px; }
+@media (max-width: 760px) { .connexion-grille { grid-template-columns: 1fr; } .connexion { place-items: start center; } }
 .profils { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; list-style: none; margin: 0; padding: 0; }
 .profil { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--ctl); border-radius: 18px; background: var(--surface); text-align: left; width: 100%; transition: transform 0.1s ease, border-color 0.15s ease; }
 .profil:hover { border-color: var(--a-deep); transform: translateY(-1px); }
@@ -660,3 +667,6 @@ button.kpi-card:hover { border-color: var(--a-deep); }
 .cap1::first-letter { text-transform: uppercase; }
 div.cap1 { display: block; }
 .menu .titre-menu { padding: 8px 14px 2px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+
+/* Sur la page de connexion, le nom de l'application reste affiché, même sur téléphone. */
+.connexion .brand-name, .connexion .brand-sub { display: block; }

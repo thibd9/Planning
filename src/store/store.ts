@@ -103,7 +103,10 @@ export interface Store {
   /** Remplace les données par l'équipe d'exemple (annulable). */
   chargerExemple: () => void;
   /** Crée l'officine depuis l'écran d'accueil : nom, horaires et première équipe. */
-  creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[], ajout?: boolean) => void;
+  /** `ajout` garde les pharmacies existantes ; `nouvelleCle` vaut pour un autre titulaire, qui reçoit sa propre clé de secours. */
+  creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[], ajout?: boolean, nouvelleCle?: boolean) => void;
+  /** Un même identifiant peut avoir un compte dans plusieurs pharmacies : le mot de passe change partout. */
+  definirMotDePasse: (identifiant: string, code: string) => void;
   changerOfficine: (id: string) => void;
   envoyerMessage: (de: string, a: string, texte: string) => void;
   lireFil: (moi: string, fil: string) => void;
@@ -172,7 +175,7 @@ export const useStore = create<Store>((set, get) => {
       set((s) => (s.past.length ? { data: s.past[s.past.length - 1], past: s.past.slice(0, -1), future: [s.data, ...s.future] } : s)),
     redo: () => set((s) => (s.future.length ? { data: s.future[0], future: s.future.slice(1), past: [...s.past, s.data] } : s)),
     reinitialiser: () => set({ officineId: uid('off'), data: vierge(), autres: {}, past: [], future: [] }),
-    creerOfficine: (nom, horaires, personnes, ajout) =>
+    creerOfficine: (nom, horaires, personnes, ajout, nouvelleCle) =>
       set((etat) => {
         const base = vierge();
         const postes = base.officine.postes
@@ -184,7 +187,7 @@ export const useStore = create<Store>((set, get) => {
             ...base.officine,
             nom,
             responsableId: personnes.find((x) => x.qualification === 'titulaire')?.id,
-            secours: etat.data.officine.secours ?? `${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 6)}`.toUpperCase(),
+            secours: (!nouvelleCle && etat.data.officine.secours) || `${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 6)}`.toUpperCase(),
             horaires,
             postes,
             effectifs: base.officine.effectifs.filter((e) => e.jours.some((j) => horaires[j].length > 0)),
@@ -202,6 +205,15 @@ export const useStore = create<Store>((set, get) => {
           past: [],
           future: [],
         };
+      }),
+    definirMotDePasse: (identifiant, code) =>
+      set((s) => {
+        const cible = identifiant.trim().toLowerCase();
+        const maj = (d: AppData): AppData =>
+          d.personnes.some((x) => x.identifiant?.trim().toLowerCase() === cible)
+            ? { ...d, personnes: d.personnes.map((x) => (x.identifiant?.trim().toLowerCase() === cible ? { ...x, code, provisoire: undefined } : x)) }
+            : d;
+        return { data: maj(s.data), autres: Object.fromEntries(Object.entries(s.autres).map(([id, d]) => [id, maj(d)])) };
       }),
     changerOfficine: (id) =>
       set((s) => {

@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, CircleAlert, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Store, Trash2, UserRound, Users } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, CircleAlert, LogIn, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Store, Trash2, UserRound, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { empreinte, identifiantPropose } from '../../domain/acces';
 import { fmtHHMM, fmtHeure, parseHHMM, uid } from '../../domain/time';
@@ -165,8 +165,13 @@ function Groupe({
  * Premier écran : créer l'officine en trois étapes (pharmacie, équipe, vérification).
  * Chaque étape se valide seule ; les erreurs sont listées en tête, reliées à leur champ, et reçoivent le focus.
  */
-export function Accueil({ ajout, onAnnuler }: { ajout?: Person; onAnnuler?: () => void } = {}): JSX.Element {
-  const { creerOfficine, chargerExemple } = useStore();
+/**
+ * Création d'une pharmacie. `ajout` : le titulaire connecté en ajoute une ;
+ * `garder` : un nouveau compte se crée sur un appareil qui a déjà des pharmacies.
+ */
+export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnuler?: () => void; garder?: boolean } = {}): JSX.Element {
+  const { creerOfficine, data, autres: autresPharmacies } = useStore();
+  const dejaPris = [data, ...Object.values(autresPharmacies)].flatMap((d) => d.personnes.map((p) => (p.identifiant ?? '').trim().toLowerCase())).filter(Boolean);
   const { setTour, connecter } = useUi();
   const [etape, setEtape] = useState(0);
   const [nom, setNom] = useState('');
@@ -220,6 +225,7 @@ export function Accueil({ ajout, onAnnuler }: { ajout?: Person; onAnnuler?: () =
       if (!titulaire.nom.trim()) out.push({ champ: 'tit-nom', message: 'Indiquez le nom du titulaire.' });
       if (!ajout) {
         if (identifiant.trim().length < 3) out.push({ champ: 'tit-identifiant', message: 'Choisissez un identifiant de connexion d’au moins 3 caractères.' });
+        else if (dejaPris.includes(identifiant.trim().toLowerCase())) out.push({ champ: 'tit-identifiant', message: 'Cet identifiant a déjà un compte sur cet appareil. Connectez-vous, ou choisissez-en un autre.' });
         if (motDePasse.length < 6) out.push({ champ: 'tit-mdp', message: 'Choisissez un mot de passe d’au moins 6 caractères.' });
       }
       for (const g of groupes) {
@@ -258,7 +264,7 @@ export function Accueil({ ajout, onAnnuler }: { ajout?: Person; onAnnuler?: () =
       return;
     }
     // Chaque membre reçoit un identifiant et un mot de passe provisoire, à lui transmettre.
-    const pris: string[] = [identifiant.trim().toLowerCase()];
+    const pris: string[] = [...dejaPris, identifiant.trim().toLowerCase()];
     const personnes: Person[] = equipe.map((l, i) => {
       const principal = i === 0;
       const id = principal ? identifiant.trim() : identifiantPropose(l.prenom, l.nom, pris);
@@ -281,7 +287,7 @@ export function Accueil({ ajout, onAnnuler }: { ajout?: Person; onAnnuler?: () =
       };
     });
     const horaires = [0, 1, 2, 3, 4].map(() => horaireSemaine.map((i) => ({ ...i }))).concat([samediOuvert ? [{ ...samedi }] : []], [[]]);
-    creerOfficine(nom.trim(), horaires, personnes, !!ajout);
+    creerOfficine(nom.trim(), horaires, personnes, !!ajout || !!garder, !ajout);
     // Celui qui crée la pharmacie en est le titulaire principal : il est connecté d'emblée à son espace.
     connecter(personnes[0].identifiant as string, 'tableau');
     if (!ajout) setTour(0);
@@ -627,26 +633,18 @@ export function Accueil({ ajout, onAnnuler }: { ajout?: Person; onAnnuler?: () =
 
           <div className="row wrap accueil-actions">
             <span className="grow small soft" aria-live="polite">
-              {etape === 1 ? `${equipe.length} personne${equipe.length > 1 ? 's' : ''} saisie${equipe.length > 1 ? 's' : ''}.` : etape === 0 ? (ajout ? 'Une pharmacie de plus, avec sa propre équipe et ses plannings.' : 'Vous préférez explorer d’abord ?') : 'Un tutoriel d’une minute suit la création.'}
+              {etape === 1 ? `${equipe.length} personne${equipe.length > 1 ? 's' : ''} saisie${equipe.length > 1 ? 's' : ''}.` : etape === 0 ? (ajout ? 'Une pharmacie de plus, avec sa propre équipe et ses plannings.' : 'Vous créez ici votre compte de titulaire principal.') : 'Un tutoriel d’une minute suit la création.'}
             </span>
             {etape === 0 ? (
-              ajout ? (
+              onAnnuler ? (
                 <button type="button" className="btn" onClick={onAnnuler}>
-                  Annuler
+                  {ajout ? 'Annuler' : (
+                    <>
+                      <LogIn size={16} aria-hidden="true" /> J’ai déjà un compte
+                    </>
+                  )}
                 </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => {
-                    chargerExemple();
-                    connecter('helene.marchetti', 'tableau');
-                    setTour(0);
-                  }}
-                >
-                  Découvrir avec une équipe d’exemple
-                </button>
-              )
+              ) : null
             ) : (
               <button type="button" className="btn" onClick={() => versEtape(etape - 1)}>
                 <ArrowLeft size={16} aria-hidden="true" /> Retour

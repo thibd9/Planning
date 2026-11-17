@@ -69,6 +69,8 @@ export function App(): JSX.Element {
   const undo = useStore((s) => s.undo);
   const { vue, aller, session, deconnecter, preferences, toast, taire, setTour } = useUi();
   const [menu, setMenu] = useState(false);
+  // Sans session, l'application s'ouvre sur la connexion ; la création d'une pharmacie se lance depuis là.
+  const [creation, setCreation] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const moi = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''));
   const espace = espaceDe(data, moi);
@@ -95,10 +97,15 @@ export function App(): JSX.Element {
   }, [prefs.theme, prefs.texte]);
 
   // Le titre de la page suit l'écran affiché : il est annoncé à chaque changement de vue.
-  const titrePage = aCreer ? 'Créer mon officine' : !moi ? 'Connexion' : vueActive === 'compte' ? 'Mon compte' : vueActive === 'nouvelle' ? 'Ajouter une pharmacie' : (liens.find((l) => l.vue === vueActive)?.label ?? 'Relève');
+  const titrePage = !moi ? (creation ? 'Créer mon officine' : 'Connexion') : vueActive === 'compte' ? 'Mon compte' : vueActive === 'nouvelle' ? 'Ajouter une pharmacie' : (liens.find((l) => l.vue === vueActive)?.label ?? 'Relève');
   useEffect(() => {
     document.title = `${titrePage} · Relève`;
   }, [titrePage]);
+
+  // Une fois connecté, l'écran de création est refermé : la déconnexion ramène à la connexion.
+  useEffect(() => {
+    if (moi) setCreation(false);
+  }, [moi]);
 
   useEffect(() => {
     if (!menu) return;
@@ -113,8 +120,7 @@ export function App(): JSX.Element {
     };
   }, [menu]);
 
-  if (aCreer) return <Accueil />;
-  if (!moi) return <Connexion />;
+  if (!moi) return creation ? <Accueil garder={!aCreer} onAnnuler={() => setCreation(false)} /> : <Connexion onCreer={() => setCreation(true)} />;
   if (vueActive === 'nouvelle' && estResponsable(data, moi)) return <Accueil ajout={moi} onAnnuler={() => aller('tableau')} />;
 
   const heure = new Date(sauvegarde);

@@ -18,7 +18,7 @@ const THEMES: { cle: Theme; nom: string; couleur: string }[] = [
 /** Mon compte : profil, apparence, code d'accès, déconnexion. Accessible à tous les rôles. */
 export function Compte({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
-  const majPersonne = useStore((s) => s.majPersonne);
+  const definirMotDePasse = useStore((s) => s.definirMotDePasse);
   const { preferences, setPreferences, deconnecter, dire, setTour, aller } = useUi();
   const person = data.personnes.find((p) => p.id === personId);
   const cle = person?.identifiant ?? personId;
@@ -33,7 +33,7 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
   const enregistrerCode = (): void => {
     if (person.code && empreinte(actuel) !== person.code) return setErreurCode('Le mot de passe actuel ne correspond pas.');
     if (nouveau.length < 6) return setErreurCode('Le nouveau mot de passe doit compter au moins 6 caractères.');
-    majPersonne({ ...person, code: empreinte(nouveau), provisoire: undefined });
+    definirMotDePasse(person.identifiant ?? '', empreinte(nouveau));
     setActuel('');
     setNouveau('');
     setErreurCode('');

@@ -64,6 +64,8 @@ interface Ui {
   setSemaine: (s: ISODate) => void;
   connecter: (personId: string, vue: Vue) => void;
   deconnecter: () => void;
+  /** Remise à zéro : rien ne doit rester sur l'appareil, pas même un identifiant dans les préférences. */
+  toutOublier: () => void;
   setPreferences: (personId: string, p: Partial<Preferences>) => void;
   dire: (message: string, annulable?: boolean) => void;
   taire: () => void;
@@ -94,6 +96,11 @@ export const useUi = create<Ui>((set) => ({
   deconnecter: () => {
     ecrire(CLE_SESSION, null);
     set({ session: null, tour: null, toast: null });
+  },
+  toutOublier: () => {
+    ecrire(CLE_SESSION, null);
+    ecrire(CLE_PREFS, {});
+    set({ session: null, preferences: {}, tour: null, toast: null });
   },
   setPreferences: (personId, p) =>
     set((s) => {

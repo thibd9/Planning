@@ -24,12 +24,14 @@ npm test
 npm run build
 ```
 
-Node 20 ou plus récent. L'application démarre **vierge**, sur l'écran « Créer mon officine », en trois
-étapes : la pharmacie (nom, horaires, fermeture le midi éventuelle), l'équipe (titulaire principal avec
-son identifiant et son mot de passe, pharmaciens adjoints, préparateurs, autres postes), puis une
-vérification avant de créer. Un tutoriel guidé présente ensuite chaque espace ; il se relance depuis le
-bouton « Tutoriel ». Une équipe d'exemple (« Pharmacie des Tilleuls », fictive) peut être chargée depuis
-l'accueil : identifiants `helene.marchetti`, `karim.benali` ou `camille.roussel`, mot de passe `demo`.
+Node 20 ou plus récent. L'application s'ouvre sur la **page de connexion** : identifiant et mot de passe
+à gauche, « Première visite ? » à droite. « Créer ma pharmacie » lance trois étapes : la pharmacie (nom,
+horaires, fermeture le midi éventuelle), l'équipe (titulaire principal avec son identifiant et son mot de
+passe, pharmaciens adjoints, préparateurs, autres postes), puis une vérification avant de créer. Un
+tutoriel guidé présente ensuite chaque espace ; il se relance depuis le bouton « Tutoriel ». Sur un
+appareil vierge, « Découvrir avec une équipe d'exemple » charge la « Pharmacie des Tilleuls » (fictive) et
+préremplit la connexion : identifiants `helene.marchetti`, `karim.benali` ou `camille.roussel`, mot de
+passe `demo`.
 
 ## Connexion, rôles et pharmacies
 
@@ -46,9 +48,13 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
   dans la fiche de la personne (« Droits d'accès »).
 - **Comptes de l'équipe.** Chaque fiche donne l'identifiant de la personne et un mot de passe provisoire à
   lui transmettre ; elle le remplace dans « Mon compte ». Le titulaire principal peut en régénérer un.
+- **Plusieurs titulaires sur un même appareil.** Depuis la page de connexion, un autre titulaire crée sa
+  propre pharmacie sans voir celles des autres ; chacun a sa clé de secours. Un identifiant ne sert qu'à
+  une personne, et un changement de mot de passe vaut pour toutes ses pharmacies.
 - **Mot de passe oublié.** Un membre demande un nouveau mot de passe provisoire au titulaire principal ;
   le titulaire principal redéfinit le sien avec la clé de secours affichée dans « Mon compte ». Une remise
-  à zéro complète de l'appareil est possible depuis le même écran (saisir EFFACER).
+  à zéro complète de l'appareil est possible depuis le même écran (saisir EFFACER) : pharmacies, comptes,
+  préférences et session sont effacés.
 - **Plusieurs pharmacies.** Le titulaire principal ajoute autant de pharmacies qu'il veut, chacune avec son
   équipe, ses plannings et ses règles, et passe de l'une à l'autre depuis le menu latéral ou le menu du compte.
 - **En haut à droite** : Mon compte, Paramètres (couleur du thème, taille du texte), ajout d'une pharmacie
@@ -130,7 +136,7 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 31 écrans,
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 33 écrans,
 fenêtres et thèmes vérifiés, ordinateur et téléphone. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 
