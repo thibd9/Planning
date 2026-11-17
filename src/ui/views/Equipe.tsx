@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarOff, CircleCheck, Crown, HeartHandshake, KeyRound, Lock, Plus, RefreshCw, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, CalendarOff, CircleCheck, Crown, Medal, HeartHandshake, KeyRound, Lock, Plus, RefreshCw, Trash2, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
@@ -221,7 +221,14 @@ function Fiche({ person }: { person: Person }): JSX.Element {
               <div className="notice ok">
                 <Crown size={17} aria-hidden="true" />
                 <span>
-                  <b>Titulaire principal.</b> A créé la pharmacie et détient tous les droits : plannings, équipe, gardes, règles et réglages. Lui seul peut donner l’accès à la gestion, à un titulaire secondaire comme à un adjoint.
+                  <b>Titulaire principal.</b> A créé la pharmacie et décide en dernier ressort : il donne son accord aux décisions des autres titulaires, et lui seul ouvre la gestion à un adjoint.
+                </span>
+              </div>
+            ) : person.qualification === 'titulaire' ? (
+              <div className="notice info">
+                <Medal size={17} aria-hidden="true" />
+                <span>
+                  <b>Titulaire secondaire.</b> Mêmes écrans que le titulaire principal. Chacune de ses décisions (publier, régler une absence, valider un remplacement, confier une garde…) attend l’accord de {chef ? chef.prenom : 'la titulaire principale'} avant d’être appliquée.
                 </span>
               </div>
             ) : (

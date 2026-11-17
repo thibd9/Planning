@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, CircleCheck, Clock3, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
+import { ArrowLeftRight, Ban, BellRing, CalendarClock, Check, ChevronDown, CircleCheck, Clock3, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
@@ -19,7 +19,7 @@ import {
 } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
 import { GARDE_LABEL, MISSION_LABEL, classeAbsence, estPharmacien, libelleAbsence, nomCourt } from '../../domain/types';
-import { decrireBesoin, decrireShift, minutesTravail } from '../../engine/core';
+import { decrireBesoin, minutesTravail } from '../../engine/core';
 import type { CompteurCle } from '../../engine/equity';
 import { delaiRemplacement, peutDemanderRemplacement, peutRemplacer } from '../../engine/remplacement';
 import { suiviDe } from '../../engine/suivi';
@@ -28,10 +28,10 @@ import { HEBERGE } from '../../env';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
-import { AvantApres, Frise, Graduations, Pill, Seg, momentDe } from '../kit';
+import { AvantApres, Pill, Seg, momentDe } from '../kit';
 import { Calendrier } from '../components/Calendrier';
 import { Compteurs } from '../components/Compteurs';
-import { echelleOfficine } from './Construire';
+import { ProchainPoste } from '../components/ProchainPoste';
 import { STATUT_BESOIN } from './Equipe';
 import { Ecart } from './Equite';
 import { usagePlafond } from './Resoudre';
@@ -51,12 +51,15 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
       setDemande(true);
       setIntention(null);
     }
+    if (intention === 'calendrier') {
+      setAffichage('calendrier');
+      setIntention(null);
+    }
   }, [intention, setIntention]);
   const [affichage, setAffichage] = useState<'semaine' | 'calendrier'>('semaine');
   const [mois, setMois] = useState(today.slice(0, 7));
   const person = data.personnes.find((p) => p.id === personId);
   const lundi = mondayOf(today);
-  const echelle = echelleOfficine(data);
 
   // L'espace salarié ne montre que la version publiée : jamais un brouillon.
   const publies = (monday: ISODate): Shift[] | null => {
@@ -68,7 +71,6 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
     .flatMap((m) => publies(m) ?? [])
     .filter((s) => s.date >= today)
     .sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start);
-  const prochain = aVenir[0];
   const changements = data.notifications.filter((n) => n.personId === personId && dayIndex(n.date) >= dayIndex(today) - 7);
   const nonLus = changements.filter((n) => !n.luLe);
   const besoins = data.besoins.filter((b) => b.personId === personId && (!b.to || b.to >= today));
@@ -77,82 +79,37 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
   const ligne = useMemo(() => equite(data, addDays(lundi, -56), addDays(lundi, 6)).find((l) => l.personId === personId), [data, lundi, personId]);
   const compteurs: CompteurCle[] = person && estPharmacien(person) ? ['samedis', 'fermetures', 'gardes', 'changementsTardifs'] : ['samedis', 'fermetures', 'changementsTardifs'];
 
-  // Lecture rapide : aujourd'hui, demain, puis le prochain jour travaillé.
-  const jourDe = (date: ISODate): Shift[] => aVenir.filter((s) => s.date === date);
-  const demain = addDays(today, 1);
-  const ensuite = aVenir.find((s) => s.date > demain)?.date;
-  const rapides: { titre: string; date: ISODate }[] = [
-    { titre: 'Aujourd’hui', date: today },
-    { titre: 'Demain', date: demain },
-    ...(ensuite ? [{ titre: 'Ensuite', date: ensuite }] : []),
-  ];
   const ouvertes = data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= today);
   const mesRemplacements = ouvertes.filter((r) => r.demandeur === personId);
   const aAider = person ? ouvertes.filter((r) => peutRemplacer(data, r, person)) : [];
   const enCours = (shiftId: string): boolean => mesRemplacements.some((r) => r.shiftId === shiftId);
 
   if (!person) return <div className="empty">Personne introuvable.</div>;
-  const quand = (date: ISODate): string => (date === today ? 'Aujourd’hui' : date === addDays(today, 1) ? 'Demain' : fmtDateLong(date).replace(/ \d{4}$/, ''));
 
   return (
     <div className="me">
-      <div className="hero">
-        <div className="eyebrow">Mon planning · {fmtDateLong(today)}</div>
-        <h1>Bonjour {person.prenom}</h1>
-        {prochain ? (
-          <p style={{ fontSize: 17 }}>
-            Prochain poste : <b>{quand(prochain.date).toLowerCase()}</b>, {decrireShift(prochain)}.
-          </p>
-        ) : (
-          <p style={{ fontSize: 17 }}>Aucun poste publié à venir pour l'instant.</p>
-        )}
-        <div className="row wrap" style={{ marginTop: 14, position: 'relative', zIndex: 1 }}>
-          {!HEBERGE ? (
-            <button type="button" className="btn no-print" onClick={() => window.print()}>
-              <Printer size={15} aria-hidden="true" /> Imprimer
+      <div className="hero tb-hero">
+        <div className="tbh-texte">
+          <div className="eyebrow">{fmtDateLong(today)}</div>
+          <h1>Bonjour {person.prenom}</h1>
+          <div className="row wrap" style={{ marginTop: 14 }}>
+            <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
+              <Plus size={16} aria-hidden="true" /> Faire une demande
             </button>
-          ) : null}
-          <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
-            <Plus size={15} /> Faire une demande
-          </button>
-          {nonLus.length ? (
-            <Pill tone="miel">
-              <BellRing size={13} /> {nonLus.length} changement{nonLus.length > 1 ? 's' : ''} à lire
-            </Pill>
-          ) : (
-            <span className="small soft">Aucun changement en attente de lecture.</span>
-          )}
+            {!HEBERGE ? (
+              <button type="button" className="btn no-print" onClick={() => window.print()}>
+                <Printer size={15} aria-hidden="true" /> Imprimer
+              </button>
+            ) : null}
+            {nonLus.length ? (
+              <Pill tone="miel">
+                <BellRing size={13} aria-hidden="true" /> {nonLus.length} changement{nonLus.length > 1 ? 's' : ''} à lire
+              </Pill>
+            ) : null}
+          </div>
         </div>
+        <ProchainPoste postes={aVenir.filter((x) => !absences.some((a) => a.statut === 'approuvee' && a.from <= x.date && x.date <= a.to))} today={today} />
       </div>
-
-      <section aria-label="Mes horaires en un coup d’œil" className="bientot" style={{ marginTop: 18 }}>
-        {rapides.map(({ titre, date }) => {
-          const postes = jourDe(date);
-          const absence = absences.find((a) => a.statut === 'approuvee' && a.from <= date && date <= a.to);
-          const garde = data.gardes.find((g) => g.personId === personId && g.date === date);
-          return (
-            <div key={titre} className={`jour${date === today ? ' auj' : ''}`}>
-              <span className={`moment ${absence ? classeAbsence(absence.type) : postes.length ? momentDe({ start: postes[0].start, end: postes[postes.length - 1].end }) : 'repos'}`} aria-hidden="true" style={{ float: 'right' }}>
-                {absence ? <Ban size={17} /> : !postes.length ? <Coffee size={17} /> : momentDe({ start: postes[0].start, end: postes[postes.length - 1].end }) === 'soir' ? <Sunset size={17} /> : <Sun size={17} />}
-              </span>
-              <div className="eyebrow">{titre}</div>
-              <div className="small soft cap1">{fmtDateCourt(date)}</div>
-              <div className="h num">{absence ? libelleAbsence(absence) : postes.length ? postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(' · ') : 'Repos'}</div>
-              <div className="small soft">
-                {postes.length ? `${fmtDuree(postes.reduce((t, s) => t + minutesTravail(s), 0))} de travail` : absence ? 'Absence approuvée' : 'Aucun poste publié'}
-                {postes[0]?.pauseStart != null && postes[0]?.pauseEnd != null ? ` · pause ${fmtHeure(postes[0].pauseStart)} – ${fmtHeure(postes[0].pauseEnd)}` : ''}
-              </div>
-              {garde ? (
-                <div style={{ marginTop: 8 }}>
-                  <Pill tone="nuit">
-                    <Moon size={12} aria-hidden="true" /> {GARDE_LABEL[garde.type]} · {fmtHHMM(garde.start)} → {fmtHHMM(garde.end)}
-                  </Pill>
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </section>
 
       {aAider.length ? (
         <div className="card" style={{ marginTop: 18 }}>
@@ -276,10 +233,6 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                   </div>
                   {postes ? (
                     <div className="jours-h">
-                      <div className="jour-h regle" aria-hidden="true">
-                        <span />
-                        <Graduations echelle={echelle} />
-                      </div>
                       {weekDates(monday).map((date) => {
                         const absence = absences.find((x) => x.statut === 'approuvee' && x.from <= date && date <= x.to);
                         // Un jour d'absence approuvée ne montre plus le poste prévu : il a été retiré.
@@ -322,7 +275,6 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                       ))}
                                     </div>
                                   </div>
-                                  <Frise shifts={duJour} echelle={echelle} missions={missions} />
                                 </>
                               ) : (
                                 <div className="jh-titre">
@@ -476,23 +428,25 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
             </div>
           </div>
 
-          <div className="card">
-            <div className="card-head">
+          <details className="card repli">
+            <summary className="card-head">
               <h2 className="h3 grow">Mon suivi</h2>
-              <span className="small soft">12 derniers mois</span>
-            </div>
+              <span className="small soft">12 mois</span>
+              <ChevronDown size={18} className="chev" aria-hidden="true" />
+            </summary>
             <div className="card-body">
               <Compteurs suivi={suivi} />
               <p className="tiny muted" style={{ marginTop: 12 }}>Ce que votre responsable a noté, et rien d’autre : des dates et des durées, jamais une raison.</p>
             </div>
-          </div>
+          </details>
 
           {ligne ? (
-            <div className="card">
-              <div className="card-head">
+            <details className="card repli">
+              <summary className="card-head">
                 <h2 className="h3 grow">Ma part des contraintes</h2>
-                <span className="small soft">8 dernières semaines</span>
-              </div>
+                <span className="small soft">8 semaines</span>
+                <ChevronDown size={18} className="chev" aria-hidden="true" />
+              </summary>
               <div className="card-body col" style={{ gap: 12 }}>
                 {compteurs.map((c) => (
                   <div key={c}>
@@ -504,7 +458,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                   Comparé à votre part attendue, au prorata de votre temps de travail. Vous ne voyez que votre position : il n'existe aucun classement de l'équipe.
                 </p>
               </div>
-            </div>
+            </details>
           ) : null}
         </div>
       </div>

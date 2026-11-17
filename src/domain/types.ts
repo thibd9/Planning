@@ -314,6 +314,19 @@ export interface Ecart {
 }
 export const ECART_LABEL: Record<EcartType, string> = { retard: 'Retard', depart: 'Départ anticipé', absence: 'Absence non prévue' };
 
+/**
+ * Décision proposée par un titulaire secondaire. Elle n'est appliquée que lorsque le titulaire
+ * principal donne son accord : l'action et ses paramètres sont rejoués à ce moment-là.
+ */
+export interface Accord {
+  id: string;
+  auteur: string;
+  at: string;
+  action: string;
+  args: unknown[];
+  titre: string;
+}
+
 /** Demande de remplacement sur un poste publié : un collègue se propose, le responsable valide. */
 export interface Remplacement {
   id: string;
@@ -333,6 +346,8 @@ export interface AppData {
   messages: Message[];
   remplacements: Remplacement[];
   ecarts: Ecart[];
+  /** Décisions d'un titulaire secondaire en attente de l'accord du titulaire principal. */
+  accords: Accord[];
   /** Jeu d'exemple : les identifiants de démonstration sont affichés à la connexion. */
   demo?: boolean;
   personnes: Person[];

@@ -7,18 +7,15 @@ import { ACTIVITE_COURT, ACTIVITE_ICONE } from '../icons';
 import type { Echelle } from '../kit';
 import { momentDe } from '../kit';
 
-const pct = (e: Echelle, m: number): number => Math.max(0, Math.min(100, ((m - e.start) / (e.end - e.start)) * 100));
 
 /**
  * Tuile d'un poste. L'icône dit la tâche (comptoir, réception, administratif, formation) ;
- * la couleur dit le moment de la journée ; la barre du bas situe le poste dans la journée.
+ * la couleur dit le moment de la journée ; l'horaire est écrit en clair.
  * Avec `onClick`, la tuile est un bouton modifiable ; sans, elle est en lecture seule.
  */
 export function Tuile({
   s,
   person,
-  echelle,
-  missions = [],
   glissable,
   onClick,
 }: {
@@ -26,7 +23,8 @@ export function Tuile({
   data?: AppData;
   s: Shift;
   person: Person;
-  echelle: Echelle;
+  /** Conservés pour les appelants ; la tuile n'affiche plus de barre de temps. */
+  echelle?: Echelle;
   missions?: { start: number; end: number }[];
   glissable?: boolean;
   onClick?: () => void;
@@ -49,13 +47,6 @@ export function Tuile({
           {s.pauseStart !== undefined && s.pauseEnd !== undefined ? `, pause de ${fmtHeure(s.pauseStart)} à ${fmtHeure(s.pauseEnd)}` : ''}
           {onClick ? '. Modifier le poste.' : '.'}
         </span>
-      </span>
-      <span className="tline" aria-hidden="true">
-        <i style={{ left: `${pct(echelle, s.start)}%`, width: `${pct(echelle, s.end) - pct(echelle, s.start)}%` }} />
-        {s.pauseStart !== undefined && s.pauseEnd !== undefined ? <i className="p" style={{ left: `${pct(echelle, s.pauseStart)}%`, width: `${pct(echelle, s.pauseEnd) - pct(echelle, s.pauseStart)}%` }} /> : null}
-        {missions.map((m, i) => (
-          <i key={i} className="m" style={{ left: `${pct(echelle, m.start)}%`, width: `${pct(echelle, m.end) - pct(echelle, m.start)}%` }} />
-        ))}
       </span>
       {s.explication && onClick ? (
         <span className="why" aria-hidden="true">

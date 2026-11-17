@@ -1,7 +1,7 @@
 import { Bell, BookOpenCheck, Building2, CalendarDays, GraduationCap, CalendarRange, ChevronDown, CircleHelp, LayoutDashboard, ListChecks, LogOut, MessageSquare, MoonStar, Scale, Plus, ScrollText, Settings, Settings2, Store, UserRound, Users } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
-import { ESPACE_LABEL, espaceDe, estResponsable, memeIdentifiant } from './domain/acces';
+import { ESPACE_LABEL, espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
 import { fmtDateCourt, fmtHeure } from './domain/time';
 import { nomComplet, nomCourt } from './domain/types';
 import { decisions } from './engine/decisions';
@@ -11,7 +11,7 @@ import { prefsDe, useUi } from './store/ui';
 import { EtiquetteRole } from './ui/icons';
 import { Avatar, Logo, LogoNom } from './ui/kit';
 import { DialogueJour } from './ui/components/Jour';
-import { BandeauTest, Parcours } from './ui/Parcours';
+import { BandeauTest, ChoixParcours, Parcours } from './ui/Parcours';
 import { Tour } from './ui/Tour';
 import { Accueil } from './ui/views/Accueil';
 import { Compte } from './ui/views/Compte';
@@ -70,7 +70,7 @@ export function App(): JSX.Element {
   const today = useStore((s) => s.today);
   const sauvegarde = useStore((s) => s.derniereSauvegarde);
   const undo = useStore((s) => s.undo);
-  const { vue, aller, agir, session, deconnecter, preferences, toast, taire, setTour, parcours, jour, voirJour } = useUi();
+  const { vue, aller, agir, session, deconnecter, preferences, toast, taire, setTour, parcours, jour, voirJour, dire } = useUi();
   const [menu, setMenu] = useState(false);
   // Sans session, l'application s'ouvre sur la connexion ; la création d'une pharmacie se lance depuis là.
   const [creation, setCreation] = useState(false);
@@ -85,7 +85,26 @@ export function App(): JSX.Element {
   const nonLus = moi ? data.messages.filter((m) => !m.luPar.includes(moi.id) && (m.a === 'equipe' || m.a === moi.id)).length : 0;
   // Les pharmacies de l'appareil où la personne connectée a un compte.
   const mesPharmacies = [{ id: officineId, nom: data.officine.nom }, ...Object.entries(autres).filter(([, d]) => d.personnes.some((p) => memeIdentifiant(p.identifiant, session ?? ''))).map(([id, d]) => ({ id, nom: d.officine.nom }))];
-  const aDecider = useMemo(() => (espace === 'responsable' ? decisions(data, today).total : 0), [data, today, espace]);
+  const secondaire = estSecondaire(data, moi);
+  const chef = responsable(data);
+  // Un titulaire secondaire ne compte pas ses propres propositions parmi ce qu'il doit décider.
+  const aDecider = useMemo(() => (espace === 'responsable' ? decisions(data, today).total - (secondaire ? (data.accords ?? []).length : 0) : 0), [data, today, espace, secondaire]);
+  const setActeur = useStore((s) => s.setActeur);
+  useEffect(() => {
+    setActeur(moi?.id ?? null);
+  }, [moi?.id, setActeur]);
+  // Une décision d'un titulaire secondaire part en attente : on le lui dit, à la place du message habituel.
+  const nbAccords = (data.accords ?? []).filter((a) => a.auteur === moi?.id).length;
+  const avantAccords = useRef(nbAccords);
+  useEffect(() => {
+    if (secondaire && nbAccords > avantAccords.current) {
+      const t = window.setTimeout(() => dire(`Envoyé à ${chef?.prenom ?? 'la titulaire principale'} pour accord. Rien n’est appliqué avant.`), 40);
+      avantAccords.current = nbAccords;
+      return () => window.clearTimeout(t);
+    }
+    avantAccords.current = nbAccords;
+    return undefined;
+  }, [nbAccords, secondaire, chef?.prenom, dire]);
   // Ce qui attend la personne connectée, rassemblé sous la cloche de la barre du haut.
   const aAider = moi ? data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= today && r.demandeur !== moi.id && !r.volontaires.includes(moi.id)).length : 0;
   const alertes: { vue: Vue; texte: string; nombre: number; icone: JSX.Element }[] = [
@@ -217,7 +236,7 @@ export function App(): JSX.Element {
         <header className="topbar no-print" aria-label="Barre d’outils">
           <div className="topbar-in">
             <span className="small soft grow">
-              <span className="esp">{ESPACE_LABEL[espace]} · </span>
+              <span className="esp">{secondaire ? `Titulaire secondaire · décisions soumises à l’accord de ${chef?.prenom ?? 'la titulaire principale'}` : ESPACE_LABEL[espace]} · </span>
               {data.officine.nom || 'Mon officine'}
             </span>
             <span className="top-date cap1" aria-hidden="true">
@@ -382,6 +401,7 @@ export function App(): JSX.Element {
 
       <Tour />
       <Parcours />
+      <ChoixParcours />
       {jour ? <DialogueJour date={jour} moi={moi.id} onClose={() => voirJour(null)} /> : null}
       {toast ? (
         <div className="toast" role="status">

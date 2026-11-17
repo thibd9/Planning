@@ -3,8 +3,8 @@ import { estPharmacien } from './types';
 
 /**
  * Trois espaces selon le rôle :
- *  - responsable : le titulaire qui a créé l'officine, et les personnes à qui il a donné l'accès ;
- *  - pharmacien  : un pharmacien (cotitulaire ou adjoint) sans droit de gestion ;
+ *  - responsable : les titulaires, et les personnes à qui le titulaire principal a donné l'accès ;
+ *  - pharmacien  : un pharmacien adjoint sans droit de gestion ;
  *  - equipe      : préparateurs, apprentis, étudiants, rayonnistes.
  */
 export type Espace = 'responsable' | 'pharmacien' | 'equipe';
@@ -18,10 +18,18 @@ export function estResponsable(data: Pick<AppData, 'officine' | 'personnes'>, p:
   return !!p && responsable(data)?.id === p.id;
 }
 
-/** Peut modifier plannings, équipe, gardes et réglages : le responsable, ou une personne à qui il a donné l'accès. */
+/**
+ * Titulaire secondaire : mêmes écrans que le titulaire principal, mais chacune de ses décisions
+ * (publication, absences, remplacements, gardes…) attend l'accord du titulaire principal.
+ */
+export function estSecondaire(data: Pick<AppData, 'officine' | 'personnes'>, p: Person | undefined): boolean {
+  return !!p && !p.externe && p.qualification === 'titulaire' && !estResponsable(data, p);
+}
+
+/** Peut gérer plannings, équipe, gardes et réglages : les titulaires, ou une personne à qui le principal a donné l'accès. */
 export function peutGerer(data: Pick<AppData, 'officine' | 'personnes'>, p: Person | undefined): boolean {
   if (!p || p.externe) return false;
-  return estResponsable(data, p) || !!p.gestion;
+  return estResponsable(data, p) || p.qualification === 'titulaire' || !!p.gestion;
 }
 
 export function espaceDe(data: Pick<AppData, 'officine' | 'personnes'>, p: Person | undefined): Espace {

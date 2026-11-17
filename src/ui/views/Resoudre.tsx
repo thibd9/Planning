@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Sparkles, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Handshake, Sparkles, CircleHelp, Clock3, ListChecks, MoonStar, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
   JOURS,
@@ -23,6 +23,7 @@ import type { RepairOption } from '../../engine/repair';
 import { optionsReparation } from '../../engine/repair';
 import { evaluerRemplacement } from '../../engine/remplacement';
 import { validateWeek } from '../../engine/validate';
+import { estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { AvantApres, Avatar, Empty, Pill } from '../kit';
@@ -35,7 +36,7 @@ const COUVERTURE: Record<RepairOption['couverture'], { label: string; tone: stri
   partielle: { label: 'Couverture partielle', tone: 'danger' },
 };
 
-type Onglet = 'absences' | 'remplacements' | 'demandes' | 'gardes' | 'publications';
+type Onglet = 'accords' | 'absences' | 'remplacements' | 'demandes' | 'gardes' | 'publications';
 
 export function Resoudre(): JSX.Element {
   const data = useStore((s) => s.data);
@@ -44,6 +45,7 @@ export function Resoudre(): JSX.Element {
   const { aller, setSemaine, ouvrirGarde } = useUi();
   const corrigerRepos = useStore((s) => s.corrigerRepos);
   const resoudreAbsence = useStore((s) => s.resoudreAbsence);
+  const { donnerAccord, ecarterAccord } = useStore();
   const dire = useUi((s) => s.dire);
   const nom = (id: string | null): string => {
     const p = data.personnes.find((x) => x.id === id);
@@ -60,7 +62,11 @@ export function Resoudre(): JSX.Element {
   const premierADecider = useMemo(() => d.trous.find((t) => optionsReparation(data, t.shift, today).impact.length)?.id ?? d.trous[0]?.id, [d.trous, data, today]);
   const nbGardes = d.gardesAAffecter.length + d.gardesRepos.length + d.gardesAbsence.length + d.gardesAValider.length;
   // Une famille de décisions par onglet : on ne lit qu'un sujet à la fois.
+  const session = useUi((s) => s.session);
+  const moi = data.personnes.find((p) => memeIdentifiant(p.identifiant, session ?? ''));
+  const principal = estResponsable(data, moi);
   const onglets: { cle: Onglet; label: string; nombre: number; icone: JSX.Element }[] = [
+    ...(d.accords.length ? [{ cle: 'accords' as Onglet, label: principal ? 'Accords à donner' : 'En attente d’accord', nombre: d.accords.length, icone: <Handshake size={16} /> }] : []),
     { cle: 'absences', label: 'Absences', nombre: d.trous.length, icone: <UserMinus size={16} /> },
     { cle: 'remplacements', label: 'Remplacements', nombre: d.remplacements.length, icone: <ArrowLeftRight size={16} /> },
     { cle: 'demandes', label: 'Demandes', nombre: d.absences.length + d.besoins.length, icone: <Check size={16} /> },
@@ -120,6 +126,60 @@ export function Resoudre(): JSX.Element {
         <Empty icon={<CircleCheck size={30} />} title="Rien à traiter ici">
           Aucune décision en attente dans « {courant.label} ».
         </Empty>
+      ) : null}
+
+      {onglet === 'accords' && d.accords.length ? (
+        <>
+          <div className="section-title">
+            <h2>{principal ? 'Accords à donner' : 'En attente d’accord'}</h2>
+          </div>
+          <div className="card">
+            {d.accords.map((a) => {
+              const auteur = data.personnes.find((p) => p.id === a.auteur);
+              return (
+                <div key={a.id} className="decision" style={{ alignItems: 'center' }}>
+                  <Avatar person={auteur} />
+                  <div className="grow" style={{ minWidth: 220 }}>
+                    <b>{a.titre}</b>
+                    <div className="small soft">
+                      Proposé par {auteur ? nomCourt(auteur) : '—'}, titulaire secondaire · {fmtDateCourt(a.at.slice(0, 10))}
+                    </div>
+                  </div>
+                  {principal ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => {
+                          ecarterAccord(a.id, true);
+                          dire('Refusé. Rien n’a été appliqué.', true);
+                        }}
+                      >
+                        Refuser
+                      </button>
+                      <button
+                        type="button"
+                        className="btn primary"
+                        onClick={() => {
+                          donnerAccord(a.id);
+                          dire('Accord donné : la décision est appliquée.', true);
+                        }}
+                      >
+                        <Check size={16} aria-hidden="true" /> Donner mon accord
+                      </button>
+                    </>
+                  ) : a.auteur === moi?.id ? (
+                    <button type="button" className="btn" onClick={() => ecarterAccord(a.id, false)}>
+                      Retirer
+                    </button>
+                  ) : (
+                    <Pill tone="warn">En attente</Pill>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
       ) : null}
 
       {onglet === 'absences' && parAbsence.length ? (

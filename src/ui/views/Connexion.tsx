@@ -1,11 +1,11 @@
-import { ArrowLeft, ArrowRight, CalendarClock, CircleAlert, FlaskConical, Info, LogIn, MessageSquare, Play, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, CircleAlert, Info, LogIn, Play, RotateCcw, ShieldCheck, Sun } from 'lucide-react';
 import { useState } from 'react';
 import { empreinte, espaceDe, estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { ROLES_TEST, lancerParcours, voirComme } from '../Parcours';
+import { ChoixParcours } from '../Parcours';
 import { tutorielDejaVu } from '../Tour';
-import { Logo, LogoNom } from '../kit';
+import { Logo, LogoNom, MotDePasse } from '../kit';
 
 type Ecran = 'connexion' | 'oubli';
 
@@ -14,8 +14,8 @@ type Ecran = 'connexion' | 'oubli';
  * avec à côté la création d'une pharmacie pour une première visite.
  */
 export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
-  const { data, autres, officineId, changerOfficine, definirMotDePasse, reinitialiser, chargerExemple } = useStore();
-  const { connecter, setTour, toutOublier } = useUi();
+  const { data, autres, officineId, changerOfficine, definirMotDePasse, reinitialiser } = useStore();
+  const { connecter, setTour, toutOublier, ouvrirTutoriels } = useUi();
   const [ecran, setEcran] = useState<Ecran>('connexion');
   const [identifiant, setIdentifiant] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
@@ -55,39 +55,58 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
     setInfo('Mot de passe redéfini. Vous pouvez vous connecter.');
   };
 
-  // Environnement de test : une pharmacie d'exemple posée à côté des vraies, sans rien effacer.
-  const entrerComme = (id: string): void => {
-    chargerExemple(false);
-    voirComme(id);
-  };
-
   return (
     <main className="connexion" id="contenu">
       <section className="cx-vitrine" aria-label="Solvéa">
         <span className="cx-halo h1" aria-hidden="true" />
         <span className="cx-halo h2" aria-hidden="true" />
         <span className="cx-halo h3" aria-hidden="true" />
-        <div className="brand" style={{ padding: 0 }}>
-          <span className="brand-mark">
-            <Logo size={44} />
-          </span>
-          <div className="brand-name">
-            <LogoNom hauteur={26} />
-          </div>
+        <div className="cx-logo">
+          <Logo size={72} />
+          <LogoNom hauteur={44} />
         </div>
         <div className="cx-accroche">
           <p className="cx-titre">Le planning de votre pharmacie, sans prise de tête.</p>
-          <ul className="atouts">
-            <li>
-              <CalendarClock size={18} aria-hidden="true" /> Vos horaires en un coup d’œil
-            </li>
-            <li>
-              <Sparkles size={18} aria-hidden="true" /> Un planning proposé et vérifié
-            </li>
-            <li>
-              <MessageSquare size={18} aria-hidden="true" /> Remplacements, gardes, messages
-            </li>
-          </ul>
+          {/* Aperçu illustré du produit : décoratif, il ne porte aucune information à lire. */}
+          <div className="cx-apercu" aria-hidden="true">
+            <div className="cx-carte">
+              <div className="cx-tete">
+                <b>Cette semaine</b>
+                <span>lun. → sam.</span>
+              </div>
+              {[
+                ['HM', ['soir', 'soir', 'milieu', 'journee', 'vide', 'journee']],
+                ['KB', ['milieu', 'milieu', 'arret', 'arret', 'arret', 'vide']],
+                ['CR', ['matin', 'journee', 'vide', 'soir', 'matin', 'journee']],
+                ['TN', ['journee', 'journee', 'matin', 'vide', 'milieu', 'matin']],
+              ].map(([nom, jours]) => (
+                <div key={nom as string} className="cx-rang">
+                  <i className="cx-av">{nom}</i>
+                  {(jours as string[]).map((j, i) => (
+                    <i key={i} className={`cx-case ${j}`} />
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="cx-bulle">
+              <span className="moment matin">
+                <Sun size={18} />
+              </span>
+              <span>
+                <small>Prochain poste</small>
+                <b>Demain · 8 h 30 – 13 h</b>
+              </span>
+            </div>
+            <div className="cx-bulle b2">
+              <span className="moment journee">
+                <Check size={18} />
+              </span>
+              <span>
+                <small>Remplacement</small>
+                <b>Validé par la titulaire</b>
+              </span>
+            </div>
+          </div>
         </div>
         <p className="cx-pied">Vos données restent sur cet appareil.</p>
       </section>
@@ -120,7 +139,7 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             </label>
             <label className="field" htmlFor="cx-mdp">
               Mot de passe
-              <input id="cx-mdp" type="password" value={motDePasse} onChange={(e) => { setMotDePasse(e.target.value); setErreur(''); }} autoComplete="current-password" aria-invalid={!!erreur} aria-describedby={erreur ? 'cx-err' : undefined} />
+              <MotDePasse id="cx-mdp" value={motDePasse} onChange={(e) => { setMotDePasse(e.target.value); setErreur(''); }} autoComplete="current-password" aria-invalid={!!erreur} aria-describedby={erreur ? 'cx-err' : undefined} />
             </label>
             {erreur ? (
               <p className="erreur" id="cx-err" role="alert">
@@ -181,7 +200,7 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
               </label>
               <label className="field" htmlFor="ob-nouveau">
                 Nouveau mot de passe
-                <input id="ob-nouveau" type="password" value={nouveau} onChange={(e) => setNouveau(e.target.value)} autoComplete="new-password" />
+                <MotDePasse id="ob-nouveau" value={nouveau} onChange={(e) => setNouveau(e.target.value)} autoComplete="new-password" />
               </label>
               {erreur ? (
                 <p className="erreur" role="alert">
@@ -218,29 +237,17 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
           </div>
         ) : null}
         {ecran === 'connexion' ? (
-          <section className="col test-env" aria-labelledby="test-titre" style={{ gap: 12 }}>
-            <div className="row wrap" style={{ gap: 10 }}>
-              <h2 id="test-titre" className="h3 grow">
-                <FlaskConical size={16} aria-hidden="true" style={{ verticalAlign: '-3px', marginRight: 6 }} />
-                Essayer avec une équipe d’exemple
-              </h2>
-              <button type="button" className="btn sm" onClick={lancerParcours}>
-                <Play size={14} aria-hidden="true" /> Parcours guidé
-              </button>
-            </div>
-            <div className="test-roles">
-              {ROLES_TEST.map((r) => (
-                <button key={r.cle} type="button" className="test-role" onClick={() => entrerComme(r.identifiant)} title={r.detail}>
-                  <span className="tr-titre">{r.titre}</span>
-                  <b>{r.nom}</b>
-                </button>
-              ))}
-            </div>
-          </section>
+          <p className="cx-nouveau cx-tuto">
+            Envie de voir avant de vous lancer ?{' '}
+            <button type="button" className="lien" onClick={() => ouvrirTutoriels(true)}>
+              <Play size={14} aria-hidden="true" /> Voir les tutoriels
+            </button>
+          </p>
         ) : null}
         <p className="tiny muted">Sans serveur, cette connexion sépare les espaces sur cet appareil ; elle ne remplace pas de vrais comptes en ligne.</p>
       </div>
       </div>
+      <ChoixParcours />
     </main>
   );
 }

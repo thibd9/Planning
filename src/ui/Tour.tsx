@@ -160,63 +160,75 @@ export function Tour(): JSX.Element | null {
 
   const W = window.innerWidth;
   const H = window.innerHeight;
-  const largeur = Math.min(380, W - 32);
+  const largeur = Math.min(400, W - 32);
   const marge = 8;
   const trou = rect
     ? { top: Math.max(4, rect.top - marge), left: Math.max(4, rect.left - marge), width: Math.min(W - 8, rect.width + marge * 2), height: Math.min(H - 8, rect.height + marge * 2) }
     : null;
   // Placement : à droite de la cible si la place existe, sinon dessous, sinon dessus, sinon centré.
-  let top = H / 2 - 130;
+  let top = H / 2 - 150;
   let left = W / 2 - largeur / 2;
+  // De quel côté de la cible la carte se pose : sa flèche pointe vers ce qui est montré.
+  let cote: 'droite' | 'bas' | 'haut' | 'centre' = 'centre';
   if (trou) {
-    if (trou.left + trou.width + 20 + largeur < W) {
-      left = trou.left + trou.width + 20;
+    if (trou.left + trou.width + 26 + largeur < W) {
+      left = trou.left + trou.width + 26;
       top = trou.top;
-    } else if (trou.top + trou.height + 260 < H) {
-      top = trou.top + trou.height + 18;
+      cote = 'droite';
+    } else if (trou.top + trou.height + 300 < H) {
+      top = trou.top + trou.height + 24;
       left = trou.left;
+      cote = 'bas';
     } else {
-      top = trou.top - 250;
+      top = trou.top - 300;
       left = trou.left;
+      cote = 'haut';
     }
   }
   left = Math.max(16, Math.min(left, W - largeur - 16));
-  top = Math.max(16, Math.min(top, H - 270));
+  top = Math.max(16, Math.min(top, H - 310));
   const dernier = tour === ETAPES.length - 1;
 
   return (
     <>
       <div className="tour-veil" onClick={fermer} aria-hidden="true" />
-      <div className={`tour-hole${trou ? '' : ' none'}`} style={trou ?? undefined} />
-      <div className="tour-card" role="dialog" aria-modal="true" aria-label={`Tutoriel, étape ${tour + 1} sur ${ETAPES.length}`} style={{ top, left, width: largeur }}>
-        <div className="row">
-          <span className="eyebrow grow">
-            Tutoriel · {tour + 1} / {ETAPES.length}
+      <div key={tour} className={`tour-hole${trou ? '' : ' none'}`} style={trou ?? undefined} />
+      <div key={`c${tour}`} className={`tour-card pos-${cote}`} role="dialog" aria-modal="true" aria-label={`Tutoriel, étape ${tour + 1} sur ${ETAPES.length}`} style={{ top, left, width: largeur }}>
+        <div className="tour-tete">
+          <span className="tour-n num" aria-hidden="true">
+            {tour + 1}
           </span>
-          <button type="button" className="btn ghost icon" style={{ width: 30, height: 30 }} onClick={fermer} aria-label="Fermer le tutoriel">
-            <X size={16} />
+          <span className="grow">
+            <span className="tour-etiquette">Tutoriel</span>
+            <span className="tour-compte">
+              Étape {tour + 1} sur {ETAPES.length}
+            </span>
+          </span>
+          <button type="button" className="tour-fermer" onClick={fermer} aria-label="Fermer le tutoriel">
+            <X size={17} aria-hidden="true" />
           </button>
         </div>
-        <h2>{etape.titre}</h2>
-        <p>{etape.texte}</p>
-        <div className="row" style={{ marginTop: 4 }}>
-          <span className="tour-dots grow" aria-hidden="true">
-            {ETAPES.map((_, i) => (
-              <i key={i} className={i === tour ? 'on' : ''} />
-            ))}
-          </span>
-          {tour > 0 ? (
-            <button type="button" className="btn sm" onClick={() => setTour(tour - 1)}>
-              <ArrowLeft size={14} /> Précédent
+        <div className="tour-corps">
+          <h2>{etape.titre}</h2>
+          <p>{etape.texte}</p>
+          <div className="tour-barre" aria-hidden="true">
+            <i style={{ width: `${((tour + 1) / ETAPES.length) * 100}%` }} />
+          </div>
+          <div className="row" style={{ gap: 8 }}>
+            {tour > 0 ? (
+              <button type="button" className="btn sm ghost" onClick={() => setTour(tour - 1)}>
+                <ArrowLeft size={14} aria-hidden="true" /> Précédent
+              </button>
+            ) : (
+              <button type="button" className="btn sm ghost" onClick={fermer}>
+                Passer
+              </button>
+            )}
+            <span className="grow" />
+            <button type="button" className="btn primary tour-suite" autoFocus onClick={() => (dernier ? fermer() : setTour(tour + 1))}>
+              {dernier ? 'C’est parti' : 'Suivant'} {dernier ? null : <ArrowRight size={16} aria-hidden="true" />}
             </button>
-          ) : (
-            <button type="button" className="btn sm ghost" onClick={fermer}>
-              Passer
-            </button>
-          )}
-          <button type="button" className="btn sm primary" autoFocus onClick={() => (dernier ? fermer() : setTour(tour + 1))}>
-            {dernier ? 'Terminer' : 'Suivant'} {dernier ? null : <ArrowRight size={14} />}
-          </button>
+          </div>
         </div>
       </div>
     </>

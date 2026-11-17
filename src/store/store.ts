@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { seed, vierge } from '../data/seed';
+import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, fmtDateCourt, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates } from '../domain/time';
 import type {
@@ -37,7 +38,7 @@ interface Enregistrement {
 function normaliser(d: AppData): AppData {
   // Les données enregistrées avant une mise à jour reçoivent les nouveautés : listes vides, fiches de règles ajoutées.
   const manquantes = REGLES_INITIALES.filter((r) => !d.regles.some((x) => x.id === r.id)).map((r) => ({ ...r }));
-  return { ...d, messages: d.messages ?? [], remplacements: d.remplacements ?? [], ecarts: d.ecarts ?? [], regles: manquantes.length ? d.regles.concat(manquantes) : d.regles };
+  return { ...d, messages: d.messages ?? [], remplacements: d.remplacements ?? [], ecarts: d.ecarts ?? [], accords: d.accords ?? [], regles: manquantes.length ? d.regles.concat(manquantes) : d.regles };
 }
 
 function charger(): { officineId: string; data: AppData; autres: Record<string, AppData> } {
@@ -106,7 +107,18 @@ export interface Store {
   reinitialiser: () => void;
   /** Remplace les données par l'équipe d'exemple (annulable). */
   /** Ouvre l'environnement de test à côté des vraies pharmacies ; `neuf` repart de données d'exemple fraîches. */
-  chargerExemple: (neuf?: boolean) => void;
+  chargerExemple: (neuf?: boolean, depart?: 'etabli' | 'vide') => void;
+  /** Personne connectée : sert à savoir si une décision doit attendre l'accord du titulaire principal. */
+  /** Vrai pendant qu'une décision acceptée est rejouée : elle ne repart pas en attente. */
+  direct: boolean;
+  acteur: string | null;
+  setActeur: (id: string | null) => void;
+  /** Dépose une décision en attente d'accord (titulaire secondaire). */
+  proposer: (auteur: string, action: string, args: unknown[]) => void;
+  /** Le titulaire principal donne son accord : la décision est appliquée maintenant. */
+  donnerAccord: (id: string) => void;
+  /** Refus par le titulaire principal, ou retrait par l'auteur : rien n'est appliqué. */
+  ecarterAccord: (id: string, refus: boolean) => void;
   /** Crée l'officine depuis l'écran d'accueil : nom, horaires et première équipe. */
   /** `ajout` garde les pharmacies existantes ; `nouvelleCle` vaut pour un autre titulaire, qui reçoit sa propre clé de secours. */
   creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[], ajout?: boolean, nouvelleCle?: boolean) => void;
@@ -169,6 +181,77 @@ function avisGarde(g: Pick<Garde, 'date' | 'start' | 'end' | 'type'>, personId: 
   return { id: uid('n'), personId, at, date: g.date, avant: confiee ? 'Pas de garde' : libelle, apres: confiee ? libelle : 'Garde retirée', tardif: dayIndex(g.date) - dayIndex(today) < 15 };
 }
 
+/**
+ * Décisions qui engagent l'équipe : venant d'un titulaire secondaire, elles attendent l'accord du principal.
+ * Les brouillons de planning et la saisie des fiches restent libres.
+ */
+const SOUMISES = ['publier', 'resoudreTrou', 'resoudreAbsence', 'deciderAbsence', 'deciderBesoin', 'validerRemplacement', 'affecterGarde', 'affecterGardes', 'ajouterGardes', 'planifierFormation', 'declarerAbsence', 'supprimerPersonne', 'signalerEcart', 'majPersonne'] as const;
+
+function titreAccord(d: AppData, action: string, args: unknown[]): string {
+  const a = args as never[];
+  const qui = (id: unknown): string => nom(d, typeof id === 'string' ? id : null);
+  switch (action) {
+    case 'publier':
+      return `Publier la semaine du ${fmtSemaine(a[0])}`;
+    case 'resoudreTrou': {
+      const t = d.trous.find((x) => x.id === a[0]);
+      return `Absence de ${qui(t?.shift.personId)}${t ? ` le ${fmtDateCourt(t.shift.date)}` : ''} : ${String((a[1] as { titre?: string })?.titre ?? 'option choisie').toLowerCase()}`;
+    }
+    case 'resoudreAbsence':
+      return `Régler l’absence de ${qui(d.absences.find((x) => x.id === a[0])?.personId)} avec les options conseillées`;
+    case 'deciderAbsence': {
+      const x = d.absences.find((y) => y.id === a[0]);
+      return `${a[1] ? 'Approuver' : 'Refuser'} : ${x ? ABSENCE_LABEL[x.type].toLowerCase() : 'absence'} de ${qui(x?.personId)}`;
+    }
+    case 'deciderBesoin':
+      return `${a[1] ? 'Accepter' : 'Refuser'} la demande d’horaires de ${qui(d.besoins.find((y) => y.id === a[0])?.personId)}`;
+    case 'validerRemplacement': {
+      const r = d.remplacements.find((y) => y.id === a[0]);
+      return `Remplacement${r ? ` du ${fmtDateCourt(r.date)}` : ''} : ${qui(a[1])} remplace ${qui(r?.demandeur)}`;
+    }
+    case 'affecterGarde': {
+      const g = d.gardes.find((y) => y.id === a[0]);
+      return a[1] ? `Confier la garde${g ? ` du ${fmtDateCourt(g.date)}` : ''} à ${qui(a[1])}` : `Retirer l’affectation de la garde${g ? ` du ${fmtDateCourt(g.date)}` : ''}`;
+    }
+    case 'affecterGardes':
+      return `Répartir ${(a[0] as unknown[]).length} garde${(a[0] as unknown[]).length > 1 ? 's' : ''}`;
+    case 'ajouterGardes':
+      return `Ajouter ${(a[0] as unknown[]).length} garde${(a[0] as unknown[]).length > 1 ? 's' : ''} au calendrier`;
+    case 'planifierFormation':
+      return `Formation « ${String((a[0] as { intitule?: string })?.intitule ?? '')} »`;
+    case 'declarerAbsence':
+      return `Enregistrer : ${ABSENCE_LABEL[(a[0] as Absence).type].toLowerCase()} de ${qui((a[0] as Absence).personId)}`;
+    case 'supprimerPersonne':
+      return `Retirer ${qui(a[0])} de l’équipe`;
+    case 'signalerEcart':
+      return `Noter : ${ECART_LABEL[(a[0] as { type: EcartType }).type].toLowerCase()} de ${qui((a[0] as { personId: string }).personId)}`;
+    case 'majPersonne': {
+      const p = a[0] as Person;
+      return d.personnes.some((x) => x.id === p.id) ? `Changer l’accès de ${p.prenom} ${p.nom} à la gestion` : `Ajouter ${p.prenom} ${p.nom} à l’équipe`;
+    }
+    default:
+      return 'Décision';
+  }
+}
+
+/** Enveloppe les décisions : proposées par un titulaire secondaire, elles sont mises en attente d'accord. */
+function soumettre(m: Store, get: () => Store): Store {
+  const out = { ...m } as unknown as Record<string, unknown>;
+  for (const action of SOUMISES) {
+    const original = m[action] as unknown as (...x: unknown[]) => void;
+    out[action] = (...args: unknown[]): void => {
+      const s = get();
+      const auteur = s.data.personnes.find((p) => p.id === s.acteur);
+      // Une fiche se corrige librement ; seuls l'ajout d'une personne et le droit de gestion sont des décisions.
+      const fiche = action === 'majPersonne' ? (args[0] as Person) : null;
+      const anodin = fiche ? (s.data.personnes.find((p) => p.id === fiche.id)?.gestion ?? false) === (fiche.gestion ?? false) && s.data.personnes.some((p) => p.id === fiche.id) : false;
+      if (!s.direct && !anodin && estSecondaire(s.data, auteur)) return s.proposer((auteur as Person).id, action, args);
+      original(...args);
+    };
+  }
+  return out as unknown as Store;
+}
+
 export const useStore = create<Store>((set, get) => {
   /** Applique un changement ; `annulable` l'ajoute à l'historique des manipulations. */
   const commit = (fn: (d: AppData, today: ISODate) => AppData, annulable = true): void => {
@@ -183,7 +266,7 @@ export const useStore = create<Store>((set, get) => {
     });
   };
 
-  return {
+  const magasin: Store = {
     ...charger(),
     today: todayISO(),
     past: [],
@@ -289,7 +372,33 @@ export const useStore = create<Store>((set, get) => {
           { type: 'reparation', titre: `Remplacement validé le ${horaire} : ${nom(d, remplacantId)} remplace ${nom(d, r.demandeur)}`, regles: true },
         );
       }),
-    chargerExemple: (neuf = true) =>
+    direct: false,
+    acteur: null,
+    setActeur: (acteur) => set({ acteur }),
+    proposer: (auteur, action, args) =>
+      set((s) => ({
+        data: { ...s.data, accords: [...(s.data.accords ?? []), { id: uid('ok'), auteur, at: now(), action, args: JSON.parse(JSON.stringify(args)) as unknown[], titre: titreAccord(s.data, action, args) }] },
+      })),
+    donnerAccord: (id) => {
+      const a = (get().data.accords ?? []).find((x) => x.id === id);
+      if (!a) return;
+      const chef = get().data.officine.responsableId ?? '';
+      set((s) => ({ data: { ...s.data, accords: (s.data.accords ?? []).filter((x) => x.id !== id) }, direct: true }));
+      // La décision est rejouée telle qu'elle a été proposée, sur le planning d'aujourd'hui.
+      const action = (get() as unknown as Record<string, (...x: unknown[]) => void>)[a.action];
+      if (typeof action === 'function') action(...a.args);
+      set({ direct: false });
+      commit((d) => journal({ ...d, messages: d.messages.concat({ id: uid('msg'), de: chef, a: a.auteur, texte: `Accord donné : ${a.titre}.`, at: now(), luPar: [chef] }) }, { type: 'regle', titre: `Accord donné à ${nom(d, a.auteur)} : ${a.titre}` }), false);
+    },
+    ecarterAccord: (id, refus) =>
+      commit((d) => {
+        const a = (d.accords ?? []).find((x) => x.id === id);
+        if (!a) return d;
+        const chef = d.officine.responsableId ?? '';
+        const reste = { ...d, accords: (d.accords ?? []).filter((x) => x.id !== id) };
+        return refus ? journal({ ...reste, messages: d.messages.concat({ id: uid('msg'), de: chef, a: a.auteur, texte: `Accord refusé : ${a.titre}.`, at: now(), luPar: [chef] }) }, { type: 'regle', titre: `Accord refusé à ${nom(d, a.auteur)} : ${a.titre}` }) : reste;
+      }, false),
+    chargerExemple: (neuf = true, depart = 'etabli') =>
       set((s) => {
         const existant = Object.entries(s.autres).find(([, d]) => d.demo);
         if (!neuf && s.data.demo) return s;
@@ -297,7 +406,7 @@ export const useStore = create<Store>((set, get) => {
         // Une vraie pharmacie ouverte est mise de côté, jamais effacée.
         if (!s.data.demo && (s.data.officine.nom.trim() || s.data.personnes.length)) autres[s.officineId] = s.data;
         if (!neuf && existant) return { officineId: existant[0], data: existant[1], autres, past: [], future: [] };
-        return { officineId: uid('off'), data: seed(todayISO(), 2), autres, past: [], future: [] };
+        return { officineId: uid('off'), data: seed(todayISO(), depart === 'vide' ? -99 : 2), autres, past: [], future: [] };
       }),
 
     saveShift: (shift) =>
@@ -649,6 +758,7 @@ export const useStore = create<Store>((set, get) => {
     lireNotification: (id) =>
       commit((d) => ({ ...d, notifications: d.notifications.map((n) => (n.id === id ? { ...n, luLe: now() } : n)) }), false),
   };
+  return soumettre(magasin, get);
 });
 
 // Sauvegarde locale à chaque changement, avec l'heure de la dernière écriture réussie.

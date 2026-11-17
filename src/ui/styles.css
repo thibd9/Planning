@@ -276,7 +276,7 @@ table.t tr:last-child td { border-bottom: 0; }
 .ring small { color: var(--ink-3); font-weight: 500; font-size: 12.5px; }
 .plan { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-l); box-shadow: var(--shadow-1); overflow: hidden; }
 .plan-scroll { overflow-x: auto; }
-.plan-grid { display: grid; min-width: 880px; }
+.plan-grid { display: grid; min-width: 760px; }
 .pg-h { padding: 12px 6px 10px; border-bottom: 1px solid var(--line); text-align: center; position: relative; }
 .pg-h.first { text-align: left; padding-left: 20px; display: flex; align-items: flex-end; }
 .pg-h .n { display: block; font-weight: 650; font-size: 17px; letter-spacing: -0.03em; line-height: 1.1; }
@@ -1037,3 +1037,152 @@ table.cal td.auj button.cal-n:hover .n { background: var(--a-hover); }
 
 /* Dans « Résoudre », l'onglet dit déjà le sujet : le titre du panneau reste pour les lecteurs d'écran seulement. */
 .panneau .section-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+
+/* ---------------------------------------------------------------- Moins de bruit */
+/* Menu latéral : un mot par entrée, sans sous-titre. */
+.nav-item .q { display: none; }
+.nav-item { padding: 6px 12px 6px 6px; }
+.nav-label { padding-top: 20px; }
+/* Tuiles : l'icône, l'horaire, la durée. Plus de barre. */
+.tile { min-height: 44px; padding: 8px 10px; }
+
+/* Barres de défilement : fines, arrondies, dans les tons de l'interface ; invisibles tant qu'on n'en a pas besoin. */
+* { scrollbar-width: thin; scrollbar-color: var(--n-4) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--n-4); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+*::-webkit-scrollbar-thumb:hover { background: var(--ctl); background-clip: content-box; border: 3px solid transparent; }
+*::-webkit-scrollbar-corner { background: transparent; }
+.side, .bandeau-test .seg { scrollbar-width: none; }
+.side::-webkit-scrollbar, .bandeau-test .seg::-webkit-scrollbar { display: none; }
+
+/* Cartes repliables. */
+details.repli > summary { cursor: pointer; list-style: none; }
+details.repli > summary::-webkit-details-marker { display: none; }
+details.repli:not([open]) > summary { border-bottom: 0; }
+details.repli .chev { transition: transform 0.15s ease; color: var(--ink-3); }
+details.repli[open] .chev { transform: rotate(180deg); }
+
+/* ---------------------------------------------------------------- Bannière et « Prochain poste » */
+.tb-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 420px); gap: 28px; align-items: center; padding: 34px 36px; }
+.tbh-texte h1 { font-size: 40px; margin: 6px 0 4px; }
+.tbh-texte p { font-size: 16px; }
+.prochain { background: rgba(255, 255, 255, 0.94); color: var(--ink); border-radius: 24px; padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 18px 44px -24px rgba(var(--ink-rgb), 0.45); }
+.prochain .eyebrow { color: var(--a-text); }
+.pp-ligne { display: flex; align-items: center; gap: 16px; }
+.prochain .moment { width: 54px; height: 54px; border-radius: 18px; }
+.pp-quand { display: block; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.pp-h { display: block; font-size: 32px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; font-variant-numeric: normal; }
+.pp-d { font-size: 14px; color: var(--ink-2); }
+.pp-suite { font-size: 13.5px; color: var(--ink-2); padding-top: 10px; border-top: 1px solid var(--line); }
+
+/* ---------------------------------------------------------------- Tableau de bord */
+.tb { max-width: 1280px; margin: 0 auto; }
+.tb-grille { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 24px; margin-top: 24px; align-items: start; }
+.tb-faire h2, .tb h2 { font-size: 20px; }
+.tb-sujets { display: flex; flex-direction: column; padding: 8px; }
+.tb-sujet { display: flex; align-items: center; gap: 14px; border: 0; background: transparent; padding: 14px 16px; border-radius: 16px; text-align: left; font-weight: 600; font-size: 15px; width: 100%; }
+.tb-sujet:hover { background: var(--a-tint); }
+.tb-sujet .compte { min-width: 30px; height: 30px; padding: 0 9px; border-radius: 999px; background: var(--ink); color: #fff; display: inline-grid; place-items: center; font-size: 14px; font-weight: 700; }
+.tb-sujet > svg { color: var(--ink-3); }
+.tb-chiffres { display: flex; flex-direction: column; gap: 12px; }
+.tb-chiffre { display: flex; align-items: center; gap: 14px; border: 1px solid var(--line); background: var(--surface); border-radius: 20px; padding: 18px 20px; text-align: left; box-shadow: var(--shadow-1); transition: transform 0.12s ease, box-shadow 0.15s ease; width: 100%; }
+.tb-chiffre:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
+.tb-chiffre .l { display: block; font-size: 13px; color: var(--ink-2); font-weight: 600; }
+.tb-chiffre .v { display: block; font-size: 24px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; }
+.tb-chiffre .d { display: block; font-size: 13px; color: var(--ink-3); }
+.tb-equipe { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 4px 20px; padding: 12px 18px 18px; }
+.tb-personne { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 14px; }
+.tb-h { border-radius: 10px; padding: 6px 10px; font-weight: 650; font-size: 13.5px; color: #111c27; white-space: nowrap; }
+.tb-h.matin { background: var(--p-matin); }
+.tb-h.journee { background: var(--p-journee); }
+.tb-h.milieu { background: var(--p-milieu); }
+.tb-h.soir { background: var(--p-soir); }
+@media (max-width: 1000px) { .tb-hero, .tb-grille { grid-template-columns: 1fr; } .tb-hero { padding: 24px 20px; } .tbh-texte h1 { font-size: 30px; } .pp-h { font-size: 26px; } }
+
+/* ---------------------------------------------------------------- Connexion : logo en grand et aperçu */
+.cx-logo { display: flex; align-items: center; gap: 16px; color: var(--ink); filter: drop-shadow(0 10px 18px rgba(31, 107, 184, 0.22)); }
+.cx-apercu { position: relative; width: min(440px, 100%); padding: 0 34px 46px 0; }
+.cx-carte { background: rgba(255, 255, 255, 0.92); border-radius: 24px; padding: 18px; box-shadow: 0 30px 60px -30px rgba(23, 79, 135, 0.55); display: flex; flex-direction: column; gap: 9px; transform: rotate(-2deg); animation: flotte-b 14s ease-in-out infinite alternate; }
+.cx-tete { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--ink-2); padding: 0 2px 4px; }
+.cx-tete b { font-size: 15px; color: var(--ink); }
+.cx-rang { display: grid; grid-template-columns: 34px repeat(6, 1fr); gap: 7px; align-items: center; }
+.cx-av { width: 34px; height: 34px; border-radius: 11px; background: var(--a-soft); color: var(--a-text); font-style: normal; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.cx-case { height: 34px; border-radius: 10px; background: var(--n-2); }
+.cx-case.matin { background: var(--p-matin); }
+.cx-case.journee { background: var(--p-journee); }
+.cx-case.milieu { background: var(--p-milieu); }
+.cx-case.soir { background: var(--p-soir); }
+.cx-case.arret { background: var(--p-arret); }
+.cx-bulle { position: absolute; right: 0; bottom: 6px; display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 18px; padding: 12px 16px 12px 12px; box-shadow: 0 22px 44px -22px rgba(23, 79, 135, 0.6); animation: flotte-a 11s ease-in-out infinite alternate; }
+.cx-bulle.b2 { right: auto; left: -18px; bottom: auto; top: -22px; animation-duration: 13s; animation-direction: alternate-reverse; }
+.cx-bulle small { display: block; font-size: 11.5px; color: var(--ink-3); font-weight: 600; }
+.cx-bulle b { font-size: 14px; }
+.cx-accroche { gap: 34px; }
+@media (max-width: 900px) { .cx-apercu { display: none; } .cx-logo svg:first-child { width: 48px; height: auto; } }
+
+/* ---------------------------------------------------------------- Tutoriel : projecteur */
+@keyframes pouls { 0% { box-shadow: 0 0 0 9999px rgba(var(--ink-rgb), 0.74), 0 0 0 4px #fff, 0 0 0 8px var(--a-2), 0 0 0 8px rgba(255, 255, 255, 0.55); } 70% { box-shadow: 0 0 0 9999px rgba(var(--ink-rgb), 0.74), 0 0 0 4px #fff, 0 0 0 8px var(--a-2), 0 0 0 26px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 9999px rgba(var(--ink-rgb), 0.74), 0 0 0 4px #fff, 0 0 0 8px var(--a-2), 0 0 0 26px rgba(255, 255, 255, 0); } }
+@keyframes arrive { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+.tour-hole { box-shadow: 0 0 0 9999px rgba(var(--ink-rgb), 0.74), 0 0 0 4px #fff, 0 0 0 8px var(--a-2); animation: pouls 1.9s ease-out infinite; border-radius: 20px; }
+.tour-hole.none { box-shadow: 0 0 0 9999px rgba(var(--ink-rgb), 0.74); animation: none; }
+.tour-card { padding: 24px; gap: 14px; border-radius: 26px; box-shadow: 0 40px 90px -30px rgba(var(--ink-rgb), 0.7); animation: arrive 0.3s cubic-bezier(0.2, 0.8, 0.3, 1); }
+.tour-card::before { height: 8px; background: var(--grad-deep); }
+.tour-card h2 { font-size: 21px; letter-spacing: -0.03em; }
+.tour-card p { font-size: 15px; line-height: 1.55; }
+.tour-n { width: 40px; height: 40px; border-radius: 14px; background: var(--a-deep); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 17px; flex: none; }
+
+/* Champ de mot de passe avec son œil. */
+.mdp { position: relative; display: block; }
+.mdp input { width: 100%; padding-right: 48px; }
+.mdp-oeil { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--ink-2); display: grid; place-items: center; }
+.mdp-oeil:hover { background: var(--n-1); color: var(--ink); }
+
+/* Fenêtre des tutoriels : deux parcours, puis l'entrée libre. */
+.choix-parcours { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.cp-carte { display: flex; flex-direction: column; gap: 8px; text-align: left; border: 0; border-radius: 22px; padding: 22px; background: var(--a-tint); transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease; }
+.cp-carte:hover { background: var(--a-soft); transform: translateY(-2px); box-shadow: var(--shadow-1); }
+.cp-carte b { font-size: 18px; letter-spacing: -0.02em; }
+.cp-ico { width: 46px; height: 46px; border-radius: 15px; background: var(--a-deep); color: #fff; display: grid; place-items: center; margin-bottom: 4px; }
+.cp-pied { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; color: var(--ink-2); }
+.cp-go { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; color: var(--a-text); }
+.cx-tuto { font-size: 13.5px; }
+
+/* Le parcours guidé reste au-dessus des fenêtres qu'il ouvre : on peut toujours passer à l'étape suivante. */
+.parcours-test { z-index: 60; }
+
+/* ---------------------------------------------------------------- Tutoriel : une carte soignée, qui pointe ce qu'elle montre */
+.tour-card { padding: 0; gap: 0; border-radius: 28px; overflow: visible; background: var(--surface); box-shadow: 0 40px 90px -28px rgba(var(--ink-rgb), 0.75), 0 0 0 1px rgba(255, 255, 255, 0.6); }
+.tour-card::before { display: none; }
+.tour-card::after { content: ''; position: absolute; width: 18px; height: 18px; background: #cfe5fd; transform: rotate(45deg); border-radius: 4px; }
+.tour-card.pos-droite::after { left: -8px; top: 34px; }
+.tour-card.pos-bas::after { top: -8px; left: 40px; }
+.tour-card.pos-haut::after { bottom: -8px; left: 40px; background: var(--surface); }
+.tour-card.pos-centre::after { display: none; }
+.tour-tete { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; padding: 18px 18px 18px 22px; border-radius: 28px 28px 0 0; background: var(--grad-vif); background-size: 220% 220%; animation: derive 14s ease-in-out infinite; color: var(--on-vif); }
+.tour-n { width: 46px; height: 46px; border-radius: 16px; background: rgba(255, 255, 255, 0.92); color: var(--a-hover); font-size: 20px; box-shadow: 0 8px 18px -10px rgba(var(--ink-rgb), 0.5); }
+.tour-etiquette { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.tour-compte { display: block; font-size: 14px; font-weight: 600; }
+.tour-fermer { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.7); color: var(--ink); display: grid; place-items: center; }
+.tour-fermer:hover { background: #fff; }
+.tour-corps { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 14px; padding: 22px 22px 20px; background: var(--surface); border-radius: 0 0 28px 28px; }
+.tour-card h2 { font-size: 21px; letter-spacing: -0.03em; }
+.tour-card p { font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.tour-barre { height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
+.tour-barre i { display: block; height: 100%; border-radius: 3px; background: var(--a-deep); transition: width 0.3s ease; }
+.tour-suite { padding: 10px 20px; }
+/* Dans le tutoriel et le parcours guidé, le focus reste visible sans le double anneau. */
+.tour-card :focus-visible, .parcours-test :focus-visible { outline: 2px solid var(--a-deep); outline-offset: 3px; box-shadow: none; border-radius: 999px; }
+
+/* Parcours guidé : même langage que le tutoriel. */
+.parcours-test { padding: 0; gap: 0; border-radius: 26px; overflow: hidden; }
+.parcours-test > .row:first-child { padding: 16px 16px 16px 20px; background: var(--grad-vif); background-size: 220% 220%; animation: derive 14s ease-in-out infinite; color: var(--on-vif); }
+.parcours-test > .row:first-child .eyebrow { color: inherit; }
+.parcours-test .pt-n { background: rgba(255, 255, 255, 0.92); color: var(--a-hover); width: 44px; height: 44px; border-radius: 15px; font-size: 18px; }
+.parcours-test > div[aria-live] { padding: 18px 20px 4px; }
+.parcours-test > div[aria-live] .h3 { font-size: 18px; }
+.parcours-test > div[aria-live] p { font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.parcours-test .pt-barre { margin: 14px 20px 0; }
+.parcours-test .pt-barre i { background: var(--a-deep); }
+.parcours-test > .row:last-child { padding: 14px 16px 16px; }
+.parcours-test .btn.ghost.icon { background: rgba(255, 255, 255, 0.7); border-radius: 50%; }

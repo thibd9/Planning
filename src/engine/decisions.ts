@@ -24,6 +24,8 @@ export interface Decisions {
   gardesAValider: Garde[];
   publications: PublicationEnAttente[];
   remplacements: AppData['remplacements'];
+  /** Décisions d'un titulaire secondaire qui attendent l'accord du titulaire principal. */
+  accords: AppData['accords'];
   total: number;
 }
 
@@ -61,7 +63,9 @@ export function decisions(data: AppData, today: ISODate): Decisions {
     }
   }
   const remplacements = (data.remplacements ?? []).filter((r) => r.statut === 'ouverte' && dayIndex(r.date) >= t);
+  const accords = data.accords ?? [];
   const total =
+    accords.length +
     remplacements.length +
     trous.length +
     absences.length +
@@ -71,5 +75,5 @@ export function decisions(data: AppData, today: ISODate): Decisions {
     gardesAbsence.length +
     gardesAValider.length +
     publications.length;
-  return { trous, absences, besoins, gardesAAffecter, gardesRepos, gardesAbsence, gardesAValider, publications, remplacements, total };
+  return { trous, absences, besoins, gardesAAffecter, gardesRepos, gardesAbsence, gardesAValider, publications, remplacements, accords, total };
 }

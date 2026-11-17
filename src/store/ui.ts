@@ -62,8 +62,13 @@ interface Ui {
   tour: number | null;
   /** Étape du parcours de test en cours ; null quand il est fermé. */
   parcours: number | null;
+  /** Parcours guidé en cours : la visite complète, ou la journée d'une pharmacie déjà en place. */
+  scenario: 'complet' | 'etabli';
+  /** Fenêtre de choix des tutoriels. */
+  tutoriels: boolean;
+  ouvrirTutoriels: (o: boolean) => void;
   /** Action demandée depuis la barre du haut, consommée par l'écran d'arrivée (ouvrir une fenêtre). */
-  intention: 'garde' | 'personne' | 'demande' | 'formation' | null;
+  intention: 'garde' | 'personne' | 'demande' | 'formation' | 'calendrier' | null;
   /** Onglet de « Résoudre » à ouvrir en arrivant (par exemple depuis le parcours de test). */
   sujet: string | null;
   /** Journée ouverte en détail (toute l'équipe, pauses, retards) ; null quand la fenêtre est fermée. */
@@ -72,7 +77,7 @@ interface Ui {
   setSujet: (s: string | null) => void;
   agir: (vue: Vue, intention: Ui['intention']) => void;
   setIntention: (i: Ui['intention']) => void;
-  setParcours: (etape: number | null) => void;
+  setParcours: (etape: number | null, scenario?: 'complet' | 'etabli') => void;
   aller: (vue: Vue) => void;
   setSemaine: (s: ISODate) => void;
   connecter: (personId: string, vue: Vue) => void;
@@ -108,7 +113,10 @@ export const useUi = create<Ui>((set) => ({
   setSujet: (sujet) => set({ sujet }),
   agir: (vue, intention) => set({ vue, intention, focus: null }),
   setIntention: (intention) => set({ intention }),
-  setParcours: (parcours) => set({ parcours, tour: null }),
+  scenario: 'etabli',
+  tutoriels: false,
+  ouvrirTutoriels: (tutoriels) => set({ tutoriels }),
+  setParcours: (parcours, scenario) => set((s) => ({ parcours, tour: null, tutoriels: false, scenario: scenario ?? s.scenario })),
   aller: (vue) => set({ vue, focus: null }),
   setSemaine: (semaine) => set({ semaine, focus: null }),
   connecter: (session, vue) => {

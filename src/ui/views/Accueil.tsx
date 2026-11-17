@@ -6,7 +6,7 @@ import type { Interval, Person, Qualification } from '../../domain/types';
 import { QUALIFICATION_COURT } from '../../domain/types';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { Logo, LogoNom } from '../kit';
+import { Logo, LogoNom, MotDePasse } from '../kit';
 
 interface Ligne {
   cle: string;
@@ -505,7 +505,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
                   </span>
                   <span>
                     <b>Vous, le titulaire principal</b>
-                    <span className="aide">Non salarié, vous détenez tous les droits. Vous seul pourrez donner à d’autres l’accès à la gestion.</span>
+                    <span className="aide">Non salarié, vous décidez en dernier ressort : les décisions des autres titulaires attendent votre accord.</span>
                   </span>
                 </legend>
                 <div className="ligne">
@@ -557,7 +557,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
                       <span>
                         Mot de passe <span className="oblig">(obligatoire)</span>
                       </span>
-                      <input id="tit-mdp" type="password" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} autoComplete="new-password" required aria-required="true" aria-invalid={!!errDe('tit-mdp')} aria-describedby="tit-mdp-aide" />
+                      <MotDePasse id="tit-mdp" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} autoComplete="new-password" required aria-required="true" aria-invalid={!!errDe('tit-mdp')} aria-describedby="tit-mdp-aide" />
                       <span className="aide" id="tit-mdp-aide">Au moins 6 caractères.</span>
                       {errDe('tit-mdp') ? (
                         <span className="erreur">
@@ -569,7 +569,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
                 )}
               </fieldset>
               <hr className="sep" />
-              <Groupe id="tit2" titre="Autres titulaires" aide="Vos associés, s’il y en a. Ils n’ont pas accès à la gestion tant que vous ne le leur accordez pas, dans « Équipe »." icone={<Crown size={18} />} ton="mint" singulier="titulaire" lignes={secondaires} onChange={setSecondaires} ajouter={() => ligne('titulaire', '35')} libelleAjout="Ajouter un titulaire" erreurs={erreurs} />
+              <Groupe id="tit2" titre="Autres titulaires" aide="Vos associés, s’il y en a. Ils ont les mêmes écrans que vous ; chacune de leurs décisions attend votre accord." icone={<Crown size={18} />} ton="mint" singulier="titulaire" lignes={secondaires} onChange={setSecondaires} ajouter={() => ligne('titulaire', '35')} libelleAjout="Ajouter un titulaire" erreurs={erreurs} />
               <hr className="sep" />
               <Groupe id="adj" titre="Pharmaciens adjoints" aide="Avec les titulaires, ils assurent la présence d’un pharmacien, pauses comprises." icone={<PillIcon size={18} />} ton="mint" singulier="pharmacien adjoint" lignes={adjoints} onChange={setAdjoints} ajouter={() => ligne('adjoint')} libelleAjout="Ajouter un pharmacien" erreurs={erreurs} />
               <hr className="sep" />

@@ -135,8 +135,8 @@ export function Construire(): JSX.Element {
 
   const ouverts = dates.map((d) => ouverture(data.officine, d).length > 0);
   const avecSynthese = lecture !== 'heures';
-  const colonnes = `${avecSynthese ? 208 : 232}px ${dates
-    .map((d, i) => (ouverts[i] ? 'minmax(108px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '104px' : '44px'))
+  const colonnes = `${avecSynthese ? 200 : 212}px ${dates
+    .map((d, i) => (ouverts[i] ? 'minmax(100px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '104px' : '40px'))
     .join(' ')}${avecSynthese ? ' 172px' : ''}`;
   const visibles = data.personnes.filter((p) => !p.externe || postes.some((s) => s.personId === p.id));
   const lignesEquite = useMemo(

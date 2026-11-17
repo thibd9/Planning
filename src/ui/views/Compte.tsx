@@ -6,7 +6,7 @@ import { useStore } from '../../store/store';
 import type { Theme } from '../../store/ui';
 import { prefsDe, useUi } from '../../store/ui';
 import { EtiquetteRole } from '../icons';
-import { Avatar, Pill } from '../kit';
+import { Avatar, MotDePasse, Pill } from '../kit';
 
 const THEMES: { cle: Theme; nom: string; couleur: string }[] = [
   { cle: 'ciel', nom: 'Bleu ciel', couleur: 'linear-gradient(120deg, #d6ebff, #9ccbf5 55%, #2474c4)' },
@@ -142,11 +142,11 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
             <div className="row wrap" style={{ alignItems: 'flex-end' }}>
               <label className="field" htmlFor="code-actuel">
                 Mot de passe actuel
-                <input id="code-actuel" type="password" autoComplete="current-password" value={actuel} onChange={(e) => setActuel(e.target.value)} style={{ width: 200 }} />
+                <MotDePasse id="code-actuel" autoComplete="current-password" value={actuel} onChange={(e) => setActuel(e.target.value)} style={{ width: 200 }} />
               </label>
               <label className="field" htmlFor="code-nouveau">
                 Nouveau mot de passe
-                <input id="code-nouveau" type="password" autoComplete="new-password" value={nouveau} onChange={(e) => setNouveau(e.target.value)} aria-describedby="code-aide" style={{ width: 200 }} />
+                <MotDePasse id="code-nouveau" autoComplete="new-password" value={nouveau} onChange={(e) => setNouveau(e.target.value)} aria-describedby="code-aide" style={{ width: 200 }} />
               </label>
               <button type="submit" className="btn primary" disabled={!nouveau || !actuel}>
                 Changer le mot de passe

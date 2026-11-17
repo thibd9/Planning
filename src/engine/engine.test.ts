@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { seed, vierge } from '../data/seed';
-import { empreinte, espaceDe, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, peutGerer } from '../domain/acces';
+import { empreinte, espaceDe, estResponsable, estSecondaire, identifiantPropose, libelleRole, memeIdentifiant, peutGerer } from '../domain/acces';
 import { addDays, dureeReelle, ferie, joursOuvresEntre, mondayOf, subtract, weekday } from '../domain/time';
 import type { AppData, Shift } from '../domain/types';
 import { minutesSemaine, shiftsSemaine, trousPharmacien } from './core';
@@ -349,13 +349,18 @@ describe('droits d’accès', () => {
     expect(espaceDe(data, helene)).toBe('responsable');
     expect(espaceDe(data, karim)).toBe('pharmacien');
     expect(espaceDe(data, camille)).toBe('equipe');
-    // Un second titulaire n'a aucun droit de gestion tant que le responsable ne le lui donne pas.
+    // Un second titulaire gère la pharmacie, sans être le titulaire principal : ses décisions attendront un accord.
     const second = { ...karim!, id: 'p_second', qualification: 'titulaire' as const, salarie: false };
     const d2: AppData = { ...data, personnes: data.personnes.concat(second) };
-    expect(peutGerer(d2, second)).toBe(false);
-    expect(espaceDe(d2, second)).toBe('pharmacien');
-    expect(espaceDe(d2, { ...second, gestion: true })).toBe('responsable');
-    expect(estResponsable(d2, { ...second, gestion: true })).toBe(false);
+    expect(peutGerer(d2, second)).toBe(true);
+    expect(espaceDe(d2, second)).toBe('responsable');
+    expect(estResponsable(d2, second)).toBe(false);
+    expect(estSecondaire(d2, second)).toBe(true);
+    expect(estSecondaire(d2, helene)).toBe(false);
+    // Un adjoint n'a la gestion que si le titulaire principal la lui donne, et n'est jamais « secondaire ».
+    expect(peutGerer(d2, karim)).toBe(false);
+    expect(peutGerer(d2, { ...karim!, gestion: true })).toBe(true);
+    expect(estSecondaire(d2, { ...karim!, gestion: true })).toBe(false);
   });
 });
 
@@ -407,10 +412,9 @@ describe('connexion et rôles', () => {
     const d = data;
     expect(libelleRole(d, d.personnes[0])).toBe('Titulaire principal');
     expect(libelleRole(d, second)).toBe('Titulaire secondaire');
-    expect(espaceDe(d, second)).toBe('pharmacien');
-    expect(espaceDe(d, { ...second, gestion: true })).toBe('responsable');
-    expect(peutGerer(d, second)).toBe(false);
-    expect(peutGerer(d, { ...second, gestion: true })).toBe(true);
+    expect(espaceDe(d, second)).toBe('responsable');
+    expect(peutGerer(d, second)).toBe(true);
+    expect(estSecondaire(d, second)).toBe(true);
   });
   it('donne un identifiant et un mot de passe à chaque membre de l’exemple', () => {
     const internes = data.personnes.filter((p) => !p.externe);

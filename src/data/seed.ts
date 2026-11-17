@@ -151,6 +151,7 @@ export function vierge(): AppData {
     messages: [],
     remplacements: [],
     ecarts: [],
+    accords: [],
   };
 }
 
@@ -229,6 +230,7 @@ export function seed(today: ISODate, avance = 0): AppData {
       { id: uid('msg'), de: 'p_camille', a: 'p_helene', texte: 'Bonjour Hélène, serait-il possible de me libérer mercredi prochain après 17 h ? Merci.', at: new Date(`${addDays(today, -1)}T14:40:00`).toISOString(), luPar: ['p_camille'] },
     ],
     remplacements: [],
+    accords: [],
     // Quelques écarts déjà constatés, pour que le suivi ne soit pas vide.
     ecarts: [
       { id: uid('e'), personId: 'p_jules', date: addDays(lundi, -20), type: 'retard', minutes: 15, at: creation },
@@ -258,6 +260,8 @@ export function seed(today: ISODate, avance = 0): AppData {
       { id: uid('m'), date: addDays(monday, 3), start: H(16), end: H(17), type: 'vaccination', personId: 'p_karim', salle: true, reportable: false },
     );
   }
+  // Départ « pharmacie à construire » : l'équipe et ses besoins existent, aucun planning n'est encore posé.
+  if (avance < -8) return { ...data, gardes: [], messages: [], ecarts: [], besoins: data.besoins.filter((b) => b.decision === 'acceptee') };
   data.missions = missions;
 
   // ---- Historique : huit semaines passées et la semaine en cours, générées puis publiées.

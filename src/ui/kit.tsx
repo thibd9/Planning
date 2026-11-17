@@ -1,6 +1,6 @@
-import { ArrowRight, X } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { useEffect, useId, useRef } from 'react';
+import { ArrowRight, Eye, EyeOff, X } from 'lucide-react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { fmtHeure } from '../domain/time';
 import type { Interval, Mission, Person, Shift } from '../domain/types';
 import { estPharmacien } from '../domain/types';
@@ -14,6 +14,19 @@ export function roleDe(p: Person | undefined): Role {
   if (estPharmacien(p)) return 'pharma';
   if (p.qualification === 'preparateur') return 'prepa';
   return 'autre';
+}
+
+/** Champ de mot de passe avec un œil pour l'afficher : on vérifie sa saisie sans la retaper. */
+export function MotDePasse(props: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>): JSX.Element {
+  const [visible, setVisible] = useState(false);
+  return (
+    <span className="mdp">
+      <input {...props} type={visible ? 'text' : 'password'} />
+      <button type="button" className="mdp-oeil" onClick={() => setVisible((v) => !v)} aria-pressed={visible} aria-label={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}>
+        {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+      </button>
+    </span>
+  );
 }
 
 export function Avatar({ person, lg }: { person: Person | undefined; lg?: boolean }): JSX.Element {
