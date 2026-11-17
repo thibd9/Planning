@@ -18,7 +18,7 @@ import {
   weekday,
 } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
-import { ABSENCE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien, nomCourt } from '../../domain/types';
+import { GARDE_LABEL, MISSION_LABEL, classeAbsence, estPharmacien, libelleAbsence, nomCourt } from '../../domain/types';
 import { decrireBesoin, decrireShift, minutesTravail } from '../../engine/core';
 import type { CompteurCle } from '../../engine/equity';
 import { peutRemplacer } from '../../engine/remplacement';
@@ -128,12 +128,12 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
           const garde = data.gardes.find((g) => g.personId === personId && g.date === date);
           return (
             <div key={titre} className={`jour${date === today ? ' auj' : ''}`}>
-              <span className={`moment ${absence ? (absence.type === 'conge' ? 'conge' : 'arret') : postes.length ? momentDe({ start: postes[0].start, end: postes[postes.length - 1].end }) : 'repos'}`} aria-hidden="true" style={{ float: 'right' }}>
+              <span className={`moment ${absence ? classeAbsence(absence.type) : postes.length ? momentDe({ start: postes[0].start, end: postes[postes.length - 1].end }) : 'repos'}`} aria-hidden="true" style={{ float: 'right' }}>
                 {absence ? <Ban size={17} /> : !postes.length ? <Coffee size={17} /> : momentDe({ start: postes[0].start, end: postes[postes.length - 1].end }) === 'soir' ? <Sunset size={17} /> : <Sun size={17} />}
               </span>
               <div className="eyebrow">{titre}</div>
               <div className="small soft cap1">{fmtDateCourt(date)}</div>
-              <div className="h num">{absence ? ABSENCE_LABEL[absence.type] : postes.length ? postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(' · ') : 'Repos'}</div>
+              <div className="h num">{absence ? libelleAbsence(absence) : postes.length ? postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(' · ') : 'Repos'}</div>
               <div className="small soft">
                 {postes.length ? `${fmtDuree(postes.reduce((t, s) => t + minutesTravail(s), 0))} de travail` : absence ? 'Absence approuvée' : 'Aucun poste publié'}
                 {postes[0]?.pauseStart != null && postes[0]?.pauseEnd != null ? ` · pause ${fmtHeure(postes[0].pauseStart)} – ${fmtHeure(postes[0].pauseEnd)}` : ''}
@@ -234,7 +234,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
         </div>
       ) : null}
 
-      <div className="me-grid">
+      <div className={`me-grid${affichage === 'calendrier' ? ' large' : ''}`}>
         <div className="col" style={{ gap: 18 }}>
           <div className="row wrap">
             <h2 className="grow">{affichage === 'semaine' ? 'Mes semaines' : 'Mon calendrier'}</h2>
@@ -319,10 +319,10 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                 </>
                               ) : (
                                 <div className="jh-titre">
-                                  <span className={`moment ${absence ? (absence.type === 'conge' ? 'conge' : 'arret') : 'repos'}`} aria-hidden="true">
+                                  <span className={`moment ${absence ? classeAbsence(absence.type) : 'repos'}`} aria-hidden="true">
                                     {absence ? <Ban size={17} /> : <Coffee size={17} />}
                                   </span>
-                                  <b className="jh-heures" style={{ color: 'var(--ink-2)' }}>{absence ? ABSENCE_LABEL[absence.type] : 'Repos'}</b>
+                                  <b className="jh-heures" style={{ color: 'var(--ink-2)' }}>{absence ? libelleAbsence(absence) : 'Repos'}</b>
                                 </div>
                               )}
                               {missions.length || gardes.length ? (
@@ -413,7 +413,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
               {absences.map((a) => (
                 <div key={a.id} className="row wrap">
                   <div className="grow">
-                    <b>{ABSENCE_LABEL[a.type]}</b>
+                    <b>{libelleAbsence(a)}</b>
                     <div className="small soft">
                       Du {fmtDateCourt(a.from)} au {fmtDateCourt(a.to)}
                     </div>

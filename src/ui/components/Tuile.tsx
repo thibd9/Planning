@@ -2,9 +2,10 @@ import { Sparkles } from 'lucide-react';
 import { JOURS, fmtDuree, fmtHHMM, fmtHeure, weekday } from '../../domain/time';
 import type { AppData, Person, Shift } from '../../domain/types';
 import { ACTIVITE_LABEL, nomCourt } from '../../domain/types';
-import { decrireShift, estFermeture, estOuverture, minutesTravail } from '../../engine/core';
+import { decrireShift, minutesTravail } from '../../engine/core';
 import { ACTIVITE_COURT, ACTIVITE_ICONE } from '../icons';
 import type { Echelle } from '../kit';
+import { momentDe } from '../kit';
 
 const pct = (e: Echelle, m: number): number => Math.max(0, Math.min(100, ((m - e.start) / (e.end - e.start)) * 100));
 
@@ -14,7 +15,6 @@ const pct = (e: Echelle, m: number): number => Math.max(0, Math.min(100, ((m - e
  * Avec `onClick`, la tuile est un bouton modifiable ; sans, elle est en lecture seule.
  */
 export function Tuile({
-  data,
   s,
   person,
   echelle,
@@ -22,7 +22,8 @@ export function Tuile({
   glissable,
   onClick,
 }: {
-  data: AppData;
+  /** Conservé pour les appelants ; le moment ne dépend plus que des heures du poste. */
+  data?: AppData;
   s: Shift;
   person: Person;
   echelle: Echelle;
@@ -30,9 +31,7 @@ export function Tuile({
   glissable?: boolean;
   onClick?: () => void;
 }): JSX.Element {
-  const ouvre = estOuverture(data.officine, s);
-  const ferme = estFermeture(data.officine, s);
-  const moment = ouvre && ferme ? 'journee' : ouvre ? 'matin' : ferme ? 'soir' : 'milieu';
+  const moment = momentDe(s);
   const Icone = ACTIVITE_ICONE[s.activite];
   const contenu = (
     <>

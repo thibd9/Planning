@@ -9,6 +9,7 @@ import { quotaAdjoints, validateEquipe } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { DialogueDemande } from '../components/Demande';
+import { DialogueFormation } from '../components/Formation';
 import { empreinte, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, responsable } from '../../domain/acces';
 import { EtiquetteRole } from '../icons';
 import { Avatar, Dialog, Empty, Pill } from '../kit';
@@ -32,10 +33,15 @@ export function Equipe(): JSX.Element {
   const { personneId, ouvrirPersonne } = useUi();
   const alertes = useMemo(() => validateEquipe(data), [data]);
   const [ajout, setAjout] = useState(false);
+  const [formation, setFormation] = useState(false);
   const { intention, setIntention } = useUi();
   useEffect(() => {
     if (intention === 'personne') {
       setAjout(true);
+      setIntention(null);
+    }
+    if (intention === 'formation') {
+      setFormation(true);
       setIntention(null);
     }
   }, [intention, setIntention]);
@@ -103,6 +109,7 @@ export function Equipe(): JSX.Element {
         {courant ? <Fiche key={courant.id} person={courant} /> : null}
       </div>
       {ajout ? <DialoguePersonne onClose={() => setAjout(false)} /> : null}
+      {formation ? <DialogueFormation onClose={() => setFormation(false)} /> : null}
     </div>
   );
 }

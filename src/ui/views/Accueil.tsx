@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, CircleAlert, LogIn, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Store, Trash2, UserRound, Users } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, CircleAlert, Crown, LogIn, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Store, Trash2, UserRound, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { empreinte, identifiantPropose } from '../../domain/acces';
 import { fmtHHMM, fmtHeure, parseHHMM, uid } from '../../domain/time';
@@ -183,6 +183,8 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
   const [titulaire, setTitulaire] = useState<Ligne>(ajout ? { ...ligne('titulaire', String(ajout.heuresHebdo)), prenom: ajout.prenom, nom: ajout.nom } : ligne('titulaire', '42'));
   const [identifiant, setIdentifiant] = useState(ajout?.identifiant ?? '');
   const [motDePasse, setMotDePasse] = useState('');
+  // Les titulaires secondaires viennent juste sous le titulaire principal ; aucun n'est imposé.
+  const [secondaires, setSecondaires] = useState<Ligne[]>([]);
   const [adjoints, setAdjoints] = useState<Ligne[]>([ligne('adjoint')]);
   const [preparateurs, setPreparateurs] = useState<Ligne[]>([ligne('preparateur'), ligne('preparateur')]);
   const [autres, setAutres] = useState<Ligne[]>([]);
@@ -205,6 +207,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
   }, [erreurs]);
 
   const groupes: { id: string; lignes: Ligne[]; singulier: string }[] = [
+    { id: 'tit2', lignes: secondaires, singulier: 'titulaire' },
     { id: 'adj', lignes: adjoints, singulier: 'pharmacien adjoint' },
     { id: 'prep', lignes: preparateurs, singulier: 'préparateur' },
     { id: 'autre', lignes: autres, singulier: 'personne' },
@@ -252,9 +255,9 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
     setEtape(n);
   };
 
-  const equipe = [titulaire, ...adjoints, ...preparateurs, ...autres].filter(complet);
+  const equipe = [titulaire, ...secondaires, ...adjoints, ...preparateurs, ...autres].filter(complet);
   const horaireSemaine: Interval[] = coupure ? [{ start: semaine.start, end: midi.start }, { start: midi.end, end: semaine.end }] : [{ ...semaine }];
-  const nbPharmaciens = 1 + adjoints.filter(complet).length;
+  const nbPharmaciens = 1 + secondaires.filter(complet).length + adjoints.filter(complet).length;
 
   const creer = (): void => {
     const tout = [...valider(0), ...valider(1)];
@@ -566,7 +569,9 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
                 )}
               </fieldset>
               <hr className="sep" />
-              <Groupe id="adj" titre="Pharmaciens adjoints" aide="Avec le titulaire, ils assurent la présence d’un pharmacien, pauses comprises." icone={<PillIcon size={18} />} ton="mint" singulier="pharmacien adjoint" lignes={adjoints} onChange={setAdjoints} ajouter={() => ligne('adjoint')} libelleAjout="Ajouter un pharmacien" erreurs={erreurs} />
+              <Groupe id="tit2" titre="Autres titulaires" aide="Vos associés, s’il y en a. Ils n’ont pas accès à la gestion tant que vous ne le leur accordez pas, dans « Équipe »." icone={<Crown size={18} />} ton="mint" singulier="titulaire" lignes={secondaires} onChange={setSecondaires} ajouter={() => ligne('titulaire', '35')} libelleAjout="Ajouter un titulaire" erreurs={erreurs} />
+              <hr className="sep" />
+              <Groupe id="adj" titre="Pharmaciens adjoints" aide="Avec les titulaires, ils assurent la présence d’un pharmacien, pauses comprises." icone={<PillIcon size={18} />} ton="mint" singulier="pharmacien adjoint" lignes={adjoints} onChange={setAdjoints} ajouter={() => ligne('adjoint')} libelleAjout="Ajouter un pharmacien" erreurs={erreurs} />
               <hr className="sep" />
               <Groupe id="prep" titre="Préparateurs" aide="Indiquez les heures du contrat : un temps partiel est comparé au prorata." icone={<Users size={18} />} ton="sky" singulier="préparateur" lignes={preparateurs} onChange={setPreparateurs} ajouter={() => ligne('preparateur')} libelleAjout="Ajouter un préparateur" erreurs={erreurs} />
               <hr className="sep" />
@@ -612,7 +617,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
                 <ul className="chips">
                   {equipe.map((l) => (
                     <li key={l.cle} className="pill" style={{ padding: '5px 12px', fontSize: 13 }}>
-                      {l.prenom} {l.nom} · {QUALIFICATION_COURT[l.qualification]} · {l.heures} h
+                      {l.prenom} {l.nom} · {l === titulaire ? 'Titulaire principal' : l.qualification === 'titulaire' ? 'Titulaire secondaire' : QUALIFICATION_COURT[l.qualification]} · {l.heures} h
                     </li>
                   ))}
                 </ul>

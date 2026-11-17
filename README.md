@@ -28,8 +28,9 @@ npm run build
 
 Node 20 ou plus récent. L'application s'ouvre sur la **page de connexion** : identifiant et mot de passe
 à gauche, « Première visite ? » à droite, et l'**environnement de test** en dessous. « Créer ma pharmacie »
-lance trois étapes : la pharmacie (nom, horaires, fermeture le midi éventuelle), l'équipe (titulaire
-principal avec son identifiant et son mot de passe, pharmaciens adjoints, préparateurs, autres postes),
+lance trois étapes : la pharmacie (nom, horaires, fermeture le midi éventuelle), l'équipe, dans l'ordre : vous, titulaire
+principal, avec votre identifiant et votre mot de passe ; les autres titulaires s'il y en a ; les pharmaciens
+adjoints ; les préparateurs ; les autres postes,
 puis une vérification avant de créer. Un tutoriel guidé présente ensuite chaque espace.
 
 ## Environnement de test
@@ -94,7 +95,7 @@ Un vrai contrôle d'accès et une vraie messagerie demandent un serveur.
 | **Résoudre** | Que décider aujourd'hui ? | Cinq onglets, un sujet à la fois : absences à couvrir (un volet par jour, options comparées, détails à la demande), remplacements, demandes, gardes, plannings à publier |
 | **Construire** | Comment couvrir la semaine ? | Grille à l'échelle du temps, contrôles immédiats, trois propositions (équité, souhaits, coût), brouillon puis publication |
 | **Gardes** | Affecter, prévenir, payer | Ajout d'une garde avec le pharmacien à qui la confier et sa notification immédiate, délai de 15 jours, interventions, repos à protéger, variables pour le comptable |
-| **Mon planning** | Quand est-ce que je travaille ? | Aujourd'hui, demain et la suite en un coup d'œil ; vue **Semaine** (horaire écrit en grand, puis frise graduée de 8 h à 20 h avec la pause hachurée) ou vue **Calendrier** du mois ; changements avant → après, demandes, remplacements, part des contraintes |
+| **Mon planning** | Quand est-ce que je travaille ? | Aujourd'hui, demain et la suite en un coup d'œil ; vue **Semaine** (horaire écrit en grand, puis frise graduée de 8 h à 20 h avec la pause hachurée) ou vue **Calendrier** du mois, en grandes cases sur toute la largeur ; changements avant → après, demandes, remplacements, part des contraintes |
 | **Messages** | Qui prévenir ? | Fil de toute l'équipe et conversations privées |
 
 Et en référentiel : équipe et compétences, mémoire d'équité, fiches de règles, journal de preuve,
@@ -113,6 +114,13 @@ fiche navette, réglages de l'officine.
    pharmaciens sont comparés (disponibilité, charge déjà portée, postes à déplacer, coût) ; les gardes
    libres se répartissent équitablement en un clic, avec la raison de chaque choix ; un tour de garde
    régulier se crée en série ; un calendrier sur douze mois et un récapitulatif mensuel complètent le tout.
+
+### Formations
+
+Le responsable planifie une formation depuis « Créer » dans la barre du haut : un intitulé, des dates, des
+participants. Chacun est prévenu dans son espace et retrouve la formation dans son planning et son
+calendrier ; les postes prévus ces jours-là passent dans « Résoudre », avec des options de remplacement.
+Pour quelques heures de formation pendant un poste, la tâche « Formation » se choisit sur le poste.
 
 ### Demandes de remplacement
 
@@ -145,9 +153,9 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 
 - **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ au moins 3:1, dans
   chacun des cinq thèmes (bleu ciel par défaut, violet, bleu-vert, bleu marine, ardoise).
-- **Repères de couleur dans les plannings** : jaune pour le matin, bleu pour la journée complète, orange
-  pour le milieu de journée, violet pour le soir, indigo pour la garde, vert d'eau pour le congé, rouge
-  doux pour l'arrêt. L'horaire est toujours écrit dans la tuile : la couleur aide, elle n'est jamais seule.
+- **Repères de couleur dans les plannings**, les mêmes dans la grille, la frise et le calendrier : jaune
+  pour le matin, orange pour la journée, bleu pour la journée longue, violet pour le soir, indigo pour la
+  garde, vert d'eau pour le congé, rouge doux pour l'arrêt, turquoise pour la formation. L'horaire est toujours écrit dans la tuile : la couleur aide, elle n'est jamais seule.
 - **Sans contours colorés** : boutons et cartes n'ont pas de bordure de couleur. Un élément choisi se lit à
   son fond teinté, à une coche ou à un libellé ; seuls les champs de saisie gardent un filet neutre.
 - **Aides au survol** : un jour à problème dans la ligne « Couverture » porte une pastille pleine ; au
@@ -162,7 +170,7 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 70 écrans,
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 72 écrans,
 fenêtres et thèmes vérifiés, ordinateur et téléphone. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
 contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 

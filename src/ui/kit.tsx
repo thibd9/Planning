@@ -146,12 +146,17 @@ export interface Echelle {
 const pct = (e: Echelle, m: number): number => Math.max(0, Math.min(100, ((m - e.start) / (e.end - e.start)) * 100));
 
 /** Barre de poste dessinée à l'échelle du temps, pause visible. */
-/** Moment d'un poste, pour sa couleur : matin (jaune), journée (vert), milieu (orange), soir (violet). */
-export function momentDe(s: { start: number; end: number }): 'matin' | 'journee' | 'milieu' | 'soir' {
+/**
+ * Moment d'un poste, le même partout (grille, frise, calendrier) : matin s'il finit avant 14 h 30,
+ * soir s'il commence après 11 h 30, journée s'il finit avant 18 h, journée longue sinon.
+ */
+export type Moment = 'matin' | 'journee' | 'milieu' | 'soir';
+export function momentDe(s: { start: number; end: number }): Moment {
   if (s.end <= 14 * 60 + 30) return 'matin';
   if (s.start >= 11 * 60 + 30) return 'soir';
-  return s.start <= 9 * 60 + 30 && s.end < 18 * 60 ? 'milieu' : 'journee';
+  return s.end < 18 * 60 ? 'milieu' : 'journee';
 }
+export const MOMENT_LABEL: Record<Moment, string> = { matin: 'Matin', journee: 'Journée longue', milieu: 'Journée', soir: 'Soir' };
 
 /** Heures rondes affichées sous une frise : toutes les deux heures, de l'ouverture à la fermeture. */
 const graduations = (e: Echelle): number[] => {

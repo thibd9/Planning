@@ -51,7 +51,7 @@ import {
 } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
 import { HEBERGE } from '../../env';
-import { ABSENCE_LABEL, ACTIVITE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt } from '../../domain/types';
+import { ABSENCE_LABEL, ACTIVITE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt, classeAbsence } from '../../domain/types';
 import {
   besoinsDe,
   decrireBesoin,
@@ -392,7 +392,7 @@ export function Construire(): JSX.Element {
                                     </span>
                                   ) : null}
                                   {absence ? (
-                                    <span className={`tile ${absence.type === 'conge' ? 'conge' : absence.type === 'maladie' ? 'arret' : 'absence'}`}>
+                                    <span className={`tile ${classeAbsence(absence.type)}`}>
                                       <span className="ti" aria-hidden="true">
                                         {(() => {
                                           const I = ABSENCE_ICONE[absence.type];
@@ -445,13 +445,14 @@ export function Construire(): JSX.Element {
                   </li>
                 );
               })}
-              <li><i className="matin" /> Matin (ouverture)</li>
-              <li><i className="journee" /> Journée complète</li>
-              <li><i className="milieu" /> Milieu de journée</li>
-              <li><i className="soir" /> Soir (fermeture)</li>
+              <li><i className="matin" /> Matin</li>
+              <li><i className="milieu" /> Journée</li>
+              <li><i className="journee" /> Journée longue</li>
+              <li><i className="soir" /> Soir</li>
               <li><i className="garde" /> Garde</li>
               <li><i className="conge" /> Congé</li>
               <li><i className="arret" /> Arrêt</li>
+              <li><i className="formation" /> Formation</li>
               <li><Lock size={13} aria-hidden="true" /> Indisponibilité reconnue</li>
               <li><Sparkles size={13} aria-hidden="true" /> Affectation expliquée</li>
             </ul>

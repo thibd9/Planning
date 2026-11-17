@@ -63,7 +63,7 @@ interface Ui {
   /** Étape du parcours de test en cours ; null quand il est fermé. */
   parcours: number | null;
   /** Action demandée depuis la barre du haut, consommée par l'écran d'arrivée (ouvrir une fenêtre). */
-  intention: 'garde' | 'personne' | 'demande' | null;
+  intention: 'garde' | 'personne' | 'demande' | 'formation' | null;
   /** Onglet de « Résoudre » à ouvrir en arrivant (par exemple depuis le parcours de test). */
   sujet: string | null;
   setSujet: (s: string | null) => void;

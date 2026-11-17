@@ -94,6 +94,8 @@ export interface Absence {
   type: AbsenceType;
   statut: AbsenceStatut;
   createdAt: string;
+  /** Intitulé d'une formation. Jamais utilisé pour un congé ou un arrêt : aucun motif n'est conservé. */
+  libelle?: string;
 }
 
 /**
@@ -385,6 +387,11 @@ export const GARDE_LABEL: Record<GardeType, string> = {
   volets_fermes: 'Garde à volets fermés',
   astreinte: 'Astreinte à domicile',
 };
+
+/** Libellé d'une absence, avec l'intitulé quand c'est une formation. */
+export const libelleAbsence = (a: Pick<Absence, 'type' | 'libelle'>): string => (a.type === 'formation' && a.libelle ? `Formation · ${a.libelle}` : ABSENCE_LABEL[a.type]);
+/** Classe de couleur d'une absence dans les plannings. */
+export const classeAbsence = (type: AbsenceType): string => ({ conge: 'conge', maladie: 'arret', formation: 'formation', autre: 'absence' })[type];
 
 export const ABSENCE_LABEL: Record<AbsenceType, string> = {
   conge: 'Congé',

@@ -125,6 +125,8 @@ export interface Store {
   publier: (monday: ISODate, accords: string[], bloquantsAssumes: number) => void;
 
   declarerAbsence: (a: Omit<Absence, 'id' | 'createdAt'>) => void;
+  /** Formation planifiée par le responsable : une absence approuvée par participant, chacun prévenu. */
+  planifierFormation: (f: { intitule: string; personnes: string[]; from: ISODate; to: ISODate }) => void;
   deciderAbsence: (id: string, approuver: boolean) => void;
   resoudreTrou: (id: string, option: RepairOption) => void;
 
@@ -386,6 +388,20 @@ export const useStore = create<Store>((set, get) => {
           titre: `${ABSENCE_LABEL[a.type]} de ${nom(d, a.personId)} ${a.statut === 'approuvee' ? 'enregistré' : 'demandé'}`,
           detail: `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}.`,
         });
+      }),
+    planifierFormation: ({ intitule, personnes, from, to }) =>
+      commit((d, today) => {
+        const at = now();
+        let next = d;
+        for (const personId of personnes) {
+          const absence: Absence = { id: uid('a'), personId, from, to, type: 'formation', statut: 'approuvee', createdAt: at, libelle: intitule };
+          next = appliquerAbsence({ ...next, absences: next.absences.concat(absence) }, absence, today);
+        }
+        const quand = from === to ? `le ${fmtDateCourt(from)}` : `du ${fmtDateCourt(from)} au ${fmtDateCourt(to)}`;
+        return journal(
+          { ...next, notifications: [...personnes.map((personId) => ({ id: uid('n'), personId, at, date: from, avant: 'Planning habituel', apres: `Formation « ${intitule} » ${quand}`, tardif: dayIndex(from) - dayIndex(today) < 7 })), ...next.notifications] },
+          { type: 'absence', titre: `Formation « ${intitule} » planifiée ${quand}`, detail: `Participants : ${personnes.map((id) => nom(d, id)).join(', ')}. Chacun a été prévenu dans son espace.` },
+        );
       }),
     deciderAbsence: (id, approuver) =>
       commit((d, today) => {

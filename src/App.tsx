@@ -1,4 +1,4 @@
-import { Bell, BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, LayoutDashboard, ListChecks, LogOut, MessageSquare, MoonStar, Scale, Plus, ScrollText, Settings, Settings2, Store, UserRound, Users } from 'lucide-react';
+import { Bell, BookOpenCheck, Building2, CalendarDays, GraduationCap, CalendarRange, ChevronDown, CircleHelp, LayoutDashboard, ListChecks, LogOut, MessageSquare, MoonStar, Scale, Plus, ScrollText, Settings, Settings2, Store, UserRound, Users } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { ESPACE_LABEL, espaceDe, estResponsable, memeIdentifiant } from './domain/acces';
@@ -240,6 +240,9 @@ export function App(): JSX.Element {
                       </button>
                       <button type="button" onClick={() => { setPanneau(null); agir('gardes', 'garde'); }}>
                         <MoonStar size={17} aria-hidden="true" /> Une garde
+                      </button>
+                      <button type="button" onClick={() => { setPanneau(null); agir('equipe', 'formation'); }}>
+                        <GraduationCap size={17} aria-hidden="true" /> Une formation
                       </button>
                       <button type="button" onClick={() => { setPanneau(null); agir('equipe', 'personne'); }}>
                         <Users size={17} aria-hidden="true" /> Une personne dans l’équipe
