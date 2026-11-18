@@ -91,7 +91,7 @@ export function Journal(): JSX.Element {
   const titreMois = `${majuscule(MOIS[Number(mois.slice(5)) - 1])} ${mois.slice(0, 4)}`;
 
   return (
-    <div style={{ maxWidth: 1100 }}>
+    <div className="page page-journal">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <ScrollText size={26} />

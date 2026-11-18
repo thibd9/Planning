@@ -42,7 +42,7 @@ export function Officine(): JSX.Element {
   };
 
   return (
-    <div style={{ maxWidth: 1080 }}>
+    <div className="page page-officine">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <Settings2 size={26} />
@@ -64,62 +64,84 @@ export function Officine(): JSX.Element {
         </label>
       </div>
 
-      <div className="split" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
-        <div className="card">
-          <div className="card-head">
-            <h2 className="h3">Horaires d'ouverture</h2>
-          </div>
-          <div role="list" aria-label="Horaires d’ouverture par jour">
-              {JOURS.map((j, i) => {
-                const plages = officine.horaires[i];
-                const setPlages = (p: Interval[]): void => majOfficine({ horaires: officine.horaires.map((h, k) => (k === i ? p : h)) });
-                return (
-                  <div key={j} className="jour-ligne" role="listitem">
-                    <div className="jl-nom cap1">{j}</div>
-                    <div className="jl-heures">
-                      {plages.length ? (
-                        <div className="col" style={{ gap: 6 }}>
-                          {plages.map((h, k) => (
-                            <div key={k} className="row" style={{ gap: 6 }}>
-                              <Heure label={`${k === 0 ? 'Ouverture' : 'Réouverture'} le ${j}`} value={h.start} onChange={(v) => setPlages(plages.map((x, n) => (n === k ? { ...x, start: v } : x)))} />
-                              <span className="muted" aria-hidden="true">→</span>
-                              <Heure label={`${k === plages.length - 1 ? 'Fermeture' : 'Fermeture du midi'} le ${j}`} value={h.end} onChange={(v) => setPlages(plages.map((x, n) => (n === k ? { ...x, end: v } : x)))} />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="muted">Fermé</span>
-                      )}
-                    </div>
-                    <div className="jl-actions">
-                        {plages.length === 1 && plages[0].end - plages[0].start > 240 ? (
-                          <button
-                            type="button"
-                            className="btn sm"
-                            aria-label={`Coupure le midi : ${j}`}
-                            onClick={() => setPlages([{ start: plages[0].start, end: Math.max(plages[0].start + 60, Math.min(750, plages[0].end - 120)) }, { start: Math.max(plages[0].start + 120, Math.min(840, plages[0].end - 60)), end: plages[0].end }])}
-                          >
-                            Coupure le midi
+      <div className="split egal">
+        <div className="col" style={{ gap: 18 }}>
+          <div className="card horaires">
+            <div className="card-head">
+              <h2 className="h3">Horaires d'ouverture</h2>
+            </div>
+            <div role="list" aria-label="Horaires d’ouverture par jour">
+                {JOURS.map((j, i) => {
+                  const plages = officine.horaires[i];
+                  const setPlages = (p: Interval[]): void => majOfficine({ horaires: officine.horaires.map((h, k) => (k === i ? p : h)) });
+                  return (
+                    <div key={j} className="jour-ligne" role="listitem">
+                      <div className="jl-nom cap1">{j}</div>
+                      <div className="jl-heures">
+                        {plages.length ? (
+                          <div className="jl-plages">
+                            {plages.map((h, k) => (
+                              <div key={k} className="row" style={{ gap: 6 }}>
+                                <Heure label={`${k === 0 ? 'Ouverture' : 'Réouverture'} le ${j}`} value={h.start} onChange={(v) => setPlages(plages.map((x, n) => (n === k ? { ...x, start: v } : x)))} />
+                                <span className="muted" aria-hidden="true">→</span>
+                                <Heure label={`${k === plages.length - 1 ? 'Fermeture' : 'Fermeture du midi'} le ${j}`} value={h.end} onChange={(v) => setPlages(plages.map((x, n) => (n === k ? { ...x, end: v } : x)))} />
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="muted">Fermé</span>
+                        )}
+                      </div>
+                      <div className="jl-actions">
+                          {plages.length === 1 && plages[0].end - plages[0].start > 240 ? (
+                            <button
+                              type="button"
+                              className="btn sm"
+                              aria-label={`Coupure le midi : ${j}`}
+                              onClick={() => setPlages([{ start: plages[0].start, end: Math.max(plages[0].start + 60, Math.min(750, plages[0].end - 120)) }, { start: Math.max(plages[0].start + 120, Math.min(840, plages[0].end - 60)), end: plages[0].end }])}
+                            >
+                              Coupure le midi
+                            </button>
+                          ) : null}
+                          {plages.length === 2 ? (
+                            <button type="button" className="btn sm" aria-label={`Sans coupure : ${j}`} onClick={() => setPlages([{ start: plages[0].start, end: plages[1].end }])}>
+                              Sans coupure
+                            </button>
+                          ) : null}
+                          <button type="button" className="btn sm" aria-label={plages.length ? `Fermer ce jour : ${j}` : `Ouvrir : ${j}`} onClick={() => setPlages(plages.length ? [] : [{ start: 9 * 60, end: 19 * 60 }])}>
+                            {plages.length ? 'Fermer ce jour' : 'Ouvrir'}
                           </button>
-                        ) : null}
-                        {plages.length === 2 ? (
-                          <button type="button" className="btn sm" aria-label={`Sans coupure : ${j}`} onClick={() => setPlages([{ start: plages[0].start, end: plages[1].end }])}>
-                            Sans coupure
-                          </button>
-                        ) : null}
-                        <button type="button" className="btn sm" aria-label={plages.length ? `Fermer ce jour : ${j}` : `Ouvrir : ${j}`} onClick={() => setPlages(plages.length ? [] : [{ start: 9 * 60, end: 19 * 60 }])}>
-                          {plages.length ? 'Fermer ce jour' : 'Ouvrir'}
-                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
+            <div className="card-body" style={{ borderTop: '1px solid var(--line)' }}>
+              <label className="check">
+                <input type="checkbox" checked={officine.fermeJoursFeries} onChange={(e) => majOfficine({ fermeJoursFeries: e.target.checked })} />
+                Officine fermée les jours fériés (hors gardes)
+              </label>
+            </div>
           </div>
-          <div className="card-body" style={{ borderTop: '1px solid var(--line)' }}>
-            <label className="check">
-              <input type="checkbox" checked={officine.fermeJoursFeries} onChange={(e) => majOfficine({ fermeJoursFeries: e.target.checked })} />
-              Officine fermée les jours fériés (hors gardes)
-            </label>
+          <div className="card pad col">
+            <h2 className="h3">Paramètres</h2>
+            <div className="champs">
+              <label className="field">
+                Valeur du point conventionnel (€)
+                <input type="number" step="0.001" min={0} placeholder="à saisir" value={officine.valeurPoint ?? ''} onChange={(e) => majOfficine({ valeurPoint: e.target.value === '' ? null : Number(e.target.value) })} />
+              </label>
+              <label className="field">
+                Demandes prioritaires par personne
+                <input type="number" min={0} max={6} value={officine.plafondPrioritaires} onChange={(e) => majOfficine({ plafondPrioritaires: Number(e.target.value) })} />
+              </label>
+              <label className="field">
+                Chiffre d'affaires annuel HT (€)
+                <input type="number" step={10000} min={0} value={officine.caAnnuelHT ?? ''} onChange={(e) => majOfficine({ caAnnuelHT: e.target.value === '' ? null : Number(e.target.value) })} />
+              </label>
+            </div>
+            <p className="tiny muted">
+              La valeur du point n'est pas préremplie : reprenez-la dans le barème en vigueur. Tant qu'elle est vide, les indemnités de sujétion sont exprimées en points.
+            </p>
           </div>
         </div>
 
@@ -220,26 +242,6 @@ export function Officine(): JSX.Element {
             <p className="tiny muted">Les règles et le nombre minimum de personnes passent toujours avant les préférences.</p>
           </div>
 
-          <div className="card pad col">
-            <h2 className="h3">Paramètres</h2>
-            <div className="row wrap" style={{ alignItems: 'flex-end' }}>
-              <label className="field">
-                Valeur du point conventionnel (€)
-                <input type="number" step="0.001" min={0} placeholder="à saisir" value={officine.valeurPoint ?? ''} onChange={(e) => majOfficine({ valeurPoint: e.target.value === '' ? null : Number(e.target.value) })} style={{ width: 170 }} />
-              </label>
-              <label className="field">
-                Demandes prioritaires par personne
-                <input type="number" min={0} max={6} value={officine.plafondPrioritaires} onChange={(e) => majOfficine({ plafondPrioritaires: Number(e.target.value) })} style={{ width: 170 }} />
-              </label>
-              <label className="field">
-                Chiffre d'affaires annuel HT (€)
-                <input type="number" step={10000} min={0} value={officine.caAnnuelHT ?? ''} onChange={(e) => majOfficine({ caAnnuelHT: e.target.value === '' ? null : Number(e.target.value) })} style={{ width: 190 }} />
-              </label>
-            </div>
-            <p className="tiny muted">
-              La valeur du point n'est pas préremplie : reprenez-la dans le barème en vigueur. Tant qu'elle est vide, les indemnités de sujétion sont exprimées en points.
-            </p>
-          </div>
         </div>
       </div>
 
@@ -248,7 +250,7 @@ export function Officine(): JSX.Element {
           <h2 className="h3">Support</h2>
           <p className="soft small" style={{ margin: '3px 0 0' }}>Quand Solvi ne sait pas répondre, il propose de joindre cette personne. Laissez vide : il renverra vers vous.</p>
         </div>
-        <div className="row wrap" style={{ alignItems: 'flex-end' }}>
+        <div className="champs">
           <label className="field" htmlFor="support-nom">
             Nom du contact
             <input id="support-nom" value={officine.support?.nom ?? ''} onChange={(e) => majOfficine({ support: { ...officine.support, nom: e.target.value } })} placeholder="Support Solvéa" autoComplete="off" />
@@ -294,7 +296,7 @@ export function Officine(): JSX.Element {
             <Plus size={14} /> Ajouter un poste type
           </button>
         </div>
-        <table className="t" style={{ minWidth: 900 }}>
+        <table className="t pt-table">
           <thead>
             <tr>
               <th scope="col">Poste</th>
@@ -310,7 +312,7 @@ export function Officine(): JSX.Element {
             {officine.postes.map((p) => (
               <tr key={p.id}>
                 <td>
-                  <input className="input" aria-label="Nom du poste" value={p.label} onChange={(e) => setPoste(p.id, { label: e.target.value })} style={{ fontWeight: 650, width: 170, padding: '6px 9px' }} />
+                  <input className="input pt-nom" aria-label="Nom du poste" value={p.label} onChange={(e) => setPoste(p.id, { label: e.target.value })} />
                 </td>
                 <td>
                   <span className="pt-couleur">

@@ -2876,20 +2876,12 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
   .aide-fab { padding: 2px; }
 }
 
-/* Le nom de Solvi a sa propre écriture : ronde et pleine, différente du reste de l'interface. */
-@font-face {
-  font-family: 'Fredoka Variable';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 300 700;
-  src: url('../../node_modules/@fontsource-variable/fredoka/files/fredoka-latin-wght-normal.woff2') format('woff2-variations');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-.solvi-nom { font-family: 'Fredoka Variable', 'Onest Variable', system-ui, sans-serif; font-weight: 650; letter-spacing: 0.01em; font-size: 1.22em; line-height: 1.05; }
-.solvi-nom.teinte { background: linear-gradient(100deg, var(--a-plein), var(--a-plein-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-:root[data-mode='sombre'] .solvi-nom.teinte, .sombre .solvi-nom.teinte { background: linear-gradient(100deg, color-mix(in srgb, var(--a-plein-2) 55%, #fff), color-mix(in srgb, var(--a-plein-2) 25%, #fff)); -webkit-background-clip: text; background-clip: text; }
-.aide-tete h2.solvi-nom { font-size: 24px; }
-.solvi-bulle-nom { font-size: 15px; margin-bottom: -2px; }
+/* Le nom de Solvi est son logo : les lettres dans la couleur du texte, le point du « i » dans celle du thème. */
+.solvi-nom { display: inline-block; height: 0.92em; width: auto; aspect-ratio: 577 / 206; vertical-align: -0.08em; color: var(--ink); overflow: visible; }
+:root[data-mode='sombre'] .solvi-nom { --solvi-point: color-mix(in srgb, var(--a-plein-2) 50%, #fff); }
+.aide-tete .solvi-nom { height: 24px; color: inherit; }
+.aide-tete h2 { line-height: 1; margin-bottom: 4px; }
+.solvi-bulle-nom { height: 15px; }
 
 /* Solvi flotte sans ombre portée : ni tache au sol, ni ombre sous son corps. */
 .solvi-ombre { display: none; }
@@ -2911,3 +2903,197 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
 
 /* Solvi renvoie vers une personne : le support, ou le titulaire. */
 .aide-support { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+/* Le rythme de la visite se choisit avant de démarrer : posé, normal ou vif. */
+.rythme { display: grid; gap: 10px; padding: 16px 18px; margin-bottom: 18px; border-radius: 18px; background: var(--a-soft); }
+.rythme-titre { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; color: var(--a-text); }
+.rythme-choix { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.rythme-option { display: grid; gap: 2px; padding: 10px 14px; border: 2px solid transparent; border-radius: 14px; background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.rythme-option span { font-size: 13px; color: var(--ink-2); }
+.rythme-option.on { border-color: var(--a-deep); box-shadow: var(--shadow-1); }
+.rythme-option.on b { color: var(--a-text); }
+.rythme.compact { grid-template-columns: auto 1fr; align-items: center; gap: 10px; margin: 12px 20px 0; padding: 8px 10px 8px 12px; border-radius: 14px; }
+.rythme.compact .rythme-titre { font-size: 12.5px; font-weight: 650; }
+.rythme.compact .rythme-option { padding: 5px 8px; text-align: center; border-radius: 10px; font-size: 13px; }
+@media (max-width: 560px) {
+  .rythme-option span { display: none; }
+  .rythme.compact { grid-template-columns: 1fr; margin-inline: 14px; }
+}
+
+/* Grille : tout au même niveau. Chaque date occupe la même boîte, qu'elle soit le jour même ou non ;
+   chaque case « Équipe au complet ? » a la même pastille, un mot et une ligne de détail. */
+.pg-h .jour-btn .n, .pg-h.today .jour-btn .n { width: 36px; height: 36px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; line-height: 1; }
+.pg-h .jour-btn { gap: 1px; }
+.pg-h .jour-btn .d { line-height: 1.3; }
+.jour-voir { margin-top: 7px; padding: 3px 9px; font-size: 11.5px; background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--a-2, var(--a)) 55%, transparent); }
+.pg-o { justify-content: flex-start; gap: 6px; padding: 12px 6px; }
+.pg-o .mark { width: 26px; height: 26px; }
+.pg-o .mark.ok { background: var(--ok-soft); color: var(--ok-ink); }
+.pg-o .mark.off { background: var(--n-1); }
+.pg-o-mot b { white-space: nowrap; font-size: 12.5px; }
+.pg-o-detail { display: block; min-height: 15px; white-space: nowrap; }
+
+/* Visite : Solvi vole se poser près de ce qu'il montre, et parle dans une vraie bulle. */
+.solvi-guide.vole { transform: none; width: min(392px, calc(100vw - 32px)); gap: 8px; bottom: auto; align-items: center; transition: left 0.75s cubic-bezier(0.34, 1.2, 0.4, 1), top 0.75s cubic-bezier(0.34, 1.2, 0.4, 1); }
+.solvi-guide.vole .solvi-guide-qui { margin: 0; }
+.solvi-guide .solvi-guide-qui { transition: rotate 0.35s ease; }
+.solvi-guide.vers-droite .solvi-guide-qui { rotate: 14deg; }
+.solvi-guide.vers-gauche .solvi-guide-qui { rotate: -14deg; }
+/* À gauche d'une fenêtre, Solvi passe de l'autre côté de sa bulle pour rester tourné vers ce qu'il montre. */
+.solvi-guide.vole.c-gauche { flex-direction: row-reverse; }
+.solvi-bulle { gap: 6px; padding: 16px 18px 12px 20px; border-radius: 24px; background: var(--surface); box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.6), 0 0 0 2px color-mix(in srgb, var(--a-plein-2) 42%, transparent); }
+.solvi-guide .solvi-bulle, .solvi-guide.haut .solvi-bulle { border-radius: 24px; }
+/* La pointe de la bulle, tournée vers Solvi. */
+.solvi-bulle::before { content: ''; position: absolute; left: -9px; bottom: 26px; width: 20px; height: 20px; border-radius: 5px; rotate: 45deg; background: var(--surface); box-shadow: -2px 2px 0 0 color-mix(in srgb, var(--a-plein-2) 42%, transparent); }
+.solvi-guide.vole .solvi-bulle::before { bottom: calc(50% - 10px); }
+.solvi-guide.vole.c-gauche .solvi-bulle::before { left: auto; right: -9px; box-shadow: 2px -2px 0 0 color-mix(in srgb, var(--a-plein-2) 42%, transparent); }
+.solvi-bulle-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 2px; }
+.solvi-pas { display: inline-flex; gap: 5px; }
+.solvi-pas i { width: 7px; height: 7px; border-radius: 50%; background: var(--n-3); transition: width 0.3s ease, background 0.3s ease; }
+.solvi-pas i.fait { background: color-mix(in srgb, var(--a-plein-2) 55%, var(--surface)); }
+.solvi-pas i.on { width: 20px; border-radius: 4px; background: var(--a-deep); }
+/* Ce que dit Solvi arrive en douceur à chaque nouveau geste. */
+.solvi-dit { display: grid; gap: 4px; animation: solvi-dit 0.4s var(--fluide) both; }
+@keyframes solvi-dit { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (max-width: 900px) {
+  .solvi-bulle::before { bottom: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .solvi-guide.vole, .solvi-guide .solvi-guide-qui { transition: none; }
+  .solvi-dit { animation: none; }
+}
+
+.solvi-guide.vole .solvi-bulle b { font-size: 15px; }
+.solvi-guide.vole .solvi-sert { font-size: 13.5px; }
+.solvi-guide.vole .solvi-bulle { padding: 14px 16px 10px 18px; }
+
+/* ------------------------------------------------------------------------------------------------
+   Planning personnel : plus clair, moins de gris. Chaque moment de la journée a sa teinte franche,
+   posée en voile léger sur du blanc plutôt qu'en bandeau sur une tuile grise.
+   ------------------------------------------------------------------------------------------------ */
+:root { --m-matin: #f2c230; --m-milieu: #f59f4c; --m-journee: #4f9fe8; --m-soir: #8f78ee; --m-conge: #45b98a; --m-arret: #ef7d7d; --m-formation: #3dbdbd; --m-garde: #3b2f9e; --m-repos: #9aa7b4; }
+
+/* Mes semaines : une tuile par jour, sur une seule rangée quand la place le permet. */
+.jours-h { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 12px; padding: 18px 20px 22px; }
+@media (min-width: 1700px) { .jours-h { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); } }
+.jour-h { --m: var(--m-repos); gap: 10px; padding: 14px 14px 14px; border-radius: 20px; background: color-mix(in srgb, var(--m) 12%, var(--surface)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--m) 34%, var(--surface)); }
+.jour-h::before { display: none; }
+.jour-h.t-matin { --m: var(--m-matin); } .jour-h.t-milieu { --m: var(--m-milieu); } .jour-h.t-journee { --m: var(--m-journee); } .jour-h.t-soir { --m: var(--m-soir); }
+.jour-h.t-conge { --m: var(--m-conge); } .jour-h.t-arret { --m: var(--m-arret); } .jour-h.t-formation { --m: var(--m-formation); } .jour-h.t-absence { --m: var(--m-repos); }
+.jour-h.t-repos { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line); }
+.jour-h.today { background: color-mix(in srgb, var(--m) 14%, var(--surface)); box-shadow: inset 0 0 0 2.5px var(--a-deep), 0 10px 24px -16px var(--a-deep); }
+.jh-date { align-items: center; }
+.jh-date .lien-jour { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+.jh-num { flex: none; width: 38px; height: 38px; border-radius: 13px; display: grid; place-items: center; font-size: 17px; font-weight: 750; letter-spacing: -0.02em; background: var(--surface); box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--m) 40%, var(--surface)); }
+.jour-h.today .jh-num { background: var(--a-deep); color: var(--on-a); box-shadow: none; }
+.jh-jour { display: grid; line-height: 1.2; min-width: 0; }
+.jh-jour b { font-size: 15px; font-weight: 700; }
+.jour-h.today .jh-jour .small { color: var(--a-text); font-weight: 650; }
+.jh-date .moment { width: 32px; height: 32px; border-radius: 11px; background: color-mix(in srgb, var(--m) 30%, var(--surface)); color: color-mix(in srgb, var(--m) 55%, #20160a); }
+.jour-h.t-repos .jh-date .moment { background: var(--n-1); color: var(--ink-2); }
+.jh-heures { font-size: 17px; letter-spacing: -0.02em; white-space: normal; }
+.jh-heures.jh-sans { font-size: 15px; font-weight: 650; color: var(--ink-2); }
+.jh-meta { margin-top: 3px; font-size: 12.5px; }
+.jh-frise { position: relative; display: block; height: 7px; border-radius: 4px; background: color-mix(in srgb, var(--m) 16%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--m) 22%, transparent); overflow: hidden; margin-top: auto; }
+.jh-frise i { position: absolute; top: 0; bottom: 0; border-radius: 4px; background: color-mix(in srgb, var(--m) 82%, #20160a); }
+.jh-corps { flex: 1; display: flex; flex-direction: column; }
+@media (max-width: 760px) {
+  .jours-h { grid-template-columns: 1fr; }
+  .jour-h { padding: 12px 14px; }
+}
+
+/* Mon calendrier : une grille de mois légère. Des filets fins, du blanc, et des postes en voile coloré. */
+.cal-scroll { padding: 4px 18px 12px; }
+table.cal { border-collapse: separate; border-spacing: 0; }
+table.cal th { padding: 12px 10px 10px; font-size: 11.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+table.cal td { height: 116px; padding: 8px; border-radius: 0; background: transparent; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); transition: background 0.2s ease; }
+table.cal tr td:last-child { border-right: 0; }
+table.cal tbody tr:last-child td { border-bottom: 0; }
+table.cal td:nth-child(n + 6):not(.hors) { background: color-mix(in srgb, var(--n-1) 55%, transparent); }
+table.cal td.hors { background: transparent; }
+table.cal td.hors .cal-n .n { opacity: 0.6; }
+table.cal td:not(.hors):hover { background: var(--a-soft); }
+table.cal td.auj { background: var(--a-soft); box-shadow: inset 0 0 0 2px var(--a-deep); border-radius: 16px; }
+.cal-n { margin-bottom: 6px; }
+.cal-n .n { min-width: 26px; height: 26px; font-size: 13px; }
+.cal-poste { --m: var(--m-repos); position: relative; gap: 1px; margin-top: 4px; padding: 7px 9px 7px 13px; border-radius: 11px; background: color-mix(in srgb, var(--m) 16%, var(--surface)); color: var(--ink); animation: none; }
+.cal-poste::before { content: ''; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 4px; border-radius: 2px; background: color-mix(in srgb, var(--m) 85%, #20160a); }
+.cal-poste.matin { --m: var(--m-matin); background: color-mix(in srgb, var(--m) 16%, var(--surface)); }
+.cal-poste.milieu { --m: var(--m-milieu); background: color-mix(in srgb, var(--m) 16%, var(--surface)); }
+.cal-poste.journee { --m: var(--m-journee); background: color-mix(in srgb, var(--m) 16%, var(--surface)); }
+.cal-poste.soir { --m: var(--m-soir); background: color-mix(in srgb, var(--m) 16%, var(--surface)); }
+.cal-poste.conge { --m: var(--m-conge); background: color-mix(in srgb, var(--m) 16%, var(--surface)); }
+.cal-poste.arret { --m: var(--m-arret); background: color-mix(in srgb, var(--m) 16%, var(--surface)); }
+.cal-poste.formation { --m: var(--m-formation); background: color-mix(in srgb, var(--m) 16%, var(--surface)); color: var(--ink); }
+.cal-poste.garde { --m: var(--m-garde); background: color-mix(in srgb, var(--m) 20%, var(--surface)); color: var(--ink); }
+.cal-poste .cp-haut, .cal-poste.garde .cp-haut { font-size: 11.5px; color: var(--ink-2); }
+.cal-poste .cp-h { font-size: 14px; }
+.cal-poste .cp-d { font-size: 11.5px; color: var(--ink-2); }
+.cal-vide { position: relative; padding: 6px 2px 6px 14px; font-size: 12px; color: var(--ink-3); }
+.cal-vide::before { content: ''; position: absolute; left: 3px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: var(--n-3); }
+@media (max-width: 760px) {
+  table.cal td { height: 84px; padding: 4px 2px; }
+  .cal-poste { padding: 5px 2px 5px 7px; }
+  .cal-poste::before { left: 2px; width: 3px; }
+  .cal-vide { padding-left: 2px; }
+  .cal-vide::before { display: none; }
+}
+
+/* Mes demandes : des cartes blanches, bordées, au lieu de blocs gris. */
+.dm { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line); padding: 18px; }
+.dm.actif { background: var(--surface); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--warn) 45%, var(--surface)); }
+.dm:hover { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--a-2, var(--a)) 60%, var(--surface)); }
+
+/* Des ombres discrètes : un bouton se détache par sa couleur, pas par un halo ; les cartes gardent une ombre légère. */
+:root { --glow: 0 2px 6px -3px color-mix(in srgb, var(--a-plein) 40%, transparent); }
+.btn.primary { box-shadow: 0 2px 5px -3px color-mix(in srgb, var(--a-plein) 55%, transparent); }
+.btn.primary:hover { box-shadow: 0 4px 9px -5px color-mix(in srgb, var(--a-plein) 60%, transparent); }
+.btn.magic { box-shadow: 0 2px 5px -3px color-mix(in srgb, var(--a-plein) 45%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.msg-alerte { box-shadow: none; }
+:root:not([data-mode='sombre']) { --shadow-1: 0 1px 2px rgba(var(--ink-rgb), 0.05), 0 8px 20px -16px color-mix(in srgb, var(--a-plein) 22%, transparent); --shadow-2: 0 16px 44px -22px color-mix(in srgb, var(--a-plein) 34%, rgba(0, 0, 0, 0.2)); }
+
+.jh-moment { display: flex; align-items: center; gap: 5px; margin-bottom: 2px; font-size: 12px; font-weight: 650; color: color-mix(in srgb, var(--m) 50%, var(--ink)); }
+.jh-heures.jh-sans { display: inline-flex; align-items: center; gap: 6px; }
+
+.pf-carte { margin: 22px 0 0; }
+
+/* ---------------------------------------------------------------- Pleine largeur : une page occupe tout l'espace qu'on lui donne */
+.page { width: 100%; }
+/* Listes déroulantes : partout le même champ que le reste de la plateforme, jamais celui du navigateur. */
+:where(select) { border: 1px solid var(--ctl); border-radius: 12px; background-color: var(--surface); color: var(--ink); font: inherit; font-weight: 500; min-height: 42px; padding: 9px 38px 9px 12px; min-width: 0; cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+:where(select):hover { border-color: var(--ink-2); }
+:where(select):focus-visible { outline: 2px solid var(--ink); outline-offset: -1px; box-shadow: 0 0 0 5px var(--a-soft); border-color: var(--ink); }
+:where(select):disabled { cursor: not-allowed; opacity: 0.6; }
+select option { background-color: var(--surface); color: var(--ink); }
+/* Règles : les questions se rangent côte à côte dès que la place existe. */
+.rg-grille { display: flex; flex-direction: column; }
+.rg-col { display: contents; }
+@media (min-width: 1400px) {
+  .rg-grille { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 24px; align-items: start; }
+  .rg-col { display: block; min-width: 0; }
+}
+/* Réglages : horaires sur une ligne quand la carte est large, postes types sur toute la largeur. */
+.horaires { container-type: inline-size; }
+.jl-plages { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+@container (min-width: 600px) {
+  .jour-ligne { grid-template-columns: 104px minmax(0, 1fr) auto; }
+  .jl-actions { grid-column: auto; justify-content: flex-end; }
+}
+.pt-table { min-width: 880px; }
+.pt-table td:first-child { width: 24%; }
+.pt-nom { width: 100%; min-width: 150px; font-weight: 650; padding: 6px 9px; min-height: 38px; }
+.pt-couleur { display: flex; }
+.pt-couleur select { flex: 1; width: auto; min-width: 140px; max-width: 240px; min-height: 38px; padding-block: 6px; }
+/* Une rangée de champs qui se partage toute la largeur de sa carte. */
+.champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 12px 14px; align-items: end; }
+.champs .field { min-width: 0; }
+.champs .field input, .champs .field select { width: 100%; }
+/* Deux colonnes de même hauteur : la dernière carte de la plus courte s'étire, aucun bord en escalier. */
+.split.egal { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
+.split.egal > .col > .card:last-child { flex: 1; }
+@media (max-width: 900px) { .split.egal { grid-template-columns: minmax(0, 1fr); } }
+.pt-table td:first-child { width: 20%; }
+.pt-table th { white-space: nowrap; }
+/* Aide : la dernière rangée de fiches s'étire, aucune case vide. */
+.ad-fiches { display: flex; flex-wrap: wrap; }
+.ad-fiche { flex: 1 1 330px; min-width: 0; }

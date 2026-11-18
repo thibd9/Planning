@@ -25,7 +25,7 @@ export function MesGardes({ personId }: { personId: string }): JSX.Element {
   const lignes = duMois.flatMap((g) => variablesGarde(data, g).variables.filter((v) => v.mois === mois).map((v) => ({ g, v })));
 
   return (
-    <div style={{ maxWidth: 1000 }}>
+    <div className="page page-mesgardes">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <MoonStar size={26} />

@@ -7,7 +7,7 @@ import { useUi } from '../store/ui';
 import type { Reponse } from './bot';
 import { fichesPour, repondre } from './bot';
 import type { Humeur } from './Solvi';
-import { Solvi } from './Solvi';
+import { NomSolvi, Solvi } from './Solvi';
 
 interface Bulle {
   id: number;
@@ -88,7 +88,9 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
               <Solvi size={52} humeur={humeurBot} />
             </span>
             <div className="grow">
-              <h2 className="solvi-nom">Solvi</h2>
+              <h2>
+                <NomSolvi />
+              </h2>
               <p>Votre assistant. Posez votre question.</p>
             </div>
             <button type="button" className="dialog-fermer" onClick={() => ouvrirAssistant(false)} aria-label="Fermer l’assistant">

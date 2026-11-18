@@ -222,7 +222,7 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
   };
 
   return (
-    <div style={{ maxWidth: 1110 }}>
+    <div className="page page-documents">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <FolderOpen size={26} />

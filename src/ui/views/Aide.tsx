@@ -6,8 +6,8 @@ import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import type { Fiche } from '../bot';
 import { fichesPour, simple } from '../bot';
-import { lancerTutoriel, tutorielDe } from '../Parcours';
-import { Solvi } from '../Solvi';
+import { ChoixRythme, lancerTutoriel, tutorielDe } from '../Parcours';
+import { NomSolvi, Solvi } from '../Solvi';
 
 /** Les fiches rangées par thème, dans l'ordre du travail. */
 const THEMES: { titre: string; ids: string[] }[] = [
@@ -45,7 +45,7 @@ const LEXIQUE: Terme[] = [
   { mot: 'Jour férié', sens: 'Marqué dans la grille, le mois et les calendriers. La liste des douze prochains mois est dans « Réglages ».' },
   { mot: 'Justificatif', sens: 'Document joint à une demande urgente ou à une absence. Seuls les titulaires et la personne concernée le voient ; il est rangé dans « Documents ».' },
   { mot: 'Motif', sens: 'Catégorie donnée pour une demande de remplacement (santé, famille, administratif…). Visible des seuls titulaires.' },
-  { mot: 'Points forts', sens: 'Faits positifs sur douze mois : ponctualité, dépannages, réponses aux appels. Ni note ni classement ; les arrêts et congés ne comptent jamais.' },
+  { mot: 'Points forts', sens: 'Ce qui a été noté de positif sur douze mois : ponctualité, dépannages, réponses aux appels. Ni note ni classement ; les arrêts et congés ne comptent jamais.' },
   { mot: 'Poste type', sens: 'Horaire modèle (matin, journée, fermeture…) avec sa couleur, pour poser un poste en un clic.', gestion: true },
   { mot: 'Préférence', sens: 'Ce qui vous convient pour le mois à venir. Le planning s’en inspire ; personne n’a à y répondre.' },
   { mot: 'Préférence prioritaire', sens: 'Contrainte d’horaires acceptée comme importante : suivie autant que possible, avec le même plafond pour tous.' },
@@ -75,7 +75,7 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
   const vu = mots.length && onglet === 'taches' && !fichesVues.length && termes.length ? 'lexique' : mots.length && onglet === 'lexique' && !termes.length && fichesVues.length ? 'taches' : onglet;
 
   return (
-    <div style={{ maxWidth: 1040 }}>
+    <div className="page page-aide">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <LifeBuoy size={26} />
@@ -99,6 +99,8 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
         ) : null}
       </div>
 
+      {/* Le rythme des tutoriels se choisit ici, avant d'en lancer un. */}
+      <ChoixRythme />
       <div className="jr-barre">
         <div className="jr-filtres" role="tablist" aria-label="Aide">
           <button type="button" role="tab" aria-selected={vu === 'taches'} className={`jr-filtre${vu === 'taches' ? ' on' : ''}`} onClick={() => setOnglet('taches')}>
@@ -176,7 +178,7 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
           </span>
           <span className="grow">
             <b>
-              Demander à <span className="solvi-nom teinte">Solvi</span>
+              Demander à <NomSolvi />
             </b>
             <span className="small soft">Posez votre question avec vos mots : il répond d’après votre planning.</span>
           </span>

@@ -44,7 +44,7 @@ deux boutons sous « Première visite ? » : « Créer ma pharmacie » et « Com
 ouvre la fenêtre « Découvrir Solvéa » : une visite guidée **par rôle**, jouée sur une pharmacie d'exemple
 (la « Grande Pharmacie de la Pinède », fictive) posée à côté des vraies, sans rien effacer.
 
-- **Titulaire — Tout Solvéa, de zéro** (52 étapes, environ 25 minutes au rythme posé) : la visite suit **l'ordre du menu**, sans changer de
+- **Titulaire — Tout Solvéa, de zéro** (54 étapes et près de 110 gestes, environ 30 minutes au rythme posé) : la visite suit **l'ordre du menu**, sans changer de
   personnage en cours de route. **Préparer** (création, équipe, fiche d'une personne, horaires et
   effectif, qui prépare le planning, règles), **Planifier** (grille, poste posé à la main, trois
   propositions, contrôles, journée, retards, mois, publication, impression, formation, inventaire,
@@ -72,8 +72,15 @@ Pendant une visite, **on lit, puis on regarde** — un clic par étape :
   clique, coche, choisit dans une liste ou tape au clavier. À chaque geste, Solvi dit dans une bulle
   **quoi faire et à quoi cela sert** (« Cliquez sur “Ajouter une personne” — ce bouton ouvre la fiche
   d'une nouvelle personne »), laisse le temps de lire, agit, puis laisse voir le résultat ;
-- le **rythme** est posé par défaut (environ sept secondes par geste) et se règle depuis la bulle :
-  posé, normal ou vif ;
+- le **rythme** se choisit **avant de démarrer** — posé, normal ou vif — dans la fenêtre des visites,
+  sur la page d'aide et sur chaque fiche d'étape ; il se change aussi en cours de route, depuis la bulle ;
+- Solvi **vole se poser près de ce qu'il montre**, à côté de la fenêtre ou du bloc éclairé, et parle
+  dans une bulle à pointe qui rappelle où l'on en est dans les gestes de l'étape ;
+- ce que le projecteur éclaire **reste à l'écran** : s'il sort du champ, la page défile pour le ramener ;
+- la visite joue les interactions de chaque écran : horaires et coupure du midi, fiches de règles,
+  navigation entre les semaines, poste type, lectures heures / coût / équité, modification puis annulation
+  d'un poste, contrôles, pause et retard dans la journée, garde, périodes et compteurs de l'équité,
+  fiche navette, tableau de bord, couleurs et taille du texte, recherche dans l'aide ;
 - un geste dont la cible est introuvable est signalé dans la console : une étape ne se vide plus en
   silence (la fenêtre des trois propositions et celle de la publication s'ouvrent bien) ;
 - le projecteur suit la fenêtre ou le bloc où se passe le geste ; « Passer » saute la démonstration ;
@@ -295,6 +302,10 @@ vue mois, une garde se voit dans la case du jour.
 - **Règles rangées par question** (« Combien d'heures au maximum ? », « Quel repos garantir ? », « Qui
   doit être présent ? »…) : une ligne par règle, avec son seuil et son état (obligatoire ou alerte) ; la
   description, la source et le réglage se déplient. Filtres : obligatoires, réglables, à faire valider.
+- **Pleine largeur.** Les pages occupent toute la largeur de l'écran : les règles se rangent sur deux
+  colonnes de hauteur voisine, les horaires d'ouverture tiennent sur une ligne par jour, le tableau des
+  postes types s'étire, et deux colonnes voisines finissent à la même hauteur. Toutes les listes
+  déroulantes ont le style des autres champs, en clair comme en sombre.
 - **Contrôles du planning** : tuiles groupées par gravité, le constat, le détail et la règle sur des
   lignes séparées.
 
@@ -316,7 +327,7 @@ vue mois, une garde se voit dans la case du jour.
   prévues, par mois, avec un filtre par personne et par nature et les totaux des douze derniers mois ;
   « Joindre » y rattache la pièce qu'on a reçue en main propre. Une demande annulée par la personne
   emporte son justificatif.
-- **Sur qui compter.** En haut de « Équipe », les titulaires voient ce que chacun apporte d'après les
+- **Les points forts de l'équipe.** En bas de « Équipe », les titulaires voient ce qui a été noté de positif d'après les
   faits des douze derniers mois : toujours à l'heure, dépanne l'équipe, répond aux appels, prend sa part
   des samedis et fermetures. Ni note ni classement (ordre alphabétique) ; **les arrêts, les congés et les
   absences n'entrent jamais en compte**. Chacun voit ses propres points forts dans « Mon suivi ».
@@ -413,6 +424,19 @@ approuvées déduites). Le titulaire régularise à la main — payer, faire ré
 solder — ou clique sur « Régulariser automatiquement » : chaque écart d'au moins une heure est résorbé sur
 la première semaine non publiée, par demi-heures et sans dépasser 8 h d'écart au contrat, et le brouillon
 de cette semaine est recalculé. Chacun voit son propre compteur dans « Mon suivi ».
+
+**Faire rattraper ou faire récupérer, en gardant la main.** Le bouton ouvre une fenêtre en trois temps :
+
+1. *Combien d'heures ?* — par demi-heures, jusqu'au solde ; la fenêtre dit ce qu'il restera au compteur.
+2. *Quand ?* — Solvéa propose jusqu'à trois créneaux des quatre prochaines semaines, un par jour, contrôlés
+   avec les règles du planning (rien de bloquant n'est proposé) : prolonger une journée, commencer plus
+   tôt, venir un jour de repos là où le comptoir manque de monde ; ou, pour une récupération, partir plus
+   tôt, arriver plus tard, prendre la journée. Le titulaire en retient un, **fixe lui-même le jour et
+   l'horaire** (le contrôle se refait à chaque changement et dit pourquoi un créneau est refusé), ou
+   laisse la semaine à construire s'en charger, sans date précise.
+3. *Le message* — un texte proposé, modifiable, part dans la messagerie de la personne ; l'annonce arrive
+   aussi sous sa cloche. Si le planning est déjà communiqué, la version vue par l'équipe est mise à jour et
+   la personne est notifiée ; à moins de sept jours, la fenêtre rappelle que son accord est nécessaire.
 
 Les calculs automatiques (proposition de planning, correction du mois, régularisation) sont faits par le
 moteur de l'application, sur l'appareil : règles impératives d'abord, optimisation ensuite.

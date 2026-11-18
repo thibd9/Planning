@@ -53,7 +53,7 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
   };
 
   return (
-    <div style={{ maxWidth: 860 }}>
+    <div className="page page-compte">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <UserRound size={26} />

@@ -29,8 +29,19 @@ export function Regles(): JSX.Element {
     { cle: 'reglable', nom: 'Réglables', n: regles.filter((r) => garde(r, 'reglable')).length },
     { cle: 'expert', nom: 'À faire valider', n: aValider },
   ];
+  // Deux colonnes de hauteur voisine : chaque question va dans la plus courte, sans changer l'ordre de lecture.
+  const groupes = QUESTIONS.map((q) => ({ q, liste: regles.filter((r) => r.famille === q.cle && garde(r, filtre)) }))
+    .filter((g) => g.liste.length)
+    .map((g, rang) => ({ ...g, rang }));
+  const colonnes: [typeof groupes, typeof groupes] = [[], []];
+  const poids = [0, 0];
+  for (const g of groupes) {
+    const c = poids[1] < poids[0] ? 1 : 0;
+    colonnes[c].push(g);
+    poids[c] += g.liste.length + 1.6;
+  }
   return (
-    <div style={{ maxWidth: 1040 }}>
+    <div className="page page-regles">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <BookOpenCheck size={26} />
@@ -60,28 +71,30 @@ export function Regles(): JSX.Element {
           ))}
         </div>
       </div>
-      {QUESTIONS.map((q) => {
-        const liste = regles.filter((r) => r.famille === q.cle && garde(r, filtre));
-        if (!liste.length) return null;
-        return (
-          <section key={q.cle} className="rg-groupe" aria-label={q.titre}>
-            <div className="rg-tete">
-              <span className="rg-pic" aria-hidden="true">
-                <q.icone size={20} />
-              </span>
-              <div>
-                <h2>{q.titre}</h2>
-                <p>{q.phrase}</p>
-              </div>
-            </div>
-            <div className="card rg-liste">
-              {liste.map((r) => (
-                <Fiche key={r.id} regle={r} />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+      <div className="rg-grille">
+        {colonnes.map((col, c) => (
+          <div key={c} className="rg-col">
+            {col.map(({ q, liste, rang }) => (
+              <section key={q.cle} className="rg-groupe" aria-label={q.titre} style={{ order: rang }}>
+                <div className="rg-tete">
+                  <span className="rg-pic" aria-hidden="true">
+                    <q.icone size={20} />
+                  </span>
+                  <div>
+                    <h2>{q.titre}</h2>
+                    <p>{q.phrase}</p>
+                  </div>
+                </div>
+                <div className="card rg-liste">
+                  {liste.map((r) => (
+                    <Fiche key={r.id} regle={r} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        ))}
+      </div>
       <div className="notice warn rg-avis">
         <FileWarning size={18} aria-hidden="true" />
         <div>

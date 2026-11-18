@@ -118,34 +118,6 @@ export function Equipe(): JSX.Element {
           Commencez par le titulaire et les pharmaciens adjoints, puis les préparateurs et les autres postes.
         </Empty>
       ) : null}
-      {enAvant.length ? (
-        <section className="card pf-carte" data-focus="points-forts">
-          <div className="card-head">
-            <span className="pf-ico" aria-hidden="true">
-              <Sparkles size={18} />
-            </span>
-            <div className="grow">
-              <h2 className="h3">Sur qui compter</h2>
-              <p className="small soft" style={{ margin: 0 }}>Ce que chacun apporte, d’après les faits des 12 derniers mois. Ni note, ni classement.</p>
-            </div>
-          </div>
-          <ul className="pf-equipe">
-            {enAvant.map(({ p, points }) => (
-              <li key={p.id}>
-                <button type="button" className="pf-qui" onClick={() => ouvrirPersonne(p.id)} title="Ouvrir sa fiche">
-                  <Avatar person={p} />
-                  <span className="pf-nom">
-                    <b>{nomComplet(p)}</b>
-                    <span className="small soft">{libelleRole(data, p)}</span>
-                  </span>
-                </button>
-                <PointsForts points={points} court />
-              </li>
-            ))}
-          </ul>
-          <p className="tiny muted pf-note">Classés par prénom. Les arrêts, les congés et les absences n’entrent jamais en compte.</p>
-        </section>
-      ) : null}
       <div className="split" style={{ gridTemplateColumns: '340px minmax(0, 1fr)', display: data.personnes.length ? undefined : 'none' }}>
         <div className="col" style={{ gap: 8 }}>
           <button data-focus="ajouter-personne" type="button" className="btn primary" onClick={() => setAjout(true)} style={{ alignSelf: 'stretch' }}>
@@ -172,6 +144,34 @@ export function Equipe(): JSX.Element {
         </div>
         {courant ? <Fiche key={courant.id} person={courant} /> : null}
       </div>
+      {enAvant.length ? (
+        <section className="card pf-carte" data-focus="points-forts">
+          <div className="card-head">
+            <span className="pf-ico" aria-hidden="true">
+              <Sparkles size={18} />
+            </span>
+            <div className="grow">
+              <h2 className="h3">Les points forts de l’équipe</h2>
+              <p className="small soft" style={{ margin: 0 }}>Ce qui a été noté de positif pour chacun sur douze mois. Ce n’est ni une note, ni un classement.</p>
+            </div>
+          </div>
+          <ul className="pf-equipe">
+            {enAvant.map(({ p, points }) => (
+              <li key={p.id}>
+                <button type="button" className="pf-qui" onClick={() => ouvrirPersonne(p.id)} title="Ouvrir sa fiche">
+                  <Avatar person={p} />
+                  <span className="pf-nom">
+                    <b>{nomComplet(p)}</b>
+                    <span className="small soft">{libelleRole(data, p)}</span>
+                  </span>
+                </button>
+                <PointsForts points={points} court />
+              </li>
+            ))}
+          </ul>
+          <p className="tiny muted pf-note">Par ordre alphabétique. Les arrêts, les congés et les absences n’entrent jamais en compte.</p>
+        </section>
+      ) : null}
       {ajout ? <DialoguePersonne onClose={() => setAjout(false)} /> : null}
       {formation ? <DialogueFormation onClose={() => setFormation(false)} /> : null}
       {inventaire ? <DialogueInventaire onClose={() => setInventaire(false)} /> : null}

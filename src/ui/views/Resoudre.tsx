@@ -88,7 +88,7 @@ export function Resoudre(): JSX.Element {
   const courant = onglets.find((o) => o.cle === onglet);
 
   return (
-    <div style={{ maxWidth: 1180 }}>
+    <div className="page page-resoudre">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <ListChecks size={26} />

@@ -614,24 +614,12 @@ function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISO
       {/* Le constat est écrit, avec l'heure : pas besoin de survoler pour comprendre. */}
       <span className={`pg-o-mot ${etat}`}>
         <b>{titre}</b>
-        {/* Chaque plage est écrite avec ce qui la crée : la pause d'un pharmacien, son départ, son arrivée. */}
-        {!vide && trous.length
-          ? trous.slice(0, 2).map((t) => (
-              <span key={t.start} className="pg-o-plage">
-                <span className="num">
-                  {fmtHeure(t.start)} – {fmtHeure(t.end)}
-                </span>
-                {t.raison ? <span className="pg-o-raison">{t.raison}</span> : null}
-              </span>
-            ))
-          : null}
-        {!vide && trous.length > 2 ? <span className="pg-o-raison">et {trous.length - 2} autre{trous.length > 3 ? 's' : ''} plage{trous.length > 3 ? 's' : ''}</span> : null}
-        {!vide && !trous.length && sous.length ? (
-          <span className="num">
-            {fmtHeure(sous[0].start)} – {fmtHeure(sous[0].end)}
-            {sous.length > 1 ? ` +${sous.length - 1}` : ''}
-          </span>
-        ) : null}
+        {/* Une seule ligne de détail, la même hauteur pour toutes les cases : la cause se lit au survol et dans la journée. */}
+        <span className="num pg-o-detail">
+          {!vide && (trous.length || sous.length)
+            ? `${fmtHeure((trous.length ? trous : sous)[0].start)} – ${fmtHeure((trous.length ? trous : sous)[0].end)}${(trous.length ? trous : sous).length > 1 ? ` +${(trous.length ? trous : sous).length - 1}` : ''}`
+            : ''}
+        </span>
       </span>
       <span className="sr">{texte}</span>
     </div>

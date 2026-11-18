@@ -13,7 +13,7 @@ import { DialogueRefus } from '../components/Refus';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
-import { AvantApres, Pill, Seg, momentDe, Ferie } from '../kit';
+import { AvantApres, Pill, Seg, momentDe, Ferie , MOMENT_LABEL } from '../kit';
 import { Calendrier } from '../components/Calendrier';
 import { ProchainPoste } from '../components/ProchainPoste';
 import { AppelRecu } from '../components/Appel';
@@ -273,26 +273,26 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                         return (
                           <div key={date} className={`jour-h ${duJour.length ? `t-${moment}` : absence ? `t-${classeAbsence(absence.type)}` : 't-repos'}${date === today ? ' today' : ''}`}>
                             <div className="jh-date">
-                              <button type="button" className="lien-jour cap1" onClick={() => voirJour(date)} title="Voir toute l’équipe ce jour-là">
-                                {JOURS[weekday(date)]}
+                              <button type="button" className="lien-jour" onClick={() => voirJour(date)} title="Voir toute l’équipe ce jour-là">
+                                <span className="jh-num num">{Number(date.slice(8))}</span>
+                                <span className="jh-jour">
+                                  <b className="cap1">{JOURS[weekday(date)]}</b>
+                                  <span className="small soft">{date === today ? 'Aujourd’hui' : fmtJourMois(date).replace(/^\d+\s*/, '')}</span>
+                                </span>
                                 <span className="sr">, voir la journée</span>
                               </button>
-                              <span className="small soft">
-                                {fmtJourMois(date)}
-                                {date === today ? ' · aujourd’hui' : ''}
-                              </span>
-                              <Ferie date={date} />
                             </div>
+                            <Ferie date={date} />
                             <div className="jh-corps">
                               {duJour.length ? (
                                 <>
                                   <div className="jh-titre">
-                                    <span className={`moment ${moment}`} aria-hidden="true">
-                                      {moment === 'soir' ? <Sunset size={17} /> : <Sun size={17} />}
-                                    </span>
                                     <div>
                                       {duJour.map((x) => (
                                         <div key={x.id}>
+                                          <span className="jh-moment">
+                                            {moment === 'soir' ? <Sunset size={13} aria-hidden="true" /> : <Sun size={13} aria-hidden="true" />} {MOMENT_LABEL[momentDe(x)]}
+                                          </span>
                                           <b className="jh-heures num">
                                             {fmtHeure(x.start)} – {fmtHeure(x.end)}
                                           </b>
@@ -311,12 +311,25 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                 </>
                               ) : (
                                 <div className="jh-titre">
-                                  <span className={`moment ${absence ? classeAbsence(absence.type) : 'repos'}`} aria-hidden="true">
-                                    {absence ? <Ban size={17} /> : <Coffee size={17} />}
-                                  </span>
-                                  <b className="jh-heures" style={{ color: 'var(--ink-2)' }}>{absence ? libelleAbsence(absence) : ferie(date) ? 'Jour férié' : 'Repos'}</b>
+                                  <b className="jh-heures jh-sans">
+                                    {absence ? <Ban size={15} aria-hidden="true" /> : <Coffee size={15} aria-hidden="true" />} {absence ? libelleAbsence(absence) : ferie(date) ? 'Jour férié' : 'Repos'}
+                                  </b>
                                 </div>
                               )}
+                              {/* La journée d'un coup d'œil : le poste sur une frise de 7 h à 21 h, la pause en creux. */}
+                              {duJour.length ? (
+                                <span className="jh-frise" aria-hidden="true">
+                                  {duJour.flatMap((x) =>
+                                    (x.pauseStart !== undefined && x.pauseEnd !== undefined
+                                      ? [
+                                          { de: x.start, a: x.pauseStart },
+                                          { de: x.pauseEnd, a: x.end },
+                                        ]
+                                      : [{ de: x.start, a: x.end }]
+                                    ).map((seg, i) => <i key={`${x.id}-${i}`} style={{ left: `${Math.max(0, ((seg.de - 420) / 840) * 100)}%`, width: `${Math.max(2, ((seg.a - seg.de) / 840) * 100)}%` }} />),
+                                  )}
+                                </span>
+                              ) : null}
                               {missions.length || gardes.length ? (
                                 <div className="row wrap" style={{ gap: 8 }}>
                                   {missions.map((m) => (

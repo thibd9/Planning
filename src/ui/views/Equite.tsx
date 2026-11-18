@@ -77,7 +77,7 @@ export function Equite(): JSX.Element {
     .filter((x) => x.p && x.f.niveau !== 'faible');
 
   return (
-    <div style={{ maxWidth: 1040 }}>
+    <div className="page page-equite">
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <Scale size={26} />

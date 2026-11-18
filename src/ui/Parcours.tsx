@@ -14,7 +14,7 @@ import type { Vue } from '../store/ui';
 import { useUi } from '../store/ui';
 import { Logo } from './kit';
 import type { Humeur } from './Solvi';
-import { Solvi } from './Solvi';
+import { NomSolvi, Solvi } from './Solvi';
 
 /** Les quatre regards de l'environnement de test, avec des personnes déjà créées. */
 export const ROLES_TEST: { cle: string; id: string; identifiant: string; court: string; titre: string; nom: string; detail: string }[] = [
@@ -67,8 +67,8 @@ type Cible = string | (() => HTMLElement | null | undefined);
  */
 type Geste =
   | { faire: 'cliquer'; sur: Cible; dit?: string; sert?: string; facultatif?: boolean }
-  | { faire: 'taper'; dans: Cible; texte: string; dit?: string; sert?: string }
-  | { faire: 'choisir'; dans: Cible; valeur: string; dit?: string; sert?: string }
+  | { faire: 'taper'; dans: Cible; texte: string; dit?: string; sert?: string; facultatif?: boolean }
+  | { faire: 'choisir'; dans: Cible; valeur: string; dit?: string; sert?: string; facultatif?: boolean }
   | { faire: 'attendre'; que: Cible; facultatif?: boolean }
   | { faire: 'pause'; ms: number; dit?: string; sert?: string }
   | { faire: 'action'; jouer: () => void; dit?: string };
@@ -143,6 +143,48 @@ const rythmeLu = (): Rythme => {
   }
 };
 let rythme: Rythme = typeof window === 'undefined' ? 'pose' : rythmeLu();
+/** Le rythme en cours, et de quoi le changer : la fenêtre des visites et la page d'aide le proposent avant de démarrer. */
+export const rythmeChoisi = (): Rythme => rythme;
+export function choisirRythme(r: Rythme): void {
+  rythme = r;
+  try {
+    window.localStorage.setItem(CLE_RYTHME, r);
+  } catch {
+    /* le rythme reste celui de la séance */
+  }
+}
+const RYTHME_PHRASE: Record<Rythme, string> = { pose: 'Le temps de tout lire et de tout voir.', normal: 'Un bon équilibre.', vif: 'Pour qui connaît déjà.' };
+
+/** Trois boutons : posé, normal, vif. À choisir avant de lancer une visite ; se change aussi en cours de route. */
+export function ChoixRythme({ compact }: { compact?: boolean }): JSX.Element {
+  const [r, setR] = useState<Rythme>(rythme);
+  return (
+    <div className={`rythme${compact ? ' compact' : ''}`} role="radiogroup" aria-label="Rythme de la visite">
+      <span className="rythme-titre">
+        <Gauge size={15} aria-hidden="true" /> Rythme de la visite
+      </span>
+      <div className="rythme-choix">
+        {(Object.keys(RYTHMES) as Rythme[]).map((cle) => (
+          <button
+            key={cle}
+            type="button"
+            role="radio"
+            aria-checked={r === cle}
+            className={`rythme-option${r === cle ? ' on' : ''}`}
+            onClick={() => {
+              choisirRythme(cle);
+              setR(cle);
+            }}
+          >
+            <b className="cap1">{RYTHMES[cle].nom}</b>
+            {compact ? null : <span>{RYTHME_PHRASE[cle]}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Une durée de démonstration, au rythme choisi. */
 const tempo = (ms: number): number => Math.round(ms * RYTHMES[rythme].facteur);
 /** Le temps de lire ce que dit Solvi avant qu'il agisse : plus la bulle est longue, plus il attend. */
@@ -548,6 +590,13 @@ const COMPLET_BRUT: Etape[] = [
     titre: 'Horaires et effectif',
     texte: () => 'Les horaires jour par jour. À droite, le nombre de personnes attendues au comptoir.',
     jouer: () => helene('officine'),
+    gestes: [
+      { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('[aria-label="Fermeture le samedi"]'), valeur: '18:00', dit: 'Réglez la fermeture du samedi à 18 h', sert: 'Chaque jour a ses heures d’ouverture et de fermeture.' },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Coupure le midi : lundi"]'), dit: 'Cliquez sur « Coupure le midi », le lundi', sert: 'La pharmacie ferme alors à l’heure du déjeuner ce jour-là.' },
+      { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('[aria-label^="Nombre minimum de personnes"]'), valeur: '3', dit: 'Passez le minimum au comptoir à 3 personnes', sert: 'En dessous, la grille écrit « Manque du monde ».', facultatif: true },
+      // Les réglages de l'exemple sont remis en place pour la suite de la visite.
+      { faire: 'action', jouer: () => poser((d) => ({ ...d, officine: { ...d.officine, horaires: reference().officine.horaires, effectifs: reference().officine.effectifs } })) },
+    ],
   },
   {
     chapitre: PREPARER,
@@ -603,6 +652,12 @@ const COMPLET_BRUT: Etape[] = [
       avecEquipe();
       helene('regles');
     },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Réglables'), sert: 'On ne garde que les règles dont vous fixez le seuil.' },
+      { faire: 'cliquer', sur: parTexte('.content summary', 'Repos quotidien'), dit: 'Ouvrez la fiche « Repos quotidien »', sert: 'Chaque fiche dit ce qui est contrôlé, sa source et son seuil.' },
+      { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'À faire valider'), sert: 'Ces règles viennent de sources secondaires : à faire relire par un spécialiste.' },
+      { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Toutes'), sert: 'Et l’on retrouve toutes les règles.' },
+    ],
   },
   // ---- 2. Planifier
   {
@@ -634,6 +689,10 @@ const COMPLET_BRUT: Etape[] = [
       avecSouhaits();
       semaineUne();
     },
+    gestes: [
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Semaine suivante"]'), dit: 'Cliquez sur la flèche « Semaine suivante »', sert: 'On passe d’une semaine à l’autre avec ces deux flèches.' },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Semaine précédente"]'), dit: 'Revenez à la semaine précédente', sert: 'La semaine affichée est rappelée en haut de la grille.' },
+    ],
   },
   {
     chapitre: PLANIFIER,
@@ -649,7 +708,8 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: '.plan-grid .add', dit: 'Cliquez sur le « + » d’une case', sert: 'Il ouvre un poste pour cette personne, ce jour-là.' },
       { faire: 'attendre', que: '.dialog' },
-      { faire: 'pause', ms: 900 },
+      { faire: 'cliquer', sur: parTexte('.dialog .btn.sm', 'Ouverture'), dit: 'Cliquez sur le poste type « Ouverture »', sert: 'Un poste type remplit les horaires et la pause d’un seul geste.', facultatif: true },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('label[for="tache-comptoir"], #tache-comptoir'), dit: 'Choisissez l’activité « Comptoir »', sert: 'Comptoir, réserve, administratif : l’activité compte pour l’effectif.', facultatif: true },
       { faire: 'cliquer', sur: VALIDER, sert: 'Horaires, pause et activité sont enregistrés dans le brouillon.' },
     ],
   },
@@ -693,6 +753,16 @@ const COMPLET_BRUT: Etape[] = [
       proposerSemaine(semaineDans(1));
       semaineUne();
     },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Coût'), sert: 'La colonne de droite passe au coût estimé de chacun.' },
+      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Équité'), sert: 'Ici : les samedis de chacun, face à sa part.' },
+      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Heures'), sert: 'Retour aux heures de la semaine, face au contrat.' },
+      { faire: 'cliquer', sur: '.plan-grid .tile', dit: 'Cliquez sur une tuile', sert: 'Un poste s’ouvre pour être corrigé ou supprimé.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'cliquer', sur: parTexte('.dialog .btn.sm', 'Journée longue'), dit: 'Cliquez sur le poste type « Journée longue »', sert: 'Les horaires et la pause changent d’un coup.', facultatif: true },
+      { faire: 'cliquer', sur: VALIDER, sert: 'La tuile change de couleur avec son horaire.' },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Annuler la dernière manipulation"]'), dit: 'Cliquez sur « Annuler »', sert: 'Chaque manipulation de la grille peut être annulée, puis rétablie.' },
+    ],
   },
   {
     chapitre: PLANIFIER,
@@ -705,6 +775,9 @@ const COMPLET_BRUT: Etape[] = [
       proposerSemaine(semaineDans(1));
       semaineUne();
     },
+    gestes: [
+      { faire: 'cliquer', sur: '.content .issue', dit: 'Cliquez sur un contrôle', sert: 'La grille montre aussitôt la personne et le jour concernés.', facultatif: true },
+    ],
   },
   {
     chapitre: PLANIFIER,
@@ -735,7 +808,12 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: nieme('.plan-grid .jour-btn', 1), dit: 'Cliquez sur « Voir la journée », sous la date', sert: 'La journée s’ouvre : toute l’équipe sur une ligne de temps.' },
       { faire: 'attendre', que: '.dialog' },
-      { faire: 'pause', ms: 3000, dit: 'Chaque ligne montre un poste et sa pause', sert: 'On y règle une pause et on y note un retard, en deux clics.' },
+      { faire: 'pause', ms: 2600, dit: 'Chaque ligne montre un poste et sa pause', sert: 'On y règle une pause et on y note un retard, en deux clics.' },
+      { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('.dialog input[id^="pause-de-"]'), valeur: '12:45', dit: 'Décalez le début d’une pause à 12 h 45', sert: 'La frise et le contrôle « pharmacien présent » se recalculent aussitôt.', facultatif: true },
+      { faire: 'cliquer', sur: parTexte('.dialog button', 'Noter un retard'), sert: 'Un retard, un départ anticipé ou une absence non prévue se note ici.' },
+      { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('.dialog select[id^="ecart-min-"]'), valeur: '15', dit: 'Choisissez « 15 min »', sert: 'Une date et une durée, jamais une raison.', facultatif: true },
+      { faire: 'cliquer', sur: parTexte('.dialog .btn.sm.primary', 'Noter'), sert: 'Le retard rejoint le suivi de la personne.', facultatif: true },
+      { faire: 'cliquer', sur: parTexte('.dialog button', 'Lendemain'), sert: 'On passe d’un jour à l’autre sans refermer la fenêtre.' },
     ],
   },
   {
@@ -787,6 +865,7 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'choisir', dans: '#garde-personne', valeur: 'p_lea', sert: 'Le pharmacien choisi est prévenu dans son espace.' },
       { faire: 'cliquer', sur: VALIDER, sert: 'Le délai de 15 jours et le repos qui suit sont contrôlés.' },
       { faire: 'action', jouer: avecGardes },
+      { faire: 'cliquer', sur: '.content .g-item', dit: 'Cliquez sur une garde de la liste', sert: 'Sa fiche s’ouvre : à qui elle est confiée, le repos qui suit, ce qui part en paie.', facultatif: true },
     ],
   },
   {
@@ -915,6 +994,9 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'attendre', que: '.dialog' },
       { faire: 'cliquer', sur: parTexte('.dialog button', 'Sortie d’école'), sert: 'Le raccourci remplit les horaires et la raison ; on peut tout ajuster.' },
+      { faire: 'choisir', dans: '#demande-motif', valeur: 'famille', sert: 'La raison se choisit dans une liste ; seuls les titulaires la voient.' },
+      { faire: 'taper', dans: '#demande-precision', texte: 'Sortie à 16 h 30', sert: 'Une précision est possible, sans être obligatoire.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'La demande part au titulaire, qui répond.' },
     ],
   },
   {
@@ -1031,6 +1113,22 @@ const COMPLET_BRUT: Etape[] = [
       helene('resoudre');
     },
     gestes: [{ faire: 'cliquer', sur: parTexte('.panneau button', 'Approuver'), sert: 'Avant d’approuver, vous voyez ce que l’absence découvre.' }],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: HELENE,
+    cible: '.content .fc',
+    titre: 'Deux demandes sur les mêmes dates',
+    texte: () => 'Inès et Thomas demandent les mêmes jours. La frise le montre, chaque demande le signale : vous répondez aux deux.',
+    jouer: () => {
+      avecCongeARefuser();
+      const s = store();
+      const ines = s.data.absences.find((x) => x.personId === 'p_ines' && x.type === 'conge');
+      if (ines && !s.data.absences.some((x) => x.personId === 'p_thomas' && x.type === 'conge')) s.declarerAbsence({ motif: 'famille', personId: 'p_thomas', from: ines.from, to: ines.to, type: 'conge', statut: 'demandee' });
+      useUi.getState().setSujet('demandes');
+      helene('resoudre');
+    },
+    gestes: [{ faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /Thomas/.test(e.textContent ?? '') && /Congé/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('.btn.primary'), dit: 'Approuvez le congé de Thomas, arrivé à sa place', sert: 'Sur la demande d’Inès, « Thomas est déjà absent » s’affiche aussitôt.', facultatif: true }],
   },
   {
     chapitre: SUIVRE,
@@ -1152,6 +1250,9 @@ const COMPLET_BRUT: Etape[] = [
       avecPlanning();
       helene('heures');
     },
+    gestes: [
+      { faire: 'cliquer', sur: "[data-focus='auto-heures']", sert: 'Les écarts sont résorbés sur la prochaine semaine à construire, sans rien publier.', facultatif: true },
+    ],
   },
   {
     chapitre: SUIVRE,
@@ -1178,6 +1279,11 @@ const COMPLET_BRUT: Etape[] = [
       avecPlanning();
       helene('equite');
     },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content button', '12 semaines'), sert: 'La période se choisit : 8 semaines, 12 semaines ou 6 mois.' },
+      { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Fermetures en semaine'), sert: 'Un compteur à la fois : ici, qui ferme le soir.' },
+      { faire: 'cliquer', sur: parTexte('.content summary', 'Comment c’est calculé'), sert: 'La part de chacun suit son temps de travail.', facultatif: true },
+    ],
   },
   {
     chapitre: BILAN,
@@ -1189,6 +1295,10 @@ const COMPLET_BRUT: Etape[] = [
       avecPlanning();
       helene('journal');
     },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Publications'), sert: 'Le journal se filtre par nature de décision.', facultatif: true },
+      { faire: 'cliquer', sur: parTexte('.content button', 'Fiche navette'), sert: 'Les heures et variables du mois, prêtes pour le comptable.' },
+    ],
   },
   {
     chapitre: BILAN,
@@ -1227,6 +1337,12 @@ const COMPLET_BRUT: Etape[] = [
       avecAbsenceImprevue();
       helene('tableau');
     },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content .btn.primary', 'Voir la journée'), sert: 'La journée d’aujourd’hui, avec toute l’équipe.', facultatif: true },
+      { faire: 'attendre', que: '.dialog', facultatif: true },
+      { faire: 'cliquer', sur: '.dialog .dialog-fermer', dit: 'Fermez la fenêtre', sert: 'On revient au tableau de bord.', facultatif: true },
+      { faire: 'cliquer', sur: '.content .tb-sujet', dit: 'Cliquez sur une ligne de décisions', sert: 'Elle mène droit à ce qui attend votre réponse, dans « Résoudre ».' },
+    ],
   },
   {
     chapitre: QUOTIDIEN,
@@ -1288,6 +1404,23 @@ const COMPLET_BRUT: Etape[] = [
   {
     chapitre: QUOTIDIEN,
     qui: HELENE,
+    cible: '.content .ad-recherche',
+    cibleFin: '.content',
+    titre: 'L’aide',
+    texte: () => 'Toutes les fonctions sont répertoriées. Chaque fiche a sa réponse, son bouton et son tutoriel.',
+    jouer: () => {
+      avecPlanning();
+      helene('aide');
+    },
+    gestes: [
+      { faire: 'taper', dans: '#aide-recherche', texte: 'garde', sert: 'La recherche filtre les fiches et le lexique en même temps.' },
+      { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Lexique'), sert: 'Le lexique définit le vocabulaire de Solvéa.' },
+      { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Comment faire'), sert: 'Et l’on revient aux fiches : « Voir le tutoriel » rejoue la tâche, rien qu’elle.' },
+    ],
+  },
+  {
+    chapitre: QUOTIDIEN,
+    qui: HELENE,
     cible: "[aria-labelledby='c-code']",
     titre: 'Mot de passe et clé de secours',
     texte: () => 'Chacun change son mot de passe. La clé de secours sert en cas d’oubli.',
@@ -1310,6 +1443,11 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: 'label[for="mode-sombre"]', sert: 'Le mode sombre repose les yeux le soir.' },
       { faire: 'pause', ms: 1600 },
       { faire: 'cliquer', sur: 'label[for="mode-clair"]', sert: 'Et l’on revient au mode clair d’un clic.' },
+      { faire: 'cliquer', sur: 'label[for="theme-emeraude"]', dit: 'Choisissez la couleur « Émeraude »', sert: 'Toute l’application, et moi avec, prenons cette couleur.', facultatif: true },
+      { faire: 'pause', ms: 1800 },
+      { faire: 'cliquer', sur: 'label[for="theme-ciel"]', dit: 'Revenez au bleu ciel', sert: 'Dix couleurs sont proposées.', facultatif: true },
+      { faire: 'cliquer', sur: 'label[for="texte-grand"]', dit: 'Passez le texte en grand', sert: 'Pour lire plus confortablement.', facultatif: true },
+      { faire: 'cliquer', sur: 'label[for="texte-normal"]', dit: 'Revenez à la taille normale', sert: 'Chaque personne garde ses propres préférences.', facultatif: true },
     ],
   },
 ];
@@ -1343,6 +1481,7 @@ const ORDRE_TITULAIRE = [
   'Valider le remplacement',
   'Une urgence médicale',
   'Congés et horaires',
+  'Deux demandes sur les mêmes dates',
   'Refuser une demande',
   'Une absence imprévue',
   'L’appel à l’équipe',
@@ -1359,6 +1498,7 @@ const ORDRE_TITULAIRE = [
   'La cloche',
   'Plusieurs pharmacies',
   'Solvi, votre assistant',
+  'L’aide',
   'Mot de passe et clé de secours',
   'Votre compte',
 ];
@@ -1580,7 +1720,7 @@ const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'L�
 const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', qui: 'Nicolas · préparateur', prenom: 'Nicolas' });
 
 export const SCENARIOS = {
-  complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', duree: `25 min · ${COMPLET.length} étapes`, etapes: COMPLET },
+  complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', duree: `30 min · ${COMPLET.length} étapes`, etapes: COMPLET },
   pharmacien: { court: 'Pharmacien', role: 'Pharmacien adjoint', titre: 'Mon espace de pharmacien', duree: `7 min · ${PHARMACIEN.length} étapes`, etapes: PHARMACIEN },
   equipe: { court: 'Équipe', role: 'Préparateur, animateur, apprenti…', titre: 'Mon espace dans l’équipe', duree: `7 min · ${EQUIPIER.length} étapes`, etapes: EQUIPIER },
   etabli: { court: 'Journée type', role: 'Tous les rôles', titre: 'Une journée type', duree: `8 min · ${ETABLI.length} étapes`, etapes: ETABLI },
@@ -1716,6 +1856,11 @@ export function Parcours(): JSX.Element | null {
   const [sert, setSert] = useState('');
   /** Où Solvi se pose pendant la démonstration, pour ne jamais cacher ce qu'il montre. */
   const [coin, setCoin] = useState<'bas' | 'gauche' | 'haut'>('bas');
+  /** Sur grand écran, Solvi vole se poser près de ce qu'il montre : sa place, et de quel côté il arrive. */
+  const [pose, setPose] = useState<{ left: number; top: number; cote: 'droite' | 'gauche' | 'dessous' | 'dessus' } | null>(null);
+  const [elan, setElan] = useState<'' | 'vers-droite' | 'vers-gauche'>('');
+  const guide = useRef<HTMLDivElement>(null);
+  const zoneVue = useRef<Zone | null>(null);
   const [allure, setAllure] = useState<Rythme>(rythme);
   /** L'humeur de Solvi suit ce qu'il fait : il explique, clique, écrit, attend un calcul, montre un résultat. */
   const [humeur, setHumeur] = useState<Humeur>('neutre');
@@ -1854,7 +1999,8 @@ export function Parcours(): JSX.Element | null {
           if (g.faire === 'attendre' && essais === 4) setHumeur('reflechi');
           if (++essais > (g.faire === 'attendre' ? (facultatif ? 14 : 200) : facultatif ? 6 : 14)) {
             // Un geste qui ne trouve pas sa cible est sauté : on le signale, pour qu'une étape ne se vide pas en silence.
-            if (!facultatif) console.warn(`[visite] geste sauté à l’étape « ${SCENARIOS[scenario].etapes[parcours]?.titre ?? '?'} » : ${g.faire}${'dit' in g && g.dit ? ` (${g.dit})` : typeof cible === 'string' ? ` ${cible}` : ''}`);
+            if (facultatif) console.debug(`[visite·facultatif] « ${SCENARIOS[scenario].etapes[parcours]?.titre ?? '?'} » : ${'dit' in g && g.dit ? g.dit : typeof cible === 'string' ? cible : g.faire}`);
+            else console.warn(`[visite] geste sauté à l’étape « ${SCENARIOS[scenario].etapes[parcours]?.titre ?? '?'} » : ${g.faire}${'dit' in g && g.dit ? ` (${g.dit})` : typeof cible === 'string' ? ` ${cible}` : ''}`);
             return derouler(gestes, i + 1);
           }
           return plusTard(viser, 150);
@@ -1874,6 +2020,32 @@ export function Parcours(): JSX.Element | null {
           const bas = touche(W / 2 - large / 2, H - 170, W / 2 + large / 2, H);
           const gauche = touche(0, H - 190, Math.min(440, W), H);
           setCoin(!bas ? 'bas' : !gauche && W > 900 ? 'gauche' : 'haut');
+          // Grand écran : Solvi vole près de ce qu'il montre, à côté de la fenêtre ou du bloc éclairé, sans rien cacher.
+          if (W < 900) return setPose(null);
+          const w = Math.min(guide.current?.offsetWidth ?? 392, 392);
+          const h = guide.current?.offsetHeight ?? 150;
+          const z = zoneVue.current ?? { top: r.top, left: r.left, width: r.width, height: r.height };
+          const borne = (v: number, min: number, max: number): number => Math.max(min, Math.min(max, v));
+          const haut = borne(r.top + r.height / 2 - h / 2, 84, H - h - 16);
+          const aligne = borne(r.left - 30, 16, W - w - 16);
+          const choix: { left: number; top: number; cote: 'droite' | 'gauche' | 'dessous' | 'dessus'; ok: boolean }[] = [
+            { left: z.left + z.width + 18, top: haut, cote: 'droite', ok: z.left + z.width + 18 + w <= W - 12 },
+            { left: z.left - 18 - w, top: haut, cote: 'gauche', ok: z.left - 18 - w >= 12 },
+            { left: aligne, top: z.top + z.height + 14, cote: 'dessous', ok: z.top + z.height + 14 + h <= H - 12 },
+            { left: aligne, top: z.top - 14 - h, cote: 'dessus', ok: z.top - 14 - h >= 84 },
+            { left: aligne, top: r.bottom + 18, cote: 'dessous', ok: r.bottom + 18 + h <= H - 12 },
+            { left: aligne, top: r.top - 18 - h, cote: 'dessus', ok: r.top - 18 - h >= 84 },
+          ];
+          const place = choix.find((c) => c.ok) ?? { left: borne(W / 2 - w / 2, 16, W - w - 16), top: H - h - 20, cote: 'dessous' as const };
+          setPose((avant) => {
+            if (avant && Math.abs(avant.left - place.left) < 6 && Math.abs(avant.top - place.top) < 6) return avant;
+            // Il penche dans le sens du trajet, le temps d'arriver.
+            if (avant) {
+              setElan(place.left > avant.left + 20 ? 'vers-droite' : place.left < avant.left - 20 ? 'vers-gauche' : '');
+              plusTard(() => setElan(''), 750);
+            }
+            return { left: Math.round(place.left), top: Math.round(place.top), cote: place.cote };
+          });
         }, 420);
         const aLire = tempsDeLire(`${g.dit ?? decrire([g])} ${g.sert ?? ''}`);
         // Le pointeur glisse jusqu'à la cible, s'y pose, puis agit.
@@ -1919,7 +2091,9 @@ export function Parcours(): JSX.Element | null {
       setAnnonce(decrire(liste[faits]));
       setSert(utilite(liste[faits]));
       setHumeur('neutre');
+      setAllure(rythme);
       setCoin('bas');
+      setPose(null);
       // La fiche a le temps de s'effacer avant le premier geste.
       plusTard(() => derouler(liste[faits], 0), 800);
     };
@@ -1954,6 +2128,7 @@ export function Parcours(): JSX.Element | null {
       return;
     }
     let amene = false;
+    let dernierRecadrage = 0;
     const mesurer = (): void => {
       const base = cible ? document.querySelector<HTMLElement>(cible) : null;
       const geste = visee.current ? element(visee.current) : null;
@@ -1977,12 +2152,24 @@ export function Parcours(): JSX.Element | null {
           el.style.scrollMarginTop = '18px';
           el.scrollIntoView({ block: r.height > (basMax - haut) * 0.8 ? 'start' : 'center', inline: 'nearest', behavior: 'smooth' });
         }
+        // Ce que le projecteur éclaire reste à l'écran : s'il sort du champ, la page défile pour le ramener au centre.
+        const champ = basMax - haut;
+        const suivi = phase === 'demo' && geste?.isConnected ? geste : el;
+        const s = suivi.getBoundingClientRect();
+        const dehors = s.height > champ - 24 ? s.bottom < haut + 80 || s.top > basMax - 80 : s.top < haut - 2 || s.bottom > basMax + 2;
+        if (amene || phase === 'demo') {
+          if (dehors && Date.now() - dernierRecadrage > 900) {
+            dernierRecadrage = Date.now();
+            suivi.scrollIntoView({ block: s.height > champ * 0.8 ? 'start' : 'center', inline: 'nearest', behavior: 'smooth' });
+          }
+        }
         const m = 8;
         const top = Math.max(haut, r.top - m);
         const bas = Math.min(basMax, r.bottom + m);
         const left = Math.max(6, r.left - m);
         const droite = Math.min(window.innerWidth - 6, r.right + m);
         const z = bas - top > 24 && droite - left > 24 ? { top, left, width: droite - left, height: bas - top } : null;
+        zoneVue.current = z;
         setZone((avant) => (memeZone(avant, z) ? avant : z));
       } else setZone(null);
       const v = visee.current ? element(visee.current) : null;
@@ -2083,17 +2270,26 @@ export function Parcours(): JSX.Element | null {
         </div>
       ) : null}
       {phase === 'demo' ? (
-        <div className={`solvi-guide no-print ${coin}`}>
+        <div ref={guide} className={`solvi-guide no-print ${pose ? `vole c-${pose.cote}` : coin} ${elan}`} style={pose ? { left: pose.left, top: pose.top } : undefined}>
           {/* Solvi reprend la parole à chaque geste : un petit bond le signale. */}
           <span key={annonce} className="solvi-guide-qui">
-            <Solvi size={66} humeur={humeur} />
+            <Solvi size={pose ? 64 : 72} humeur={humeur} />
           </span>
           <div className="solvi-bulle" role="status">
-            <span className="solvi-nom teinte solvi-bulle-nom" aria-hidden="true">
-              Solvi
+            <span className="solvi-bulle-tete" aria-hidden="true">
+              <NomSolvi className="solvi-bulle-nom" />
+              {nbTemps > 1 ? (
+                <span className="solvi-pas">
+                  {Array.from({ length: nbTemps }, (_, i) => (
+                    <i key={i} className={i < joues ? 'fait' : i === joues ? 'on' : ''} />
+                  ))}
+                </span>
+              ) : null}
             </span>
-            <b>{annonce || etape.titre}</b>
-            {sert ? <span className="solvi-sert">{sert}</span> : null}
+            <span key={annonce} className="solvi-dit">
+              <b>{annonce || etape.titre}</b>
+              {sert ? <span className="solvi-sert">{sert}</span> : null}
+            </span>
             <span className="solvi-outils">
               <button
                 type="button"
@@ -2101,13 +2297,8 @@ export function Parcours(): JSX.Element | null {
                 title="Changer le rythme de la démonstration"
                 onClick={() => {
                   const suivant: Rythme = allure === 'pose' ? 'normal' : allure === 'normal' ? 'vif' : 'pose';
-                  rythme = suivant;
+                  choisirRythme(suivant);
                   setAllure(suivant);
-                  try {
-                    window.localStorage.setItem(CLE_RYTHME, suivant);
-                  } catch {
-                    /* le rythme reste celui de la séance */
-                  }
                 }}
               >
                 <Gauge size={13} aria-hidden="true" /> Rythme {RYTHMES[allure].nom}
@@ -2180,6 +2371,7 @@ export function Parcours(): JSX.Element | null {
             ) : null}
           </div>
         )}
+        {!sommaire && !libre ? <ChoixRythme key={`${parcours}-${allure}`} compact /> : null}
         <div className="pt-segments" aria-hidden="true">
           {(tache ? [{ titre: 'Tutoriel', debut, n: terme - debut + 1 }] : chapitres).map((c) => (
             <span key={c.titre} style={{ flexGrow: c.n }}>
@@ -2258,6 +2450,7 @@ export function ChoixParcours(): JSX.Element | null {
           </button>
         </div>
         <div className="dc-corps">
+          <ChoixRythme />
           <div className="choix-parcours">
             {(Object.keys(SCENARIOS) as Scenario[]).map((cle) => {
               const c = CARTES[cle];
