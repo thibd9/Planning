@@ -129,21 +129,45 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
             <small>Votre titulaire prévient tous ceux qui peuvent reprendre le poste.</small>
           </span>
         </label>
-        {avis.map((c) => {
-          const p = data.personnes.find((x) => x.id === c.personId);
-          if (!p) return null;
-          return (
-            <label key={c.personId} className={c.ok ? '' : 'non'}>
-              <input type="radio" name="collegue" checked={collegue === c.personId} disabled={!c.ok} onChange={() => setCollegue(c.personId)} />
-              <Avatar person={p} />
-              <span className="grow">
-                {p.prenom} {p.nom}
-                <small>{c.ok ? (c.contrat ? `${fmtDuree(c.avant)} → ${fmtDuree(c.apres)} cette semaine-là, pour un contrat de ${fmtDuree(c.contrat)}` : 'Titulaire, hors décompte d’heures') : c.raisons[0]}</small>
-              </span>
-              <span className={`col-avis ${c.ok ? 'ok' : 'non'}`}>{c.ok ? 'Possible' : 'Impossible'}</span>
-            </label>
-          );
-        })}
+        {avis
+          .filter((c) => c.ok)
+          .map((c) => {
+            const p = data.personnes.find((x) => x.id === c.personId);
+            if (!p) return null;
+            return (
+              <label key={c.personId}>
+                <input type="radio" name="collegue" checked={collegue === c.personId} onChange={() => setCollegue(c.personId)} />
+                <Avatar person={p} />
+                <span className="grow">
+                  {p.prenom} {p.nom}
+                  <small>{c.contrat ? `${fmtDuree(c.avant)} → ${fmtDuree(c.apres)} cette semaine-là, pour un contrat de ${fmtDuree(c.contrat)}` : 'Titulaire, hors décompte d’heures'}</small>
+                </span>
+                <span className="col-avis ok">Possible</span>
+              </label>
+            );
+          })}
+        {avis.some((c) => !c.ok) ? (
+          <details className="col-non">
+            <summary>
+              {avis.filter((c) => !c.ok).length} collègue{avis.filter((c) => !c.ok).length > 1 ? 's ne peuvent' : ' ne peut'} pas reprendre ce poste
+            </summary>
+            <ul>
+              {avis
+                .filter((c) => !c.ok)
+                .map((c) => {
+                  const p = data.personnes.find((x) => x.id === c.personId);
+                  return p ? (
+                    <li key={c.personId}>
+                      <b>
+                        {p.prenom} {p.nom}
+                      </b>
+                      <span>{c.raisons[0]}</span>
+                    </li>
+                  ) : null;
+                })}
+            </ul>
+          </details>
+        ) : null}
         <p className="aide">Calcul automatique : règles de repos et heures de la semaine. Dans tous les cas, votre titulaire valide.</p>
       </fieldset>
       <fieldset className="choix urgence">
