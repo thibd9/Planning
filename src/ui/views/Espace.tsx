@@ -16,7 +16,6 @@ import { DialogueDemande } from '../components/Demande';
 import { ProchainPoste } from '../components/ProchainPoste';
 import { DialogueRendezVous, ProchainsRendezVous } from '../components/RendezVous';
 import { iconeDe } from '../icons';
-import { Solvi } from '../Solvi';
 
 const jourLong = (date: ISODate): string => `${JOURS[weekday(date)]} ${fmtJourMois(date)}`;
 
@@ -91,7 +90,6 @@ export function Espace({ personId }: { personId: string }): JSX.Element | null {
           <p>{profil.phrase}</p>
         </div>
         <p className="tb-resume">
-          <Solvi size={44} calme humeur={aRepondre ? 'intrigue' : 'heureux'} />
           <span>
             {aRepondre ? (
               <>

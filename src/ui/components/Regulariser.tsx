@@ -11,7 +11,6 @@ import { FORME_LABEL, controlerCreneau, proposerCreneaux } from '../../engine/ra
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { Dialog, momentDe } from '../kit';
-import { Solvi } from '../Solvi';
 
 const jourLong = (date: ISODate): string => `${JOURS[weekday(date)]} ${fmtJourMois(date)}`;
 const signe = (min: number): string => `${min > 0 ? '+' : '−'}${fmtDuree(Math.abs(min))}`;
@@ -204,8 +203,10 @@ export function Regulariser({ solde, sens, onClose }: { solde: Solde; sens: Sens
 
         <div className="rat-col">
           <section className="rat-bloc" aria-labelledby="rat-propose">
-            <div className="rat-solvi">
-              <Solvi size={34} calme humeur={propositions.length ? 'confiant' : 'reflechi'} />
+            <div className="rat-propose-tete">
+              <span className="rat-propose-ico" aria-hidden="true">
+                <Sparkles size={18} />
+              </span>
               <div className="grow">
                 <h3 id="rat-propose">Solvéa propose</h3>
                 <span className="small soft">{propositions.length ? 'Sans règle enfreinte, sur les quatre prochaines semaines.' : 'Aucun créneau sans règle enfreinte dans les plannings déjà posés.'}</span>

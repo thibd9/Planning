@@ -64,6 +64,8 @@ thème, flotte sur place, cligne des yeux, et change d'humeur selon ce qu'il fai
 clique, concentré quand il écrit, pensif pendant un calcul, émerveillé devant un résultat, perplexe quand
 il n'a pas compris une question. Quinze humeurs sont dessinées (neutre, heureux, content, excité, surpris,
 intrigué, réfléchi, satisfait, confiant, concentré, inquiet, triste, fatigué, confus, joyeux).
+Solvi n'apparaît que dans l'aide (le bouton « Aide », l'assistant, la page d'aide) et dans la visite
+guidée : le tableau de bord, les accueils et les fenêtres de travail restent sans mascotte.
 
 Pendant une visite, **on lit, puis on regarde** — un clic par étape :
 
