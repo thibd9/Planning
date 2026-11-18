@@ -179,7 +179,7 @@ Un vrai contrôle d'accès et une vraie messagerie demandent un serveur.
 
 | Espace | Question | Contenu |
 | --- | --- | --- |
-| **Tableau de bord** | Où en est la pharmacie ? | Décisions en attente, couverture pharmacien de la semaine, équipe du jour, prochains horaires, messages, mes pharmacies |
+| **Tableau de bord** | Que faire maintenant ? | **La priorité du moment** en tête (une seule, avec son bouton), cinq repères sur une rangée, les décisions par sujet, le prochain planning étape par étape, **l'équipe du jour en frise** avec l'heure qu'il est, les décisions récentes, mes pharmacies |
 | **Résoudre** | Que décider aujourd'hui ? | Cinq onglets, un sujet à la fois : absences (bouton « Tout régler » avec les options conseillées, ou un volet par jour avec options comparées), remplacements, demandes, gardes, plannings à publier |
 | **Construire** | Comment couvrir la semaine ? | Grille à l'échelle du temps, contrôles immédiats, trois propositions (équité, préférences, coût), brouillon puis publication |
 | **Gardes** | Affecter, prévenir, payer | Ajout d'une garde avec le pharmacien à qui la confier et sa notification immédiate, délai de 15 jours, interventions, repos à protéger, variables pour le comptable |
