@@ -2089,6 +2089,9 @@ export function Parcours(): JSX.Element | null {
             <Solvi size={66} humeur={humeur} />
           </span>
           <div className="solvi-bulle" role="status">
+            <span className="solvi-nom teinte solvi-bulle-nom" aria-hidden="true">
+              Solvi
+            </span>
             <b>{annonce || etape.titre}</b>
             {sert ? <span className="solvi-sert">{sert}</span> : null}
             <span className="solvi-outils">
@@ -2119,7 +2122,7 @@ export function Parcours(): JSX.Element | null {
       <aside ref={panneau} className={`parcours-test no-print${ferme ? ' ferme' : ''}`} aria-label="Parcours guidé" aria-hidden={ferme} {...(ferme ? { inert: '' } : {})} style={place ? { left: place.left, top: place.top, right: 'auto', bottom: 'auto' } : undefined}>
         <div className="row" style={{ gap: 10 }}>
           <span className="pt-solvi" aria-hidden="true">
-            <Solvi size={46} humeur={phase === 'fini' ? (dernier ? 'joyeux' : 'heureux') : 'neutre'} />
+            <Solvi size={54} humeur={phase === 'fini' ? (dernier ? 'joyeux' : 'heureux') : 'neutre'} />
           </span>
           <div className="grow">
             <div className="eyebrow">

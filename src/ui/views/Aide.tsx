@@ -175,7 +175,9 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
             <Solvi size={34} calme humeur="heureux" />
           </span>
           <span className="grow">
-            <b>Demander à Solvi</b>
+            <b>
+              Demander à <span className="solvi-nom teinte">Solvi</span>
+            </b>
             <span className="small soft">Posez votre question avec vos mots : il répond d’après votre planning.</span>
           </span>
           <ArrowRight size={16} aria-hidden="true" />

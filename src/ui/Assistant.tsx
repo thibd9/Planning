@@ -82,10 +82,10 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
         <section className="aide-panneau" role="dialog" aria-label="Solvi, votre assistant">
           <div className="aide-tete">
             <span className="aide-logo" aria-hidden="true">
-              <Solvi size={42} humeur={humeurBot} />
+              <Solvi size={52} humeur={humeurBot} />
             </span>
             <div className="grow">
-              <h2>Solvi</h2>
+              <h2 className="solvi-nom">Solvi</h2>
               <p>Votre assistant. Posez votre question.</p>
             </div>
             <button type="button" className="dialog-fermer" onClick={() => ouvrirAssistant(false)} aria-label="Fermer l’assistant">
@@ -184,7 +184,7 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
         </section>
       ) : null}
       <button ref={bouton} type="button" className={`aide-fab${assistant ? ' on' : ''}`} onClick={() => ouvrirAssistant(!assistant)} aria-expanded={assistant} data-focus="assistant" title="Solvi, votre assistant">
-        <Solvi size={40} humeur={assistant ? humeurBot : 'neutre'} />
+        <Solvi size={54} humeur={assistant ? humeurBot : 'neutre'} />
         <span className="aide-mot">Aide</span>
         <span className="sr">, Solvi, votre assistant</span>
       </button>

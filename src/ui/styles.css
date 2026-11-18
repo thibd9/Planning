@@ -2859,3 +2859,34 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
 /* Aide : les deux boutons d'une fiche respirent. */
 .ad-actions { gap: 14px 12px; margin-top: 16px; }
 .ad-fiche { gap: 10px; padding: 22px; }
+
+/* Solvi n'est jamais enfermé dans un cadre : il flotte librement, avec un léger halo pour se détacher du fond. */
+.aide-logo, .pt-solvi, .ad-autre-pic.solvi-case { width: auto; height: auto; padding: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+.aide-logo .solvi-corps svg, .pt-solvi .solvi-corps svg { filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.7)) drop-shadow(0 4px 6px color-mix(in srgb, var(--solvi-ombre) 40%, transparent)); }
+.aide-tete { padding-left: 16px; gap: 14px; overflow: visible; }
+.aide-tete .solvi { margin: 2px 4px 6px 2px; }
+.parcours-test > .row:first-child { padding-left: 16px; gap: 14px; }
+.pt-solvi .solvi { margin: 2px 2px 6px; }
+/* Le bouton d'aide : Solvi seul, sans pastille autour ; le mot « Aide » le suit dans une petite étiquette. */
+.aide-fab { background: none; box-shadow: none; padding: 4px; gap: 6px; min-height: 0; border-radius: 22px; animation: none; overflow: visible; }
+.aide-fab:hover { background: none; transform: translateY(-3px) scale(1.06); }
+.aide-fab .aide-mot { padding: 6px 12px; border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 14px; box-shadow: var(--shadow-1), 0 0 0 1px var(--line); }
+.aide-fab .solvi-corps svg { filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--solvi-ombre) 45%, transparent)); }
+@media (max-width: 900px) {
+  .aide-fab { padding: 2px; }
+}
+
+/* Le nom de Solvi a sa propre écriture : ronde et pleine, différente du reste de l'interface. */
+@font-face {
+  font-family: 'Fredoka Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 700;
+  src: url('../../node_modules/@fontsource-variable/fredoka/files/fredoka-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+.solvi-nom { font-family: 'Fredoka Variable', 'Onest Variable', system-ui, sans-serif; font-weight: 650; letter-spacing: 0.01em; font-size: 1.22em; line-height: 1.05; }
+.solvi-nom.teinte { background: linear-gradient(100deg, var(--a-plein), var(--a-plein-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+:root[data-mode='sombre'] .solvi-nom.teinte, .sombre .solvi-nom.teinte { background: linear-gradient(100deg, color-mix(in srgb, var(--a-plein-2) 55%, #fff), color-mix(in srgb, var(--a-plein-2) 25%, #fff)); -webkit-background-clip: text; background-clip: text; }
+.aide-tete h2.solvi-nom { font-size: 24px; }
+.solvi-bulle-nom { font-size: 15px; margin-bottom: -2px; }
