@@ -1,12 +1,16 @@
 import { Coffee, Sun, Sunset } from 'lucide-react';
-import { addDays, fmtDateCourt, fmtDuree, fmtHeure } from '../../domain/time';
+import type { ReactNode } from 'react';
+import { addDays, fmtDateCourt, fmtDuree, fmtHeure, todayISO } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
 import { MOMENT_LABEL, momentDe } from '../kit';
 
 /** Le prochain poste, écrit en grand : c'est la première question de chacun en ouvrant l'application. */
-export function ProchainPoste({ postes, today }: { postes: Shift[]; today: ISODate }): JSX.Element {
-  const [p, suivant] = postes;
+export function ProchainPoste({ postes, today, action }: { postes: Shift[]; today: ISODate; action?: ReactNode }): JSX.Element {
+  // Un poste d'aujourd'hui déjà terminé n'est plus « le prochain » : on montre celui qui vient.
+  const heure = new Date();
+  const maintenant = today === todayISO() ? heure.getHours() * 60 + heure.getMinutes() : 0;
+  const [p, suivant] = postes.filter((s) => s.date > today || s.end > maintenant);
   const quand = (date: ISODate): string => (date === today ? 'Aujourd’hui' : date === addDays(today, 1) ? 'Demain' : fmtDateCourt(date));
   if (!p) {
     return (
@@ -48,6 +52,7 @@ export function ProchainPoste({ postes, today }: { postes: Shift[]; today: ISODa
           Ensuite : <span className="cap1">{quand(suivant.date)}</span>, {fmtHeure(suivant.start)} – {fmtHeure(suivant.end)}
         </span>
       ) : null}
+      {action}
     </div>
   );
 }

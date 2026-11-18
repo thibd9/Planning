@@ -1,10 +1,11 @@
-import { ArrowLeftRight, ArrowRight, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus, UsersRound } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, ArrowRight, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus, UsersRound } from 'lucide-react';
 import { useMemo } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
 import { addDays, fmtDateCourt, fmtDateLong, fmtHeure, fmtSemaine, mondayOf, todayISO, totalDuree, weekDates } from '../../domain/time';
 import type { AppData } from '../../domain/types';
-import { nomCourt } from '../../domain/types';
+import { nomCourt, MOTIF_RETARD_LABEL } from '../../domain/types';
 import { ouverture, shiftsSemaine, trousPharmacien } from '../../engine/core';
+import { arriveePrevue, retardsDuJour } from '../../engine/retard';
 import { decisions } from '../../engine/decisions';
 import { aRegulariser, semaineLibre } from '../../engine/heures';
 import { estCollaboratif, moisDe, reponses } from '../../engine/souhaits';
@@ -42,6 +43,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   const etatSuivante = data.semaines[suivante]?.statut === 'publie' ? 'Publiée' : shiftsSemaine(data, suivante).length ? 'Brouillon' : 'À construire';
   const prochaineGarde = data.gardes.filter((g) => g.date >= today).sort((a, b) => a.date.localeCompare(b.date))[0];
   const duJour = data.shifts.filter((s) => s.date === today).sort((a, b) => a.start - b.start);
+  const retards = retardsDuJour(data, today);
   const absents = data.absences.filter((a) => a.statut === 'approuvee' && a.from <= today && today <= a.to);
   const pharmacies = [{ id: officineId, d: data }, ...Object.entries(autres).map(([id, x]) => ({ id, d: x }))].filter(({ d: x }) => x.personnes.some((p) => memeIdentifiant(p.identifiant, session ?? '')));
 
@@ -174,7 +176,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
           <span className="ico" aria-hidden="true"><ShieldCheck size={18} /></span>
           <span className="grow">
             <span className="l">Pharmacien présent</span>
-            <span className="v num">{cetteSemaine === null ? '—' : `${cetteSemaine} %`}</span>
+            <span className="v num">{cetteSemaine === null ? '-' : `${cetteSemaine} %`}</span>
             <span className="d">cette semaine</span>
           </span>
         </button>
@@ -293,6 +295,13 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
                       <span style={{ minWidth: 0 }}>
                         <b>{nomCourt(p)}</b>
                         <span className="small soft">{libelleRole(data, p)}</span>
+                        {retards
+                          .filter((r) => r.personId === p.id)
+                          .map((r) => (
+                            <span key={r.id} className="tbj-retard" title={[r.motif ? MOTIF_RETARD_LABEL[r.motif] : '', r.note ?? ''].filter(Boolean).join(' : ') || undefined}>
+                              <AlarmClock size={12} aria-hidden="true" /> Retard<span className="sr"> annoncé</span> · arrivée {fmtHeure(arriveePrevue(r))}
+                            </span>
+                          ))}
                       </span>
                     </span>
                     <span className="tbj-piste">

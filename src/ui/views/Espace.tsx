@@ -14,6 +14,7 @@ import { useUi } from '../../store/ui';
 import { ListeAnnonces, annoncesDe } from '../components/Annonces';
 import { DialogueDemande } from '../components/Demande';
 import { ProchainPoste } from '../components/ProchainPoste';
+import { PrevenirRetard } from '../components/Retard';
 import { DialogueRendezVous, ProchainsRendezVous } from '../components/RendezVous';
 import { iconeDe } from '../icons';
 
@@ -125,7 +126,7 @@ export function Espace({ personId }: { personId: string }): JSX.Element | null {
         </section>
       ) : null}
 
-      <ProchainPoste postes={aVenir} today={today} />
+      <ProchainPoste postes={aVenir} today={today} action={<PrevenirRetard personId={personId} />} />
 
       <div className="esp-grille">
         <section className="card esp-metier" aria-labelledby="esp-metier" data-focus="mon-metier">

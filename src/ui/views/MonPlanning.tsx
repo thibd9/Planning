@@ -17,6 +17,7 @@ import { useUi } from '../../store/ui';
 import { AvantApres, Pill, Seg, momentDe, Ferie , MOMENT_LABEL } from '../kit';
 import { Calendrier } from '../components/Calendrier';
 import { ProchainPoste } from '../components/ProchainPoste';
+import { PrevenirRetard } from '../components/Retard';
 import { AppelRecu } from '../components/Appel';
 
 export function MonPlanning({ personId }: { personId: string }): JSX.Element {
@@ -97,7 +98,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
             ) : null}
           </div>
         </div>
-        <ProchainPoste postes={aVenir.filter((x) => !absences.some((a) => a.statut === 'approuvee' && a.from <= x.date && x.date <= a.to))} today={today} />
+        <ProchainPoste postes={aVenir.filter((x) => !absences.some((a) => a.statut === 'approuvee' && a.from <= x.date && x.date <= a.to))} today={today} action={<PrevenirRetard personId={personId} />} />
       </div>
 
       {aAider.length ? (

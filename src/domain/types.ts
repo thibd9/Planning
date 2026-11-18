@@ -419,6 +419,26 @@ export interface Ecart {
 export const ECART_LABEL: Record<EcartType, string> = { retard: 'Retard', depart: 'Départ anticipé', absence: 'Absence non prévue' };
 
 /**
+ * Avis de retard donné par la personne elle-même, avant ou pendant sa prise de poste : ses titulaires sont
+ * prévenus aussitôt. Ce n'est pas un retard constaté (voir `Ecart`) : c'est ce que la personne annonce.
+ */
+export type MotifRetard = 'transport' | 'sante' | 'famille' | 'autre';
+export const MOTIF_RETARD_LABEL: Record<MotifRetard, string> = { transport: 'Transport', sante: 'Santé', famille: 'Famille', autre: 'Autre raison' };
+export interface AvisRetard {
+  id: string;
+  personId: string;
+  date: ISODate;
+  /** L'heure de prise de poste prévue : avec la date, elle désigne le poste concerné. */
+  start: Minutes;
+  /** Le retard annoncé. */
+  minutes: number;
+  /** Facultatif, vu des seuls titulaires. */
+  motif?: MotifRetard;
+  note?: string;
+  at: string;
+}
+
+/**
  * Décision proposée par un titulaire secondaire. Elle n'est appliquée que lorsque le titulaire
  * principal donne son accord : l'action et ses paramètres sont rejoués à ce moment-là.
  */
@@ -558,6 +578,8 @@ export interface AppData {
   notifications: Notification[];
   /** Décisions annoncées, la plus récente en tête. */
   annonces?: Annonce[];
+  /** Les retards que les personnes ont annoncés elles-mêmes. */
+  retards?: AvisRetard[];
   trous: Trou[];
 }
 

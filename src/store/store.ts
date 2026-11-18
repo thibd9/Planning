@@ -5,7 +5,9 @@ import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
 import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, RendezVous, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
-import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
+import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, MOTIF_RETARD_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
+import type { AvisRetard, MotifRetard } from '../domain/types';
+import { RETARD_MAX, arriveePrevue, dureeRetard, effetsRetard, superieurs } from '../engine/retard';
 import { decrireBesoin, decrireJournee, minutesSemaine, shiftsSemaine } from '../engine/core';
 import { appliquerCreneau, controlerCreneau } from '../engine/rattrapage';
 import type { Creneau, SensRegul } from '../engine/rattrapage';
@@ -208,6 +210,10 @@ export interface Store {
   /** Écart de présence constaté par le responsable (retard, départ anticipé, absence non prévue). */
   signalerEcart: (e: { personId: string; date: ISODate; type: EcartType; minutes?: number }) => void;
   retirerEcart: (id: string) => void;
+  /** « Je serai en retard » : la personne prévient elle-même. Ses titulaires reçoivent une notification et un message. */
+  prevenirRetard: (r: { personId: string; date: ISODate; start: number; minutes: number; motif?: MotifRetard; note?: string }) => void;
+  /** « Je serai finalement à l'heure » : l'avis est retiré, les titulaires en sont prévenus. */
+  annulerRetard: (id: string) => void;
   planifierFormation: (f: { intitule: string; personnes: string[]; from: ISODate; to: ISODate }) => void;
   /** Inventaire : un poste « inventaire » par participant, visible aussitôt et notifié. */
   planifierInventaire: (i: { date: ISODate; start: number; end: number; personnes: string[] }) => void;
@@ -882,7 +888,7 @@ export const useStore = create<Store>((set, get) => {
           type: ctrl.premiere ? 'publication' : 'modification',
           titre: ctrl.premiere
             ? `Planning de la semaine du ${fmtSemaine(monday)} publié`
-            : `Modification publiée — semaine du ${fmtSemaine(monday)}`,
+            : `Modification publiée - semaine du ${fmtSemaine(monday)}`,
           detail: [
             ctrl.premiere
               ? `${snapshot.length} postes communiqués ${jours > 0 ? `${jours} jours avant le début de la semaine` : 'en cours de semaine'}.`
@@ -924,6 +930,42 @@ export const useStore = create<Store>((set, get) => {
         ),
       ),
     retirerEcart: (id) => commit((d) => ({ ...d, ecarts: (d.ecarts ?? []).filter((e) => e.id !== id) })),
+    prevenirRetard: (r) =>
+      commit((d, today) => {
+        const p = d.personnes.find((x) => x.id === r.personId);
+        const chefs = superieurs(d, r.personId);
+        if (!p || !chefs.length) return d;
+        const at = now();
+        const note = r.note?.trim() || undefined;
+        const avis: AvisRetard = { id: uid('ret'), personId: r.personId, date: r.date, start: r.start, minutes: Math.max(1, Math.min(RETARD_MAX, Math.round(r.minutes))), motif: r.motif, note, at };
+        // Un nouvel avis pour le même poste remplace le précédent : on peut corriger sa durée.
+        const deja = (d.retards ?? []).some((x) => x.personId === r.personId && x.date === r.date && x.start === r.start);
+        const retards = (d.retards ?? []).filter((x) => !(x.personId === r.personId && x.date === r.date && x.start === r.start)).concat(avis);
+        const jour = r.date === today ? 'aujourd’hui' : r.date === addDays(today, 1) ? 'demain' : `le ${fmtDateCourt(r.date)}`;
+        const arrivee = fmtHeure(arriveePrevue(avis));
+        const raison = [avis.motif ? MOTIF_RETARD_LABEL[avis.motif].toLowerCase() : '', note ?? ''].filter(Boolean).join(' : ');
+        const texte = `${deja ? 'Correction : je' : 'Je'} serai en retard d’environ ${dureeRetard(avis.minutes)} ${jour}. Arrivée prévue vers ${arrivee}, au lieu de ${fmtHeure(r.start)}.${raison ? ` (${raison.charAt(0).toUpperCase()}${raison.slice(1)})` : ''}`;
+        const suite: AppData = { ...d, retards, messages: d.messages.concat(chefs.map((c) => ({ id: uid('msg'), de: r.personId, a: c, texte, at, luPar: [r.personId] }))) };
+        return journal(
+          suite,
+          { type: 'absence', titre: `${nom(d, r.personId)} prévient d’un retard de ${dureeRetard(avis.minutes)}, ${jour}`, detail: `Poste de ${fmtHeure(r.start)} : arrivée prévue vers ${arrivee}.${raison ? ` ${raison.charAt(0).toUpperCase()}${raison.slice(1)}.` : ''}` },
+          { pour: chefs, effets: [`Arrivée prévue vers ${arrivee}, au lieu de ${fmtHeure(r.start)}.`, ...effetsRetard(suite, avis)] },
+        );
+      }, false),
+    annulerRetard: (id) =>
+      commit((d, today) => {
+        const avis = (d.retards ?? []).find((x) => x.id === id);
+        if (!avis) return d;
+        const chefs = superieurs(d, avis.personId);
+        const at = now();
+        const jour = avis.date === today ? 'aujourd’hui' : avis.date === addDays(today, 1) ? 'demain' : `le ${fmtDateCourt(avis.date)}`;
+        const suite: AppData = {
+          ...d,
+          retards: (d.retards ?? []).filter((x) => x.id !== id),
+          messages: d.messages.concat(chefs.map((c) => ({ id: uid('msg'), de: avis.personId, a: c, texte: `Finalement, je serai à l’heure ${jour}, à ${fmtHeure(avis.start)}.`, at, luPar: [avis.personId] }))),
+        };
+        return journal(suite, { type: 'absence', titre: `${nom(d, avis.personId)} sera finalement à l’heure, ${jour}` }, { pour: chefs, effets: [`Prise de poste à ${fmtHeure(avis.start)}, comme prévu.`] });
+      }, false),
     planifierFormation: ({ intitule, personnes, from, to }) =>
       commit((d, today) => {
         const at = now();
