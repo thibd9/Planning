@@ -36,7 +36,7 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
       if (!p) continue;
       if (id !== officineId) changerOfficine(id);
       const responsable = espaceDe(d, p) === 'responsable';
-      connecter(p.identifiant as string, responsable ? 'tableau' : 'moi');
+      connecter(p.identifiant as string, responsable ? 'tableau' : 'espace');
       if (responsable && !tutorielDejaVu()) setTour(0);
       return;
     }

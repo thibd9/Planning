@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp } from 'lucide-react';
+import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
@@ -34,10 +34,12 @@ import { PlanningEquipe } from './ui/views/PlanningEquipe';
 import { Heures } from './ui/views/Heures';
 import { Assistant } from './ui/Assistant';
 import { aRegulariser } from './engine/heures';
+import { autreDuRdv, rdvARepondre } from './engine/rdv';
 import { URGENCE_LABEL } from './domain/types';
 import { Regles } from './ui/views/Regles';
 import { Resoudre } from './ui/views/Resoudre';
 import { Tableau } from './ui/views/Tableau';
+import { Espace as MonAccueil } from './ui/views/Espace';
 
 interface Lien {
   vue: Vue;
@@ -52,6 +54,7 @@ const MOI: Lien = { vue: 'moi', label: 'Mon planning', question: 'Mes horaires',
 const DEMANDES: Lien = { vue: 'demandes', label: 'Mes demandes', question: 'Préférences, absences, remplacements', icon: <Inbox size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const SUIVI: Lien = { vue: 'suivi', label: 'Mon suivi', question: 'Compteurs et équité', icon: <Gauge size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const DOCUMENTS: Lien = { vue: 'documents', label: 'Mes documents', question: 'Plannings, absences, fichiers', icon: <FolderOpen size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
+const ACCUEIL: Lien = { vue: 'espace', label: 'Accueil', question: 'Mon métier, mes rendez-vous', icon: <House size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const PERSO: Lien[] = [MOI, DEMANDES, SUIVI, DOCUMENTS];
 const AIDE: Lien = { vue: 'aide', label: 'Aide et tutoriels', question: 'Comment faire, lexique', icon: <LifeBuoy size={18} />, couleur: 'c-clair', groupe: 'Besoin d’aide ?' };
 const MESSAGES: Lien = { vue: 'messages', label: 'Messages', question: 'Équipe et privé', icon: <MessageSquare size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
@@ -77,8 +80,8 @@ const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gard
 /** Chaque rôle a sa propre navigation ; « Mon planning » est toujours en tête. Le compte est en haut à droite. */
 const NAV: Record<Espace, Lien[]> = {
   responsable: GESTION,
-  pharmacien: [...PERSO, MESGARDES, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
-  equipe: [...PERSO, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
+  pharmacien: [ACCUEIL, ...PERSO, MESGARDES, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
+  equipe: [ACCUEIL, ...PERSO, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
 };
 // Le titulaire garde ses propres horaires à portée, depuis le menu du compte.
 const HORS_MENU: Vue[] = ['compte', 'nouvelle', 'moi', 'demandes'];
@@ -109,7 +112,7 @@ export function App(): JSX.Element {
   const espace = espaceDe(data, moi);
   // Sans collecte des préférences (modèle classique), l'entrée disparaît du menu.
   const liens = NAV[espace];
-  const vueActive = liens.some((l) => l.vue === vue) || HORS_MENU.includes(vue) ? vue : espace === 'responsable' ? 'tableau' : 'moi';
+  const vueActive = liens.some((l) => l.vue === vue) || HORS_MENU.includes(vue) ? vue : espace === 'responsable' ? 'tableau' : 'espace';
   const aLire = moi ? data.notifications.filter((n) => n.personId === moi.id && !n.luLe).length : 0;
   const nonLus = moi ? data.messages.filter((m) => !m.luPar.includes(moi.id) && (m.a === 'equipe' || m.a === moi.id)).length : 0;
   // Les pharmacies de l'appareil où la personne connectée a un compte.
@@ -143,6 +146,8 @@ export function App(): JSX.Element {
   const heuresEnPlus = compteurs.filter((x) => x.solde > 0).length;
   const heuresARegler = compteurs.length - heuresEnPlus;
   // Les décisions prises depuis ma dernière visite, avec ce qu'elles changent dans les plannings.
+  const rdvAttente = moi ? rdvARepondre(data, moi.id, today) : [];
+  const viserFil = useUi((s) => s.viserFil);
   const annonces = annoncesDe(data, moi?.id, true);
   const lireAnnonces = useStore((s) => s.lireAnnonces);
   const IconeRole = secondaire ? Medal : estResponsable(data, moi) ? Crown : iconeDe(moi);
@@ -165,6 +170,7 @@ export function App(): JSX.Element {
     ...(aDecider - demandes.length > 0 ? [{ cle: 'decisions', vue: 'resoudre' as Vue, texte: `Autre${aDecider - demandes.length > 1 ? 's' : ''} décision${aDecider - demandes.length > 1 ? 's' : ''} à prendre`, nombre: aDecider - demandes.length, icone: <ListChecks size={17} aria-hidden="true" /> }] : []),
     ...(heuresEnPlus ? [{ cle: 'heures-plus', vue: 'heures' as Vue, texte: `Personne${heuresEnPlus > 1 ? 's' : ''} en heures supplémentaires`, nombre: heuresEnPlus, icone: <TrendingUp size={17} aria-hidden="true" /> }] : []),
     ...(heuresARegler ? [{ cle: 'heures', vue: 'heures' as Vue, texte: `Compteur${heuresARegler > 1 ? 's' : ''} d’heures en dessous du contrat`, nombre: heuresARegler, icone: <Hourglass size={17} aria-hidden="true" /> }] : []),
+    ...(rdvAttente.length ? [{ cle: 'rdv', vue: 'messages' as Vue, texte: `Demande${rdvAttente.length > 1 ? 's' : ''} de rendez-vous à laquelle répondre`, nombre: rdvAttente.length, icone: <CalendarClock size={17} aria-hidden="true" />, avant: () => viserFil(autreDuRdv(rdvAttente[0], moi?.id ?? '')) }] : []),
     ...(aLire ? [{ cle: 'lire', vue: 'moi' as Vue, texte: `Changement${aLire > 1 ? 's' : ''} de mon planning à lire`, nombre: aLire, icone: <CalendarDays size={17} aria-hidden="true" /> }] : []),
     ...(espace !== 'responsable' && aAider ? [{ cle: 'aider', vue: 'moi' as Vue, texte: 'Collègue qui cherche un remplaçant', nombre: aAider, icone: <Users size={17} aria-hidden="true" /> }] : []),
   ];
@@ -467,7 +473,9 @@ export function App(): JSX.Element {
         </header>
         {data.demo ? <BandeauTest moi={moi.id} /> : null}
         <main className="content" id="contenu" tabIndex={0}>
-          {vueActive === 'moi' ? (
+          {vueActive === 'espace' ? (
+            <MonAccueil personId={moi.id} />
+          ) : vueActive === 'moi' ? (
             <MonPlanning personId={moi.id} />
           ) : vueActive === 'demandes' ? (
             <MesDemandes personId={moi.id} />

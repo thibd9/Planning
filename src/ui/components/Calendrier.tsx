@@ -1,9 +1,10 @@
-import { Ban, ChevronLeft, ChevronRight, Sun, Sunset } from 'lucide-react';
+import { Ban, ChevronLeft, ChevronRight, Handshake, Sun, Sunset } from 'lucide-react';
 import { IconeGarde } from '../icons';
 import { JOURS, MOIS, addDays, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, mondayOf, weekday } from '../../domain/time';
 import type { AppData, ISODate } from '../../domain/types';
-import { classeAbsence, libelleAbsence, nomGarde } from '../../domain/types';
+import { classeAbsence, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
+import { autreDuRdv, rdvDe } from '../../engine/rdv';
 import { MOMENT_LABEL, momentDe } from '../kit';
 
 const cle = (annee: number, mois: number): string => `${annee}-${String(mois).padStart(2, '0')}`;
@@ -114,6 +115,24 @@ export function Calendrier({ data, personId, today, mois, setMois, onJour }: { d
                               </span>
                             </span>
                           ) : null}
+                          {rdvDe(data, personId).filter((r) => r.date === date && (r.statut === 'fixe' || r.statut === 'propose')).map((r) => {
+                            const autre = data.personnes.find((q) => q.id === autreDuRdv(r, personId));
+                            return (
+                              <span key={r.id} className={`cal-poste rdv ${r.statut}`}>
+                                <span className="cp-haut">
+                                  <Handshake size={14} aria-hidden="true" />
+                                  <span className="cp-nom">Rendez-vous{r.statut === 'propose' ? ' à confirmer' : ''}</span>
+                                </span>
+                                <b className="cp-h">
+                                  <span>{fmtHeure(r.start)}</span>
+                                  <span className="cp-sep" aria-hidden="true"> – </span>
+                                  <span className="sr"> à </span>
+                                  <span>{fmtHeure(r.end)}</span>
+                                </b>
+                                <span className="cp-d">avec {autre ? nomCourt(autre) : ''}</span>
+                              </span>
+                            );
+                          })}
                           {gardes.map((g) => (
                             <span key={g.id} className="cal-poste garde">
                               <span className="cp-haut">

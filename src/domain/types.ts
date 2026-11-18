@@ -1,3 +1,4 @@
+import type { MarqueAnimee, TypeProduit } from './profils';
 /**
  * Modèle métier de Solvéa.
  *
@@ -71,6 +72,10 @@ export interface Person {
   identifiant?: string;
   /** Mot de passe provisoire à transmettre, effacé dès que la personne choisit le sien. */
   provisoire?: string;
+  /** Animateur : les marques qu'il présente, chacune pour les familles de produits choisies par le titulaire. */
+  marques?: MarqueAnimee[];
+  /** Rayonniste : les familles de produits dont il tient les rayons. */
+  rayons?: TypeProduit[];
 }
 
 export type Activite = 'comptoir' | 'back' | 'admin' | 'formation' | 'inventaire';
@@ -374,6 +379,27 @@ export interface Message {
   texte: string;
   at: string;
   luPar: string[];
+  /** Le message porte une demande de rendez-vous : la conversation affiche sa carte, avec les réponses possibles. */
+  rdvId?: string;
+}
+
+/** Rendez-vous entre deux personnes de l'équipe, demandé dans la messagerie puis fixé dans l'agenda des deux. */
+export type RdvStatut = 'propose' | 'fixe' | 'decline' | 'annule';
+export const RDV_STATUT_LABEL: Record<RdvStatut, string> = { propose: 'En attente de réponse', fixe: 'Fixé dans l’agenda', decline: 'Décliné', annule: 'Annulé' };
+export interface RendezVous {
+  id: string;
+  /** Qui a demandé le rendez-vous. */
+  de: string;
+  avec: string;
+  sujet: string;
+  date: ISODate;
+  start: Minutes;
+  end: Minutes;
+  note?: string;
+  statut: RdvStatut;
+  /** Qui doit répondre : l'autre personne, ou le demandeur après une contre-proposition d'horaire. */
+  attend: string;
+  at: string;
 }
 
 /**
@@ -510,6 +536,8 @@ export interface AppData {
   /** Documents déposés par chacun dans son espace ; ils restent sur l'appareil. */
   documents?: DocumentGed[];
   messages: Message[];
+  /** Rendez-vous demandés ou fixés entre membres de l'équipe. */
+  rendezVous?: RendezVous[];
   remplacements: Remplacement[];
   ecarts: Ecart[];
   /** Décisions d'un titulaire secondaire en attente de l'accord du titulaire principal. */

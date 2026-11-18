@@ -1,10 +1,11 @@
-import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
+import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Handshake, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
 import { JOURS, addDays, dayIndex, fmtDateCourt, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, weekDates, weekday, ferie } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
 import { MISSION_LABEL, classeAbsence, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
+import { autreDuRdv, rdvDe } from '../../engine/rdv';
 import { peutRemplacer } from '../../engine/remplacement';
 import { imprimer } from '../../env';
 import { IconeGarde } from '../icons';
@@ -330,6 +331,18 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                   )}
                                 </span>
                               ) : null}
+                              {rdvDe(data, personId).filter((r) => r.date === date && (r.statut === 'fixe' || r.statut === 'propose')).map((r) => {
+                                const autre = data.personnes.find((q) => q.id === autreDuRdv(r, personId));
+                                return (
+                                  <span key={r.id} className={`rdv-puce ${r.statut}`}>
+                                    <Handshake size={13} aria-hidden="true" />
+                                    <span>
+                                      <b className="num">{fmtHeure(r.start)} – {fmtHeure(r.end)}</b> · Rendez-vous avec {autre ? nomCourt(autre) : ''}
+                                      {r.statut === 'propose' ? ' (à confirmer)' : ''}
+                                    </span>
+                                  </span>
+                                );
+                              })}
                               {missions.length || gardes.length ? (
                                 <div className="row wrap" style={{ gap: 8 }}>
                                   {missions.map((m) => (

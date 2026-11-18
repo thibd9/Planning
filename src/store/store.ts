@@ -4,7 +4,7 @@ import { DEMO_VERSION, seed, vierge } from '../data/seed';
 import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
-import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
+import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, RendezVous, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
 import { decrireBesoin, decrireJournee, minutesSemaine, shiftsSemaine } from '../engine/core';
 import { appliquerCreneau, controlerCreneau } from '../engine/rattrapage';
@@ -19,6 +19,7 @@ import { depannagesDe, tourDeRole, tourRemplacement } from '../engine/appel';
 import { generer } from '../engine/generate';
 import { cibleSemaine, proposerRegularisations, semaineLibre } from '../engine/heures';
 import { absencesSimultanees } from '../engine/suivi';
+import { avisRdv } from '../engine/rdv';
 import type { Correction } from '../engine/souhaits';
 
 const KEY = 'releve.v3';
@@ -156,6 +157,11 @@ export interface Store {
   definirMotDePasse: (identifiant: string, code: string) => void;
   changerOfficine: (id: string) => void;
   envoyerMessage: (de: string, a: string, texte: string) => void;
+  /** Demande de rendez-vous : elle part dans la conversation des deux personnes, avec sa carte de réponse. */
+  demanderRendezVous: (r: Pick<RendezVous, 'de' | 'avec' | 'sujet' | 'date' | 'start' | 'end' | 'note'>) => void;
+  /** Accepter (le rendez-vous est fixé dans les deux agendas), décliner, annuler, ou proposer un autre horaire. */
+  repondreRendezVous: (id: string, personId: string, reponse: 'accepter' | 'decliner' | 'annuler') => void;
+  deplacerRendezVous: (id: string, personId: string, quand: Pick<RendezVous, 'date' | 'start' | 'end'>) => void;
   lireFil: (moi: string, fil: string) => void;
   /** `destinataire` : la demande est adressée à ce collègue en particulier, et toujours au titulaire qui valide. */
   demanderRemplacement: (shift: Shift, urgence?: Urgence, justificatif?: Justificatif, destinataire?: string, raison?: { motif: MotifRemplacement; precision?: string }) => void;
@@ -401,6 +407,55 @@ export const useStore = create<Store>((set, get) => {
       }),
     envoyerMessage: (de, a, texte) =>
       commit((d) => ({ ...d, messages: d.messages.concat({ id: uid('msg'), de, a, texte: texte.trim(), at: now(), luPar: [de] }) }), false),
+    demanderRendezVous: (r) =>
+      commit((d, today) => {
+        if (avisRdv(d, r, today).bloquants.length) return d;
+        const id = uid('rdv');
+        const at = now();
+        const note = r.note?.trim();
+        const quand = `${fmtDateCourt(r.date)}, de ${fmtHeure(r.start)} à ${fmtHeure(r.end)}`;
+        return {
+          ...d,
+          rendezVous: (d.rendezVous ?? []).concat({ ...r, note: note || undefined, id, statut: 'propose', attend: r.avec, at }),
+          messages: d.messages.concat({ id: uid('msg'), de: r.de, a: r.avec, texte: `Demande de rendez-vous : ${r.sujet}, ${quand}.${note ? ` ${note}` : ''}`, at, luPar: [r.de], rdvId: id }),
+        };
+      }, false),
+    repondreRendezVous: (id, personId, reponse) =>
+      commit((d, today) => {
+        const r = (d.rendezVous ?? []).find((x) => x.id === id);
+        if (!r || (r.de !== personId && r.avec !== personId)) return d;
+        const autre = r.de === personId ? r.avec : r.de;
+        const quand = `${fmtDateCourt(r.date)}, de ${fmtHeure(r.start)} à ${fmtHeure(r.end)}`;
+        const at = now();
+        const dire = (texte: string): AppData['messages'] => d.messages.concat({ id: uid('msg'), de: personId, a: autre, texte, at, luPar: [personId] });
+        const etat = (statut: RendezVous['statut']): RendezVous[] => (d.rendezVous ?? []).map((x) => (x.id === id ? { ...x, statut } : x));
+        if (reponse === 'accepter') {
+          if (r.statut !== 'propose' || r.attend !== personId || avisRdv(d, r, today).bloquants.length) return d;
+          return annoncer({ ...d, rendezVous: etat('fixe'), messages: dire(`Rendez-vous fixé : ${r.sujet}, ${quand}. Il est dans nos deux agendas.`) }, `Rendez-vous fixé : ${r.sujet}`, {
+            pour: [r.de, r.avec],
+            effets: [`${nom(d, r.de)} et ${nom(d, r.avec)} : ${quand}.`, 'Le rendez-vous apparaît dans « Mon planning » des deux personnes.'],
+          });
+        }
+        if (reponse === 'decliner') {
+          if (r.statut !== 'propose') return d;
+          return { ...d, rendezVous: etat('decline'), messages: dire(`Je ne peux pas donner suite au rendez-vous « ${r.sujet} » du ${fmtDateCourt(r.date)}. Proposez-moi un autre moment si besoin.`) };
+        }
+        if (r.statut !== 'fixe' && r.statut !== 'propose') return d;
+        return { ...d, rendezVous: etat('annule'), messages: dire(`Rendez-vous annulé : ${r.sujet}, ${quand}.`) };
+      }, false),
+    deplacerRendezVous: (id, personId, quand) =>
+      commit((d, today) => {
+        const r = (d.rendezVous ?? []).find((x) => x.id === id);
+        if (!r || (r.de !== personId && r.avec !== personId) || r.statut === 'decline' || r.statut === 'annule') return d;
+        const autre = r.de === personId ? r.avec : r.de;
+        const suite = { ...r, ...quand, statut: 'propose' as const, attend: autre };
+        if (avisRdv(d, suite, today).bloquants.length) return d;
+        return {
+          ...d,
+          rendezVous: (d.rendezVous ?? []).map((x) => (x.id === id ? suite : x)),
+          messages: d.messages.concat({ id: uid('msg'), de: personId, a: autre, texte: `Autre horaire proposé pour « ${r.sujet} » : ${fmtDateCourt(quand.date)}, de ${fmtHeure(quand.start)} à ${fmtHeure(quand.end)}. À vous de répondre.`, at: now(), luPar: [personId] }),
+        };
+      }, false),
     lireFil: (moi, fil) =>
       commit((d) => {
         const concerne = (m: AppData['messages'][number]): boolean => (fil === 'equipe' ? m.a === 'equipe' : (m.de === fil && m.a === moi) || (m.de === moi && m.a === fil));

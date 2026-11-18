@@ -78,7 +78,15 @@ export const EQUIPE_DEMO: Person[] = [
   personne('p_thomas', 'Thomas', 'Nguyen', 'preparateur', 35, 15.2, { competences: ['commandes'] }),
   personne('p_ines', 'Inès', 'Da Silva', 'preparateur', 24, 15.2, { volontaireHeuresComp: true }),
   personne('p_jules', 'Jules', 'Perrin', 'preparateur', 35, 14.6, { competences: ['commandes'] }),
-  personne('p_sarah', 'Sarah', 'Lemoine', 'animateur', 21, 13.2, { competences: ['dermo', 'beaute', 'para'] }),
+  personne('p_sarah', 'Sarah', 'Lemoine', 'animateur', 21, 13.2, {
+    competences: ['dermo', 'beaute', 'para'],
+    // Marques d'exemple, inventées pour la démonstration.
+    marques: [
+      { id: 'mq_1', marque: 'Lumaderm', types: ['dermocosmetique', 'solaire'] },
+      { id: 'mq_2', marque: 'Petit Lin', types: ['bebe', 'hygiene'] },
+      { id: 'mq_3', marque: 'Verdéa', types: ['phyto', 'complements'] },
+    ],
+  }),
   personne('p_manon', 'Manon', 'Girard', 'apprenti', 21, 9.4),
   personne('p_yanis', 'Yanis', 'Morel', 'etudiant', 16, 13.9),
   personne('x_paul', 'Paul', 'Lemaire', 'adjoint', 0, 62, { externe: true, competences: ['vaccination', 'trod'] }),
@@ -164,7 +172,7 @@ export function vierge(): AppData {
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
 /** À augmenter quand l'exemple change (noms, équipe) : les exemples enregistrés sur l'appareil sont alors régénérés. */
-export const DEMO_VERSION = 4;
+export const DEMO_VERSION = 5;
 
 export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);

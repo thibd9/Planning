@@ -104,6 +104,9 @@ La même fenêtre permet d'entrer librement dans la peau de quatre personnes :
 | Titulaire 2 | Pierre Fiandino, titulaire secondaire | `pierre.fiandino` | Les mêmes écrans ; ses décisions attendent l'accord de Caroline |
 | Pharmacien | Igor Le Russe, adjoint | `igor.lerusse` | Son planning, le planning publié, ses gardes, ses messages |
 | Préparateur | Nicolas Le Syndicaliste, préparateur | `nicolas.lesyndicaliste` | Ses horaires, ses demandes, les remplacements, ses messages |
+| Animateur | Sarah Lemoine, animatrice | `sarah.lemoine` | Son accueil : les marques qu'elle présente, ses jours d'animation, ses rendez-vous |
+| Apprenti | Manon Girard, apprentie | `manon.girard` | Son accueil : son alternance, ses jours d'école, le point avec son tuteur |
+| Étudiant | Yanis Morel, étudiant | `yanis.morel` | Son accueil : ses horaires autour de ses cours et de ses examens |
 
 Mot de passe commun : `demo`. Une fois dans l'exemple, un bandeau permet de changer de regard en un clic.
 
@@ -143,7 +146,15 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
   (équité, journal et paie). Le titulaire suit l'activité de son équipe : pas d'espace personnel dans son
   menu (ses propres horaires restent accessibles depuis le menu du compte). Le tableau de bord montre
   l'équipe du jour et « Où en est le planning » : préférences, brouillon, contrôles, publication.
-- **Menu de l'équipe** : « Mon planning » (mes horaires, en semaine ou en calendrier), « Mes demandes »
+- **Un accueil par profil.** Chaque salarié arrive sur « Accueil », à son nom et à son métier (« Espace
+  animateur », « Espace étudiant », « Espace apprenti », « Espace rayonniste », « Espace préparateur »,
+  « Espace pharmacien adjoint »). En tête, **ce qui attend sa réponse** (un collègue à remplacer, un
+  rendez-vous proposé, un changement de planning à lire), puis son prochain poste, et un bloc propre au
+  métier : les **marques présentées** par famille de produits et les jours d'animation pour un
+  animateur, les **rayons confiés** pour un rayonniste, les cours et examens signalés pour un étudiant,
+  l'alternance et le point avec le tuteur pour un apprenti, les gardes et compétences pour un adjoint,
+  les compétences pour un préparateur. À côté : ses rendez-vous et ses raccourcis.
+- **Menu de l'équipe** : « Accueil », « Mon planning » (mes horaires, en semaine ou en calendrier), « Mes demandes »
   et « Mon suivi » (compteur d'heures, compteurs de présence, part des contraintes), puis le planning de
   l'équipe et les messages.
 - **Mes demandes** s'ouvre sur trois cartes, une par chose possible, avec qui répond : **Mes
@@ -314,6 +325,14 @@ vue mois, une garde se voit dans la case du jour.
 - **Messages.** On arrive sur la conversation qui a du nouveau. Les conversations non lues sont en tête,
   en couleur, avec un aperçu du dernier message et une pastille ; dans le fil, un trait « Nouveau message »
   marque ce qui n'avait pas été lu.
+- **Demander un rendez-vous.** Depuis les messages ou son accueil : la personne, un sujet proposé selon
+  le profil (bilan d'animation, point avec mon tuteur, cours et examens, gardes…), le jour, l'heure, la
+  durée. Solvéa propose des moments où les deux sont en poste en même temps, et signale une absence ou
+  un autre rendez-vous au même moment. La demande arrive dans la conversation sous forme de carte :
+  **accepter**, **proposer un autre horaire** (c'est alors au demandeur de répondre) ou **décliner**.
+  Accepté, le rendez-vous est **fixé dans l'agenda des deux** (« Mon planning », en semaine comme en
+  calendrier ; en pointillés tant qu'il est à confirmer), annoncé sous la cloche, et peut être déplacé ou
+  annulé. La cloche signale une demande à laquelle répondre.
 - **Équité.** La page répond d'abord à la question (« La charge est-elle bien répartie ? ») : combien sont
   à l'équilibre, qui a porté plus, qui a porté moins. Puis un compteur à la fois (samedis, fermetures,
   gardes, dépannages…), une ligne par personne : ce qu'elle a fait, sa part attendue, l'écart en mots.
@@ -357,6 +376,12 @@ vue mois, une garde se voit dans la case du jour.
 - **Assistant.** Il répond aussi à « Quels sont mes droits ? » avec les règles actives et leurs seuils.
 
 ### Fiche d'une personne
+
+**Marques d'un animateur, rayons d'un rayonniste.** Dans la fiche d'un animateur, le titulaire ajoute
+les marques qu'il présente et touche, pour chacune, les familles de produits concernées
+(dermocosmétique, solaire, bébé et maternité, compléments alimentaires, phytothérapie…). Dans celle
+d'un rayonniste, il choisit les rayons confiés. Chacun retrouve la liste sur son accueil. Les marques
+de l'exemple sont inventées.
 
 Chaque rubrique a son titre et son icône : poste et contrat, compétences et diplômes, droits d'accès,
 suivi sur 12 mois, compte de connexion, volontariat, besoins personnels, absences à venir. Les vingt-deux

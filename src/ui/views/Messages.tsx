@@ -1,8 +1,10 @@
-import { BellDot, MessageSquare, Send, Users } from 'lucide-react';
+import { BellDot, CalendarPlus, MessageSquare, Send, Users } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { fmtDateCourt, fmtHeure, fmtHorodatage } from '../../domain/time';
 import { nomComplet, nomCourt } from '../../domain/types';
 import { useStore } from '../../store/store';
+import { useUi } from '../../store/ui';
+import { CarteRendezVous, DialogueRendezVous } from '../components/RendezVous';
 import { Avatar } from '../kit';
 
 /** Messagerie interne : un fil pour toute l'équipe, et un fil privé avec chaque collègue. */
@@ -14,7 +16,12 @@ export function Messages({ personId }: { personId: string }): JSX.Element {
   const nonLus = (f: string): number => duFil(f).filter((m) => !m.luPar.includes(personId)).length;
   const dernier = (f: string) => duFil(f).sort((a, b) => b.at.localeCompare(a.at))[0];
   // On arrive sur la conversation qui a du nouveau, pas sur une conversation déjà lue.
-  const [fil, setFil] = useState(() => ['equipe', ...collegues.map((p) => p.id)].find((f) => nonLus(f) > 0) ?? 'equipe');
+  const { filVise, viserFil } = useUi();
+  const [fil, setFil] = useState(() => (filVise && collegues.some((p) => p.id === filVise) ? filVise : (['equipe', ...collegues.map((p) => p.id)].find((f) => nonLus(f) > 0) ?? 'equipe')));
+  const [rdv, setRdv] = useState(false);
+  useEffect(() => {
+    if (filVise) viserFil(null);
+  }, [filVise, viserFil]);
   const [texte, setTexte] = useState('');
   /** Les messages qui étaient non lus à l'ouverture de la conversation : ils restent marqués « nouveau » tant qu'on y est. */
   const [nouveaux, setNouveaux] = useState<string[]>([]);
@@ -57,6 +64,9 @@ export function Messages({ personId }: { personId: string }): JSX.Element {
           </h1>
           <p>Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.</p>
         </div>
+        <button type="button" className="btn primary" id="rdv-demander" onClick={() => setRdv(true)}>
+          <CalendarPlus size={16} aria-hidden="true" /> Demander un rendez-vous
+        </button>
         {totalNonLus ? (
           <span className="msg-alerte" role="status">
             <BellDot size={17} aria-hidden="true" /> {totalNonLus} message{totalNonLus > 1 ? 's' : ''} non lu{totalNonLus > 1 ? 's' : ''}
@@ -105,6 +115,7 @@ export function Messages({ personId }: { personId: string }): JSX.Element {
                     {m.texte}
                     <span className="quand">{fmtHorodatage(m.at)}</span>
                   </div>
+                  {m.rdvId && (data.rendezVous ?? []).some((r) => r.id === m.rdvId) ? <CarteRendezVous rdv={(data.rendezVous ?? []).find((r) => r.id === m.rdvId)!} moi={personId} /> : null}
                   </div>
                 );
               })
@@ -133,6 +144,7 @@ export function Messages({ personId }: { personId: string }): JSX.Element {
           </form>
         </section>
       </div>
+      {rdv ? <DialogueRendezVous de={personId} avec={fil === 'equipe' ? undefined : fil} onClose={() => setRdv(false)} /> : null}
     </div>
   );
 }

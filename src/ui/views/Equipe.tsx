@@ -1,7 +1,9 @@
 import type { LucideIcon } from 'lucide-react';
-import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, ClipboardList, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lightbulb, Lock, Plus, RefreshCw, ShieldCheck, Sparkles, Stethoscope, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, ClipboardList, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lightbulb, Lock, Plus, RefreshCw, ShieldCheck, Sparkles, Stethoscope, Tags, Trash2, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import { TYPES_PRODUIT, TYPE_PRODUIT_LABEL } from '../../domain/profils';
+import type { MarqueAnimee, TypeProduit } from '../../domain/profils';
 import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
 import type { AppData } from '../../domain/types';
@@ -326,6 +328,67 @@ function Fiche({ person }: { person: Person }): JSX.Element {
           </div>
           <p className="tiny muted">Un rendez-vous n’est planifiable que si une personne formée est en poste et la salle libre.</p>
         </section>
+
+        {person.qualification === 'animateur' ? (
+          <section className="fiche-bloc" data-focus="marques">
+            <TitreFiche icone={Tags} note={`${(person.marques ?? []).length} marque${(person.marques ?? []).length > 1 ? 's' : ''}`}>
+              Marques présentées
+            </TitreFiche>
+            <p className="small soft">Vous choisissez les marques que {person.prenom} anime, et pour quelles familles de produits. Il les retrouve dans son espace.</p>
+            <div className="mq-liste">
+              {(person.marques ?? []).map((m, i) => {
+                const majMarque = (patch: Partial<MarqueAnimee>): void => maj({ marques: (person.marques ?? []).map((x) => (x.id === m.id ? { ...x, ...patch } : x)) });
+                return (
+                  <div key={m.id} className="mq" role="group" aria-label={m.marque.trim() || `Marque ${i + 1}`}>
+                    <div className="mq-tete">
+                      <label className="field grow" htmlFor={`mq-${m.id}`}>
+                        Marque
+                        <input id={`mq-${m.id}`} value={m.marque} onChange={(e) => majMarque({ marque: e.target.value })} placeholder="Nom de la marque" maxLength={60} autoComplete="off" />
+                      </label>
+                      <button type="button" className="btn ghost icon" aria-label={`Retirer la marque ${m.marque.trim() || i + 1}`} onClick={() => maj({ marques: (person.marques ?? []).filter((x) => x.id !== m.id) })}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <div className="mq-types" role="group" aria-label={`Familles de produits pour ${m.marque.trim() || `la marque ${i + 1}`}`}>
+                      {TYPES_PRODUIT.map((t: TypeProduit) => {
+                        const on = m.types.includes(t);
+                        return (
+                          <button key={t} type="button" className={`comp${on ? ' on' : ''}`} aria-pressed={on} onClick={() => majMarque({ types: on ? m.types.filter((x) => x !== t) : [...m.types, t] })}>
+                            <span>{TYPE_PRODUIT_LABEL[t]}</span>
+                            {on ? <Check size={14} strokeWidth={3} className="comp-coche" aria-hidden="true" /> : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {!m.types.length ? <p className="tiny muted">Touchez au moins une famille de produits pour cette marque.</p> : null}
+                  </div>
+                );
+              })}
+            </div>
+            <button type="button" className="btn" id="mq-ajouter" style={{ alignSelf: 'flex-start' }} onClick={() => maj({ marques: [...(person.marques ?? []), { id: uid('mq'), marque: '', types: [] }] })}>
+              <Plus size={15} aria-hidden="true" /> Ajouter une marque
+            </button>
+          </section>
+        ) : null}
+        {person.qualification === 'rayonniste' ? (
+          <section className="fiche-bloc" data-focus="rayons">
+            <TitreFiche icone={Tags} note={`${(person.rayons ?? []).length} rayon${(person.rayons ?? []).length > 1 ? 's' : ''}`}>
+              Rayons confiés
+            </TitreFiche>
+            <p className="small soft">Les familles de produits dont {person.prenom} tient les rayons. Il les retrouve dans son espace.</p>
+            <div className="mq-types" role="group" aria-label="Rayons confiés">
+              {TYPES_PRODUIT.map((t: TypeProduit) => {
+                const on = (person.rayons ?? []).includes(t);
+                return (
+                  <button key={t} type="button" className={`comp${on ? ' on' : ''}`} aria-pressed={on} onClick={() => maj({ rayons: on ? (person.rayons ?? []).filter((x) => x !== t) : [...(person.rayons ?? []), t] })}>
+                    <span>{TYPE_PRODUIT_LABEL[t]}</span>
+                    {on ? <Check size={14} strokeWidth={3} className="comp-coche" aria-hidden="true" /> : null}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         {!person.externe ? (
           <section className="fiche-bloc">

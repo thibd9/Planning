@@ -22,6 +22,9 @@ export const ROLES_TEST: { cle: string; id: string; identifiant: string; court: 
   { cle: 't2', id: 'p_antoine', identifiant: 'pierre.fiandino', court: 'Titulaire 2', titre: 'Titulaire secondaire', nom: 'Pierre Fiandino', detail: 'Mêmes écrans que la titulaire principale ; ses décisions attendent son accord.' },
   { cle: 'ph', id: 'p_karim', identifiant: 'igor.lerusse', court: 'Pharmacien', titre: 'Pharmacien adjoint', nom: 'Igor Le Russe', detail: 'Son planning, le planning publié, ses gardes, ses messages.' },
   { cle: 'pr', id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', court: 'Préparateur', titre: 'Préparateur', nom: 'Nicolas Le Syndicaliste', detail: 'Ses horaires, ses demandes, les remplacements, ses messages.' },
+  { cle: 'an', id: 'p_sarah', identifiant: 'sarah.lemoine', court: 'Animateur', titre: 'Animatrice', nom: 'Sarah Lemoine', detail: 'Son accueil : les marques qu’elle présente, ses jours d’animation, ses rendez-vous.' },
+  { cle: 'ap', id: 'p_manon', identifiant: 'manon.girard', court: 'Apprenti', titre: 'Apprentie', nom: 'Manon Girard', detail: 'Son accueil : son alternance, ses jours d’école, le point avec son tuteur.' },
+  { cle: 'et', id: 'p_yanis', identifiant: 'yanis.morel', court: 'Étudiant', titre: 'Étudiant', nom: 'Yanis Morel', detail: 'Son accueil : ses horaires autour de ses cours et de ses examens.' },
 ];
 
 /** Ouvre l'environnement de test dans la peau d'une personne ; l'écran d'arrivée dépend de ses droits. */
@@ -31,7 +34,7 @@ export function voirComme(identifiant: string, vue?: Vue): void {
   const gere = peutGerer(data, p);
   useStore.getState().setActeur(p?.id ?? null);
   useUi.getState().setTour(null);
-  useUi.getState().connecter(identifiant, vue ?? (gere ? 'tableau' : 'moi'));
+  useUi.getState().connecter(identifiant, vue ?? (gere ? 'tableau' : 'espace'));
 }
 
 const store = (): ReturnType<typeof useStore.getState> => useStore.getState();
@@ -1561,6 +1564,28 @@ function appelPour(personId: string): void {
 function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: string; pharmacien?: boolean }): Etape[] {
   const moi = (vue: Vue): void => voirComme(p.identifiant, vue);
   return [
+    {
+      chapitre: MON_PLANNING,
+      qui: p.qui,
+      cible: "[data-focus='mon-metier']",
+      titre: 'Mon accueil',
+      texte: () => 'Chaque profil a le sien : ce qui attend une réponse, le prochain poste, puis ce qui est propre au métier.',
+      jouer: () => moi('espace'),
+    },
+    {
+      chapitre: MON_PLANNING,
+      qui: p.qui,
+      cible: "[data-focus='mes-rdv']",
+      titre: 'Demander un rendez-vous',
+      texte: () => 'Un point avec le titulaire, un entretien : la demande part dans la messagerie, puis se fixe dans l’agenda.',
+      jouer: () => moi('espace'),
+      gestes: [
+        { faire: 'cliquer', sur: '#esp-rdv-demander', dit: 'Cliquez sur « Demander un rendez-vous »', sert: 'La fenêtre propose les sujets de votre profil et la personne à voir.' },
+        { faire: 'attendre', que: '.dialog #rdv-avis' },
+        { faire: 'cliquer', sur: '.rdv-idees .comp', dit: 'Choisissez un moment proposé', sert: 'Solvéa propose des moments où vous êtes tous les deux en poste.', facultatif: true },
+        { faire: 'cliquer', sur: '#rdv-envoyer', dit: 'Cliquez sur « Envoyer la demande »', sert: 'La demande part dans la conversation. Une fois acceptée, le rendez-vous est dans vos deux agendas.' },
+      ],
+    },
     {
       chapitre: MON_PLANNING,
       qui: p.qui,

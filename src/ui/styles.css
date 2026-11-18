@@ -992,7 +992,7 @@ table.cal td.dim .cp-h { display: flex; flex-direction: column; font-size: 13px;
   .cal-scroll { padding: 10px 8px 6px; }
   table.cal { border-spacing: 4px; margin: -4px; width: calc(100% + 8px); }
   table.cal col.col-dim { width: auto; }
-  table.cal .cal-jl { display: none; }
+  table.cal .cal-jl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   table.cal .cal-jc { display: inline; }
   table.cal th { padding: 2px; text-align: center; font-size: 11.5px; }
   table.cal td { padding: 6px 3px; height: 92px; border-radius: 12px; text-align: center; }
@@ -3231,3 +3231,57 @@ select option { background-color: var(--surface); color: var(--ink); }
   .tbj-ligne { grid-template-columns: 112px minmax(0, 1fr); gap: 10px; }
   .tbj-qui .avatar { display: none; }
 }
+
+/* ---------------------------------------------------------------- Marques d'un animateur, rayons d'un rayonniste : par familles de produits */
+.mq-liste { display: flex; flex-direction: column; gap: 12px; }
+.mq { padding: 16px 18px; border-radius: 18px; background: var(--n-1); display: flex; flex-direction: column; gap: 12px; }
+.mq-tete { display: flex; align-items: flex-end; gap: 10px; }
+.mq-tete .field input { width: 100%; }
+.mq-types { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------------------------------------------------------------- Rendez-vous : la carte dans la conversation, la puce dans l'agenda */
+.rdv-carte { align-self: stretch; display: flex; align-items: flex-start; gap: 12px; margin: 2px 0 6px; padding: 14px 16px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--surface); max-width: 560px; }
+.bulle.moi + .rdv-carte { align-self: flex-end; }
+.rdv-carte.propose { border-color: var(--a-deep); background: var(--a-tint); }
+.rdv-carte.fixe { border-color: var(--ok); background: color-mix(in srgb, var(--ok-soft) 60%, var(--surface)); }
+.rdv-carte.decline, .rdv-carte.annule { background: var(--n-1); }
+.rdv-carte.decline b, .rdv-carte.annule b, .rdv-carte.decline .rdv-quand, .rdv-carte.annule .rdv-quand { text-decoration: line-through; color: var(--ink-2); }
+.rdv-ico { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--surface); color: var(--a-text); box-shadow: inset 0 0 0 1px var(--line); }
+.rdv-carte.fixe .rdv-ico, .rdv-ligne.fixe .rdv-ico { color: var(--ok-ink); }
+.rdv-etat { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
+.rdv-carte.fixe .rdv-etat { color: var(--ok-ink); }
+.rdv-carte b { display: block; font-size: 15.5px; }
+.rdv-quand { font-size: 14.5px; }
+.rdv-empeche { margin: 6px 0 0; color: var(--danger-ink); }
+.rdv-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.rdv-idees { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.rdv-idees-tete { flex-basis: 100%; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+.rdv-puce { display: inline-flex; align-items: flex-start; gap: 7px; padding: 7px 10px; border-radius: 12px; font-size: 13px; line-height: 1.35; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--a-deep); color: var(--ink); }
+.rdv-puce svg { flex: none; margin-top: 2px; color: var(--a-text); }
+.rdv-puce.propose { box-shadow: none; border: 1.5px dashed var(--a-deep); }
+.cal-poste.rdv { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--a-deep); }
+.cal-poste.rdv.propose { box-shadow: none; outline: 1.5px dashed var(--a-deep); outline-offset: -1.5px; }
+.rdv-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rdv-ligne { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; color: var(--ink); padding: 11px 13px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; }
+.rdv-ligne:hover { border-color: var(--ink-3); }
+.rdv-ligne b, .rdv-ligne .small { display: block; }
+
+/* ---------------------------------------------------------------- L'accueil de chaque profil */
+.page-espace .page-head { align-items: center; }
+.page-espace .prochain { margin-bottom: 20px; }
+.esp-grille { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: stretch; margin-top: 20px; }
+@media (max-width: 1040px) { .esp-grille { grid-template-columns: minmax(0, 1fr); } }
+.esp-corps { display: flex; flex-direction: column; gap: 20px; }
+.esp-sous { display: flex; flex-direction: column; gap: 10px; }
+.esp-sous h3 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-2); }
+.esp-jours { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.esp-jours li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 14px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.esp-jours li:last-child { border-bottom: 0; }
+.esp-jours span { color: var(--ink-2); }
+.esp-marques { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.esp-marques li { display: grid; grid-template-columns: minmax(150px, 230px) minmax(0, 1fr); gap: 8px 16px; align-items: center; padding: 12px 14px; border-radius: 16px; background: var(--n-1); }
+.esp-type { font-weight: 650; font-size: 14.5px; }
+.esp-puces { display: flex; flex-wrap: wrap; gap: 8px; }
+.esp-marque { padding: 5px 13px; border-radius: 999px; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--a-deep); color: var(--ink); font-weight: 650; font-size: 14px; }
+.esp-raccourcis { display: flex; flex-direction: column; padding: 8px; }
+@media (max-width: 640px) { .esp-marques li { grid-template-columns: minmax(0, 1fr); } }

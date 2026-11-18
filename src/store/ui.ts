@@ -20,6 +20,7 @@ export type Vue =
   | 'messages'
   | 'nouvelle'
   | 'moi'
+  | 'espace'
   | 'planning'
   | 'mesgardes'
   | 'compte';
@@ -92,6 +93,9 @@ interface Ui {
   /** Demande de remplacement à mettre en avant en arrivant dans « Résoudre ». */
   demandeVisee: string | null;
   viserDemande: (id: string | null) => void;
+  /** Conversation à ouvrir en arrivant dans les messages. */
+  filVise: string | null;
+  viserFil: (id: string | null) => void;
   /** Onglet ouvert dans « Mes demandes » ; null = celui qui convient le mieux. */
   demandesOnglet: 'souhaits' | 'absences' | 'remplacements' | null;
   setDemandesOnglet: (o: 'souhaits' | 'absences' | 'remplacements' | null) => void;
@@ -145,6 +149,8 @@ export const useUi = create<Ui>((set) => ({
   voirJour: (jour) => set({ jour }),
   demandeVisee: null,
   viserDemande: (demandeVisee) => set({ demandeVisee }),
+  filVise: null,
+  viserFil: (filVise) => set({ filVise }),
   demandesOnglet: null,
   setDemandesOnglet: (demandesOnglet) => set({ demandesOnglet }),
   assistant: false,

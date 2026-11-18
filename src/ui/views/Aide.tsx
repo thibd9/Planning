@@ -11,13 +11,13 @@ import { NomSolvi, Solvi } from '../Solvi';
 
 /** Les fiches rangées par thème, dans l'ordre du travail. */
 const THEMES: { titre: string; ids: string[] }[] = [
-  { titre: 'Mon planning', ids: ['prochain', 'equipe-planning', 'gardes-moi', 'suivi'] },
+  { titre: 'Mon planning', ids: ['accueil', 'prochain', 'equipe-planning', 'gardes-moi', 'suivi'] },
   { titre: 'Mes demandes', ids: ['difference', 'souhaits', 'conge', 'remplacer', 'aider'] },
-  { titre: 'Préparer', ids: ['personne', 'mdp-equipe', 'reglages', 'feries', 'regles', 'pharmacie'] },
+  { titre: 'Préparer', ids: ['personne', 'marques', 'mdp-equipe', 'reglages', 'feries', 'regles', 'pharmacie'] },
   { titre: 'Construire et publier', ids: ['construire', 'controles', 'mois', 'retard', 'publier', 'formation', 'gardes'] },
   { titre: 'Absences et remplacements', ids: ['absence', 'demande-remplacement', 'demandes-equipe', 'accord', 'decisions'] },
   { titre: 'Suivre et faire le bilan', ids: ['heures', 'equite', 'points-forts', 'paie', 'historique', 'documents'] },
-  { titre: 'Messages et compte', ids: ['message', 'compte'] },
+  { titre: 'Messages et compte', ids: ['message', 'rendez-vous', 'compte'] },
 ];
 
 interface Terme {
