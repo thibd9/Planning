@@ -324,7 +324,7 @@ export function App(): JSX.Element {
                     <div className="menu">
                       <div className="titre-menu">Créer</div>
                       <button type="button" onClick={() => { setPanneau(null); aller('construire'); }}>
-                        <CalendarRange size={17} aria-hidden="true" /> Un planning de semaine
+                        <CalendarRange size={17} aria-hidden="true" /> Un planning
                       </button>
                       <button type="button" onClick={() => { setPanneau(null); agir('gardes', 'garde'); }}>
                         <MoonStar size={17} aria-hidden="true" /> Une garde
@@ -336,13 +336,13 @@ export function App(): JSX.Element {
                         <ClipboardCheck size={17} aria-hidden="true" /> Un inventaire
                       </button>
                       <button type="button" onClick={() => { setPanneau(null); agir('equipe', 'personne'); }}>
-                        <Users size={17} aria-hidden="true" /> Une personne dans l’équipe
+                        <Users size={17} aria-hidden="true" /> Une personne
                       </button>
                       <button type="button" onClick={() => { setPanneau(null); agir('moi', 'demande'); }}>
-                        <CalendarDays size={17} aria-hidden="true" /> Une absence pour moi
+                        <CalendarDays size={17} aria-hidden="true" /> Mon absence
                       </button>
                       <button type="button" onClick={() => { setPanneau(null); aller('messages'); }}>
-                        <MessageSquare size={17} aria-hidden="true" /> Un message à l’équipe
+                        <MessageSquare size={17} aria-hidden="true" /> Un message
                       </button>
                     </div>
                   ) : null}

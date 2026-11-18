@@ -199,7 +199,7 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
           <h1>
             Mes <span className="hl">demandes</span>
           </h1>
-          <p>Choisissez ce que vous voulez faire. Jamais de raison à donner.</p>
+          <p>Choisissez ce que vous voulez faire.</p>
         </div>
       </div>
       <div className="voies" role="tablist" aria-label="Mes demandes">

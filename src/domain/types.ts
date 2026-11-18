@@ -412,6 +412,9 @@ export interface Regularisation {
 }
 
 /** Demande de remplacement sur un poste publié : le titulaire l'accepte, un collègue se propose, le titulaire confie le poste. */
+export type MotifRemplacement = 'sante' | 'famille' | 'administratif' | 'formation' | 'transport' | 'autre';
+export const MOTIF_REMPLACEMENT_LABEL: Record<MotifRemplacement, string> = { sante: 'Raison de santé', famille: 'Obligation familiale', administratif: 'Rendez-vous administratif', formation: 'Formation ou examen', transport: 'Problème de transport', autre: 'Autre raison' };
+
 export interface Remplacement {
   id: string;
   shiftId: string;
@@ -427,6 +430,9 @@ export interface Remplacement {
   /** Réponse du titulaire à la demande elle-même ; absente pour un appel lancé par le titulaire. */
   accord?: 'attente' | 'accepte';
   justificatif?: Justificatif;
+  /** Pourquoi la personne demande à être remplacée : une catégorie, et une précision si elle le souhaite. Visible des titulaires. */
+  motif?: MotifRemplacement;
+  precision?: string;
   /** Collègue à qui la demande est adressée en particulier ; absent : toute l'équipe disponible. */
   destinataire?: string;
   /** Appel à l'équipe pour une absence à couvrir : le poste n'est plus au planning, il est dans le trou. */

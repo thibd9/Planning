@@ -42,6 +42,7 @@ export function DialogueRefus({
   const motif = motifRefus(raison, mot);
   return (
     <Dialog
+      size="mid"
       title={titre}
       subtitle={quoi}
       onClose={onClose}
@@ -87,7 +88,7 @@ export function DialogueRefus({
             <span>
               Un mot pour {pour} <span className="soft">(facultatif)</span>
             </span>
-            <textarea id="refus-mot" rows={2} maxLength={240} value={mot} onChange={(e) => setMot(e.target.value)} placeholder={exemple} />
+            <textarea id="refus-mot" rows={4} maxLength={240} value={mot} onChange={(e) => setMot(e.target.value)} placeholder={exemple} />
           </label>
           <div className="refus-apercu" aria-live="polite">
             <span className="refus-apercu-tete">

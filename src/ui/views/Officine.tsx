@@ -1,4 +1,4 @@
-import { Plus, RotateCcw, Settings2, Store, Trash2, UserRound, Users } from 'lucide-react';
+import { Check, Plus, RotateCcw, Settings2, Store, Trash2, UserRound, Users } from 'lucide-react';
 import { useState } from 'react';
 import { JOURS, MOIS, fmtDateCourt, fmtDuree, fmtHHMM, parseHHMM } from '../../domain/time';
 import type { CouleurPoste, Interval, PosteType } from '../../domain/types';
@@ -169,54 +169,53 @@ export function Officine(): JSX.Element {
           </div>
 
           <div className="card pad col" data-focus="modele">
-            <div>
-              <h2 className="h3">Qui prépare le planning ?</h2>
-              <p className="small soft" style={{ margin: '3px 0 0' }}>Deux façons de faire. Vous pouvez changer à tout moment.</p>
-            </div>
-            <fieldset className="choix modele">
+            <h2 className="h3">Qui prépare le planning ?</h2>
+            <fieldset className="qui-prepare">
               <legend className="sr">Façon de construire le planning</legend>
-              <label>
+              <label className={collaboratif ? 'on' : ''}>
                 <input type="radio" name="modele" checked={collaboratif} onChange={() => majOfficine({ modele: 'collaboratif' })} />
-                <span className="modele-pic" aria-hidden="true">
-                  <Users size={18} />
+                <span className="qp-pic" aria-hidden="true">
+                  <Users size={22} />
                 </span>
-                <span>
-                  Avec l’équipe <span className="modele-nom">Collaboratif</span>
-                  <ol className="modele-etapes">
-                    <li>Chacun indique ce qui l’arrange pour le mois suivant.</li>
-                    <li>Solvéa propose un planning qui en tient compte.</li>
-                    <li>Vous ajustez, puis vous publiez.</li>
-                  </ol>
+                <span className="qp-texte">
+                  <b>Avec l’équipe</b>
+                  <span>Chacun donne ses préférences, vous ajustez.</span>
+                </span>
+                <span className="qp-coche" aria-hidden="true">
+                  <Check size={15} strokeWidth={3} />
                 </span>
               </label>
-              <label>
+              <label className={collaboratif ? '' : 'on'}>
                 <input type="radio" name="modele" checked={!collaboratif} onChange={() => majOfficine({ modele: 'classique' })} />
-                <span className="modele-pic" aria-hidden="true">
-                  <UserRound size={18} />
+                <span className="qp-pic" aria-hidden="true">
+                  <UserRound size={22} />
                 </span>
-                <span>
-                  Vous seul <span className="modele-nom">Classique</span>
-                  <ol className="modele-etapes">
-                    <li>Vous construisez le planning.</li>
-                    <li>Vous le publiez.</li>
-                    <li>L’équipe le consulte et fait ses demandes.</li>
-                  </ol>
+                <span className="qp-texte">
+                  <b>Vous seul</b>
+                  <span>Vous construisez, l’équipe consulte.</span>
+                </span>
+                <span className="qp-coche" aria-hidden="true">
+                  <Check size={15} strokeWidth={3} />
                 </span>
               </label>
             </fieldset>
             {collaboratif ? (
-              <div className="modele-limite">
-                <label htmlFor="souhaits-limite">
-                  L’équipe donne ses préférences jusqu’au
-                  <input id="souhaits-limite" type="number" min={1} max={28} value={officine.souhaitsLimite ?? 20} onChange={(e) => majOfficine({ souhaitsLimite: Math.min(28, Math.max(1, Number(e.target.value) || 20)) })} />
-                  du mois précédent.
-                </label>
-                <p className="small soft">
-                  Exemple : pour le planning de {MOIS[Number(moisSuivant.slice(5)) - 1]}, jusqu’au {fmtDateCourt(limiteSouhaits(officine, moisSuivant))} inclus.
-                </p>
+              <div className="qp-limite">
+                <label htmlFor="souhaits-limite">Préférences à donner avant le</label>
+                <select id="souhaits-limite" value={officine.souhaitsLimite ?? 20} onChange={(e) => majOfficine({ souhaitsLimite: Number(e.target.value) })}>
+                  {Array.from({ length: 28 }, (_, k) => k + 1).map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <span>du mois précédent</span>
+                <span className="qp-exemple">
+                  Pour {MOIS[Number(moisSuivant.slice(5)) - 1]} : jusqu’au {fmtDateCourt(limiteSouhaits(officine, moisSuivant))}
+                </span>
               </div>
             ) : null}
-            <p className="tiny muted">Dans les deux cas, les règles et le nombre minimum de personnes passent avant les préférences.</p>
+            <p className="tiny muted">Les règles et le nombre minimum de personnes passent toujours avant les préférences.</p>
           </div>
 
           <div className="card pad col">

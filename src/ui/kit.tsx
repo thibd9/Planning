@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { AlarmClock, ArrowRight, CalendarCheck, Eye, EyeOff, HeartPulse, Hourglass, Sparkles, X } from 'lucide-react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
@@ -132,7 +133,8 @@ export function Dialog({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return (
+  // La fenêtre est posée à la racine de la page : une carte qui la contient ne peut ni la rogner ni la déplacer.
+  return createPortal(
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`dialog${size ? ` ${size}` : ''}`} role="dialog" aria-modal="true" aria-label={title} ref={ref}>
         <div className="dialog-head">
@@ -150,7 +152,8 @@ export function Dialog({
         <div className="dialog-body">{children}</div>
         {footer ? <div className="dialog-foot">{footer}</div> : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

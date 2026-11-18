@@ -16,8 +16,8 @@ import {
   mondayOf,
   weekday,
 } from '../../domain/time';
-import type { Absence, AppData, Besoin, BesoinStatut, ISODate, Remplacement, Trou } from '../../domain/types';
-import { classeAbsence, libelleAbsence, nomCourt, nomGarde, libelleGarde } from '../../domain/types';
+import type { Absence, AppData, Besoin, BesoinStatut, ISODate, Remplacement, Trou, Shift } from '../../domain/types';
+import { classeAbsence, libelleAbsence, nomCourt, nomGarde, libelleGarde, MOTIF_REMPLACEMENT_LABEL, estPharmacien } from '../../domain/types';
 import { decrireBesoin, decrireShift, minutesSemaine, shiftsSemaine } from '../../engine/core';
 import { decisions } from '../../engine/decisions';
 import { diagnosticPrealable } from '../../engine/diagnose';
@@ -412,6 +412,8 @@ export function Resoudre(): JSX.Element {
 // ---------------------------------------------------------------- Réparation
 
 const MAIN = 'main';
+/** Les options sont recalculées à chaque choix et changent d'identifiant : on les reconnaît à leur nature et à leur titre. */
+const cleOption = (o: RepairOption): string => (o.id === 'moi' ? 'moi' : `${o.type}|${o.titre}`);
 
 /**
  * Régler une absence sans rien décider à votre place : pour chaque jour, la solution conseillée est cochée,
@@ -422,8 +424,19 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const resoudre = useStore((s) => s.resoudreTrou);
-  const { dire, setSemaine, aller } = useUi();
+  const { dire, setSemaine, aller, session } = useUi();
   const [choix, setChoix] = useState<Record<string, string>>({});
+  // Le titulaire peut assumer lui-même le poste, sans le reporter sur un collègue.
+  const moi = data.personnes.find((p) => memeIdentifiant(p.identifiant, session ?? ''));
+  const parMoi = (t: Trou, d: AppData): RepairOption | null => {
+    const absent = data.personnes.find((p) => p.id === t.shift.personId);
+    // Un poste de pharmacien ne se reprend que par un pharmacien.
+    if (!moi || moi.id === t.shift.personId || (absent && estPharmacien(absent) && !estPharmacien(moi))) return null;
+    const pris = d.shifts.some((x) => x.personId === moi.id && x.date === t.shift.date && x.start < t.shift.end && t.shift.start < x.end);
+    if (pris || d.absences.some((a) => a.personId === moi.id && a.statut === 'approuvee' && a.from <= t.shift.date && t.shift.date <= a.to)) return null;
+    const poste: Shift = { ...t.shift, id: `moi-${t.id}`, personId: moi.id, origine: 'reparation', explication: `Poste repris par ${nomCourt(moi)}.` };
+    return { id: 'moi', type: 'echange', titre: 'Je prends ce poste moi-même', resume: `Vous assurez le poste de ${fmtHeure(t.shift.start)} à ${fmtHeure(t.shift.end)}. Personne d’autre n’est sollicité.`, couverture: 'maintenue', changements: [{ personId: moi.id, date: t.shift.date, avant: 'Repos', apres: decrireShift(poste) }], personnesTouchees: [moi.id], creneauxModifies: 1, coutSupp: 0, validations: [], regles: [], restant: [], patch: { retirer: [], ajouter: [poste], auComptoir: [], liberer: [], confier: [] }, recommande: false };
+  };
   const nom = (id: string): string => {
     const p = data.personnes.find((x) => x.id === id);
     return p ? nomCourt(p) : '—';
@@ -431,10 +444,12 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
   const plan = useMemo(() => {
     let courant = data;
     return trous.map((t) => {
-      const rep = optionsReparation(courant, t.shift, today);
+      const base = optionsReparation(courant, t.shift, today);
+      const perso = parMoi(t, courant);
+      const rep = perso ? { ...base, options: base.options.concat(perso) } : base;
       const conseillee = rep.options.find((o) => o.recommande) ?? rep.options[0];
       const voulu = choix[t.id];
-      const retenue = voulu === MAIN ? null : (rep.options.find((o) => o.id === voulu) ?? conseillee ?? null);
+      const retenue = voulu === MAIN ? null : (rep.options.find((o) => cleOption(o) === voulu) ?? conseillee ?? null);
       if (retenue) courant = appliquerPatch(courant, retenue.patch);
       return { trou: t, rep, retenue, main: voulu === MAIN };
     });
@@ -446,7 +461,8 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
       if (!x.retenue) continue;
       // Chaque jour est recalculé sur le planning déjà corrigé, puis l'option choisie est appliquée.
       const frais = optionsReparation(useStore.getState().data, x.trou.shift, today).options;
-      const o = frais.find((y) => y.id === x.retenue?.id) ?? frais.find((y) => y.recommande) ?? frais[0];
+      const voulue = x.retenue ? cleOption(x.retenue) : '';
+      const o = voulue === 'moi' ? parMoi(x.trou, useStore.getState().data) : (frais.find((y) => cleOption(y) === voulue) ?? frais.find((y) => y.recommande) ?? frais[0]);
       if (o) resoudre(x.trou.id, o);
     }
     dire(`${regles} jour${regles > 1 ? 's' : ''} réglé${regles > 1 ? 's' : ''}${aLaMain.length ? `, ${aLaMain.length} à régler à la main` : ''}.`, true);
@@ -484,10 +500,10 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
           </legend>
           {rep.impact.length ? <p className="rs-impact">{rep.impact.join(' ')}</p> : <p className="rs-impact ok">Rien n’est découvert ce jour-là.</p>}
           {rep.options.map((o) => {
-            const on = retenue?.id === o.id;
+            const on = !!retenue && cleOption(retenue) === cleOption(o);
             return (
-              <label key={o.id} className={`rs-option${on ? ' on' : ''}`}>
-                <input type="radio" name={`reglage-${trou.id}`} checked={on} onChange={() => setChoix((c) => ({ ...c, [trou.id]: o.id }))} />
+              <label key={cleOption(o)} className={`rs-option${on ? ' on' : ''}`}>
+                <input type="radio" name={`reglage-${trou.id}`} checked={on} onChange={() => setChoix((c) => ({ ...c, [trou.id]: cleOption(o) }))} />
                 <span className="rs-corps">
                   <span className="rs-tete">
                     <b>{o.titre}</b>
@@ -508,7 +524,7 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
                     <span className="rs-faits small">
                       <span>{o.personnesTouchees.length ? `Touche ${o.personnesTouchees.map(nom).join(', ')}` : 'Personne d’autre n’est touché'}</span>
                       <span>{o.coutSupp > 0 ? `+ ${fmtEuros(o.coutSupp)}` : 'Sans coût en plus'}</span>
-                      <span>{o.regles.every((r) => r.ok) ? 'Règles respectées' : 'Une règle à regarder'}</span>
+                      {o.regles.length ? <span>{o.regles.every((r) => r.ok) ? 'Règles respectées' : 'Une règle à regarder'}</span> : null}
                       {o.restant.length ? <span className="reste">Reste : {o.restant.join(' ')}</span> : null}
                     </span>
                   ) : null}
@@ -957,6 +973,8 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
   const tour = useMemo(() => (attente && !r.destinataire ? [] : tourRemplacement(data, r, today)), [data, r, today, attente]);
   const adresse = r.destinataire ? data.personnes.find((p) => p.id === r.destinataire) : undefined;
   const refusCollegue = !!r.destinataire && (r.indisponibles ?? []).includes(r.destinataire);
+  // Pour décider : combien de fois cette personne a demandé à être remplacée sur trois mois.
+  const deja = data.remplacements.filter((x) => x.demandeur === r.demandeur && !x.trouId && x.date >= addDays(today, -90) && x.statut !== 'annulee').length;
   const [refus, setRefus] = useState(false);
   const volontaires = tour.filter((c) => c.volontaire);
   const premier = aSonTour(tour);
@@ -990,17 +1008,37 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
           <b>
             {fmtDateCourt(r.date)}, {fmtHeure(r.start)} – {fmtHeure(r.end)}
           </b>
-          <div className="small soft">
-            {adresse
-              ? refusCollegue
-                ? `${adresse.prenom} ne peut pas. ${demandeur ? demandeur.prenom : 'Le demandeur'} peut ouvrir la demande à toute l’équipe.`
-                : r.volontaires.includes(adresse.id)
-                  ? `${adresse.prenom} est d’accord : il reste à valider.`
-                  : `${adresse.prenom} n’a pas encore répondu.`
-              : attente
-                ? 'Oui : l’équipe disponible est prévenue. Non : le poste reste le sien.'
-                : 'Demande acceptée. Sans remplaçant confirmé, le poste reste le sien.'}
-          </div>
+          {adresse ? (
+            <div className="small soft">
+              {refusCollegue ? `${adresse.prenom} ne peut pas. ${demandeur ? demandeur.prenom : 'Le demandeur'} peut ouvrir la demande à toute l’équipe.` : r.volontaires.includes(adresse.id) ? `${adresse.prenom} est d’accord : il reste à valider.` : `${adresse.prenom} n’a pas encore répondu.`}
+            </div>
+          ) : attente ? (
+            <ul className="oui-non">
+              <li className="oui">
+                <Check size={14} strokeWidth={3} aria-hidden="true" />
+                <span>
+                  <b>Si vous acceptez</b> : l’équipe disponible est prévenue.
+                </span>
+              </li>
+              <li className="non">
+                <X size={14} strokeWidth={3} aria-hidden="true" />
+                <span>
+                  <b>Si vous refusez</b> : le poste reste le sien.
+                </span>
+              </li>
+            </ul>
+          ) : (
+            <div className="small soft">Demande acceptée. Sans remplaçant confirmé, le poste reste le sien.</div>
+          )}
+        </div>
+        <div className="rm-faits">
+          <span className={r.motif ? 'motif' : 'motif absent'}>
+            Motif : <b>{r.motif ? MOTIF_REMPLACEMENT_LABEL[r.motif] : 'non précisé'}</b>
+            {r.precision ? ` — « ${r.precision} »` : ''}
+          </span>
+          <span title="Demandes de remplacement de cette personne sur les trois derniers mois, celle-ci comprise">
+            {deja <= 1 ? '1re demande en 3 mois' : `${deja}e demande en 3 mois`}
+          </span>
         </div>
         {r.justificatif ? (
           r.justificatif.data ? (

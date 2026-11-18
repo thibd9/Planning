@@ -4,7 +4,7 @@ import { DEMO_VERSION, seed, vierge } from '../data/seed';
 import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
-import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed } from '../domain/types';
+import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
 import { decrireBesoin, minutesSemaine, shiftsSemaine } from '../engine/core';
 import { reposApresGarde } from '../engine/gardes';
@@ -129,7 +129,7 @@ export interface Store {
   envoyerMessage: (de: string, a: string, texte: string) => void;
   lireFil: (moi: string, fil: string) => void;
   /** `destinataire` : la demande est adressée à ce collègue en particulier, et toujours au titulaire qui valide. */
-  demanderRemplacement: (shift: Shift, urgence?: Urgence, justificatif?: Justificatif, destinataire?: string) => void;
+  demanderRemplacement: (shift: Shift, urgence?: Urgence, justificatif?: Justificatif, destinataire?: string, raison?: { motif: MotifRemplacement; precision?: string }) => void;
   /** Le collègue demandé ne peut pas : la demande s'ouvre à toute l'équipe disponible. */
   elargirDemande: (id: string) => void;
   /** Le titulaire répond à la demande elle-même : oui (l'équipe est alors prévenue) ou non. */
@@ -370,12 +370,12 @@ export const useStore = create<Store>((set, get) => {
         if (!d.messages.some((m) => concerne(m) && !m.luPar.includes(moi))) return d;
         return { ...d, messages: d.messages.map((m) => (concerne(m) && !m.luPar.includes(moi) ? { ...m, luPar: [...m.luPar, moi] } : m)) };
       }, false),
-    demanderRemplacement: (shift, urgence = 'prevu', justificatif, destinataire) =>
+    demanderRemplacement: (shift, urgence = 'prevu', justificatif, destinataire, raison) =>
       commit((d) =>
         journal(
           {
             ...d,
-            remplacements: d.remplacements.concat({ id: uid('r'), shiftId: shift.id, demandeur: shift.personId, date: shift.date, start: shift.start, end: shift.end, creeLe: now(), volontaires: [], statut: 'ouverte', urgence, accord: 'attente', justificatif, ...(destinataire ? { destinataire, sollicites: [destinataire] } : {}) }),
+            remplacements: d.remplacements.concat({ id: uid('r'), shiftId: shift.id, demandeur: shift.personId, date: shift.date, start: shift.start, end: shift.end, creeLe: now(), volontaires: [], statut: 'ouverte', urgence, accord: 'attente', justificatif, ...(raison ? { motif: raison.motif, ...(raison.precision?.trim() ? { precision: raison.precision.trim() } : {}) } : {}), ...(destinataire ? { destinataire, sollicites: [destinataire] } : {}) }),
             // Le collègue demandé est prévenu tout de suite ; le titulaire reçoit la demande dans « Résoudre ».
             messages: destinataire
               ? d.messages.concat({ id: uid('msg'), de: shift.personId, a: destinataire, texte: `Pouvez-vous me remplacer ${fmtDateCourt(shift.date)}, ${fmtHHMM(shift.start)} – ${fmtHHMM(shift.end)} ? Répondez depuis « Mon planning ». Notre titulaire devra valider.`, at: now(), luPar: [shift.personId] })
@@ -411,7 +411,7 @@ export const useStore = create<Store>((set, get) => {
             {
               ...d,
               // Une demande tranchée ne garde pas son justificatif.
-              remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut: 'refusee' as const, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined } : x)),
+              remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut: 'refusee' as const, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined, precision: undefined } : x)),
               messages: d.messages.concat(r.demandeur !== de ? [msg(r.demandeur, texteRefus(`de remplacement du ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`, motif ?? '', 'Vous restez en poste.'))] : []),
             },
             { type: 'modification', titre: `Demande de remplacement de ${nom(d, r.demandeur)} du ${fmtDateCourt(r.date)} refusée`, ...(motif ? { detail: motif } : {}) },
@@ -483,7 +483,7 @@ export const useStore = create<Store>((set, get) => {
         const prevenir = !!r && statut === 'refusee' && motif !== undefined && !!de && r.demandeur !== de;
         return {
           ...d,
-          remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined } : x)),
+          remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined, precision: undefined } : x)),
           messages: prevenir && r ? d.messages.concat({ id: uid('msg'), de, a: r.demandeur, texte: texteRefus(`de remplacement du ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`, motif ?? '', 'Vous restez en poste.'), at: now(), luPar: [de] }) : d.messages,
         };
       }),
@@ -598,7 +598,7 @@ export const useStore = create<Store>((set, get) => {
             shifts: passer(d.shifts),
             // Le remplacement validé vaut publication : les deux personnes voient aussitôt leur changement.
             semaines: semaine?.snapshot ? { ...d.semaines, [monday]: { ...semaine, snapshot: passer(semaine.snapshot) } } : d.semaines,
-            remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut: 'acceptee' as const, remplacantId, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined } : x)),
+            remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut: 'acceptee' as const, remplacantId, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined, precision: undefined } : x)),
             notifications: [
               { id: uid('n'), personId: r.demandeur, at, date: poste.date, avant: 'En poste', apres: `Remplacé par ${nom(d, remplacantId)}`, tardif: dayIndex(poste.date) - dayIndex(today) < 7 },
               { id: uid('n'), personId: remplacantId, at, date: poste.date, avant: 'Repos', apres: `En poste à la place de ${nom(d, r.demandeur)}${plus}`, tardif: dayIndex(poste.date) - dayIndex(today) < 7 },

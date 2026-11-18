@@ -1,8 +1,8 @@
 import { FileCheck2, Hourglass, Paperclip, ShieldCheck, Users, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { dayIndex, fmtDateLong, fmtDuree, fmtHeure } from '../../domain/time';
-import type { Justificatif, Shift, Urgence } from '../../domain/types';
-import { URGENCE_LABEL } from '../../domain/types';
+import type { Justificatif, MotifRemplacement, Shift, Urgence } from '../../domain/types';
+import { MOTIF_REMPLACEMENT_LABEL, URGENCE_LABEL } from '../../domain/types';
 import { avisCollegues, delaiRemplacement, peutDemanderRemplacement } from '../../engine/remplacement';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
@@ -60,11 +60,17 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
   const [urgence, setUrgence] = useState<Urgence>(loin ? 'prevu' : 'urgent');
   const [piece, setPiece] = useState<Justificatif | null>(null);
   const [erreur, setErreur] = useState('');
+  /** Le motif est obligatoire : c'est le titulaire qui décide, il doit savoir pourquoi. */
+  const [motif, setMotif] = useState<MotifRemplacement | ''>('');
+  const [precision, setPrecision] = useState('');
   /** À qui la demande s'adresse : '' pour toute l'équipe disponible, sinon un collègue précis. */
   const [collegue, setCollegue] = useState('');
   // Pour chaque collègue : les règles sont relues et ses heures de la semaine comptées.
   const avis = useMemo(() => avisCollegues(data, shift), [data, shift]);
   const choisi = data.personnes.find((p) => p.id === collegue);
+  // Une urgence médicale porte son motif ; « autre raison » demande quelques mots.
+  const raison: MotifRemplacement | '' = urgence === 'medical' ? 'sante' : motif;
+  const pret = !!raison && (raison !== 'autre' || precision.trim().length >= 3);
   // Un poste à moins de sept jours ne peut pas être « prévu » : il passe par une demande urgente.
   const niveaux: Urgence[] = loin ? ['prevu', 'urgent', 'medical'] : ['urgent', 'medical'];
 
@@ -99,8 +105,10 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
           <button
             type="button"
             className="btn primary"
+            disabled={!pret}
+            title={pret ? undefined : 'Indiquez le motif de votre demande'}
             onClick={() => {
-              demander(shift, urgence, urgence === 'medical' ? (piece ?? undefined) : undefined, collegue || undefined);
+              demander(shift, urgence, urgence === 'medical' ? (piece ?? undefined) : undefined, collegue || undefined, raison ? { motif: raison, precision } : undefined);
               dire(choisi ? `Demande envoyée à ${choisi.prenom} et à votre titulaire. Vous restez en poste tant qu’elle n’est pas validée.` : 'Demande envoyée à votre titulaire. Vous restez en poste tant qu’elle n’est pas réglée.', true);
               onClose();
             }}
@@ -116,6 +124,26 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
           <b>{jours <= 0 ? 'Poste aujourd’hui' : jours === 1 ? 'Poste demain' : `Poste dans ${jours} jours`}.</b>{' '}
           {loin ? `Plus de ${delai} jours : vos collègues sont prévenus dans les règles.` : `Moins de ${delai} jours : seul un volontaire peut le reprendre.`}
         </span>
+      </div>
+      <div className="rm-motif">
+        <label className="field" htmlFor="rempl-motif">
+          Motif de la demande
+          <select id="rempl-motif" value={raison} disabled={urgence === 'medical'} onChange={(e) => setMotif(e.target.value as MotifRemplacement | '')} aria-required="true">
+            <option value="">Choisir…</option>
+            {(Object.keys(MOTIF_REMPLACEMENT_LABEL) as MotifRemplacement[]).map((m) => (
+              <option key={m} value={m}>
+                {MOTIF_REMPLACEMENT_LABEL[m]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field" htmlFor="rempl-precision">
+          <span>
+            Précision {raison === 'autre' ? <span className="soft">(nécessaire)</span> : <span className="soft">(facultatif)</span>}
+          </span>
+          <input id="rempl-precision" value={precision} maxLength={140} onChange={(e) => setPrecision(e.target.value)} placeholder="Quelques mots pour votre titulaire" />
+        </label>
+        <p className="aide">Votre titulaire décide. Le motif n’est visible que des titulaires ; la précision est effacée une fois la demande réglée.</p>
       </div>
       <fieldset className="choix collegues">
         <legend>À qui demander ?</legend>
@@ -213,7 +241,7 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
           </p>
         </div>
       ) : null}
-      <p className="tiny muted">Aucune raison n’est demandée. Sans collègue volontaire, le poste reste le vôtre : prévenez votre titulaire si vous ne pouvez pas venir.</p>
+      <p className="tiny muted">Tant que votre titulaire n’a pas validé un remplaçant, le poste reste le vôtre.</p>
     </Dialog>
   );
 }

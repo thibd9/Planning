@@ -2402,3 +2402,76 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
 .doc-note { display: flex; align-items: center; gap: 6px; margin: 0; }
 .doc-qui { display: flex; align-items: center; gap: 10px; padding: 12px 20px 0; list-style: none; }
 .doc-partage { align-items: center; }
+
+/* ================================================================ Qui prépare le planning : deux tuiles, un choix */
+.qui-prepare { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.qui-prepare label { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 18px; background: var(--n-1); cursor: pointer; box-shadow: inset 0 0 0 1.5px transparent; transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s var(--fluide); }
+.qui-prepare label:hover { transform: translateY(-1px); }
+.qui-prepare label.on { background: var(--a-soft); box-shadow: inset 0 0 0 2px var(--a-deep); }
+.qui-prepare input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; border-radius: inherit; }
+.qui-prepare label:has(input:focus-visible) { outline: 3px solid var(--a-deep); outline-offset: 2px; }
+.qp-pic { flex: none; width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; background: var(--surface); color: var(--ink-2); transition: background 0.25s ease, color 0.25s ease; }
+.qui-prepare label.on .qp-pic { background: var(--a-deep); color: var(--on-a); }
+.qp-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.qp-texte b { font-size: 16px; font-weight: 700; }
+.qp-texte span { font-size: 13.5px; color: var(--ink-2); }
+.qp-coche { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--a-deep); color: var(--on-a); opacity: 0; transform: scale(0.6); transition: opacity 0.25s ease, transform 0.3s var(--fluide); }
+.qui-prepare label.on .qp-coche { opacity: 1; transform: none; }
+.qp-limite { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 14.5px; font-weight: 600; }
+.qp-limite select { width: 78px; padding: 8px 30px 8px 12px; border-radius: 12px; border: 1.5px solid var(--n-4); background-color: var(--surface); color: var(--ink); font: inherit; font-weight: 700; }
+.qp-exemple { flex-basis: 100%; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.pt-section { display: inline-flex; align-items: center; }
+.pt-section::before { content: '›'; margin: 0 6px; opacity: 0.7; }
+
+/* ================================================================ Fluidité : plus de flou d'arrière-plan ni d'animation sans fin.
+   Mesuré sur la visite guidée et les changements d'écran : ces deux effets divisaient par trois le nombre d'images par seconde. */
+.topbar-in, .overlay, .accueil-actions, .decouvrir, .side, .card, .tb-chiffre, .bandeau-test, .onglets button:not(.on), .plan, .dialog, .parcours-test, .tour-corps, .connexion .card.pad, .aide-fab, .aide-panneau, .cx-vitrine .verre { -webkit-backdrop-filter: none; backdrop-filter: none; }
+:root { --verre: color-mix(in srgb, var(--surface) 94%, transparent); --verre-fort: var(--surface); }
+.side { background: color-mix(in srgb, var(--surface) 90%, transparent); }
+.topbar-in { background: color-mix(in srgb, var(--surface) 95%, transparent); }
+.overlay { background: rgba(var(--ink-rgb), 0.56); }
+.tile, .cal-poste, .frise .bloc, .moment, .tb-h, .cx-case, .bientot .jour.auj, .premiere, .option.reco, .g-date, .btn.primary, .btn.magic, .btn.ia, .nav-item.on, .nav-item.on .ni, .page-ico, .ico.grad, .cp-ico, .tour-n, .pt-n, .hero, .hero::before, .hero::after, .main, .app, .dialog-head, .dialog-filigrane, .dc-tete, .dc-tete::after, .tour-tete, .parcours-test > .row:first-child, .aide-fab, .aide-tete { animation: none; }
+/* Les entrées d'écran restent, mais ne jouent que sur l'opacité et la position : rien à recalculer. */
+.focus-parcours { will-change: top, left, width, height; }
+.parcours-test { will-change: transform, opacity; }
+
+/* Préférences : le calendrier ne montre que mes choix ; un simple point signale un jour où l'équipe manque. */
+.sh-aider { display: inline-block; flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--warn); font-style: normal; }
+.sh-jour .sh-aider { position: absolute; top: 12px; right: 12px; }
+.sh-jour { position: relative; }
+.sh-legende .sh-aider { margin-right: 8px; }
+.sh-palette-mot { align-self: center; margin-right: 4px; font-size: 13.5px; font-weight: 650; color: var(--ink-2); }
+
+/* Demande de remplacement : le motif, pour que le titulaire décide en connaissance de cause */
+.rm-motif { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 16px; background: var(--n-1); }
+.rm-motif .aide { margin: 0; }
+.rm-faits { display: flex; flex-wrap: wrap; gap: 6px; }
+.rm-faits > span { padding: 4px 11px; border-radius: 999px; background: var(--n-1); color: var(--ink-2); font-size: 13px; }
+.rm-faits b { color: var(--ink); }
+.rm-faits .motif { background: var(--info-soft); color: var(--info); }
+.rm-faits .motif b { color: inherit; }
+.rm-faits .motif.absent { background: var(--warn-soft); color: var(--warn); }
+.focus-parcours { transition-duration: 0.5s; }
+
+/* Ce que change un oui, ce que change un non : deux lignes, chacune avec son signe */
+.oui-non { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 5px; font-size: 14px; }
+.oui-non li { display: flex; align-items: center; gap: 9px; }
+.oui-non svg { flex: none; width: 22px; height: 22px; padding: 4px; border-radius: 50%; }
+.oui-non .oui svg { background: var(--ok-soft); color: var(--ok-ink); }
+.oui-non .non svg { background: var(--danger-soft); color: var(--danger-ink); }
+
+/* Fenêtre de résolution : de l'air entre les jours, autour des options et dans le pied */
+.dialog.wide .dialog-body { padding: 28px 34px 30px; gap: 22px; }
+.rs-jour { padding: 22px 24px 24px; gap: 12px; border-radius: 22px; }
+.rs-jour legend { margin-bottom: 10px; gap: 6px 14px; }
+.rs-impact { padding: 11px 16px; border-radius: 14px; margin-bottom: 4px; }
+.rs-option { padding: 18px 20px; gap: 16px; border-radius: 18px; }
+.rs-corps { gap: 9px; }
+.rs-tete { gap: 8px 12px; }
+.rs-tete b { font-size: 16px; }
+.rs-changements { padding: 12px 14px; gap: 8px; border-radius: 13px; margin-top: 4px; }
+.rs-faits { gap: 8px; margin-top: 2px; }
+.rs-faits > span { padding: 5px 12px; }
+.dialog.wide .dialog-foot { padding: 20px 34px; gap: 14px; align-items: center; }
+.dialog.mid .dialog-body { padding: 28px 32px 30px; gap: 20px; }
+.refus-apercu { padding: 16px 18px; }

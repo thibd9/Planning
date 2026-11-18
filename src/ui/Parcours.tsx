@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, CircleCheck, Crown, FlaskConical, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Crown, FlaskConical, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -222,7 +222,7 @@ function avecDemande(): void {
   if (demandeDeCamille(s.data)) return;
   const id = posteARemplacer(s.data, s.today);
   const poste = s.data.shifts.find((x) => x.id === id);
-  if (poste) s.demanderRemplacement(poste, 'prevu');
+  if (poste) s.demanderRemplacement(poste, 'prevu', undefined, undefined, { motif: 'famille' });
 }
 function accepterDemandeDeCamille(): void {
   const r = demandeDeCamille(store().data);
@@ -260,7 +260,7 @@ function avecUrgenceMedicale(): void {
   const poste = s.data.shifts
     .filter((x) => x.personId === 'p_thomas' && x.date >= semaineDans(1))
     .sort((x, y) => x.date.localeCompare(y.date) || x.start - y.start)[0];
-  if (poste) s.demanderRemplacement(poste, 'medical', JUSTIFICATIF_EXEMPLE);
+  if (poste) s.demanderRemplacement(poste, 'medical', JUSTIFICATIF_EXEMPLE, undefined, { motif: 'sante' });
 }
 /** Inès a demandé un congé, pour montrer un refus. */
 function avecCongeARefuser(): void {
@@ -359,7 +359,7 @@ const ETABLI: Etape[] = [
         // Le poste est cherché une seule fois : le calcul relit les règles pour chaque collègue.
         const id = posteARemplacer(s.data, s.today);
         const poste = s.data.shifts.find((x) => x.id === id);
-        if (poste) s.demanderRemplacement(poste);
+        if (poste) s.demanderRemplacement(poste, 'prevu', undefined, undefined, { motif: 'famille' });
         accepterDemandeDeCamille();
       }
       voirComme('nicolas.lesyndicaliste', 'moi');
@@ -475,7 +475,7 @@ const ETABLI: Etape[] = [
 
 const PREPARER = 'Préparer';
 const PLANIFIER = 'Planifier';
-const EQUIPE = 'Côté équipe';
+const EQUIPE = 'Vu par l’équipe';
 const SUIVRE = 'Suivre';
 const BILAN = 'Bilan';
 const QUOTIDIEN = 'Au quotidien';
@@ -484,7 +484,7 @@ const semaineUne = (): void => {
   useUi.getState().setSemaine(semaineDans(1));
 };
 
-const COMPLET: Etape[] = [
+const COMPLET_BRUT: Etape[] = [
   // ---- 1. Préparer
   {
     chapitre: PREPARER,
@@ -507,13 +507,13 @@ const COMPLET: Etape[] = [
     chapitre: PREPARER,
     qui: HELENE,
     cible: "[data-focus='modele']",
-    titre: 'Classique ou collaboratif',
-    texte: () => 'Collaboratif : l’équipe donne ses préférences. Classique : vous construisez seule.',
+    titre: 'Qui prépare le planning',
+    texte: () => 'Avec l’équipe : chacun donne ses préférences. Vous seul : vous construisez sans les demander.',
     jouer: () => helene('officine'),
     gestes: [
-      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Classique') },
+      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Vous seul') },
       { faire: 'pause', ms: 900 },
-      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Collaboratif') },
+      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Avec l’équipe') },
     ],
   },
   {
@@ -654,13 +654,14 @@ const COMPLET: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='mois']",
     titre: 'Le mois',
-    texte: () => 'Objectif d’équipe par jour, heures face au contrat, préférences en gris.',
+    texte: () => 'Le mois d’un coup d’œil : horaires, équipe au complet ou non, heures de chacun. Et les préférences reçues.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
       semaineUne();
       useUi.getState().setPlanVue('mois');
     },
+    gestes: [{ faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('.mo-pref input'), dit: 'Cocher « Afficher les préférences »' }],
   },
   {
     chapitre: PLANIFIER,
@@ -858,7 +859,7 @@ const COMPLET: Etape[] = [
     cible: "[data-focus='remplacer']",
     cibleFin: "[data-focus='remplacer']",
     titre: 'Se faire remplacer',
-    texte: () => 'Prévu, urgent ou urgence médicale, avec justificatif. La titulaire répondra.',
+    texte: () => 'Un motif, un niveau d’urgence, à toute l’équipe ou à un collègue. La titulaire décide.',
     jouer: () => {
       avecPlanning();
       versDemandes('nicolas.lesyndicaliste', 'remplacements');
@@ -869,6 +870,7 @@ const COMPLET: Etape[] = [
       { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgence médicale') },
       { faire: 'pause', ms: 900 },
       { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgent') },
+      { faire: 'choisir', dans: '#rempl-motif', valeur: 'famille' },
       { faire: 'cliquer', sur: VALIDER },
     ],
   },
@@ -1030,7 +1032,7 @@ const COMPLET: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: parTexte('.panneau button', 'Voir et choisir la solution') },
       { faire: 'attendre', que: '.rs-jour' },
-      { faire: 'cliquer', sur: '.rs-jour .rs-option:not(.on):not(.main)', dit: 'Choisir une autre option pour le premier jour' },
+      { faire: 'cliquer', sur: '.rs-jour .rs-option:not(.on):not(.libre)', dit: 'Choisir une autre option pour le premier jour' },
       { faire: 'cliquer', sur: '.dialog-foot .btn.primary' },
     ],
   },
@@ -1123,6 +1125,19 @@ const COMPLET: Etape[] = [
       avecPlanning();
       helene('journal');
     },
+  },
+  {
+    chapitre: BILAN,
+    qui: HELENE,
+    cible: '.content .jr-barre',
+    cibleFin: '.content .doc-liste, .content .card',
+    titre: 'Les documents',
+    texte: () => 'Plannings publiés, absences, fichiers déposés : chacun retrouve tout au même endroit.',
+    jouer: () => {
+      avecPlanning();
+      helene('documents');
+    },
+    gestes: [{ faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'absences') }, { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Mes fichiers') }],
   },
   // ---- 6. Au quotidien
   {
@@ -1219,6 +1234,69 @@ const COMPLET: Etape[] = [
       { faire: 'cliquer', sur: 'label[for="mode-clair"]' },
     ],
   },
+];
+
+/**
+ * La visite titulaire reste dans la peau de la titulaire, rubrique après rubrique, dans l'ordre du menu :
+ * Équipe, Réglages, Règles, Construire, Gardes, Résoudre, Messages, Heures, Équité, Journal, Documents,
+ * puis les gestes du quotidien. Ce que voit l'équipe vient ensuite, dans un seul chapitre.
+ */
+const ORDRE_TITULAIRE = [
+  'Créer la pharmacie',
+  'Ajouter l’équipe',
+  'La fiche d’une personne',
+  'Horaires et effectif',
+  'Qui prépare le planning',
+  'Les règles',
+  'Une semaine à construire',
+  'Poser un poste',
+  'Trois propositions',
+  'La semaine est posée',
+  'Les contrôles',
+  'Une journée',
+  'Retards et suivi',
+  'Le mois',
+  'Publier',
+  'Imprimer',
+  'Une formation',
+  'Un inventaire',
+  'Les gardes',
+  'La demande arrive',
+  'Valider le remplacement',
+  'Une urgence médicale',
+  'Congés et horaires',
+  'Refuser une demande',
+  'Une absence imprévue',
+  'L’appel à l’équipe',
+  'Personne ne se propose',
+  'Donner son accord',
+  'Les messages',
+  'Le compteur d’heures',
+  'L’équité',
+  'Le journal et la paie',
+  'Les documents',
+  'Le tableau de bord',
+  'Le bouton « Créer »',
+  'La cloche',
+  'Plusieurs pharmacies',
+  'L’assistant Solvéa',
+  'Mot de passe et clé de secours',
+  'Votre compte',
+];
+/** Le dernier chapitre : les mêmes sujets, vus par un préparateur, une pharmacienne, l'autre titulaire. */
+const ORDRE_EQUIPE = ['Mon planning', 'Le calendrier du mois', 'Le planning de l’équipe', 'Les préférences du mois', 'Mes demandes', 'Demander, sans raison', 'Se faire remplacer', 'Un collègue se propose', 'Mes gardes', 'Mon suivi', 'Décider à deux'];
+/** Quelques étapes changent de chapitre pour rester avec leur rubrique du menu. */
+const CHAPITRE_DE: Record<string, string> = { 'Créer la pharmacie': 'Démarrer', 'Retards et suivi': PLANIFIER };
+const dans = (ordre: string[], chapitre?: string): Etape[] =>
+  ordre
+    .map((t) => COMPLET_BRUT.find((e) => e.titre === t))
+    .filter((e): e is Etape => !!e)
+    .map((e) => ({ ...e, chapitre: chapitre ?? CHAPITRE_DE[e.titre] ?? e.chapitre }));
+const COMPLET: Etape[] = [
+  ...dans(ORDRE_TITULAIRE),
+  ...dans(ORDRE_EQUIPE, EQUIPE),
+  // Une étape ajoutée sans être rangée ne disparaît pas : elle vient à la fin.
+  ...COMPLET_BRUT.filter((e) => !ORDRE_TITULAIRE.includes(e.titre) && !ORDRE_EQUIPE.includes(e.titre)),
 ];
 
 const MON_PLANNING = 'Mon planning';
@@ -1467,7 +1545,9 @@ export function Parcours(): JSX.Element | null {
   const ETAPES: readonly Etape[] = SCENARIOS[scenario].etapes;
   const etape = parcours !== null ? ETAPES[parcours] : null;
   /** On lit d'abord ; la démonstration ne se joue que sur demande, fiche refermée ; puis la fiche revient. */
-  const [phase, setPhase] = useState<'lire' | 'demo' | 'pause' | 'fini'>('lire');
+  const [phase, setPhase] = useState<'lire' | 'demo' | 'fini'>('lire');
+  /** La rubrique du menu où l'on se trouve, lue à l'écran : « Réglages », « Construire »… */
+  const [section, setSection] = useState('');
   /** Les temps de la démonstration, et combien ont déjà été joués. */
   const temps = useRef<Geste[][]>([]);
   const [joues, setJoues] = useState(0);
@@ -1545,18 +1625,26 @@ export function Parcours(): JSX.Element | null {
     setJoues(0);
     setAnnonce('');
     let faits = 0;
-    /** Le temps est joué : on laisse voir le résultat un instant, puis la fiche revient pour la suite. */
+    const dernierePas = parcours >= SCENARIOS[scenario].etapes.length - 1;
+    /** Un temps est joué : le suivant s'enchaîne. Après le dernier, on laisse voir le résultat, puis l'étape suivante arrive. */
     const fin = (): void => {
       visee.current = null;
       setClic(false);
+      faits++;
+      setJoues(faits);
+      if (faits < liste.length) {
+        setAnnonce(decrire(liste[faits]));
+        plusTard(() => derouler(liste[faits], 0), 420);
+        return;
+      }
       plusTard(() => {
-        faits++;
-        setJoues(faits);
-        if (faits >= liste.length) contexte.current = null;
-        setPhase(faits >= liste.length ? 'fini' : 'pause');
-        noter();
-        setOuvert(true);
-      }, 850);
+        contexte.current = null;
+        if (dernierePas) {
+          setPhase('fini');
+          noter();
+          setOuvert(true);
+        } else setParcours(parcours + 1);
+      }, 1300);
     };
     /** Joue le geste i du temps en cours, puis le suivant. Un élément introuvable est attendu un instant, puis ignoré. */
     const derouler = (gestes: Geste[], i: number): void => {
@@ -1617,13 +1705,21 @@ export function Parcours(): JSX.Element | null {
       setSommaire(false);
       setOuvert(false);
       setPhase('demo');
-      // La fiche a le temps de s'effacer avant le geste.
-      plusTard(() => derouler(liste[faits], 0), 700);
+      setAnnonce(decrire(liste[faits]));
+      // La fiche a le temps de s'effacer avant le premier geste.
+      plusTard(() => derouler(liste[faits], 0), 650);
     };
     plusTard(() => {
+      const ici = document.querySelector<HTMLElement>('.side .nav-item.on, .tabbar .on');
+      const nom = ici ? nomDe(ici) : '';
+      setSection((avant) => {
+        // On change de rubrique : son entrée dans le menu se signale un instant.
+        if (nom && nom !== avant && ici) ici.animate([{ boxShadow: '0 0 0 0 var(--a-2)' }, { boxShadow: '0 0 0 7px transparent' }], { duration: 900, iterations: 2, easing: 'ease-out' });
+        return nom;
+      });
       noter();
       setOuvert(true);
-    }, 560);
+    }, 520);
     return annulerMinuteries;
   }, [parcours, scenario, tirage]);
 
@@ -1647,11 +1743,13 @@ export function Parcours(): JSX.Element | null {
     const mesurer = (): void => {
       const base = cible ? document.querySelector<HTMLElement>(cible) : null;
       const geste = visee.current ? element(visee.current) : null;
-      // Pendant une démonstration, le projecteur suit le geste : la fenêtre ou le menu où il a lieu, sinon le bloc présenté.
-      if (phase === 'demo' && geste) {
-        contexte.current = geste.closest<HTMLElement>('.dialog, .decouvrir, .menu, .aide-panneau') ?? (base?.contains(geste) ? base : (geste.closest<HTMLElement>('.card, .plan, .panneau, .voies, .side, .bandeau-test, .topbar-in') ?? geste));
-      }
-      const el = (phase === 'demo' || phase === 'pause') && contexte.current?.isConnected ? contexte.current : base;
+      // Une fenêtre ouverte passe devant tout le reste : c'est elle qu'on éclaire, pas le bloc resté derrière.
+      const devant = document.querySelector<HTMLElement>('.overlay .dialog, .overlay .decouvrir, .assistant .aide-panneau');
+      const autour = (g: HTMLElement): HTMLElement => g.closest<HTMLElement>('.dialog, .decouvrir, .menu, .aide-panneau') ?? (base?.contains(g) ? base : (g.closest<HTMLElement>('.card, .plan, .panneau, .voies, .side, .bandeau-test, .topbar-in') ?? g));
+      // Pendant une démonstration, le projecteur suit le geste ; entre deux gestes, il reste là où l'on travaille.
+      if (phase === 'demo' && geste) contexte.current = autour(geste);
+      if (devant && contexte.current && !devant.contains(contexte.current) && !contexte.current.closest('.menu')) contexte.current = devant;
+      const el = phase === 'demo' ? (contexte.current?.isConnected ? contexte.current : (devant ?? base)) : devant && !(base && devant.contains(base)) ? devant : base;
       const r = el?.getBoundingClientRect();
       if (el && r && r.width >= 4 && r.height >= 4) {
         // Ce qui est dans la page ne déborde pas sur les barres du haut : le cadre s'arrête au bord de la zone de contenu.
@@ -1688,7 +1786,7 @@ export function Parcours(): JSX.Element | null {
       window.removeEventListener('resize', mesurer);
       window.removeEventListener('scroll', mesurer, true);
     };
-  }, [cible, parcours, scenario, tirage, phase]);
+  }, [cible, parcours, scenario, tirage, phase, joues]);
 
   // La fiche d'explication se range là où elle ne cache pas ce qu'elle montre.
   const [place, setPlace] = useState<{ left: number; top: number } | null>(null);
@@ -1721,21 +1819,9 @@ export function Parcours(): JSX.Element | null {
     if (reste) return demarrer.current();
     if (parcours < N - 1) setParcours(parcours + 1);
   };
-  // Ce que le prochain geste va faire se lit sur l'écran lui-même ; l'élément peut mettre un instant à apparaître.
-  useEffect(() => {
-    if (!ouvert || !reste) return;
-    let essais = 0;
-    const lire = (): void => {
-      const texte = decrire(temps.current[joues]);
-      setAnnonce(texte);
-      if (/^(Cliquer ici|Écrire « [^»]* »|Choisir « [^»]* »)$/.test(texte) && ++essais < 12) minuterie = window.setTimeout(lire, 200);
-    };
-    let minuterie = window.setTimeout(lire, 0);
-    return () => window.clearTimeout(minuterie);
-  }, [ouvert, reste, joues, parcours, tirage]);
   // Lecture automatique : le temps de lire, un geste, le temps de voir, puis la suite.
   const duree = etape ? Math.min(9000, Math.max(4500, 2200 + etape.texte(data).length * 45)) : 0;
-  const attente = phase === 'pause' ? 2600 : phase === 'fini' ? Math.max(3200, duree * 0.6) : duree;
+  const attente = phase === 'fini' ? Math.max(3200, duree * 0.6) : duree;
   useEffect(() => {
     if (!lecture || parcours === null || libre || sommaire || phase === 'demo' || !ouvert) return;
     if (!reste && parcours >= N - 1) return setLecture(false);
@@ -1832,7 +1918,8 @@ export function Parcours(): JSX.Element | null {
           <div aria-live="polite" key={parcours} className="pt-corps">
             {etape.chapitre ? (
               <button type="button" className="pt-chapitre" onClick={() => setSommaire(true)} title="Ouvrir le sommaire">
-                <ListTree size={14} aria-hidden="true" /> {rang + 1}/{chapitres.length} · {etape.chapitre}
+                <ListTree size={14} aria-hidden="true" /> {etape.chapitre}
+                {section && section !== etape.chapitre ? <span className="pt-section">{section}</span> : null}
                 <span className="sr">, ouvrir le sommaire</span>
               </button>
             ) : null}
@@ -1845,27 +1932,9 @@ export function Parcours(): JSX.Element | null {
                   <Undo2 size={14} aria-hidden="true" /> Revenir à l’étape
                 </button>
               </div>
-            ) : demonstration && !reste ? (
-              <div className="pt-fait small">
-                <CircleCheck size={15} aria-hidden="true" /> {nbTemps > 1 ? `${nbTemps} gestes montrés` : 'Geste montré'}
-                <button type="button" className="pt-revoir" onClick={() => setTirage((t) => t + 1)}>
-                  <RotateCcw size={13} aria-hidden="true" /> Revoir
-                </button>
-              </div>
-            ) : demonstration ? (
-              <div className="pt-geste">
-                <span className="pt-geste-tete">
-                  <MousePointer2 size={14} aria-hidden="true" />
-                  {nbTemps > 1 ? `Geste ${joues + 1} sur ${nbTemps}` : 'À l’écran'}
-                  {nbTemps > 1 ? (
-                    <span className="pt-points" aria-hidden="true">
-                      {Array.from({ length: nbTemps }, (_, i) => (
-                        <i key={i} className={i < joues ? 'fait' : i === joues ? 'on' : ''} />
-                      ))}
-                    </span>
-                  ) : null}
-                </span>
-                <b>{annonce || 'Voir la suite'}</b>
+            ) : reste ? (
+              <div className="pt-annonce small">
+                <MousePointer2 size={15} aria-hidden="true" /> « Suivant » : Solvéa vous le montre à l’écran{nbTemps > 1 ? `, en ${nbTemps} gestes` : ''}.
               </div>
             ) : null}
           </div>

@@ -134,6 +134,7 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
               ) : null}
             </span>
             <div className="sh-palette" role="group" aria-label="Forme à poser en cliquant sur un jour">
+              <span className="sh-palette-mot">Je préfère</span>
               {CHOIX.map((c) => (
                 <button key={c} type="button" className={`sh-choix ${c}${pinceau === c ? ' on' : ''}`} aria-pressed={pinceau === c} onClick={() => setPinceau(c)} disabled={clos}>
                   {ICONE[c]} {SOUHAIT_LABEL[c]}
@@ -176,9 +177,7 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
                     <button type="button" className={`sh-jour${choix ? ` ${choix}` : ''}${jourChoisi === date ? ' sel' : ''}`} onClick={() => cliquer(date)} aria-pressed={jourChoisi === date}>
                       <span className="n num">{n}</span>
                       <span className="c">{choix ? <>{ICONE[choix]} <span className="t">{SOUHAIT_LABEL[choix]}</span></> : <span className="t vide">À remplir</span>}</span>
-                      {court && e ? (
-                        <span className="sh-manque">{manque(e.matin) && manque(e.soir) ? 'Manque du monde' : manque(e.matin) ? 'Manque le matin' : 'Manque l’ap.-midi'}</span>
-                      ) : null}
+                      {court ? <i className="sh-aider" title="L’équipe annoncée ne suffit pas ce jour-là" /> : null}
                       {/* Le nom lu reprend d'abord ce qui est écrit, puis le précise. */}
                       <span className="sr">
                         , {JOURS[weekday(date)]}
@@ -189,7 +188,7 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
               })}
             </div>
           </div>
-          <p className="sh-legende small soft"><span className="sh-manque">Manque</span> L’équipe annoncée ne suffit pas ce jour-là. Touchez le jour pour voir, et aider si vous voulez.</p>
+          <p className="sh-legende small soft"><i className="sh-aider" /> L’équipe annoncée ne suffit pas encore ce jour-là : touchez le jour pour voir qui vient, et aider si vous le voulez.</p>
         </section>
 
         <aside className="col" style={{ gap: 18 }}>
@@ -248,12 +247,12 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
             ) : (
               <>
                 <div className="eyebrow">Comment faire</div>
-                <h2 className="h3">Choisissez une forme, cliquez les jours</h2>
+                <h2 className="h3">Deux gestes</h2>
                 <ol className="sh-aide">
-                  <li>Prenez « Matin », « Journée », « Après-midi » ou « Repos » dans la barre.</li>
-                  <li>Cliquez chaque jour concerné. Un second clic l’efface.</li>
-                  <li>« M’assister » remplit le reste d’après vos habitudes.</li>
+                  <li>Choisissez ce que vous préférez : matin, journée, après-midi ou repos.</li>
+                  <li>Touchez les jours concernés.</li>
                 </ol>
+                <p className="small soft" style={{ margin: '10px 0 0' }}>« M’assister » remplit le reste d’après vos habitudes. Ce ne sont que des préférences : rien à justifier.</p>
               </>
             )}
           </section>

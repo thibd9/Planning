@@ -448,14 +448,14 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
       id: uid('opt'),
       type: 'accepter',
       titre: reduit
-        ? 'Accepter un effectif réduit'
+        ? 'Assumer la charge, sans réaffecter'
         : repris
           ? `Confier le rendez-vous à ${nomCourt(data.personnes.find((p) => p.id === e.patch.confier[0].personId) as Person)}`
           : e.rdvSansPreneur.length
             ? 'Reprogrammer le rendez-vous'
             : 'Aucun remplacement nécessaire',
       resume: reduit
-        ? 'Les horaires restent tels quels : un pharmacien est présent, mais l’effectif attendu n’est pas atteint.'
+        ? 'Personne n’est déplacé : un pharmacien est présent et l’équipe en poste absorbe la charge. L’effectif attendu n’est pas atteint.'
         : repris
           ? 'Aucun horaire ne change : une personne formée, déjà en poste, reprend le rendez-vous.'
           : e.rdvSansPreneur.length
