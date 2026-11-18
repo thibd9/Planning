@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp } from 'lucide-react';
+import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp, Menu, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
@@ -78,6 +78,28 @@ const PLANNING: Lien = { vue: 'planning', label: 'Planning de l’équipe', ques
 const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gardes et astreintes', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 
 /** Chaque rôle a sa propre navigation ; « Mon planning » est toujours en tête. Le compte est en haut à droite. */
+/** Les rubriques de la barre du bas, sur téléphone : quatre au plus par espace, avec un nom court. */
+const RAPIDES: Record<Espace, { vue: Vue; court: string }[]> = {
+  responsable: [
+    { vue: 'tableau', court: 'Accueil' },
+    { vue: 'construire', court: 'Planning' },
+    { vue: 'resoudre', court: 'À décider' },
+    { vue: 'messages', court: 'Messages' },
+  ],
+  pharmacien: [
+    { vue: 'espace', court: 'Accueil' },
+    { vue: 'moi', court: 'Planning' },
+    { vue: 'demandes', court: 'Demandes' },
+    { vue: 'messages', court: 'Messages' },
+  ],
+  equipe: [
+    { vue: 'espace', court: 'Accueil' },
+    { vue: 'moi', court: 'Planning' },
+    { vue: 'demandes', court: 'Demandes' },
+    { vue: 'messages', court: 'Messages' },
+  ],
+};
+
 const NAV: Record<Espace, Lien[]> = {
   responsable: GESTION,
   pharmacien: [ACCUEIL, ...PERSO, MESGARDES, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
@@ -108,6 +130,8 @@ export function App(): JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const outilsRef = useRef<HTMLDivElement>(null);
   const [panneau, setPanneau] = useState<'creer' | 'alertes' | null>(null);
+  /** Sur téléphone, toutes les rubriques s'ouvrent dans un volet ; la barre du bas garde les quatre plus utiles. */
+  const [volet, setVolet] = useState(false);
   const moi = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''));
   const espace = espaceDe(data, moi);
   // Sans collecte des préférences (modèle classique), l'entrée disparaît du menu.
@@ -254,7 +278,14 @@ export function App(): JSX.Element {
       <a className="skip" href="#contenu">
         Aller au contenu
       </a>
-      <nav className="side" aria-label="Navigation principale">
+      {volet ? <div className="side-voile no-print" onClick={() => setVolet(false)} aria-hidden="true" /> : null}
+      <nav className={`side${volet ? ' ouvert' : ''}`} id="menu-rubriques" aria-label="Navigation principale" onKeyDown={(e) => e.key === 'Escape' && setVolet(false)}>
+        <div className="side-tete">
+          <b>Toutes les rubriques</b>
+          <button type="button" className="btn ghost icon" onClick={() => setVolet(false)} aria-label="Fermer le menu">
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
         <div className="brand">
           <span className="brand-mark">
             <Logo />
@@ -302,7 +333,7 @@ export function App(): JSX.Element {
             {liens
               .filter((l) => l.groupe === g)
               .map((n) => (
-                <button key={n.vue} type="button" data-tour={`nav-${n.vue}`} className={`nav-item${vueActive === n.vue ? ' on' : ''}`} onClick={() => aller(n.vue)} aria-current={vueActive === n.vue ? 'page' : undefined}>
+                <button key={n.vue} type="button" data-tour={`nav-${n.vue}`} className={`nav-item${vueActive === n.vue ? ' on' : ''}`} onClick={() => { aller(n.vue); setVolet(false); }} aria-current={vueActive === n.vue ? 'page' : undefined}>
                   <span className={`ni ${n.couleur}`} aria-hidden="true">
                     {n.icon}
                   </span>
@@ -324,6 +355,36 @@ export function App(): JSX.Element {
           <i aria-hidden="true" />
           <span>Enregistré sur cet appareil à {fmtHeure(heure.getHours() * 60 + heure.getMinutes())}</span>
         </div>
+      </nav>
+
+      {/* Téléphone : les quatre rubriques les plus utiles sous le pouce, et « Menu » pour toutes les autres. */}
+      <nav className="tabbar no-print" aria-label="Navigation rapide">
+        {RAPIDES[espace]
+          .map((r) => ({ ...r, lien: liens.find((l) => l.vue === r.vue) }))
+          .filter((r) => r.lien)
+          .map((r) => {
+            const n = r.vue === 'resoudre' ? aDecider : r.vue === 'messages' ? nonLus : r.vue === 'moi' ? aLire : 0;
+            return (
+              <button key={r.vue} type="button" className={`tab${vueActive === r.vue ? ' on' : ''}`} data-tab={r.vue} onClick={() => { aller(r.vue); setVolet(false); }} aria-current={vueActive === r.vue ? 'page' : undefined}>
+                <span className="ni" aria-hidden="true">
+                  {r.lien?.icon}
+                </span>
+                <span className="tab-lib">{r.court}</span>
+                {n ? (
+                  <span className="nav-badge">
+                    {n}
+                    <span className="sr">{r.vue === 'resoudre' ? ' décisions en attente' : r.vue === 'messages' ? ' messages non lus' : ' changements à lire'}</span>
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        <button type="button" className={`tab burger${volet ? ' on' : ''}`} aria-label="Ouvrir le menu" aria-expanded={volet} aria-controls="menu-rubriques" onClick={() => setVolet((x) => !x)}>
+          <span className="ni" aria-hidden="true">
+            <Menu size={18} />
+          </span>
+          <span className="tab-lib">Menu</span>
+        </button>
       </nav>
 
       <div className="main">

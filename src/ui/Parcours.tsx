@@ -1242,7 +1242,13 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSujet('demandes');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.panneau button', 'Approuver'), sert: 'Avant d’approuver, vous voyez ce que l’absence découvre.' }],
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.panneau button', 'Décider'), sert: 'Une demande ne se tranche pas d’un clic : la fenêtre montre d’abord ce qu’elle implique.' },
+      { faire: 'attendre', que: '.dialog #dc-implications' },
+      { faire: 'pause', ms: 3200, dit: 'Ce que cette absence implique', sert: 'Les postes déjà planifiés sur ces dates, ce qui manquerait au comptoir, et qui d’autre est absent.' },
+      { faire: 'cliquer', sur: 'label[for="dc-accepter"]', dit: 'Choisissez « Accepter la demande »', sert: 'Vous pourriez aussi refuser en donnant la raison, ou en parler d’abord avec Jules.', facultatif: true },
+      { faire: 'cliquer', sur: '#dc-confirmer', sert: 'L’absence est enregistrée ; les postes à couvrir vont dans « Résoudre ».', facultatif: true },
+    ],
   },
   {
     chapitre: SUIVRE,
@@ -1272,11 +1278,12 @@ const COMPLET_BRUT: Etape[] = [
       helene('resoudre');
     },
     gestes: [
-      { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /Inès/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button'), dit: 'Cliquez sur « Refuser », sur la demande d’Inès', sert: 'Un refus s’explique toujours : la fenêtre vous y aide.' },
-      { faire: 'attendre', que: '#refus-raison' },
-      { faire: 'choisir', dans: '#refus-raison', valeur: 'Plusieurs absences déjà prévues', dit: 'Choisissez la raison du refus dans la liste', sert: 'Une liste, pour rester factuel.' },
-      { faire: 'taper', dans: '#refus-mot', texte: 'La semaine suivante serait possible.', dit: 'Ajoutez un mot, si vous le souhaitez', sert: 'Il peut proposer une autre solution.' },
-      { faire: 'cliquer', sur: '.dialog-foot .btn.danger', sert: 'Le message part à la personne ; son planning ne change pas.' },
+      { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /Inès/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button[data-decider]'), dit: 'Cliquez sur « Décider », sur la demande d’Inès', sert: 'La fenêtre montre ce que l’absence implique avant toute décision.' },
+      { faire: 'attendre', que: '.dialog #dc-implications' },
+      { faire: 'cliquer', sur: 'label[for="dc-refuser"]', dit: 'Choisissez « Refuser »', sert: 'Un refus se motive : la raison part avec le message.' },
+      { faire: 'choisir', dans: '#dc-raison', valeur: 'Plusieurs absences déjà prévues', dit: 'Choisissez la raison du refus dans la liste', sert: 'Une liste, pour rester factuel.' },
+      { faire: 'taper', dans: '#dc-mot', texte: 'La semaine suivante serait possible.', dit: 'Ajoutez un mot, si vous le souhaitez', sert: 'Il peut proposer une autre solution.' },
+      { faire: 'cliquer', sur: '#dc-confirmer', sert: 'Le message part à la personne ; son planning ne change pas.' },
     ],
   },
   {
@@ -3021,6 +3028,24 @@ export function BandeauTest({ moi }: { moi: string }): JSX.Element {
       <span className="bt-titre" title="Environnement de test">
         <FlaskConical size={16} aria-hidden="true" /> Environnement de test
       </span>
+      <label className="sr" htmlFor="bt-role">
+        Voir l’application comme
+      </label>
+      <select
+        id="bt-role"
+        className="bt-select"
+        value={ROLES_TEST.find((r) => r.id === moi)?.cle ?? ''}
+        onChange={(e) => {
+          const r = ROLES_TEST.find((x) => x.cle === e.target.value);
+          if (r) voirComme(r.identifiant);
+        }}
+      >
+        {ROLES_TEST.filter((r) => personnes.some((p) => p.id === r.id)).map((r) => (
+          <option key={r.cle} value={r.cle}>
+            {r.court}
+          </option>
+        ))}
+      </select>
       <div className="seg" role="group" aria-label="Voir l’application comme">
         {ROLES_TEST.map((r) => (
           <button key={r.cle} type="button" className={moi === r.id ? 'on' : ''} aria-pressed={moi === r.id} title={`${r.nom} · ${r.titre}`} disabled={!personnes.some((p) => p.id === r.id)} onClick={() => voirComme(r.identifiant)}>

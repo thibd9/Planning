@@ -4,6 +4,7 @@ import { RAISONS_REFUS, texteRefus } from '../../domain/refus';
 import { FriseConges } from '../components/FriseConges';
 import { DialogueRefus } from '../components/Refus';
 import { DecisionRemplacement } from '../components/DecisionRemplacement';
+import { DialogueDecision } from '../components/Decision';
 import {
   JOURS,
   addDays,
@@ -20,7 +21,7 @@ import {
 } from '../../domain/time';
 import type { Absence, AppData, Besoin, BesoinStatut, ISODate, MotifDemande, Remplacement, Trou, Shift } from '../../domain/types';
 import { classeAbsence, libelleAbsence, nomCourt, nomGarde, libelleGarde, MOTIF_DEMANDE_LABEL, MOTIF_REMPLACEMENT_LABEL, estPharmacien } from '../../domain/types';
-import { decrireBesoin, decrireShift, minutesSemaine, shiftsSemaine } from '../../engine/core';
+import { besoinApplicable, contreditBesoin, decrireBesoin, decrireShift, minutesSemaine, shiftsSemaine } from '../../engine/core';
 import { absencesSimultanees } from '../../engine/suivi';
 import { decisions } from '../../engine/decisions';
 import { diagnosticPrealable } from '../../engine/diagnose';
@@ -758,8 +759,11 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
     const x = data.personnes.find((y) => y.id === id);
     return x ? nomCourt(x) : 'un collègue';
   };
-  const [refus, setRefus] = useState(false);
+  const [decision, setDecision] = useState(false);
   const jours = dayIndex(absence.to) - dayIndex(absence.from) + 1;
+  // Les postes déjà planifiés sur la période : ceux qu'un accord rendrait à couvrir.
+  const postes = data.shifts.filter((s) => s.personId === absence.personId && s.date >= absence.from && s.date <= absence.to).sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start);
+  const objet = `${libelleAbsence(absence).toLowerCase()}, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)}`;
   return (
     <div className="decision">
       <Avatar person={p} />
@@ -825,37 +829,80 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
         </div>
       </div>
       <div className="row">
-        <button
-          type="button"
-          className="btn sm"
-          onClick={() => setRefus(true)}
-        >
-          Refuser
+        {/* Une demande ne se tranche pas d'un clic : « Décider » montre ce qu'elle implique, puis les décisions possibles. */}
+        <button type="button" className="btn sm primary" data-decider={absence.id} onClick={() => setDecision(true)}>
+          <ListChecks size={14} aria-hidden="true" /> Décider
         </button>
-        {refus ? (
-          <DialogueRefus
-            quoi={`${libelleAbsence(absence)} de ${p ? nomCourt(p) : '-'}, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)}`}
+        {decision ? (
+          <DialogueDecision
+            titre={`Décider : ${libelleAbsence(absence).toLowerCase()} de ${p ? nomCourt(p) : 'la personne'}`}
+            sousTitre={`Du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)}, ${jours} jour${jours > 1 ? 's' : ''}.`}
+            personne={p}
+            demande={
+              <dl className="dr-faits">
+                <dt>Demande</dt>
+                <dd>
+                  {libelleAbsence(absence)}, {jours} jour{jours > 1 ? 's' : ''}
+                </dd>
+                <dt>Raison</dt>
+                <dd>
+                  {absence.motif ? MOTIF_DEMANDE_LABEL[absence.motif] : 'Non précisée'}
+                  {absence.precision ? ` : « ${absence.precision} »` : ''}
+                </dd>
+                <dt>Délai</dt>
+                <dd>
+                  <Delai date={absence.from} today={today} />
+                </dd>
+              </dl>
+            }
+            implications={
+              <>
+                <p className={postes.length ? 'dr-alerte' : 'dr-ok'}>
+                  {postes.length
+                    ? `${postes.length} poste${postes.length > 1 ? 's sont déjà planifiés' : ' est déjà planifié'} sur ces dates : ${postes
+                        .slice(0, 4)
+                        .map((x) => `${fmtDateCourt(x.date)}, ${fmtHeure(x.start)} – ${fmtHeure(x.end)}`)
+                        .join(' ; ')}${postes.length > 4 ? '…' : ''}. Si vous acceptez, ${postes.length > 1 ? 'ils passent' : 'il passe'} dans « Absences à couvrir », avec les options de remplacement comparées.`
+                    : sim.sansPlanning
+                      ? 'Aucun poste n’est encore planifié sur ces dates : l’absence sera prise en compte quand vous construirez le planning.'
+                      : 'Aucun poste n’est planifié sur ces dates : rien à couvrir.'}
+                </p>
+                {sim.messages.length ? (
+                  <ul className="dr-risques">
+                    {sim.messages.slice(0, 5).map((m) => (
+                      <li key={m} className={/pharmacien/i.test(m) ? 'bad' : undefined}>
+                        {m}
+                      </li>
+                    ))}
+                    {sim.messages.length > 5 ? <li>… et {sim.messages.length - 5} autre{sim.messages.length - 5 > 1 ? 's' : ''} plage{sim.messages.length - 5 > 1 ? 's' : ''} à regarder.</li> : null}
+                  </ul>
+                ) : postes.length ? (
+                  <p className="dr-ok">Même sans {p?.prenom ?? 'cette personne'}, un pharmacien reste présent et l’effectif attendu est atteint.</p>
+                ) : null}
+                {sim.garde ? <p className="dr-alerte">Une garde lui est confiée sur cette période : accepter imposera de la réaffecter.</p> : null}
+                {memeTemps.demandees.length || memeTemps.accordees.length ? (
+                  <p className="dr-alerte">
+                    En même temps :{' '}
+                    {[...memeTemps.accordees.map((x) => `${nomDe(x.absence.personId)} est déjà absent (${x.jours} jour${x.jours > 1 ? 's' : ''} en commun)`), ...memeTemps.demandees.map((x) => `${nomDe(x.absence.personId)} demande aussi ces dates (${x.jours} jour${x.jours > 1 ? 's' : ''} en commun)`)].join(' ; ')}
+                    .{memeTemps.demandees.length ? ' Accepter l’une peut rendre l’autre impossible.' : ''}
+                  </p>
+                ) : null}
+              </>
+            }
+            options={[
+              { cle: 'accepter', titre: 'Accepter la demande', phrase: postes.length ? `L’absence est enregistrée ; ${postes.length > 1 ? 'ses postes sont' : 'son poste est'} à couvrir dans « Résoudre ».` : 'L’absence est enregistrée et prise en compte dans les plannings.', icone: Check },
+              { cle: 'refuser', titre: 'Refuser', phrase: `${p?.prenom ?? 'La personne'} garde ses postes et reçoit votre raison.`, icone: X, refus: true },
+            ]}
             raisons={RAISONS_REFUS.absence}
-            apercu={(m) => texteRefus(`(${libelleAbsence(absence).toLowerCase()}, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)})`, m)}
-            sansMessage={`La demande sera marquée comme refusée, sans message. ${p?.prenom ?? 'La personne'} le verra dans « Mes demandes ».`}
-            pour={p?.prenom ?? 'la personne'}
-            onClose={() => setRefus(false)}
-            onConfirmer={(motif) => {
-              decider(absence.id, false, motif);
-              dire(motif !== undefined ? `Demande refusée. ${p?.prenom ?? 'La personne'} est prévenu.` : 'Demande refusée.', true);
+            message={(cle, motif) => (cle === 'accepter' ? `Votre demande (${objet}) est acceptée.` : texteRefus(`(${objet})`, motif))}
+            bouton={(cle) => (cle === 'accepter' ? 'Accepter la demande' : `Refuser et prévenir ${p?.prenom ?? 'la personne'}`)}
+            onConfirmer={(cle, motif) => {
+              decider(absence.id, cle === 'accepter', cle === 'accepter' ? undefined : motif);
+              dire(cle === 'accepter' ? `Demande acceptée.${postes.length ? ` ${postes.length} poste${postes.length > 1 ? 's' : ''} à couvrir dans « Résoudre ».` : ''}` : `Demande refusée. ${p?.prenom ?? 'La personne'} est prévenu.`, true);
             }}
+            onClose={() => setDecision(false)}
           />
         ) : null}
-        <button
-          type="button"
-          className="btn sm primary"
-          onClick={() => {
-            decider(absence.id, true);
-            dire('Congé approuvé.', true);
-          }}
-        >
-          Approuver
-        </button>
       </div>
     </div>
   );
@@ -874,10 +921,10 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
   const decider = useStore((s) => s.deciderBesoin);
   const dire = useUi((s) => s.dire);
   const p = data.personnes.find((x) => x.id === besoin.personId);
-  const [statut, setStatut] = useState<BesoinStatut>(besoin.statut);
   const [refus, setRefus] = useState(false);
   const usage = usagePlafond(data, besoin.personId, today);
-  const plein = statut === 'prioritaire' && usage.actifs >= usage.plafond;
+  // Les postes à venir qui ne respecteraient pas la demande si elle était acceptée.
+  const contredits = data.shifts.filter((x) => x.personId === besoin.personId && x.date >= today && besoinApplicable({ ...besoin, decision: 'acceptee' }, x.date) && contreditBesoin(besoin, x)).sort((a, b) => a.date.localeCompare(b.date));
   return (
     <div className="decision">
       <Avatar person={p} />
@@ -890,57 +937,70 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
         </div>
         <Raison motif={besoin.motif} precision={besoin.precision} />
         <div className="row wrap small" style={{ marginTop: 9 }}>
-          <label className="row" style={{ gap: 6 }}>
-            <span className="soft">Statut accordé</span>
-            <select className="input" value={statut} onChange={(e) => setStatut(e.target.value as BesoinStatut)} style={{ padding: '5px 8px' }}>
-              <option value="preference">Simple préférence</option>
-              <option value="prioritaire">Préférence prioritaire</option>
-              <option value="reconnue">Indisponibilité reconnue</option>
-            </select>
-          </label>
-          <Pill tone={plein ? 'warn' : undefined} title="Plafond identique pour toute l'équipe">
+          <Pill title="Plafond identique pour toute l'équipe">
             Demandes prioritaires actives : {usage.actifs} / {usage.plafond}
           </Pill>
         </div>
-        {plein ? (
-          <div className="notice warn small" style={{ marginTop: 8 }}>
-            <AlertTriangle size={15} /> Le plafond de demandes prioritaires est atteint pour {p ? nomCourt(p) : 'cette personne'}. Accordez une simple préférence, ou libérez une demande existante.
-          </div>
-        ) : null}
       </div>
       <div className="row">
-        <button
-          type="button"
-          className="btn sm"
-          onClick={() => setRefus(true)}
-        >
-          Refuser
+        <button type="button" className="btn sm primary" data-decider={besoin.id} onClick={() => setRefus(true)}>
+          <ListChecks size={14} aria-hidden="true" /> Décider
         </button>
         {refus ? (
-          <DialogueRefus
-            quoi={`${p ? nomCourt(p) : '-'} : ${decrireBesoin(besoin)}`}
+          <DialogueDecision
+            titre={`Décider : demande d’horaires de ${p ? nomCourt(p) : 'la personne'}`}
+            sousTitre={decrireBesoin(besoin)}
+            personne={p}
+            demande={
+              <dl className="dr-faits">
+                <dt>Demande</dt>
+                <dd>{decrireBesoin(besoin)}</dd>
+                <dt>Période</dt>
+                <dd>
+                  {besoin.from ? `À partir du ${fmtDateCourt(besoin.from)}` : 'Sans date de début'}
+                  {besoin.to ? `, jusqu’au ${fmtDateCourt(besoin.to)}` : ''}
+                </dd>
+                <dt>Raison</dt>
+                <dd>
+                  {besoin.motif ? MOTIF_DEMANDE_LABEL[besoin.motif] : 'Non précisée'}
+                  {besoin.precision ? ` : « ${besoin.precision} »` : ''}
+                </dd>
+              </dl>
+            }
+            implications={
+              <>
+                <p className={contredits.length ? 'dr-alerte' : 'dr-ok'}>
+                  {contredits.length
+                    ? `${contredits.length} poste${contredits.length > 1 ? 's déjà planifiés ne respectent' : ' déjà planifié ne respecte'} pas cette demande : ${contredits
+                        .slice(0, 3)
+                        .map((x) => `${fmtDateCourt(x.date)}, ${fmtHeure(x.start)} – ${fmtHeure(x.end)}`)
+                        .join(' ; ')}${contredits.length > 3 ? '…' : ''}. Ils ne changent pas tout seuls : à vous de les corriger dans « Construire ».`
+                    : 'Aucun poste déjà planifié ne contredit cette demande.'}
+                </p>
+                <p className="small soft" style={{ margin: 0 }}>
+                  Demandes prioritaires actives de {p?.prenom ?? 'cette personne'} : {usage.actifs} sur {usage.plafond}, le même plafond pour toute l’équipe. Une indisponibilité reconnue devient une règle pour le calcul : aucun poste n’y est proposé.
+                </p>
+              </>
+            }
+            options={[
+              { cle: 'preference', titre: 'Accepter comme simple préférence', phrase: 'Le planning en tient compte quand c’est possible.', icone: Check },
+              { cle: 'prioritaire', titre: 'Accepter comme préférence prioritaire', phrase: usage.actifs >= usage.plafond ? 'Son plafond de demandes prioritaires est atteint.' : 'Elle passe avant les simples préférences, et compte dans son plafond.', icone: ArrowRight, off: usage.actifs >= usage.plafond },
+              { cle: 'reconnue', titre: 'Reconnaître une indisponibilité', phrase: 'Aucun poste ne sera proposé sur cette plage : c’est une règle pour le calcul.', icone: CircleCheck },
+              { cle: 'refuser', titre: 'Refuser', phrase: `${p?.prenom ?? 'La personne'} reçoit votre raison ; le refus compte dans la mémoire d’équité.`, icone: X, refus: true },
+            ]}
             raisons={RAISONS_REFUS.horaire}
-            apercu={(m) => texteRefus(`« ${decrireBesoin(besoin)} »`, m)}
-            sansMessage={`La demande sera marquée comme refusée, sans message. ${p?.prenom ?? 'La personne'} le verra dans « Mes demandes ».`}
-            pour={p?.prenom ?? 'la personne'}
-            onClose={() => setRefus(false)}
-            onConfirmer={(motif) => {
-              decider(besoin.id, false, undefined, motif);
-              dire('Demande refusée. Le refus est compté dans la mémoire d’équité.', true);
+            message={(cle, motif) =>
+              cle === 'refuser' ? texteRefus(`« ${decrireBesoin(besoin)} »`, motif) : `Votre demande « ${decrireBesoin(besoin)} » est acceptée, comme ${cle === 'reconnue' ? 'indisponibilité reconnue' : cle === 'prioritaire' ? 'préférence prioritaire' : 'simple préférence'}.`
+            }
+            bouton={(cle) => (cle === 'refuser' ? `Refuser et prévenir ${p?.prenom ?? 'la personne'}` : 'Accepter la demande')}
+            onConfirmer={(cle, motif) => {
+              if (cle === 'refuser') decider(besoin.id, false, undefined, motif);
+              else decider(besoin.id, true, cle as BesoinStatut);
+              dire(cle === 'refuser' ? 'Demande refusée. Le refus est compté dans la mémoire d’équité.' : 'Demande acceptée.', true);
             }}
+            onClose={() => setRefus(false)}
           />
         ) : null}
-        <button
-          type="button"
-          className="btn sm primary"
-          disabled={plein}
-          onClick={() => {
-            decider(besoin.id, true, statut);
-            dire('Demande acceptée.', true);
-          }}
-        >
-          Accepter
-        </button>
       </div>
     </div>
   );
