@@ -6,7 +6,9 @@ import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
 import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
-import { decrireBesoin, minutesSemaine, shiftsSemaine } from '../engine/core';
+import { decrireBesoin, decrireJournee, minutesSemaine, shiftsSemaine } from '../engine/core';
+import { appliquerCreneau, controlerCreneau } from '../engine/rattrapage';
+import type { Creneau, SensRegul } from '../engine/rattrapage';
 import { reposApresGarde } from '../engine/gardes';
 import type { GenResult } from '../engine/generate';
 import { VARIANTE_LABEL } from '../engine/generate';
@@ -162,6 +164,8 @@ export interface Store {
   /** Le titulaire répond à la demande elle-même : oui (l'équipe est alors prévenue) ou non. */
   deciderDemande: (id: string, accepter: boolean, motif?: string) => void;
   regulariser: (r: Pick<Regularisation, 'personId' | 'minutes' | 'type' | 'semaine'>) => void;
+  /** Rattrapage ou récupération décidé par le titulaire : un créneau précis (le planning est modifié) ou une semaine à construire, avec un message à la personne. */
+  planifierRegularisation: (r: { personId: string; sens: SensRegul; minutes: number; creneau?: Creneau; semaine?: ISODate; message?: string }) => void;
   retirerRegularisation: (id: string) => void;
   /** Marque comme lues les annonces de décision d'une personne ; `id` absent : toutes. */
   lireAnnonces: (personId: string, id?: string) => void;
@@ -241,7 +245,7 @@ function avisGarde(g: Pick<Garde, 'date' | 'start' | 'end' | 'type'>, personId: 
  * Décisions qui engagent l'équipe : venant d'un titulaire secondaire, elles attendent l'accord du principal.
  * Les brouillons de planning et la saisie des fiches restent libres.
  */
-const SOUMISES = ['deciderDemande', 'regulariser', 'regulariserAuto', 'publier', 'resoudreTrou', 'resoudreAbsence', 'deciderAbsence', 'deciderBesoin', 'validerRemplacement', 'affecterGarde', 'affecterGardes', 'ajouterGardes', 'planifierFormation', 'planifierInventaire', 'declarerAbsence', 'supprimerPersonne', 'signalerEcart', 'majPersonne'] as const;
+const SOUMISES = ['deciderDemande', 'regulariser', 'planifierRegularisation', 'regulariserAuto', 'publier', 'resoudreTrou', 'resoudreAbsence', 'deciderAbsence', 'deciderBesoin', 'validerRemplacement', 'affecterGarde', 'affecterGardes', 'ajouterGardes', 'planifierFormation', 'planifierInventaire', 'declarerAbsence', 'supprimerPersonne', 'signalerEcart', 'majPersonne'] as const;
 
 function titreAccord(d: AppData, action: string, args: unknown[]): string {
   const a = args as never[];
@@ -255,6 +259,10 @@ function titreAccord(d: AppData, action: string, args: unknown[]): string {
     }
     case 'regulariser':
       return `Compteur d’heures de ${qui((a[0] as { personId: string }).personId)} : ${REGUL_LABEL[(a[0] as { type: RegulType }).type].toLowerCase()}`;
+    case 'planifierRegularisation': {
+      const r = a[0] as { personId: string; sens: RegulType; minutes: number; creneau?: Creneau };
+      return `Compteur d’heures de ${qui(r.personId)} : ${REGUL_LABEL[r.sens].toLowerCase()} de ${fmtDuree(r.minutes)}${r.creneau ? ` le ${fmtDateCourt(r.creneau.date)}` : ''}`;
+    }
     case 'regulariserAuto':
       return 'Régulariser automatiquement les compteurs d’heures';
     case 'resoudreTrou': {
@@ -473,6 +481,53 @@ export const useStore = create<Store>((set, get) => {
           { type: 'modification', titre: `Compteur d’heures de ${nom(d, r.personId)} : ${REGUL_LABEL[r.type].toLowerCase()}, ${fmtDuree(Math.abs(r.minutes))}${r.semaine ? ` (semaine du ${fmtSemaine(r.semaine)})` : ''}` },
         ),
       ),
+    planifierRegularisation: (r) =>
+      commit((d, today) => {
+        const de = get().acteur ?? d.officine.responsableId ?? '';
+        const at = now();
+        const sens = r.sens === 'rattrapage' ? 1 : -1;
+        const prevenir = (suite: AppData): AppData =>
+          r.message && de && de !== r.personId ? { ...suite, messages: suite.messages.concat({ id: uid('msg'), de, a: r.personId, texte: r.message, at, luPar: [de] }) } : suite;
+        if (!r.creneau) {
+          const semaine = r.semaine ?? semaineLibre(d, today);
+          return prevenir(
+            journal(
+              { ...d, regularisations: (d.regularisations ?? []).concat({ id: uid('reg'), personId: r.personId, minutes: sens * r.minutes, type: r.sens, semaine, at }) },
+              { type: 'modification', titre: `Compteur d’heures de ${nom(d, r.personId)} : ${REGUL_LABEL[r.sens].toLowerCase()}, ${fmtDuree(r.minutes)} (semaine du ${fmtSemaine(semaine)})` },
+              { pour: [r.personId], effets: [`${fmtDuree(r.minutes)} ${sens > 0 ? 'de plus' : 'de moins'} à prévoir sur la semaine du ${fmtSemaine(semaine)} : les horaires seront fixés quand ce planning sera construit.`] },
+            ),
+          );
+        }
+        const c = r.creneau;
+        const controle = controlerCreneau(d, r.personId, c, r.sens, today);
+        const res = appliquerCreneau(d, r.personId, c, r.sens);
+        if (!res.data || controle.bloquants.length) return d;
+        const monday = fromDayIndex(dayIndex(c.date) - ((dayIndex(c.date) + 3) % 7));
+        const duJour = (x: AppData): Shift[] => x.shifts.filter((s) => s.personId === r.personId && s.date === c.date);
+        const avant = decrireJournee(duJour(d));
+        const apres = decrireJournee(duJour(res.data));
+        const semaine = d.semaines[monday];
+        const publie = semaine?.statut === 'publie';
+        // Planning déjà communiqué : la version que voit l'équipe suit, et la personne est notifiée du changement.
+        const semaines = semaine?.snapshot
+          ? { ...d.semaines, [monday]: { ...semaine, snapshot: semaine.snapshot.filter((s) => !(s.personId === r.personId && s.date === c.date)).concat(duJour(res.data).map((s) => ({ ...s }))) } }
+          : d.semaines;
+        return prevenir(
+          journal(
+            {
+              ...res.data,
+              semaines,
+              regularisations: (d.regularisations ?? []).concat({ id: uid('reg'), personId: r.personId, minutes: sens * controle.minutes, type: r.sens, semaine: monday, date: c.date, start: c.start, end: c.end, at }),
+              notifications: publie ? [{ id: uid('n'), personId: r.personId, at, date: c.date, avant, apres, tardif: controle.tardif }, ...d.notifications] : d.notifications,
+            },
+            { type: 'modification', titre: `Compteur d’heures de ${nom(d, r.personId)} : ${REGUL_LABEL[r.sens].toLowerCase()} de ${fmtDuree(controle.minutes)} le ${fmtDateCourt(c.date)}, ${fmtHeure(c.start)} – ${fmtHeure(c.end)}`, semaine: monday, regles: true },
+            {
+              pour: [r.personId],
+              effets: [`${nom(d, r.personId)}, ${fmtDateCourt(c.date)} : ${avant} → ${apres}.`, publie ? 'Le planning communiqué à l’équipe est mis à jour.' : 'Le changement est dans le brouillon : il sera communiqué à la publication.'],
+            },
+          ),
+        );
+      }),
     retirerRegularisation: (id) => commit((d) => ({ ...d, regularisations: (d.regularisations ?? []).filter((r) => r.id !== id) })),
     ajouterDocument: (doc) => commit((d) => ({ ...d, documents: (d.documents ?? []).concat({ ...doc, id: uid('doc'), at: now() }) }), false),
     supprimerDocument: (id) => commit((d) => ({ ...d, documents: (d.documents ?? []).filter((x) => x.id !== id) }), false),

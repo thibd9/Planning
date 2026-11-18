@@ -428,12 +428,17 @@ de cette semaine est recalculé. Chacun voit son propre compteur dans « Mon sui
 **Faire rattraper ou faire récupérer, en gardant la main.** Le bouton ouvre une fenêtre en trois temps :
 
 1. *Combien d'heures ?* — par demi-heures, jusqu'au solde ; la fenêtre dit ce qu'il restera au compteur.
-2. *Quand ?* — Solvéa propose jusqu'à trois créneaux des quatre prochaines semaines, un par jour, contrôlés
+2. *Où et quand ?* — **le planning de la personne s'affiche**, semaine par semaine (flèches précédente /
+   suivante, état de la semaine : communiquée, brouillon, pas encore construite) : ses postes, les manques
+   au comptoir, les créneaux proposés en pointillés. **Un clic sur une plage libre y place les heures** ;
+   le créneau se colle au poste voisin et s'arrête à la fermeture. Pour une récupération, on clique au
+   début ou à la fin d'un poste. Les champs Jour, De, À donnent le même réglage au clavier.
+   Solvéa propose jusqu'à trois créneaux des quatre prochaines semaines, un par jour, contrôlés
    avec les règles du planning (rien de bloquant n'est proposé) : prolonger une journée, commencer plus
    tôt, venir un jour de repos là où le comptoir manque de monde ; ou, pour une récupération, partir plus
    tôt, arriver plus tard, prendre la journée. Le titulaire en retient un, **fixe lui-même le jour et
-   l'horaire** (le contrôle se refait à chaque changement et dit pourquoi un créneau est refusé), ou
-   laisse la semaine à construire s'en charger, sans date précise.
+   l'horaire** (le contrôle se refait à chaque changement et dit pourquoi un créneau est refusé),
+   revient à « Laisser Solvéa choisir », ou laisse la semaine à construire s'en charger, sans date précise.
 3. *Le message* — un texte proposé, modifiable, part dans la messagerie de la personne ; l'annonce arrive
    aussi sous sa cloche. Si le planning est déjà communiqué, la version vue par l'équipe est mise à jour et
    la personne est notifiée ; à moins de sept jours, la fenêtre rappelle que son accord est nécessaire.

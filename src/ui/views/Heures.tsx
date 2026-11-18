@@ -1,10 +1,12 @@
 import { AlertTriangle, CircleCheck, Hourglass, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { fmtDuree, fmtHorodatage, fmtSemaine } from '../../domain/time';
+import { fmtDateCourt, fmtDuree, fmtHeure, fmtHorodatage, fmtSemaine } from '../../domain/time';
 import type { RegulType } from '../../domain/types';
 import { REGUL_LABEL, nomCourt } from '../../domain/types';
 import type { Solde } from '../../engine/heures';
 import { proposerRegularisations, semaineLibre, soldes } from '../../engine/heures';
+import type { SensRegul } from '../../engine/rattrapage';
+import { Regulariser } from '../components/Regulariser';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { EtiquetteRole } from '../icons';
@@ -19,6 +21,7 @@ export function Heures(): JSX.Element {
   const { regulariser, regulariserAuto, retirerRegularisation } = useStore();
   const dire = useUi((s) => s.dire);
   const [calcul, setCalcul] = useState(false);
+  const [fenetre, setFenetre] = useState<{ personId: string; sens: SensRegul } | null>(null);
   const liste = useMemo(() => soldes(data, today), [data, today]);
   const propositions = useMemo(() => proposerRegularisations(data, today), [data, today]);
   const semaine = semaineLibre(data, today);
@@ -31,12 +34,10 @@ export function Heures(): JSX.Element {
   const totalMoins = enMoins.reduce((t, x) => t - x.solde, 0);
 
   const agir = (s: Solde, type: RegulType): void => {
-    // Payer ou solder efface le solde ; récupérer ou rattraper le planifie sur la prochaine semaine à construire.
-    const planifie = type === 'recuperation' || type === 'rattrapage';
-    const borne = planifie ? Math.max(-480, Math.min(480, s.solde)) : s.solde;
-    regulariser({ personId: s.personId, minutes: -Math.round(borne), type, semaine: planifie ? semaine : undefined });
+    // Payer ou solder efface le solde d'un coup ; récupérer et rattraper passent par la fenêtre, où l'on choisit le moment.
+    regulariser({ personId: s.personId, minutes: -Math.round(s.solde), type });
     const p = personne(s.personId);
-    dire(`${p ? nomCourt(p) : 'Compteur'} : ${REGUL_LABEL[type].toLowerCase()}${planifie ? `, semaine du ${fmtSemaine(semaine)}` : ''}.`, true);
+    dire(`${p ? nomCourt(p) : 'Compteur'} : ${REGUL_LABEL[type].toLowerCase()}.`, true);
   };
   const laisserFaire = (): void => {
     setCalcul(true);
@@ -135,8 +136,8 @@ export function Heures(): JSX.Element {
                     contrat <b>{fmtDuree(s.contrat)}</b>
                   </span>
                   {s.prevues.map((r) => (
-                    <span key={r.semaine ?? r.minutes} className="prevu">
-                      {signe(r.minutes)} prévu semaine du {fmtSemaine(r.semaine ?? '')}
+                    <span key={r.id} className={`prevu${r.date ? ' date' : ''}`}>
+                      {signe(r.minutes)} prévu {r.date && r.start !== undefined && r.end !== undefined ? `${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}` : `semaine du ${fmtSemaine(r.semaine ?? '')}`}
                     </span>
                   ))}
                 </span>
@@ -151,7 +152,7 @@ export function Heures(): JSX.Element {
                 <div className="row wrap" style={{ gap: 6 }}>
                   {s.solde > 0 ? (
                     <>
-                      <button type="button" className="btn sm" onClick={() => agir(s, 'recuperation')}>
+                      <button type="button" className="btn sm" data-regul="recuperation" onClick={() => setFenetre({ personId: s.personId, sens: 'recuperation' })}>
                         Faire récupérer
                       </button>
                       <button type="button" className="btn sm" onClick={() => agir(s, 'paiement')}>
@@ -160,7 +161,7 @@ export function Heures(): JSX.Element {
                     </>
                   ) : (
                     <>
-                      <button type="button" className="btn sm" onClick={() => agir(s, 'rattrapage')}>
+                      <button type="button" className="btn sm" data-regul="rattrapage" onClick={() => setFenetre({ personId: s.personId, sens: 'rattrapage' })}>
                         Faire rattraper
                       </button>
                       <button type="button" className="btn sm" onClick={() => agir(s, 'solde')}>
@@ -188,7 +189,7 @@ export function Heures(): JSX.Element {
                 <div className="grow">
                   <b>{p ? nomCourt(p) : '—'}</b> · {REGUL_LABEL[r.type]} <span className="num">{signe(r.minutes)}</span>
                   <div className="small soft">
-                    {r.semaine ? `Semaine du ${fmtSemaine(r.semaine)} · ` : ''}
+                    {r.date && r.start !== undefined && r.end !== undefined ? `${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)} · ` : r.semaine ? `Semaine du ${fmtSemaine(r.semaine)} · ` : ''}
                     {fmtHorodatage(r.at)}
                   </div>
                 </div>
@@ -200,6 +201,9 @@ export function Heures(): JSX.Element {
             );
           })}
         </section>
+      ) : null}
+      {fenetre && liste.find((x) => x.personId === fenetre.personId) ? (
+        <Regulariser solde={liste.find((x) => x.personId === fenetre.personId) as Solde} sens={fenetre.sens} onClose={() => setFenetre(null)} />
       ) : null}
       <p className="tiny muted" style={{ marginTop: 16, maxWidth: '80ch' }}>
         Le compteur aide à décider : il ne calcule ni majoration ni repos compensateur. La paie applique la convention collective ; faites valider le choix entre paiement et récupération par votre expert-comptable.

@@ -554,8 +554,15 @@ const ETABLI: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='compteurs-heures']",
     titre: 'Le compteur d’heures',
-    texte: () => 'Heures en plus ou en moins. À régulariser à la main, ou automatiquement.',
+    texte: () => 'Heures en plus ou en moins. Vous choisissez où et quand les faire rattraper, ou vous laissez Solvéa régulariser.',
     jouer: () => voirComme('caroline.tellier', 'heures'),
+    gestes: [
+      { faire: 'cliquer', sur: "[data-regul='rattrapage']", dit: 'Cliquez sur « Faire rattraper »', sert: 'Une fenêtre s’ouvre sur le planning de la personne : vous gardez la main sur le jour et l’horaire.', facultatif: true },
+      { faire: 'attendre', que: '.dialog .rat-pl', facultatif: true },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('.rat-pl-ligne:not(.vise):not(.passe) .rat-pl-case'), dit: 'Cliquez sur une plage libre du planning', sert: 'Les heures se placent là, collées au poste voisin. Solvéa contrôle aussitôt le créneau avec les règles.', facultatif: true },
+      { faire: 'cliquer', sur: '#rat-auto', dit: 'Cliquez sur « Laisser Solvéa choisir »', sert: 'Solvéa reprend son meilleur créneau : aucune règle enfreinte, là où le comptoir en a besoin.', facultatif: true },
+      { faire: 'cliquer', sur: '#rat-valider', dit: 'Cliquez sur « Planifier et prévenir »', sert: 'Le planning est mis à jour, et le message part à la personne.', facultatif: true },
+    ],
   },
 ];
 
@@ -1251,7 +1258,12 @@ const COMPLET_BRUT: Etape[] = [
       helene('heures');
     },
     gestes: [
-      { faire: 'cliquer', sur: "[data-focus='auto-heures']", sert: 'Les écarts sont résorbés sur la prochaine semaine à construire, sans rien publier.', facultatif: true },
+      { faire: 'cliquer', sur: "[data-regul='rattrapage']", dit: 'Cliquez sur « Faire rattraper »', sert: 'Une fenêtre s’ouvre sur le planning de la personne : vous gardez la main sur le jour et l’horaire.', facultatif: true },
+      { faire: 'attendre', que: '.dialog .rat-pl', facultatif: true },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('.rat-pl-ligne:not(.vise):not(.passe) .rat-pl-case'), dit: 'Cliquez sur une plage libre du planning', sert: 'Les heures se placent là, collées au poste voisin. Solvéa contrôle aussitôt le créneau avec les règles.', facultatif: true },
+      { faire: 'cliquer', sur: '#rat-auto', dit: 'Cliquez sur « Laisser Solvéa choisir »', sert: 'Solvéa reprend son meilleur créneau : aucune règle enfreinte, là où le comptoir en a besoin.', facultatif: true },
+      { faire: 'cliquer', sur: '#rat-valider', dit: 'Cliquez sur « Planifier et prévenir »', sert: 'Le planning est mis à jour, et le message part à la personne.', facultatif: true },
+      { faire: 'cliquer', sur: "[data-focus='auto-heures']", sert: 'Les écarts restants sont résorbés sur la prochaine semaine à construire, sans rien publier.', facultatif: true },
     ],
   },
   {

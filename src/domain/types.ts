@@ -452,6 +452,10 @@ export interface Regularisation {
   type: RegulType;
   /** Semaine où la récupération ou le rattrapage est planifié. */
   semaine?: ISODate;
+  /** Créneau précis choisi par le titulaire : la tranche ajoutée (rattrapage) ou retirée (récupération). */
+  date?: ISODate;
+  start?: Minutes;
+  end?: Minutes;
   at: string;
   /** Proposée par le calcul automatique. */
   auto?: boolean;

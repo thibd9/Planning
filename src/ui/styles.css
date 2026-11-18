@@ -3097,3 +3097,83 @@ select option { background-color: var(--surface); color: var(--ink); }
 /* Aide : la dernière rangée de fiches s'étire, aucune case vide. */
 .ad-fiches { display: flex; flex-wrap: wrap; }
 .ad-fiche { flex: 1 1 330px; min-width: 0; }
+
+/* ---------------------------------------------------------------- Régulariser un compteur : durée, planning cliquable, propositions, message */
+.rat-grille { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px 26px; align-items: start; }
+.rat-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+@media (max-width: 980px) { .rat-grille { grid-template-columns: minmax(0, 1fr); } }
+.rat-bloc { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.rat-bloc + .rat-bloc { padding-top: 16px; border-top: 1px solid var(--line); }
+.rat-bloc h3 { margin: 0; font-size: 15.5px; letter-spacing: -0.01em; }
+.rat-duree { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.rat-pas { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; background: var(--n-1); }
+.rat-pas output { min-width: 86px; text-align: center; font-size: 19px; font-weight: 750; letter-spacing: -0.02em; }
+.rat-pas .btn.icon { width: 38px; height: 38px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+/* Le planning de la personne */
+.rat-pl-tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; }
+.rat-pl-nav { display: inline-flex; align-items: center; gap: 8px; }
+.rat-pl-semaine { display: flex; flex-direction: column; align-items: center; min-width: 170px; line-height: 1.25; font-size: 14px; text-align: center; }
+.rat-pl { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 10px; border-radius: 18px; background: var(--n-1); }
+.rat-pl-ligne { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 10px; align-items: center; }
+.rat-pl-ligne.tete { height: 18px; }
+.rat-pl-jour { display: flex; flex-direction: column; line-height: 1.2; font-size: 13.5px; }
+.rat-pl-jour span { font-size: 12px; color: var(--ink-3); }
+.rat-pl-ligne.vise .rat-pl-jour b { color: var(--a-text); }
+.rat-pl-piste { position: relative; display: block; height: 40px; border-radius: 10px; background: repeating-linear-gradient(135deg, var(--n-2), var(--n-2) 5px, transparent 5px, transparent 10px); }
+.rat-pl-ligne.tete .rat-pl-piste { height: 18px; background: none; }
+.rat-pl-heure { position: absolute; top: 0; transform: translateX(-50%); font-style: normal; font-size: 11.5px; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+.rat-pl-heure:first-child { transform: none; }
+.rat-pl-heure:last-child { transform: translateX(-100%); }
+.rat-pl-ouvert { position: absolute; top: 0; bottom: 0; border-radius: 10px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.rat-pl-trait { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); z-index: 1; }
+.rat-pl-manque { position: absolute; bottom: 0; height: 5px; border-radius: 3px; background: var(--warn); opacity: 0.75; z-index: 2; }
+.rat-pl-poste { position: absolute; top: 4px; bottom: 4px; border-radius: 8px; overflow: hidden; z-index: 2; display: flex; align-items: center; padding: 0 8px; color: #111c27; background: var(--p-journee); }
+.rat-pl-poste.matin { background: var(--p-matin); } .rat-pl-poste.milieu { background: var(--p-milieu); } .rat-pl-poste.soir { background: var(--p-soir); }
+.rat-pl-poste em { position: relative; z-index: 1; font-style: normal; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rat-pl-poste .pause { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85) 2px, rgba(255, 255, 255, 0.35) 2px, rgba(255, 255, 255, 0.35) 4px); }
+.rat-pl-case { position: absolute; top: 0; bottom: 0; z-index: 3; padding: 0; border: 0; border-radius: 6px; background: transparent; cursor: pointer; }
+.rat-pl-case:hover, .rat-pl-case:focus-visible { background: color-mix(in srgb, var(--a-deep) 22%, transparent); outline: none; box-shadow: inset 0 0 0 1.5px var(--a-deep); }
+.rat-pl.recuperation .rat-pl-case:hover, .rat-pl.recuperation .rat-pl-case:focus-visible { background: rgba(255, 255, 255, 0.45); }
+.rat-pl-propose { position: absolute; top: 3px; bottom: 3px; border-radius: 8px; border: 2px dashed var(--a-deep); background: color-mix(in srgb, var(--a-deep) 8%, transparent); z-index: 4; pointer-events: none; }
+.rat-pl-choisi { position: absolute; top: 2px; bottom: 2px; border-radius: 8px; z-index: 5; pointer-events: none; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 750; white-space: nowrap; overflow: hidden; background: var(--a-deep); color: var(--on-a); box-shadow: 0 0 0 2px var(--surface); }
+.rat-pl.recuperation .rat-pl-choisi { background: repeating-linear-gradient(135deg, var(--surface), var(--surface) 4px, color-mix(in srgb, var(--a-deep) 30%, var(--surface)) 4px, color-mix(in srgb, var(--a-deep) 30%, var(--surface)) 8px); color: var(--ink); box-shadow: inset 0 0 0 2px var(--a-deep); }
+.rat-pl-choisi.ko, .rat-pl.recuperation .rat-pl-choisi.ko { background: var(--danger-soft); color: var(--danger-ink); box-shadow: inset 0 0 0 2px var(--danger); }
+.rat-pl-ligne.passe .rat-pl-piste { opacity: 0.45; }
+.rat-pl-ligne.passe .rat-pl-jour b { color: var(--ink-2); font-weight: 600; }
+.rat-pl-legende { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; font-size: 12px; color: var(--ink-2); }
+.rat-pl-legende span { display: inline-flex; align-items: center; gap: 6px; }
+.rat-pl-legende i { width: 18px; height: 10px; border-radius: 4px; }
+.rat-pl-legende .l-poste { background: var(--p-journee); } .rat-pl-legende .l-choisi { background: var(--a-deep); }
+.rat-pl-legende .l-propose { border: 1.5px dashed var(--a-deep); } .rat-pl-legende .l-manque { height: 5px; background: var(--warn); }
+.rat-aide { margin: 0; }
+.rat-champs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* Les propositions */
+.rat-solvi { display: flex; align-items: center; gap: 12px; }
+.rat-choix { display: flex; flex-direction: column; gap: 8px; }
+.rat-carte { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; text-align: left; font: inherit; color: var(--ink); padding: 12px 14px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--surface); cursor: pointer; transition: border-color 0.15s ease, background-color 0.15s ease; }
+.rat-carte:hover { border-color: var(--ink-3); }
+.rat-carte.on { border-color: var(--a-deep); background: var(--a-tint); box-shadow: inset 0 0 0 1px var(--a-deep); }
+.rat-carte:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.rat-carte b { font-size: 15px; }
+.rat-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.rat-tag { padding: 2px 10px; border-radius: 999px; background: var(--n-2); color: var(--ink-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.rat-tag.conseille { background: var(--a-deep); color: var(--on-a); }
+.rat-tag.ok { background: var(--ok-soft); color: var(--ok-ink); }
+.rat-tag.warn { background: var(--warn-soft); color: var(--warn); }
+.rat-controle { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 14px; font-size: 14px; }
+.rat-controle svg { flex: none; margin-top: 2px; }
+.rat-controle ul { margin: 4px 0 0; padding-left: 18px; }
+.rat-controle.ok { background: var(--ok-soft); color: var(--ok-ink); }
+.rat-controle.attention { background: var(--warn-soft); color: var(--warn); }
+.rat-controle.ko { background: var(--danger-soft); color: var(--danger-ink); }
+.rat-texte-tete { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.rat-texte-tete .btn { margin-left: auto; }
+.hc .prevu.date { white-space: normal; }
+.rat-pl.recuperation .rat-pl-legende .l-choisi { background: repeating-linear-gradient(135deg, var(--surface), var(--surface) 3px, var(--a-deep) 3px, var(--a-deep) 5px); box-shadow: inset 0 0 0 1px var(--a-deep); }
+@media (max-width: 640px) {
+  .rat-pl { padding-inline: 10px; }
+  .rat-pl-ligne { grid-template-columns: 58px minmax(0, 1fr); gap: 8px; }
+  .rat-pl-heure:nth-child(even) { display: none; }
+  .rat-pl-poste { padding: 0 5px; }
+  .rat-pl-poste em { font-size: 11px; }
+}
