@@ -3817,3 +3817,18 @@ input[list]::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer;
 .top-signaler { background: var(--warn-soft); color: var(--warn-ink); white-space: nowrap; }
 .top-signaler:hover { filter: brightness(0.97); }
 @media (max-width: 1180px) { .top-signaler .lib { display: none; } .top-signaler { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 50%; } }
+@media (max-width: 760px) {
+  .topbar-in > .grow { overflow: visible; text-overflow: clip; }
+  .tb-banniere .tb-chiffre .l { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.2; }
+  .tbj-qui .small { white-space: normal; }
+  .tbj-ligne { grid-template-columns: minmax(0, 132px) minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  /* Barre du haut : le badge du rôle garde sa place, les outils se rangent à droite sans se chevaucher. */
+  .topbar-in { gap: 6px; padding-inline: 10px; }
+  .topbar-in > .grow { flex: 0 0 auto; }
+  .topbar-in .espace-badge { flex: none; }
+  .topbar-in .outils { margin-left: auto; gap: 4px; }
+  .topbar-in .top-date { display: none; }
+  .aide-fab::before { inset: -10px; filter: blur(4px); }
+}
