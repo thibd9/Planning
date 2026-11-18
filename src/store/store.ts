@@ -16,6 +16,7 @@ import { appliquerPatch, optionsReparation } from '../engine/repair';
 import { depannagesDe, tourDeRole, tourRemplacement } from '../engine/appel';
 import { generer } from '../engine/generate';
 import { cibleSemaine, proposerRegularisations, semaineLibre } from '../engine/heures';
+import { absencesSimultanees } from '../engine/suivi';
 import type { Correction } from '../engine/souhaits';
 
 const KEY = 'releve.v3';
@@ -870,6 +871,9 @@ export const useStore = create<Store>((set, get) => {
         const periode = a.from === a.to ? `le ${fmtDateCourt(a.from)}` : `du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}`;
         const ouverts = next.trous.filter((t) => t.absenceId === a.id && !d.trous.some((x) => x.id === t.id));
         const retires = d.shifts.length - next.shifts.length;
+        // Une autre demande attend sur les mêmes dates : l'annonce la rappelle, pour qu'elle ne soit pas oubliée.
+        const enAttente = absencesSimultanees(next, a).demandees;
+        const rappel = enAttente.length ? `Reste à trancher sur ces dates : ${enAttente.map((x) => `la demande de ${nom(d, x.absence.personId)}`).join(', ')}.` : '';
         return journal(
           next,
           {
@@ -880,13 +884,14 @@ export const useStore = create<Store>((set, get) => {
           {
             pour: [a.personId],
             effets: !approuver
-              ? [`Aucun changement au planning : ${nom(d, a.personId)} garde ses postes ${periode}.`]
+              ? [`Aucun changement au planning : ${nom(d, a.personId)} garde ses postes ${periode}.`, rappel]
               : retires
                 ? [
                     `${retires} poste${retires > 1 ? 's' : ''} de ${nom(d, a.personId)} retiré${retires > 1 ? 's' : ''} du planning, ${periode}.`,
                     ouverts.length ? `${ouverts.length} poste${ouverts.length > 1 ? 's' : ''} à couvrir (${ouverts.slice(0, 4).map((t) => fmtDateCourt(t.shift.date)).join(', ')}${ouverts.length > 4 ? '…' : ''}) : les titulaires s’en chargent dans « Résoudre ».` : '',
+                    rappel,
                   ]
-                : [`${nom(d, a.personId)} sera absent ${periode}. Aucun poste n’était posé sur ces dates : rien à couvrir.`],
+                : [`${nom(d, a.personId)} sera absent ${periode}. Aucun poste n’était posé sur ces dates : rien à couvrir.`, rappel],
           },
         );
       }),

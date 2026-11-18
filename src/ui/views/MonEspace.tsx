@@ -14,12 +14,12 @@ import { pointsForts, suiviDe } from '../../engine/suivi';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { Compteurs, PointsForts } from '../components/Compteurs';
+import { FriseConges } from '../components/FriseConges';
 import { DialogueDemande } from '../components/Demande';
 import { DialogueRemplacement } from '../components/Remplacer';
 import { ABSENCE_ICONE } from '../icons';
 import { Delai, PastilleUrgence, Pill } from '../kit';
 import { STATUT_BESOIN } from './Equipe';
-import { Ecart } from './Equite';
 import { Souhaits } from './Souhaits';
 import { usagePlafond } from './Resoudre';
 
@@ -223,6 +223,8 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
         {onglet === 'souhaits' ? <Souhaits personId={personId} /> : null}
         {onglet === 'absences' ? (
           <div className="une">
+            {/* Les absences déjà accordées dans l'équipe : pour choisir ses dates en connaissance de cause. */}
+            <FriseConges data={data} today={today} discret={!gere} surligner={personId} />
             <div className="card">
               <div className="card-head">
                 <div className="grow">
@@ -420,15 +422,37 @@ export function MonSuivi({ personId }: { personId: string }): JSX.Element {
                 <h2 className="h3 grow">Ma part des contraintes</h2>
                 <span className="small soft">8 semaines</span>
               </div>
-              <div className="card-body col" style={{ gap: 12 }}>
-                {compteurs.map((c) => (
-                  <div key={c}>
-                    <div className="small soft" style={{ marginBottom: 3 }}>{COMPTEUR_LABEL[c]}</div>
-                    <Ecart ligne={ligne} cle={c} max={3} />
-                  </div>
-                ))}
+              <div className="card-body col" style={{ gap: 10 }}>
+                <p className="small soft" style={{ margin: 0 }}>
+                  Ce que vous avez fait sur 8 semaines, à côté de <b>votre part</b> : le total de l’équipe, partagé selon les heures de chacun.
+                </p>
+                <ul className="part-liste">
+                  {compteurs.map((c) => {
+                    const fait = ligne.reel[c];
+                    const part = ligne.attendu[c];
+                    const ecart = part === null ? 0 : Math.round(fait - part);
+                    // En mots : « dans votre part », « 2 de plus », « 2 de moins ».
+                    const mot = part === null ? 'Non concerné' : ecart === 0 ? 'Dans votre part' : `${Math.abs(ecart)} de ${ecart > 0 ? 'plus' : 'moins'} que votre part`;
+                    return (
+                      <li key={c} className={`part ${part === null || ecart === 0 ? 'egal' : ecart > 0 ? 'plus' : 'moins'}`}>
+                        <span className="part-nom">{COMPTEUR_LABEL[c]}</span>
+                        <span className="part-chiffres">
+                          <span>
+                            <b className="num">{fait}</b> fait{fait > 1 ? 's' : ''}
+                          </span>
+                          {part !== null ? (
+                            <span>
+                              <b className="num">{Math.round(part)}</b> pour votre part
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="part-mot">{mot}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
                 <p className="tiny muted">
-                  Comparé à votre part attendue, au prorata de votre temps de travail. Vous ne voyez que votre position : il n'existe aucun classement de l'équipe.
+                  « De plus » : vous en avez porté davantage que votre part, cela vous sera rendu sur les prochains plannings. Vous ne voyez que votre position : il n’existe aucun classement.
                 </p>
               </div>
             </section>

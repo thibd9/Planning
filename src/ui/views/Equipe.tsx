@@ -84,7 +84,7 @@ export function Equipe(): JSX.Element {
         <div className="grow">
           <div className="eyebrow">Équipe</div>
           <h1>Qui peut faire quoi, et quand</h1>
-          <p>Contrats, compétences et besoins personnels. Un besoin décrit une contrainte d'horaire, jamais sa raison.</p>
+          <p>Contrats, compétences et besoins personnels. La raison d’une demande n’est visible que des titulaires.</p>
         </div>
         {quota ? (
           <div className="card pad" style={{ padding: '10px 16px' }}>
@@ -473,7 +473,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
               <p className="soft small">Aucun besoin enregistré.</p>
             )}
             <p className="tiny muted">
-              Indisponibilité reconnue : contrainte impérative. Préférence prioritaire : servie avant les autres, plafonnée. Simple préférence : satisfaite si possible. Aucun motif n'est stocké.
+              Indisponibilité reconnue : contrainte impérative. Préférence prioritaire : servie avant les autres, plafonnée. Simple préférence : satisfaite si possible.
             </p>
           </section>
         ) : null}

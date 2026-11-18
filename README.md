@@ -40,7 +40,7 @@ deux boutons sous « Première visite ? » : « Créer ma pharmacie » et « Com
 ouvre la fenêtre « Découvrir Solvéa » : une visite guidée **par rôle**, jouée sur une pharmacie d'exemple
 (la « Grande Pharmacie de la Pinède », fictive) posée à côté des vraies, sans rien effacer.
 
-- **Titulaire — Tout Solvéa, de zéro** (52 étapes) : la visite suit **l'ordre du menu**, sans changer de
+- **Titulaire — Tout Solvéa, de zéro** (52 étapes, environ 25 minutes au rythme posé) : la visite suit **l'ordre du menu**, sans changer de
   personnage en cours de route. **Préparer** (création, équipe, fiche d'une personne, horaires et
   effectif, qui prépare le planning, règles), **Planifier** (grille, poste posé à la main, trois
   propositions, contrôles, journée, retards, mois, publication, impression, formation, inventaire,
@@ -55,12 +55,23 @@ ouvre la fenêtre « Découvrir Solvéa » : une visite guidée **par rôle**, j
 - **Une journée type** (13 étapes, tous les rôles) : huit semaines d'historique, un arrêt à couvrir, des
   demandes en attente ; on suit la titulaire et son équipe.
 
+**Solvi**, la mascotte de l'aide, accompagne la visite et tient l'assistant. Il prend la couleur du
+thème, flotte sur place, cligne des yeux, et change d'humeur selon ce qu'il fait : un clin d'œil quand il
+clique, concentré quand il écrit, pensif pendant un calcul, émerveillé devant un résultat, perplexe quand
+il n'a pas compris une question. Quinze humeurs sont dessinées (neutre, heureux, content, excité, surpris,
+intrigué, réfléchi, satisfait, confiant, concentré, inquiet, triste, fatigué, confus, joyeux).
+
 Pendant une visite, **on lit, puis on regarde** — un clic par étape :
 
 - un **projecteur** éclaire ce dont on parle ; rien ne bouge tant que la fiche d'explication est ouverte ;
 - « Suivant » referme la fiche et joue **toute la démonstration de l'étape** : un pointeur se déplace,
-  clique, coche, choisit dans une liste ou tape au clavier, un bandeau nomme chaque geste (« Cliquer sur
-  “Ajouter une personne” », « Écrire “Sarah” dans “Prénom” »), puis l'étape suivante arrive seule ;
+  clique, coche, choisit dans une liste ou tape au clavier. À chaque geste, Solvi dit dans une bulle
+  **quoi faire et à quoi cela sert** (« Cliquez sur “Ajouter une personne” — ce bouton ouvre la fiche
+  d'une nouvelle personne »), laisse le temps de lire, agit, puis laisse voir le résultat ;
+- le **rythme** est posé par défaut (environ sept secondes par geste) et se règle depuis la bulle :
+  posé, normal ou vif ;
+- un geste dont la cible est introuvable est signalé dans la console : une étape ne se vide plus en
+  silence (la fenêtre des trois propositions et celle de la publication s'ouvrent bien) ;
 - le projecteur suit la fenêtre ou le bloc où se passe le geste ; « Passer » saute la démonstration ;
 - le **sommaire** saute d'un chapitre à l'autre ; **lecture automatique** et flèches du clavier restent
   disponibles, ainsi que « Revenir à l'étape » si l'on est parti explorer.
@@ -314,9 +325,16 @@ vue mois, une garde se voit dans la case du jour.
   pharmacien, préparateur…).
 - **Jours fériés.** Marqués dans la grille, la vue mois, « Mes semaines » et le calendrier des
   préférences ; « Réglages » liste ceux des douze prochains mois.
-- **Grille : des alertes en mots.** La ligne « Équipe au complet ? » écrit « Complet », « Sans
-  pharmacien », « Manque du monde » ou « Rien de posé », avec les heures concernées.
+- **Grille : des alertes en mots.** La ligne « Équipe au complet ? » écrit « Complet », « Pharmacien
+  absent », « Aucun pharmacien », « Manque du monde » ou « Rien de posé ». **Titulaires et adjoints
+  comptent tous comme pharmaciens** (le groupe le rappelle) : une plage sans pharmacien dit donc ce qui la
+  crée — « 12 h 30 – 13 h 30, pause de Caroline », « après le départ de Caroline ». Les contrôles et la
+  vue d'une journée reprennent la même explication.
 - **Mes semaines.** Une tuile par jour, colorée selon le moment de la journée, avec la pause et la durée.
+- **Menu du titulaire.** Les rubriques n'ont plus de numéro : des titres plus grands, et un fil qui les
+  relie dans l'ordre du travail (préparer, planifier, suivre, bilan).
+- **Demandes de remplacement.** Une carte par demande, sur fond blanc, entourée à la couleur de son
+  urgence (rouge pour le médical, orange pour l'urgent).
 - **Déconnexion sans perte.** Tout est enregistré au fur et à mesure. Avant de se déconnecter, une fenêtre
   rappelle ce qui reste en cours (accords à donner, postes à couvrir, demandes, plannings en brouillon,
   messages non lus) avec un accès direct, et le navigateur demande confirmation si une fenêtre de saisie
@@ -395,21 +413,28 @@ de cette semaine est recalculé. Chacun voit son propre compteur dans « Mon sui
 Les calculs automatiques (proposition de planning, correction du mois, régularisation) sont faits par le
 moteur de l'application, sur l'appareil : règles impératives d'abord, optimisation ensuite.
 
-### Besoins personnels : jamais de motif
+### Demandes : toujours une raison, visible des seuls titulaires
 
-Le modèle de données ne contient **aucun champ « motif » ni texte libre** sur un besoin. Garde d'enfant,
-pratique religieuse, soin, transport ou cours du soir passent par le même formulaire : une contrainte
-d'horaire, sans raison. Trois statuts ne sont jamais confondus — indisponibilité reconnue (impérative),
-préférence prioritaire (plafonnée de la même façon pour tous), simple préférence. Un droit ou un
-aménagement validé n'entre pas dans le plafond. Un calendrier de repères de toutes traditions aide le
-salarié à retrouver une date ; son choix n'est pas enregistré.
+Une demande d'absence ou d'horaires porte **toujours sa raison** : une catégorie choisie dans une liste
+(congés et repos, famille, santé, études, démarche administrative, raison personnelle) et, si la personne
+le souhaite, une précision. Seuls les titulaires la voient ; les collègues ne voient que des horaires.
+Quand le titulaire saisit lui-même un besoin, la raison est facultative. Trois statuts ne sont jamais
+confondus — indisponibilité reconnue (impérative), préférence prioritaire (plafonnée de la même façon
+pour tous), simple préférence. Un droit ou un aménagement validé n'entre pas dans le plafond. Les
+**préférences du mois**, elles, ne sont pas des demandes : aucune raison n'y est attachée.
+
+**Deux demandes sur les mêmes dates.** Chaque demande d'absence montre qui d'autre est absent ou
+demande à l'être en même temps, dans l'ordre d'arrivée, et une frise « Absences de l'équipe » (dix
+semaines, une ligne par personne, demandes en pointillés) accompagne les décisions. L'annonce d'une
+décision rappelle la demande restée en attente sur ces dates. L'équipe voit la même frise dans « Mes
+demandes », sans la nature des absences ni les demandes des autres.
 
 Des **préréglages** remplissent le formulaire en un clic — Chabbat (finir plus tôt le vendredi, ne pas
 travailler le samedi), prière du vendredi, office du dimanche, rupture du jeûne, sortie d'école, mercredi,
-cours du soir — et s'ajustent ensuite librement. Le nom du préréglage n'est **jamais enregistré** : seules
-partent des contraintes d'horaire (« finir avant 16 h le vendredi »), et c'est tout ce que le responsable
-voit. La religion est une donnée sensible (RGPD, article 9) qu'un employeur n'a pas à détenir ; ne pas la
-stocker protège le salarié comme le titulaire. Une indisponibilité peut aussi porter sur une plage horaire
+cours du soir — et s'ajustent ensuite librement. Le nom du préréglage n'est **jamais enregistré** : il
+présélectionne seulement une raison générale (« famille », « études », « raison personnelle »). La
+religion et la santé sont des données sensibles (RGPD, article 9) : la liste des raisons reste donc
+volontairement générale, et la précision est facultative. Une indisponibilité peut aussi porter sur une plage horaire
 précise (de 12 h à 14 h 30, par exemple).
 
 ## Accessibilité

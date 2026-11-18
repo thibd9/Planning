@@ -6,7 +6,8 @@ import { useStore } from '../store/store';
 import { useUi } from '../store/ui';
 import type { Reponse } from './bot';
 import { fichesPour, repondre } from './bot';
-import { Logo } from './kit';
+import type { Humeur } from './Solvi';
+import { Solvi } from './Solvi';
 
 interface Bulle {
   id: number;
@@ -22,7 +23,7 @@ const AMORCES: Record<Espace, string[]> = {
   equipe: ['Mon prochain poste ?', 'Qui travaille demain ?', 'Mon compteur d’heures ?', 'Me faire remplacer'],
 };
 
-/** Assistant Solvéa : on lui pose une question, il répond d'après le planning ou d'après ses fiches, et il y emmène. */
+/** Solvi, l'assistant de Solvéa : on lui pose une question, il répond d'après le planning ou d'après ses fiches, et il y emmène. */
 export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom: string; personId: string }): JSX.Element | null {
   const { assistant, ouvrirAssistant, vue, parcours, tour, assistantEnVisite, ouvrirTutoriels } = useUi();
   const data = useStore((s) => s.data);
@@ -71,18 +72,21 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
   };
 
   // Pendant un tutoriel, la place est à la visite : le bouton ne s'affiche que si l'étape le présente.
+  // Solvi réfléchit pendant qu'il cherche, s'interroge quand il n'a pas compris, sourit quand il a répondu.
+  const derniere = [...fil].reverse().find((b) => b.de !== 'moi');
+  const humeurBot: Humeur = reflexion ? 'reflechi' : !derniere ? 'heureux' : /^Je n’ai pas trouvé/.test(derniere.texte) ? 'intrigue' : 'content';
   if (tour !== null || (parcours !== null && !assistant && !assistantEnVisite)) return null;
   return (
     <div className="assistant no-print">
       {assistant ? (
-        <section className="aide-panneau" role="dialog" aria-label="Assistant Solvéa">
+        <section className="aide-panneau" role="dialog" aria-label="Solvi, votre assistant">
           <div className="aide-tete">
             <span className="aide-logo" aria-hidden="true">
-              <Logo size={30} />
+              <Solvi size={42} humeur={humeurBot} />
             </span>
             <div className="grow">
-              <h2>Assistant Solvéa</h2>
-              <p>Posez votre question.</p>
+              <h2>Solvi</h2>
+              <p>Votre assistant. Posez votre question.</p>
             </div>
             <button type="button" className="dialog-fermer" onClick={() => ouvrirAssistant(false)} aria-label="Fermer l’assistant">
               <X size={18} />
@@ -141,7 +145,7 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
               ),
             )}
             {reflexion ? (
-              <div className="aide-bulle bot attente" aria-label="L’assistant cherche">
+              <div className="aide-bulle bot attente" aria-label="Solvi cherche">
                 <i />
                 <i />
                 <i />
@@ -179,10 +183,10 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
           </div>
         </section>
       ) : null}
-      <button ref={bouton} type="button" className={`aide-fab${assistant ? ' on' : ''}`} onClick={() => ouvrirAssistant(!assistant)} aria-expanded={assistant} data-focus="assistant" title="Assistant Solvéa">
-        <Logo size={30} />
+      <button ref={bouton} type="button" className={`aide-fab${assistant ? ' on' : ''}`} onClick={() => ouvrirAssistant(!assistant)} aria-expanded={assistant} data-focus="assistant" title="Solvi, votre assistant">
+        <Solvi size={40} humeur={assistant ? humeurBot : 'neutre'} />
         <span className="aide-mot">Aide</span>
-        <span className="sr">, assistant Solvéa</span>
+        <span className="sr">, Solvi, votre assistant</span>
       </button>
     </div>
   );

@@ -11,6 +11,7 @@ import { estCollaboratif, moisDe, reponses } from '../../engine/souhaits';
 import { validateWeek } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { ListeAnnonces, annoncesDe } from '../components/Annonces';
+import { Solvi } from '../Solvi';
 import { useUi } from '../../store/ui';
 import { Avatar, Pill, momentDe } from '../kit';
 
@@ -169,7 +170,10 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
               ))}
             </div>
           ) : (
-            <p className="card-body soft">Absences couvertes, demandes arbitrées, plannings publiés.</p>
+            <p className="card-body soft tb-ajour">
+              <Solvi size={54} humeur="satisfait" />
+              <span>Absences couvertes, demandes arbitrées, plannings publiés.</span>
+            </p>
           )}
         </section>
 

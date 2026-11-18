@@ -164,7 +164,7 @@ export function vierge(): AppData {
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
 /** À augmenter quand l'exemple change (noms, équipe) : les exemples enregistrés sur l'appareil sont alors régénérés. */
-export const DEMO_VERSION = 3;
+export const DEMO_VERSION = 4;
 
 export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);
@@ -184,6 +184,7 @@ export function seed(today: ISODate, avance = 0): AppData {
     {
       ...besoin({ personId: 'p_jules', forme: 'finir_avant', heure: H(18), jours: [4], statut: 'prioritaire' }, new Date(`${addDays(today, -1)}T18:40:00`).toISOString()),
       decision: 'en_attente',
+      motif: 'famille',
       decidedAt: undefined,
       from: addDays(lundi, 7),
     },
@@ -367,6 +368,7 @@ export function seed(today: ISODate, avance = 0): AppData {
     to: addDays(lundi, 18),
     type: 'conge',
     statut: 'demandee',
+    motif: 'repos',
     createdAt: new Date(`${addDays(today, -2)}T13:15:00`).toISOString(),
   });
 

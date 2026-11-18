@@ -109,6 +109,17 @@ export interface Mission {
 export type AbsenceType = 'conge' | 'maladie' | 'formation' | 'autre';
 export type AbsenceStatut = 'demandee' | 'approuvee' | 'refusee';
 
+/** La raison d'une demande d'absence ou d'horaires : une catégorie, visible des seuls titulaires. */
+export type MotifDemande = 'repos' | 'famille' | 'sante' | 'etudes' | 'administratif' | 'personnel';
+export const MOTIF_DEMANDE_LABEL: Record<MotifDemande, string> = {
+  repos: 'Congés, repos',
+  famille: 'Famille, garde d’enfant',
+  sante: 'Santé, rendez-vous médical',
+  etudes: 'Études, formation',
+  administratif: 'Démarche administrative',
+  personnel: 'Raison personnelle',
+};
+
 export interface Absence {
   id: string;
   personId: string;
@@ -117,12 +128,15 @@ export interface Absence {
   type: AbsenceType;
   statut: AbsenceStatut;
   createdAt: string;
-  /** Intitulé d'une formation. Jamais utilisé pour un congé ou un arrêt : aucun motif n'est conservé. */
+  /** Intitulé d'une formation. */
   libelle?: string;
+  /** La raison donnée par la personne : une catégorie, et une précision si elle le souhaite. Visible des seuls titulaires. */
+  motif?: MotifDemande;
+  precision?: string;
 }
 
 /**
- * Besoin personnel, toujours sans motif.
+ * Besoin personnel : une contrainte d'horaires, avec la raison donnée par la personne (une catégorie).
  *  - reconnue    : indisponibilité reconnue, traitée comme une contrainte impérative ;
  *  - prioritaire : préférence prioritaire, plafonnée de la même façon pour tous ;
  *  - preference  : simple préférence.
@@ -133,6 +147,9 @@ export type BesoinDecision = 'en_attente' | 'acceptee' | 'refusee';
 
 export interface Besoin {
   id: string;
+  /** La raison donnée par la personne ; visible des seuls titulaires. */
+  motif?: MotifDemande;
+  precision?: string;
   personId: string;
   forme: BesoinForme;
   /** Jours concernés : 0 = lundi … 6 = dimanche. */

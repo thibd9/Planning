@@ -3,7 +3,7 @@ import { seed, vierge } from '../data/seed';
 import { empreinte, espaceDe, estResponsable, estSecondaire, identifiantPropose, libelleRole, memeIdentifiant, peutGerer } from '../domain/acces';
 import { addDays, dureeReelle, ferie, joursOuvresEntre, mondayOf, subtract, weekday } from '../domain/time';
 import type { AppData, Shift } from '../domain/types';
-import { minutesSemaine, shiftsSemaine, trousPharmacien } from './core';
+import { minutesSemaine, shiftsSemaine, trousPharmacien, trousPharmacienExpliques } from './core';
 import { decisions } from './decisions';
 import { diagnosticPrealable } from './diagnose';
 import { equite } from './equity';
@@ -67,11 +67,34 @@ describe('contrôles', () => {
   it('signale la minute sans pharmacien, pause comprise', () => {
     const d: AppData = {
       ...data,
-      shifts: [poste('p_helene', SUIVANT, 510, 1170, { pauseStart: 750, pauseEnd: 780 }), poste('p_camille', SUIVANT, 510, 990, { pauseStart: 750, pauseEnd: 810 })],
+      shifts: [poste('p_karim', SUIVANT, 510, 1170, { pauseStart: 750, pauseEnd: 780 }), poste('p_camille', SUIVANT, 510, 990, { pauseStart: 750, pauseEnd: 810 })],
     };
     expect(trousPharmacien(d, SUIVANT)).toEqual([{ start: 750, end: 780 }]);
     const issue = validateWeek(d, SUIVANT).find((i) => i.regle === 'pharmacie.presence' && i.date === SUIVANT);
     expect(issue?.message).toContain('de 12 h 30 à 13 h, aucun pharmacien');
+    // Le message dit ce qui laisse la plage sans pharmacien : la pause de l'adjoint.
+    expect(issue?.message).toContain('présent (pause d’Igor)');
+    // Avec une titulaire à la place de l'adjoint, sa pause ne manque à personne.
+    const avecTitulaire: AppData = { ...d, shifts: [poste('p_helene', SUIVANT, 510, 1170, { pauseStart: 750, pauseEnd: 780 })] };
+    expect(trousPharmacien(avecTitulaire, SUIVANT)).toEqual([]);
+  });
+  it('un titulaire compte comme pharmacien, et chaque plage sans pharmacien dit ce qui la crée', () => {
+    const seule: AppData = { ...data, shifts: [poste('p_helene', SUIVANT, 600, 990, { pauseStart: 750, pauseEnd: 810 })] };
+    const e = trousPharmacienExpliques(seule, SUIVANT);
+    expect(e.aucun).toBe(false);
+    // Tant que la titulaire est en poste, il ne manque aucun pharmacien, pause comprise.
+    expect(e.trous.map((t) => t.raison)).toEqual(['avant l’arrivée de Caroline', 'après le départ de Caroline']);
+    // Un adjoint seul : sa pause, elle, laisse l'officine sans pharmacien.
+    const adjoint: AppData = { ...data, shifts: [poste('p_karim', SUIVANT, 600, 990, { pauseStart: 750, pauseEnd: 810 })] };
+    const a = trousPharmacienExpliques(adjoint, SUIVANT);
+    expect(a.trous.map((t) => t.raison)).toEqual(['avant l’arrivée d’Igor', 'pause d’Igor', 'après le départ d’Igor']);
+    expect(a.trous[1]).toMatchObject({ start: 750, end: 810 });
+    // Sans titulaire ni adjoint posé, c'est toute l'ouverture, et on le dit autrement.
+    const sans: AppData = { ...data, shifts: [poste('p_camille', SUIVANT, 510, 990)] };
+    const rien = trousPharmacienExpliques(sans, SUIVANT);
+    expect(rien.aucun).toBe(true);
+    expect(rien.trous.length).toBeGreaterThan(0);
+    expect(validateWeek(sans, SUIVANT).find((i) => i.regle === 'pharmacie.presence' && i.date === SUIVANT)?.message).toContain("aucun pharmacien n'est planifié");
   });
   it('contrôle le repos de 11 h et la durée quotidienne des salariés, pas du titulaire', () => {
     const mardi = addDays(SUIVANT, 1);

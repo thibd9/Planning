@@ -239,6 +239,8 @@ export function App(): JSX.Element {
 
   const heure = new Date(sauvegarde);
   const groupes = [...new Set(liens.map((l) => l.groupe))];
+  // Les rubriques du titulaire se suivent dans l'ordre du travail : on prépare, on planifie, on suit, on fait le bilan.
+  const ordre = espace === 'responsable' ? ['Préparer', 'Planifier', 'Suivre', 'Bilan'].filter((g) => groupes.includes(g)) : [];
 
   return (
     <div className={`app${parcours !== null && data.demo ? ' en-parcours' : ''}`}>
@@ -277,15 +279,17 @@ export function App(): JSX.Element {
           </div>
         ) : null}
         {groupes.map((g) => (
-          <div key={g || 'tete'} style={{ display: 'contents' }}>
+          <div key={g || 'tete'} className={`nav-groupe${ordre.includes(g) ? ` ordre${ordre.indexOf(g) === ordre.length - 1 ? ' fin' : ''}` : ''}`}>
             {g ? (
               <div className="nav-label">
-                {espace === 'responsable' ? (
-                  <span className="nav-etape" aria-hidden="true">
-                    {groupes.filter(Boolean).indexOf(g) + 1}
+                {/* Pas de numéro : un fil relie les rubriques dans l'ordre du travail, et une flèche dit « puis ». */}
+                {ordre.includes(g) ? (
+                  <span className={`nav-etape${ordre.indexOf(g) === 0 ? ' debut' : ''}`} aria-hidden="true">
+                    {ordre.indexOf(g) > 0 ? <ChevronDown size={13} strokeWidth={2.6} /> : null}
                   </span>
                 ) : null}
                 {g}
+                {ordre.includes(g) ? <span className="sr">, étape {ordre.indexOf(g) + 1} sur {ordre.length}</span> : null}
               </div>
             ) : null}
             {liens

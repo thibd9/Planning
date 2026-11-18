@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Crown, FlaskConical, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Crown, FlaskConical, Gauge, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -13,6 +13,8 @@ import { useStore } from '../store/store';
 import type { Vue } from '../store/ui';
 import { useUi } from '../store/ui';
 import { Logo } from './kit';
+import type { Humeur } from './Solvi';
+import { Solvi } from './Solvi';
 
 /** Les quatre regards de l'environnement de test, avec des personnes déjà créées. */
 export const ROLES_TEST: { cle: string; id: string; identifiant: string; court: string; titre: string; nom: string; detail: string }[] = [
@@ -59,12 +61,16 @@ function posteARemplacer(d: AppData, today: string): string | null {
 /** Ce que vise un geste : un sélecteur, ou une fonction qui trouve l'élément (par son texte, son rang…). */
 type Cible = string | (() => HTMLElement | null | undefined);
 /** Un geste que la visite fait elle-même, à l'écran : elle clique, tape, choisit, comme le ferait l'utilisateur. */
+/**
+ * `dit` : ce que Solvi demande de faire, quand le nom de l'élément ne suffit pas.
+ * `sert` : à quoi sert le geste, en une phrase. `facultatif` : l'élément peut ne pas être là.
+ */
 type Geste =
-  | { faire: 'cliquer'; sur: Cible; dit?: string }
-  | { faire: 'taper'; dans: Cible; texte: string; dit?: string }
-  | { faire: 'choisir'; dans: Cible; valeur: string; dit?: string }
-  | { faire: 'attendre'; que: Cible }
-  | { faire: 'pause'; ms: number }
+  | { faire: 'cliquer'; sur: Cible; dit?: string; sert?: string; facultatif?: boolean }
+  | { faire: 'taper'; dans: Cible; texte: string; dit?: string; sert?: string }
+  | { faire: 'choisir'; dans: Cible; valeur: string; dit?: string; sert?: string }
+  | { faire: 'attendre'; que: Cible; facultatif?: boolean }
+  | { faire: 'pause'; ms: number; dit?: string; sert?: string }
   | { faire: 'action'; jouer: () => void; dit?: string };
 type GesteVisible = Extract<Geste, { faire: 'cliquer' | 'taper' | 'choisir' }>;
 const visible = (g: Geste): g is GesteVisible => g.faire === 'cliquer' || g.faire === 'taper' || g.faire === 'choisir';
@@ -114,13 +120,33 @@ function decrire(temps: Geste[] | undefined): string {
   const el = element(g.faire === 'cliquer' ? g.sur : g.dans);
   if (g.faire === 'cliquer') {
     const nom = el ? nomDe(el) : '';
-    return nom ? `Cliquer sur « ${nom} »` : 'Cliquer ici';
+    return nom ? `Cliquez sur « ${nom} »` : 'Cliquez ici';
   }
   const champ = el ? champDe(el) : '';
-  if (g.faire === 'taper') return champ ? `Écrire « ${g.texte} » dans « ${champ} »` : `Écrire « ${g.texte} »`;
+  if (g.faire === 'taper') return champ ? `Écrivez « ${g.texte} » dans « ${champ} »` : `Écrivez « ${g.texte} »`;
   const option = el instanceof HTMLSelectElement ? [...el.options].find((o) => o.value === g.valeur)?.text : undefined;
-  return champ ? `Choisir « ${option ?? g.valeur} » dans « ${champ} »` : `Choisir « ${option ?? g.valeur} »`;
+  return champ ? `Choisissez « ${option ?? g.valeur} » dans « ${champ} »` : `Choisissez « ${option ?? g.valeur} »`;
 }
+/** À quoi sert le geste visible d'un temps, quand l'étape le dit. */
+const utilite = (temps: Geste[] | undefined): string => temps?.find(visible)?.sert ?? '';
+
+/** Le rythme des démonstrations : posé par défaut, pour laisser le temps de voir et de comprendre. */
+type Rythme = 'pose' | 'normal' | 'vif';
+const RYTHMES: Record<Rythme, { nom: string; facteur: number }> = { pose: { nom: 'posé', facteur: 1 }, normal: { nom: 'normal', facteur: 0.72 }, vif: { nom: 'vif', facteur: 0.48 } };
+const CLE_RYTHME = 'releve.visite.rythme';
+const rythmeLu = (): Rythme => {
+  try {
+    const r = window.localStorage.getItem(CLE_RYTHME);
+    return r === 'normal' || r === 'vif' ? r : 'pose';
+  } catch {
+    return 'pose';
+  }
+};
+let rythme: Rythme = typeof window === 'undefined' ? 'pose' : rythmeLu();
+/** Une durée de démonstration, au rythme choisi. */
+const tempo = (ms: number): number => Math.round(ms * RYTHMES[rythme].facteur);
+/** Le temps de lire ce que dit Solvi avant qu'il agisse : plus la bulle est longue, plus il attend. */
+const tempsDeLire = (texte: string): number => tempo(Math.min(5200, Math.max(2100, 1000 + texte.length * 36)));
 
 interface Etape {
   /** Chapitre de la visite ; le sommaire permet de sauter de l'un à l'autre. */
@@ -173,6 +199,10 @@ function proposerSemaine(monday: string): void {
   const s = store();
   if (s.data.shifts.filter((x) => x.date >= monday && x.date <= addDays(monday, 6)).length > 8) return;
   s.appliquerGeneration(monday, generer(s.data, monday, { variante: 'equite', graine: 7, iterations: 9000 }));
+}
+/** La semaine redevient un brouillon : sa publication peut être montrée. */
+function enBrouillon(monday: string): void {
+  poser((d) => (d.semaines[monday]?.statut === 'publie' ? { ...d, semaines: Object.fromEntries(Object.entries(d.semaines).filter(([lundi]) => lundi !== monday)) } : d));
 }
 function publierSemaine(monday: string): void {
   proposerSemaine(monday);
@@ -266,7 +296,7 @@ function avecUrgenceMedicale(): void {
 function avecCongeARefuser(): void {
   avecPlanning();
   const s = store();
-  if (!s.data.absences.some((x) => x.personId === 'p_ines' && x.type === 'conge')) s.declarerAbsence({ personId: 'p_ines', from: addDays(semaineDans(5), 0), to: addDays(semaineDans(5), 2), type: 'conge', statut: 'demandee' });
+  if (!s.data.absences.some((x) => x.personId === 'p_ines' && x.type === 'conge')) s.declarerAbsence({ motif: 'repos', personId: 'p_ines', from: addDays(semaineDans(5), 0), to: addDays(semaineDans(5), 2), type: 'conge', statut: 'demandee' });
 }
 
 const manque = (d: AppData, date: string): number => sousEffectifs(d, date).length + trousPharmacien(d, date).length;
@@ -395,7 +425,7 @@ const ETABLI: Etape[] = [
     qui: CAMILLE,
     cible: '.sh-cal',
     titre: 'Mes préférences',
-    texte: () => 'Une forme par jour, sans raison à donner. « M’assister » remplit le reste.',
+    texte: () => 'Une forme par jour. « M’assister » remplit le reste.',
     jouer: () => versDemandes('nicolas.lesyndicaliste', 'souhaits'),
   },
   {
@@ -432,18 +462,24 @@ const ETABLI: Etape[] = [
   },
   {
     qui: HELENE,
-    cible: '.dialog',
+    cible: '.plan-grid .pg-h.today',
+    cibleFin: '.dialog',
     titre: 'Pauses et retards',
-    texte: () => 'Toute l’équipe sur une ligne de temps. On règle une pause, on note un retard.',
+    texte: () => 'Sous chaque date, « Voir la journée » ouvre toute l’équipe sur une ligne de temps.',
     jouer: () => {
       voirComme('caroline.tellier', 'construire');
       useUi.getState().setSemaine(mondayOf(store().today));
-      useUi.getState().voirJour(store().today);
     },
+    gestes: [
+      { faire: 'cliquer', sur: '.plan-grid .pg-h.today .jour-btn', dit: 'Cliquez sur « Voir la journée », sous la date du jour', sert: 'La journée s’ouvre : toute l’équipe sur une ligne de temps.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'pause', ms: 3000, dit: 'Chaque ligne montre un poste et sa pause', sert: 'On y règle une pause et on y note un retard, en deux clics.' },
+    ],
   },
   {
     qui: HELENE,
     cible: "[data-tour='proposer']",
+    cibleFin: '.content .plan',
     titre: 'Construire',
     texte: () => '« Proposer un planning » calcule trois semaines comparables. Vous choisissez.',
     jouer: () => {
@@ -451,6 +487,16 @@ const ETABLI: Etape[] = [
       // L'exemple a deux semaines publiées d'avance : la semaine à construire est la troisième.
       useUi.getState().setSemaine(addDays(mondayOf(store().today), 21));
     },
+    gestes: [
+      { faire: 'cliquer', sur: "[data-tour='proposer']", sert: 'Solvéa calcule trois plannings complets pour la semaine.' },
+      { faire: 'attendre', que: '.dialog .variant' },
+      { faire: 'pause', ms: 3600, dit: 'Trois plannings à comparer : équité, préférences, coût' },
+      { faire: 'cliquer', sur: nieme('.dialog .variant', 1), dit: 'Comparez avec « Préférences d’abord »', sert: 'Un clic sur une carte la sélectionne ; les chiffres soulignés sont les meilleurs.' },
+      { faire: 'pause', ms: 1400 },
+      { faire: 'cliquer', sur: nieme('.dialog .variant', 0), dit: 'Revenez à « Équité d’abord »', sert: 'Samedis et fermetures y sont les mieux répartis.' },
+      { faire: 'pause', ms: 900 },
+      { faire: 'cliquer', sur: VALIDER, sert: 'La proposition retenue devient le brouillon : rien n’est encore publié.' },
+    ],
   },
   {
     qui: HELENE,
@@ -493,7 +539,7 @@ const COMPLET_BRUT: Etape[] = [
     titre: 'Créer la pharmacie',
     texte: () => 'Trois écrans : le nom, les horaires, l’équipe. Ici, on part de zéro.',
     jouer: () => helene('nouvelle'),
-    gestes: [{ faire: 'taper', dans: '#officine-nom', texte: 'Grande Pharmacie de la Pinède' }],
+    gestes: [{ faire: 'taper', dans: '#officine-nom', texte: 'Grande Pharmacie de la Pinède', sert: 'Ce nom s’affiche en haut de l’écran et sur les plannings imprimés.' }],
   },
   {
     chapitre: PREPARER,
@@ -511,9 +557,9 @@ const COMPLET_BRUT: Etape[] = [
     texte: () => 'Avec l’équipe : chacun donne ses préférences. Vous seul : vous construisez sans les demander.',
     jouer: () => helene('officine'),
     gestes: [
-      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Vous seul') },
+      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Vous seul'), sert: 'Planning classique : vous construisez sans recueillir de préférences.' },
       { faire: 'pause', ms: 900 },
-      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Avec l’équipe') },
+      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Avec l’équipe'), sert: 'Planning collaboratif : chacun donne ses préférences avant le calcul.' },
     ],
   },
   {
@@ -524,12 +570,12 @@ const COMPLET_BRUT: Etape[] = [
     texte: (d) => (d.personnes.length > 2 ? `${d.personnes.length} personnes, rangées par poste. Chacune a sa couleur et son compte.` : 'Prénom, nom, poste, heures du contrat. Regardez.'),
     jouer: () => helene('equipe'),
     gestes: [
-      { faire: 'cliquer', sur: "[data-focus='ajouter-personne']" },
-      { faire: 'taper', dans: '#personne-prenom', texte: 'Sarah' },
-      { faire: 'taper', dans: '#personne-nom', texte: 'Lemoine' },
-      { faire: 'choisir', dans: '#personne-fonction', valeur: 'animateur' },
-      { faire: 'taper', dans: '#personne-heures', texte: '21' },
-      { faire: 'cliquer', sur: VALIDER },
+      { faire: 'cliquer', sur: "[data-focus='ajouter-personne']", sert: 'Ce bouton ouvre la fiche d’une nouvelle personne.' },
+      { faire: 'taper', dans: '#personne-prenom', texte: 'Sarah', sert: 'Le prénom apparaît sur chaque ligne du planning.' },
+      { faire: 'taper', dans: '#personne-nom', texte: 'Lemoine', sert: 'Le nom sert aussi à créer son identifiant de connexion.' },
+      { faire: 'choisir', dans: '#personne-fonction', valeur: 'animateur', sert: 'La fonction fixe sa couleur et ce qu’elle peut tenir seule.' },
+      { faire: 'taper', dans: '#personne-heures', texte: '21', sert: 'Les heures du contrat servent au compteur d’heures et à l’équité.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'La personne rejoint l’équipe ; son compte est prêt.' },
       { faire: 'action', jouer: arriveeEquipe },
       { faire: 'pause', ms: 2600 },
     ],
@@ -545,7 +591,7 @@ const COMPLET_BRUT: Etape[] = [
       helene('equipe');
       useUi.getState().ouvrirPersonne('p_camille');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.content .split > :last-child button[aria-pressed]', 'Dermatologie') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.content .split > :last-child button[aria-pressed]', 'Dermatologie'), sert: 'Une compétence cochée aide le planning à placer la bonne personne au bon moment.' }],
   },
   {
     chapitre: PREPARER,
@@ -564,16 +610,18 @@ const COMPLET_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.sh-cal',
     titre: 'Les préférences du mois',
-    texte: () => 'Nicolas choisit une forme, clique les jours. « M’assister » remplit le reste. Jamais de raison.',
+    texte: () => 'Nicolas choisit une forme, clique les jours. « M’assister » remplit le reste.',
     jouer: () => {
       avecSouhaits(false);
+      // Son mois repart vide : sinon « M’assister » n’aurait plus rien à remplir.
+      poser((d) => ({ ...d, souhaits: (d.souhaits ?? []).filter((x) => x.personId !== 'p_camille') }));
       versDemandes('nicolas.lesyndicaliste', 'souhaits');
     },
     gestes: [
-      { faire: 'cliquer', sur: '.sh-choix.matin' },
-      { faire: 'cliquer', sur: nieme('button.sh-jour', 1) },
-      { faire: 'cliquer', sur: nieme('button.sh-jour', 2) },
-      { faire: 'cliquer', sur: "[data-focus='assister']" },
+      { faire: 'cliquer', sur: '.sh-choix.matin', sert: 'On choisit d’abord une forme : matin, journée, après-midi ou repos.' },
+      { faire: 'cliquer', sur: nieme('button.sh-jour', 1), dit: 'Cliquez sur un jour du calendrier', sert: 'Le jour prend la forme choisie.' },
+      { faire: 'cliquer', sur: nieme('button.sh-jour', 2), dit: 'Cliquez sur un autre jour', sert: 'Autant de jours que l’on veut, de la même façon.' },
+      { faire: 'cliquer', sur: "[data-focus='assister']", sert: '« M’assister » remplit le reste du mois d’après les habitudes.' },
     ],
   },
   {
@@ -599,10 +647,10 @@ const COMPLET_BRUT: Etape[] = [
       semaineUne();
     },
     gestes: [
-      { faire: 'cliquer', sur: '.plan-grid .add' },
+      { faire: 'cliquer', sur: '.plan-grid .add', dit: 'Cliquez sur le « + » d’une case', sert: 'Il ouvre un poste pour cette personne, ce jour-là.' },
       { faire: 'attendre', que: '.dialog' },
       { faire: 'pause', ms: 900 },
-      { faire: 'cliquer', sur: VALIDER },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Horaires, pause et activité sont enregistrés dans le brouillon.' },
     ],
   },
   {
@@ -611,18 +659,27 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .plan',
     cibleFin: '.content .plan',
     titre: 'Trois propositions',
-    texte: () => 'Équité, préférences ou coût d’abord. Les règles passent toujours avant. Vous choisissez.',
+    texte: () => 'Solvéa calcule trois plannings : équité, préférences ou coût d’abord. Les règles passent toujours avant. Vous comparez, vous choisissez.',
     jouer: () => {
       avecSouhaits();
       semaineUne();
     },
     gestes: [
-      { faire: 'cliquer', sur: "[data-tour='proposer']" },
+      { faire: 'cliquer', sur: "[data-tour='proposer']", sert: 'Solvéa va calculer trois plannings complets pour la semaine.' },
+      { faire: 'attendre', que: '.dialog' },
+      // Un poste a été posé à la main à l'étape précédente : la fenêtre demande d'abord quoi en faire.
+      { faire: 'cliquer', sur: parTexte('.dialog label.check', 'Conserver les postes déjà posés'), facultatif: true, dit: 'Cochez « Conserver les postes déjà posés »', sert: 'Le poste posé à la main est gardé ; le calcul complète autour.' },
+      { faire: 'cliquer', sur: parTexte('.dialog .btn', 'Calculer trois propositions'), facultatif: true, dit: 'Cliquez sur « Calculer trois propositions »', sert: 'Les règles impératives passent toujours avant le reste.' },
       { faire: 'attendre', que: '.dialog .variant' },
-      { faire: 'pause', ms: 1200 },
-      { faire: 'cliquer', sur: nieme('.dialog .variant', 1), dit: 'Regarder la deuxième proposition' },
-      { faire: 'cliquer', sur: nieme('.dialog .variant', 0), dit: 'Revenir à la première proposition' },
-      { faire: 'cliquer', sur: VALIDER },
+      // Le temps de lire les trois propositions côte à côte.
+      { faire: 'pause', ms: 3600, dit: 'Trois plannings à comparer : équité, préférences, coût' },
+      { faire: 'cliquer', sur: nieme('.dialog .variant', 1), dit: 'Comparez : « Préférences d’abord »', sert: 'Elle suit le plus de préférences possible.' },
+      { faire: 'pause', ms: 1400 },
+      { faire: 'cliquer', sur: nieme('.dialog .variant', 2), dit: 'Comparez : « Coût d’abord »', sert: 'Elle évite les heures au-delà des contrats.' },
+      { faire: 'pause', ms: 1400 },
+      { faire: 'cliquer', sur: nieme('.dialog .variant', 0), dit: 'Retenez « Équité d’abord »', sert: 'Samedis et fermetures y sont répartis selon l’historique de chacun.' },
+      { faire: 'pause', ms: 900 },
+      { faire: 'cliquer', sur: VALIDER, sert: 'La proposition devient le brouillon : vous pourrez encore tout modifier.' },
     ],
   },
   {
@@ -661,20 +718,25 @@ const COMPLET_BRUT: Etape[] = [
       semaineUne();
       useUi.getState().setPlanVue('mois');
     },
-    gestes: [{ faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('.mo-pref input'), dit: 'Cocher « Afficher les préférences »' }],
+    gestes: [{ faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('.mo-pref input'), dit: 'Cochez « Afficher les préférences »', sert: 'Les préférences de chacun s’affichent dans les cases du mois.' }],
   },
   {
     chapitre: PLANIFIER,
     qui: HELENE,
-    cible: '.dialog',
+    cible: '.plan-grid .pg-h:nth-child(3)',
+    cibleFin: '.dialog',
     titre: 'Une journée',
-    texte: () => 'Toute l’équipe sur une ligne de temps. On règle les pauses, on note un retard.',
+    texte: () => 'Sous chaque date, « Voir la journée » ouvre toute l’équipe sur une ligne de temps : pauses, retards.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
       semaineUne();
-      useUi.getState().voirJour(addDays(semaineDans(1), 1));
     },
+    gestes: [
+      { faire: 'cliquer', sur: nieme('.plan-grid .jour-btn', 1), dit: 'Cliquez sur « Voir la journée », sous la date', sert: 'La journée s’ouvre : toute l’équipe sur une ligne de temps.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'pause', ms: 3000, dit: 'Chaque ligne montre un poste et sa pause', sert: 'On y règle une pause et on y note un retard, en deux clics.' },
+    ],
   },
   {
     chapitre: PLANIFIER,
@@ -686,13 +748,15 @@ const COMPLET_BRUT: Etape[] = [
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
+      // Une étape précédente a pu publier la semaine : on repart du brouillon pour montrer la publication.
+      enBrouillon(semaineDans(1));
       semaineUne();
     },
     gestes: [
-      { faire: 'cliquer', sur: "[data-focus='publier']" },
+      { faire: 'cliquer', sur: "[data-focus='publier']", sert: 'Solvéa relit les règles et les délais avant d’envoyer.' },
       { faire: 'attendre', que: '.dialog' },
-      { faire: 'cliquer', sur: parTexte('.dialog button', 'Tout cocher') },
-      { faire: 'cliquer', sur: VALIDER },
+      { faire: 'cliquer', sur: parTexte('.dialog button', 'Tout cocher'), facultatif: true, sert: 'Les accords à recueillir sont notés d’un seul geste.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Toute l’équipe voit maintenant sa semaine.' },
       { faire: 'action', jouer: avecPlanning },
     ],
   },
@@ -719,9 +783,9 @@ const COMPLET_BRUT: Etape[] = [
       helene('gardes');
     },
     gestes: [
-      { faire: 'cliquer', sur: parTexte('.content button', 'Ajouter une garde') },
-      { faire: 'choisir', dans: '#garde-personne', valeur: 'p_lea' },
-      { faire: 'cliquer', sur: VALIDER },
+      { faire: 'cliquer', sur: parTexte('.content button', 'Ajouter une garde'), sert: 'On ajoute la garde du secteur : sa date et son type.' },
+      { faire: 'choisir', dans: '#garde-personne', valeur: 'p_lea', sert: 'Le pharmacien choisi est prévenu dans son espace.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Le délai de 15 jours et le repos qui suit sont contrôlés.' },
       { faire: 'action', jouer: avecGardes },
     ],
   },
@@ -738,12 +802,12 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSemaine(semaineDans(2));
     },
     gestes: [
-      { faire: 'cliquer', sur: '.top-creer' },
-      { faire: 'cliquer', sur: parTexte('.outils .menu button', 'Une formation') },
-      { faire: 'taper', dans: '#formation-intitule', texte: 'Gestes d’urgence' },
-      { faire: 'cliquer', sur: '#formation-p_thomas', dit: 'Cocher Thomas parmi les participants' },
-      { faire: 'cliquer', sur: '#formation-p_ines', dit: 'Cocher Inès' },
-      { faire: 'cliquer', sur: VALIDER, dit: 'Cliquer sur « Planifier et prévenir »' },
+      { faire: 'cliquer', sur: '.top-creer', sert: '« Créer » réunit tout ce que l’on peut ajouter.' },
+      { faire: 'cliquer', sur: parTexte('.outils .menu button', 'Une formation'), sert: 'On ouvre la fenêtre de la formation.' },
+      { faire: 'taper', dans: '#formation-intitule', texte: 'Gestes d’urgence', sert: 'L’intitulé apparaîtra dans le planning des participants.' },
+      { faire: 'cliquer', sur: '#formation-p_thomas', dit: 'Cochez Thomas parmi les participants', sert: 'Seuls les participants seront absents du comptoir.' },
+      { faire: 'cliquer', sur: '#formation-p_ines', dit: 'Cochez Inès', sert: 'On coche autant de personnes que nécessaire.' },
+      { faire: 'cliquer', sur: VALIDER, dit: 'Cliquez sur « Planifier et prévenir »', sert: 'Chacun est prévenu ; les postes à couvrir vont dans « Résoudre ».' },
       {
         faire: 'action',
         jouer: () => {
@@ -766,10 +830,10 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSemaine(semaineDans(3));
     },
     gestes: [
-      { faire: 'cliquer', sur: '.top-creer' },
-      { faire: 'cliquer', sur: parTexte('.outils .menu button', 'Un inventaire') },
-      { faire: 'cliquer', sur: parTexte('.dialog button', 'Toute l’équipe'), dit: 'Cliquer sur « Toute l’équipe »' },
-      { faire: 'cliquer', sur: VALIDER },
+      { faire: 'cliquer', sur: '.top-creer', sert: 'Le même bouton « Créer ».' },
+      { faire: 'cliquer', sur: parTexte('.outils .menu button', 'Un inventaire'), sert: 'On ouvre la fenêtre de l’inventaire.' },
+      { faire: 'cliquer', sur: parTexte('.dialog button', 'Toute l’équipe'), dit: 'Cliquez sur « Toute l’équipe »', sert: 'Tout le monde est coché d’un seul geste.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Un poste « Inventaire » est ajouté au planning de chacun.' },
       {
         faire: 'action',
         jouer: () => {
@@ -803,7 +867,7 @@ const COMPLET_BRUT: Etape[] = [
       avecPlanning();
       voirComme('nicolas.lesyndicaliste', 'moi');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.me-grid .seg button', 'Calendrier') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.me-grid .seg button', 'Calendrier'), sert: 'Le calendrier montre le mois entier, avec la couleur de chaque horaire.' }],
   },
   {
     chapitre: EQUIPE,
@@ -817,9 +881,9 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSemaine(semaineDans(1));
     },
     gestes: [
-      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Mes postes') },
+      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Mes postes'), sert: '« Mes postes » ne garde que sa propre ligne.' },
       { faire: 'pause', ms: 1400 },
-      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Toute l’équipe') },
+      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Toute l’équipe'), sert: '« Toute l’équipe » remet le planning au complet.' },
     ],
   },
   {
@@ -833,16 +897,16 @@ const COMPLET_BRUT: Etape[] = [
       versDemandes('nicolas.lesyndicaliste', 'absences');
     },
     gestes: [
-      { faire: 'cliquer', sur: parTexte('#contenu .voie', 'remplacer') },
-      { faire: 'cliquer', sur: parTexte('#contenu .voie', 'Absence') },
+      { faire: 'cliquer', sur: parTexte('#contenu .voie', 'remplacer'), sert: 'Chaque carte ouvre un type de demande. Ici : se faire remplacer.' },
+      { faire: 'cliquer', sur: parTexte('#contenu .voie', 'Absence'), sert: 'Et ici : un congé ou une contrainte d’horaires.' },
     ],
   },
   {
     chapitre: EQUIPE,
     qui: CAMILLE,
     cible: '.dialog',
-    titre: 'Demander, sans raison',
-    texte: () => 'Un raccourci remplit les horaires. Le motif n’est jamais demandé ni conservé.',
+    titre: 'Demander, avec sa raison',
+    texte: () => 'Un raccourci remplit les horaires et la raison. Une raison est toujours demandée ; seuls les titulaires la voient.',
     jouer: () => {
       avecPlanning();
       versDemandes('nicolas.lesyndicaliste', 'absences');
@@ -850,7 +914,7 @@ const COMPLET_BRUT: Etape[] = [
     },
     gestes: [
       { faire: 'attendre', que: '.dialog' },
-      { faire: 'cliquer', sur: parTexte('.dialog button', 'Sortie d’école') },
+      { faire: 'cliquer', sur: parTexte('.dialog button', 'Sortie d’école'), sert: 'Le raccourci remplit les horaires et la raison ; on peut tout ajuster.' },
     ],
   },
   {
@@ -865,13 +929,13 @@ const COMPLET_BRUT: Etape[] = [
       versDemandes('nicolas.lesyndicaliste', 'remplacements');
     },
     gestes: [
-      { faire: 'cliquer', sur: "[data-focus='remplacer'] .btn" },
+      { faire: 'cliquer', sur: "[data-focus='remplacer'] .btn", sert: 'On choisit le poste à faire reprendre par un collègue.' },
       { faire: 'attendre', que: '.dialog .choix.urgence' },
-      { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgence médicale') },
+      { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgence médicale'), sert: 'L’urgence médicale passe en tête, avec un justificatif possible.' },
       { faire: 'pause', ms: 900 },
-      { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgent') },
-      { faire: 'choisir', dans: '#rempl-motif', valeur: 'famille' },
-      { faire: 'cliquer', sur: VALIDER },
+      { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgent'), sert: 'Urgent : le poste est à moins de sept jours.' },
+      { faire: 'choisir', dans: '#rempl-motif', valeur: 'famille', sert: 'Un motif est demandé ; seuls les titulaires le voient.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'La demande part au titulaire, qui décide.' },
     ],
   },
   {
@@ -909,7 +973,7 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSujet('remplacements');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.demande-r button', 'Accepter') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.demande-r button', 'Accepter'), sert: 'Accepter prévient tous ceux qui peuvent tenir le poste.' }],
   },
   {
     chapitre: SUIVRE,
@@ -923,7 +987,7 @@ const COMPLET_BRUT: Etape[] = [
       const v = volontaire();
       voirComme(store().data.personnes.find((p) => p.id === v)?.identifiant ?? 'nicolas.lesyndicaliste', 'moi');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte("[data-focus='aider'] button", 'Je me propose') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte("[data-focus='aider'] button", 'Je me propose'), sert: 'Le collègue se propose ; le calcul vérifie son repos et ses heures.' }],
   },
   {
     chapitre: SUIVRE,
@@ -937,7 +1001,7 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSujet('remplacements');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.demande-r button', 'Valider avec') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.demande-r button', 'Valider avec'), sert: 'Les deux plannings changent, et chacun est prévenu.' }],
   },
   {
     chapitre: SUIVRE,
@@ -951,7 +1015,7 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSujet('remplacements');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.demande-r.u-medical button', 'Accepter') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.demande-r.u-medical button', 'Accepter'), sert: 'Une demande médicale se traite toujours en premier.' }],
   },
   {
     chapitre: SUIVRE,
@@ -962,11 +1026,11 @@ const COMPLET_BRUT: Etape[] = [
     jouer: () => {
       avecPlanning();
       const s = store();
-      if (!s.data.absences.some((x) => x.personId === 'p_jules' && x.type === 'conge')) s.declarerAbsence({ personId: 'p_jules', from: addDays(semaineDans(4), 0), to: addDays(semaineDans(4), 4), type: 'conge', statut: 'demandee' });
+      if (!s.data.absences.some((x) => x.personId === 'p_jules' && x.type === 'conge')) s.declarerAbsence({ motif: 'famille', personId: 'p_jules', from: addDays(semaineDans(4), 0), to: addDays(semaineDans(4), 4), type: 'conge', statut: 'demandee' });
       useUi.getState().setSujet('demandes');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.panneau button', 'Approuver') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.panneau button', 'Approuver'), sert: 'Avant d’approuver, vous voyez ce que l’absence découvre.' }],
   },
   {
     chapitre: SUIVRE,
@@ -980,11 +1044,11 @@ const COMPLET_BRUT: Etape[] = [
       helene('resoudre');
     },
     gestes: [
-      { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /Inès/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button'), dit: 'Cliquer sur « Refuser », sur la demande d’Inès' },
+      { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /Inès/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button'), dit: 'Cliquez sur « Refuser », sur la demande d’Inès', sert: 'Un refus s’explique toujours : la fenêtre vous y aide.' },
       { faire: 'attendre', que: '#refus-raison' },
-      { faire: 'choisir', dans: '#refus-raison', valeur: 'Plusieurs absences déjà prévues' },
-      { faire: 'taper', dans: '#refus-mot', texte: 'La semaine suivante serait possible.' },
-      { faire: 'cliquer', sur: '.dialog-foot .btn.danger' },
+      { faire: 'choisir', dans: '#refus-raison', valeur: 'Plusieurs absences déjà prévues', sert: 'La raison se choisit dans une liste, pour rester factuel.' },
+      { faire: 'taper', dans: '#refus-mot', texte: 'La semaine suivante serait possible.', sert: 'Un mot libre peut proposer une autre solution.' },
+      { faire: 'cliquer', sur: '.dialog-foot .btn.danger', sert: 'Le message part à la personne ; son planning ne change pas.' },
     ],
   },
   {
@@ -1012,7 +1076,7 @@ const COMPLET_BRUT: Etape[] = [
       helene('resoudre');
     },
     gestes: [
-      { faire: 'cliquer', sur: '.appel .btn.primary' },
+      { faire: 'cliquer', sur: '.appel .btn.primary', sert: 'Tous ceux qui peuvent tenir le poste sont prévenus en même temps.' },
       { faire: 'action', jouer: reponsesAppel },
       { faire: 'action', jouer: appelEnCours },
     ],
@@ -1030,10 +1094,10 @@ const COMPLET_BRUT: Etape[] = [
       helene('resoudre');
     },
     gestes: [
-      { faire: 'cliquer', sur: parTexte('.panneau button', 'Voir et choisir la solution') },
+      { faire: 'cliquer', sur: parTexte('.panneau button', 'Voir et choisir la solution'), sert: 'Solvéa montre comment régler chaque jour, option par option.' },
       { faire: 'attendre', que: '.rs-jour' },
-      { faire: 'cliquer', sur: '.rs-jour .rs-option:not(.on):not(.libre)', dit: 'Choisir une autre option pour le premier jour' },
-      { faire: 'cliquer', sur: '.dialog-foot .btn.primary' },
+      { faire: 'cliquer', sur: '.rs-jour .rs-option:not(.on):not(.libre)', dit: 'Choisissez une autre option pour le premier jour', sert: 'Vous gardez la main : l’option conseillée n’est qu’une proposition.' },
+      { faire: 'cliquer', sur: '.dialog-foot .btn.primary', sert: 'Les changements sont appliqués et annoncés aux personnes concernées.' },
     ],
   },
   {
@@ -1060,7 +1124,7 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSujet('accords');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.panneau button', 'Donner mon accord') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.panneau button', 'Donner mon accord'), sert: 'La décision de l’autre titulaire est appliquée dès votre accord.' }],
   },
   {
     chapitre: SUIVRE,
@@ -1074,8 +1138,8 @@ const COMPLET_BRUT: Etape[] = [
       helene('messages');
     },
     gestes: [
-      { faire: 'taper', dans: '#msg-texte', texte: 'Planning publié pour deux semaines.' },
-      { faire: 'cliquer', sur: parTexte('.content button', 'Envoyer') },
+      { faire: 'taper', dans: '#msg-texte', texte: 'Planning publié pour deux semaines.', sert: 'Un message pour toute l’équipe, ou pour une seule personne.' },
+      { faire: 'cliquer', sur: parTexte('.content button', 'Envoyer'), sert: 'Il arrive aussitôt dans l’espace de chacun.' },
     ],
   },
   {
@@ -1137,7 +1201,7 @@ const COMPLET_BRUT: Etape[] = [
       avecPlanning();
       helene('documents');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'absences') }, { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Mes fichiers') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'absences'), sert: 'Vos absences et vos arrêts, avec leur état.' }, { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Mes fichiers'), sert: 'Les fichiers que vous déposez : une photo ou un PDF.' }],
   },
   {
     chapitre: BILAN,
@@ -1150,7 +1214,7 @@ const COMPLET_BRUT: Etape[] = [
       avecAbsenceImprevue();
       helene('documents');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Absences de l’équipe') }],
+    gestes: [{ faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Absences de l’équipe'), sert: 'Tout l’historique de l’équipe, par personne et par nature.' }],
   },
   // ---- 6. Au quotidien
   {
@@ -1175,7 +1239,7 @@ const COMPLET_BRUT: Etape[] = [
       avecPlanning();
       helene('tableau');
     },
-    gestes: [{ faire: 'cliquer', sur: '.top-creer' }],
+    gestes: [{ faire: 'cliquer', sur: '.top-creer', sert: 'Poste, personne, garde, formation, inventaire : tout part d’ici.' }],
   },
   {
     chapitre: QUOTIDIEN,
@@ -1188,7 +1252,7 @@ const COMPLET_BRUT: Etape[] = [
       avecAbsenceImprevue();
       helene('tableau');
     },
-    gestes: [{ faire: 'cliquer', sur: '.outils .top-ico' }],
+    gestes: [{ faire: 'cliquer', sur: '.outils .top-ico', dit: 'Cliquez sur la cloche', sert: 'Elle réunit les décisions prises et ce qui vous attend.' }],
   },
   {
     chapitre: QUOTIDIEN,
@@ -1206,7 +1270,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='assistant']",
     cibleFin: '.aide-panneau',
-    titre: 'L’assistant Solvéa',
+    titre: 'Solvi, votre assistant',
     texte: () => 'Posez une question : il lit le planning, répond, et vous emmène au bon écran.',
     jouer: () => {
       avecPlanning();
@@ -1214,10 +1278,11 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().montrerAssistant(true);
     },
     gestes: [
-      { faire: 'cliquer', sur: "[data-focus='assistant']" },
-      { faire: 'taper', dans: '#aide-question', texte: 'Qui travaille demain ?' },
-      { faire: 'cliquer', sur: '.aide-envoyer' },
-      { faire: 'attendre', que: '.aide-bulle.bot ul, .aide-bulle.bot .btn' },
+      { faire: 'cliquer', sur: "[data-focus='assistant']", dit: 'Cliquez sur « Aide », en bas à droite', sert: 'C’est moi, Solvi ! Un clic ouvre la conversation.' },
+      { faire: 'taper', dans: '#aide-question', texte: 'Qui travaille demain ?', sert: 'Posez la question avec vos mots.' },
+      { faire: 'cliquer', sur: '.aide-envoyer', dit: 'Cliquez sur la flèche pour envoyer', sert: 'Je lis le planning et je réponds, avec un bouton vers le bon écran.' },
+      { faire: 'attendre', que: () => [...document.querySelectorAll<HTMLElement>('.aide-bulle.bot:not(.attente)')][1] },
+      { faire: 'pause', ms: 2600, dit: 'La réponse arrive, avec le bouton qui y mène', sert: 'Je réponds d’après votre planning du moment.' },
     ],
   },
   {
@@ -1242,9 +1307,9 @@ const COMPLET_BRUT: Etape[] = [
       helene('compte');
     },
     gestes: [
-      { faire: 'cliquer', sur: 'label[for="mode-sombre"]' },
+      { faire: 'cliquer', sur: 'label[for="mode-sombre"]', sert: 'Le mode sombre repose les yeux le soir.' },
       { faire: 'pause', ms: 1600 },
-      { faire: 'cliquer', sur: 'label[for="mode-clair"]' },
+      { faire: 'cliquer', sur: 'label[for="mode-clair"]', sert: 'Et l’on revient au mode clair d’un clic.' },
     ],
   },
 ];
@@ -1293,12 +1358,12 @@ const ORDRE_TITULAIRE = [
   'Le bouton « Créer »',
   'La cloche',
   'Plusieurs pharmacies',
-  'L’assistant Solvéa',
+  'Solvi, votre assistant',
   'Mot de passe et clé de secours',
   'Votre compte',
 ];
 /** Le dernier chapitre : les mêmes sujets, vus par un préparateur, une pharmacienne, l'autre titulaire. */
-const ORDRE_EQUIPE = ['Mon planning', 'Le calendrier du mois', 'Le planning de l’équipe', 'Les préférences du mois', 'Mes demandes', 'Demander, sans raison', 'Se faire remplacer', 'Un collègue se propose', 'Mes gardes', 'Mon suivi', 'Décider à deux'];
+const ORDRE_EQUIPE = ['Mon planning', 'Le calendrier du mois', 'Le planning de l’équipe', 'Les préférences du mois', 'Mes demandes', 'Demander, avec sa raison', 'Se faire remplacer', 'Un collègue se propose', 'Mes gardes', 'Mon suivi', 'Décider à deux'];
 /** Quelques étapes changent de chapitre pour rester avec leur rubrique du menu. */
 const CHAPITRE_DE: Record<string, string> = { 'Créer la pharmacie': 'Démarrer', 'Retards et suivi': PLANIFIER };
 const dans = (ordre: string[], chapitre?: string): Etape[] =>
@@ -1368,7 +1433,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       titre: 'Le calendrier du mois',
       texte: () => 'Le mois entier, les mêmes couleurs que partout.',
       jouer: () => moi('moi'),
-      gestes: [{ faire: 'cliquer', sur: parTexte('.me-grid .seg button', 'Calendrier') }],
+      gestes: [{ faire: 'cliquer', sur: parTexte('.me-grid .seg button', 'Calendrier'), sert: 'Le calendrier montre le mois entier, avec la couleur de chaque horaire.' }],
     },
     {
       chapitre: MON_PLANNING,
@@ -1380,7 +1445,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
         moi('planning');
         useUi.getState().setSemaine(mondayOf(store().today));
       },
-      gestes: [{ faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Mes postes') }],
+      gestes: [{ faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Mes postes'), sert: '« Mes postes » ne garde que sa propre ligne.' }],
     },
     {
       chapitre: MES_DEMANDES,
@@ -1390,8 +1455,8 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       texte: () => 'Trois cartes : mes préférences, une absence, un remplacement.',
       jouer: () => versDemandes(p.identifiant, 'absences'),
       gestes: [
-        { faire: 'cliquer', sur: parTexte('#contenu .voie', 'remplacer') },
-        { faire: 'cliquer', sur: parTexte('#contenu .voie', 'Absence') },
+        { faire: 'cliquer', sur: parTexte('#contenu .voie', 'remplacer'), sert: 'Chaque carte ouvre un type de demande. Ici : se faire remplacer.' },
+        { faire: 'cliquer', sur: parTexte('#contenu .voie', 'Absence'), sert: 'Et ici : un congé ou une contrainte d’horaires.' },
       ],
     },
     {
@@ -1399,13 +1464,17 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.sh-cal',
       titre: 'Mes préférences',
-      texte: () => 'Une forme, puis les jours. « M’assister » remplit le reste. Jamais de raison.',
-      jouer: () => versDemandes(p.identifiant, 'souhaits'),
+      texte: () => 'Une forme, puis les jours. « M’assister » remplit le reste.',
+      jouer: () => {
+        // Son mois repart vide : sinon « M’assister » n’aurait plus rien à remplir.
+        poser((d) => ({ ...d, souhaits: (d.souhaits ?? []).filter((x) => x.personId !== p.id) }));
+        versDemandes(p.identifiant, 'souhaits');
+      },
       gestes: [
-        { faire: 'cliquer', sur: '.sh-choix.matin' },
-        { faire: 'cliquer', sur: nieme('button.sh-jour', 1) },
-        { faire: 'cliquer', sur: nieme('button.sh-jour', 2) },
-        { faire: 'cliquer', sur: "[data-focus='assister']" },
+        { faire: 'cliquer', sur: '.sh-choix.matin', sert: 'On choisit d’abord une forme : matin, journée, après-midi ou repos.' },
+        { faire: 'cliquer', sur: nieme('button.sh-jour', 1), dit: 'Cliquez sur un jour du calendrier', sert: 'Le jour prend la forme choisie.' },
+        { faire: 'cliquer', sur: nieme('button.sh-jour', 2), dit: 'Cliquez sur un autre jour', sert: 'Autant de jours que l’on veut, de la même façon.' },
+        { faire: 'cliquer', sur: "[data-focus='assister']", sert: '« M’assister » remplit le reste du mois d’après les habitudes.' },
       ],
     },
     {
@@ -1413,14 +1482,14 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.dialog',
       titre: 'Demander un congé',
-      texte: () => 'Des dates, c’est tout. Le motif n’est jamais demandé.',
+      texte: () => 'Des dates et une raison, choisie dans une liste. Seuls les titulaires la voient.',
       jouer: () => {
         versDemandes(p.identifiant, 'absences');
         useUi.getState().agir('demandes', 'demande');
       },
       gestes: [
         { faire: 'attendre', que: '.dialog' },
-        { faire: 'cliquer', sur: parTexte('.dialog button', 'Sortie d’école') },
+        { faire: 'cliquer', sur: parTexte('.dialog button', 'Sortie d’école'), sert: 'Le raccourci remplit les horaires et la raison ; on peut tout ajuster.' },
       ],
     },
     {
@@ -1432,9 +1501,9 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       texte: () => 'Prévu, urgent ou urgence médicale, avec justificatif. Votre titulaire répond.',
       jouer: () => versDemandes(p.identifiant, 'remplacements'),
       gestes: [
-        { faire: 'cliquer', sur: "[data-focus='remplacer'] .btn" },
+        { faire: 'cliquer', sur: "[data-focus='remplacer'] .btn", sert: 'On choisit le poste à faire reprendre par un collègue.' },
         { faire: 'attendre', que: '.dialog .choix.urgence' },
-        { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgence médicale') },
+        { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgence médicale'), sert: 'L’urgence médicale passe en tête, avec un justificatif possible.' },
       ],
     },
     {
@@ -1468,7 +1537,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       titre: 'Les messages',
       texte: () => 'Un fil pour l’équipe, des conversations privées.',
       jouer: () => moi('messages'),
-      gestes: [{ faire: 'taper', dans: '#msg-texte', texte: 'Bonjour à tous !' }],
+      gestes: [{ faire: 'taper', dans: '#msg-texte', texte: 'Bonjour à tous !', sert: 'Un message pour toute l’équipe, ou pour une seule personne.' }],
     },
     {
       chapitre: MON_ESPACE,
@@ -1483,16 +1552,16 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: "[data-focus='assistant']",
       cibleFin: '.aide-panneau',
-      titre: 'L’assistant Solvéa',
+      titre: 'Solvi, votre assistant',
       texte: () => 'Posez une question : il lit votre planning et vous répond.',
       jouer: () => {
         moi('moi');
         useUi.getState().montrerAssistant(true);
       },
       gestes: [
-        { faire: 'cliquer', sur: "[data-focus='assistant']" },
-        { faire: 'taper', dans: '#aide-question', texte: 'Mon prochain poste ?' },
-        { faire: 'cliquer', sur: '.aide-envoyer' },
+        { faire: 'cliquer', sur: "[data-focus='assistant']", dit: 'Cliquez sur « Aide », en bas à droite', sert: 'C’est moi, Solvi ! Un clic ouvre la conversation.' },
+        { faire: 'taper', dans: '#aide-question', texte: 'Mon prochain poste ?', sert: 'Posez la question avec vos mots.' },
+        { faire: 'cliquer', sur: '.aide-envoyer', dit: 'Cliquez sur la flèche pour envoyer', sert: 'Je lis le planning et je réponds, avec un bouton vers le bon écran.' },
         { faire: 'attendre', que: '.aide-bulle.bot + .aide-bulle.moi + .aide-bulle.bot, .aide-bulle.bot .btn' },
       ],
     },
@@ -1511,10 +1580,10 @@ const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'L�
 const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', qui: 'Nicolas · préparateur', prenom: 'Nicolas' });
 
 export const SCENARIOS = {
-  complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', duree: `15 min · ${COMPLET.length} étapes`, etapes: COMPLET },
-  pharmacien: { court: 'Pharmacien', role: 'Pharmacien adjoint', titre: 'Mon espace de pharmacien', duree: `5 min · ${PHARMACIEN.length} étapes`, etapes: PHARMACIEN },
-  equipe: { court: 'Équipe', role: 'Préparateur, animateur, apprenti…', titre: 'Mon espace dans l’équipe', duree: `5 min · ${EQUIPIER.length} étapes`, etapes: EQUIPIER },
-  etabli: { court: 'Journée type', role: 'Tous les rôles', titre: 'Une journée type', duree: `4 min · ${ETABLI.length} étapes`, etapes: ETABLI },
+  complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', duree: `25 min · ${COMPLET.length} étapes`, etapes: COMPLET },
+  pharmacien: { court: 'Pharmacien', role: 'Pharmacien adjoint', titre: 'Mon espace de pharmacien', duree: `7 min · ${PHARMACIEN.length} étapes`, etapes: PHARMACIEN },
+  equipe: { court: 'Équipe', role: 'Préparateur, animateur, apprenti…', titre: 'Mon espace dans l’équipe', duree: `7 min · ${EQUIPIER.length} étapes`, etapes: EQUIPIER },
+  etabli: { court: 'Journée type', role: 'Tous les rôles', titre: 'Une journée type', duree: `8 min · ${ETABLI.length} étapes`, etapes: ETABLI },
 } as const;
 export type Scenario = keyof typeof SCENARIOS;
 
@@ -1574,7 +1643,7 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   historique: { gestion: ['Absences et justificatifs'] },
   feries: { gestion: ['Horaires et effectif'] },
   decisions: { gestion: ['La cloche'] },
-  assistant: { gestion: ['L’assistant Solvéa'], equipe: ['L’assistant Solvéa'] },
+  assistant: { gestion: ['Solvi, votre assistant'], equipe: ['Solvi, votre assistant'] },
   controles: { gestion: ['Les contrôles'] },
 };
 
@@ -1643,6 +1712,13 @@ export function Parcours(): JSX.Element | null {
   const [nbTemps, setNbTemps] = useState(0);
   /** Ce que le prochain temps va faire, lu à l'écran. */
   const [annonce, setAnnonce] = useState('');
+  /** À quoi sert le geste en cours : la deuxième ligne de la bulle de Solvi. */
+  const [sert, setSert] = useState('');
+  /** Où Solvi se pose pendant la démonstration, pour ne jamais cacher ce qu'il montre. */
+  const [coin, setCoin] = useState<'bas' | 'gauche' | 'haut'>('bas');
+  const [allure, setAllure] = useState<Rythme>(rythme);
+  /** L'humeur de Solvi suit ce qu'il fait : il explique, clique, écrit, attend un calcul, montre un résultat. */
+  const [humeur, setHumeur] = useState<Humeur>('neutre');
   /** La fiche d'explication est-elle à l'écran ? Elle s'efface le temps d'une transition ou d'une démonstration. */
   const [ouvert, setOuvert] = useState(false);
   const [clic, setClic] = useState(false);
@@ -1722,6 +1798,7 @@ export function Parcours(): JSX.Element | null {
     setNbTemps(liste.length);
     setJoues(0);
     setAnnonce('');
+    setSert('');
     let faits = 0;
     const dernierePas = parcours >= (useUi.getState().tache?.a ?? SCENARIOS[scenario].etapes.length - 1);
     /** Un temps est joué : le suivant s'enchaîne. Après le dernier, on laisse voir le résultat, puis l'étape suivante arrive. */
@@ -1732,9 +1809,13 @@ export function Parcours(): JSX.Element | null {
       setJoues(faits);
       if (faits < liste.length) {
         setAnnonce(decrire(liste[faits]));
-        plusTard(() => derouler(liste[faits], 0), 420);
+        setSert(utilite(liste[faits]));
+        setHumeur('neutre');
+        plusTard(() => derouler(liste[faits], 0), tempo(650));
         return;
       }
+      // La démonstration de l'étape est finie : Solvi est content du résultat.
+      setHumeur('heureux');
       plusTard(() => {
         contexte.current = null;
         if (dernierePas) {
@@ -1742,56 +1823,88 @@ export function Parcours(): JSX.Element | null {
           noter();
           setOuvert(true);
         } else setParcours(parcours + 1);
-      }, 1300);
+      }, tempo(2600));
     };
     /** Joue le geste i du temps en cours, puis le suivant. Un élément introuvable est attendu un instant, puis ignoré. */
     const derouler = (gestes: Geste[], i: number): void => {
       if (i >= gestes.length) return fin();
       const g = gestes[i];
       const suite = (ms: number): void => plusTard(() => derouler(gestes, i + 1), ms);
-      if (g.faire === 'pause') return suite(g.ms);
+      if (g.faire === 'pause') {
+        // Une pause peut dire ce qu'on regarde pendant qu'elle dure.
+        if (g.dit) {
+          setAnnonce(g.dit);
+          setSert(g.sert ?? '');
+          // Il montre un résultat : il s'en réjouit.
+          setHumeur('excite');
+        }
+        return suite(tempo(g.ms));
+      }
       if (g.faire === 'action') {
         g.jouer();
-        return suite(700);
+        return suite(tempo(900));
       }
       const cible = g.faire === 'cliquer' ? g.sur : g.faire === 'attendre' ? g.que : g.dans;
       let essais = 0;
+      const facultatif = 'facultatif' in g && !!g.facultatif;
       const viser = (): void => {
         const el = element(cible);
         if (!el || (el as HTMLButtonElement).disabled) {
-          if (++essais > (g.faire === 'attendre' ? 80 : 14)) return derouler(gestes, i + 1);
+          // Une attente qui dure (un calcul) : Solvi réfléchit.
+          if (g.faire === 'attendre' && essais === 4) setHumeur('reflechi');
+          if (++essais > (g.faire === 'attendre' ? (facultatif ? 14 : 200) : facultatif ? 6 : 14)) {
+            // Un geste qui ne trouve pas sa cible est sauté : on le signale, pour qu'une étape ne se vide pas en silence.
+            if (!facultatif) console.warn(`[visite] geste sauté à l’étape « ${SCENARIOS[scenario].etapes[parcours]?.titre ?? '?'} » : ${g.faire}${'dit' in g && g.dit ? ` (${g.dit})` : typeof cible === 'string' ? ` ${cible}` : ''}`);
+            return derouler(gestes, i + 1);
+          }
           return plusTard(viser, 150);
         }
         if (g.faire === 'attendre') return suite(350);
         el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
         visee.current = cible;
         plusTard(() => mesure.current(), 60);
+        // Solvi se pose là où il ne cache pas ce qu'il montre : en bas, sinon à gauche, sinon en haut.
+        plusTard(() => {
+          const r = element(cible)?.getBoundingClientRect();
+          if (!r) return;
+          const W = window.innerWidth;
+          const H = window.innerHeight;
+          const touche = (x1: number, y1: number, x2: number, y2: number): boolean => r.left < x2 + 16 && r.right > x1 - 16 && r.top < y2 + 16 && r.bottom > y1 - 16;
+          const large = Math.min(560, W - 32);
+          const bas = touche(W / 2 - large / 2, H - 170, W / 2 + large / 2, H);
+          const gauche = touche(0, H - 190, Math.min(440, W), H);
+          setCoin(!bas ? 'bas' : !gauche && W > 900 ? 'gauche' : 'haut');
+        }, 420);
+        const aLire = tempsDeLire(`${g.dit ?? decrire([g])} ${g.sert ?? ''}`);
         // Le pointeur glisse jusqu'à la cible, s'y pose, puis agit.
         plusTard(() => {
           setClic(true);
+          // Un clin d'œil au moment d'agir ; il se concentre pour écrire.
+          setHumeur(g.faire === 'taper' ? 'concentre' : g.faire === 'choisir' ? 'content' : 'confiant');
           plusTard(() => {
             setClic(false);
             const cibleFinale = element(cible);
             if (!cibleFinale) return derouler(gestes, i + 1);
             if (g.faire === 'cliquer') {
               cibleFinale.click();
-              suite(950);
+              // Le temps de voir ce que le clic a changé.
+              suite(tempo(1900));
             } else if (g.faire === 'choisir') {
               ecrire(cibleFinale, g.valeur);
-              suite(800);
+              suite(tempo(1700));
             } else {
               cibleFinale.focus();
               const taper = (n: number): void => {
                 const champ = element(cible);
                 if (!champ) return derouler(gestes, i + 1);
                 ecrire(champ, g.texte.slice(0, n));
-                if (n >= g.texte.length) return suite(600);
-                plusTard(() => taper(n + 1), 70);
+                if (n >= g.texte.length) return suite(tempo(1300));
+                plusTard(() => taper(n + 1), tempo(90));
               };
               taper(1);
             }
-          }, 460);
-        }, 1150);
+          }, 520);
+        }, aLire);
       };
       viser();
     };
@@ -1804,8 +1917,11 @@ export function Parcours(): JSX.Element | null {
       setOuvert(false);
       setPhase('demo');
       setAnnonce(decrire(liste[faits]));
+      setSert(utilite(liste[faits]));
+      setHumeur('neutre');
+      setCoin('bas');
       // La fiche a le temps de s'effacer avant le premier geste.
-      plusTard(() => derouler(liste[faits], 0), 650);
+      plusTard(() => derouler(liste[faits], 0), 800);
     };
     plusTard(() => {
       const ici = document.querySelector<HTMLElement>('.side .nav-item.on, .tabbar .on');
@@ -1967,22 +2083,43 @@ export function Parcours(): JSX.Element | null {
         </div>
       ) : null}
       {phase === 'demo' ? (
-        <div className="pt-legende no-print" role="status">
-          <span className="pt-legende-pic" aria-hidden="true">
-            <Play size={13} />
+        <div className={`solvi-guide no-print ${coin}`}>
+          {/* Solvi reprend la parole à chaque geste : un petit bond le signale. */}
+          <span key={annonce} className="solvi-guide-qui">
+            <Solvi size={66} humeur={humeur} />
           </span>
-          <span>
+          <div className="solvi-bulle" role="status">
             <b>{annonce || etape.titre}</b>
-          </span>
-          <button type="button" className="btn sm" onClick={() => (dernier ? setParcours(null) : setParcours(parcours + 1))}>
-            Passer
-          </button>
+            {sert ? <span className="solvi-sert">{sert}</span> : null}
+            <span className="solvi-outils">
+              <button
+                type="button"
+                className="solvi-rythme"
+                title="Changer le rythme de la démonstration"
+                onClick={() => {
+                  const suivant: Rythme = allure === 'pose' ? 'normal' : allure === 'normal' ? 'vif' : 'pose';
+                  rythme = suivant;
+                  setAllure(suivant);
+                  try {
+                    window.localStorage.setItem(CLE_RYTHME, suivant);
+                  } catch {
+                    /* le rythme reste celui de la séance */
+                  }
+                }}
+              >
+                <Gauge size={13} aria-hidden="true" /> Rythme {RYTHMES[allure].nom}
+              </button>
+              <button type="button" className="solvi-passer" onClick={() => (dernier ? setParcours(null) : setParcours(parcours + 1))}>
+                Passer
+              </button>
+            </span>
+          </div>
         </div>
       ) : null}
       <aside ref={panneau} className={`parcours-test no-print${ferme ? ' ferme' : ''}`} aria-label="Parcours guidé" aria-hidden={ferme} {...(ferme ? { inert: '' } : {})} style={place ? { left: place.left, top: place.top, right: 'auto', bottom: 'auto' } : undefined}>
         <div className="row" style={{ gap: 10 }}>
-          <span className="pt-n num" aria-hidden="true">
-            {parcours + 1}
+          <span className="pt-solvi" aria-hidden="true">
+            <Solvi size={46} humeur={phase === 'fini' ? (dernier ? 'joyeux' : 'heureux') : 'neutre'} />
           </span>
           <div className="grow">
             <div className="eyebrow">
@@ -2035,7 +2172,7 @@ export function Parcours(): JSX.Element | null {
               </div>
             ) : reste ? (
               <div className="pt-annonce small">
-                <MousePointer2 size={15} aria-hidden="true" /> « Suivant » : Solvéa vous le montre à l’écran{nbTemps > 1 ? `, en ${nbTemps} gestes` : ''}.
+                <MousePointer2 size={15} aria-hidden="true" /> « Suivant » : Solvi vous le montre à l’écran{nbTemps > 1 ? `, en ${nbTemps} gestes` : ''}.
               </div>
             ) : null}
           </div>

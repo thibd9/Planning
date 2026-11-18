@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Justificatif } from '../domain/types';
-import { pointsForts } from '../engine/suivi';
+import { absencesSimultanees, pointsForts } from '../engine/suivi';
 import { useStore } from './store';
 
 const s = (): ReturnType<typeof useStore.getState> => useStore.getState();
@@ -67,6 +67,31 @@ describe('décisions annoncées', () => {
     expect(a.pour).toEqual(expect.arrayContaining(['p_camille', candidat!, 'p_helene', 'p_antoine']));
     expect(a.effets[0]).toMatch(/Nicolas L\. : en poste → repos/);
     expect(a.effets[1]).toMatch(/repos → en poste/);
+  });
+});
+
+describe('deux demandes sur les mêmes dates', () => {
+  it('chaque demande montre l’autre, dans l’ordre d’arrivée, et l’annonce rappelle celle qui reste', () => {
+    const conge = s().data.absences.find((a) => a.personId === 'p_camille' && a.statut === 'demandee')!;
+    // Léa demande un congé qui chevauche celui de Nicolas, un jour plus tard.
+    s().setActeur('p_lea');
+    s().declarerAbsence({ personId: 'p_lea', from: conge.to, to: conge.to, type: 'conge', statut: 'demandee' });
+    s().setActeur('p_helene');
+    const lea = s().data.absences.find((a) => a.personId === 'p_lea' && a.statut === 'demandee')!;
+    const vuDeNicolas = absencesSimultanees(s().data, conge);
+    expect(vuDeNicolas.demandees.map((x) => x.absence.personId)).toEqual(['p_lea']);
+    expect(vuDeNicolas.demandees[0]).toMatchObject({ jours: 1, avant: false });
+    const vuDeLea = absencesSimultanees(s().data, lea);
+    expect(vuDeLea.demandees[0]).toMatchObject({ jours: 1, avant: true });
+    // Nicolas est accepté : pour Léa, il passe de « demande aussi » à « déjà absent », et l'annonce rappelle sa demande.
+    s().deciderAbsence(conge.id, true);
+    const apres = absencesSimultanees(s().data, lea);
+    expect(apres.demandees).toHaveLength(0);
+    expect(apres.accordees.map((x) => x.absence.personId)).toEqual(['p_camille']);
+    expect((s().data.annonces ?? [])[0].effets.join(' ')).toMatch(/Reste à trancher sur ces dates : la demande de Léa F\./);
+    // Une demande refusée ne compte plus.
+    s().deciderAbsence(lea.id, false);
+    expect(absencesSimultanees(s().data, conge).demandees).toHaveLength(0);
   });
 });
 

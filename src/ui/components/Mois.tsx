@@ -22,8 +22,8 @@ const ABSENCE_COURT: Record<string, string> = { conge: 'Congé', arret: 'Arrêt'
 const SOUHAIT_COURT: Record<string, string> = { matin: 'Matin', journee: 'Jour', soir: 'Ap.-m.', repos: 'Repos' };
 
 /** Les lignes se rangent par poste, comme dans la grille de la semaine. */
-const GROUPES: { titre: string; cles: Qualification[]; couleur: string; icone: JSX.Element }[] = [
-  { titre: 'Pharmaciens', cles: ['titulaire', 'adjoint'], couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
+const GROUPES: { titre: string; note?: string; cles: Qualification[]; couleur: string; icone: JSX.Element }[] = [
+  { titre: 'Pharmaciens', note: 'titulaires et adjoints', cles: ['titulaire', 'adjoint'], couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
   { titre: 'Préparateurs', cles: ['preparateur'], couleur: 'r-prepa', icone: <FlaskConical size={14} /> },
   { titre: 'Animateurs', cles: ['animateur'], couleur: 'r-anim', icone: <Megaphone size={14} /> },
   { titre: 'Apprentis', cles: ['apprenti'], couleur: 'r-apprenti', icone: <Sprout size={14} /> },
@@ -388,6 +388,7 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
                           {g.icone}
                         </span>
                         {g.titre}
+                        {g.note ? <span className="pg-group-note"> · {g.note}</span> : null}
                       </span>
                     </th>
                   </tr>

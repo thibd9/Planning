@@ -1274,7 +1274,8 @@ details.repli[open] .chev { transform: rotate(180deg); }
 .pg-h .n { font-size: 19px; }
 
 /* ---------------------------------------------------------------- Flèches, chevrons et listes : aux couleurs du thème */
-.lucide-chevron-down, .lucide-chevron-up, .lucide-chevron-left, .lucide-chevron-right, .lucide-arrow-right, .lucide-arrow-left, .lucide-arrow-left-right { color: var(--a-text); }
+/* Une icône prend l'encre de ce qui la porte : jamais une flèche bleue sur une pastille jaune. */
+.lucide-chevron-down, .lucide-chevron-up, .lucide-chevron-left, .lucide-chevron-right, .lucide-arrow-right, .lucide-arrow-left, .lucide-arrow-left-right { color: inherit; }
 .btn.primary svg, .btn.magic svg, .onglet.on svg, .seg button.on svg, .tb-sujet .compte svg, .hero .btn.primary svg, .tile svg, .cal-poste svg { color: inherit; }
 .volet .chev, .plus .chev, details.repli .chev, .tb-sujet > svg { color: var(--a-text); }
 /* Listes déroulantes : le chevron du navigateur est remplacé par le nôtre, dans la couleur du thème. */
@@ -2647,3 +2648,214 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
   .pf-equipe { display: flex; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 12px; }
   .pf-equipe > li { flex: 0 0 78%; scroll-snap-align: start; }
 }
+
+/* Grille : une plage sans pharmacien dit ce qui la crée ; le groupe rappelle que les titulaires sont pharmaciens. */
+.pg-o-plage { display: flex; flex-direction: column; align-items: center; margin-top: 3px; }
+.pg-o-raison { font-size: 11.5px; color: var(--ink-2); }
+.pg-group-note { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ink-2); }
+
+/* Propositions : le titre sur sa ligne, la phrase sur deux lignes au plus, l'état dessous. */
+.variant-titre { display: block; font-size: 17px; letter-spacing: -0.02em; }
+.variant-phrase { display: block; margin-top: 4px; min-height: 2.9em; }
+.variant-etat { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; min-height: 28px; }
+@media (max-width: 760px) {
+  .variant-phrase { min-height: 0; }
+}
+
+/* « Ou réglez-le vous-même » : le titre respire, et « Conseillé » se pose dans la carte au lieu de mordre sur son bord. */
+.appel-ou { margin: 30px 0 16px; }
+.option .reco-tag { position: static; align-self: flex-start; font-size: 12px; padding: 4px 12px; margin-bottom: -2px; }
+
+/* Solvi, la mascotte de l'aide : elle flotte sur place et cligne des yeux, dans la couleur du thème. */
+.solvi {
+  --solvi-1: color-mix(in srgb, var(--a-plein) 84%, #0a0f3c);
+  --solvi-2: var(--a-plein-2);
+  --solvi-3: color-mix(in srgb, var(--a-plein-2) 64%, #fff);
+  --solvi-4: color-mix(in srgb, var(--a-plein-2) 34%, #fff);
+  --solvi-oeil: color-mix(in srgb, var(--a-plein) 50%, #0a0f3c);
+  --solvi-oeil-2: var(--a-plein-2);
+  --solvi-joue: color-mix(in srgb, var(--a-plein-2) 9%, #fff);
+  --solvi-ombre: color-mix(in srgb, var(--a-plein) 45%, #050a2e);
+  position: relative; display: inline-block; flex: none; vertical-align: middle;
+}
+.solvi-corps { position: absolute; inset: 0; display: block; animation: solvi-flotte 3.8s ease-in-out infinite; will-change: transform; }
+.solvi-corps svg { display: block; overflow: visible; filter: drop-shadow(0 3px 5px color-mix(in srgb, var(--solvi-ombre) 38%, transparent)); }
+.solvi-ombre { position: absolute; left: 14%; right: 14%; bottom: -9%; height: 12%; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--a-plein-2) 42%, transparent), transparent); animation: solvi-ombre 3.8s ease-in-out infinite; }
+.solvi { --solvi-signe: var(--a-plein-2); }
+.solvi-yeux { transform-box: fill-box; transform-origin: center; animation: solvi-humeur 0.32s var(--fluide) both; }
+.solvi-yeux.cligne { animation: solvi-humeur 0.32s var(--fluide) both, solvi-cligne 5.2s ease-in-out 0.4s infinite; }
+/* Le signe d'une humeur arrive d'un bond, puis vit sa petite vie. */
+.solvi-signe { transform-box: fill-box; transform-origin: 20% 80%; animation: solvi-signe 0.45s var(--fluide) both; }
+.solvi-signe.eclat { animation: solvi-signe 0.45s var(--fluide) both, solvi-eclat 1.6s ease-in-out 0.45s infinite; }
+.solvi-signe.scintille { transform-origin: center; animation: solvi-signe 0.45s var(--fluide) both, solvi-scintille 1.4s ease-in-out 0.45s infinite; }
+.solvi-signe.hoche { animation: solvi-signe 0.45s var(--fluide) both, solvi-hoche 2.2s ease-in-out 0.45s infinite; }
+.solvi-signe.tombe { transform-origin: center; animation: solvi-tombe 1.5s ease-in 0.2s infinite both; }
+.solvi-signe.monte { animation: solvi-monte 2.4s ease-out infinite both; }
+.solvi-signe.tourne { transform-origin: center; animation: solvi-signe 0.45s var(--fluide) both, solvi-tourne 3s linear 0.45s infinite; }
+.solvi-point { animation: solvi-point 1.2s ease-in-out infinite; }
+.solvi-point.p1 { animation-delay: 0.18s; }
+.solvi-point.p2 { animation-delay: 0.36s; }
+@keyframes solvi-humeur { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+@keyframes solvi-signe { from { opacity: 0; transform: scale(0.2); } 70% { transform: scale(1.15); } to { opacity: 1; transform: scale(1); } }
+@keyframes solvi-eclat { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.88); } }
+@keyframes solvi-scintille { 0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; } 50% { transform: scale(0.72) rotate(18deg); opacity: 0.7; } }
+@keyframes solvi-hoche { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-2px) rotate(6deg); } }
+@keyframes solvi-tombe { 0% { opacity: 0; transform: translateY(-4px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
+@keyframes solvi-monte { 0% { opacity: 0; transform: translate(-3px, 5px) scale(0.8); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(4px, -7px) scale(1.08); } }
+@keyframes solvi-tourne { to { transform: rotate(360deg); } }
+@keyframes solvi-point { 0%, 100% { opacity: 0.45; } 40% { opacity: 1; } }
+/* Un petit bond quand Solvi prend la parole. */
+.solvi.parle .solvi-corps { animation: solvi-bond 0.6s var(--fluide), solvi-flotte 3.8s ease-in-out 0.6s infinite; }
+.solvi.calme .solvi-corps, .solvi.calme .solvi-ombre { animation: none; }
+@keyframes solvi-flotte { 0%, 100% { transform: translateY(2%) rotate(-1.5deg); } 50% { transform: translateY(-7%) rotate(1.5deg); } }
+@keyframes solvi-ombre { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(0.8); opacity: 0.6; } }
+@keyframes solvi-cligne { 0%, 44%, 50%, 90%, 96%, 100% { transform: scaleY(1); } 47%, 93% { transform: scaleY(0.08); } }
+@keyframes solvi-bond { 0% { transform: translateY(2%) scale(1); } 35% { transform: translateY(-16%) scale(1.06, 0.95); } 70% { transform: translateY(4%) scale(0.97, 1.04); } 100% { transform: translateY(2%) scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .solvi-corps, .solvi-ombre, .solvi-yeux, .solvi-yeux.cligne, .solvi.parle .solvi-corps, .solvi-signe, .solvi-point { animation: none !important; }
+}
+
+/* Menu : des titres de rubrique plus lisibles, sans numéro. Un fil relie les rubriques dans l'ordre du travail. */
+.nav-groupe { display: contents; }
+.nav-label { font-size: 13px; font-weight: 750; letter-spacing: 0.07em; color: var(--ink); padding: 22px 12px 8px; }
+.nav-etape { width: 20px; height: 20px; border-radius: 50%; background: var(--surface); color: var(--a-text); box-shadow: inset 0 0 0 2px var(--a-2, var(--a)); }
+.nav-etape.debut { background: var(--a-deep); box-shadow: 0 0 0 4px var(--a-soft); width: 12px; height: 12px; margin: 0 4px; }
+@media (min-width: 901px) {
+  .nav-groupe.ordre { display: flex; flex-direction: column; gap: 4px; position: relative; isolation: isolate; }
+  /* Le fil passe derrière les icônes, de la rubrique à la suivante. */
+  .nav-groupe.ordre::before { content: ''; position: absolute; z-index: -1; left: 21px; top: 36px; bottom: -30px; width: 2px; border-radius: 1px; background: color-mix(in srgb, var(--a-2, var(--a)) 45%, transparent); }
+  .nav-groupe.ordre.fin::before { bottom: 18px; }
+  .nav-groupe.ordre .nav-item .ni { box-shadow: 0 0 0 3px var(--surface); }
+}
+@media (max-width: 900px) {
+  /* En barre horizontale, la flèche pointe vers la suite. */
+  .nav-etape svg { transform: rotate(-90deg); }
+}
+
+/* Visite : Solvi accompagne chaque geste. Il reste posé au même endroit et dit quoi faire, et à quoi cela sert. */
+.solvi-guide { position: fixed; z-index: 62; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; align-items: flex-end; gap: 12px; width: min(560px, calc(100vw - 32px)); pointer-events: none; animation: solvi-arrive 0.5s var(--fluide) both; transition: left 0.6s var(--fluide), bottom 0.6s var(--fluide), top 0.6s var(--fluide); }
+.solvi-guide.gauche { left: 24px; transform: none; width: min(420px, calc(100vw - 32px)); }
+.solvi-guide.haut { bottom: auto; top: 92px; align-items: flex-start; }
+.solvi-guide-qui { flex: none; margin-bottom: 6px; }
+.solvi-guide-qui .solvi-corps { animation: solvi-bond 0.6s var(--fluide), solvi-flotte 3.8s ease-in-out 0.6s infinite; }
+.solvi-bulle { position: relative; flex: 1; min-width: 0; display: grid; gap: 4px; padding: 14px 16px 12px 18px; border-radius: 22px 22px 22px 6px; background: var(--surface); color: var(--ink); box-shadow: 0 22px 54px -18px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--line); pointer-events: auto; }
+.solvi-guide.haut .solvi-bulle { border-radius: 6px 22px 22px 22px; }
+.solvi-bulle b { font-size: 16px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
+.solvi-sert { font-size: 14.5px; line-height: 1.45; color: var(--ink-2); }
+.solvi-outils { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 4px; }
+.solvi-rythme, .solvi-passer { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border: 0; border-radius: 999px; background: var(--n-2); color: var(--ink-2); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.solvi-passer { background: var(--a-soft); color: var(--a-text); }
+.solvi-rythme:hover, .solvi-passer:hover { color: var(--ink); }
+@keyframes solvi-arrive { from { opacity: 0; translate: 0 18px; } to { opacity: 1; translate: 0 0; } }
+@media (max-width: 900px) {
+  .solvi-guide, .solvi-guide.gauche { left: 12px; right: 12px; transform: none; width: auto; bottom: 92px; gap: 8px; }
+  .solvi-guide.haut { top: 76px; bottom: auto; }
+  .solvi-guide-qui .solvi { width: 48px !important; height: 48px !important; }
+  .solvi-guide-qui svg { width: 48px; height: 48px; }
+  .solvi-bulle b { font-size: 15px; }
+  .solvi-sert { font-size: 13.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .solvi-guide, .solvi-guide-qui .solvi-corps { animation: none; }
+}
+/* La fiche de la visite : Solvi présente l'étape. */
+.pt-solvi { flex: none; width: 52px; height: 52px; border-radius: 17px; display: grid; place-items: center; background: color-mix(in srgb, var(--surface) 92%, transparent); }
+/* L'assistant : Solvi ne tourne pas sur lui-même au survol. */
+.aide-fab:hover svg, .aide-fab.on svg { transform: none; }
+.aide-fab { padding-left: 8px; gap: 10px; }
+.aide-logo { background: color-mix(in srgb, var(--surface) 92%, transparent); }
+
+/* Frise des absences de l'équipe : une ligne par personne, une barre par absence, sur les semaines à venir. */
+.fc { margin-bottom: 18px; }
+.fc-ico { flex: none; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--a-soft); color: var(--a-text); }
+.fc-legende { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink-2); }
+.fc-legende li { display: inline-flex; align-items: center; gap: 6px; }
+.fc-legende .fc-barre { width: 22px; height: 12px; min-height: 0; border-radius: 4px; }
+.fc-zone { overflow-x: auto; padding: 4px 18px 14px; border-radius: 14px; }
+.fc-grille { min-width: 640px; display: grid; gap: 8px; }
+.fc-tete, .fc-ligne { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 12px; }
+.fc-semaines { display: grid; grid-template-columns: repeat(var(--fc-jours), minmax(0, 1fr)); }
+.fc-semaine { grid-column: span 7; font-size: 12px; color: var(--ink-2); padding-left: 4px; border-left: 1px solid var(--line); white-space: nowrap; }
+.fc-semaine b { color: var(--ink); font-weight: 700; text-transform: capitalize; }
+.fc-qui { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 600; font-size: 13.5px; }
+.fc-nom { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fc-ligne.moi .fc-nom { color: var(--a-text); }
+.fc-piste { position: relative; display: grid; grid-template-columns: repeat(var(--fc-jours), minmax(0, 1fr)); grid-auto-rows: 30px; align-items: center; border-radius: 10px; background-color: var(--n-1); background-image: linear-gradient(to right, var(--line) 1px, transparent 1px); background-size: calc(100% * 7 / var(--fc-jours)) 100%; }
+.fc-piste > * { grid-row: 1; }
+.fc-auj { align-self: stretch; background: color-mix(in srgb, var(--a) 26%, transparent); border-radius: 3px; }
+.fc-ferie { align-self: stretch; background: repeating-linear-gradient(135deg, transparent 0 3px, color-mix(in srgb, var(--ink-3) 30%, transparent) 3px 4px); }
+.fc-barre { position: relative; z-index: 1; min-height: 22px; margin: 0 1px; border-radius: 7px; display: flex; align-items: center; padding: 0 7px; overflow: hidden; font-size: 11.5px; font-weight: 650; color: #111c27; white-space: nowrap; background: var(--n-3); }
+.fc-barre.conge { background: var(--p-conge); }
+.fc-barre.arret { background: var(--p-arret); }
+.fc-barre.formation { background: var(--p-formation); }
+.fc-barre.absence { background: var(--n-3); color: var(--ink); }
+.fc-barre.attente { background: color-mix(in srgb, var(--p-conge) 22%, var(--surface)); color: var(--ink); outline: 2px dashed var(--warn); outline-offset: -2px; }
+.fc-note { margin: 0; padding: 0 18px 14px; }
+@media (max-width: 760px) {
+  .fc-tete, .fc-ligne { grid-template-columns: 96px minmax(0, 1fr); gap: 8px; }
+  .fc-qui .avatar { display: none; }
+}
+
+.ad-vide, .tb-ajour { display: flex; align-items: center; gap: 16px; text-align: left; }
+.ad-vide { justify-content: center; }
+/* Sur le fond assombri de la visite, le signe de Solvi s'éclaircit pour rester lisible. */
+.solvi-guide .solvi { --solvi-signe: color-mix(in srgb, var(--a-plein-2) 42%, #fff); }
+
+/* Une demande porte sa raison : la liste et la précision dans la fenêtre, le rappel sur la carte du titulaire. */
+.demande-raison { display: grid; grid-template-columns: minmax(220px, 280px) 1fr; gap: 10px 14px; padding: 16px 18px; border-radius: 16px; background: var(--a-soft); }
+.demande-raison .field { margin: 0; }
+.demande-raison-note { grid-column: 1 / -1; margin: 0; }
+.demande-motif { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 8px; padding: 8px 12px; border-radius: 12px; background: var(--n-1); }
+@media (max-width: 640px) {
+  .demande-raison { grid-template-columns: 1fr; }
+}
+
+/* Demandes de remplacement : des blocs séparés, sur fond blanc, entourés à la couleur de leur urgence. */
+.demandes-pile { display: grid; gap: 16px; }
+.demandes-pile .demande-r { padding: 22px 24px; border: 2px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: var(--shadow-1); }
+.demandes-pile .demande-r.u-urgent, .dem-ligne.u-urgent { background: var(--surface); border-color: color-mix(in srgb, var(--warn) 60%, var(--surface)); }
+.demandes-pile .demande-r.u-medical, .dem-ligne.u-medical { background: var(--surface); border-color: color-mix(in srgb, var(--danger) 62%, var(--surface)); }
+.dem-ligne.u-urgent, .dem-ligne.u-medical { border-width: 2px; border-style: solid; }
+
+/* Grille : « Voir la journée » est un vrai bouton, sous chaque date. */
+.jour-btn { gap: 2px; padding: 6px 10px 8px; cursor: pointer; }
+.jour-voir { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; padding: 4px 10px; border-radius: 999px; background: var(--a-soft); color: var(--a-text); font-size: 12px; font-weight: 650; white-space: nowrap; transition: background 0.2s ease, color 0.2s ease; }
+.jour-btn:hover { background: transparent; }
+.jour-btn:hover .jour-voir, .jour-btn:focus-visible .jour-voir { background: var(--a-deep); color: var(--on-a); }
+@media (max-width: 1240px) {
+  .jour-voir { padding: 4px 8px; font-size: 11.5px; }
+}
+@media print {
+  .jour-voir { display: none; }
+}
+
+/* Logique des couleurs. Une pastille teintée porte une icône de la même teinte : bleu sur bleu clair (information),
+   vert sur vert clair (validé), brun sur jaune (attention), rouge sur rose (bloquant), couleur du thème sur sa teinte claire.
+   Le rouge est réservé à ce qui bloque ou à l'urgence médicale : un message non lu ou une notification n'est pas une erreur. */
+.msg-alerte { background: var(--a-deep); color: var(--on-a); box-shadow: 0 8px 22px -12px var(--a-deep); }
+.msg-rubrique.nouveau { color: var(--a-text); }
+.msg-fil.non-lu { background: var(--a-soft); box-shadow: inset 5px 0 0 var(--a-deep), var(--shadow-1); }
+.msg-fil.non-lu .msg-heure { color: var(--a-text); }
+.msg-pastille { background: var(--a-deep); color: var(--on-a); }
+.msg-separateur { color: var(--a-text); }
+.msg-separateur::before, .msg-separateur::after { background: color-mix(in srgb, var(--a-deep) 40%, transparent); }
+.bulle.nouveau { box-shadow: 0 0 0 2px var(--a-deep); }
+.pastille-n { background: var(--a-deep); color: var(--on-a); }
+/* Ma part des contraintes : des chiffres et une phrase, sans jauge à déchiffrer. */
+.part-liste { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; }
+.part { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 12px 14px; border-radius: 14px; background: var(--n-1); }
+.part-nom { font-weight: 650; }
+.part-chiffres { grid-column: 1; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13.5px; color: var(--ink-2); }
+.part-chiffres b { color: var(--ink); font-size: 15px; }
+.part-mot { grid-column: 2; grid-row: 1 / span 2; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 650; white-space: nowrap; background: var(--ok-soft); color: var(--ok-ink); }
+.part.plus .part-mot { background: var(--warn-soft); color: var(--warn-ink); }
+.part.moins .part-mot { background: var(--info-soft); color: var(--info); }
+@media (max-width: 560px) {
+  .part { grid-template-columns: 1fr; }
+  .part-mot { grid-column: 1; grid-row: auto; justify-self: start; white-space: normal; }
+}
+/* Le texte réservé aux lecteurs d'écran reste dans sa rubrique : sinon il élargit la page sur téléphone. */
+.nav-label { position: relative; }
+/* Aide : les deux boutons d'une fiche respirent. */
+.ad-actions { gap: 14px 12px; margin-top: 16px; }
+.ad-fiche { gap: 10px; padding: 22px; }

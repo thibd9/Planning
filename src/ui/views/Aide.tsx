@@ -1,4 +1,4 @@
-import { ArrowRight, BookA, GraduationCap, LifeBuoy, ListChecks, MessageCircleQuestion, Play, Search, X } from 'lucide-react';
+import { ArrowRight, BookA, GraduationCap, LifeBuoy, ListChecks, Play, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { Espace } from '../../domain/acces';
 import { estCollaboratif } from '../../engine/souhaits';
@@ -7,6 +7,7 @@ import { useUi } from '../../store/ui';
 import type { Fiche } from '../bot';
 import { fichesPour, simple } from '../bot';
 import { lancerTutoriel, tutorielDe } from '../Parcours';
+import { Solvi } from '../Solvi';
 
 /** Les fiches rangées par thème, dans l'ordre du travail. */
 const THEMES: { titre: string; ids: string[] }[] = [
@@ -140,7 +141,10 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
             </section>
           ))
         ) : (
-          <div className="card empty">Rien ne correspond à « {recherche} ». Essayez un autre mot, ou demandez à l’assistant.</div>
+          <div className="card empty ad-vide">
+            <Solvi size={64} humeur="intrigue" />
+            <span>Rien ne correspond à « {recherche} ». Essayez un autre mot, ou demandez à Solvi.</span>
+          </div>
         )
       ) : termes.length ? (
         <dl className="card lex">
@@ -167,11 +171,11 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
           <ArrowRight size={16} aria-hidden="true" />
         </button>
         <button type="button" className="ad-autre" onClick={() => ui.ouvrirAssistant(true)}>
-          <span className="ad-autre-pic" aria-hidden="true">
-            <MessageCircleQuestion size={20} />
+          <span className="ad-autre-pic solvi-case" aria-hidden="true">
+            <Solvi size={34} calme humeur="heureux" />
           </span>
           <span className="grow">
-            <b>Demander à l’assistant</b>
+            <b>Demander à Solvi</b>
             <span className="small soft">Posez votre question avec vos mots : il répond d’après votre planning.</span>
           </span>
           <ArrowRight size={16} aria-hidden="true" />

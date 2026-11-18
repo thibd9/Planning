@@ -4,7 +4,7 @@ import { peutGerer } from '../../domain/acces';
 import { addDays, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, mondayOf, parseHHMM } from '../../domain/time';
 import type { EcartType, ISODate, Shift } from '../../domain/types';
 import { ECART_LABEL, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
-import { minutesTravail, ouverture, trousPharmacien } from '../../engine/core';
+import { minutesTravail, ouverture, trousPharmacienExpliques } from '../../engine/core';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { EtiquetteRole, IconeGarde } from '../icons';
@@ -31,7 +31,7 @@ export function DialogueJour({ date: initiale, moi, onClose }: { date: ISODate; 
   const postes = source.filter((s) => s.date === date && !absentes.some((a) => a.personId === s.personId)).sort((a, b) => a.start - b.start);
   const plages = ouverture(data.officine, date);
   const echelle: Echelle = { start: Math.floor((Math.min(8 * 60, ...postes.map((s) => s.start), ...plages.map((p) => p.start)) - 30) / 60) * 60, end: Math.ceil((Math.max(20 * 60, ...postes.map((s) => s.end), ...plages.map((p) => p.end)) + 30) / 60) * 60 };
-  const trous = gere && postes.length ? trousPharmacien(data, date) : [];
+  const trous = gere && postes.length ? trousPharmacienExpliques(data, date).trous : [];
   const gardes = data.gardes.filter((g) => g.date === date && g.personId);
   const ecarts = (data.ecarts ?? []).filter((e) => e.date === date);
   const personne = (id: string | null): (typeof data.personnes)[number] | undefined => data.personnes.find((p) => p.id === id);
@@ -73,7 +73,7 @@ export function DialogueJour({ date: initiale, moi, onClose }: { date: ISODate; 
           <p className="notice danger small" role="status">
             <AlertTriangle size={16} aria-hidden="true" />
             <span>
-              <b>Aucun pharmacien</b> de {trous.map((t) => `${fmtHeure(t.start)} à ${fmtHeure(t.end)}`).join(', puis de ')}. Décalez une pause ou allongez un poste.
+              <b>Aucun pharmacien présent</b> de {trous.map((t) => `${fmtHeure(t.start)} à ${fmtHeure(t.end)}${t.raison ? ` (${t.raison})` : ''}`).join(', puis de ')}. Décalez une pause, allongez un poste ou posez un autre pharmacien, titulaire ou adjoint.
             </span>
           </p>
         ) : (

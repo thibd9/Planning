@@ -1,4 +1,4 @@
-import { AlertTriangle, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users, X, BookOpenCheck } from 'lucide-react';
+import { AlertTriangle, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users, X, BookOpenCheck , Eye } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
@@ -33,6 +33,7 @@ import {
   shiftsSemaine,
   sousEffectifs,
   trousPharmacien,
+  trousPharmacienExpliques,
 } from '../../engine/core';
 import type { Blocage } from '../../engine/diagnose';
 import { CAS_LABEL, diagnosticPrealable, diagnosticResultat } from '../../engine/diagnose';
@@ -63,8 +64,8 @@ export function echelleOfficine(data: AppData): Echelle {
   };
 }
 
-const GROUPES: { titre: string; test: (p: Person) => boolean; couleur: string; icone: JSX.Element }[] = [
-  { titre: 'Pharmaciens', test: (p) => estPharmacien(p) && !p.externe, couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
+const GROUPES: { titre: string; note?: string; test: (p: Person) => boolean; couleur: string; icone: JSX.Element }[] = [
+  { titre: 'Pharmaciens', note: 'titulaires et adjoints', test: (p) => estPharmacien(p) && !p.externe, couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
   { titre: 'Préparateurs', test: (p) => p.qualification === 'preparateur' && !p.externe, couleur: 'r-prepa', icone: <FlaskConical size={14} /> },
   { titre: 'Animateurs', test: (p) => p.qualification === 'animateur' && !p.externe, couleur: 'r-anim', icone: <Megaphone size={14} /> },
   { titre: 'Apprentis', test: (p) => p.qualification === 'apprenti' && !p.externe, couleur: 'r-apprenti', icone: <Sprout size={14} /> },
@@ -296,7 +297,14 @@ export function Construire(): JSX.Element {
                       <button type="button" className="jour-btn" onClick={() => voirJour(date)} title="Voir la journée : équipe, pauses, retards">
                         <span className="n">{Number(date.slice(8))}</span>
                         <span className="d">{ouverts[i] ? JOURS[weekday(date)] : JOURS_COURT[weekday(date)]}</span>
-                        <span className="sr">, voir la journée</span>
+                        {/* L'accès à la journée se voit : un bouton écrit, sous la date. */}
+                        {ouverts[i] ? (
+                          <span className="jour-voir">
+                            <Eye size={13} aria-hidden="true" /> Voir la journée
+                          </span>
+                        ) : (
+                          <span className="sr">, voir la journée</span>
+                        )}
                       </button>
                       <Ferie date={date} court />
                       {!ouverts[i] ? <span className="sr"> (fermé)</span> : null}
@@ -331,6 +339,7 @@ export function Construire(): JSX.Element {
                             {g.icone}
                           </span>{' '}
                           {g.titre}
+                          {g.note ? <span className="pg-group-note"> · {g.note}</span> : null}
                         </span>
                       </div>
                       {membres.map((p) => {
@@ -575,22 +584,27 @@ function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISO
       </div>
     );
   }
-  const trous = trousPharmacien(data, date);
+  const { aucun, trous } = trousPharmacienExpliques(data, date);
   const sous = vide ? [] : sousEffectifs(data, date);
+  /** « 12 h 30 – 13 h 30 (pause de Caroline) » : la plage et ce qui la crée. */
+  const dire = (t: { start: number; end: number; raison?: string }): string => `${fmtHeure(t.start)} – ${fmtHeure(t.end)}${t.raison ? ` (${t.raison})` : ''}`;
+  const titre = vide ? 'Rien de posé' : trous.length ? (aucun ? 'Aucun pharmacien' : 'Pharmacien absent') : sous.length ? 'Manque du monde' : 'Complet';
   const etat = vide ? 'off' : trous.length ? 'bad' : sous.length ? 'warn' : 'ok';
   const texte = vide
     ? 'Aucun poste posé ce jour-là'
     : trous.length
-      ? `Sans pharmacien : ${trous.map((t) => `${fmtHeure(t.start)} – ${fmtHeure(t.end)}`).join(', ')}`
+      ? `${titre} : ${trous.map(dire).join(', ')}`
       : sous.length
         ? `Sous l'effectif attendu : ${sous.map((t) => `${fmtHeure(t.start)} – ${fmtHeure(t.end)}`).join(', ')}`
         : 'Pharmacien présent sur toute l’ouverture, effectif atteint';
-  const plages = (l: { start: number; end: number }[]): string => l.map((t) => `• ${fmtHeure(t.start)} – ${fmtHeure(t.end)}`).join('\n');
+  const plages = (l: { start: number; end: number; raison?: string }[]): string => l.map((t) => `• ${dire(t)}`).join('\n');
   // La bulle d'aide dit le problème, les plages concernées et quoi faire.
   const aide = vide
     ? 'Aucun poste posé ce jour-là.'
     : trous.length
-      ? `Aucun pharmacien sur :\n${plages(trous)}\nPosez ou allongez le poste d’un pharmacien.`
+      ? aucun
+        ? `Aucun pharmacien n’a de poste ce jour-là :\n${plages(trous)}\nPosez le poste d’un titulaire ou d’un adjoint.`
+        : `Aucun pharmacien présent sur :\n${plages(trous)}\nDécalez une pause, allongez un poste ou posez un autre pharmacien (titulaire ou adjoint).`
       : sous.length
         ? `Sous l’effectif attendu sur :\n${plages(sous)}\nAjoutez une personne au comptoir.`
         : 'Pharmacien présent sur toute l’ouverture, effectif atteint.';
@@ -599,11 +613,23 @@ function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISO
       <span className={`mark ${etat}`}>{etat === 'ok' ? <Check size={15} /> : etat === 'bad' ? <X size={14} /> : etat === 'warn' ? <AlertTriangle size={13} /> : <Minus size={14} />}</span>
       {/* Le constat est écrit, avec l'heure : pas besoin de survoler pour comprendre. */}
       <span className={`pg-o-mot ${etat}`}>
-        <b>{vide ? 'Rien de posé' : trous.length ? 'Sans pharmacien' : sous.length ? 'Manque du monde' : 'Complet'}</b>
-        {!vide && (trous.length || sous.length) ? (
+        <b>{titre}</b>
+        {/* Chaque plage est écrite avec ce qui la crée : la pause d'un pharmacien, son départ, son arrivée. */}
+        {!vide && trous.length
+          ? trous.slice(0, 2).map((t) => (
+              <span key={t.start} className="pg-o-plage">
+                <span className="num">
+                  {fmtHeure(t.start)} – {fmtHeure(t.end)}
+                </span>
+                {t.raison ? <span className="pg-o-raison">{t.raison}</span> : null}
+              </span>
+            ))
+          : null}
+        {!vide && trous.length > 2 ? <span className="pg-o-raison">et {trous.length - 2} autre{trous.length > 3 ? 's' : ''} plage{trous.length > 3 ? 's' : ''}</span> : null}
+        {!vide && !trous.length && sous.length ? (
           <span className="num">
-            {fmtHeure((trous.length ? trous : sous)[0].start)} – {fmtHeure((trous.length ? trous : sous)[0].end)}
-            {(trous.length ? trous : sous).length > 1 ? ` +${(trous.length ? trous : sous).length - 1}` : ''}
+            {fmtHeure(sous[0].start)} – {fmtHeure(sous[0].end)}
+            {sous.length > 1 ? ` +${sous.length - 1}` : ''}
           </span>
         ) : null}
       </span>
@@ -1029,16 +1055,17 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
               return (
                 <button key={r.variante} type="button" className={`variant${i === choix ? ' on' : ''}`} onClick={() => setChoix(i)} aria-pressed={i === choix}>
                   <span style={{ display: 'block' }}>
-                    <span className="row wrap" style={{ gap: 8 }}>
-                      <b className="grow" style={{ fontSize: 16, letterSpacing: '-0.02em' }}>{VARIANTE_LABEL[r.variante].titre}</b>
+                    {/* Le titre tient sur sa ligne ; l'état de la proposition vient dessous, au même endroit sur les trois cartes. */}
+                    <b className="variant-titre">{VARIANTE_LABEL[r.variante].titre}</b>
+                    <span className="soft small variant-phrase">{VARIANTE_LABEL[r.variante].phrase}</span>
+                    <span className="variant-etat">
+                      {k.bloquants ? <Pill tone="danger">{k.bloquants} bloquant{k.bloquants > 1 ? 's' : ''}</Pill> : <Pill tone="ok">Règles respectées</Pill>}
                       {i === choix ? (
                         <Pill tone="iris">
                           <Check size={12} aria-hidden="true" /> Sélectionnée
                         </Pill>
                       ) : null}
-                      {k.bloquants ? <Pill tone="danger">{k.bloquants} bloquant{k.bloquants > 1 ? 's' : ''}</Pill> : <Pill tone="ok">Règles respectées</Pill>}
                     </span>
-                    <span className="soft small" style={{ marginTop: 4, display: 'block' }}>{VARIANTE_LABEL[r.variante].phrase}</span>
                   </span>
                   <span className="mini" aria-hidden="true">
                     {personnes.map((p) => (

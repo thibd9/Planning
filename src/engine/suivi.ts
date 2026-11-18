@@ -1,5 +1,5 @@
 import { addDays, dayIndex } from '../domain/time';
-import type { AppData, ISODate } from '../domain/types';
+import type { Absence, AppData, ISODate } from '../domain/types';
 import { equite } from './equity';
 
 export interface Suivi {
@@ -70,4 +70,25 @@ export function pointsForts(data: AppData, personId: string, today: ISODate): Po
     if (ligne.attendu.samedis !== null && attendu >= 2 && reel >= attendu) points.push({ cle: 'part', titre: 'Prend sa part', detail: 'Samedis et fermetures : au moins sa part sur 3 mois' });
   }
   return points;
+}
+
+/** Une autre absence sur les mêmes dates : demandée elle aussi, ou déjà accordée. */
+export interface AbsenceSimultanee {
+  absence: Absence;
+  /** Jours en commun avec la demande examinée. */
+  jours: number;
+  /** Reçue avant la demande examinée. */
+  avant: boolean;
+}
+
+/**
+ * Qui d'autre sera absent, ou demande à l'être, sur les dates d'une demande : pour ne jamais
+ * répondre à une demande en oubliant l'autre. Les demandes sont rangées dans l'ordre où elles sont arrivées.
+ */
+export function absencesSimultanees(data: Pick<AppData, 'absences'>, a: Pick<Absence, 'id' | 'personId' | 'from' | 'to' | 'createdAt'>): { demandees: AbsenceSimultanee[]; accordees: AbsenceSimultanee[] } {
+  const autres = data.absences
+    .filter((x) => x.id !== a.id && x.personId !== a.personId && x.statut !== 'refusee' && x.from <= a.to && x.to >= a.from)
+    .map((x) => ({ absence: x, jours: dayIndex(x.to < a.to ? x.to : a.to) - dayIndex(x.from > a.from ? x.from : a.from) + 1, avant: x.createdAt < a.createdAt }))
+    .sort((x, y) => x.absence.createdAt.localeCompare(y.absence.createdAt));
+  return { demandees: autres.filter((x) => x.absence.statut === 'demandee'), accordees: autres.filter((x) => x.absence.statut === 'approuvee') };
 }

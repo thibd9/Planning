@@ -1,6 +1,7 @@
 import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Handshake, CircleHelp, Clock3, ListChecks, MoonStar, Paperclip, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RAISONS_REFUS, texteRefus } from '../../domain/refus';
+import { FriseConges } from '../components/FriseConges';
 import { DialogueRefus } from '../components/Refus';
 import {
   JOURS,
@@ -16,9 +17,10 @@ import {
   mondayOf,
   weekday,
 } from '../../domain/time';
-import type { Absence, AppData, Besoin, BesoinStatut, ISODate, Remplacement, Trou, Shift } from '../../domain/types';
-import { classeAbsence, libelleAbsence, nomCourt, nomGarde, libelleGarde, MOTIF_REMPLACEMENT_LABEL, estPharmacien } from '../../domain/types';
+import type { Absence, AppData, Besoin, BesoinStatut, ISODate, MotifDemande, Remplacement, Trou, Shift } from '../../domain/types';
+import { classeAbsence, libelleAbsence, nomCourt, nomGarde, libelleGarde, MOTIF_DEMANDE_LABEL, MOTIF_REMPLACEMENT_LABEL, estPharmacien } from '../../domain/types';
 import { decrireBesoin, decrireShift, minutesSemaine, shiftsSemaine } from '../../engine/core';
+import { absencesSimultanees } from '../../engine/suivi';
 import { decisions } from '../../engine/decisions';
 import { diagnosticPrealable } from '../../engine/diagnose';
 import { congesIncompatibles } from '../../engine/gardes';
@@ -239,7 +241,8 @@ export function Resoudre(): JSX.Element {
             <h2>Demandes de remplacement</h2>
             <span className="count">{d.remplacements.length}</span>
           </div>
-          <div className="card">
+          {/* Une carte par demande, entourée à la couleur de son urgence : chacune se lit séparément. */}
+          <div className="demandes-pile">
             {d.remplacements.map((r) => (
               <DemandeRemplacement key={r.id} remplacement={r} />
             ))}
@@ -256,6 +259,8 @@ export function Resoudre(): JSX.Element {
             <h2>Demandes à arbitrer</h2>
             <span className="count">{d.absences.length + d.besoins.length}</span>
           </div>
+          {/* Avant de répondre : qui est déjà absent, et qui demande les mêmes dates. */}
+          {d.absences.length ? <FriseConges data={data} today={today} /> : null}
           <div className="card">
             {d.absences.map((a) => (
               <DemandeAbsence key={a.id} absence={a} />
@@ -723,6 +728,17 @@ function simulerAbsence(data: AppData, a: Absence): { messages: string[]; garde:
   return { messages: [...new Set(messages)], garde, sansPlanning };
 }
 
+/** La raison donnée par la personne pour sa demande ; les demandes anciennes n'en portent pas. */
+function Raison({ motif, precision }: { motif?: MotifDemande; precision?: string }): JSX.Element {
+  return (
+    <div className="demande-motif">
+      <span className="small soft">Raison donnée</span>
+      <b>{motif ? MOTIF_DEMANDE_LABEL[motif] : 'Non précisée'}</b>
+      {precision ? <span className="small">« {precision} »</span> : null}
+    </div>
+  );
+}
+
 function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
@@ -730,6 +746,12 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
   const dire = useUi((s) => s.dire);
   const p = data.personnes.find((x) => x.id === absence.personId);
   const sim = useMemo(() => simulerAbsence(data, absence), [data, absence]);
+  // Qui d'autre est absent, ou demande à l'être, sur ces dates : pour ne pas répondre à l'un en oubliant l'autre.
+  const memeTemps = useMemo(() => absencesSimultanees(data, absence), [data, absence]);
+  const nomDe = (id: string): string => {
+    const x = data.personnes.find((y) => y.id === id);
+    return x ? nomCourt(x) : 'un collègue';
+  };
   const [refus, setRefus] = useState(false);
   const jours = dayIndex(absence.to) - dayIndex(absence.from) + 1;
   return (
@@ -739,12 +761,37 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
         <div className="row wrap" style={{ gap: 8, marginBottom: 6 }}>
           <span className={`pill nature ${classeAbsence(absence.type)}`}>{libelleAbsence(absence)}</span>
           <Delai date={absence.from} today={today} />
+          {memeTemps.demandees.length ? (
+            <span className="pill warn">
+              <Users size={13} aria-hidden="true" /> {memeTemps.demandees.length + 1} demandes sur ces dates
+            </span>
+          ) : null}
         </div>
         <b>{p ? nomCourt(p) : '—'}</b>
         <div className="soft small" style={{ marginTop: 3 }}>
           Du {fmtDateCourt(absence.from)} au {fmtDateCourt(absence.to)} · {jours} jour{jours > 1 ? 's' : ''}
         </div>
+        <Raison motif={absence.motif} precision={absence.precision} />
         <div className="col" style={{ gap: 6, marginTop: 9 }}>
+          {memeTemps.demandees.length || memeTemps.accordees.length ? (
+            <div className="notice info small meme-temps">
+              <Users size={15} aria-hidden="true" />
+              <div>
+                <b>En même temps</b>
+                {memeTemps.demandees.map((x) => (
+                  <div key={x.absence.id}>
+                    {nomDe(x.absence.personId)} demande aussi : {libelleAbsence(x.absence).toLowerCase()} du {fmtDateCourt(x.absence.from)} au {fmtDateCourt(x.absence.to)}, {x.jours} jour{x.jours > 1 ? 's' : ''} en commun. Sa demande est arrivée {x.avant ? 'avant' : 'après'} celle-ci.
+                  </div>
+                ))}
+                {memeTemps.accordees.map((x) => (
+                  <div key={x.absence.id}>
+                    {nomDe(x.absence.personId)} est déjà absent : {libelleAbsence(x.absence).toLowerCase()} du {fmtDateCourt(x.absence.from)} au {fmtDateCourt(x.absence.to)}, {x.jours} jour{x.jours > 1 ? 's' : ''} en commun.
+                  </div>
+                ))}
+                {memeTemps.demandees.length ? <div className="soft">Répondez aux deux demandes : accepter l’une peut rendre l’autre impossible.</div> : null}
+              </div>
+            </div>
+          ) : null}
           {sim.garde ? (
             <div className="notice danger small">
               <AlertTriangle size={15} /> Une garde est déjà affectée à {p ? nomCourt(p) : 'cette personne'} sur cette période : approuver le congé imposera de la réaffecter.
@@ -833,8 +880,9 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
         <div style={{ marginTop: 3 }}>{decrireBesoin(besoin)}</div>
         <div className="soft small" style={{ marginTop: 3 }}>
           {besoin.from ? `À partir du ${fmtDateCourt(besoin.from)}` : 'Sans date de début'}
-          {besoin.to ? ` jusqu'au ${fmtDateCourt(besoin.to)}` : ''} · demande présentée sans motif, comme toutes les autres
+          {besoin.to ? ` jusqu'au ${fmtDateCourt(besoin.to)}` : ''}
         </div>
+        <Raison motif={besoin.motif} precision={besoin.precision} />
         <div className="row wrap small" style={{ marginTop: 9 }}>
           <label className="row" style={{ gap: 6 }}>
             <span className="soft">Statut accordé</span>

@@ -24,7 +24,7 @@ import {
   pharmacienSeulEnRendezVous,
   segmentsTravail,
   sousEffectifs,
-  trousPharmacien,
+  trousPharmacienExpliques,
 } from './core';
 
 export type Gravite = 'bloquant' | 'alerte' | 'info';
@@ -76,14 +76,16 @@ export function validateWeek(data: AppData, monday: ISODate): Issue[] {
   // ---- Présence pharmaceutique et effectif, jour par jour
   for (const date of dates) {
     if (regleActive(R, 'pharmacie.presence')) {
-      for (const t of trousPharmacien(data, date)) {
+      const expliques = trousPharmacienExpliques(data, date);
+      for (const t of expliques.trous) {
         add({
           regle: 'pharmacie.presence',
           gravite: 'bloquant',
           date,
           start: t.start,
           end: t.end,
-          message: `${Jour(date)}, de ${fmtHeure(t.start)} à ${fmtHeure(t.end)}, aucun pharmacien n'est planifié.`,
+          // Titulaires et adjoints comptent : le message dit ce qui laisse la plage sans pharmacien.
+          message: `${Jour(date)}, de ${fmtHeure(t.start)} à ${fmtHeure(t.end)}, aucun pharmacien n'est ${expliques.aucun ? 'planifié' : `présent${t.raison ? ` (${t.raison})` : ''}`}.`,
         });
       }
     }

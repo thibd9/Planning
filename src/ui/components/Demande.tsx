@@ -2,9 +2,10 @@ import { AlertTriangle, CalendarHeart, EyeOff, Sparkles, Check } from 'lucide-re
 import { useMemo, useState } from 'react';
 import { reperesAVenir } from '../../data/fetes';
 import { JOURS, fmtDateCourt, fmtHHMM, mondayOf, parseHHMM, weekday } from '../../domain/time';
-import type { AbsenceType, BesoinForme, BesoinStatut } from '../../domain/types';
-import { ABSENCE_LABEL } from '../../domain/types';
+import type { AbsenceType, BesoinForme, BesoinStatut, MotifDemande } from '../../domain/types';
+import { ABSENCE_LABEL, MOTIF_DEMANDE_LABEL } from '../../domain/types';
 import { lireBesoin } from '../../engine/nlp';
+import { absencesSimultanees } from '../../engine/suivi';
 import { useStore } from '../../store/store';
 import { NomsFormations } from './Formation';
 import { useUi } from '../../store/ui';
@@ -37,6 +38,8 @@ const GENRES: { value: Genre; label: string }[] = [
 interface Prereglage {
   nom: string;
   detail: string;
+  /** La raison que le raccourci présélectionne ; une pratique personnelle reste « raison personnelle ». */
+  motif: MotifDemande;
   /** Une ou deux contraintes : le Chabbat en demande deux (vendredi soir et samedi). */
   lignes: { forme: BesoinForme; jours: number[]; heure?: string; plage?: Plage; de?: string; a?: string }[];
 }
@@ -44,23 +47,24 @@ interface Prereglage {
 const PREREGLAGES: Prereglage[] = [
   {
     nom: 'Chabbat',
+    motif: 'personnel',
     detail: 'Finir avant 16 h le vendredi, ne pas travailler le samedi',
     lignes: [
       { forme: 'finir_avant', jours: [4], heure: '16:00' },
       { forme: 'indisponible', jours: [5], plage: 'journee' },
     ],
   },
-  { nom: 'Prière du vendredi', detail: 'Ne pas travailler le vendredi de 12 h à 14 h 30', lignes: [{ forme: 'indisponible', jours: [4], plage: 'perso', de: '12:00', a: '14:30' }] },
-  { nom: 'Office du dimanche', detail: 'Ne pas travailler le dimanche matin', lignes: [{ forme: 'indisponible', jours: [6], plage: 'matin' }] },
-  { nom: 'Rupture du jeûne', detail: 'Finir avant 18 h tous les jours, sur une période à préciser', lignes: [{ forme: 'finir_avant', jours: [0, 1, 2, 3, 4, 5], heure: '18:00' }] },
-  { nom: 'Sortie d’école', detail: 'Finir avant 16 h 30 les lundis, mardis, jeudis et vendredis', lignes: [{ forme: 'finir_avant', jours: [0, 1, 3, 4], heure: '16:30' }] },
-  { nom: 'Mercredi', detail: 'Ne pas travailler le mercredi', lignes: [{ forme: 'indisponible', jours: [2], plage: 'journee' }] },
-  { nom: 'Cours du soir', detail: 'Finir avant 17 h 30 certains soirs, à choisir', lignes: [{ forme: 'finir_avant', jours: [], heure: '17:30' }] },
+  { nom: 'Prière du vendredi', motif: 'personnel', detail: 'Ne pas travailler le vendredi de 12 h à 14 h 30', lignes: [{ forme: 'indisponible', jours: [4], plage: 'perso', de: '12:00', a: '14:30' }] },
+  { nom: 'Office du dimanche', motif: 'personnel', detail: 'Ne pas travailler le dimanche matin', lignes: [{ forme: 'indisponible', jours: [6], plage: 'matin' }] },
+  { nom: 'Rupture du jeûne', motif: 'personnel', detail: 'Finir avant 18 h tous les jours, sur une période à préciser', lignes: [{ forme: 'finir_avant', jours: [0, 1, 2, 3, 4, 5], heure: '18:00' }] },
+  { nom: 'Sortie d’école', motif: 'famille', detail: 'Finir avant 16 h 30 les lundis, mardis, jeudis et vendredis', lignes: [{ forme: 'finir_avant', jours: [0, 1, 3, 4], heure: '16:30' }] },
+  { nom: 'Mercredi', motif: 'famille', detail: 'Ne pas travailler le mercredi', lignes: [{ forme: 'indisponible', jours: [2], plage: 'journee' }] },
+  { nom: 'Cours du soir', motif: 'etudes', detail: 'Finir avant 17 h 30 certains soirs, à choisir', lignes: [{ forme: 'finir_avant', jours: [], heure: '17:30' }] },
 ];
 
 /**
- * Formulaire unique pour tous les besoins personnels. Il n'y a ni champ « motif » ni texte libre :
- * garde d'enfant, pratique religieuse, soin, transport ou cours du soir passent par le même chemin.
+ * Formulaire unique pour tous les besoins personnels. Une demande porte toujours sa raison : une catégorie
+ * choisie dans une liste, et une précision facultative. Seuls les titulaires la voient.
  */
 export function DialogueDemande({ personId, espace, onClose }: { personId: string; espace: 'responsable' | 'salarie'; onClose: () => void }): JSX.Element {
   const data = useStore((s) => s.data);
@@ -82,12 +86,21 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
   const [typeAbsence, setTypeAbsence] = useState<AbsenceType>('conge');
   const [formation, setFormation] = useState('');
   const [phrase, setPhrase] = useState('');
+  /** La raison de la demande : obligatoire pour l'équipe, facultative quand le titulaire saisit lui-même. */
+  const [motif, setMotif] = useState<MotifDemande | ''>('');
+  const [precision, setPrecision] = useState('');
   const [compris, setCompris] = useState<{ ok: string[]; manque: string[] } | null>(null);
   const [calendrier, setCalendrier] = useState(false);
   // Seconde contrainte d'un préréglage double (Chabbat) : envoyée avec la première.
   const [suite, setSuite] = useState<Prereglage['lignes'][number] | null>(null);
   const [choisi, setChoisi] = useState<string | null>(null);
   const usage = usagePlafond(data, personId, today);
+  // D'autres absences, demandées ou accordées, sur les dates choisies : on le dit, sans nommer personne.
+  const autresSurCesDates = useMemo(() => {
+    if (genre !== 'absence' || !from || !to || to < from) return 0;
+    const m = absencesSimultanees(data, { id: '', personId, from, to, createdAt: '' });
+    return m.demandees.length + m.accordees.length;
+  }, [data, genre, personId, from, to]);
   const reperes = useMemo(() => reperesAVenir(today), [today]);
   const plein = statut === 'prioritaire' && !horsPlafond && usage.actifs >= usage.plafond;
 
@@ -141,11 +154,13 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
     if (a.a) setPlageA(a.a);
     setSuite(b ?? null);
     setChoisi(p.nom);
+    setMotif(p.motif);
   };
 
+  const raison = motif ? { motif, ...(precision.trim() ? { precision: precision.trim() } : {}) } : {};
   const envoyer = (): void => {
     if (genre === 'absence') {
-      declarerAbsence({ personId, from, to, type: typeAbsence, statut: responsable ? 'approuvee' : 'demandee', ...(typeAbsence === 'formation' && formation.trim() ? { libelle: formation.trim() } : {}) });
+      declarerAbsence({ personId, from, to, type: typeAbsence, statut: responsable ? 'approuvee' : 'demandee', ...(typeAbsence === 'formation' && formation.trim() ? { libelle: formation.trim() } : {}), ...raison });
       dire(responsable ? 'Absence enregistrée. Les postes concernés sont à couvrir dans « Résoudre ».' : 'Demande d’absence envoyée au responsable.', true);
       onClose();
       return;
@@ -154,6 +169,7 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
     const h = parseHHMM(heure) ?? undefined;
     ajouterBesoin({
       personId,
+      ...raison,
       forme: jour ? 'indisponible' : genre,
       jours: jour ? [weekday(from)] : jours,
       frequence: jour ? 1 : frequence,
@@ -170,6 +186,7 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
     if (suite && !jour) {
       ajouterBesoin({
         personId,
+        ...raison,
         forme: suite.forme,
         jours: suite.jours,
         frequence,
@@ -192,14 +209,14 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
     <Dialog
       size="mid"
       title={responsable ? 'Enregistrer un besoin' : 'Nouvelle demande'}
-      subtitle="Décrivez le besoin, jamais sa raison : aucun motif n'est demandé ni conservé."
+      subtitle={responsable ? 'Décrivez le besoin ; la raison est facultative quand vous l’enregistrez vous-même.' : 'Décrivez le besoin et donnez sa raison : seuls vos titulaires la voient.'}
       onClose={onClose}
       footer={
         <>
           <button type="button" className="btn" onClick={onClose}>
             Annuler
           </button>
-          <button type="button" className="btn primary" disabled={!valide || plein} onClick={envoyer}>
+          <button type="button" className="btn primary" disabled={!valide || plein || (!responsable && !motif)} onClick={envoyer}>
             {responsable ? 'Enregistrer' : 'Envoyer au responsable'}
           </button>
         </>
@@ -238,7 +255,7 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
           ))}
         </div>
         <p className="tiny muted" style={{ marginTop: 6 }}>
-          <EyeOff size={13} aria-hidden="true" style={{ verticalAlign: '-2px' }} /> Un raccourci pour remplir le formulaire. <b>Votre choix n’est pas enregistré</b> : votre responsable ne voit que des horaires, par exemple « finir avant 16 h le vendredi ».
+          <EyeOff size={13} aria-hidden="true" style={{ verticalAlign: '-2px' }} /> Un raccourci pour remplir le formulaire. <b>Le raccourci choisi n’est pas enregistré</b> : votre responsable ne voit que des horaires, par exemple « finir avant 16 h le vendredi ».
         </p>
         {choisi ? (
           <p className="notice ok small" role="status">
@@ -249,6 +266,27 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
           </p>
         ) : null}
       </fieldset>
+
+      <div className="demande-raison">
+        <label className="field" htmlFor="demande-motif">
+          Raison de la demande{responsable ? ' (facultatif)' : ''}
+          <select id="demande-motif" value={motif} onChange={(e) => setMotif(e.target.value as MotifDemande | '')} required={!responsable}>
+            <option value="">Choisir une raison…</option>
+            {(Object.keys(MOTIF_DEMANDE_LABEL) as MotifDemande[]).map((m) => (
+              <option key={m} value={m}>
+                {MOTIF_DEMANDE_LABEL[m]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field grow" htmlFor="demande-precision">
+          Précision (facultatif)
+          <input id="demande-precision" value={precision} onChange={(e) => setPrecision(e.target.value)} maxLength={120} placeholder="Exemple : rendez-vous à 15 h" />
+        </label>
+        <p className="tiny muted demande-raison-note">
+          <EyeOff size={13} aria-hidden="true" style={{ verticalAlign: '-2px' }} /> Une raison est demandée pour chaque demande. Seuls vos titulaires la voient ; vos collègues ne voient que vos horaires.
+        </p>
+      </div>
 
       <label className="field">
         Type de besoin
@@ -322,6 +360,14 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
         </>
       ) : null}
 
+      {autresSurCesDates ? (
+        <p className="notice info small" role="status">
+          <AlertTriangle size={15} aria-hidden="true" />
+          <span>
+            {autresSurCesDates > 1 ? `${autresSurCesDates} collègues sont déjà absents ou ont` : 'Un collègue est déjà absent ou a'} demandé ces dates. Votre demande part quand même : {responsable ? 'pensez à répondre aux deux.' : 'votre titulaire verra les deux ensemble.'}
+          </span>
+        </p>
+      ) : null}
       <div className="row wrap" style={{ alignItems: 'flex-end' }}>
         <label className="field">
           {genre === 'jour' ? 'Date' : genre === 'absence' ? 'Premier jour' : 'À partir du'}

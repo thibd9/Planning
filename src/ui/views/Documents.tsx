@@ -7,6 +7,7 @@ import { CATEGORIE_DOC_LABEL, ECART_LABEL, MOTIF_REMPLACEMENT_LABEL, URGENCE_LAB
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { PDF_MAX, lirePdf, reduireImage } from '../components/Remplacer';
+import { FriseConges } from '../components/FriseConges';
 import { Avatar } from '../kit';
 
 type Onglet = 'plannings' | 'absences' | 'fichiers' | 'equipe' | 'historique';
@@ -371,6 +372,7 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
 
       {onglet === 'historique' ? (
         <>
+          <FriseConges data={data} today={today} />
           <div className="hist-tete">
             <label className="field" htmlFor="hist-personne">
               Personne

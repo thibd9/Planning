@@ -203,13 +203,19 @@ export function shiftsDuJour(data: Pick<AppData, 'shifts'>, date: ISODate): Shif
 /** Présence physique dans l'officine : un poste en formation extérieure ne compte pas. */
 const surPlace = (s: Shift): boolean => s.activite !== 'formation';
 
-/** Intervalles où au moins un pharmacien est présent dans l'officine. */
+/**
+ * Intervalles où au moins un pharmacien est présent dans l'officine. Titulaires et adjoints sont pharmaciens.
+ * Un titulaire reste sur place et responsable pendant sa pause : tant qu'il est en poste, il ne manque
+ * aucun pharmacien. La pause d'un adjoint salarié, elle, est un temps où il n'est plus à disposition.
+ */
 export function presencePharmaciens(data: Pick<AppData, 'shifts' | 'personnes'>, date: ISODate): Interval[] {
-  const pharmaciens = new Set(data.personnes.filter(estPharmacien).map((p) => p.id));
+  const pharmaciens = new Map(data.personnes.filter(estPharmacien).map((p) => [p.id, p.qualification]));
   const segs: Interval[] = [];
   for (const s of data.shifts) {
-    if (s.date !== date || !pharmaciens.has(s.personId) || !surPlace(s)) continue;
-    segs.push(...segmentsTravail(s));
+    const qualification = pharmaciens.get(s.personId);
+    if (s.date !== date || !qualification || !surPlace(s)) continue;
+    if (qualification === 'titulaire') segs.push({ start: s.start, end: s.end });
+    else segs.push(...segmentsTravail(s));
   }
   return union(segs);
 }
@@ -217,6 +223,35 @@ export function presencePharmaciens(data: Pick<AppData, 'shifts' | 'personnes'>,
 /** Plages d'ouverture sans aucun pharmacien planifié. */
 export function trousPharmacien(data: Pick<AppData, 'shifts' | 'personnes' | 'officine'>, date: ISODate): Interval[] {
   return subtract(ouverture(data.officine, date), presencePharmaciens(data, date));
+}
+
+/** Une plage sans pharmacien, et pourquoi : la pause d'un pharmacien, son départ, son arrivée. */
+export interface TrouExplique extends Interval {
+  raison: string;
+}
+
+/**
+ * Les plages d'ouverture sans pharmacien, expliquées. Titulaires et adjoints sont tous pharmaciens :
+ * `aucun` dit qu'aucun d'eux n'a de poste ce jour-là ; sinon chaque plage dit ce qui la crée.
+ */
+export function trousPharmacienExpliques(data: Pick<AppData, 'shifts' | 'personnes' | 'officine'>, date: ISODate): { aucun: boolean; trous: TrouExplique[] } {
+  const pharmaciens = new Map(data.personnes.filter(estPharmacien).map((p) => [p.id, p.prenom]));
+  const postes = data.shifts.filter((s) => s.date === date && pharmaciens.has(s.personId) && surPlace(s));
+  /** « de Caroline », « d’Igor ». */
+  const de = (s: Shift): string => {
+    const prenom = pharmaciens.get(s.personId);
+    return !prenom ? 'd’un pharmacien' : /^[aeiouyhàâéèêîôûAEIOUYHÀÂÉÈÊÎÔÛ]/.test(prenom) ? `d’${prenom}` : `de ${prenom}`;
+  };
+  const trous = trousPharmacien(data, date).map((t) => {
+    const enPause = postes.find((s) => s.pauseStart !== undefined && s.pauseEnd !== undefined && s.pauseStart <= t.start && s.pauseEnd >= t.end);
+    if (enPause) return { ...t, raison: `pause ${de(enPause)}` };
+    const avant = postes.filter((s) => s.end <= t.start).sort((a, b) => b.end - a.end)[0];
+    const apres = postes.filter((s) => s.start >= t.end).sort((a, b) => a.start - b.start)[0];
+    if (avant && !apres) return { ...t, raison: `après le départ ${de(avant)}` };
+    if (apres && !avant) return { ...t, raison: `avant l’arrivée ${de(apres)}` };
+    return { ...t, raison: avant && apres ? 'entre deux postes' : '' };
+  });
+  return { aucun: postes.length === 0, trous };
 }
 
 function missionsDe(missions: Mission[], personId: string, date: ISODate): Interval[] {

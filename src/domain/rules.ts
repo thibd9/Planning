@@ -127,7 +127,7 @@ export const REGLES_INITIALES: Regle[] = [
     famille: 'pharmacie',
     titre: 'Pharmacien présent pendant toute l’ouverture',
     description:
-      'Les médicaments sont préparés par un pharmacien ou sous sa surveillance directe. Le contrôle porte sur chaque minute d’ouverture, pauses comprises, pas sur un total d’heures.',
+      'Les médicaments sont préparés par un pharmacien ou sous sa surveillance directe. Le contrôle porte sur chaque minute d’ouverture, pas sur un total d’heures. Titulaires et adjoints sont pharmaciens ; un titulaire en poste reste présent pendant sa pause, la pause d’un adjoint compte comme une absence.',
     nature: 'imperative',
     source: 'Code de la santé publique ; Ordre national des pharmaciens',
     dateEffet: '2026-01-01',
