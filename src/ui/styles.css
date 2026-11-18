@@ -2900,3 +2900,14 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
 .solvi-bord { stroke: var(--solvi-contour, transparent); stroke-width: 4.5; stroke-linejoin: round; paint-order: stroke; }
 :root[data-mode='sombre'] .solvi, .solvi-guide .solvi { --solvi-contour: rgba(255, 255, 255, 0.92); }
 :root[data-mode='sombre'] .aide-logo .solvi-corps svg, :root[data-mode='sombre'] .pt-solvi .solvi-corps svg { filter: none; }
+
+/* Solvi a sa place en bas de l'écran : le contenu s'arrête au-dessus de lui, jamais sous lui. */
+.content { padding-bottom: 136px; }
+.assistant { right: 22px; bottom: 18px; }
+@media (max-width: 900px) {
+  .content { padding-bottom: 112px; }
+  .assistant { right: 12px; bottom: 84px; }
+}
+
+/* Solvi renvoie vers une personne : le support, ou le titulaire. */
+.aide-support { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }

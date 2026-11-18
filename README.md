@@ -527,8 +527,13 @@ src/
 - **Documents sur l'appareil.** Les fichiers déposés restent dans le navigateur, 600 Ko par fichier et
   3 Mo au total : ils ne sont ni sauvegardés ni transmis à un autre poste. Un vrai coffre de documents,
   surtout pour des arrêts de travail, demande un hébergement adapté.
-- **Assistant à règles.** L'assistant reconnaît une dizaine de questions sur le planning et une trentaine
-  de fiches d'aide (les mêmes que la rubrique « Aide »). Une question formulée autrement peut ne pas être comprise : il le dit et propose des
+- **Solvi, assistant à règles.** Solvi calcule sur le planning (qui travaille, qui est absent, prochain
+  poste, droits), connaît une trentaine de fiches d'aide (les mêmes que la rubrique « Aide ») et tient une
+  conversation courante : saluer, remercier, dire qui il est, plaisanter. Il dit ses limites (aucun conseil
+  médical, pas de conseil juridique ou de paie) et, quand il ne sait pas, le dit avec le sourire puis
+  renvoie vers l'aide ou vers une personne : le contact de support indiqué dans « Réglages », à défaut
+  le titulaire. Ce n'est pas une intelligence artificielle qui improvise : répondre à n'importe quelle
+  question demanderait un serveur et un modèle de langage, donc l'envoi des questions hors de l'appareil. Une question formulée autrement peut ne pas être comprise : il le dit et propose des
   suggestions. Il ne rédige rien et n'apprend pas.
 - **Impression.** L'impression passe par le navigateur. Dans l'aperçu hébergé sur claude.ai, la fenêtre
   d'impression peut être bloquée : l'application le signale au lieu de rester muette.

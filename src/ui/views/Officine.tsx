@@ -243,6 +243,27 @@ export function Officine(): JSX.Element {
         </div>
       </div>
 
+      <div className="card pad col" style={{ marginTop: 18 }} data-focus="support">
+        <div>
+          <h2 className="h3">Support</h2>
+          <p className="soft small" style={{ margin: '3px 0 0' }}>Quand Solvi ne sait pas répondre, il propose de joindre cette personne. Laissez vide : il renverra vers vous.</p>
+        </div>
+        <div className="row wrap" style={{ alignItems: 'flex-end' }}>
+          <label className="field" htmlFor="support-nom">
+            Nom du contact
+            <input id="support-nom" value={officine.support?.nom ?? ''} onChange={(e) => majOfficine({ support: { ...officine.support, nom: e.target.value } })} placeholder="Support Solvéa" autoComplete="off" />
+          </label>
+          <label className="field" htmlFor="support-email">
+            Adresse électronique
+            <input id="support-email" type="email" value={officine.support?.email ?? ''} onChange={(e) => majOfficine({ support: { ...officine.support, email: e.target.value } })} placeholder="support@exemple.fr" autoComplete="off" />
+          </label>
+          <label className="field" htmlFor="support-telephone">
+            Téléphone
+            <input id="support-telephone" type="tel" value={officine.support?.telephone ?? ''} onChange={(e) => majOfficine({ support: { ...officine.support, telephone: e.target.value } })} placeholder="01 23 45 67 89" autoComplete="off" />
+          </label>
+        </div>
+      </div>
+
       <div className="card pad col" style={{ marginTop: 18 }}>
         <div className="row wrap">
           <div className="grow">

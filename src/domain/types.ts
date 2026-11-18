@@ -236,8 +236,16 @@ export interface BesoinEffectif {
 /** collaboratif : chacun pose ses préférences du mois avant la date limite ; classique : le responsable construit seul. */
 export type ModelePlanning = 'collaboratif' | 'classique';
 
+/** Qui joindre quand Solvi ne sait pas répondre : renseigné par le titulaire. */
+export interface Support {
+  nom?: string;
+  email?: string;
+  telephone?: string;
+}
+
 export interface Officine {
   nom: string;
+  support?: Support;
   modele?: ModelePlanning;
   /** Jour du mois précédent où la collecte des préférences se ferme (20 par défaut). */
   souhaitsLimite?: number;

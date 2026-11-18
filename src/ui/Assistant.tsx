@@ -1,4 +1,4 @@
-import { ArrowRight, GraduationCap, SendHorizontal, X } from 'lucide-react';
+import { ArrowRight, GraduationCap, LifeBuoy, Mail, MessageSquare, Phone, SendHorizontal, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from '../domain/acces';
 import { estCollaboratif } from '../engine/souhaits';
@@ -74,7 +74,10 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
   // Pendant un tutoriel, la place est à la visite : le bouton ne s'affiche que si l'étape le présente.
   // Solvi réfléchit pendant qu'il cherche, s'interroge quand il n'a pas compris, sourit quand il a répondu.
   const derniere = [...fil].reverse().find((b) => b.de !== 'moi');
-  const humeurBot: Humeur = reflexion ? 'reflechi' : !derniere ? 'heureux' : /^Je n’ai pas trouvé/.test(derniere.texte) ? 'intrigue' : 'content';
+  const humeurBot: Humeur = reflexion ? 'reflechi' : !derniere ? 'heureux' : (derniere.reponse?.humeur ?? 'content');
+  const support = data.officine.support;
+  const courriel = support?.email?.trim();
+  const telephone = support?.telephone?.trim();
   if (tour !== null || (parcours !== null && !assistant && !assistantEnVisite)) return null;
   return (
     <div className="assistant no-print">
@@ -131,6 +134,45 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
                     >
                       {b.reponse.bouton.label} <ArrowRight size={15} aria-hidden="true" />
                     </button>
+                  ) : null}
+                  {b.reponse?.support ? (
+                    <div className="aide-support">
+                      {courriel ? (
+                        <a className="btn sm" href={`mailto:${courriel}`}>
+                          <Mail size={14} aria-hidden="true" /> Écrire {support?.nom?.trim() ? `à ${support.nom.trim()}` : 'au support'}
+                        </a>
+                      ) : null}
+                      {telephone ? (
+                        <a className="btn sm" href={`tel:${telephone.replace(/[^+\d]/g, '')}`}>
+                          <Phone size={14} aria-hidden="true" /> {telephone}
+                        </a>
+                      ) : null}
+                      {!courriel && !telephone && espace !== 'responsable' ? (
+                        <button
+                          type="button"
+                          className="btn sm"
+                          onClick={() => {
+                            useUi.getState().aller('messages');
+                            ouvrirAssistant(false);
+                          }}
+                        >
+                          <MessageSquare size={14} aria-hidden="true" /> Écrire à mon titulaire
+                        </button>
+                      ) : null}
+                      {!courriel && !telephone && espace === 'responsable' ? (
+                        <button
+                          type="button"
+                          className="btn sm"
+                          onClick={() => {
+                            useUi.getState().aller('officine');
+                            ouvrirAssistant(false);
+                            window.setTimeout(() => document.querySelector('[data-focus="support"]')?.scrollIntoView({ block: 'center' }), 80);
+                          }}
+                        >
+                          <LifeBuoy size={14} aria-hidden="true" /> Indiquer un contact de support
+                        </button>
+                      ) : null}
+                    </div>
                   ) : null}
                   {b.reponse?.suites?.length ? (
                     <div className="aide-puces">

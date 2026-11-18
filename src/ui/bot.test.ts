@@ -54,6 +54,26 @@ describe('assistant : répondre d’après le planning', () => {
     const inconnu = repondre('xyzzy', camille);
     expect(inconnu.texte).toMatch(/pas trouvé/);
     expect(inconnu.suites?.length).toBeGreaterThan(0);
+    // Quand il ne sait pas, Solvi le dit avec le sourire et renvoie vers l'aide ou vers une personne.
+    expect(inconnu).toMatchObject({ support: true, humeur: 'confus' });
+    expect(inconnu.bouton?.label).toBe('Ouvrir l’aide');
+  });
+
+  it('tient une conversation courante, sans se faire passer pour ce qu’il n’est pas', () => {
+    expect(repondre('Bonjour !', camille).texte).toMatch(/^Bonjour Nicolas/);
+    expect(repondre('merci beaucoup', camille).humeur).toBe('joyeux');
+    expect(repondre('Qui es-tu ?', camille).texte).toMatch(/Je suis Solvi.*règles/);
+    expect(repondre('Tu es une intelligence artificielle ?', camille).texte).toMatch(/assistant à règles/);
+    expect(repondre('raconte-moi une blague', camille).humeur).toBe('joyeux');
+    expect(repondre('Quel jour sommes-nous ? on est quel jour', camille).texte).toMatch(/Nous sommes le/);
+  });
+
+  it('dit ses limites et renvoie vers une personne', () => {
+    expect(repondre('Quelle dose de paracétamol pour ce médicament ?', camille).texte).toMatch(/aucun conseil médical/);
+    expect(repondre('Combien pour une rupture conventionnelle ?', camille).texte).toMatch(/dépasse le planning/);
+    expect(repondre('Il y a un bug, ça ne marche pas', camille)).toMatchObject({ support: true });
+    // Une vraie question d'usage reste une question d'usage, même dite poliment.
+    expect(repondre('Bonjour, comment me faire remplacer ?', camille).bouton?.label).toBe('Demander un remplacement');
   });
 
   it('réserve les fiches personnelles à l’équipe', () => {

@@ -80,7 +80,7 @@ export const FICHES: Fiche[] = [
 ];
 
 export const simple = (t: string): string => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’']/g, ' ');
-const VIDES = new Set(['est', 'une', 'des', 'les', 'pour', 'que', 'qui', 'quoi', 'mon', 'mes', 'ma', 'sur', 'dans', 'avec', 'quelqu', 'comment', 'faire', 'veux', 'voudrais', 'peux', 'dois', 'faut', 'suis', 'sont', 'ont', 'demain', 'aujourd', 'hui', 'cette', 'ces', 'son', 'ses', 'pas', 'plus', 'tout', 'tous', 'ou', 'et', 'la', 'le', 'un', 'je', 'il', 'elle', 'on', 'du', 'de', 'au', 'aux', 'en', 'ne', 'se', 'ce', 'voir']);
+const VIDES = new Set(['est', 'une', 'des', 'les', 'pour', 'que', 'qui', 'quoi', 'mon', 'mes', 'ma', 'sur', 'dans', 'avec', 'quelqu', 'comment', 'faire', 'veux', 'voudrais', 'peux', 'dois', 'faut', 'suis', 'sont', 'ont', 'demain', 'aujourd', 'hui', 'cette', 'ces', 'son', 'ses', 'pas', 'plus', 'tout', 'tous', 'ou', 'et', 'la', 'le', 'un', 'je', 'il', 'elle', 'on', 'du', 'de', 'au', 'aux', 'en', 'ne', 'se', 'ce', 'voir', 'quel', 'quelle', 'quels', 'quelles', 'pourquoi', 'quand', 'combien', 'vous', 'nous', 'moi', 'toi', 'tes', 'ton', 'ete', 'etre', 'avoir', 'fait', 'dit', 'donc', 'alors', 'tres', 'bien', 'bonjour', 'salut', 'merci', 'svp', 'plait']);
 const mots = (t: string): string[] => simple(t).split(/[^a-z0-9]+/).filter((m) => m.length >= 3 && !VIDES.has(m));
 /** Deux mots se répondent s'ils partagent leur début : « remplacer » trouve « remplacement ». */
 const proche = (a: string, b: string): boolean => a === b || (a.length >= 4 && b.length >= 4 && (a.startsWith(b.slice(0, Math.max(4, b.length - 3))) || b.startsWith(a.slice(0, Math.max(4, a.length - 3)))));
@@ -94,8 +94,11 @@ export function chercher(fiches: Fiche[], question: string): Fiche[] {
       const titre = mots(f.question);
       const cles = mots(f.mots);
       const texte = mots(f.reponse);
-      const score = demandes.reduce((t, m) => t + (titre.some((x) => proche(x, m)) ? 3 : cles.some((x) => proche(x, m)) ? 2 : texte.some((x) => proche(x, m)) ? 1 : 0), 0);
-      return { f, score };
+      const points = demandes.map((m) => (titre.some((x) => proche(x, m)) ? 3 : cles.some((x) => proche(x, m)) ? 2 : texte.some((x) => proche(x, m)) ? 1 : 0));
+      const score = points.reduce<number>((t, x) => t + x, 0);
+      // Une fiche ne répond que si elle parle vraiment de la question : au moins un tiers de ses mots, ou un mot de son titre.
+      const pertinent = points.filter(Boolean).length / demandes.length >= 0.34 && (score >= 2 || demandes.length === 1);
+      return { f, score: pertinent ? score : 0 };
     })
     .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score || a.f.pour.length - b.f.pour.length)
@@ -111,6 +114,12 @@ export interface Reponse {
   bouton?: { label: string; aller: (ui: Ui, espace: Espace) => void };
   /** Questions voisines, proposées à la suite. */
   suites?: string[];
+  /** L'humeur de Solvi quand il donne cette réponse. */
+  humeur?: 'heureux' | 'content' | 'joyeux' | 'intrigue' | 'confus' | 'surpris' | 'inquiet' | 'satisfait' | 'confiant';
+  /** Solvi renvoie vers une personne : le support, ou le titulaire. */
+  support?: boolean;
+  /** Une limite à dire avant tout le reste (santé, droit, panne), ou au contraire une simple politesse qui cède la place à une vraie question. */
+  rang?: 'limite' | 'politesse';
 }
 
 interface Contexte {
@@ -236,16 +245,92 @@ function calculer(question: string, c: Contexte): Reponse | null {
   return null;
 }
 
-/** La réponse du bot : d'abord ce qui se calcule sur le planning, sinon la fiche qui correspond le mieux. */
+const BLAGUES = [
+  'Pourquoi le planning dort-il si bien ? Parce qu’il a de bonnes gardes.',
+  'Un préparateur dit à son planning : « Tu me couvres ? » Le planning répond : « De 8 h 30 à 16 h 30, pause comprise. »',
+  'Quel est le comble pour un planning ? Ne pas trouver un créneau pour souffler.',
+  'Je connais une blague sur les heures supplémentaires… mais je la garde pour plus tard, il faut d’abord la régulariser.',
+];
+const SECHES = [
+  'Là, je sèche. Mes quatre lobes ont beau chauffer, je n’ai pas trouvé.',
+  'Bonne question… à laquelle je n’ai pas trouvé de réponse. Mon rayon, c’est le planning.',
+  'Je donne ma langue au chat. Enfin, si j’en avais une : je n’ai pas trouvé.',
+  'Je n’ai pas trouvé, et pourtant j’ai regardé partout, même derrière le comptoir.',
+];
+/** Un choix qui change d'une question à l'autre, sans hasard : la même question reçoit la même réponse. */
+const tirer = (liste: string[], graine: string): string => liste[[...graine].reduce((t, ch) => t + ch.charCodeAt(0), 0) % liste.length];
+
+/**
+ * La conversation courante : saluer, remercier, dire qui il est, plaisanter, dire ce qu'il ne fait pas.
+ * Solvi reste honnête : il répond d'après des règles, sur l'appareil, et renvoie vers une personne quand il le faut.
+ */
+function converser(question: string, c: Contexte): Reponse | null {
+  const q = ` ${simple(question).replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim()} `;
+  const a = (...mots: string[]): boolean => mots.some((m) => q.includes(` ${m} `) || q.includes(` ${m}s `));
+  const prenom = c.data.personnes.find((p) => p.id === c.moi)?.prenom ?? '';
+  const debut = c.fiches.slice(0, 3).map((x) => x.question);
+  if (a('support', 'assistance', 'bug', 'bogue', 'panne', 'plante', 'bloque', 'marche pas', 'fonctionne pas', 'erreur', 'reclamation', 'contacter quelqu un', 'parler a quelqu un', 'humain'))
+    return { texte: 'Pour un souci que je ne sais pas régler, le mieux est d’en parler à une personne. Dites-lui ce que vous faisiez et ce qui s’est affiché.', support: true, humeur: 'inquiet', rang: 'limite' };
+  if (a('ordonnance', 'medicament', 'posologie', 'dose', 'dosage', 'traitement', 'symptome', 'diagnostic', 'malade'))
+    return { texte: 'Je ne donne aucun conseil médical ni pharmaceutique : je m’occupe du planning. Pour cela, voyez un pharmacien de l’équipe.', humeur: 'inquiet', rang: 'limite' };
+  if (a('licenciement', 'prud hommes', 'avocat', 'proces', 'salaire', 'augmentation', 'prime', 'rupture conventionnelle', 'demission'))
+    return { texte: 'Ce sujet dépasse le planning : voyez votre titulaire, votre expert-comptable ou un conseil en droit social. Je peux en revanche vous dire les règles d’horaires que j’applique.', suites: ['Quels sont mes droits ?'], humeur: 'intrigue', rang: 'limite' };
+  if (a('blague', 'rire', 'humour', 'drole', 'rigole'))
+    return { texte: tirer(BLAGUES, q), suites: ['Une autre blague'], humeur: 'joyeux' };
+  if (a('qui es tu', 'tu es qui', 'ton nom', 't appelles', 'c est quoi solvi', 'qui est solvi', 'presente toi'))
+    return { texte: 'Je suis Solvi, l’assistant de Solvéa. Je lis votre planning, je connais chaque écran et je vous y emmène. Je ne suis pas une intelligence artificielle qui devine : je réponds d’après des règles, sur cet appareil.', suites: debut, humeur: 'heureux' };
+  if (a('intelligence artificielle', 'ia', 'robot', 'chatgpt', 'claude', 'vraie personne', 'es tu humain'))
+    return { texte: 'Ni humain, ni intelligence artificielle qui improvise : je suis un assistant à règles. Je calcule sur votre planning et je connais l’application ; rien ne quitte cet appareil.', humeur: 'confiant' };
+  if (a('que sais tu faire', 'tu sais faire quoi', 'a quoi tu sers', 'tu peux faire quoi', 'que peux tu faire', 'aide moi', 'aidez moi', 'help'))
+    return { texte: 'Je sais dire qui travaille un jour donné, qui est absent, votre prochain poste, vos droits d’horaires, et vous montrer comment faire chaque chose dans Solvéa.', suites: debut, bouton: { label: 'Ouvrir l’aide', aller: (ui) => ui.aller('aide') }, humeur: 'heureux' };
+  if (a('quelle heure', 'heure est il', 'l heure'))
+    return { texte: `Il est ${new Date().toLocaleTimeString('fr-FR', { hour: 'numeric', minute: '2-digit' }).replace(':', ' h ')}. Pile le moment de regarder le planning.`, humeur: 'content' };
+  if (a('quel jour', 'quelle date', 'on est quel', 'date du jour'))
+    return { texte: `Nous sommes le ${fmtDateCourt(c.today)}.`, humeur: 'content' };
+  if (a('meteo', 'temps qu il fait', 'pleut', 'soleil'))
+    return { texte: 'Je n’ai pas de fenêtre, seulement un planning. Mais je peux vous dire qui travaille demain, qu’il pleuve ou non.', suites: ['Qui travaille demain ?'], humeur: 'joyeux' };
+  if (a('merci', 'super', 'genial', 'parfait', 'bravo', 'top', 'je t aime', 'je t adore', 'tu es mignon'))
+    return { texte: tirer(['Avec plaisir ! Ça me fait briller les lobes.', 'Merci ! Je flotte de joie.', 'Avec plaisir. Revenez quand vous voulez, je ne bouge pas d’ici.'], q), humeur: 'joyeux', rang: 'politesse' };
+  if (a('nul', 'idiot', 'stupide', 'debile', 'con', 'merde', 'inutile', 'incapable'))
+    return { texte: 'Aïe. Je fais de mon mieux avec mes quatre lobes. Dites-moi ce qui n’allait pas avec d’autres mots, ou parlez-en à une personne.', support: true, humeur: 'inquiet', rang: 'limite' };
+  if (a('ca va', 'comment vas tu', 'comment allez vous', 'tu vas bien', 'la forme'))
+    return { texte: 'Très bien : je flotte, je cligne des yeux, et votre planning tient debout. Une question ?', suites: debut, humeur: 'heureux', rang: 'politesse' };
+  if (a('quel age', 'ton age', 'tu as quel age'))
+    return { texte: 'Je suis tout neuf : assez jeune pour flotter, assez vieux pour lire un planning.', humeur: 'joyeux' };
+  if (a('sens de la vie', '42'))
+    return { texte: '42, bien sûr. Et pour le reste, il y a le planning.', humeur: 'confiant' };
+  if (a('au revoir', 'a bientot', 'bonne journee', 'bonne soiree', 'bye', 'a plus', 'ciao'))
+    return { texte: `À bientôt${prenom ? `, ${prenom}` : ''} ! Je reste dans mon coin si vous avez besoin de moi.`, humeur: 'content', rang: 'politesse' };
+  if (a('bonjour', 'bonsoir', 'salut', 'coucou', 'hello', 'hey'))
+    return { texte: `Bonjour${prenom ? ` ${prenom}` : ''} ! Que puis-je faire pour vous ?`, suites: debut, humeur: 'heureux', rang: 'politesse' };
+  return null;
+}
+
+/**
+ * La réponse de Solvi : ce qui se calcule sur le planning, puis la fiche d'aide qui correspond, puis la
+ * conversation courante. S'il ne sait pas, il le dit avec le sourire et renvoie vers l'aide ou vers une personne.
+ */
 export function repondre(question: string, c: Contexte): Reponse {
+  const parle = converser(question, c);
+  // Santé, droit, panne : Solvi dit d'abord sa limite, avant tout calcul.
+  if (parle?.rang === 'limite') return parle;
   const calcul = calculer(question, c);
   if (calcul) return calcul;
   const trouvees = chercher(c.fiches, question);
+  // Une politesse cède la place à une vraie question d'usage ; le reste de la conversation passe d'abord.
+  if (parle && (parle.rang !== 'politesse' || !trouvees.length)) return parle;
   if (trouvees.length) {
     const f = trouvees[0];
-    return { texte: f.reponse, bouton: { label: f.bouton, aller: f.aller }, suites: trouvees.slice(1, 3).map((x) => x.question) };
+    return { texte: f.reponse, bouton: { label: f.bouton, aller: f.aller }, suites: trouvees.slice(1, 3).map((x) => x.question), humeur: 'content' };
   }
-  return { texte: 'Je n’ai pas trouvé. Essayez avec d’autres mots, ou choisissez :', suites: c.fiches.slice(0, 3).map((x) => x.question) };
+  if (parle) return parle;
+  return {
+    texte: `${tirer(SECHES, simple(question))} Essayez avec d’autres mots, ouvrez l’aide, ou parlez-en à une personne.`,
+    suites: c.fiches.slice(0, 3).map((x) => x.question),
+    bouton: { label: 'Ouvrir l’aide', aller: (ui) => ui.aller('aide') },
+    support: true,
+    humeur: 'confus',
+  };
 }
 
 /** Les fiches utiles à un rôle : la gestion n'est pas proposée à l'équipe, ni les préférences en modèle classique. */
