@@ -456,7 +456,7 @@ function avecFormation(): void {
   avecPlanning();
   const s = store();
   const jour = addDays(semaineDans(2), 3);
-  if (!s.data.absences.some((x) => x.type === 'formation')) s.planifierFormation({ intitule: 'Gestes d’urgence', personnes: ['p_thomas', 'p_ines'], from: jour, to: jour });
+  if (!s.data.absences.some((x) => x.type === 'formation')) s.planifierFormation({ intitule: 'Gestes d’urgence', personnes: ['p_thomas', 'p_ines'], from: jour, to: jour, cadre: 'externe', lieu: 'Centre de formation, à Lyon' });
 }
 
 // ---------------------------------------------------------------- Une journée type : la pharmacie tourne déjà
@@ -616,7 +616,7 @@ const ETABLI_BRUT: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: "[data-tour='proposer']", sert: 'Solvéa calcule trois plannings complets pour la semaine.' },
       { faire: 'attendre', que: '.dialog .variant' },
-      { faire: 'pause', ms: 3600, dit: 'Trois plannings à comparer : équité, préférences, coût' },
+      { faire: 'pause', ms: 3600, dit: 'Trois plannings à comparer : équité, préférences, contrats' },
       { faire: 'cliquer', sur: nieme('.dialog .variant', 1), dit: 'Comparez avec « Préférences d’abord »', sert: 'Un clic sur une carte la sélectionne ; les chiffres soulignés sont les meilleurs.' },
       { faire: 'pause', ms: 1400 },
       { faire: 'cliquer', sur: nieme('.dialog .variant', 0), dit: 'Revenez à « Équité d’abord »', sert: 'Samedis et fermetures y sont les mieux répartis.' },
@@ -837,7 +837,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .plan',
     cibleFin: '.content .plan',
     titre: 'Trois propositions',
-    texte: () => 'Solvéa calcule trois plannings complets : l’un privilégie l’équité, l’autre les préférences, le dernier le coût. Les règles passent toujours avant. Vous comparez, puis vous choisissez.',
+    texte: () => 'Solvéa calcule trois plannings complets : l’un privilégie l’équité, l’autre les préférences, le dernier le respect des contrats. Les règles passent toujours avant. Vous comparez, puis vous choisissez.',
     jouer: () => {
       avecSouhaits();
       semaineUne();
@@ -850,10 +850,10 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: parTexte('.dialog .btn', 'Calculer trois propositions'), facultatif: true, dit: 'Cliquez sur « Calculer trois propositions »', sert: 'Les règles impératives passent toujours avant le reste.' },
       { faire: 'attendre', que: '.dialog .variant' },
       // Le temps de lire les trois propositions côte à côte.
-      { faire: 'pause', ms: 3600, dit: 'Trois plannings à comparer : équité, préférences, coût' },
+      { faire: 'pause', ms: 3600, dit: 'Trois plannings à comparer : équité, préférences, contrats' },
       { faire: 'cliquer', sur: nieme('.dialog .variant', 1), dit: 'Comparez : « Préférences d’abord »', sert: 'Elle suit le plus de préférences possible.' },
       { faire: 'pause', ms: 1400 },
-      { faire: 'cliquer', sur: nieme('.dialog .variant', 2), dit: 'Comparez : « Coût d’abord »', sert: 'Elle évite les heures au-delà des contrats.' },
+      { faire: 'cliquer', sur: nieme('.dialog .variant', 2), dit: 'Comparez : « Contrats d’abord »', sert: 'Elle évite les heures au-delà des contrats.' },
       { faire: 'pause', ms: 1400 },
       { faire: 'cliquer', sur: nieme('.dialog .variant', 0), dit: 'Retenez « Équité d’abord »', sert: 'Samedis et fermetures y sont répartis selon l’historique de chacun.' },
       { faire: 'pause', ms: 900 },
@@ -872,8 +872,7 @@ const COMPLET_BRUT: Etape[] = [
       semaineUne();
     },
     gestes: [
-      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Coût'), sert: 'La colonne de droite passe au coût estimé de chacun.' },
-      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Équité'), sert: 'Ici : les samedis de chacun, face à sa part.' },
+      { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Équité'), sert: 'La colonne de droite montre les samedis et les fermetures de chacun, face à sa part.' },
       { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Heures'), sert: 'Retour aux heures de la semaine, face au contrat.' },
       { faire: 'cliquer', sur: '.plan-grid .tile', dit: 'Cliquez sur une tuile', sert: 'Un poste s’ouvre pour être corrigé ou supprimé.' },
       { faire: 'attendre', que: '.dialog' },
@@ -1002,6 +1001,8 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: '.top-creer', sert: '« Créer » réunit tout ce que l’on peut ajouter.' },
       { faire: 'cliquer', sur: parTexte('.outils .menu button', 'Une formation'), sert: 'On ouvre la fenêtre de la formation.' },
       { faire: 'taper', dans: '#formation-intitule', texte: 'Gestes d’urgence', dit: 'Donnez un intitulé à la formation', sert: 'Il apparaîtra dans le planning des participants.' },
+      { faire: 'cliquer', sur: 'label[for="formation-externe"]', dit: 'Précisez : formation interne ou externe', sert: 'Interne, elle a lieu à la pharmacie. Externe, dans un organisme.' },
+      { faire: 'taper', dans: '#formation-lieu', texte: 'Centre de formation, à Lyon', dit: 'Indiquez le lieu', sert: 'Les participants le lisent dans leur espace, avec les dates.' },
       { faire: 'cliquer', sur: '#formation-p_thomas', dit: 'Cochez Thomas parmi les participants', sert: 'Seuls les participants seront absents du comptoir.' },
       { faire: 'cliquer', sur: '#formation-p_ines', dit: 'Cochez Inès', sert: 'On coche autant de personnes que nécessaire.' },
       { faire: 'cliquer', sur: VALIDER, dit: 'Cliquez sur « Planifier et prévenir »', sert: 'Chacun est prévenu ; les postes à couvrir vont dans « Résoudre ».' },
@@ -1173,7 +1174,13 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSujet('remplacements');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.demande-r button', 'Accepter'), sert: 'Accepter prévient tous ceux qui peuvent tenir le poste.' }],
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.demande-r button', 'Décider'), sert: 'Une fenêtre réunit ce qu’il faut pour trancher, au lieu d’un simple oui ou non.' },
+      { faire: 'attendre', que: '.dialog .dr' },
+      { faire: 'pause', ms: 3200, dit: 'Tout est là pour décider', sert: 'La demande et sa raison, qui peut reprendre le poste, et ce qui se passe au comptoir s’il n’est pas repris.' },
+      { faire: 'cliquer', sur: 'label[for="dr-equipe"]', dit: 'Choisissez « Accepter et prévenir l’équipe »', sert: 'Vous pourriez aussi confier le poste tout de suite, ou refuser en donnant la raison.', facultatif: true },
+      { faire: 'cliquer', sur: '#dr-confirmer', sert: 'Tous ceux qui peuvent tenir le poste sont prévenus ensemble.', facultatif: true },
+    ],
   },
   {
     chapitre: SUIVRE,
@@ -1215,7 +1222,12 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().setSujet('remplacements');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.demande-r.u-medical button', 'Accepter'), sert: 'Une demande médicale se traite toujours en premier.' }],
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.demande-r.u-medical button', 'Décider'), sert: 'Une demande médicale se traite toujours en premier.' },
+      { faire: 'attendre', que: '.dialog .dr' },
+      { faire: 'cliquer', sur: 'label[for="dr-equipe"]', dit: 'Choisissez « Accepter et prévenir l’équipe »', sert: 'Le justificatif est conservé pour les seuls titulaires.', facultatif: true },
+      { faire: 'cliquer', sur: '#dr-confirmer', sert: 'L’équipe disponible est prévenue aussitôt.', facultatif: true },
+    ],
   },
   {
     chapitre: SUIVRE,

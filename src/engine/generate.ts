@@ -29,7 +29,7 @@ export type Variante = 'equite' | 'souhaits' | 'cout';
 export const VARIANTE_LABEL: Record<Variante, { titre: string; phrase: string }> = {
   equite: { titre: 'Équité d’abord', phrase: 'Répartit samedis et fermetures selon l’historique de chacun.' },
   souhaits: { titre: 'Préférences d’abord', phrase: 'Suit le plus de préférences possible.' },
-  cout: { titre: 'Coût d’abord', phrase: 'Évite les heures au-delà des contrats.' },
+  cout: { titre: 'Contrats d’abord', phrase: 'Évite les heures au-delà des contrats.' },
 };
 
 export interface GenOptions {

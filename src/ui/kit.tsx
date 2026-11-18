@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { dayIndex, fmtHeure, ferie } from '../domain/time';
 import type { ISODate, Interval, Mission, Person, Shift, Urgence } from '../domain/types';
 import { URGENCE_LABEL, estPharmacien } from '../domain/types';
+import { useStore } from '../store/store';
 import { couleurDe } from './icons';
 
 export type Role = 'pharma' | 'prepa' | 'autre' | 'externe';
@@ -367,4 +368,13 @@ export function Ferie({ date, court }: { date: ISODate; court?: boolean }): JSX.
       {court ? <span className="sr"> : {nom}</span> : null}
     </span>
   );
+}
+
+/**
+ * Ce qui parle d'argent ne s'affiche que si le titulaire a activé « Afficher les coûts estimés » dans les réglages :
+ * Solvéa ne connaît pas les salaires, il ne montre donc aucun chiffre tant qu'on ne lui en a pas donné.
+ */
+export function SiCouts({ children, sinon = null }: { children: ReactNode; sinon?: ReactNode }): JSX.Element {
+  const actif = useStore((st) => !!st.data.officine.couts);
+  return <>{actif ? children : sinon}</>;
 }

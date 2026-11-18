@@ -125,6 +125,9 @@ export const MOTIF_DEMANDE_LABEL: Record<MotifDemande, string> = {
   personnel: 'Raison personnelle',
 };
 
+export type CadreFormation = 'interne' | 'externe';
+export const CADRE_FORMATION_LABEL: Record<CadreFormation, string> = { interne: 'Formation interne', externe: 'Formation externe' };
+
 export interface Absence {
   id: string;
   personId: string;
@@ -135,6 +138,10 @@ export interface Absence {
   createdAt: string;
   /** Intitulé d'une formation. */
   libelle?: string;
+  /** Formation interne (à la pharmacie) ou externe (dans un organisme, à l'extérieur). */
+  cadre?: CadreFormation;
+  /** Où la formation a lieu. */
+  lieu?: string;
   /** La raison donnée par la personne : une catégorie, et une précision si elle le souhaite. Visible des seuls titulaires. */
   motif?: MotifDemande;
   precision?: string;
@@ -248,8 +255,25 @@ export interface Support {
   telephone?: string;
 }
 
+/** Quand le planning d'un mois doit être transmis à l'équipe, et ce qui se passe si l'échéance est dépassée. */
+export interface ReglagePublication {
+  /** Le planning du mois est publié au plus tard ce nombre de jours avant le 1er. */
+  delai: number;
+  /** Le rappel commence ce nombre de jours avant l'échéance. */
+  rappel: number;
+  /** Échéance dépassée sans rien de fait : Solvéa prépare les semaines vides d'après les habitudes. */
+  relais: boolean;
+}
+
 export interface Officine {
   nom: string;
+  /**
+   * Afficher les coûts estimés. Désactivé par défaut : Solvéa ne connaît pas les salaires. Activé, il montre des
+   * coûts calculés sur les seuls taux horaires que le titulaire a saisis dans les fiches.
+   */
+  couts?: boolean;
+  /** Publication au mois : l'échéance, son rappel, et le relais par Solvéa si rien n'est fait. */
+  publication?: Partial<ReglagePublication>;
   /** Le répertoire des marques de la pharmacie : celles qu'on peut confier à un animateur. Il s'enrichit à l'usage. */
   marques?: string[];
   support?: Support;
@@ -278,6 +302,8 @@ export type SemaineStatut = 'brouillon' | 'publie';
 export interface Semaine {
   statut: SemaineStatut;
   publishedAt?: string;
+  /** Brouillon préparé par Solvéa d'après les habitudes, à l'échéance : la date de cette préparation. */
+  auto?: string;
   /** Version officielle : celle que voient les salariés. */
   snapshot?: Shift[];
 }
@@ -693,7 +719,8 @@ export const nomGarde = (g: Pick<Garde, 'start' | 'end' | 'type'>): string => `$
 export const libelleGarde = (g: Pick<Garde, 'start' | 'end' | 'type'>): string => `${nomGarde(g)} · ${GARDE_COURT[g.type]}`;
 
 /** Libellé d'une absence, avec l'intitulé quand c'est une formation. */
-export const libelleAbsence = (a: Pick<Absence, 'type' | 'libelle'>): string => (a.type === 'formation' && a.libelle ? `Formation · ${a.libelle}` : ABSENCE_LABEL[a.type]);
+export const libelleAbsence = (a: Pick<Absence, 'type' | 'libelle' | 'cadre' | 'lieu'>): string =>
+  a.type === 'formation' && a.libelle ? `${a.cadre ? CADRE_FORMATION_LABEL[a.cadre] : 'Formation'} · ${a.libelle}${a.lieu ? ` (${a.lieu})` : ''}` : ABSENCE_LABEL[a.type];
 /** Classe de couleur d'une absence dans les plannings. */
 export const classeAbsence = (type: AbsenceType): string => ({ conge: 'conge', maladie: 'arret', formation: 'formation', autre: 'absence' })[type];
 

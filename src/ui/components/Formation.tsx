@@ -1,6 +1,7 @@
-import { CalendarClock, GraduationCap, Info } from 'lucide-react';
+import { Building2, CalendarClock, Check, GraduationCap, Info, MapPin, Store } from 'lucide-react';
 import { useState } from 'react';
 import { addDays, fmtDateCourt } from '../../domain/time';
+import type { CadreFormation } from '../../domain/types';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { EtiquetteRole } from '../icons';
@@ -19,10 +20,19 @@ export function DialogueFormation({ onClose, personId }: { onClose: () => void; 
   const [from, setFrom] = useState(addDays(today, 14));
   const [to, setTo] = useState(addDays(today, 14));
   const [choisis, setChoisis] = useState<string[]>(personId ? [personId] : []);
+  // Interne ou externe : le choix se fait, il n'est pas deviné. Le lieu suit : la pharmacie, ou une adresse à donner.
+  const [cadre, setCadre] = useState<CadreFormation | null>(null);
+  const [lieu, setLieu] = useState('');
+  const ici = data.officine.nom.trim() ? `À la pharmacie (${data.officine.nom.trim()})` : 'À la pharmacie';
+  const choisirCadre = (c: CadreFormation): void => {
+    setCadre(c);
+    // Le lieu proposé pour une formation interne ne suit pas vers une formation externe.
+    setLieu((l) => (c === 'interne' ? (l.trim() && l !== ici ? l : ici) : l === ici ? '' : l));
+  };
   const equipe = data.personnes.filter((p) => !p.externe);
   const fin = to && to >= from ? to : from;
   const postes = data.shifts.filter((s) => choisis.includes(s.personId) && s.date >= from && s.date <= fin).length;
-  const pret = intitule.trim().length >= 2 && !!from && choisis.length > 0;
+  const pret = intitule.trim().length >= 2 && !!from && choisis.length > 0 && !!cadre && lieu.trim().length >= 2;
   const basculer = (id: string): void => setChoisis((x) => (x.includes(id) ? x.filter((y) => y !== id) : [...x, id]));
 
   return (
@@ -41,7 +51,7 @@ export function DialogueFormation({ onClose, personId }: { onClose: () => void; 
             className="btn primary"
             disabled={!pret}
             onClick={() => {
-              planifier({ intitule: intitule.trim(), personnes: choisis, from, to: fin });
+              planifier({ intitule: intitule.trim(), personnes: choisis, from, to: fin, cadre: cadre ?? undefined, lieu: lieu.trim() });
               dire(`Formation « ${intitule.trim()} » planifiée pour ${choisis.length} personne${choisis.length > 1 ? 's' : ''}. ${postes ? 'Les postes concernés sont à couvrir dans « Résoudre ».' : 'Aucun poste n’est touché.'}`, true);
               onClose();
             }}
@@ -56,6 +66,45 @@ export function DialogueFormation({ onClose, personId }: { onClose: () => void; 
         <input id="formation-intitule" value={intitule} onChange={(e) => setIntitule(e.target.value)} placeholder="Vaccination, entretiens pharmaceutiques, gestes d’urgence…" list="formations-connues" autoComplete="off" data-autofocus aria-required="true" />
       </label>
       <NomsFormations />
+      <fieldset className="fo-cadre">
+        <legend className="field">Cette formation est</legend>
+        <div className="fo-choix">
+          {(
+            [
+              { cle: 'interne', titre: 'Interne', phrase: 'À la pharmacie, animée par l’équipe ou un intervenant.', Icone: Store },
+              { cle: 'externe', titre: 'Externe', phrase: 'À l’extérieur, dans un organisme de formation.', Icone: Building2 },
+            ] as const
+          ).map(({ cle, titre, phrase, Icone }) => (
+            <label key={cle} className={`fo-carte${cadre === cle ? ' on' : ''}`} htmlFor={`formation-${cle}`}>
+              <input id={`formation-${cle}`} type="radio" name="formation-cadre" checked={cadre === cle} onChange={() => choisirCadre(cle)} />
+              <span className="fo-ico" aria-hidden="true">
+                <Icone size={20} />
+              </span>
+              <span className="fo-texte">
+                <b>{titre}</b>
+                <span>{phrase}</span>
+              </span>
+              <span className="fo-coche" aria-hidden="true">
+                <Check size={14} strokeWidth={3} />
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <label className="field" htmlFor="formation-lieu">
+        <span>
+          <MapPin size={14} aria-hidden="true" /> Lieu de la formation
+        </span>
+        <input
+          id="formation-lieu"
+          value={lieu}
+          onChange={(e) => setLieu(e.target.value)}
+          placeholder={cadre === 'externe' ? 'Organisme, adresse ou ville' : 'Par exemple : à la pharmacie, salle de réunion'}
+          maxLength={120}
+          autoComplete="off"
+        />
+        <span className="aide">Les participants le lisent dans leur espace, avec les dates.</span>
+      </label>
       <div className="row wrap" style={{ alignItems: 'flex-end' }}>
         <label className="field" htmlFor="formation-debut">
           Premier jour

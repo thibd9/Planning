@@ -27,6 +27,7 @@ import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { EtiquetteRole, GARDE_ICONE, IconeGarde, MOMENT_GARDE_ICONE } from '../icons';
 import { Avatar, Dialog, Empty, Pill } from '../kit';
+import { SiCouts } from '../kit';
 
 const ETAPES: { cle: EtapeGarde; label: string }[] = [
   { cle: 'prevue', label: 'Prévue' },
@@ -136,18 +137,31 @@ export function Gardes(): JSX.Element {
                     <b>{j}</b>
                     <span>{MOIS_COURT[m - 1]}</span>
                   </span>
-                  <span className="grow">
-                    <b className="g-nom">
-                      <span className={`g-moment ${momentGarde(g)}`} aria-hidden="true">
-                        <IconeGarde garde={g} size={13} />
-                      </span>
-                      {nomGarde(g)}
-                    </b>
-                    <span className="small soft" style={{ display: 'block' }}>
-                      {GARDE_COURT[g.type]} · {JOURS_COURT[weekday(g.date)]} {fmtHHMM(g.start)} → {fmtHHMM(g.end)} · {p ? nomCourt(p) : 'à affecter'}
+                  {/* Trois lignes qui se lisent d'un trait : quoi et où en est la garde, quand, puis sa forme et qui la tient. */}
+                  <span className="grow g-corps">
+                    <span className="g-ligne">
+                      <b className="g-nom">
+                        <span className={`g-moment ${momentGarde(g)}`} aria-hidden="true">
+                          <IconeGarde garde={g} size={13} />
+                        </span>
+                        {nomGarde(g)}
+                      </b>
+                      <Pill tone={etape === 'prevue' ? 'warn' : etape === 'validee' ? 'ok' : etape === 'realisee' ? 'danger' : 'nuit'}>{ETAPES.find((e) => e.cle === etape)?.label}</Pill>
+                    </span>
+                    <span className="g-quand num">
+                      <span className="cap1">{JOURS[weekday(g.date)]}</span> · {fmtHeure(g.start)} → {fmtHeure(g.end)}
+                    </span>
+                    <span className="g-meta">
+                      <span className="g-forme">{GARDE_COURT[g.type]}</span>
+                      {p ? (
+                        <span className="g-qui">
+                          <Avatar person={p} /> {nomCourt(p)}
+                        </span>
+                      ) : (
+                        <span className="g-qui libre">À affecter</span>
+                      )}
                     </span>
                   </span>
-                  <Pill tone={etape === 'prevue' ? 'warn' : etape === 'validee' ? 'ok' : etape === 'realisee' ? 'danger' : 'nuit'}>{ETAPES.find((e) => e.cle === etape)?.label}</Pill>
                 </button>
               );
             })}
@@ -287,7 +301,9 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
                         <b className="num">{c.nombre}</b> garde{c.nombre > 1 ? 's' : ''} en {annee}
                       </span>
                       {c.person.volontaireGardes ? <span>Volontaire</span> : null}
-                      <span>{!c.person.salarie ? 'Hors paie' : c.cout === null ? 'Coût à valoriser' : `Coût estimé ${fmtEuros(c.cout)}`}</span>
+                      <SiCouts sinon={!c.person.salarie ? <span>Hors paie</span> : null}>
+                        <span>{!c.person.salarie ? 'Hors paie' : c.cout === null ? 'Taux horaire non saisi' : `Coût estimé ${fmtEuros(c.cout)}`}</span>
+                      </SiCouts>
                     </span>
                     {c.obstacles.length || c.postesADeplacer || !c.delaiOk ? (
                       <span className="g-alerte">
@@ -464,7 +480,9 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
                       <td className="num" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                         <b>{fmtDecimal(v.quantite)}</b> {v.unite}
                       </td>
-                      <td className="num" style={{ textAlign: 'right' }}>{v.montant !== null ? fmtEuros(v.montant) : <span className="muted">à valoriser</span>}</td>
+                      <td className="num" style={{ textAlign: 'right' }}>
+                        <SiCouts sinon={<span className="muted">à valoriser en paie</span>}>{v.montant !== null ? fmtEuros(v.montant) : <span className="muted">à valoriser</span>}</SiCouts>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -478,7 +496,7 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
             {calcul.variables.length ? (
               <div className="row wrap">
                 <span className="small soft grow">
-                  {total > 0 ? `Total valorisable à ce stade : ${fmtEuros(total)} (taux horaire indicatif). ` : ''}
+                  <SiCouts>{total > 0 ? `Total valorisable à ce stade : ${fmtEuros(total)} (d’après le taux horaire saisi dans la fiche). ` : ''}</SiCouts>
                   Quantités calculées d'après l'accord du 23 mars 2000 ; à faire relire par votre cabinet comptable.
                 </span>
                 {garde.valideLe ? (

@@ -3570,3 +3570,76 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill { -we
 .tile.ptc.on { box-shadow: inset 0 0 0 2.5px #111c27; }
 .ptc-coche { position: absolute; top: 8px; right: 9px; color: #111c27; }
 .tile.ptc:focus-visible { outline: 3px solid var(--a-deep); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- Gardes : une ligne se lit en trois temps, sans coupure au milieu d'une information */
+.g-corps { display: grid; gap: 4px; min-width: 0; }
+.g-ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+.g-ligne .g-nom { font-size: 15.5px; letter-spacing: -0.01em; }
+.g-ligne .pill { flex: none; }
+.g-quand { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.g-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13px; color: var(--ink-2); }
+.g-forme { padding: 2px 9px; border-radius: 999px; background: var(--n-2); font-weight: 600; white-space: nowrap; text-transform: capitalize; }
+.g-qui { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+.g-qui .avatar { width: 22px; height: 22px; font-size: 9.5px; border-radius: 7px; }
+.g-qui.libre { color: var(--warn-ink); background: var(--warn-soft); padding: 2px 9px; border-radius: 999px; }
+.g-item { align-items: flex-start; }
+.g-item .g-date { margin-top: 2px; }
+
+/* ---------------------------------------------------------------- Formation : interne ou externe, puis le lieu */
+.fo-cadre { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 8px; }
+.fo-cadre legend { padding: 0; margin-bottom: 8px; }
+.fo-choix { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.fo-carte { position: relative; display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: 16px; background: var(--n-1); cursor: pointer; box-shadow: inset 0 0 0 1px transparent; transition: background 0.15s ease, box-shadow 0.15s ease; }
+.fo-carte:hover { background: var(--a-tint); }
+.fo-carte.on { background: var(--a-soft); box-shadow: inset 0 0 0 2px var(--a-deep); }
+.fo-carte input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; border-radius: inherit; }
+.fo-carte:has(input:focus-visible) { outline: 3px solid var(--a-deep); outline-offset: 2px; }
+.fo-ico { flex: none; width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: var(--surface); color: var(--ink-2); }
+.fo-carte.on .fo-ico { background: var(--a-deep); color: var(--on-a); }
+.fo-texte { display: grid; gap: 2px; min-width: 0; }
+.fo-texte b { font-size: 15px; }
+.fo-texte span { font-size: 13px; line-height: 1.35; color: var(--ink-2); }
+.fo-coche { flex: none; margin-left: auto; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--a-deep); color: var(--on-a); opacity: 0; }
+.fo-carte.on .fo-coche { opacity: 1; }
+.field > span > svg { vertical-align: -2px; }
+/* La flèche d'une liste de suggestions garde la couleur du texte, jamais un triangle noir du navigateur. */
+input[list]::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer; }
+
+/* ---------------------------------------------------------------- Publication au mois : l'échéance, le rappel, le relais */
+.pub-regles { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 15px; }
+.pub-regles input { width: 76px; text-align: center; padding: 7px 8px; font-weight: 700; }
+.pub-exemple { margin: 0; padding: 10px 14px; border-radius: 14px; background: var(--a-tint); color: var(--ink); font-size: 14px; font-weight: 600; }
+.mo-publier { white-space: nowrap; }
+
+.tb-echeance { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-top: 16px; padding: 18px 22px; border-radius: 22px; background: var(--warn-soft); color: var(--warn-ink); }
+.tb-echeance.depasse { box-shadow: inset 0 0 0 1.5px var(--warn); }
+.tb-echeance h2 { margin: 0; font-size: 17px; letter-spacing: -0.01em; color: inherit; }
+.tb-echeance p { margin: 4px 0 0; font-size: 14.5px; line-height: 1.45; color: inherit; max-width: 78ch; }
+.tb-echeance-ico { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--surface) 70%, transparent); }
+.tb-echeance .grow { min-width: 220px; }
+
+/* ---------------------------------------------------------------- Décider d'une demande de remplacement : les faits, puis la décision */
+.dr { display: grid; gap: 18px; }
+.dr-bloc { display: grid; gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.dr-bloc h3, .dr-bloc legend { margin: 0; padding: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.dr-bloc legend { margin-bottom: 10px; }
+.dr-demande { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--n-1); }
+.dr-faits { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 0; font-size: 14px; }
+.dr-faits dt { color: var(--ink-3); font-weight: 600; }
+.dr-faits dd { margin: 0; }
+.dr-candidats { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.dr-candidats li { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 14px; background: var(--n-1); }
+.dr-candidats .grow { display: grid; gap: 1px; min-width: 0; }
+.dr-rang { flex: none; padding: 3px 10px; border-radius: 999px; background: var(--ok-soft); color: var(--ok-ink); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.dr-alerte, .dr-ok { margin: 0; padding: 11px 14px; border-radius: 14px; font-size: 14px; }
+.dr-alerte { background: var(--warn-soft); color: var(--warn-ink); }
+.dr-ok { background: var(--ok-soft); color: var(--ok-ink); }
+.dr-risques { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.dr-risques li { padding: 11px 14px; border-radius: 14px; background: var(--warn-soft); color: var(--warn-ink); font-size: 14px; }
+.dr-risques li.bad { background: var(--danger-soft); color: var(--danger-ink); }
+.dr-choix { display: grid; gap: 8px; }
+.dr-carte.off { opacity: 0.55; cursor: not-allowed; }
+.dr-carte.off input { cursor: not-allowed; }
+.dr-carte.non.on { background: var(--danger-soft); box-shadow: inset 0 0 0 2px var(--danger); }
+.dr-carte.non.on .fo-ico, .dr-carte.non.on .fo-coche { background: var(--danger); color: #fff; }
+.dr-decision .field, .dr-decision .refus-apercu { margin-top: 10px; }

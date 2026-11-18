@@ -51,7 +51,7 @@ import { useUi } from '../../store/ui';
 import type { Echelle } from '../kit';
 import { Tuile } from '../components/Tuile';
 import { ABSENCE_ICONE, ACTIVITE_COULEUR, ACTIVITE_COURT, ACTIVITE_ICONE, GARDE_ICONE } from '../icons';
-import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, Track, momentDe, roleDe, Ferie } from '../kit';
+import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, SiCouts, Track, momentDe, roleDe, Ferie } from '../kit';
 
 type Lecture = 'heures' | 'cout' | 'equite';
 
@@ -80,7 +80,10 @@ export function Construire(): JSX.Element {
   const { undo, redo, past, future, moveShift, copierSemaine, viderSemaine } = useStore();
   const { semaine, setSemaine, focus, setFocus, dire, voirJour, planVue, setPlanVue, seulementMoi, setSeulementMoi, session } = useUi();
   const moiId = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''))?.id;
-  const [lecture, setLecture] = useState<Lecture>('heures');
+  const [lectureChoisie, setLecture] = useState<Lecture>('heures');
+  // Les coûts ne se lisent que si le titulaire les a activés dans les réglages.
+  const couts = !!data.officine.couts;
+  const lecture: Lecture = lectureChoisie === 'cout' && !couts ? 'heures' : lectureChoisie;
   const [edition, setEdition] = useState<{ personId: string; date: ISODate; shift?: Shift } | null>(null);
   const [generation, setGeneration] = useState(false);
   const [publication, setPublication] = useState(false);
@@ -260,7 +263,7 @@ export function Construire(): JSX.Element {
                   onChange={setLecture}
                   options={[
                     { value: 'heures', label: 'Heures' },
-                    { value: 'cout', label: 'Coût' },
+                    ...(couts ? [{ value: 'cout' as const, label: 'Coût' }] : []),
                     { value: 'equite', label: 'Équité' },
                   ]}
                 />
@@ -1104,8 +1107,10 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
                     <b className={meilleur('ecartSamedis', i) ? 'best' : ''}>{fmtDecimal(k.ecartSamedis, 2)}</b>
                     <span>Heures au-delà des contrats</span>
                     <b className={meilleur('auDela', i) ? 'best' : ''}>{fmtDuree(k.auDela)}</b>
-                    <span>Coût salarial estimé</span>
-                    <b className={meilleur('coutEstime', i) ? 'best' : ''}>{fmtEuros(k.coutEstime)}</b>
+                    <SiCouts>
+                      <span title="Heures planifiées × taux horaire saisi dans chaque fiche">Coût estimé</span>
+                      <b className={meilleur('coutEstime', i) ? 'best' : ''}>{fmtEuros(k.coutEstime)}</b>
+                    </SiCouts>
                     <span>Sous l'effectif attendu</span>
                     <b className={meilleur('sousEffectif', i) ? 'best' : ''}>{k.sousEffectif ? fmtDuree(k.sousEffectif) : 'Jamais'}</b>
                   </span>
@@ -1122,7 +1127,8 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
             </div>
           ) : null}
           <p className="tiny muted">
-            Indicateurs calculés sur les données saisies. Le coût est une estimation à partir de taux horaires indicatifs, pas un calcul de paie.
+            Indicateurs calculés sur les données saisies.
+            <SiCouts> Le coût estimé multiplie les heures planifiées par le taux horaire que vous avez saisi dans chaque fiche ; une personne sans taux n’est pas comptée. Ce n’est pas un calcul de paie.</SiCouts>
           </p>
         </>
       ) : null}

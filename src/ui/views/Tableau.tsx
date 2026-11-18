@@ -1,11 +1,12 @@
-import { AlarmClock, ArrowLeftRight, ArrowRight, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus, UsersRound } from 'lucide-react';
-import { useMemo } from 'react';
+import { AlarmClock, ArrowLeftRight, ArrowRight, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus, UsersRound, BellRing, Sparkles } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
-import { addDays, fmtDateCourt, fmtDateLong, fmtHeure, fmtSemaine, mondayOf, todayISO, totalDuree, weekDates } from '../../domain/time';
+import { MOIS, addDays, fmtDateCourt, fmtDateLong, fmtHeure, fmtSemaine, mondayOf, todayISO, totalDuree, weekDates } from '../../domain/time';
 import type { AppData } from '../../domain/types';
 import { nomCourt, MOTIF_RETARD_LABEL } from '../../domain/types';
 import { ouverture, shiftsSemaine, trousPharmacien } from '../../engine/core';
 import { arriveePrevue, retardsDuJour } from '../../engine/retard';
+import { etatPublication, reglagePublication } from '../../engine/echeance';
 import { decisions } from '../../engine/decisions';
 import { aRegulariser, semaineLibre } from '../../engine/heures';
 import { estCollaboratif, moisDe, reponses } from '../../engine/souhaits';
@@ -30,7 +31,8 @@ function couverture(data: AppData, monday: string): number | null {
 /** Tableau de bord du responsable : l'état de l'officine en un écran. */
 export function Tableau({ personId }: { personId: string }): JSX.Element {
   const { data, autres, officineId, today, changerOfficine } = useStore();
-  const { aller, setSemaine, session, setSujet, voirJour } = useUi();
+  const { aller, setSemaine, session, setSujet, voirJour, dire } = useUi();
+  const preparerMois = useStore((st) => st.preparerMois);
   const moi = data.personnes.find((p) => p.id === personId);
   const lundi = mondayOf(today);
   const d = useMemo(() => decisions(data, today), [data, today]);
@@ -115,6 +117,26 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
     if (cycle.etapes.some((e) => e.etat !== 'fait')) return { ton: 'calme', icone: <CalendarRange size={22} />, titre: `Préparer la semaine du ${fmtSemaine(cycle.semaine)}`, detail: 'Rien d’urgent : c’est le bon moment pour avancer le prochain planning.', bouton: cycle.bouton, action: cycle.action };
     return { ton: 'ok', icone: <Check size={22} />, titre: 'Tout est à jour', detail: 'Absences couvertes, demandes arbitrées, plannings publiés.' };
   })();
+  // Le planning se transmet au mois : à l'approche de l'échéance, puis une fois dépassée, un bandeau le rappelle.
+  const pub = etatPublication(data, today);
+  const relais = reglagePublication(data.officine).relais;
+  const nomMois = MOIS[Number(pub.mois.slice(5)) - 1];
+  const prepares = pub.semaines.filter((x) => x.auto).length;
+  // Dans une vraie pharmacie, le relais se fait sans geste : dès qu'un titulaire ouvre Solvéa après l'échéance.
+  // Dans l'environnement d'exemple, le bandeau propose un bouton, pour le voir faire.
+  const aPreparer = !data.demo && relais && pub.etat === 'depasse' && pub.vides > 0;
+  useEffect(() => {
+    if (!aPreparer) return;
+    preparerMois(pub.mois);
+    dire(`L’échéance est passée : Solvéa a préparé ${nomMois} en brouillon d’après vos habitudes. Relisez, puis publiez le mois.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aPreparer, pub.mois]);
+  const versLeMois = (): void => {
+    const ui = useUi.getState();
+    ui.setSemaine(pub.semaines.find((x) => x.etat !== 'publie')?.monday ?? pub.semaines[0]?.monday ?? today);
+    ui.setPlanVue('mois');
+    ui.aller('construire');
+  };
   // L'équipe du jour, une ligne par personne, sur l'échelle des heures d'ouverture.
   const ouvertures = ouverture(data.officine, today);
   const echelle = ouvertures.length ? { start: Math.floor(ouvertures[0].start / 60) * 60, end: Math.ceil(ouvertures[ouvertures.length - 1].end / 60) * 60 } : { start: 8 * 60, end: 20 * 60 };
@@ -163,6 +185,50 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
         ) : null}
       </section>
 
+
+      {pub.etat === 'rappel' || pub.etat === 'depasse' ? (
+        <section className={`tb-echeance ${pub.etat}`} aria-labelledby="tb-echeance" data-focus="echeance">
+          <span className="tb-echeance-ico" aria-hidden="true">
+            {pub.etat === 'depasse' && prepares ? <Sparkles size={20} /> : <BellRing size={20} />}
+          </span>
+          <div className="grow">
+            <h2 id="tb-echeance">
+              {pub.etat === 'rappel'
+                ? `Planning de ${nomMois} : à transmettre avant le ${fmtDateCourt(pub.echeance)}`
+                : prepares && !pub.vides
+                  ? `Solvéa a préparé ${nomMois} d’après vos habitudes`
+                  : `Le planning de ${nomMois} devait être transmis le ${fmtDateCourt(pub.echeance)}`}
+            </h2>
+            <p>
+              {pub.etat === 'rappel'
+                ? `${pub.jours === 0 ? 'C’est aujourd’hui.' : `Il reste ${pub.jours} jour${pub.jours > 1 ? 's' : ''}.`} ${pub.restantes} semaine${pub.restantes > 1 ? 's ne sont' : ' n’est'} pas encore publiée${pub.restantes > 1 ? 's' : ''}${pub.vides ? `, dont ${pub.vides} vide${pub.vides > 1 ? 's' : ''}` : ''}.`
+                : pub.vides
+                  ? relais
+                    ? `${pub.vides} semaine${pub.vides > 1 ? 's sont' : ' est'} encore vide${pub.vides > 1 ? 's' : ''}. Solvéa peut ${pub.vides > 1 ? 'les' : 'la'} préparer en brouillon d’après vos habitudes ; vos semaines déjà commencées ne sont pas touchées, et rien n’est publié sans vous.`
+                    : `${pub.vides} semaine${pub.vides > 1 ? 's sont' : ' est'} encore vide${pub.vides > 1 ? 's' : ''}, ${pub.restantes} à publier.`
+                  : `${pub.restantes} semaine${pub.restantes > 1 ? 's sont' : ' est'} en brouillon${prepares ? `, dont ${prepares} préparée${prepares > 1 ? 's' : ''} par Solvéa` : ''} : relisez, corrigez si besoin, puis publiez le mois.`}
+            </p>
+          </div>
+          {pub.etat === 'depasse' && pub.vides && relais ? (
+            <button
+              type="button"
+              className="btn primary"
+              id="echeance-preparer"
+              onClick={() => {
+                preparerMois(pub.mois);
+                dire(`Solvéa a préparé ${nomMois} en brouillon d’après vos habitudes. Relisez, puis publiez le mois.`, true);
+                versLeMois();
+              }}
+            >
+              <Sparkles size={16} aria-hidden="true" /> Laisser Solvéa préparer {nomMois}
+            </button>
+          ) : (
+            <button type="button" className="btn primary" id="echeance-ouvrir" onClick={versLeMois}>
+              {pub.vides ? `Construire ${nomMois}` : 'Relire et publier le mois'} <ArrowRight size={16} aria-hidden="true" />
+            </button>
+          )}
+        </section>
+      ) : null}
       <div className="tb-chiffres" aria-label="Repères">
         <button type="button" className="tb-chiffre tb-auj" onClick={() => voirJour(today)}>
           <span className="ico" aria-hidden="true"><UsersRound size={18} /></span>

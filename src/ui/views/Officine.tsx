@@ -7,6 +7,7 @@ import { minutesTravail } from '../../engine/core';
 import { estCollaboratif, limiteSouhaits, moisDe, moisDecale } from '../../engine/souhaits';
 import { COULEURS_POSTE, DialoguePosteType, classePoste } from '../components/PosteTypeDialogue';
 import { useStore } from '../../store/store';
+import { SEMAINES_DE_REFERENCE, etatPublication, reglagePublication } from '../../engine/echeance';
 import { useUi } from '../../store/ui';
 
 function Heure({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }): JSX.Element {
@@ -30,6 +31,10 @@ export function Officine(): JSX.Element {
   const officine = useStore((s) => s.data.officine);
   const { majOfficine, reinitialiser } = useStore();
   const collaboratif = estCollaboratif(useStore((s) => s.data.officine));
+  const donnees = useStore((s) => s.data);
+  const aujourdhui = useStore((s) => s.today);
+  const pub = reglagePublication(donnees.officine);
+  const etatPub = etatPublication(donnees, aujourdhui);
   const [confirmation, setConfirmation] = useState(false);
   const [nouveauPoste, setNouveauPoste] = useState(false);
   const today = useStore((s) => s.today);
@@ -140,6 +145,16 @@ export function Officine(): JSX.Element {
                 <input type="number" step={10000} min={0} value={officine.caAnnuelHT ?? ''} onChange={(e) => majOfficine({ caAnnuelHT: e.target.value === '' ? null : Number(e.target.value) })} />
               </label>
             </div>
+            <label className="check couts-option">
+              <input type="checkbox" id="couts-afficher" checked={!!officine.couts} onChange={(e) => majOfficine({ couts: e.target.checked })} />
+              <span>
+                <b>Afficher les coûts estimés</b>
+                <span className="small soft" style={{ display: 'block' }}>
+                  Solvéa ne connaît pas vos salaires : sans cette option, aucun montant n’est affiché. Si vous la cochez, un champ « Taux horaire brut », facultatif, apparaît dans la fiche de chaque personne. Les coûts affichés
+                  multiplient alors les heures planifiées par ce taux ; une personne sans taux n’est pas comptée. Ce n’est jamais un calcul de paie.
+                </span>
+              </span>
+            </label>
             <p className="tiny muted">
               La valeur du point n'est pas préremplie : reprenez-la dans le barème en vigueur. Tant qu'elle est vide, les indemnités de sujétion sont exprimées en points.
             </p>
@@ -191,6 +206,40 @@ export function Officine(): JSX.Element {
             <div className="card-body tiny muted" style={{ borderTop: '1px solid var(--line)' }}>
               Un pharmacien doit être présent à chaque minute d’ouverture : c’est contrôlé à part, quel que soit ce minimum.
             </div>
+          </div>
+
+          <div className="card pad col" data-focus="publication">
+            <h2 className="h3">Publication du planning, au mois</h2>
+            <div className="pub-regles">
+              <span>Le planning d’un mois est transmis à l’équipe au plus tard</span>
+              <label className="sr" htmlFor="pub-delai">
+                Nombre de jours avant le 1er du mois
+              </label>
+              <input id="pub-delai" type="number" className="num" min={1} max={45} value={pub.delai} onChange={(e) => majOfficine({ publication: { ...pub, delai: Math.max(1, Math.min(45, Number(e.target.value) || 1)) } })} />
+              <span>jours avant le 1er.</span>
+            </div>
+            <div className="pub-regles">
+              <span>Solvéa vous le rappelle</span>
+              <label className="sr" htmlFor="pub-rappel">
+                Nombre de jours de rappel avant l’échéance
+              </label>
+              <input id="pub-rappel" type="number" className="num" min={0} max={30} value={pub.rappel} onChange={(e) => majOfficine({ publication: { ...pub, rappel: Math.max(0, Math.min(30, Number(e.target.value) || 0)) } })} />
+              <span>jours avant cette échéance, sur le tableau de bord.</span>
+            </div>
+            <p className="pub-exemple" role="status">
+              Pour {MOIS[Number(etatPub.mois.slice(5)) - 1]} : rappel à partir du {fmtDateCourt(etatPub.rappelLe)}, à publier au plus tard le {fmtDateCourt(etatPub.echeance)}.
+            </p>
+            <label className="check">
+              <input type="checkbox" id="pub-relais" checked={pub.relais} onChange={(e) => majOfficine({ publication: { ...pub, relais: e.target.checked } })} />
+              <span>
+                <b>Passé l’échéance, laisser Solvéa préparer le planning</b>
+                <span className="small soft" style={{ display: 'block' }}>
+                  Si rien n’est fait à l’échéance, Solvéa prépare en brouillon les semaines restées vides, d’après vos habitudes : pour chaque personne et chaque jour, sa journée la plus fréquente sur vos {SEMAINES_DE_REFERENCE}{' '}
+                  dernières semaines publiées. Un planning que vous avez commencé à la main passe toujours avant : il n’est jamais touché. Rien n’est publié sans vous : vous relisez, corrigez, puis publiez.
+                </span>
+              </span>
+            </label>
+            <p className="tiny muted">Solvéa fonctionne sur cet appareil, sans serveur : le rappel et la préparation se font à l’ouverture de l’application par un titulaire.</p>
           </div>
 
           <div className="card pad col" data-focus="modele">

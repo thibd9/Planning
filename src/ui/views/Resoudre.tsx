@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { RAISONS_REFUS, texteRefus } from '../../domain/refus';
 import { FriseConges } from '../components/FriseConges';
 import { DialogueRefus } from '../components/Refus';
+import { DecisionRemplacement } from '../components/DecisionRemplacement';
 import {
   JOURS,
   addDays,
@@ -34,6 +35,7 @@ import { aSonTour, tourRemplacement } from '../../engine/appel';
 import { cibleSemaine } from '../../engine/heures';
 import { useUi } from '../../store/ui';
 import { AvantApres, Avatar, Delai, Empty, PastilleUrgence, Pill, Dialog } from '../kit';
+import { SiCouts } from '../kit';
 
 const capitale = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
@@ -528,7 +530,9 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
                   {on ? (
                     <span className="rs-faits small">
                       <span>{o.personnesTouchees.length ? `Touche ${o.personnesTouchees.map(nom).join(', ')}` : 'Personne d’autre n’est touché'}</span>
-                      <span>{o.coutSupp > 0 ? `+ ${fmtEuros(o.coutSupp)}` : 'Sans coût en plus'}</span>
+                      <SiCouts>
+                        <span>{o.coutSupp > 0 ? `+ ${fmtEuros(o.coutSupp)}` : 'Sans coût en plus'}</span>
+                      </SiCouts>
                       {o.regles.length ? <span>{o.regles.every((r) => r.ok) ? 'Règles respectées' : 'Une règle à regarder'}</span> : null}
                       {o.restant.length ? <span className="reste">Reste : {o.restant.join(' ')}</span> : null}
                     </span>
@@ -631,8 +635,10 @@ function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Eleme
               <dd>{o.personnesTouchees.length ? o.personnesTouchees.map(nom).join(', ') : 'Aucune dans l’équipe'}</dd>
               <dt>Horaires modifiés</dt>
               <dd>{o.creneauxModifies || 'Aucun'}</dd>
-              <dt>Coût en plus</dt>
-              <dd className="num">{o.coutSupp > 0 ? `+ ${fmtEuros(o.coutSupp)}` : 'Aucun'}</dd>
+              <SiCouts>
+                <dt>Coût en plus</dt>
+                <dd className="num">{o.coutSupp > 0 ? `+ ${fmtEuros(o.coutSupp)}` : 'Aucun'}</dd>
+              </SiCouts>
             </dl>
             {o.changements.length ? (
               <div className="col small" style={{ gap: 4 }}>
@@ -1024,6 +1030,7 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
   // Pour décider : combien de fois cette personne a demandé à être remplacée sur trois mois.
   const deja = data.remplacements.filter((x) => x.demandeur === r.demandeur && !x.trouId && x.date >= addDays(today, -90) && x.statut !== 'annulee').length;
   const [refus, setRefus] = useState(false);
+  const [decision, setDecision] = useState(false);
   const volontaires = tour.filter((c) => c.volontaire);
   const premier = aSonTour(tour);
   const urgence = r.urgence ?? 'prevu';
@@ -1061,20 +1068,7 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
               {refusCollegue ? `${adresse.prenom} ne peut pas. ${demandeur ? demandeur.prenom : 'Le demandeur'} peut ouvrir la demande à toute l’équipe.` : r.volontaires.includes(adresse.id) ? `${adresse.prenom} est d’accord : il reste à valider.` : `${adresse.prenom} n’a pas encore répondu.`}
             </div>
           ) : attente ? (
-            <ul className="oui-non">
-              <li className="oui">
-                <Check size={14} strokeWidth={3} aria-hidden="true" />
-                <span>
-                  <b>Si vous acceptez</b> : l’équipe disponible est prévenue.
-                </span>
-              </li>
-              <li className="non">
-                <X size={14} strokeWidth={3} aria-hidden="true" />
-                <span>
-                  <b>Si vous refusez</b> : le poste reste le sien.
-                </span>
-              </li>
-            </ul>
+            <div className="small soft">« Décider » ouvre ce qu’il faut pour trancher : qui peut reprendre le poste, ce qui se passe s’il n’est pas repris, puis votre décision.</div>
           ) : (
             <div className="small soft">Demande acceptée. Sans remplaçant confirmé, le poste reste le sien.</div>
           )}
@@ -1138,25 +1132,31 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
           );
         })}
       </div>
-      {attente && !(adresse && volontaires.some((c) => c.ok)) ? (
-        <button
-          type="button"
-          className="btn primary sm"
-          onClick={() => {
-            deciderDemande(r.id, true);
-            dire(adresse && !refusCollegue ? `Accord donné. Il reste à ${adresse.prenom} de répondre.` : 'Demande acceptée : l’équipe disponible est prévenue.', true);
-          }}
-        >
-          <Check size={14} aria-hidden="true" /> Accepter
+      {attente && !adresse ? (
+        // Une demande à trancher ouvre la fenêtre de décision : ce qu'il faut savoir, puis trois décisions possibles.
+        <button type="button" className="btn primary sm" data-decider={r.id} onClick={() => setDecision(true)}>
+          <ListChecks size={14} aria-hidden="true" /> Décider
         </button>
-      ) : null}
-      <button
-        type="button"
-        className="btn sm"
-        onClick={() => setRefus(true)}
-      >
-        Refuser
-      </button>
+      ) : (
+        <>
+          {attente && !(adresse && volontaires.some((c) => c.ok)) ? (
+            <button
+              type="button"
+              className="btn primary sm"
+              onClick={() => {
+                deciderDemande(r.id, true);
+                dire(adresse && !refusCollegue ? `Accord donné. Il reste à ${adresse.prenom} de répondre.` : 'Demande acceptée : l’équipe disponible est prévenue.', true);
+              }}
+            >
+              <Check size={14} aria-hidden="true" /> Accepter
+            </button>
+          ) : null}
+          <button type="button" className="btn sm" onClick={() => setRefus(true)}>
+            Refuser
+          </button>
+        </>
+      )}
+      {decision ? <DecisionRemplacement remplacement={r} onClose={() => setDecision(false)} /> : null}
       {refus ? (
         <DialogueRefus
           quoi={`Remplacement de ${demandeur ? nomCourt(demandeur) : '-'}, ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`}

@@ -1,10 +1,11 @@
-import { Boxes, CalendarHeart, Check, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, History, Hourglass, Lock, Megaphone, Pill as PillIcon, Plus, Sprout } from 'lucide-react';
+import { Boxes, CalendarCheck, CalendarHeart, Check, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, History, Hourglass, Lock, Megaphone, Pill as PillIcon, Plus, Sprout } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { JOURS, JOURS_COURT, MOIS, addDays, fmtDateCourt, fmtHeure, isoWeek, mondayOf, weekday, ferie } from '../../domain/time';
+import { JOURS, JOURS_COURT, MOIS, addDays, fmtDateCourt, fmtHeure, fmtSemaine, isoWeek, mondayOf, weekday, ferie } from '../../domain/time';
 import type { ISODate, Person, Qualification } from '../../domain/types';
 import { ABSENCE_LABEL, SOUHAIT_LABEL, classeAbsence, couleurDuPoste, libelleGarde, nomCourt, nomGarde } from '../../domain/types';
 import { IconeGarde } from '../icons';
-import { ouverture } from '../../engine/core';
+import { ouverture, shiftsSemaine } from '../../engine/core';
+import { validateWeek } from '../../engine/validate';
 import { semainesDuMois } from '../../engine/payroll';
 import type { Correction } from '../../engine/souhaits';
 import { corrigerMois, datesDuMois, estCollaboratif, joursRestants, limiteSouhaits, moisDe, moisDecale, objectifJour, planifieMois, reponses, souhaitDe, souhaitRespecte } from '../../engine/souhaits';
@@ -36,6 +37,7 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const appliquer = useStore((s) => s.appliquerCorrection);
+  const publier = useStore((s) => s.publier);
   const { semaine, setSemaine, setPlanVue, voirJour, dire, seulementMoi } = useUi();
   const [mois, setMois] = useState(() => moisDe(addDays(semaine, 3)));
   const [calcul, setCalcul] = useState(false);
@@ -51,6 +53,30 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
   const restants = joursRestants(data.officine, mois, today);
   const personnes = data.personnes.filter((p) => !p.externe && (!seulementMoi || p.id === moiId));
   const brouillons = lundis.filter((l) => data.semaines[l]?.statut !== 'publie' && addDays(l, 6) >= today);
+  // Le planning se transmet au mois : un bouton publie toutes les semaines prêtes, et dit celles qui restent à corriger.
+  const aPublier = brouillons.filter((l) => shiftsSemaine(data, l).length > 0);
+  const publierLeMois = (): void => {
+    const bloquees: string[] = [];
+    let faites = 0;
+    for (const l of aPublier) {
+      const bloquants = validateWeek(data, l).filter((i) => i.gravite === 'bloquant').length;
+      if (bloquants) bloquees.push(`la semaine du ${fmtSemaine(l)} (${bloquants} point${bloquants > 1 ? 's' : ''} bloquant${bloquants > 1 ? 's' : ''})`);
+      else {
+        publier(l, [], 0);
+        faites++;
+      }
+    }
+    const vides = brouillons.length - aPublier.length;
+    dire(
+      [
+        faites ? `${faites} semaine${faites > 1 ? 's' : ''} de ${MOIS[Number(mois.slice(5)) - 1]} publiée${faites > 1 ? 's' : ''} : l’équipe est prévenue.` : '',
+        bloquees.length ? `À corriger avant de publier : ${bloquees.join(', ')}.` : '',
+        vides ? `${vides} semaine${vides > 1 ? 's' : ''} encore vide${vides > 1 ? 's' : ''}.` : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
+    );
+  };
   const fermes = useMemo(() => new Set(dates.filter((d) => ouverture(data.officine, d).length === 0)), [data.officine, dates]);
   const objectifs = useMemo(() => new Map(dates.map((d) => [d, objectifJour(data, d)])), [data, dates]);
   const parCase = useMemo(() => {
@@ -256,6 +282,9 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
           <BoutonAuto onClick={corriger} disabled={calcul || !brouillons.length} occupe={calcul} focus="corriger" title={brouillons.length ? 'Recalcule les semaines en brouillon en suivant les préférences. Calcul fait sur cet appareil.' : 'Toutes les semaines du mois sont publiées'}>
             {calcul ? 'Calcul en cours…' : 'Corriger automatiquement'}
           </BoutonAuto>
+          <button type="button" className="btn primary mo-publier" id="mois-publier" disabled={!aPublier.length} onClick={publierLeMois} title={aPublier.length ? 'Publie toutes les semaines du mois qui sont prêtes' : 'Aucune semaine en brouillon à publier'}>
+            <CalendarCheck size={16} aria-hidden="true" /> Publier le mois
+          </button>
         </div>
       </div>
 

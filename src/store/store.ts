@@ -3,10 +3,10 @@ import { create } from 'zustand';
 import { DEMO_VERSION, seed, vierge } from '../data/seed';
 import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
-import { addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
+import { MOIS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
 import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, RendezVous, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, MOTIF_RETARD_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
-import type { AvisRetard, MotifRetard } from '../domain/types';
+import type { AvisRetard, CadreFormation, MotifRetard } from '../domain/types';
 import { RETARD_MAX, arriveePrevue, dureeRetard, effetsRetard, superieurs } from '../engine/retard';
 import { decrireBesoin, decrireJournee, minutesSemaine, shiftsSemaine } from '../engine/core';
 import { appliquerCreneau, controlerCreneau } from '../engine/rattrapage';
@@ -22,6 +22,7 @@ import { generer } from '../engine/generate';
 import { cibleSemaine, proposerRegularisations, semaineLibre } from '../engine/heures';
 import { absencesSimultanees } from '../engine/suivi';
 import { avisRdv } from '../engine/rdv';
+import { preparerMois as preparerMoisVide } from '../engine/echeance';
 import type { Correction } from '../engine/souhaits';
 
 const KEY = 'releve.v3';
@@ -204,6 +205,11 @@ export interface Store {
   viderSemaine: (monday: ISODate) => void;
   copierSemaine: (source: ISODate, cible: ISODate) => void;
   publier: (monday: ISODate, accords: string[], bloquantsAssumes: number) => void;
+  /**
+   * Échéance du mois dépassée : Solvéa prépare en brouillon les semaines restées vides, d'après les habitudes.
+   * Les semaines déjà commencées à la main ne sont pas touchées, et rien n'est publié.
+   */
+  preparerMois: (mois: string) => void;
 
   declarerAbsence: (a: Omit<Absence, 'id' | 'createdAt'>) => void;
   /** Formation planifiée par le responsable : une absence approuvée par participant, chacun prévenu. */
@@ -214,7 +220,7 @@ export interface Store {
   prevenirRetard: (r: { personId: string; date: ISODate; start: number; minutes: number; motif?: MotifRetard; note?: string }) => void;
   /** « Je serai finalement à l'heure » : l'avis est retiré, les titulaires en sont prévenus. */
   annulerRetard: (id: string) => void;
-  planifierFormation: (f: { intitule: string; personnes: string[]; from: ISODate; to: ISODate }) => void;
+  planifierFormation: (f: { intitule: string; personnes: string[]; from: ISODate; to: ISODate; cadre?: CadreFormation; lieu?: string }) => void;
   /** Inventaire : un poste « inventaire » par participant, visible aussitôt et notifié. */
   planifierInventaire: (i: { date: ISODate; start: number; end: number; personnes: string[] }) => void;
   /** `motif` (en cas de refus) : un message part à la personne, avec la raison ; absent, rien n'est envoyé. */
@@ -858,6 +864,22 @@ export const useStore = create<Store>((set, get) => {
           .map((s) => ({ ...s, id: uid('s'), date: addDays(s.date, decalage), origine: 'trame' as const, explication: undefined }));
         return { ...d, shifts: d.shifts.filter((s) => !anciens.includes(s)).concat(copies) };
       }),
+    preparerMois: (mois) =>
+      commit((d, today) => {
+        const r = preparerMoisVide(d, today, mois, now());
+        if (!r.semaines.length) return d;
+        const nomMois = MOIS[Number(mois.slice(5)) - 1];
+        const n = r.semaines.length;
+        return journal(
+          r.data,
+          {
+            type: 'modification',
+            titre: `Solvéa a préparé le planning de ${nomMois} en brouillon`,
+            detail: `${n} semaine${n > 1 ? 's' : ''} préparée${n > 1 ? 's' : ''} ${r.habitudes ? 'd’après vos habitudes (vos dernières semaines publiées)' : 'par le calcul habituel, faute d’historique suffisant'} : ${r.semaines.map((l) => `semaine du ${fmtSemaine(l)}`).join(', ')}. Rien n’est publié.`,
+          },
+          { pour: [], effets: [`${n} semaine${n > 1 ? 's' : ''} de ${nomMois} en brouillon : à relire, corriger si besoin, puis publier.`, 'Les semaines que vous aviez commencées à la main n’ont pas été touchées.'] },
+        );
+      }),
     publier: (monday, accords, bloquantsAssumes) =>
       commit((d, today) => {
         const ctrl = controlePublication(d, monday, today);
@@ -966,22 +988,27 @@ export const useStore = create<Store>((set, get) => {
         };
         return journal(suite, { type: 'absence', titre: `${nom(d, avis.personId)} sera finalement à l’heure, ${jour}` }, { pour: chefs, effets: [`Prise de poste à ${fmtHeure(avis.start)}, comme prévu.`] });
       }, false),
-    planifierFormation: ({ intitule, personnes, from, to }) =>
+    planifierFormation: ({ intitule: nomFormation, personnes, from, to, cadre, lieu: ou }) =>
       commit((d, today) => {
         const at = now();
+        const lieu = ou?.trim() || undefined;
+        // « Formation externe « Vaccination », à Lyon » : ce que chaque participant lit dans son espace.
+        const intitule = nomFormation;
+        const precise = `${cadre ? `${cadre} ` : ''}« ${intitule} »`;
+        const ouCa = lieu ? ` Lieu : ${lieu}.` : '';
         let next = d;
         for (const personId of personnes) {
-          const absence: Absence = { id: uid('a'), personId, from, to, type: 'formation', statut: 'approuvee', createdAt: at, libelle: intitule };
+          const absence: Absence = { id: uid('a'), personId, from, to, type: 'formation', statut: 'approuvee', createdAt: at, libelle: intitule, ...(cadre ? { cadre } : {}), ...(lieu ? { lieu } : {}) };
           next = appliquerAbsence({ ...next, absences: next.absences.concat(absence) }, absence, today);
         }
         const quand = from === to ? `le ${fmtDateCourt(from)}` : `du ${fmtDateCourt(from)} au ${fmtDateCourt(to)}`;
         return journal(
-          { ...next, notifications: [...personnes.map((personId) => ({ id: uid('n'), personId, at, date: from, avant: 'Planning habituel', apres: `Formation « ${intitule} » ${quand}`, tardif: dayIndex(from) - dayIndex(today) < 7 })), ...next.notifications] },
-          { type: 'absence', titre: `Formation « ${intitule} » planifiée ${quand}`, detail: `Participants : ${personnes.map((id) => nom(d, id)).join(', ')}. Chacun a été prévenu dans son espace.` },
+          { ...next, notifications: [...personnes.map((personId) => ({ id: uid('n'), personId, at, date: from, avant: 'Planning habituel', apres: `Formation ${precise} ${quand}.${ouCa}`, tardif: dayIndex(from) - dayIndex(today) < 7 })), ...next.notifications] },
+          { type: 'absence', titre: `Formation ${precise} planifiée ${quand}`, detail: `Participants : ${personnes.map((id) => nom(d, id)).join(', ')}.${ouCa} Chacun a été prévenu dans son espace.` },
           {
             pour: personnes,
             effets: [
-              `En formation ${quand} : ${personnes.map((id) => nom(d, id)).join(', ')}.`,
+              `En formation ${quand} : ${personnes.map((id) => nom(d, id)).join(', ')}.${ouCa}`,
               next.trous.length > d.trous.length ? `${next.trous.length - d.trous.length} poste${next.trous.length - d.trous.length > 1 ? 's' : ''} à couvrir : les titulaires s’en chargent dans « Résoudre ».` : 'Aucun poste à couvrir.',
             ],
           },

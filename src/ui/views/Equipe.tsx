@@ -19,7 +19,7 @@ import { DialogueFormation } from '../components/Formation';
 import { DialogueInventaire } from '../components/Inventaire';
 import { empreinte, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, responsable } from '../../domain/acces';
 import { COMPETENCE_ICONE, EtiquetteRole } from '../icons';
-import { Avatar, Dialog, Empty, Pill } from '../kit';
+import { Avatar, Dialog, Empty, Pill, SiCouts } from '../kit';
 import { usagePlafond } from './Resoudre';
 
 /** Mot de passe provisoire : six chiffres, à transmettre de vive voix puis à changer. */
@@ -194,6 +194,7 @@ const POSTES: { titre: string; cles: Qualification[] }[] = [
 
 function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: () => void }): JSX.Element {
   const data = useStore((s) => s.data);
+  const couts = !!data.officine.couts;
   return (
     <button type="button" className={`g-item${on ? ' on' : ''}`} onClick={onClick} aria-pressed={on}>
       <Avatar person={p} lg />
@@ -201,7 +202,7 @@ function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: ()
         <b>{nomComplet(p)}</b>
         <span className="row wrap" style={{ gap: 6, marginTop: 4 }}>
           <EtiquetteRole person={p} />
-          <span className="small soft">{p.externe ? `${p.tauxHoraire} € / h facturés` : `${p.heuresHebdo} h${p.heuresHebdo < 35 && p.salarie ? ' (temps partiel)' : ''}`}</span>
+          <span className="small soft">{p.externe ? (couts && p.tauxHoraire !== null ? `${p.tauxHoraire} € / h facturés` : 'Extérieur à l’équipe') : `${p.heuresHebdo} h${p.heuresHebdo < 35 && p.salarie ? ' (temps partiel)' : ''}`}</span>
           {!estResponsable(data, p) && p.gestion ? <Pill tone="iris">Accès gestion</Pill> : null}
         </span>
       </span>
@@ -342,10 +343,15 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             </label>
           ) : null}
           {person.salarie ? (
-            <label className="field">
-              Taux horaire indicatif (€)
-              <input type="number" min={0} step={0.1} value={person.tauxHoraire ?? ''} onChange={(e) => maj({ tauxHoraire: e.target.value === '' ? null : Number(e.target.value) })} style={{ width: 150 }} />
-            </label>
+            <SiCouts>
+              <label className="field">
+                <span>
+                  Taux horaire brut (€) <span className="oblig">facultatif</span>
+                </span>
+                <input type="number" min={0} step={0.1} value={person.tauxHoraire ?? ''} onChange={(e) => maj({ tauxHoraire: e.target.value === '' ? null : Number(e.target.value) })} style={{ width: 150 }} />
+                <span className="aide">Il ne sert qu’à estimer les coûts ; seuls les titulaires le voient.</span>
+              </label>
+            </SiCouts>
           ) : null}
         </section>
         {person.salarie ? <p className="tiny muted" style={{ marginTop: -12 }}>Le taux horaire ne sert qu'à comparer le coût de deux scénarios. Il n'est jamais visible dans l'espace salarié.</p> : null}
@@ -736,10 +742,12 @@ function DialoguePersonne({ onClose }: { onClose: () => void }): JSX.Element {
           </label>
         ) : null}
         {qualification !== 'titulaire' ? (
-          <label className="field" style={{ width: 170 }}>
-            Taux horaire indicatif (€)
-            <input id="personne-taux" type="number" min={0} step={0.1} value={taux} onChange={(e) => setTaux(e.target.value)} placeholder="facultatif" className="num" />
-          </label>
+          <SiCouts>
+            <label className="field" style={{ width: 190 }}>
+              Taux horaire brut (€)
+              <input id="personne-taux" type="number" min={0} step={0.1} value={taux} onChange={(e) => setTaux(e.target.value)} placeholder="facultatif" className="num" />
+            </label>
+          </SiCouts>
         ) : null}
       </div>
       {qualification !== 'titulaire' ? (
