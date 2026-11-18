@@ -1,7 +1,7 @@
 import type { Espace } from '../domain/acces';
 import { JOURS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHeure, mondayOf, weekday } from '../domain/time';
 import type { AppData, ISODate, Shift } from '../domain/types';
-import { GARDE_LABEL, nomCourt } from '../domain/types';
+import { libelleGarde, nomCourt } from '../domain/types';
 import { decisions } from '../engine/decisions';
 import { aRegulariser, soldeHeures } from '../engine/heures';
 import { useStore } from '../store/store';
@@ -44,7 +44,7 @@ export const FICHES: Fiche[] = [
   { id: 'difference', question: 'Préférence, demande : quelle différence ?', reponse: 'Une préférence dit ce qui vous convient pour le mois à venir : le planning s’en inspire, personne ne vous répond. Une demande (congé, horaire à tenir, remplacement) attend une réponse du titulaire.', mots: 'preferences souhaits demandes comprendre onglets', pour: MOI_SEUL, ecrans: ['demandes'], bouton: 'Ouvrir mes demandes', aller: (ui) => ui.aller('demandes') },
   { id: 'souhaits', question: 'Donner mes préférences du mois', reponse: 'Choisissez une forme (matin, journée, après-midi, repos) puis cliquez les jours. « M’assister » remplit le reste d’après vos habitudes. Aucune raison n’est demandée.', mots: 'preferences souhaits mois ideal assister matin apres-midi repos', pour: MOI_SEUL, ecrans: ['demandes', 'moi'], bouton: 'Donner mes préférences', aller: versDemandes('souhaits') },
   { id: 'conge', question: 'Poser un congé ou une contrainte d’horaires', reponse: 'Dans « Mes demandes », onglet « Absences et horaires ». Un raccourci (garde d’enfant, pratique religieuse, cours du soir) remplit les horaires ; le motif n’est jamais enregistré.', mots: 'absence vacances formation finir tot commencer tard indisponible religion enfant', pour: TOUS, ecrans: ['demandes', 'moi'], bouton: 'Faire une demande', aller: (ui) => ui.agir('demandes', 'demande') },
-  { id: 'remplacer', question: 'Me faire remplacer sur un poste', reponse: 'Onglet « Remplacements » : choisissez le poste et un niveau d’urgence (prévu, urgent, urgence médicale, avec justificatif possible). Votre titulaire répond, puis un collègue volontaire reprend le poste.', mots: 'remplacement urgent medical justificatif arret malade empeche ceder echanger', pour: MOI_SEUL, ecrans: ['demandes', 'moi'], bouton: 'Demander un remplacement', aller: versDemandes('remplacements') },
+  { id: 'remplacer', question: 'Me faire remplacer sur un poste', reponse: 'Dans « Mes demandes », carte « Me faire remplacer » : choisissez le poste, puis demandez à toute l’équipe ou à un collègue précis. Le calcul dit qui peut le reprendre, d’après les règles et ses heures de la semaine. Votre titulaire valide dans tous les cas.', mots: 'remplacement urgent medical justificatif arret malade empeche ceder echanger', pour: MOI_SEUL, ecrans: ['demandes', 'moi'], bouton: 'Demander un remplacement', aller: versDemandes('remplacements') },
   { id: 'aider', question: 'Répondre à un appel ou aider un collègue', reponse: 'L’appel apparaît en tête de « Mon planning », avec votre rang dans le tour de rôle. « Je peux » ou « Je ne peux pas » : dire non ne change pas votre rang.', mots: 'volontaire depanner tour de role appel equipe je peux', pour: MOI_SEUL, ecrans: ['moi'], bouton: 'Voir les appels', aller: (ui) => ui.aller('moi') },
   { id: 'suivi', question: 'Voir mon compteur d’heures et mon suivi', reponse: '« Mon suivi » montre vos heures en plus ou en moins, ce qui a été noté sur douze mois et votre part des contraintes. Vous ne voyez que votre position.', mots: 'heures supplementaires compteur retards equite samedis', pour: MOI_SEUL, ecrans: ['suivi'], bouton: 'Ouvrir mon suivi', aller: (ui) => ui.aller('suivi') },
   { id: 'gardes-moi', question: 'Voir mes gardes', reponse: '« Mes gardes » liste vos gardes et astreintes, le repos qui suit et ce qui partira en paie.', mots: 'garde astreinte nuit dimanche repos', pour: ['pharmacien'], ecrans: ['mesgardes'], bouton: 'Ouvrir mes gardes', aller: (ui) => ui.aller('mesgardes') },
@@ -166,7 +166,7 @@ function calculer(question: string, c: Contexte): Reponse | null {
     if (!futures.length) return { texte: espace === 'responsable' ? 'Aucune garde à venir dans le calendrier.' : 'Vous n’avez aucune garde à venir.' };
     return {
       texte: espace === 'responsable' ? 'Les prochaines gardes :' : 'Vos prochaines gardes :',
-      lignes: futures.slice(0, 4).map((g) => `${fmtDateCourt(g.date)} · ${GARDE_LABEL[g.type]}${espace === 'responsable' ? ` · ${g.personId ? nom(data, g.personId) : 'à affecter'}` : ''}`),
+      lignes: futures.slice(0, 4).map((g) => `${fmtDateCourt(g.date)} · ${libelleGarde(g)}${espace === 'responsable' ? ` · ${g.personId ? nom(data, g.personId) : 'à affecter'}` : ''}`),
       bouton: { label: 'Ouvrir les gardes', aller: (ui: Ui, e: Espace) => ui.aller(e === 'responsable' ? 'gardes' : 'mesgardes') },
     };
   }

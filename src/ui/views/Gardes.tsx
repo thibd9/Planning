@@ -18,14 +18,14 @@ import {
   parseHHMM,
   weekday,
 } from '../../domain/time';
-import type { Garde, GardeType } from '../../domain/types';
-import { GARDE_LABEL, estPharmacien, nomCourt } from '../../domain/types';
+import type { Garde, GardeType, MomentGarde } from '../../domain/types';
+import { GARDE_LABEL, estPharmacien, nomCourt, GARDE_COURT, libelleGarde, momentGarde, nomGarde } from '../../domain/types';
 import { decrireShift, gardeDuree } from '../../engine/core';
 import type { EtapeGarde } from '../../engine/gardes';
 import { candidatsGarde, congesIncompatibles, delaiGarde, etapeGarde, parseCalendrierGardes, poidsGarde, repartirGardes, reposApresGarde, serieGardes, variablesGarde } from '../../engine/gardes';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { EtiquetteRole, GARDE_ICONE } from '../icons';
+import { EtiquetteRole, GARDE_ICONE, IconeGarde, MOMENT_GARDE_ICONE } from '../icons';
 import { Avatar, Dialog, Empty, Pill } from '../kit';
 
 const ETAPES: { cle: EtapeGarde; label: string }[] = [
@@ -137,9 +137,14 @@ export function Gardes(): JSX.Element {
                     <span>{MOIS_COURT[m - 1]}</span>
                   </span>
                   <span className="grow">
-                    <b>{GARDE_LABEL[g.type]}</b>
+                    <b className="g-nom">
+                      <span className={`g-moment ${momentGarde(g)}`} aria-hidden="true">
+                        <IconeGarde garde={g} size={13} />
+                      </span>
+                      {nomGarde(g)}
+                    </b>
                     <span className="small soft" style={{ display: 'block' }}>
-                      {JOURS_COURT[weekday(g.date)]} {fmtHHMM(g.start)} → {fmtHHMM(g.end)} · {p ? nomCourt(p) : 'à affecter'}
+                      {GARDE_COURT[g.type]} · {JOURS_COURT[weekday(g.date)]} {fmtHHMM(g.start)} → {fmtHHMM(g.end)} · {p ? nomCourt(p) : 'à affecter'}
                     </span>
                   </span>
                   <Pill tone={etape === 'prevue' ? 'warn' : etape === 'validee' ? 'ok' : etape === 'realisee' ? 'danger' : 'nuit'}>{ETAPES.find((e) => e.cle === etape)?.label}</Pill>
@@ -189,7 +194,7 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
           })()}
         </span>
         <div className="grow">
-          <h2>{GARDE_LABEL[garde.type]}</h2>
+          <h2>{libelleGarde(garde)}</h2>
           <div className="soft small" style={{ marginTop: 3 }}>
             {fmtDateLong(garde.date)}, de {fmtHeure(garde.start)} à {fmtHeure(garde.end)}
             {garde.end <= garde.start ? ' le lendemain' : ''} · {fmtDuree(calcul.dureeReelle)}
@@ -209,7 +214,7 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
           <Trash2 size={16} />
         </button>
       </div>
-      <div className="card-body col" style={{ gap: 20 }}>
+      <div className="card-body col g-detail" style={{ gap: 16 }}>
         <ol className="stepper" aria-label="Parcours de la garde">
           {ETAPES.map((e, i) => (
             <li key={e.cle} className={`step${i < rang || etape === 'validee' ? ' done' : i === rang ? ' now' : ''}`} aria-current={i === rang ? 'step' : undefined}>
@@ -242,9 +247,13 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
         ))}
 
         {/* 1. Affectation */}
-        <section className="col" style={{ gap: 9 }}>
-          <h3>1 · Qui assure la garde ?</h3>
-          <p className="small soft">Les pharmaciens sont comparés sur leur disponibilité, la charge de gardes déjà portée cette année, le repos à protéger et le coût.</p>
+        <section className="g-section">
+          <h3 className="g-titre">
+            <span className="g-num" aria-hidden="true">1</span>
+            <span className="sr">1. </span>
+            Qui assure la garde ?
+          </h3>
+          <p className="small soft">Comparés sur leur disponibilité, leurs gardes de l’année, le repos à protéger et le coût.</p>
           <div className="col" style={{ gap: 8 }}>
             {candidats.map((c) => {
               const on = garde.personId === c.person.id;
@@ -273,14 +282,16 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
                       ) : null}
                       {!c.disponible ? <Pill tone="danger">Indisponible</Pill> : null}
                     </span>
-                    <span className="small soft" style={{ display: 'block', marginTop: 4 }}>
-                      {c.nombre} garde{c.nombre > 1 ? 's' : ''} en {annee} · charge {fmtDecimal(c.charge, 1)}
-                      {c.person.volontaireGardes ? ' · volontaire' : ''}
-                      {' · '}
-                      {!c.person.salarie ? 'titulaire, hors paie' : c.cout === null ? 'coût à valoriser' : `coût estimé ${fmtEuros(c.cout)}`}
+                    <span className="g-faits">
+                      <span title={`Charge de gardes sur l’année : ${fmtDecimal(c.charge, 1)} (une nuit de 12 h compte pour 1)`}>
+                        <b className="num">{c.nombre}</b> garde{c.nombre > 1 ? 's' : ''} en {annee}
+                      </span>
+                      {c.person.volontaireGardes ? <span>Volontaire</span> : null}
+                      <span>{!c.person.salarie ? 'Hors paie' : c.cout === null ? 'Coût à valoriser' : `Coût estimé ${fmtEuros(c.cout)}`}</span>
                     </span>
                     {c.obstacles.length || c.postesADeplacer || !c.delaiOk ? (
-                      <span className="small" style={{ display: 'block', marginTop: 3, color: 'var(--warn)', fontWeight: 600 }}>
+                      <span className="g-alerte">
+                        <AlertTriangle size={14} aria-hidden="true" />
                         {[...c.obstacles, c.postesADeplacer ? `${c.postesADeplacer} poste${c.postesADeplacer > 1 ? 's' : ''} à déplacer pour le repos` : '', !c.delaiOk ? 'délai de prévenance non tenu : accord à recueillir' : ''].filter(Boolean).join(' · ')}
                       </span>
                     ) : null}
@@ -321,8 +332,12 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
 
         {/* 2. Interventions */}
         {person ? (
-          <section className="col" style={{ gap: 9 }}>
-            <h3>2 · {garde.type === 'astreinte' ? 'Interventions pendant l’astreinte' : garde.type === 'volets_fermes' ? 'Dérangements (service sur appel)' : 'Déroulement'}</h3>
+          <section className="g-section">
+            <h3 className="g-titre">
+              <span className="g-num" aria-hidden="true">2</span>
+              <span className="sr">2. </span>
+              {garde.type === 'astreinte' ? 'Interventions pendant l’astreinte' : garde.type === 'volets_fermes' ? 'Dérangements (service sur appel)' : 'Déroulement'}
+            </h3>
             {garde.type === 'volets_ouverts' ? (
               <p className="soft small">Volets ouverts : l'officine est librement accessible, toute la durée est du travail effectif. Aucune intervention à déclarer.</p>
             ) : (
@@ -375,8 +390,12 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
 
         {/* 3. Repos */}
         {person ? (
-          <section className="col" style={{ gap: 9 }}>
-            <h3>3 · Conséquences sur le repos</h3>
+          <section className="g-section">
+            <h3 className="g-titre">
+              <span className="g-num" aria-hidden="true">3</span>
+              <span className="sr">3. </span>
+              Conséquences sur le repos
+            </h3>
             {!person.salarie ? (
               <p className="soft small">Garde assurée par le titulaire : les règles de repos des salariés ne s'appliquent pas. Pensez tout de même à votre propre récupération.</p>
             ) : repos ? (
@@ -418,8 +437,12 @@ function DetailGarde({ garde }: { garde: Garde }): JSX.Element {
 
         {/* 4. Variables */}
         {person ? (
-          <section className="col" style={{ gap: 9 }}>
-            <h3>4 · Variables pour le comptable</h3>
+          <section className="g-section">
+            <h3 className="g-titre">
+              <span className="g-num" aria-hidden="true">4</span>
+              <span className="sr">4. </span>
+              Variables pour le comptable
+            </h3>
             {calcul.variables.length ? (
               <table className="t" aria-label="Variables de paie de la garde">
                 <thead>
@@ -560,6 +583,13 @@ function DialogueImport({ onClose }: { onClose: () => void }): JSX.Element {
   );
 }
 
+/** Les trois moments d'une garde, avec les horaires qu'ils proposent ; ils restent modifiables. */
+const MOMENTS: { cle: MomentGarde; nom: string; detail: string; debut: string; fin: string }[] = [
+  { cle: 'nuit', nom: 'Nuit', detail: '19 h 30 → 8 h 30', debut: '19:30', fin: '08:30' },
+  { cle: 'jour', nom: 'Jour', detail: 'Dimanche ou jour férié', debut: '09:00', fin: '19:30' },
+  { cle: 'complet', nom: '24 heures', detail: 'Jour et nuit', debut: '08:30', fin: '08:30' },
+];
+
 function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
   const ajouter = useStore((s) => s.ajouterGardes);
   const data = useStore((s) => s.data);
@@ -576,7 +606,9 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
   const [nombre, setNombre] = useState(6);
   const d = parseHHMM(debut);
   const f = parseHHMM(fin);
-  const pret = !!date && d !== null && f !== null && d !== f;
+  // Début et fin identiques : une garde de vingt-quatre heures.
+  const pret = !!date && d !== null && f !== null;
+  const moment = d !== null && f !== null ? momentGarde({ start: d, end: f }) : null;
   // Les pharmaciens sont comparés pour cette garde précise : disponibilité, charge déjà portée, obstacles.
   const candidats = useMemo(
     () => (pret ? candidatsGarde(data, { id: 'nouvelle', date, start: d as number, end: f as number, type, personId: null, interventions: [] }, today) : []),
@@ -611,8 +643,32 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
         </>
       }
     >
+      <fieldset className="choix moment-garde">
+        <legend>Quand ?</legend>
+        {MOMENTS.map((m) => {
+          const Icone = MOMENT_GARDE_ICONE[m.cle];
+          return (
+            <label key={m.cle}>
+              <input
+                type="radio"
+                name="garde-moment"
+                checked={moment === m.cle}
+                onChange={() => {
+                  setDebut(m.debut);
+                  setFin(m.fin);
+                }}
+              />
+              <Icone size={18} aria-hidden="true" />
+              <span>
+                {m.nom}
+                <small>{m.detail}</small>
+              </span>
+            </label>
+          );
+        })}
+      </fieldset>
       <label className="field">
-        Type
+        Forme
         <select id="garde-type" value={type} onChange={(e) => setType(e.target.value as GardeType)} data-autofocus>
           {(Object.keys(GARDE_LABEL) as GardeType[]).map((t) => (
             <option key={t} value={t}>
@@ -751,7 +807,7 @@ function DialogueRepartition({ onClose }: { onClose: () => void }): JSX.Element 
                 <tr key={x.gardeId}>
                   <td>
                     <b>{fmtDateCourt(g.date)}</b>
-                    <div className="small soft">{GARDE_LABEL[g.type]}</div>
+                    <div className="small soft">{libelleGarde(g)}</div>
                   </td>
                   <td>
                     <span className="row" style={{ gap: 8 }}>
@@ -824,11 +880,11 @@ function CalendrierGardes(): JSX.Element {
                     const p = data.personnes.find((x) => x.id === g.personId);
                     return (
                       <li key={g.id}>
-                        <button type="button" className={`cal-g${p ? ' pleine' : ''}`} onClick={() => ouvrir(g.id)} title={`${GARDE_LABEL[g.type]} · ${p ? nomCourt(p) : 'à affecter'}`}>
+                        <button type="button" className={`cal-g${p ? ' pleine' : ''}`} onClick={() => ouvrir(g.id)} title={`${libelleGarde(g)} · ${p ? nomCourt(p) : 'à affecter'}`}>
                           {Number(g.date.slice(8))}
                           <span className="sr">
                             {' '}
-                            {MOIS[m - 1]}, {GARDE_LABEL[g.type]}, {p ? `confiée à ${nomCourt(p)}` : 'à affecter'}
+                            {MOIS[m - 1]}, {libelleGarde(g)}, {p ? `confiée à ${nomCourt(p)}` : 'à affecter'}
                           </span>
                         </button>
                       </li>

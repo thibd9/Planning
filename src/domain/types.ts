@@ -199,7 +199,14 @@ export interface PosteType {
   pauseEnd?: Minutes;
   /** Jours où ce poste est proposé : 0 = lundi … 6 = dimanche. */
   jours: number[];
+  /** Couleur choisie pour ce poste dans les plannings ; absente : la couleur suit l'horaire (matin, journée, soir). */
+  couleur?: CouleurPoste;
 }
+
+export type CouleurPoste = 'jaune' | 'orange' | 'bleu' | 'violet' | 'anis' | 'rose' | 'sable' | 'gris';
+export const COULEUR_POSTE_LABEL: Record<CouleurPoste, string> = { jaune: 'Jaune', orange: 'Orange', bleu: 'Bleu', violet: 'Violet', anis: 'Vert anis', rose: 'Rose', sable: 'Sable', gris: 'Gris' };
+/** La couleur choisie pour un poste qui reprend exactement les horaires d'un poste type ; sinon rien. */
+export const couleurDuPoste = (postes: PosteType[], s: { start: number; end: number }): CouleurPoste | undefined => postes.find((p) => p.couleur && p.start === s.start && p.end === s.end)?.couleur;
 
 export interface BesoinEffectif {
   jours: number[];
@@ -402,6 +409,8 @@ export interface Remplacement {
   /** Réponse du titulaire à la demande elle-même ; absente pour un appel lancé par le titulaire. */
   accord?: 'attente' | 'accepte';
   justificatif?: Justificatif;
+  /** Collègue à qui la demande est adressée en particulier ; absent : toute l'équipe disponible. */
+  destinataire?: string;
   /** Appel à l'équipe pour une absence à couvrir : le poste n'est plus au planning, il est dans le trou. */
   trouId?: string;
   /** Personnes prévenues par l'appel : toutes celles qui peuvent légalement tenir le poste. */
@@ -431,6 +440,8 @@ export interface AppData {
   accords: Accord[];
   /** Jeu d'exemple : les identifiants de démonstration sont affichés à la connexion. */
   demo?: boolean;
+  /** Version du jeu d'exemple : un exemple d'une version précédente est régénéré. */
+  demoVersion?: number;
   personnes: Person[];
   shifts: Shift[];
   missions: Mission[];
@@ -528,6 +539,28 @@ export const GARDE_LABEL: Record<GardeType, string> = {
   volets_fermes: 'Garde à volets fermés',
   astreinte: 'Astreinte à domicile',
 };
+
+export type MomentGarde = 'nuit' | 'jour' | 'complet';
+/**
+ * Une garde est « de nuit » quand au moins la moitié se passe entre 20 h et 8 h,
+ * « de 24 h » à partir de vingt heures d'affilée, « de jour » sinon (dimanche, jour férié).
+ */
+export function momentGarde(g: Pick<Garde, 'start' | 'end'>): MomentGarde {
+  const duree = g.end > g.start ? g.end - g.start : g.end + 1440 - g.start;
+  if (duree >= 20 * 60) return 'complet';
+  let nuit = 0;
+  for (let t = g.start; t < g.start + duree; t += 15) {
+    const h = (t % 1440) / 60;
+    if (h >= 20 || h < 8) nuit += 15;
+  }
+  return nuit * 2 >= duree ? 'nuit' : 'jour';
+}
+export const MOMENT_GARDE_LABEL: Record<MomentGarde, string> = { nuit: 'de nuit', jour: 'de jour', complet: 'de 24 h' };
+export const GARDE_COURT: Record<GardeType, string> = { volets_ouverts: 'volets ouverts', volets_fermes: 'volets fermés', astreinte: 'à domicile' };
+/** « Garde de nuit », « Garde de jour », « Astreinte de nuit ». */
+export const nomGarde = (g: Pick<Garde, 'start' | 'end' | 'type'>): string => `${g.type === 'astreinte' ? 'Astreinte' : 'Garde'} ${MOMENT_GARDE_LABEL[momentGarde(g)]}`;
+/** « Garde de nuit · volets fermés ». */
+export const libelleGarde = (g: Pick<Garde, 'start' | 'end' | 'type'>): string => `${nomGarde(g)} · ${GARDE_COURT[g.type]}`;
 
 /** Libellé d'une absence, avec l'intitulé quand c'est une formation. */
 export const libelleAbsence = (a: Pick<Absence, 'type' | 'libelle'>): string => (a.type === 'formation' && a.libelle ? `Formation · ${a.libelle}` : ABSENCE_LABEL[a.type]);

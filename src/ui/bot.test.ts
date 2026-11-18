@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { seed } from '../data/seed';
 import { addDays } from '../domain/time';
+import { motifRefus, texteDeclin, texteRefus } from '../domain/refus';
+import { libelleGarde, momentGarde, nomGarde } from '../domain/types';
+import { avisCollegues } from '../engine/remplacement';
 import { planifieMois } from '../engine/souhaits';
 import { chercher, fichesPour, jourDe, repondre } from './bot';
 
@@ -75,5 +78,58 @@ describe('vue mois : heures planifiées face au contrat', () => {
     // Une semaine d'absence approuvée réduit la cible d'autant.
     const absente = planifieMois({ ...data, absences: data.absences.concat({ id: 'a_test', personId: 'p_camille', from: '2026-11-09', to: '2026-11-13', type: 'conge', statut: 'approuvee', createdAt: '2026-11-01T08:00:00.000Z' }) }, camille, '2026-11');
     expect(h.cible - absente.cible).toBe(camille.heuresHebdo * 60);
+  });
+});
+
+describe('gardes : de nuit, de jour, de 24 heures', () => {
+  it('reconnaît le moment d’une garde d’après ses horaires', () => {
+    expect(momentGarde({ start: 19 * 60 + 30, end: 8 * 60 + 30 })).toBe('nuit');
+    expect(momentGarde({ start: 9 * 60, end: 19 * 60 })).toBe('jour');
+    expect(momentGarde({ start: 8 * 60 + 30, end: 8 * 60 + 30 })).toBe('complet');
+    expect(momentGarde({ start: 20 * 60, end: 8 * 60 })).toBe('nuit');
+    expect(nomGarde({ start: 19 * 60, end: 9 * 60, type: 'astreinte' })).toBe('Astreinte de nuit');
+    expect(libelleGarde({ start: 9 * 60, end: 19 * 60, type: 'volets_ouverts' })).toBe('Garde de jour · volets ouverts');
+  });
+});
+
+describe('demander à un collègue de me remplacer', () => {
+  const data = seed(TODAY, 2);
+  const poste = data.shifts.filter((s) => s.personId === 'p_camille' && s.date >= '2026-11-25').sort((a, b) => a.date.localeCompare(b.date))[0];
+
+  it('part d’un poste publié à venir', () => {
+    expect(poste).toBeDefined();
+  });
+
+  it('ne propose que des collègues qui ont la qualification, et dit pourquoi les autres ne peuvent pas', () => {
+    const avis = avisCollegues(data, poste);
+    expect(avis.length).toBeGreaterThan(3);
+    expect(avis.some((c) => c.personId === 'p_camille')).toBe(false);
+    expect(avis.some((c) => c.ok)).toBe(true);
+    for (const c of avis) {
+      expect(c.ok).toBe(c.raisons.length === 0);
+      expect(c.apres).toBeGreaterThan(c.avant);
+    }
+    // Les collègues possibles sont listés d'abord.
+    const premierNon = avis.findIndex((c) => !c.ok);
+    if (premierNon >= 0) expect(avis.slice(premierNon).every((c) => !c.ok)).toBe(true);
+  });
+
+  it('refuse un collègue dont les heures de la semaine dépasseraient le plafond', () => {
+    // Plafond ramené très bas : plus aucun salarié ne peut reprendre le poste, pour une raison d'heures.
+    const serre = { ...data, regles: data.regles.map((r) => (r.id === 'equipe.heuresMax' ? { ...r, active: true, valeur: 1 } : r)) };
+    const avis = avisCollegues(serre, poste).filter((c) => c.contrat > 0);
+    expect(avis.length).toBeGreaterThan(0);
+    expect(avis.every((c) => !c.ok)).toBe(true);
+    expect(avis.some((c) => c.raisons.some((r) => /Dépasserait/.test(r)))).toBe(true);
+  });
+});
+
+describe('refuser avec une raison', () => {
+  it('compose une phrase propre, avec ou sans raison, avec ou sans mot', () => {
+    expect(motifRefus('', '')).toBe('');
+    expect(motifRefus('Effectif insuffisant sur cette période', '')).toBe('Raison : effectif insuffisant sur cette période.');
+    expect(motifRefus('', '  la semaine   suivante serait possible ')).toBe('la semaine suivante serait possible.');
+    expect(texteRefus('(congé, du 3 au 7 mars)', motifRefus('Période de forte activité', 'Voyons en avril ?'))).toBe('Votre demande (congé, du 3 au 7 mars) n’est pas acceptée. Raison : période de forte activité. Voyons en avril ?');
+    expect(texteDeclin('lun. 30 novembre, 8 h 30 – 13 h', '')).toBe('Je ne peux pas reprendre le poste du lun. 30 novembre, 8 h 30 – 13 h.');
   });
 });

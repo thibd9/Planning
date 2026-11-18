@@ -1,7 +1,8 @@
-import { Ban, ChevronLeft, ChevronRight, Moon, Sun, Sunset } from 'lucide-react';
+import { Ban, ChevronLeft, ChevronRight, Sun, Sunset } from 'lucide-react';
+import { IconeGarde } from '../icons';
 import { JOURS, MOIS, addDays, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, mondayOf, weekday } from '../../domain/time';
 import type { AppData, ISODate } from '../../domain/types';
-import { GARDE_LABEL, classeAbsence, libelleAbsence } from '../../domain/types';
+import { classeAbsence, libelleAbsence, nomGarde } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
 import { MOMENT_LABEL, momentDe } from '../kit';
 
@@ -116,8 +117,8 @@ export function Calendrier({ data, personId, today, mois, setMois, onJour }: { d
                           {gardes.map((g) => (
                             <span key={g.id} className="cal-poste garde">
                               <span className="cp-haut">
-                                <Moon size={14} aria-hidden="true" />
-                                <span className="cp-nom">{GARDE_LABEL[g.type]}</span>
+                                <IconeGarde garde={g} size={14} />
+                                <span className="cp-nom">{nomGarde(g)}</span>
                               </span>
                               <b className="cp-h">
                                 <span>{fmtHHMM(g.start)}</span>

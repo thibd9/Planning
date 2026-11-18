@@ -1,4 +1,4 @@
-import { AlertTriangle, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users, X } from 'lucide-react';
+import { AlertTriangle, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users, X, BookOpenCheck } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
@@ -23,7 +23,7 @@ import {
 } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
 import { imprimer } from '../../env';
-import { ABSENCE_LABEL, ACTIVITE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt, classeAbsence } from '../../domain/types';
+import { ABSENCE_LABEL, ACTIVITE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt, classeAbsence, libelleGarde } from '../../domain/types';
 import {
   besoinsDe,
   decrireBesoin,
@@ -406,7 +406,7 @@ export function Construire(): JSX.Element {
                                     <Tuile key={s.id} data={data} s={s} person={p} echelle={echelle} missions={missions} glissable={!passee} onClick={() => setEdition({ personId: p.id, date, shift: s })} />
                                   ))}
                                   {gardes.map((g) => (
-                                    <span key={g.id} className="tile garde" title={GARDE_LABEL[g.type]}>
+                                    <span key={g.id} className="tile garde" title={libelleGarde(g)}>
                                       <span className="ti" aria-hidden="true">
                                         {(() => {
                                           const I = GARDE_ICONE[g.type];
@@ -517,13 +517,35 @@ export function Construire(): JSX.Element {
             </div>
             <div className="card-body">
               {blocages.length || visiblesIssues.length ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
-                  {blocages.map((b, i) => (
-                    <CarteBlocage key={i} b={b} data={data} />
-                  ))}
-                  {visiblesIssues.map((i) => (
-                    <CarteIssue key={i.id} issue={i} data={data} onClick={() => setFocus(i.personId || i.date ? { personId: i.personId, date: i.date } : null)} />
-                  ))}
+                <div className="issues">
+                  {blocages.length ? (
+                    <div className="issues-groupe">
+                      <h3 className="issues-titre bloquant">
+                        Impossible en l’état <span className="num">{blocages.length}</span>
+                      </h3>
+                      <div className="issues-grille">
+                        {blocages.map((b, i) => (
+                          <CarteBlocage key={i} b={b} data={data} />
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {(['bloquant', 'alerte', 'info'] as const).map((g) => {
+                    const liste = visiblesIssues.filter((i) => i.gravite === g);
+                    if (!liste.length) return null;
+                    return (
+                      <div key={g} className="issues-groupe">
+                        <h3 className={`issues-titre ${g}`}>
+                          {GRAVITE_NOM[g]} <span className="num">{liste.length}</span>
+                        </h3>
+                        <div className="issues-grille">
+                          {liste.map((i) => (
+                            <CarteIssue key={i.id} issue={i} data={data} onClick={() => setFocus(i.personId || i.date ? { personId: i.personId, date: i.date } : null)} />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="soft small">
@@ -632,22 +654,33 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
   );
 }
 
+const GRAVITE_NOM: Record<Issue['gravite'], string> = { bloquant: 'À corriger', alerte: 'À surveiller', info: 'Pour information' };
+
+/** Un constat des contrôles : sa gravité, la phrase, le détail sur sa ligne, puis la règle qui s'applique. */
 function CarteIssue({ issue, data, onClick }: { issue: Issue; data: AppData; onClick: () => void }): JSX.Element {
   const regle = data.regles.find((r) => r.id === issue.regle);
   return (
     <button type="button" className={`issue ${issue.gravite}`} onClick={onClick}>
-      <span className="ico">{issue.gravite === 'info' ? <Info size={14} /> : <AlertTriangle size={14} />}</span>
-      <span>
-        <span className="sr">{issue.gravite === 'bloquant' ? 'Point bloquant : ' : issue.gravite === 'alerte' ? 'Alerte : ' : 'Information : '}</span>
-        {issue.message}
-        {issue.detail ? <span className="src">{issue.detail}</span> : null}
+      <span className="ico" aria-hidden="true">
+        {issue.gravite === 'info' ? <Info size={18} /> : <AlertTriangle size={18} />}
+      </span>
+      <span className="issue-corps">
+        <span className="issue-nature">{GRAVITE_NOM[issue.gravite]}</span>
+        <span className="issue-message">{issue.message}</span>
+        {issue.detail ? <span className="issue-detail">{issue.detail}</span> : null}
         {regle ? (
-          <span className="src" style={{ display: 'block' }}>
+          <span className="src">
+            <BookOpenCheck size={13} aria-hidden="true" />
             {regle.titre} · v{regle.version}
             {regle.verification === 'a_valider' ? ' · à valider par un expert' : ''}
           </span>
         ) : null}
       </span>
+      {issue.personId || issue.date ? (
+        <span className="issue-voir" aria-hidden="true">
+          <ChevronRight size={18} />
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -655,12 +688,12 @@ function CarteIssue({ issue, data, onClick }: { issue: Issue; data: AppData; onC
 export function CarteBlocage({ b, data, ouvert }: { b: Blocage; data: AppData; ouvert?: boolean }): JSX.Element {
   return (
     <div className="issue diag">
-      <span className="ico">
-        <Ban size={14} />
+      <span className="ico" aria-hidden="true">
+        <Ban size={18} />
       </span>
-      <span className="grow">
-        <b style={{ display: 'block', fontSize: 11.5, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--danger)' }}>{CAS_LABEL[b.cas]}</b>
-        {b.message}
+      <span className="issue-corps">
+        <span className="issue-nature">{CAS_LABEL[b.cas]}</span>
+        <span className="issue-message">{b.message}</span>
         {b.raisons.length || b.leviers.length ? (
           <details className="why" open={ouvert}>
             <summary>Pourquoi, et que faire ?</summary>

@@ -2,7 +2,7 @@ import { AlertTriangle, CircleCheck, MoonStar, Plus, Printer, Trash2 } from 'luc
 import { useMemo, useState } from 'react';
 import { MOIS, dayIndex, fmtDateLong, fmtDecimal, fmtDuree, fmtHHMM, fmtHeure, parseHHMM } from '../../domain/time';
 import type { Garde } from '../../domain/types';
-import { GARDE_LABEL } from '../../domain/types';
+import { libelleGarde } from '../../domain/types';
 import { imprimer } from '../../env';
 import { gardeDuree } from '../../engine/core';
 import { delaiGarde, reposApresGarde, variablesGarde } from '../../engine/gardes';
@@ -133,7 +133,7 @@ function CarteGarde({ garde }: { garde: Garde }): JSX.Element {
           <Icone size={18} />
         </span>
         <div className="grow">
-          <h3>{GARDE_LABEL[garde.type]}</h3>
+          <h3>{libelleGarde(garde)}</h3>
           <div className="small soft">
             {fmtDateLong(garde.date)}, de {fmtHeure(garde.start)} à {fmtHeure(garde.end)}
             {garde.end <= garde.start ? ' le lendemain' : ''} · {fmtDuree(duree)}

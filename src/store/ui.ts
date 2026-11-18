@@ -34,6 +34,10 @@ const PREFS_DEFAUT: Preferences = { theme: 'ciel', texte: 'normal', mode: 'clair
 const CLE_SESSION = 'releve.session';
 const CLE_PREFS = 'releve.preferences';
 
+/** Les comptes de l'exemple ont changé de nom : une session ouverte avec un ancien identifiant suit. */
+const ANCIENS_COMPTES: Record<string, string> = { 'helene.marchetti': 'caroline.tellier', 'antoine.mercier': 'pierre.fiandino', 'karim.benali': 'igor.lerusse', 'camille.roussel': 'nicolas.lesyndicaliste' };
+const sessionAJour = (s: string | null): string | null => (s && ANCIENS_COMPTES[s] ? ANCIENS_COMPTES[s] : s);
+
 function lire<T>(cle: string, defaut: T): T {
   try {
     const brut = localStorage.getItem(cle);
@@ -122,7 +126,7 @@ export const prefsDe = (prefs: Record<string, Preferences>, personId: string | n
 export const useUi = create<Ui>((set) => ({
   vue: 'tableau',
   semaine: addDays(mondayOf(todayISO()), 7),
-  session: lire<string | null>(CLE_SESSION, null),
+  session: sessionAJour(lire<string | null>(CLE_SESSION, null)),
   preferences: lire<Record<string, Preferences>>(CLE_PREFS, {}),
   toast: null,
   focus: null,

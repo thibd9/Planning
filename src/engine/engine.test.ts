@@ -268,11 +268,11 @@ describe('équité, paie et langage courant', () => {
   it('exporte une fiche navette lisible', () => {
     const csv = ficheNavetteCSV(data, '2026-11');
     expect(csv).toContain('heures PRÉVUES');
-    expect(csv).toContain('Karim Benali;Adjoint;35');
+    expect(csv).toContain('Igor Le Russe;Adjoint;35');
     expect(csv).not.toContain('Marchetti');
   });
   it('lit une demande en langage courant sans jamais stocker de motif', () => {
-    const l = lireBesoin("Camille souhaite finir avant 17 h un mercredi sur deux jusqu'à fin juin", data.personnes, TODAY);
+    const l = lireBesoin("Nicolas souhaite finir avant 17 h un mercredi sur deux jusqu'à fin juin", data.personnes, TODAY);
     expect(l.besoin).toMatchObject({ personId: 'p_camille', forme: 'finir_avant', heure: 17 * 60, jours: [2], frequence: 2, to: '2027-06-30', statut: 'preference' });
     expect(Object.keys(l.besoin ?? {})).not.toContain('motif');
     const m = lireBesoin('Inès ne peut pas travailler le samedi matin à partir du 4 janvier', data.personnes, TODAY);

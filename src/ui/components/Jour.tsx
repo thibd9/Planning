@@ -1,13 +1,13 @@
-import { AlertTriangle, ChevronLeft, ChevronRight, CircleCheck, Clock3, Coffee, Moon, Trash2 } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, CircleCheck, Clock3, Coffee, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { peutGerer } from '../../domain/acces';
 import { addDays, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, mondayOf, parseHHMM } from '../../domain/time';
 import type { EcartType, ISODate, Shift } from '../../domain/types';
-import { ECART_LABEL, GARDE_LABEL, libelleAbsence, nomCourt } from '../../domain/types';
+import { ECART_LABEL, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
 import { minutesTravail, ouverture, trousPharmacien } from '../../engine/core';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { EtiquetteRole } from '../icons';
+import { EtiquetteRole, IconeGarde } from '../icons';
 import { Avatar, Dialog, Frise, Graduations, Pill } from '../kit';
 import type { Echelle } from '../kit';
 
@@ -225,7 +225,7 @@ export function DialogueJour({ date: initiale, moi, onClose }: { date: ISODate; 
           ))}
           {gardes.map((g) => (
             <Pill key={g.id} tone="nuit">
-              <Moon size={12} aria-hidden="true" /> {GARDE_LABEL[g.type]} · {nomDe(g.personId)} · {fmtHHMM(g.start)} → {fmtHHMM(g.end)}
+              <IconeGarde garde={g} /> {nomGarde(g)} · {nomDe(g.personId)} · {fmtHHMM(g.start)} → {fmtHHMM(g.end)}
             </Pill>
           ))}
         </div>

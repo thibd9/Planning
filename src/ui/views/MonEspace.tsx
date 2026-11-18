@@ -47,8 +47,8 @@ function Etapes({ etapes, faites, refus }: { etapes: string[]; faites: number; r
 export function MesDemandes({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
-  const { cloreRemplacement } = useStore();
-  const { intention, setIntention, demandesOnglet, setDemandesOnglet } = useUi();
+  const { cloreRemplacement, elargirDemande } = useStore();
+  const { intention, setIntention, demandesOnglet, setDemandesOnglet, dire } = useUi();
   const [demande, setDemande] = useState(false);
   const [aRemplacer, setARemplacer] = useState<Shift | null>(null);
   useEffect(() => {
@@ -138,7 +138,22 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
             <Delai date={x.date} today={today} />
             {r ? <PastilleUrgence urgence={r.urgence ?? 'prevu'} /> : null}
           </div>
-          {r ? (
+          {r && r.destinataire ? (
+            (() => {
+              const c = data.personnes.find((p) => p.id === r.destinataire);
+              const qui = c ? c.prenom : 'Votre collègue';
+              const refuse = (r.indisponibles ?? []).includes(r.destinataire);
+              const accepte = r.volontaires.includes(r.destinataire);
+              return (
+                <>
+                  <Etapes etapes={[`Demandé à ${qui}`, `${qui} accepte`, 'Le titulaire valide']} faites={accepte ? 2 : 1} refus={refuse} />
+                  <p className="dm-etat">
+                    {refuse ? `${qui} ne peut pas. Vous pouvez demander à toute l’équipe.` : accepte ? `${qui} est d’accord. Il reste à votre titulaire de valider.` : `${qui} n’a pas encore répondu.`} Vous restez en poste tant que rien n’est validé.
+                  </p>
+                </>
+              );
+            })()
+          ) : r ? (
             <>
               <Etapes etapes={['Demandé', 'Accord du titulaire', 'Un collègue reprend']} faites={r.accord === 'attente' ? 1 : r.volontaires.length ? 3 : 2} />
               <p className="dm-etat">
@@ -148,6 +163,18 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
             </>
           ) : null}
         </div>
+        {r && r.destinataire && (r.indisponibles ?? []).includes(r.destinataire) ? (
+          <button
+            type="button"
+            className="btn sm primary"
+            onClick={() => {
+              elargirDemande(r.id);
+              dire('Demande ouverte à toute l’équipe.', true);
+            }}
+          >
+            Demander à toute l’équipe
+          </button>
+        ) : null}
         {r ? (
           <button type="button" className="btn sm" onClick={() => cloreRemplacement(r.id, 'annulee')}>
             Annuler

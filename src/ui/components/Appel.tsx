@@ -1,5 +1,7 @@
 import { Check, Megaphone, Scale, X } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { RAISONS_DECLIN, texteDeclin } from '../../domain/refus';
+import { DialogueRefus } from './Refus';
 import { fmtDateCourt, fmtHeure, fmtJourMois } from '../../domain/time';
 import type { Remplacement, Trou } from '../../domain/types';
 import { nomCourt } from '../../domain/types';
@@ -143,6 +145,8 @@ export function AppelRecu({ appel, personId }: { appel: Remplacement; personId: 
   const poste = posteDe(data, appel);
   const tour = useMemo(() => (poste ? tourDeRole(data, poste, today, appel) : []), [data, poste, today, appel]);
   const moi = tour.find((c) => c.personId === personId);
+  const [refus, setRefus] = useState(false);
+  const chef = data.personnes.find((p) => p.id === data.officine.responsableId);
   if (!poste || !moi) return null;
   const peuvent = tour.filter((c) => c.ok).length;
   return (
@@ -180,19 +184,29 @@ export function AppelRecu({ appel, personId }: { appel: Remplacement; personId: 
           {moi.indisponible ? (
             <Pill>Vous avez répondu non</Pill>
           ) : (
-            <button
-              type="button"
-              className="btn sm"
-              onClick={() => {
-                declinerAppel(appel.id, personId);
-                dire('C’est noté. Votre rang ne change pas.');
-              }}
-            >
+            <button type="button" className="btn sm" onClick={() => setRefus(true)}>
               Je ne peux pas
             </button>
           )}
         </>
       )}
+      {refus ? (
+        <DialogueRefus
+          titre="Répondre non"
+          quoi={`Poste à couvrir ${fmtDateCourt(appel.date)}, ${fmtHeure(appel.start)} – ${fmtHeure(appel.end)}`}
+          raisons={RAISONS_DECLIN}
+          pour={chef?.prenom ?? 'votre titulaire'}
+          apercu={(m) => texteDeclin(`${fmtDateCourt(appel.date)}, ${fmtHeure(appel.start)} – ${fmtHeure(appel.end)}`, m)}
+          bouton="Répondre non"
+          exemple="Par exemple : je peux le lendemain."
+          sansMessage="Votre réponse est notée, sans message. Dire non ne change pas votre rang dans le tour de rôle."
+          onClose={() => setRefus(false)}
+          onConfirmer={(motif) => {
+            declinerAppel(appel.id, personId, motif);
+            dire('C’est noté. Votre rang ne change pas.');
+          }}
+        />
+      ) : null}
     </div>
   );
 }

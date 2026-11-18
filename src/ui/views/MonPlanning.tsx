@@ -1,4 +1,4 @@
-import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
+import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
 import {
@@ -19,10 +19,13 @@ import {
   weekday,
 } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
-import { GARDE_LABEL, MISSION_LABEL, classeAbsence, libelleAbsence, nomCourt } from '../../domain/types';
+import { MISSION_LABEL, classeAbsence, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
 import { peutRemplacer } from '../../engine/remplacement';
 import { imprimer } from '../../env';
+import { IconeGarde } from '../icons';
+import { RAISONS_DECLIN, texteDeclin } from '../../domain/refus';
+import { DialogueRefus } from '../components/Refus';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
@@ -35,7 +38,8 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const lire = useStore((s) => s.lireNotification);
-  const { seProposer } = useStore();
+  const { seProposer, declinerAppel } = useStore();
+  const [declin, setDeclin] = useState<string | null>(null);
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
   const { intention, setIntention, voirJour, aller, setSeulementMoi } = useUi();
@@ -71,7 +75,10 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
 
   const ouvertes = data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= today);
   // Un appel à l'équipe s'adresse à tous ceux qui ont été prévenus ; une demande de remplacement, à ceux qui ont la qualification.
-  const aAider = person ? ouvertes.filter((r) => (r.trouId ? (r.sollicites ?? []).includes(personId) : r.accord !== 'attente' && peutRemplacer(data, r, person))) : [];
+  // Une demande adressée à un collègue précis n'apparaît que chez lui, dès son envoi ; les autres, une fois acceptées par le titulaire.
+  const aAider = person
+    ? ouvertes.filter((r) => (r.trouId ? (r.sollicites ?? []).includes(personId) : r.destinataire ? r.destinataire === personId && !(r.indisponibles ?? []).includes(personId) : r.accord !== 'attente' && peutRemplacer(data, r, person)))
+    : [];
 
   if (!person) return <div className="empty">Personne introuvable.</div>;
 
@@ -115,12 +122,33 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
               <HandHelping size={18} />
             </span>
             <div className="grow">
-              <h2 className="h3">{aAider.some((r) => r.trouId) ? 'L’équipe a besoin d’un coup de main' : 'Un collègue cherche un remplaçant'}</h2>
+              <h2 className="h3">{aAider.some((r) => r.trouId) ? 'L’équipe a besoin d’un coup de main' : aAider.some((r) => r.destinataire === personId) ? 'Un collègue vous demande de le remplacer' : 'Un collègue cherche un remplaçant'}</h2>
               <div className="small soft">Vous proposer n’engage à rien tant que le responsable n’a pas validé.</div>
             </div>
           </div>
           {aAider.map((r) => {
             if (r.trouId) return <AppelRecu key={r.id} appel={r} personId={personId} />;
+            if (declin === r.id) {
+              const qui = data.personnes.find((p) => p.id === r.demandeur);
+              return (
+                <DialogueRefus
+                  key={r.id}
+                  titre="Répondre non"
+                  quoi={`Remplacer ${qui ? nomCourt(qui) : 'un collègue'}, ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`}
+                  raisons={RAISONS_DECLIN}
+                  pour={qui?.prenom ?? 'votre collègue'}
+                  apercu={(m) => `${texteDeclin(`${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`, m)} Vous pouvez demander à toute l’équipe depuis « Mes demandes ».`}
+                  bouton="Répondre non"
+                  exemple="Par exemple : je peux un autre jour."
+                  sansMessage={`${qui?.prenom ?? 'Votre collègue'} reçoit seulement votre réponse, sans raison.`}
+                  onClose={() => setDeclin(null)}
+                  onConfirmer={(motif) => {
+                    declinerAppel(r.id, personId, motif);
+                    dire(`C’est noté : ${qui ? qui.prenom : 'votre collègue'} est prévenu.`, true);
+                  }}
+                />
+              );
+            }
             const d = data.personnes.find((p) => p.id === r.demandeur);
             const propose = r.volontaires.includes(personId);
             const occupe = aVenir.some((s) => s.date === r.date && s.start < r.end && r.start < s.end);
@@ -129,7 +157,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                 <div className="grow">
                   <b className="cap1">{fmtDateCourt(r.date)}</b> · <span className="num">{fmtHeure(r.start)} – {fmtHeure(r.end)}</span>
                   <div className="small soft">
-                    Demandé par {d ? nomCourt(d) : 'un collègue'}
+                    {r.destinataire === personId ? `${d ? d.prenom : 'Un collègue'} vous le demande, à vous. Le titulaire validera.` : `Demandé par ${d ? nomCourt(d) : 'un collègue'}`}
                     {occupe ? ' · vous travaillez déjà sur cet horaire' : ''}
                   </div>
                 </div>
@@ -143,17 +171,28 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                     </button>
                   </>
                 ) : (
-                  <button
-                    type="button"
-                    className="btn primary sm"
-                    disabled={occupe}
-                    onClick={() => {
-                      seProposer(r.id, personId, true);
-                      dire('Vous êtes volontaire. Le responsable valide le remplacement.', true);
-                    }}
-                  >
-                    Je me propose
-                  </button>
+                  <>
+                    {r.destinataire === personId ? (
+                      <button
+                        type="button"
+                        className="btn sm"
+                        onClick={() => setDeclin(r.id)}
+                      >
+                        Je ne peux pas
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="btn primary sm"
+                      disabled={occupe}
+                      onClick={() => {
+                        seProposer(r.id, personId, true);
+                        dire(r.destinataire === personId ? `Merci. ${d ? d.prenom : 'Votre collègue'} est prévenu ; le titulaire valide.` : 'Vous êtes volontaire. Le responsable valide le remplacement.', true);
+                      }}
+                    >
+                      {r.destinataire === personId ? 'J’accepte' : 'Je me propose'}
+                    </button>
+                  </>
                 )}
               </div>
             );
@@ -291,7 +330,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                   ))}
                                   {gardes.map((g) => (
                                     <Pill key={g.id} tone="nuit">
-                                      <Moon size={12} aria-hidden="true" /> {GARDE_LABEL[g.type]} · {fmtHHMM(g.start)} → {fmtHHMM(g.end)}
+                                      <IconeGarde garde={g} /> {nomGarde(g)} · {fmtHHMM(g.start)} → {fmtHHMM(g.end)}
                                     </Pill>
                                   ))}
                                 </div>

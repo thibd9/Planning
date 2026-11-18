@@ -11,7 +11,7 @@ const H = (h: number, m = 0): number => h * 60 + m;
 const SEMAINE = [0, 1, 2, 3, 4];
 
 export const OFFICINE_DEMO: Officine = {
-  nom: 'Pharmacie des Tilleuls',
+  nom: 'Grande Pharmacie de la Pinède',
   responsableId: 'p_helene',
   horaires: [
     [{ start: H(8, 30), end: H(19, 30) }],
@@ -69,12 +69,12 @@ const personne = (
 
 /** Équipe fictive. Les taux horaires sont indicatifs et ne servent qu'à comparer des scénarios. */
 export const EQUIPE_DEMO: Person[] = [
-  personne('p_helene', 'Hélène', 'Marchetti', 'titulaire', 42, null, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
+  personne('p_helene', 'Caroline', 'Tellier', 'titulaire', 42, null, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
   // Titulaire secondaire, associé à temps réduit : sans droit de gestion tant que la titulaire principale ne le lui donne pas.
-  personne('p_antoine', 'Antoine', 'Mercier', 'titulaire', 24, null, { competences: ['vaccination'], volontaireGardes: true }),
-  personne('p_karim', 'Karim', 'Benali', 'adjoint', 35, 24, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
+  personne('p_antoine', 'Pierre', 'Fiandino', 'titulaire', 24, null, { competences: ['vaccination'], volontaireGardes: true }),
+  personne('p_karim', 'Igor', 'Le Russe', 'adjoint', 35, 24, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
   personne('p_lea', 'Léa', 'Fontaine', 'adjoint', 28, 23.5, { competences: ['vaccination', 'entretien'], volontaireHeuresComp: true, volontaireGardes: true }),
-  personne('p_camille', 'Camille', 'Roussel', 'preparateur', 35, 15.8, { competences: ['orthopedie'] }),
+  personne('p_camille', 'Nicolas', 'Le Syndicaliste', 'preparateur', 35, 15.8, { competences: ['orthopedie'] }),
   personne('p_thomas', 'Thomas', 'Nguyen', 'preparateur', 35, 15.2, { competences: ['commandes'] }),
   personne('p_ines', 'Inès', 'Da Silva', 'preparateur', 24, 15.2, { volontaireHeuresComp: true }),
   personne('p_jules', 'Jules', 'Perrin', 'preparateur', 35, 14.6, { competences: ['commandes'] }),
@@ -163,6 +163,9 @@ export function vierge(): AppData {
  * Jeu de démonstration : huit semaines d'historique publiées, la semaine en cours publiée
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
+/** À augmenter quand l'exemple change (noms, équipe) : les exemples enregistrés sur l'appareil sont alors régénérés. */
+export const DEMO_VERSION = 2;
+
 export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);
   const creation = new Date(`${addDays(lundi, -70)}T09:00:00`).toISOString();
@@ -229,9 +232,10 @@ export function seed(today: ISODate, avance = 0): AppData {
   let data: AppData = {
     officine: { ...OFFICINE_DEMO, secours: 'TILL-2026' },
     demo: true,
+    demoVersion: DEMO_VERSION,
     messages: [
       { id: uid('msg'), de: 'p_helene', a: 'equipe', texte: 'Bonjour à tous, le planning de la semaine prochaine sera publié jeudi. Pensez à me signaler vos contraintes d’ici là.', at: new Date(`${addDays(today, -1)}T09:12:00`).toISOString(), luPar: ['p_helene'] },
-      { id: uid('msg'), de: 'p_camille', a: 'p_helene', texte: 'Bonjour Hélène, serait-il possible de me libérer mercredi prochain après 17 h ? Merci.', at: new Date(`${addDays(today, -1)}T14:40:00`).toISOString(), luPar: ['p_camille'] },
+      { id: uid('msg'), de: 'p_camille', a: 'p_helene', texte: 'Bonjour Caroline, serait-il possible de me libérer mercredi prochain après 17 h ? Merci.', at: new Date(`${addDays(today, -1)}T14:40:00`).toISOString(), luPar: ['p_camille'] },
     ],
     remplacements: [],
     accords: [],
@@ -316,7 +320,7 @@ export function seed(today: ISODate, avance = 0): AppData {
     });
   }
 
-  // ---- Arrêt de Karim de mercredi à vendredi : les postes retirés deviennent des trous à résoudre.
+  // ---- Arrêt d’Igor de mercredi à vendredi : les postes retirés deviennent des trous à résoudre.
   const arretId = uid('a');
   const from = addDays(lundi, 2);
   const to = addDays(lundi, 4);
@@ -336,7 +340,7 @@ export function seed(today: ISODate, avance = 0): AppData {
     id: uid('j'),
     at: new Date(`${today}T07:40:00`).toISOString(),
     type: 'absence',
-    titre: 'Arrêt de Karim B. enregistré',
+    titre: 'Arrêt d’Igor L. enregistré',
     detail: `Du ${from.split('-').reverse().join('/')} au ${to.split('-').reverse().join('/')} : ${retires.length} poste${retires.length > 1 ? 's' : ''} à couvrir.`,
     semaine: lundi,
   });

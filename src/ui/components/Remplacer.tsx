@@ -1,12 +1,12 @@
-import { FileCheck2, Hourglass, Paperclip, ShieldCheck, X } from 'lucide-react';
-import { useState } from 'react';
-import { dayIndex, fmtDateLong, fmtHeure } from '../../domain/time';
+import { FileCheck2, Hourglass, Paperclip, ShieldCheck, Users, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { dayIndex, fmtDateLong, fmtDuree, fmtHeure } from '../../domain/time';
 import type { Justificatif, Shift, Urgence } from '../../domain/types';
 import { URGENCE_LABEL } from '../../domain/types';
-import { delaiRemplacement, peutDemanderRemplacement } from '../../engine/remplacement';
+import { avisCollegues, delaiRemplacement, peutDemanderRemplacement } from '../../engine/remplacement';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { Dialog } from '../kit';
+import { Avatar, Dialog } from '../kit';
 
 const PDF_MAX = 600 * 1024;
 
@@ -60,6 +60,11 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
   const [urgence, setUrgence] = useState<Urgence>(loin ? 'prevu' : 'urgent');
   const [piece, setPiece] = useState<Justificatif | null>(null);
   const [erreur, setErreur] = useState('');
+  /** À qui la demande s'adresse : '' pour toute l'équipe disponible, sinon un collègue précis. */
+  const [collegue, setCollegue] = useState('');
+  // Pour chaque collègue : les règles sont relues et ses heures de la semaine comptées.
+  const avis = useMemo(() => avisCollegues(data, shift), [data, shift]);
+  const choisi = data.personnes.find((p) => p.id === collegue);
   // Un poste à moins de sept jours ne peut pas être « prévu » : il passe par une demande urgente.
   const niveaux: Urgence[] = loin ? ['prevu', 'urgent', 'medical'] : ['urgent', 'medical'];
 
@@ -95,8 +100,8 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
             type="button"
             className="btn primary"
             onClick={() => {
-              demander(shift, urgence, urgence === 'medical' ? (piece ?? undefined) : undefined);
-              dire('Demande envoyée à votre titulaire. Vous restez en poste tant qu’elle n’est pas réglée.', true);
+              demander(shift, urgence, urgence === 'medical' ? (piece ?? undefined) : undefined, collegue || undefined);
+              dire(choisi ? `Demande envoyée à ${choisi.prenom} et à votre titulaire. Vous restez en poste tant qu’elle n’est pas validée.` : 'Demande envoyée à votre titulaire. Vous restez en poste tant qu’elle n’est pas réglée.', true);
               onClose();
             }}
           >
@@ -112,6 +117,35 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
           {loin ? `Plus de ${delai} jours : vos collègues sont prévenus dans les règles.` : `Moins de ${delai} jours : seul un volontaire peut le reprendre.`}
         </span>
       </div>
+      <fieldset className="choix collegues">
+        <legend>À qui demander ?</legend>
+        <label>
+          <input type="radio" name="collegue" checked={collegue === ''} onChange={() => setCollegue('')} />
+          <span className="col-pic" aria-hidden="true">
+            <Users size={18} />
+          </span>
+          <span className="grow">
+            Toute l’équipe
+            <small>Votre titulaire prévient tous ceux qui peuvent reprendre le poste.</small>
+          </span>
+        </label>
+        {avis.map((c) => {
+          const p = data.personnes.find((x) => x.id === c.personId);
+          if (!p) return null;
+          return (
+            <label key={c.personId} className={c.ok ? '' : 'non'}>
+              <input type="radio" name="collegue" checked={collegue === c.personId} disabled={!c.ok} onChange={() => setCollegue(c.personId)} />
+              <Avatar person={p} />
+              <span className="grow">
+                {p.prenom} {p.nom}
+                <small>{c.ok ? (c.contrat ? `${fmtDuree(c.avant)} → ${fmtDuree(c.apres)} cette semaine-là, pour un contrat de ${fmtDuree(c.contrat)}` : 'Titulaire, hors décompte d’heures') : c.raisons[0]}</small>
+              </span>
+              <span className={`col-avis ${c.ok ? 'ok' : 'non'}`}>{c.ok ? 'Possible' : 'Impossible'}</span>
+            </label>
+          );
+        })}
+        <p className="aide">Calcul automatique : règles de repos et heures de la semaine. Dans tous les cas, votre titulaire valide.</p>
+      </fieldset>
       <fieldset className="choix urgence">
         <legend>Niveau d’urgence</legend>
         {niveaux.map((u) => (

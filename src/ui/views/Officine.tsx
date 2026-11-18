@@ -1,9 +1,11 @@
-import { Plus, RotateCcw, Settings2, Store, Trash2 } from 'lucide-react';
+import { Plus, RotateCcw, Settings2, Store, Trash2, UserRound, Users } from 'lucide-react';
 import { useState } from 'react';
-import { JOURS, fmtDuree, fmtHHMM, parseHHMM, uid } from '../../domain/time';
-import type { Interval, PosteType } from '../../domain/types';
+import { JOURS, MOIS, fmtDateCourt, fmtDuree, fmtHHMM, parseHHMM } from '../../domain/time';
+import type { CouleurPoste, Interval, PosteType } from '../../domain/types';
+import { COULEUR_POSTE_LABEL } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
-import { estCollaboratif } from '../../engine/souhaits';
+import { estCollaboratif, limiteSouhaits, moisDe, moisDecale } from '../../engine/souhaits';
+import { COULEURS_POSTE, DialoguePosteType, classePoste } from '../components/PosteTypeDialogue';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 
@@ -29,6 +31,9 @@ export function Officine(): JSX.Element {
   const { majOfficine, reinitialiser } = useStore();
   const collaboratif = estCollaboratif(useStore((s) => s.data.officine));
   const [confirmation, setConfirmation] = useState(false);
+  const [nouveauPoste, setNouveauPoste] = useState(false);
+  const today = useStore((s) => s.today);
+  const moisSuivant = moisDecale(moisDe(today), 1);
   const dire = useUi((s) => s.dire);
   const setPoste = (id: string, patch: Partial<PosteType>): void => {
     majOfficine({ postes: officine.postes.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
@@ -119,14 +124,17 @@ export function Officine(): JSX.Element {
         <div className="col" style={{ gap: 18 }}>
           <div className="card">
             <div className="card-head">
-              <h2 className="h3">Effectif attendu au comptoir</h2>
+              <div className="grow">
+                <h2 className="h3">Combien de personnes au comptoir ?</h2>
+                <div className="small soft">Le minimum à tenir, selon le jour et l’heure. En dessous, le planning vous prévient.</div>
+              </div>
             </div>
             <table className="t">
               <thead>
                 <tr>
                   <th scope="col">Jours</th>
-                  <th scope="col">Tranche</th>
-                  <th scope="col" style={{ textAlign: 'right' }}>Minimum</th>
+                  <th scope="col">Horaire</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Personnes au minimum</th>
                 </tr>
               </thead>
               <tbody>
@@ -137,52 +145,78 @@ export function Officine(): JSX.Element {
                       {fmtHHMM(e.start)} → {fmtHHMM(e.end)}
                     </td>
                     <td style={{ textAlign: 'right' }}>
+                      <span className="eff-min">
                       <input
                         type="number"
                         min={0}
                         max={12}
                         className="input num"
-                        aria-label="Effectif minimal"
+                        aria-label={`Nombre minimum de personnes, ${e.jours.length === 5 && e.jours[0] === 0 ? 'lundi à vendredi' : e.jours.map((j) => JOURS[j]).join(', ')}, de ${fmtHHMM(e.start)} à ${fmtHHMM(e.end)}`}
                         value={e.minEquipe}
                         onChange={(ev) => majOfficine({ effectifs: officine.effectifs.map((x, k) => (k === i ? { ...x, minEquipe: Number(ev.target.value) } : x)) })}
                         style={{ width: 70, textAlign: 'right', padding: '5px 7px' }}
                       />
+                      <span className="small soft" aria-hidden="true">{e.minEquipe > 1 ? 'personnes' : 'personne'}</span>
+                      </span>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <div className="card-body tiny muted" style={{ borderTop: '1px solid var(--line)' }}>
-              La présence d'un pharmacien sur chaque minute d'ouverture est contrôlée à part : elle ne dépend pas de ces seuils.
+              Un pharmacien doit être présent à chaque minute d’ouverture : c’est contrôlé à part, quel que soit ce minimum.
             </div>
           </div>
 
           <div className="card pad col" data-focus="modele">
-            <h2 className="h3">Façon de construire le planning</h2>
+            <div>
+              <h2 className="h3">Qui prépare le planning ?</h2>
+              <p className="small soft" style={{ margin: '3px 0 0' }}>Deux façons de faire. Vous pouvez changer à tout moment.</p>
+            </div>
             <fieldset className="choix modele">
-              <legend className="sr">Modèle de planification</legend>
+              <legend className="sr">Façon de construire le planning</legend>
               <label>
                 <input type="radio" name="modele" checked={collaboratif} onChange={() => majOfficine({ modele: 'collaboratif' })} />
+                <span className="modele-pic" aria-hidden="true">
+                  <Users size={18} />
+                </span>
                 <span>
-                  Collaboratif
-                  <small>Chacun donne ses préférences du mois, puis vous ajustez.</small>
+                  Avec l’équipe <span className="modele-nom">Collaboratif</span>
+                  <ol className="modele-etapes">
+                    <li>Chacun indique ce qui l’arrange pour le mois suivant.</li>
+                    <li>Solvéa propose un planning qui en tient compte.</li>
+                    <li>Vous ajustez, puis vous publiez.</li>
+                  </ol>
                 </span>
               </label>
               <label>
                 <input type="radio" name="modele" checked={!collaboratif} onChange={() => majOfficine({ modele: 'classique' })} />
+                <span className="modele-pic" aria-hidden="true">
+                  <UserRound size={18} />
+                </span>
                 <span>
-                  Classique
-                  <small>Vous construisez seul ; l’équipe consulte.</small>
+                  Vous seul <span className="modele-nom">Classique</span>
+                  <ol className="modele-etapes">
+                    <li>Vous construisez le planning.</li>
+                    <li>Vous le publiez.</li>
+                    <li>L’équipe le consulte et fait ses demandes.</li>
+                  </ol>
                 </span>
               </label>
             </fieldset>
             {collaboratif ? (
-              <label className="field">
-                Préférences à donner avant le… du mois précédent
-                <input type="number" min={1} max={28} value={officine.souhaitsLimite ?? 20} onChange={(e) => majOfficine({ souhaitsLimite: Math.min(28, Math.max(1, Number(e.target.value) || 20)) })} style={{ width: 110 }} />
-              </label>
+              <div className="modele-limite">
+                <label htmlFor="souhaits-limite">
+                  L’équipe donne ses préférences jusqu’au
+                  <input id="souhaits-limite" type="number" min={1} max={28} value={officine.souhaitsLimite ?? 20} onChange={(e) => majOfficine({ souhaitsLimite: Math.min(28, Math.max(1, Number(e.target.value) || 20)) })} />
+                  du mois précédent.
+                </label>
+                <p className="small soft">
+                  Exemple : pour le planning de {MOIS[Number(moisSuivant.slice(5)) - 1]}, jusqu’au {fmtDateCourt(limiteSouhaits(officine, moisSuivant))} inclus.
+                </p>
+              </div>
             ) : null}
-            <p className="tiny muted">Dans les deux cas, les règles impératives et l’effectif passent avant toute préférence.</p>
+            <p className="tiny muted">Dans les deux cas, les règles et le nombre minimum de personnes passent avant les préférences.</p>
           </div>
 
           <div className="card pad col">
@@ -212,24 +246,17 @@ export function Officine(): JSX.Element {
         <div className="card-head">
           <div className="grow">
             <h2 className="h3">Postes types</h2>
-            <span className="small soft">Utilisés par les propositions de planning et la saisie rapide</span>
+            <span className="small soft">Vos horaires habituels, chacun avec sa couleur. Ils servent à la saisie rapide et aux propositions de planning.</span>
           </div>
-          <button
-            type="button"
-            className="btn sm"
-            onClick={() =>
-              majOfficine({
-                postes: officine.postes.concat({ id: uid('poste'), label: 'Nouveau poste', start: 9 * 60, end: 17 * 60, pauseStart: 12 * 60 + 30, pauseEnd: 13 * 60 + 30, jours: [0, 1, 2, 3, 4] }),
-              })
-            }
-          >
+          <button type="button" className="btn primary sm" onClick={() => setNouveauPoste(true)}>
             <Plus size={14} /> Ajouter un poste type
           </button>
         </div>
-        <table className="t" style={{ minWidth: 760 }}>
+        <table className="t" style={{ minWidth: 900 }}>
           <thead>
             <tr>
               <th scope="col">Poste</th>
+              <th scope="col">Couleur</th>
               <th scope="col">Horaires</th>
               <th scope="col">Pause</th>
               <th scope="col">Jours</th>
@@ -242,6 +269,19 @@ export function Officine(): JSX.Element {
               <tr key={p.id}>
                 <td>
                   <input className="input" aria-label="Nom du poste" value={p.label} onChange={(e) => setPoste(p.id, { label: e.target.value })} style={{ fontWeight: 650, width: 170, padding: '6px 9px' }} />
+                </td>
+                <td>
+                  <span className="pt-couleur">
+                    <i className={`pt-pastille ${classePoste(p)}`} aria-hidden="true" />
+                    <select aria-label={`Couleur du poste ${p.label}`} value={p.couleur ?? ''} onChange={(e) => setPoste(p.id, { couleur: (e.target.value || undefined) as CouleurPoste | undefined })}>
+                      <option value="">Automatique</option>
+                      {COULEURS_POSTE.map((c) => (
+                        <option key={c} value={c}>
+                          {COULEUR_POSTE_LABEL[c]}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
                 </td>
                 <td>
                   <div className="row" style={{ gap: 6 }}>
@@ -305,6 +345,7 @@ export function Officine(): JSX.Element {
           </button>
         )}
       </div>
+      {nouveauPoste ? <DialoguePosteType onClose={() => setNouveauPoste(false)} onAjouter={(p) => { majOfficine({ postes: officine.postes.concat(p) }); dire(`Poste type « ${p.label} » ajouté.`, true); }} /> : null}
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { Sparkles } from 'lucide-react';
 import { JOURS, fmtDuree, fmtHHMM, fmtHeure, weekday } from '../../domain/time';
 import type { AppData, Person, Shift } from '../../domain/types';
-import { ACTIVITE_LABEL, nomCourt } from '../../domain/types';
+import { ACTIVITE_LABEL, nomCourt, couleurDuPoste } from '../../domain/types';
 import { decrireShift, minutesTravail } from '../../engine/core';
 import { ACTIVITE_COURT, ACTIVITE_ICONE } from '../icons';
 import type { Echelle } from '../kit';
+import { useStore } from '../../store/store';
 import { momentDe } from '../kit';
 
 
@@ -29,7 +30,10 @@ export function Tuile({
   glissable?: boolean;
   onClick?: () => void;
 }): JSX.Element {
-  const moment = momentDe(s);
+  // Un poste type peut avoir sa couleur ; sinon elle suit le moment de la journée.
+  const postesTypes = useStore((st) => st.data.officine.postes);
+  const choisie = couleurDuPoste(postesTypes, s);
+  const moment = choisie ? `k-${choisie}` : momentDe(s);
   const Icone = ACTIVITE_ICONE[s.activite];
   const contenu = (
     <>

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Crown, FlaskConical, ListTree, MousePointerClick, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CircleCheck, Crown, FlaskConical, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -16,10 +16,10 @@ import { Logo } from './kit';
 
 /** Les quatre regards de l'environnement de test, avec des personnes déjà créées. */
 export const ROLES_TEST: { cle: string; id: string; identifiant: string; court: string; titre: string; nom: string; detail: string }[] = [
-  { cle: 't1', id: 'p_helene', identifiant: 'helene.marchetti', court: 'Titulaire 1', titre: 'Titulaire principale', nom: 'Hélène Marchetti', detail: 'Tous les droits : tableau de bord, plannings, équipe, gardes, réglages.' },
-  { cle: 't2', id: 'p_antoine', identifiant: 'antoine.mercier', court: 'Titulaire 2', titre: 'Titulaire secondaire', nom: 'Antoine Mercier', detail: 'Mêmes écrans que la titulaire principale ; ses décisions attendent son accord.' },
-  { cle: 'ph', id: 'p_karim', identifiant: 'karim.benali', court: 'Pharmacien', titre: 'Pharmacien adjoint', nom: 'Karim Benali', detail: 'Son planning, le planning publié, ses gardes, ses messages.' },
-  { cle: 'pr', id: 'p_camille', identifiant: 'camille.roussel', court: 'Préparateur', titre: 'Préparatrice', nom: 'Camille Roussel', detail: 'Ses horaires, ses demandes, les remplacements, ses messages.' },
+  { cle: 't1', id: 'p_helene', identifiant: 'caroline.tellier', court: 'Titulaire 1', titre: 'Titulaire principale', nom: 'Caroline Tellier', detail: 'Tous les droits : tableau de bord, plannings, équipe, gardes, réglages.' },
+  { cle: 't2', id: 'p_antoine', identifiant: 'pierre.fiandino', court: 'Titulaire 2', titre: 'Titulaire secondaire', nom: 'Pierre Fiandino', detail: 'Mêmes écrans que la titulaire principale ; ses décisions attendent son accord.' },
+  { cle: 'ph', id: 'p_karim', identifiant: 'igor.lerusse', court: 'Pharmacien', titre: 'Pharmacien adjoint', nom: 'Igor Le Russe', detail: 'Son planning, le planning publié, ses gardes, ses messages.' },
+  { cle: 'pr', id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', court: 'Préparateur', titre: 'Préparateur', nom: 'Nicolas Le Syndicaliste', detail: 'Ses horaires, ses demandes, les remplacements, ses messages.' },
 ];
 
 /** Ouvre l'environnement de test dans la peau d'une personne ; l'écran d'arrivée dépend de ses droits. */
@@ -48,7 +48,7 @@ function volontairePour(d: AppData, r: Remplacement): string | undefined {
   return (possibles.find((p) => p.qualification === demandeur?.qualification) ?? possibles[0])?.id;
 }
 
-/** Premier poste publié à venir de Camille qu'un autre préparateur, de préférence, peut reprendre. */
+/** Premier poste publié à venir de Nicolas qu'un autre préparateur, de préférence, peut reprendre. */
 function posteARemplacer(d: AppData, today: string): string | null {
   const postes = d.shifts.filter((s) => s.personId === 'p_camille' && peutDemanderRemplacement(d, s.date, today) && d.semaines[mondayOf(s.date)]?.statut === 'publie').sort((a, b) => a.date.localeCompare(b.date));
   const essai = (s: (typeof postes)[number]): Remplacement => ({ id: 'essai', shiftId: s.id, demandeur: 'p_camille', date: s.date, start: s.start, end: s.end, creeLe: '', volontaires: [], statut: 'ouverte' });
@@ -60,12 +60,67 @@ function posteARemplacer(d: AppData, today: string): string | null {
 type Cible = string | (() => HTMLElement | null | undefined);
 /** Un geste que la visite fait elle-même, à l'écran : elle clique, tape, choisit, comme le ferait l'utilisateur. */
 type Geste =
-  | { faire: 'cliquer'; sur: Cible }
-  | { faire: 'taper'; dans: Cible; texte: string }
-  | { faire: 'choisir'; dans: Cible; valeur: string }
+  | { faire: 'cliquer'; sur: Cible; dit?: string }
+  | { faire: 'taper'; dans: Cible; texte: string; dit?: string }
+  | { faire: 'choisir'; dans: Cible; valeur: string; dit?: string }
   | { faire: 'attendre'; que: Cible }
   | { faire: 'pause'; ms: number }
-  | { faire: 'action'; jouer: () => void };
+  | { faire: 'action'; jouer: () => void; dit?: string };
+type GesteVisible = Extract<Geste, { faire: 'cliquer' | 'taper' | 'choisir' }>;
+const visible = (g: Geste): g is GesteVisible => g.faire === 'cliquer' || g.faire === 'taper' || g.faire === 'choisir';
+
+/**
+ * Une démonstration se regarde geste par geste : chaque « temps » contient un seul geste visible
+ * (un clic, une saisie, un choix), avec les attentes et les suites automatiques qui l'entourent.
+ */
+function decouper(gestes: Geste[]): Geste[][] {
+  const temps: Geste[][] = [];
+  let courant: Geste[] = [];
+  let vu = false;
+  for (const g of gestes) {
+    if (visible(g) && vu) {
+      temps.push(courant);
+      courant = [];
+      vu = false;
+    }
+    courant.push(g);
+    if (visible(g)) vu = true;
+  }
+  if (courant.length) temps.push(courant);
+  return temps;
+}
+
+/** Le nom lisible d'un élément : son texte, sans les mentions réservées aux lecteurs d'écran ni les précisions. */
+function nomDe(el: HTMLElement): string {
+  const copie = el.cloneNode(true) as HTMLElement;
+  copie.querySelectorAll('.sr, small, svg, .small, .soft, .aide, .compte, .nav-badge, select, input, textarea, ol, ul, .modele-nom, .voie-etat, .voie-reponse, .pill').forEach((x) => x.remove());
+  let texte = (copie.textContent ?? '').replace(/\s+/g, ' ').trim() || el.getAttribute('aria-label') || el.getAttribute('title') || '';
+  // Un bloc qui contient un titre et une phrase : on garde le titre.
+  const titre = copie.querySelector('b, strong, h2, h3')?.textContent?.trim();
+  if (titre && texte.length > titre.length + 12) texte = titre;
+  return texte.length > 44 ? `${texte.slice(0, 42).trim()}…` : texte;
+}
+const champDe = (el: HTMLElement): string => {
+  const champ = el as HTMLInputElement;
+  const libelle = champ.labels?.[0];
+  return (libelle ? nomDe(libelle).replace(/\s*[:*]\s*$/, '') : '') || el.getAttribute('aria-label') || champ.placeholder || '';
+};
+/** Ce que le prochain temps va faire, dit simplement : « Cliquer sur… », « Écrire… », « Choisir… ». */
+function decrire(temps: Geste[] | undefined): string {
+  if (!temps) return '';
+  const g = temps.find(visible);
+  if (!g) return temps.find((x): x is Extract<Geste, { faire: 'action' }> => x.faire === 'action')?.dit ?? 'Voir la suite';
+  if (g.dit) return g.dit;
+  const el = element(g.faire === 'cliquer' ? g.sur : g.dans);
+  if (g.faire === 'cliquer') {
+    const nom = el ? nomDe(el) : '';
+    return nom ? `Cliquer sur « ${nom} »` : 'Cliquer ici';
+  }
+  const champ = el ? champDe(el) : '';
+  if (g.faire === 'taper') return champ ? `Écrire « ${g.texte} » dans « ${champ} »` : `Écrire « ${g.texte} »`;
+  const option = el instanceof HTMLSelectElement ? [...el.options].find((o) => o.value === g.valeur)?.text : undefined;
+  return champ ? `Choisir « ${option ?? g.valeur} » dans « ${champ} »` : `Choisir « ${option ?? g.valeur} »`;
+}
 
 interface Etape {
   /** Chapitre de la visite ; le sommaire permet de sauter de l'un à l'autre. */
@@ -107,7 +162,7 @@ const annulerMinuteries = (): void => {
 };
 
 const semaineDans = (n: number): string => addDays(mondayOf(store().today), 7 * n);
-const helene = (vue: Vue): void => voirComme('helene.marchetti', vue);
+const helene = (vue: Vue): void => voirComme('caroline.tellier', vue);
 /** Mise en place directe des données de démonstration, sans passer par le journal. */
 const poser = (fn: (d: AppData) => AppData): void => useStore.setState((s) => ({ data: fn(s.data) }));
 /** L'équipe d'exemple et ses contraintes reconnues, sans aucun planning. */
@@ -160,7 +215,7 @@ function avecPlanning(): void {
   publierSemaine(semaineDans(2));
 }
 
-/** Camille a demandé à être remplacée : la demande attend la réponse de sa titulaire. */
+/** Nicolas a demandé à être remplacée : la demande attend la réponse de sa titulaire. */
 function avecDemande(): void {
   avecPlanning();
   const s = store();
@@ -177,7 +232,7 @@ function avecDemandeAcceptee(): void {
   avecDemande();
   accepterDemandeDeCamille();
 }
-/** Le collègue qui peut reprendre le poste de Camille. */
+/** Le collègue qui peut reprendre le poste de Nicolas. */
 function volontaire(): string | undefined {
   const r = demandeDeCamille(store().data);
   return r ? (r.volontaires[0] ?? volontairePour(store().data, r)) : undefined;
@@ -271,8 +326,8 @@ function avecFormation(): void {
 
 // ---------------------------------------------------------------- Une journée type : la pharmacie tourne déjà
 
-const HELENE = 'Hélène · titulaire';
-const CAMILLE = 'Camille · préparatrice';
+const HELENE = 'Caroline · titulaire';
+const CAMILLE = 'Nicolas · préparateur';
 
 const ETABLI: Etape[] = [
   {
@@ -280,7 +335,7 @@ const ETABLI: Etape[] = [
     cible: "[data-focus='cycle']",
     titre: 'Le tableau de bord',
     texte: () => 'L’équipe du jour, où en est le planning, les décisions qui attendent.',
-    jouer: () => voirComme('helene.marchetti', 'tableau'),
+    jouer: () => voirComme('caroline.tellier', 'tableau'),
   },
   {
     qui: HELENE,
@@ -290,14 +345,14 @@ const ETABLI: Etape[] = [
     jouer: () => {
       appelEnCours();
       useUi.getState().setSujet('absences');
-      voirComme('helene.marchetti', 'resoudre');
+      voirComme('caroline.tellier', 'resoudre');
     },
   },
   {
     qui: CAMILLE,
     cible: '.prochain',
     titre: 'Ses horaires',
-    texte: () => 'Camille voit d’abord son prochain poste. Elle vient de demander un remplacement.',
+    texte: () => 'Nicolas voit d’abord son prochain poste. Il vient de demander un remplacement.',
     jouer: () => {
       const s = store();
       if (!demandeDeCamille(s.data)) {
@@ -307,7 +362,7 @@ const ETABLI: Etape[] = [
         if (poste) s.demanderRemplacement(poste);
         accepterDemandeDeCamille();
       }
-      voirComme('camille.roussel', 'moi');
+      voirComme('nicolas.lesyndicaliste', 'moi');
     },
   },
   {
@@ -318,12 +373,12 @@ const ETABLI: Etape[] = [
     jouer: () => {
       const s = store();
       const r = demandeDeCamille(s.data);
-      if (!r) return voirComme('camille.roussel', 'moi');
+      if (!r) return voirComme('nicolas.lesyndicaliste', 'moi');
       if (r.accord === 'attente') accepterDemandeDeCamille();
       const v = volontaire();
-      if (!v) return voirComme('camille.roussel', 'moi');
+      if (!v) return voirComme('nicolas.lesyndicaliste', 'moi');
       if (!r.volontaires.includes(v)) store().seProposer(r.id, v, true);
-      voirComme(store().data.personnes.find((p) => p.id === v)?.identifiant ?? 'camille.roussel', 'moi');
+      voirComme(store().data.personnes.find((p) => p.id === v)?.identifiant ?? 'nicolas.lesyndicaliste', 'moi');
     },
   },
   {
@@ -333,7 +388,7 @@ const ETABLI: Etape[] = [
     texte: () => 'Les règles sont relues, les heures en plus annoncées. Un clic valide.',
     jouer: () => {
       useUi.getState().setSujet('remplacements');
-      voirComme('helene.marchetti', 'resoudre');
+      voirComme('caroline.tellier', 'resoudre');
     },
   },
   {
@@ -341,20 +396,20 @@ const ETABLI: Etape[] = [
     cible: '.sh-cal',
     titre: 'Mes préférences',
     texte: () => 'Une forme par jour, sans raison à donner. « M’assister » remplit le reste.',
-    jouer: () => versDemandes('camille.roussel', 'souhaits'),
+    jouer: () => versDemandes('nicolas.lesyndicaliste', 'souhaits'),
   },
   {
-    qui: 'Karim · pharmacien adjoint',
+    qui: 'Igor · pharmacien adjoint',
     cible: '.content .card',
     titre: 'Ses gardes',
     texte: () => 'Dates, repos qui suit, récupérations. Pas d’accès à la gestion.',
-    jouer: () => voirComme('karim.benali', 'mesgardes'),
+    jouer: () => voirComme('igor.lerusse', 'mesgardes'),
   },
   {
-    qui: 'Antoine · titulaire secondaire',
+    qui: 'Pierre · titulaire secondaire',
     cible: '.panneau',
     titre: 'Décider à deux',
-    texte: () => 'Mêmes écrans qu’Hélène. Sa décision attend son accord.',
+    texte: () => 'Mêmes écrans que Caroline. Sa décision attend son accord.',
     jouer: () => {
       const s = store();
       if (!(s.data.accords ?? []).some((x) => x.auteur === 'p_antoine')) {
@@ -362,17 +417,17 @@ const ETABLI: Etape[] = [
         if (garde) s.proposer('p_antoine', 'affecterGarde', [garde.id, 'p_antoine', false]);
       }
       useUi.getState().setSujet('accords');
-      voirComme('antoine.mercier', 'resoudre');
+      voirComme('pierre.fiandino', 'resoudre');
     },
   },
   {
     qui: HELENE,
     cible: '.panneau',
     titre: 'Donner son accord',
-    texte: () => 'Hélène accepte ou refuse. Antoine est prévenu.',
+    texte: () => 'Caroline accepte ou refuse. Pierre est prévenu.',
     jouer: () => {
       useUi.getState().setSujet('accords');
-      voirComme('helene.marchetti', 'resoudre');
+      voirComme('caroline.tellier', 'resoudre');
     },
   },
   {
@@ -381,7 +436,7 @@ const ETABLI: Etape[] = [
     titre: 'Pauses et retards',
     texte: () => 'Toute l’équipe sur une ligne de temps. On règle une pause, on note un retard.',
     jouer: () => {
-      voirComme('helene.marchetti', 'construire');
+      voirComme('caroline.tellier', 'construire');
       useUi.getState().setSemaine(mondayOf(store().today));
       useUi.getState().voirJour(store().today);
     },
@@ -392,7 +447,7 @@ const ETABLI: Etape[] = [
     titre: 'Construire',
     texte: () => '« Proposer un planning » calcule trois semaines comparables. Vous choisissez.',
     jouer: () => {
-      voirComme('helene.marchetti', 'construire');
+      voirComme('caroline.tellier', 'construire');
       // L'exemple a deux semaines publiées d'avance : la semaine à construire est la troisième.
       useUi.getState().setSemaine(addDays(mondayOf(store().today), 21));
     },
@@ -403,7 +458,7 @@ const ETABLI: Etape[] = [
     titre: 'Le mois',
     texte: () => 'Objectif d’équipe, heures face au contrat, préférences données.',
     jouer: () => {
-      voirComme('helene.marchetti', 'construire');
+      voirComme('caroline.tellier', 'construire');
       useUi.getState().setPlanVue('mois');
     },
   },
@@ -412,7 +467,7 @@ const ETABLI: Etape[] = [
     cible: "[data-focus='compteurs-heures']",
     titre: 'Le compteur d’heures',
     texte: () => 'Heures en plus ou en moins. À régulariser à la main, ou automatiquement.',
-    jouer: () => voirComme('helene.marchetti', 'heures'),
+    jouer: () => voirComme('caroline.tellier', 'heures'),
   },
 ];
 
@@ -438,7 +493,7 @@ const COMPLET: Etape[] = [
     titre: 'Créer la pharmacie',
     texte: () => 'Trois écrans : le nom, les horaires, l’équipe. Ici, on part de zéro.',
     jouer: () => helene('nouvelle'),
-    gestes: [{ faire: 'taper', dans: '#officine-nom', texte: 'Pharmacie des Tilleuls' }],
+    gestes: [{ faire: 'taper', dans: '#officine-nom', texte: 'Grande Pharmacie de la Pinède' }],
   },
   {
     chapitre: PREPARER,
@@ -509,10 +564,10 @@ const COMPLET: Etape[] = [
     qui: CAMILLE,
     cible: '.sh-cal',
     titre: 'Les préférences du mois',
-    texte: () => 'Camille choisit une forme, clique les jours. « M’assister » remplit le reste. Jamais de raison.',
+    texte: () => 'Nicolas choisit une forme, clique les jours. « M’assister » remplit le reste. Jamais de raison.',
     jouer: () => {
       avecSouhaits(false);
-      versDemandes('camille.roussel', 'souhaits');
+      versDemandes('nicolas.lesyndicaliste', 'souhaits');
     },
     gestes: [
       { faire: 'cliquer', sur: '.sh-choix.matin' },
@@ -565,8 +620,8 @@ const COMPLET: Etape[] = [
       { faire: 'cliquer', sur: "[data-tour='proposer']" },
       { faire: 'attendre', que: '.dialog .variant' },
       { faire: 'pause', ms: 1200 },
-      { faire: 'cliquer', sur: nieme('.dialog .variant', 1) },
-      { faire: 'cliquer', sur: nieme('.dialog .variant', 0) },
+      { faire: 'cliquer', sur: nieme('.dialog .variant', 1), dit: 'Regarder la deuxième proposition' },
+      { faire: 'cliquer', sur: nieme('.dialog .variant', 0), dit: 'Revenir à la première proposition' },
       { faire: 'cliquer', sur: VALIDER },
     ],
   },
@@ -685,9 +740,9 @@ const COMPLET: Etape[] = [
       { faire: 'cliquer', sur: '.top-creer' },
       { faire: 'cliquer', sur: parTexte('.outils .menu button', 'Une formation') },
       { faire: 'taper', dans: '#formation-intitule', texte: 'Gestes d’urgence' },
-      { faire: 'cliquer', sur: '#formation-p_thomas' },
-      { faire: 'cliquer', sur: '#formation-p_ines' },
-      { faire: 'cliquer', sur: VALIDER },
+      { faire: 'cliquer', sur: '#formation-p_thomas', dit: 'Cocher Thomas parmi les participants' },
+      { faire: 'cliquer', sur: '#formation-p_ines', dit: 'Cocher Inès' },
+      { faire: 'cliquer', sur: VALIDER, dit: 'Cliquer sur « Planifier et prévenir »' },
       {
         faire: 'action',
         jouer: () => {
@@ -712,7 +767,7 @@ const COMPLET: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: '.top-creer' },
       { faire: 'cliquer', sur: parTexte('.outils .menu button', 'Un inventaire') },
-      { faire: 'cliquer', sur: parTexte('.dialog button', 'Toute l’équipe') },
+      { faire: 'cliquer', sur: parTexte('.dialog button', 'Toute l’équipe'), dit: 'Cliquer sur « Toute l’équipe »' },
       { faire: 'cliquer', sur: VALIDER },
       {
         faire: 'action',
@@ -733,7 +788,7 @@ const COMPLET: Etape[] = [
     texte: () => 'Le prochain poste en grand, puis la semaine. Jamais un brouillon.',
     jouer: () => {
       avecPlanning();
-      voirComme('camille.roussel', 'moi');
+      voirComme('nicolas.lesyndicaliste', 'moi');
     },
   },
   {
@@ -745,7 +800,7 @@ const COMPLET: Etape[] = [
     texte: () => 'Le mois entier, les horaires dans chaque case.',
     jouer: () => {
       avecPlanning();
-      voirComme('camille.roussel', 'moi');
+      voirComme('nicolas.lesyndicaliste', 'moi');
     },
     gestes: [{ faire: 'cliquer', sur: parTexte('.me-grid .seg button', 'Calendrier') }],
   },
@@ -757,7 +812,7 @@ const COMPLET: Etape[] = [
     texte: () => 'Qui travaille quand. « Mes postes » ne garde que sa ligne.',
     jouer: () => {
       avecPlanning();
-      voirComme('camille.roussel', 'planning');
+      voirComme('nicolas.lesyndicaliste', 'planning');
       useUi.getState().setSemaine(semaineDans(1));
     },
     gestes: [
@@ -774,7 +829,7 @@ const COMPLET: Etape[] = [
     texte: () => 'Trois cartes : mes préférences, une absence, un remplacement.',
     jouer: () => {
       avecPlanning();
-      versDemandes('camille.roussel', 'absences');
+      versDemandes('nicolas.lesyndicaliste', 'absences');
     },
     gestes: [
       { faire: 'cliquer', sur: parTexte('#contenu .voie', 'remplacer') },
@@ -789,7 +844,7 @@ const COMPLET: Etape[] = [
     texte: () => 'Un raccourci remplit les horaires. Le motif n’est jamais demandé ni conservé.',
     jouer: () => {
       avecPlanning();
-      versDemandes('camille.roussel', 'absences');
+      versDemandes('nicolas.lesyndicaliste', 'absences');
       useUi.getState().agir('demandes', 'demande');
     },
     gestes: [
@@ -806,7 +861,7 @@ const COMPLET: Etape[] = [
     texte: () => 'Prévu, urgent ou urgence médicale, avec justificatif. La titulaire répondra.',
     jouer: () => {
       avecPlanning();
-      versDemandes('camille.roussel', 'remplacements');
+      versDemandes('nicolas.lesyndicaliste', 'remplacements');
     },
     gestes: [
       { faire: 'cliquer', sur: "[data-focus='remplacer'] .btn" },
@@ -836,7 +891,7 @@ const COMPLET: Etape[] = [
     texte: () => 'Son compteur d’heures, ce qui a été noté, sa part des contraintes. Aucun classement.',
     jouer: () => {
       avecPlanning();
-      voirComme('camille.roussel', 'suivi');
+      voirComme('nicolas.lesyndicaliste', 'suivi');
     },
   },
   // ---- 4. Suivre
@@ -846,7 +901,7 @@ const COMPLET: Etape[] = [
     cible: "[data-focus='demande-remplacement']",
     cibleFin: "[data-focus='demande-remplacement']",
     titre: 'La demande arrive',
-    texte: (d) => (demandeDeCamille(d)?.accord === 'attente' ? 'Triée par urgence. Hélène répond oui ou non.' : 'Acceptée : ceux qui peuvent tenir le poste sont prévenus ensemble.'),
+    texte: (d) => (demandeDeCamille(d)?.accord === 'attente' ? 'Triée par urgence. Caroline répond oui ou non.' : 'Acceptée : ceux qui peuvent tenir le poste sont prévenus ensemble.'),
     jouer: () => {
       avecDemande();
       useUi.getState().setSujet('remplacements');
@@ -864,7 +919,7 @@ const COMPLET: Etape[] = [
     jouer: () => {
       avecDemandeAcceptee();
       const v = volontaire();
-      voirComme(store().data.personnes.find((p) => p.id === v)?.identifiant ?? 'camille.roussel', 'moi');
+      voirComme(store().data.personnes.find((p) => p.id === v)?.identifiant ?? 'nicolas.lesyndicaliste', 'moi');
     },
     gestes: [{ faire: 'cliquer', sur: parTexte("[data-focus='aider'] button", 'Je me propose') }],
   },
@@ -874,7 +929,7 @@ const COMPLET: Etape[] = [
     cible: "[data-focus='demande-remplacement']",
     cibleFin: '.onglets, .content .empty, .content .card',
     titre: 'Valider le remplacement',
-    texte: (d) => (demandeDeCamille(d) ? 'Règles relues, heures en plus annoncées. Hélène valide.' : 'Validé : les deux personnes sont prévenues, le compteur d’heures suit.'),
+    texte: (d) => (demandeDeCamille(d) ? 'Règles relues, heures en plus annoncées. Caroline valide.' : 'Validé : les deux personnes sont prévenues, le compteur d’heures suit.'),
     jouer: () => {
       avecVolontaire();
       useUi.getState().setSujet('remplacements');
@@ -916,13 +971,19 @@ const COMPLET: Etape[] = [
     qui: HELENE,
     cible: '.panneau',
     titre: 'Refuser une demande',
-    texte: (d) => (d.absences.some((a) => a.personId === 'p_ines' && a.statut === 'refusee') ? 'Refusée. Inès le voit dans « Mes demandes », sans commentaire à écrire.' : 'Inès demande un congé au mauvais moment. Un clic suffit pour refuser.'),
+    texte: (d) => (d.absences.some((a) => a.personId === 'p_ines' && a.statut === 'refusee') ? 'Refusée. Inès reçoit le message, avec la raison.' : 'Inès demande un congé au mauvais moment. On refuse, en donnant la raison.'),
     jouer: () => {
       avecCongeARefuser();
       useUi.getState().setSujet('demandes');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /Inès/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button') }],
+    gestes: [
+      { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /Inès/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button'), dit: 'Cliquer sur « Refuser », sur la demande d’Inès' },
+      { faire: 'attendre', que: '#refus-raison' },
+      { faire: 'choisir', dans: '#refus-raison', valeur: 'Plusieurs absences déjà prévues' },
+      { faire: 'taper', dans: '#refus-mot', texte: 'La semaine suivante serait possible.' },
+      { faire: 'cliquer', sur: '.dialog-foot .btn.danger' },
+    ],
   },
   {
     chapitre: SUIVRE,
@@ -960,24 +1021,29 @@ const COMPLET: Etape[] = [
     cible: '.panneau',
     cibleFin: '.panneau, .onglets, .content .empty',
     titre: 'Personne ne se propose',
-    texte: (d) => (d.trous.some((t) => t.statut === 'ouvert') ? 'Pas de volontaire ? « Tout régler » applique l’option conseillée, jour par jour.' : 'Réglé : chaque jour a sa solution, tout le monde est prévenu.'),
+    texte: (d) => (d.trous.some((t) => t.statut === 'ouvert') ? 'Pas de volontaire ? Pour chaque jour, la solution conseillée est cochée. Vous gardez la main.' : 'Réglé : chaque jour a sa solution, tout le monde est prévenu.'),
     jouer: () => {
       avecAbsenceImprevue();
       useUi.getState().setSujet('absences');
       helene('resoudre');
     },
-    gestes: [{ faire: 'cliquer', sur: parTexte('.panneau button', 'Tout régler') }],
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.panneau button', 'Voir et choisir la solution') },
+      { faire: 'attendre', que: '.rs-jour' },
+      { faire: 'cliquer', sur: '.rs-jour .rs-option:not(.on):not(.main)', dit: 'Choisir une autre option pour le premier jour' },
+      { faire: 'cliquer', sur: '.dialog-foot .btn.primary' },
+    ],
   },
   {
     chapitre: SUIVRE,
-    qui: 'Antoine · titulaire secondaire',
+    qui: 'Pierre · titulaire secondaire',
     cible: '.panneau',
     titre: 'Décider à deux',
-    texte: () => 'Antoine a les mêmes écrans. Sa décision attend l’accord d’Hélène.',
+    texte: () => 'Pierre a les mêmes écrans. Sa décision attend l’accord de Caroline.',
     jouer: () => {
       avecAccordEnAttente();
       useUi.getState().setSujet('accords');
-      voirComme('antoine.mercier', 'resoudre');
+      voirComme('pierre.fiandino', 'resoudre');
     },
   },
   {
@@ -986,7 +1052,7 @@ const COMPLET: Etape[] = [
     cible: '.panneau',
     cibleFin: '.onglets, .content .empty, .content .card',
     titre: 'Donner son accord',
-    texte: (d) => ((d.accords ?? []).length ? 'La décision d’Antoine arrive ici. Hélène l’accepte.' : 'Accord donné : la décision est appliquée, Antoine est prévenu.'),
+    texte: (d) => ((d.accords ?? []).length ? 'La décision de Pierre arrive ici. Caroline l’accepte.' : 'Accord donné : la décision est appliquée, Pierre est prévenu.'),
     jouer: () => {
       avecAccordEnAttente();
       useUi.getState().setSujet('accords');
@@ -1350,7 +1416,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
 }
 
 const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'Léa · pharmacienne adjointe', prenom: 'Léa', pharmacien: true });
-const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'camille.roussel', qui: 'Camille · préparatrice', prenom: 'Camille' });
+const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', qui: 'Nicolas · préparateur', prenom: 'Nicolas' });
 
 export const SCENARIOS = {
   complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', duree: `15 min · ${COMPLET.length} étapes`, etapes: COMPLET },
@@ -1366,10 +1432,24 @@ export function lancerParcours(scenario: Scenario = 'etabli'): void {
   store().chargerExemple(true, scenario === 'complet' ? 'zero' : 'etabli');
   useUi.getState().montrerAssistant(false);
   // Le parcours est remis à l'étape 1 : l'écran de la première étape est posé par le composant.
-  voirComme('helene.marchetti');
+  voirComme('caroline.tellier');
   useUi.getState().setParcours(0, scenario);
   // Relancé depuis l'étape 1, le parcours ne change pas d'étape : son écran est reposé ici.
   SCENARIOS[scenario].etapes[0].jouer();
+}
+
+/** Le nouvel écran d'une étape arrive en fondu. Rien si l'appareil demande moins d'animations. */
+function adoucir(): void {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (const id of ['contenu']) {
+    document.getElementById(id)?.animate(
+      [
+        { opacity: 0, transform: 'translateY(12px)' },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: 620, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+    );
+  }
 }
 
 interface Zone {
@@ -1386,8 +1466,16 @@ export function Parcours(): JSX.Element | null {
   const data = useStore((s) => s.data);
   const ETAPES: readonly Etape[] = SCENARIOS[scenario].etapes;
   const etape = parcours !== null ? ETAPES[parcours] : null;
-  /** 0 : la démonstration se joue ; 1 : elle est finie. */
-  const [phase, setPhase] = useState(0);
+  /** On lit d'abord ; la démonstration ne se joue que sur demande, fiche refermée ; puis la fiche revient. */
+  const [phase, setPhase] = useState<'lire' | 'demo' | 'pause' | 'fini'>('lire');
+  /** Les temps de la démonstration, et combien ont déjà été joués. */
+  const temps = useRef<Geste[][]>([]);
+  const [joues, setJoues] = useState(0);
+  const [nbTemps, setNbTemps] = useState(0);
+  /** Ce que le prochain temps va faire, lu à l'écran. */
+  const [annonce, setAnnonce] = useState('');
+  /** La fiche d'explication est-elle à l'écran ? Elle s'efface le temps d'une transition ou d'une démonstration. */
+  const [ouvert, setOuvert] = useState(false);
   const [clic, setClic] = useState(false);
   const [lecture, setLecture] = useState(false);
   const [sommaire, setSommaire] = useState(false);
@@ -1400,6 +1488,12 @@ export function Parcours(): JSX.Element | null {
   /** Ce que le repère de clic vise en ce moment. */
   const visee = useRef<Cible | null>(null);
   const mesure = useRef<() => void>(() => undefined);
+  /** Joue le prochain temps de la démonstration. */
+  const demarrer = useRef<() => void>(() => undefined);
+  /** Ce que le projecteur éclaire pendant une démonstration : la fenêtre ou le bloc où se passe le geste. */
+  const contexte = useRef<HTMLElement | null>(null);
+  const action = useRef<HTMLButtonElement>(null);
+
 
   const chapitres = useMemo(() => {
     const out: { titre: string; debut: number; n: number }[] = [];
@@ -1421,12 +1515,14 @@ export function Parcours(): JSX.Element | null {
     const e = SCENARIOS[scenario].etapes[parcours] as Etape | undefined;
     if (!e) return;
     annulerMinuteries();
-    setPhase(0);
+    setPhase('lire');
+    setOuvert(false);
     setClic(false);
     setSommaire(false);
     setLibre(false);
     visee.current = null;
     attendu.current = null;
+    contexte.current = null;
     const u = useUi.getState();
     // Fenêtres et menus ouverts par l'étape précédente sont refermés, comme le ferait la touche Échap.
     document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
@@ -1440,69 +1536,94 @@ export function Parcours(): JSX.Element | null {
     // Les mises en place sont des décisions de la titulaire principale : elles ne partent jamais « pour accord ».
     useStore.getState().setActeur('p_helene');
     e.jouer();
+    // Le nouvel écran arrive en fondu, plutôt que de remplacer l'ancien d'un coup.
+    adoucir();
 
+    const liste = decouper(e.gestes ?? []);
+    temps.current = liste;
+    setNbTemps(liste.length);
+    setJoues(0);
+    setAnnonce('');
+    let faits = 0;
+    /** Le temps est joué : on laisse voir le résultat un instant, puis la fiche revient pour la suite. */
     const fin = (): void => {
       visee.current = null;
       setClic(false);
-      setPhase(1);
-      plusTard(noter, 200);
+      plusTard(() => {
+        faits++;
+        setJoues(faits);
+        if (faits >= liste.length) contexte.current = null;
+        setPhase(faits >= liste.length ? 'fini' : 'pause');
+        noter();
+        setOuvert(true);
+      }, 850);
     };
-    const gestes = e.gestes ?? [];
-    if (!gestes.length) {
-      fin();
-      return annulerMinuteries;
-    }
-    /** Joue le geste i, puis le suivant. Un élément introuvable est attendu un instant, puis ignoré. */
-    const derouler = (i: number): void => {
+    /** Joue le geste i du temps en cours, puis le suivant. Un élément introuvable est attendu un instant, puis ignoré. */
+    const derouler = (gestes: Geste[], i: number): void => {
       if (i >= gestes.length) return fin();
       const g = gestes[i];
-      const suite = (ms: number): void => plusTard(() => derouler(i + 1), ms);
+      const suite = (ms: number): void => plusTard(() => derouler(gestes, i + 1), ms);
       if (g.faire === 'pause') return suite(g.ms);
       if (g.faire === 'action') {
         g.jouer();
-        return suite(500);
+        return suite(700);
       }
       const cible = g.faire === 'cliquer' ? g.sur : g.faire === 'attendre' ? g.que : g.dans;
       let essais = 0;
       const viser = (): void => {
         const el = element(cible);
         if (!el || (el as HTMLButtonElement).disabled) {
-          if (++essais > (g.faire === 'attendre' ? 80 : 14)) return derouler(i + 1);
+          if (++essais > (g.faire === 'attendre' ? 80 : 14)) return derouler(gestes, i + 1);
           return plusTard(viser, 150);
         }
-        if (g.faire === 'attendre') return suite(250);
+        if (g.faire === 'attendre') return suite(350);
         el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
         visee.current = cible;
         plusTard(() => mesure.current(), 60);
+        // Le pointeur glisse jusqu'à la cible, s'y pose, puis agit.
         plusTard(() => {
           setClic(true);
           plusTard(() => {
             setClic(false);
             const cibleFinale = element(cible);
-            if (!cibleFinale) return derouler(i + 1);
+            if (!cibleFinale) return derouler(gestes, i + 1);
             if (g.faire === 'cliquer') {
               cibleFinale.click();
-              suite(700);
+              suite(950);
             } else if (g.faire === 'choisir') {
               ecrire(cibleFinale, g.valeur);
-              suite(600);
+              suite(800);
             } else {
               cibleFinale.focus();
               const taper = (n: number): void => {
                 const champ = element(cible);
-                if (!champ) return derouler(i + 1);
+                if (!champ) return derouler(gestes, i + 1);
                 ecrire(champ, g.texte.slice(0, n));
-                if (n >= g.texte.length) return suite(450);
-                plusTard(() => taper(n + 1), 55);
+                if (n >= g.texte.length) return suite(600);
+                plusTard(() => taper(n + 1), 70);
               };
               taper(1);
             }
-          }, 380);
-        }, 820);
+          }, 460);
+        }, 1150);
       };
       viser();
     };
-    plusTard(() => derouler(0), 1100);
+    demarrer.current = (): void => {
+      if (faits >= liste.length) return;
+      annulerMinuteries();
+      attendu.current = null;
+      setLibre(false);
+      setSommaire(false);
+      setOuvert(false);
+      setPhase('demo');
+      // La fiche a le temps de s'effacer avant le geste.
+      plusTard(() => derouler(liste[faits], 0), 700);
+    };
+    plusTard(() => {
+      noter();
+      setOuvert(true);
+    }, 560);
     return annulerMinuteries;
   }, [parcours, scenario, tirage]);
 
@@ -1515,7 +1636,7 @@ export function Parcours(): JSX.Element | null {
   // Projecteur : la zone de ce qui est présenté. L'écran défile pour l'amener au centre, puis le projecteur le suit.
   const [zone, setZone] = useState<Zone | null>(null);
   const [point, setPoint] = useState<{ x: number; y: number } | null>(null);
-  const cible = libre ? undefined : phase === 1 && etape?.cibleFin ? etape.cibleFin : etape?.cible;
+  const cible = libre ? undefined : phase === 'fini' && etape?.cibleFin ? etape.cibleFin : etape?.cible;
   useEffect(() => {
     if (parcours === null) {
       setZone(null);
@@ -1524,17 +1645,29 @@ export function Parcours(): JSX.Element | null {
     }
     let amene = false;
     const mesurer = (): void => {
-      const el = cible ? document.querySelector<HTMLElement>(cible) : null;
+      const base = cible ? document.querySelector<HTMLElement>(cible) : null;
+      const geste = visee.current ? element(visee.current) : null;
+      // Pendant une démonstration, le projecteur suit le geste : la fenêtre ou le menu où il a lieu, sinon le bloc présenté.
+      if (phase === 'demo' && geste) {
+        contexte.current = geste.closest<HTMLElement>('.dialog, .decouvrir, .menu, .aide-panneau') ?? (base?.contains(geste) ? base : (geste.closest<HTMLElement>('.card, .plan, .panneau, .voies, .side, .bandeau-test, .topbar-in') ?? geste));
+      }
+      const el = (phase === 'demo' || phase === 'pause') && contexte.current?.isConnected ? contexte.current : base;
       const r = el?.getBoundingClientRect();
       if (el && r && r.width >= 4 && r.height >= 4) {
+        // Ce qui est dans la page ne déborde pas sur les barres du haut : le cadre s'arrête au bord de la zone de contenu.
+        const page = document.getElementById('contenu');
+        const bords = page?.contains(el) ? page.getBoundingClientRect() : null;
+        const haut = Math.max(6, (bords?.top ?? 0) + 4);
+        const basMax = Math.min(window.innerHeight - 6, (bords?.bottom ?? window.innerHeight) - 4);
         // Tant qu'un geste est en cours, c'est lui qui fait défiler l'écran.
-        if (!amene && !visee.current) {
+        if (!amene && phase !== 'demo') {
           amene = true;
-          el.scrollIntoView({ block: r.height > window.innerHeight * 0.62 ? 'start' : 'center', inline: 'nearest', behavior: 'smooth' });
+          el.style.scrollMarginTop = '18px';
+          el.scrollIntoView({ block: r.height > (basMax - haut) * 0.8 ? 'start' : 'center', inline: 'nearest', behavior: 'smooth' });
         }
         const m = 8;
-        const top = Math.max(6, r.top - m);
-        const bas = Math.min(window.innerHeight - 6, r.bottom + m);
+        const top = Math.max(haut, r.top - m);
+        const bas = Math.min(basMax, r.bottom + m);
         const left = Math.max(6, r.left - m);
         const droite = Math.min(window.innerWidth - 6, r.right + m);
         const z = bas - top > 24 && droite - left > 24 ? { top, left, width: droite - left, height: bas - top } : null;
@@ -1555,7 +1688,7 @@ export function Parcours(): JSX.Element | null {
       window.removeEventListener('resize', mesurer);
       window.removeEventListener('scroll', mesurer, true);
     };
-  }, [cible, parcours, scenario, tirage]);
+  }, [cible, parcours, scenario, tirage, phase]);
 
   // La fiche d'explication se range là où elle ne cache pas ce qu'elle montre.
   const [place, setPlace] = useState<{ left: number; top: number } | null>(null);
@@ -1575,18 +1708,45 @@ export function Parcours(): JSX.Element | null {
     const cache = (c: { left: number; top: number }): number => (zone ? Math.max(0, Math.min(c.left + w, zone.left + zone.width) - Math.max(c.left, zone.left)) * Math.max(0, Math.min(c.top + h, zone.top + zone.height) - Math.max(c.top, zone.top)) : 0);
     const meilleur = coins.reduce((a, b) => (cache(b) < cache(a) * 0.5 - 400 ? b : a));
     setPlace((avant) => (avant && avant.left === meilleur.left && avant.top === meilleur.top ? avant : meilleur));
-  }, [zone, parcours, phase, sommaire, libre, data]);
+  }, [zone, parcours, phase, sommaire, libre, data, ouvert]);
 
   const N = ETAPES.length;
   const dernier = parcours === N - 1;
-  // Lecture automatique : le temps de la démonstration, puis celui de lire.
-  const duree = etape ? Math.min(9000, Math.max(4500, 2200 + etape.texte(data).length * 45)) : 0;
+  const demonstration = nbTemps > 0;
+  /** Il reste un geste à montrer dans cette étape. */
+  const reste = demonstration && joues < nbTemps && !libre;
+  /** « Suivant » : le prochain geste s'il en reste un, sinon l'étape suivante. */
+  const avancer = (): void => {
+    if (parcours === null) return;
+    if (reste) return demarrer.current();
+    if (parcours < N - 1) setParcours(parcours + 1);
+  };
+  // Ce que le prochain geste va faire se lit sur l'écran lui-même ; l'élément peut mettre un instant à apparaître.
   useEffect(() => {
-    if (!lecture || parcours === null || libre || sommaire || phase === 0) return;
-    if (parcours >= N - 1) return setLecture(false);
-    const t = window.setTimeout(() => setParcours(parcours + 1), duree);
+    if (!ouvert || !reste) return;
+    let essais = 0;
+    const lire = (): void => {
+      const texte = decrire(temps.current[joues]);
+      setAnnonce(texte);
+      if (/^(Cliquer ici|Écrire « [^»]* »|Choisir « [^»]* »)$/.test(texte) && ++essais < 12) minuterie = window.setTimeout(lire, 200);
+    };
+    let minuterie = window.setTimeout(lire, 0);
+    return () => window.clearTimeout(minuterie);
+  }, [ouvert, reste, joues, parcours, tirage]);
+  // Lecture automatique : le temps de lire, un geste, le temps de voir, puis la suite.
+  const duree = etape ? Math.min(9000, Math.max(4500, 2200 + etape.texte(data).length * 45)) : 0;
+  const attente = phase === 'pause' ? 2600 : phase === 'fini' ? Math.max(3200, duree * 0.6) : duree;
+  useEffect(() => {
+    if (!lecture || parcours === null || libre || sommaire || phase === 'demo' || !ouvert) return;
+    if (!reste && parcours >= N - 1) return setLecture(false);
+    const t = window.setTimeout(() => (reste ? demarrer.current() : setParcours(parcours + 1)), attente);
     return () => window.clearTimeout(t);
-  }, [lecture, parcours, libre, sommaire, phase, N, duree, setParcours]);
+  }, [lecture, parcours, libre, sommaire, phase, ouvert, reste, N, attente, setParcours]);
+
+  // La fiche revient : le bouton principal reprend le focus, pour continuer au clavier.
+  useEffect(() => {
+    if (ouvert && !sommaire) action.current?.focus({ preventScroll: true });
+  }, [ouvert, phase, parcours, sommaire, joues]);
 
   // Visite quittée : le bouton d'aide reprend sa place habituelle.
   useEffect(() => {
@@ -1599,25 +1759,40 @@ export function Parcours(): JSX.Element | null {
     const onKey = (e: KeyboardEvent): void => {
       const origine = e.target instanceof Element ? e.target : null;
       if (!e.isTrusted || e.altKey || e.ctrlKey || e.metaKey || origine?.closest('input, textarea, select, [contenteditable]')) return;
-      if (e.key === 'ArrowRight' && parcours < N - 1) setParcours(parcours + 1);
+      if (phase === 'demo') return;
+      if (e.key === 'ArrowRight') avancer();
       if (e.key === 'ArrowLeft' && parcours > 0) setParcours(parcours - 1);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [parcours, N, setParcours]);
+  }, [parcours, N, setParcours, phase, reste]);
 
   if (!etape || parcours === null || !data.demo) return null;
   const rang = chapitres.findIndex((c) => parcours >= c.debut && parcours < c.debut + c.n);
-  const demonstration = !!etape.gestes?.length;
+  const ferme = !ouvert || phase === 'demo';
   return (
     <>
-      {zone ? <div className="focus-parcours" style={zone} aria-hidden="true" /> : null}
-      {point && phase === 0 && !libre ? (
+      {zone ? <div className={`focus-parcours${phase === 'demo' ? ' demo' : ''}`} style={zone} aria-hidden="true" /> : null}
+      {point && phase === 'demo' && !libre ? (
         <div className={`pointe-parcours${clic ? ' clic' : ''}`} style={{ left: point.x, top: point.y }} aria-hidden="true">
-          <MousePointerClick size={22} />
+          <i className="pointe-halo" />
+          <MousePointer2 size={26} />
         </div>
       ) : null}
-      <aside ref={panneau} className="parcours-test no-print" aria-label="Parcours guidé" style={place ? { left: place.left, top: place.top, right: 'auto', bottom: 'auto' } : undefined}>
+      {phase === 'demo' ? (
+        <div className="pt-legende no-print" role="status">
+          <span className="pt-legende-pic" aria-hidden="true">
+            <Play size={13} />
+          </span>
+          <span>
+            <b>{annonce || etape.titre}</b>
+          </span>
+          <button type="button" className="btn sm" onClick={() => (dernier ? setParcours(null) : setParcours(parcours + 1))}>
+            Passer
+          </button>
+        </div>
+      ) : null}
+      <aside ref={panneau} className={`parcours-test no-print${ferme ? ' ferme' : ''}`} aria-label="Parcours guidé" aria-hidden={ferme} {...(ferme ? { inert: '' } : {})} style={place ? { left: place.left, top: place.top, right: 'auto', bottom: 'auto' } : undefined}>
         <div className="row" style={{ gap: 10 }}>
           <span className="pt-n num" aria-hidden="true">
             {parcours + 1}
@@ -1634,7 +1809,7 @@ export function Parcours(): JSX.Element | null {
           <button type="button" className="btn ghost icon sm" onClick={() => setParcours(null)} aria-label="Quitter le parcours guidé">
             <X size={16} aria-hidden="true" />
           </button>
-          {lecture && !libre && !sommaire && !dernier && phase === 1 ? <i key={`${parcours}-${tirage}`} className="pt-chrono" style={{ animationDuration: `${duree}ms` }} aria-hidden="true" /> : null}
+          {lecture && !libre && !sommaire && ouvert && phase !== 'demo' && !(dernier && !reste) ? <i key={`${parcours}-${tirage}-${phase}-${joues}`} className="pt-chrono" style={{ animationDuration: `${attente}ms` }} aria-hidden="true" /> : null}
         </div>
         {sommaire ? (
           <nav className="pt-sommaire" aria-label="Sommaire de la visite">
@@ -1670,14 +1845,28 @@ export function Parcours(): JSX.Element | null {
                   <Undo2 size={14} aria-hidden="true" /> Revenir à l’étape
                 </button>
               </div>
-            ) : demonstration && phase === 0 ? (
-              <div className="pt-action small">
-                <span className="spinner" /> Démonstration en cours
+            ) : demonstration && !reste ? (
+              <div className="pt-fait small">
+                <CircleCheck size={15} aria-hidden="true" /> {nbTemps > 1 ? `${nbTemps} gestes montrés` : 'Geste montré'}
+                <button type="button" className="pt-revoir" onClick={() => setTirage((t) => t + 1)}>
+                  <RotateCcw size={13} aria-hidden="true" /> Revoir
+                </button>
               </div>
             ) : demonstration ? (
-              <button type="button" className="btn sm pt-rejouer" onClick={() => setTirage((t) => t + 1)}>
-                <RotateCcw size={14} aria-hidden="true" /> Revoir la démonstration
-              </button>
+              <div className="pt-geste">
+                <span className="pt-geste-tete">
+                  <MousePointer2 size={14} aria-hidden="true" />
+                  {nbTemps > 1 ? `Geste ${joues + 1} sur ${nbTemps}` : 'À l’écran'}
+                  {nbTemps > 1 ? (
+                    <span className="pt-points" aria-hidden="true">
+                      {Array.from({ length: nbTemps }, (_, i) => (
+                        <i key={i} className={i < joues ? 'fait' : i === joues ? 'on' : ''} />
+                      ))}
+                    </span>
+                  ) : null}
+                </span>
+                <b>{annonce || 'Voir la suite'}</b>
+              </div>
             ) : null}
           </div>
         )}
@@ -1693,12 +1882,21 @@ export function Parcours(): JSX.Element | null {
             <ArrowLeft size={15} aria-hidden="true" /> Précédent
           </button>
           <span className="grow" />
-          {dernier ? (
-            <button type="button" className="btn sm primary" onClick={() => setParcours(null)}>
+          {reste && !dernier ? (
+            <button type="button" className="btn sm ghost pt-passer" onClick={() => setParcours(parcours + 1)}>
+              Passer
+            </button>
+          ) : null}
+          {reste ? (
+            <button ref={action} type="button" className="btn sm primary pt-voir" data-suite="geste" onClick={avancer}>
+              Suivant <ArrowRight size={15} aria-hidden="true" />
+            </button>
+          ) : dernier ? (
+            <button ref={action} type="button" className="btn sm primary" data-suite="fin" onClick={() => setParcours(null)}>
               Terminer
             </button>
           ) : (
-            <button type="button" className="btn sm primary" onClick={() => setParcours(parcours + 1)}>
+            <button ref={action} type="button" className="btn sm primary" data-suite="etape" onClick={avancer}>
               Étape suivante <ArrowRight size={15} aria-hidden="true" />
             </button>
           )}

@@ -1,8 +1,9 @@
-import { Boxes, CalendarHeart, Check, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, Hourglass, Lock, Megaphone, Pill as PillIcon, Sprout } from 'lucide-react';
+import { Boxes, CalendarHeart, Check, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, History, Hourglass, Lock, Megaphone, Pill as PillIcon, Plus, Sprout } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { JOURS, JOURS_COURT, MOIS, addDays, fmtDateCourt, fmtHeure, isoWeek, mondayOf, weekday } from '../../domain/time';
 import type { ISODate, Person, Qualification } from '../../domain/types';
-import { ABSENCE_LABEL, SOUHAIT_LABEL, classeAbsence, nomCourt } from '../../domain/types';
+import { ABSENCE_LABEL, SOUHAIT_LABEL, classeAbsence, couleurDuPoste, libelleGarde, nomCourt, nomGarde } from '../../domain/types';
+import { IconeGarde } from '../icons';
 import { ouverture } from '../../engine/core';
 import { semainesDuMois } from '../../engine/payroll';
 import type { Correction } from '../../engine/souhaits';
@@ -40,6 +41,8 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
   const [calcul, setCalcul] = useState(false);
   const [bilan, setBilan] = useState<Correction | null>(null);
   const [preferences, setPreferences] = useState(false);
+  /** Les semaines déjà passées sont rangées : elles ne reviennent que sur demande, en grisé. */
+  const [anciennes, setAnciennes] = useState(false);
 
   const dates = useMemo(() => datesDuMois(mois), [mois]);
   const lundis = useMemo(() => semainesDuMois(mois), [mois]);
@@ -67,11 +70,21 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
           const jours = dates.filter((d) => mondayOf(d) === l);
           const construit = data.shifts.some((s) => s.date >= l && s.date <= addDays(l, 6));
           const etat = data.semaines[l]?.statut === 'publie' ? 'publie' : construit ? 'brouillon' : 'vide';
-          return { lundi: l, jours, etat };
+          return { lundi: l, jours, etat, passee: addDays(l, 6) < today };
         })
         .filter((s) => s.jours.length),
-    [lundis, dates, data.shifts, data.semaines],
+    [lundis, dates, data.shifts, data.semaines, today],
   );
+  const passees = semaines.filter((s) => s.passee);
+  // Un mois entièrement passé s'affiche en entier : il n'y aurait rien d'autre à montrer.
+  const toutPasse = passees.length === semaines.length;
+  const affichees = semaines.filter((s) => anciennes || toutPasse || !s.passee);
+  /** Une semaine sans aucun poste tient en une colonne étroite, sauf si on regarde les préférences. */
+  const repliee = (s: (typeof semaines)[number]): boolean => s.etat === 'vide' && !(collaboratif && preferences);
+  const colonnes = affichees.flatMap((s) => (repliee(s) ? [{ cle: `r${s.lundi}`, sem: s, date: null as ISODate | null }] : s.jours.map((d) => ({ cle: d, sem: s, date: d as ISODate | null }))));
+  const nbJours = colonnes.filter((c) => c.date).length;
+  const debuts = new Set(affichees.map((s) => s.jours[0]));
+  const grises = new Set(toutPasse ? [] : passees.flatMap((s) => s.jours));
   const etatDe = (d: ISODate): string => semaines.find((s) => s.lundi === mondayOf(d))?.etat ?? 'vide';
 
   // Le mois en cours s'ouvre sur la semaine d'aujourd'hui, sans avoir à faire défiler.
@@ -80,7 +93,7 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
     const zone = grille.current;
     const jour = zone?.querySelector<HTMLElement>('th.auj');
     if (zone) zone.scrollLeft = jour ? Math.max(0, jour.offsetLeft - zone.clientWidth * 0.62) : 0;
-  }, [mois]);
+  }, [mois, anciennes]);
 
   const corriger = (): void => {
     setCalcul(true);
@@ -101,7 +114,7 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
     setMois(moisDecale(mois, n));
     setBilan(null);
   };
-  const classeJour = (d: ISODate): string => `${fermes.has(d) ? 'ferme ' : ''}${d === today ? 'auj ' : ''}${weekday(d) === 0 || d === dates[0] ? 'debut ' : ''}`;
+  const classeJour = (d: ISODate): string => `${fermes.has(d) ? 'ferme ' : ''}${d === today ? 'auj ' : ''}${debuts.has(d) ? 'debut ' : ''}${grises.has(d) ? 'passe ' : ''}`;
 
   const ligne = (p: Person): JSX.Element => {
     const h = planifieMois(data, p, mois);
@@ -129,13 +142,22 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
             </span>
           </span>
         </th>
-        {dates.map((d) => {
+        {colonnes.map((col) => {
+          if (!col.date) return <td key={col.cle} className="replie debut" />;
+          const d = col.date;
           const cls = classeJour(d);
           const jour = `${JOURS[weekday(d)]} ${Number(d.slice(8))}`;
           if (fermes.has(d)) return <td key={d} className={cls} />;
           const postes = parCase.get(`${p.id}|${d}`) ?? [];
           const absence = data.absences.find((a) => a.personId === p.id && a.statut === 'approuvee' && a.from <= d && d <= a.to);
           const choix = collaboratif && preferences ? souhaitDe(data, p.id, d) : undefined;
+          const garde = data.gardes.find((g) => g.personId === p.id && g.date === d);
+          const marque = garde ? (
+            <i className="mo-garde" title={`${libelleGarde(garde)}, à partir de ${fmtHeure(garde.start)}`}>
+              <IconeGarde garde={garde} size={11} />
+              <span className="sr">{nomGarde(garde)}</span>
+            </i>
+          ) : null;
           if (absence) {
             const c = classeAbsence(absence.type);
             return (
@@ -149,7 +171,8 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
           if (postes.length) {
             const debut = Math.min(...postes.map((s) => s.start));
             const fin = Math.max(...postes.map((s) => s.end));
-            const m = momentDe({ start: debut, end: fin });
+            const choisie = postes.length === 1 ? couleurDuPoste(data.officine.postes, postes[0]) : undefined;
+            const m = choisie ? `k-${choisie}` : momentDe({ start: debut, end: fin });
             const suivi = choix ? souhaitRespecte({ personId: p.id, date: d, choix }, postes) : true;
             return (
               <td key={d} className={cls}>
@@ -161,6 +184,18 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
                     {choix && !suivi ? `, préférence non suivie (${SOUHAIT_LABEL[choix]})` : ''}. Ouvrir la semaine
                   </span>
                 </button>
+                {marque}
+              </td>
+            );
+          }
+          if (garde) {
+            return (
+              <td key={d} className={cls}>
+                <span className="mo-c garde" title={`${libelleGarde(garde)}, de ${fmtHeure(garde.start)} à ${fmtHeure(garde.end)}`}>
+                  <IconeGarde garde={garde} size={13} />
+                  <span>{court(garde.start)}</span>
+                  <span className="sr">{nomGarde(garde)}</span>
+                </span>
               </td>
             );
           }
@@ -232,6 +267,12 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
         <span><i className="mo-pastille conge" /> Congé</span>
         <span><i className="mo-pastille arret" /> Arrêt</span>
         <span><i className="mo-pastille formation" /> Formation</span>
+        <span><i className="mo-pastille garde" /> Garde</span>
+        {passees.length && !toutPasse ? (
+          <button type="button" className={`btn sm mo-anciennes no-print${anciennes ? ' on' : ''}`} aria-pressed={anciennes} onClick={() => setAnciennes(!anciennes)}>
+            <History size={15} aria-hidden="true" /> {anciennes ? 'Masquer les semaines passées' : `Semaines passées (${passees.length})`}
+          </button>
+        ) : null}
         {collaboratif ? (
           <label className="check mo-pref no-print">
             <input type="checkbox" checked={preferences} onChange={(e) => setPreferences(e.target.checked)} />
@@ -262,24 +303,38 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
       ) : null}
 
       <div className="plan-scroll" data-tour="grille" data-focus="mois" tabIndex={0} ref={grille}>
-        <table className="mo" aria-label={`Planning de ${titreMois(mois)}`}>
+        <table className={`mo ${nbJours <= 14 ? 'aise' : nbJours <= 21 ? 'moyen' : 'serre'}`} aria-label={`Planning de ${titreMois(mois)}`}>
           <thead>
             <tr className="mo-semaines">
               <th scope="col" rowSpan={2} className="mo-qui">
                 Équipe
               </th>
-              {semaines.map((s) => (
-                <th key={s.lundi} colSpan={s.jours.length} className="debut">
-                  <button type="button" className={`mo-semaine ${s.etat}`} onClick={() => ouvrirSemaine(s.lundi)} title="Ouvrir cette semaine">
-                    <b>Sem. {isoWeek(s.lundi)}</b>
-                    {s.jours.length > 2 ? <span>{s.etat === 'publie' ? 'Publiée' : s.etat === 'brouillon' ? 'Brouillon' : 'À construire'}</span> : null}
-                    <span className="sr">{s.jours.length > 2 ? '' : s.etat === 'publie' ? ', publiée' : s.etat === 'brouillon' ? ', brouillon' : ', à construire'} : ouvrir la semaine</span>
-                  </button>
-                </th>
-              ))}
+              {affichees.map((s) =>
+                repliee(s) ? (
+                  <th key={s.lundi} rowSpan={2} className="debut replie">
+                    <button type="button" className="mo-semaine vide" onClick={() => ouvrirSemaine(s.lundi)} title="Construire cette semaine">
+                      <b>Sem. {isoWeek(s.lundi)}</b>
+                      <span>
+                        <Plus size={13} aria-hidden="true" /> À construire
+                      </span>
+                      <span className="sr"> : ouvrir la semaine</span>
+                    </button>
+                  </th>
+                ) : (
+                  <th key={s.lundi} colSpan={s.jours.length} className={`debut${s.passee && !toutPasse ? ' passe' : ''}`}>
+                    <button type="button" className={`mo-semaine ${s.etat}`} onClick={() => ouvrirSemaine(s.lundi)} title="Ouvrir cette semaine">
+                      <b>Sem. {isoWeek(s.lundi)}</b>
+                      {s.jours.length > 2 ? <span>{s.etat === 'publie' ? 'Publiée' : s.etat === 'brouillon' ? 'Brouillon' : 'À construire'}</span> : null}
+                      <span className="sr">{s.jours.length > 2 ? '' : s.etat === 'publie' ? ', publiée' : s.etat === 'brouillon' ? ', brouillon' : ', à construire'} : ouvrir la semaine</span>
+                    </button>
+                  </th>
+                ),
+              )}
             </tr>
             <tr className="mo-jours">
-              {dates.map((d) => (
+              {colonnes.map((col) => {
+                const d = col.date;
+                return !d ? null : (
                 <th key={d} scope="col" className={classeJour(d)}>
                   <button type="button" className="mo-jour" onClick={() => voirJour(d)} title="Voir la journée">
                     <span>{JOURS_COURT[weekday(d)].slice(0, 3)}</span>
@@ -287,13 +342,16 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
                     <span className="sr">, {JOURS[weekday(d)]} : voir la journée</span>
                   </button>
                 </th>
-              ))}
+                );
+              })}
             </tr>
             <tr className="mo-effectif">
               <th scope="row" className="mo-qui">
                 Équipe au complet ?
               </th>
-              {dates.map((d) => {
+              {colonnes.map((col) => {
+                if (!col.date) return <td key={col.cle} className="replie debut" />;
+                const d = col.date;
                 const o = objectifs.get(d);
                 const vide = !o || fermes.has(d) || !data.shifts.some((s) => s.date === d);
                 const manque = o ? o.requis - o.present : 0;
@@ -322,7 +380,7 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
               <tbody key={g.titre}>
                 {seulementMoi ? null : (
                   <tr className="mo-groupe">
-                    <th scope="colgroup" colSpan={dates.length + 1}>
+                    <th scope="colgroup" colSpan={colonnes.length + 1}>
                       <span>
                         <span className={`chip-i ${g.couleur}`} aria-hidden="true">
                           {g.icone}

@@ -38,7 +38,7 @@ puis une vérification avant de créer. Un tutoriel guidé présente ensuite cha
 La page de connexion est sobre : des formes en dégradé, fixes, le logo centré au-dessus du formulaire, et
 deux boutons sous « Première visite ? » : « Créer ma pharmacie » et « Comment ça marche ? ». Ce dernier
 ouvre la fenêtre « Découvrir Solvéa » : une visite guidée **par rôle**, jouée sur une pharmacie d'exemple
-(la « Pharmacie des Tilleuls », fictive) posée à côté des vraies, sans rien effacer.
+(la « Grande Pharmacie de la Pinède », fictive) posée à côté des vraies, sans rien effacer.
 
 - **Titulaire — Tout Solvéa, de zéro** (50 étapes, six chapitres, dans l'ordre du travail) :
   **Préparer** (création, horaires, modèle de planification, équipe, fiche, règles), **Planifier**
@@ -55,26 +55,27 @@ ouvre la fenêtre « Découvrir Solvéa » : une visite guidée **par rôle**, j
 - **Une journée type** (13 étapes, tous les rôles) : huit semaines d'historique, un arrêt à couvrir, des
   demandes en attente ; on suit la titulaire et son équipe.
 
-Pendant une visite :
+Pendant une visite, **on lit, puis on regarde** :
 
-- un **projecteur** éclaire ce dont on parle, et l'écran défile pour l'amener au centre ;
-- **l'application fait les gestes à votre place** : un pointeur se déplace, clique, coche, choisit dans
-  une liste et tape au clavier, lettre par lettre (créer la pharmacie, ajouter une personne, poser un
-  poste, publier, demander un remplacement, accepter, refuser, interroger l'assistant) ; « Revoir la
-  démonstration » la rejoue ;
-- chaque étape tient en une ou deux phrases courtes ;
-- la fiche d'explication se range dans le coin où elle cache le moins ;
-- le **sommaire** saute d'un chapitre à l'autre, et l'écran se met en place tout seul ;
-- **lecture automatique**, flèches du clavier, et « Revenir à l'étape » si l'on est parti explorer.
+- un **projecteur** éclaire ce dont on parle ; rien ne bouge tant que la fiche d'explication est ouverte ;
+- la fiche annonce le prochain geste en clair (« Cliquer sur “Ajouter une personne” », « Écrire “Sarah”
+  dans “Prénom” ») ; « Suivant » referme la fiche et joue **ce seul geste** : un pointeur entouré d'un halo
+  se déplace, clique, coche, choisit dans une liste ou tape au clavier ; puis la fiche revient pour le geste
+  suivant. La visite titulaire compte 50 étapes et 69 gestes ;
+- pendant le geste, le projecteur suit la fenêtre ou le bloc où il se passe, et un bandeau rappelle ce
+  qui est montré ; « Passer » saute la démonstration ;
+- les transitions sont lentes et douces (fiche, projecteur, pointeur, changement d'écran) ;
+- le **sommaire** saute d'un chapitre à l'autre ; **lecture automatique** et flèches du clavier restent
+  disponibles, ainsi que « Revenir à l'étape » si l'on est parti explorer.
 
 La même fenêtre permet d'entrer librement dans la peau de quatre personnes :
 
 | Regard | Personne | Identifiant | Ce qu'elle voit |
 | --- | --- | --- | --- |
-| Titulaire 1 | Hélène Marchetti, titulaire principale | `helene.marchetti` | Toute la gestion, et les accords à donner |
-| Titulaire 2 | Antoine Mercier, titulaire secondaire | `antoine.mercier` | Les mêmes écrans ; ses décisions attendent l'accord d'Hélène |
-| Pharmacien | Karim Benali, adjoint | `karim.benali` | Son planning, le planning publié, ses gardes, ses messages |
-| Préparateur | Camille Roussel, préparatrice | `camille.roussel` | Ses horaires, ses demandes, les remplacements, ses messages |
+| Titulaire 1 | Caroline Tellier, titulaire principale | `caroline.tellier` | Toute la gestion, et les accords à donner |
+| Titulaire 2 | Pierre Fiandino, titulaire secondaire | `pierre.fiandino` | Les mêmes écrans ; ses décisions attendent l'accord de Caroline |
+| Pharmacien | Igor Le Russe, adjoint | `igor.lerusse` | Son planning, le planning publié, ses gardes, ses messages |
+| Préparateur | Nicolas Le Syndicaliste, préparateur | `nicolas.lesyndicaliste` | Ses horaires, ses demandes, les remplacements, ses messages |
 
 Mot de passe commun : `demo`. Une fois dans l'exemple, un bandeau permet de changer de regard en un clic.
 
@@ -230,12 +231,51 @@ Côté responsable, « Construire » a une **vue mois** qui se lit comme la gril
 - une ligne « Équipe au complet ? » : une coche, ou le nombre de personnes qui manquent au comptoir ;
 - pour chacun, « 126 h sur 140 h » : les heures planifiées face au contrat, compté seulement sur les
   semaines déjà construites, absences déduites ;
+- les **semaines passées sont rangées** (bouton « Semaines passées ») et une semaine sans planning tient
+  en une colonne « À construire » : la grille tient sans défiler et les cases sont plus grandes ;
 - les préférences ne s'affichent que si on coche « Afficher les préférences » (un point rouge signale un
   poste qui s'en écarte) ;
 - le mois en cours s'ouvre sur la semaine d'aujourd'hui.
 
 « Corriger automatiquement » recalcule d'un coup les semaines encore en brouillon en suivant les
 préférences, et dit combien ont été suivies ; les semaines publiées ne bougent pas.
+
+### Demander à un collègue, refuser avec une raison
+
+- **Demander à un collègue précis.** Dans « Me faire remplacer », on choisit « Toute l'équipe » ou un
+  collègue. Pour chacun, le calcul relit les règles et compte ses heures de la semaine : au-delà du plafond
+  de l'officine, il est marqué « Impossible », avec la raison, et ne peut pas être choisi. Le collègue
+  répond « J'accepte » ou « Je ne peux pas » ; le titulaire valide dans tous les cas. Si le collègue ne
+  peut pas, la demande s'ouvre à toute l'équipe d'un clic.
+- **Refuser proprement.** Quand le titulaire refuse un congé, un horaire ou un remplacement, une fenêtre
+  propose une raison dans une liste (effectif insuffisant, période de forte activité, délai trop court…),
+  un mot facultatif, et l'aperçu du message que la personne recevra. Le refus sans message reste possible.
+  La raison est inscrite au journal.
+- **Répondre non à un appel.** La personne sollicitée peut de même donner une raison, toujours
+  facultative ; dire non ne change pas son rang dans le tour de rôle.
+- **Régler une absence sans pilote automatique.** « Voir et choisir la solution » montre, jour par jour,
+  l'option conseillée déjà cochée, les autres options avec ce qu'elles changent (qui, quels horaires, quel
+  coût), et « Je règle ce jour à la main », qui ouvre ensuite le planning. Rien n'est appliqué avant accord.
+
+### Gardes de nuit, de jour, de 24 heures
+
+Chaque garde dit son moment, d'après ses horaires : « Garde de nuit · volets fermés », « Garde de jour ·
+volets ouverts », « Astreinte de nuit ». À la création, « Quand ? » propose nuit, jour (dimanche ou jour
+férié) ou 24 heures et règle les horaires. La fiche d'une garde est découpée en blocs numérotés ; dans la
+vue mois, une garde se voit dans la case du jour.
+
+### Réglages et règles
+
+- **Postes types en couleur.** Chaque poste type peut recevoir une couleur ; un poste du planning qui
+  reprend ses horaires la porte, dans la semaine comme dans le mois. « Ajouter un poste type » ouvre une
+  fenêtre : modèle de départ, horaires, pause, jours, couleur, avec l'aperçu de la tuile.
+- **Qui prépare le planning ?** Les deux façons de faire sont décrites en trois étapes chacune, avec un
+  exemple de date limite pour les préférences.
+- **Règles rangées par question** (« Combien d'heures au maximum ? », « Quel repos garantir ? », « Qui
+  doit être présent ? »…) : une ligne par règle, avec son seuil et son état (obligatoire ou alerte) ; la
+  description, la source et le réglage se déplient. Filtres : obligatoires, réglables, à faire valider.
+- **Contrôles du planning** : tuiles groupées par gravité, le constat, le détail et la règle sur des
+  lignes séparées.
 
 ### Fiche d'une personne
 
@@ -379,7 +419,8 @@ src/
 - **Impératif et souple ne se compensent pas.** Le générateur classe les solutions sur trois niveaux :
   règles impératives, effectif attendu, objectifs souples. Une préférence ne rachète jamais une règle.
 - **Moteur pur, testé.** `src/engine` ne dépend ni de React ni du navigateur (`src/engine/engine.test.ts`).
-  L'assistant a ses propres tests (`src/ui/bot.test.ts`) : 65 tests au total.
+  L'assistant, les gardes, la demande à un collègue et les refus ont leurs tests (`src/ui/bot.test.ts`) :
+  70 tests au total.
 
 ## Limites à connaître
 
@@ -408,8 +449,9 @@ src/
   suggestions. Il ne rédige rien et n'apprend pas.
 - **Impression.** L'impression passe par le navigateur. Dans l'aperçu hébergé sur claude.ai, la fenêtre
   d'impression peut être bloquée : l'application le signale au lieu de rester muette.
-- **Vue mois sur petit écran.** Un mois entier dépasse la largeur d'un écran d'ordinateur portable : la
-  grille défile horizontalement, le nom des personnes restant fixe.
+- **Couleur d'un poste type.** Elle s'applique aux postes qui reprennent exactement ses horaires ; un
+  poste modifié à la main retrouve la couleur de son moment de la journée.
+- **Demande à un collègue.** Faute de serveur, le collègue ne la reçoit que sur le même appareil.
 - **Générateur heuristique.** La recherche locale donne de bonnes semaines en moins de deux secondes
   pour une dizaine de personnes ; elle ne prouve pas l'optimalité.
 

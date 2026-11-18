@@ -1,5 +1,8 @@
 import type { LucideIcon } from 'lucide-react';
 import {
+  Moon,
+  Sun,
+  SunMoon,
   Activity,
   Apple,
   Baby,
@@ -42,7 +45,8 @@ import {
   TreePalm,
   UserRoundPlus,
 } from 'lucide-react';
-import type { AbsenceType, Activite, CompetenceId, GardeType, MissionType, Person, Qualification } from '../domain/types';
+import type { AbsenceType, Activite, CompetenceId, GardeType, MissionType, MomentGarde, Person, Qualification } from '../domain/types';
+import { momentGarde } from '../domain/types';
 import { estResponsable, libelleRole } from '../domain/acces';
 import { useStore } from '../store/store';
 
@@ -101,6 +105,8 @@ export const GARDE_ICONE: Record<GardeType, LucideIcon> = {
   volets_fermes: DoorClosed,
   astreinte: PhoneCall,
 };
+/** Nuit, jour (dimanche ou férié) ou vingt-quatre heures. */
+export const MOMENT_GARDE_ICONE: Record<MomentGarde, LucideIcon> = { nuit: Moon, jour: Sun, complet: SunMoon };
 export const ABSENCE_ICONE: Record<AbsenceType, LucideIcon> = {
   conge: TreePalm,
   maladie: HeartPulse,
@@ -160,4 +166,10 @@ export function EtiquetteRole({ person }: { person: Person }): JSX.Element {
       {libelleRole(data, person)}
     </span>
   );
+}
+
+/** L'icône d'une garde selon son moment : lune, soleil, ou les deux pour vingt-quatre heures. */
+export function IconeGarde({ garde, size = 12 }: { garde: { start: number; end: number }; size?: number }): JSX.Element {
+  const Icone = MOMENT_GARDE_ICONE[momentGarde(garde)];
+  return <Icone size={size} aria-hidden="true" />;
 }

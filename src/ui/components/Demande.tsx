@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarHeart, EyeOff, Sparkles } from 'lucide-react';
+import { AlertTriangle, CalendarHeart, EyeOff, Sparkles, Check } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { reperesAVenir } from '../../data/fetes';
 import { JOURS, fmtDateCourt, fmtHHMM, mondayOf, parseHHMM, weekday } from '../../domain/time';
@@ -118,6 +118,19 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
   };
 
   const appliquer = (p: Prereglage): void => {
+    // Un second clic sur le raccourci choisi le retire : le formulaire revient à son état de départ.
+    if (choisi === p.nom) {
+      setGenre('indisponible');
+      setJours([]);
+      setFrequence(1);
+      setHeure('17:00');
+      setPlage('journee');
+      setPlageDe('12:00');
+      setPlageA('14:00');
+      setSuite(null);
+      setChoisi(null);
+      return;
+    }
     const [a, b] = p.lignes;
     setGenre(a.forme);
     setJours(a.jours);
@@ -219,8 +232,8 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
         <legend className="field" style={{ marginBottom: 6 }}>Besoins courants (facultatif)</legend>
         <div className="row wrap" style={{ gap: 6 }}>
           {PREREGLAGES.map((p) => (
-            <button key={p.nom} type="button" className={`btn sm${choisi === p.nom ? ' primary' : ''}`} aria-pressed={choisi === p.nom} title={p.detail} onClick={() => appliquer(p)}>
-              {p.nom}
+            <button key={p.nom} type="button" className={`btn sm${choisi === p.nom ? ' primary' : ''}`} aria-pressed={choisi === p.nom} title={choisi === p.nom ? 'Cliquer de nouveau pour retirer ce raccourci' : p.detail} onClick={() => appliquer(p)}>
+              {choisi === p.nom ? <Check size={14} aria-hidden="true" /> : null} {p.nom}
             </button>
           ))}
         </div>

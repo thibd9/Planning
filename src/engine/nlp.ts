@@ -36,7 +36,7 @@ function dateLibre(jour: string, moisTexte: string, annee: string | undefined, t
 
 /**
  * Transforme une phrase courante en besoin structuré, par règles explicites (aucun modèle de langage).
- * Exemple : « Camille souhaite finir avant 17 h un mercredi sur deux jusqu'à fin juin ».
+ * Exemple : « Nicolas souhaite finir avant 17 h un mercredi sur deux jusqu'à fin juin ».
  * Le résultat est une proposition : rien n'est créé sans confirmation, et la phrase n'est pas conservée.
  */
 export function lireBesoin(phrase: string, personnes: Person[], today: ISODate): Lecture {

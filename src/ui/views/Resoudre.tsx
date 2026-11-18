@@ -1,5 +1,7 @@
-import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Handshake, Sparkles, CircleHelp, Clock3, ListChecks, MoonStar, Paperclip, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Handshake, CircleHelp, Clock3, ListChecks, MoonStar, Paperclip, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { RAISONS_REFUS, texteRefus } from '../../domain/refus';
+import { DialogueRefus } from '../components/Refus';
 import {
   JOURS,
   addDays,
@@ -15,13 +17,13 @@ import {
   weekday,
 } from '../../domain/time';
 import type { Absence, AppData, Besoin, BesoinStatut, ISODate, Remplacement, Trou } from '../../domain/types';
-import { GARDE_LABEL, classeAbsence, libelleAbsence, nomCourt } from '../../domain/types';
+import { classeAbsence, libelleAbsence, nomCourt, nomGarde, libelleGarde } from '../../domain/types';
 import { decrireBesoin, decrireShift, minutesSemaine, shiftsSemaine } from '../../engine/core';
 import { decisions } from '../../engine/decisions';
 import { diagnosticPrealable } from '../../engine/diagnose';
 import { congesIncompatibles } from '../../engine/gardes';
 import type { RepairOption } from '../../engine/repair';
-import { optionsReparation } from '../../engine/repair';
+import { appliquerPatch, optionsReparation } from '../../engine/repair';
 import { validateWeek } from '../../engine/validate';
 import { estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
@@ -29,7 +31,7 @@ import { TourDeRole } from '../components/Appel';
 import { aSonTour, tourRemplacement } from '../../engine/appel';
 import { cibleSemaine } from '../../engine/heures';
 import { useUi } from '../../store/ui';
-import { AvantApres, Avatar, Delai, Empty, PastilleUrgence, Pill } from '../kit';
+import { AvantApres, Avatar, Delai, Empty, PastilleUrgence, Pill, Dialog } from '../kit';
 
 const capitale = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
@@ -45,9 +47,10 @@ export function Resoudre(): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const d = useMemo(() => decisions(data, today), [data, today]);
+  /** L'absence dont on choisit la solution, jour par jour. */
+  const [reglage, setReglage] = useState<string | null>(null);
   const { aller, setSemaine, ouvrirGarde } = useUi();
   const corrigerRepos = useStore((s) => s.corrigerRepos);
-  const resoudreAbsence = useStore((s) => s.resoudreAbsence);
   const { donnerAccord, ecarterAccord } = useStore();
   const dire = useUi((s) => s.dire);
   const nom = (id: string | null): string => {
@@ -213,15 +216,8 @@ export function Resoudre(): JSX.Element {
                     <Pill tone="danger">
                       <Clock3 size={12} /> {dayIndex(trous[0].shift.date) - dayIndex(today) <= 1 ? 'Urgent' : `Dans ${dayIndex(trous[0].shift.date) - dayIndex(today)} jours`}
                     </Pill>
-                    <button
-                      type="button"
-                      className="btn primary"
-                      onClick={() => {
-                        resoudreAbsence(absenceId);
-                        dire(`${trous.length} jour${trous.length > 1 ? 's' : ''} réglé${trous.length > 1 ? 's' : ''} avec les options conseillées.`, true);
-                      }}
-                    >
-                      <Sparkles size={16} aria-hidden="true" /> Tout régler
+                    <button type="button" className="btn primary" onClick={() => setReglage(absenceId)}>
+                      <ListChecks size={16} aria-hidden="true" /> Voir et choisir la solution
                     </button>
                   </div>
                   {trous.map((t) => (
@@ -332,7 +328,7 @@ export function Resoudre(): JSX.Element {
                 <div key={g.id} className="decision">
                   <div className="grow">
                     <b>
-                      {GARDE_LABEL[g.type]} du {fmtDateCourt(g.date)} à affecter
+                      {nomGarde(g)} du {fmtDateCourt(g.date)} à affecter
                     </b>
                     <div className="soft small" style={{ marginTop: 3 }}>
                       De {fmtHeure(g.start)} à {fmtHeure(g.end)}
@@ -354,7 +350,7 @@ export function Resoudre(): JSX.Element {
                 <div className="grow">
                   <b>Variables de la garde du {fmtDateCourt(g.date)} à valider</b>
                   <div className="soft small" style={{ marginTop: 3 }}>
-                    {nom(g.personId)} · {GARDE_LABEL[g.type].toLowerCase()} · à relire avant transmission au comptable
+                    {nom(g.personId)} · {libelleGarde(g).toLowerCase()} · à relire avant transmission au comptable
                   </div>
                 </div>
                 <button type="button" className="btn sm" onClick={() => ouvrirGarde(g.id)}>
@@ -408,11 +404,132 @@ export function Resoudre(): JSX.Element {
         </>
       ) : null}
       </div>
+      {reglage ? <DialogueReglage trous={data.trous.filter((t) => t.absenceId === reglage && t.statut === 'ouvert')} titre={(() => { const a = data.absences.find((x) => x.id === reglage); const p = data.personnes.find((x) => x.id === a?.personId); return `${a ? libelleAbsence(a) : 'Absence'} de ${p ? nomCourt(p) : '—'}`; })()} onClose={() => setReglage(null)} /> : null}
     </div>
   );
 }
 
 // ---------------------------------------------------------------- Réparation
+
+const MAIN = 'main';
+
+/**
+ * Régler une absence sans rien décider à votre place : pour chaque jour, la solution conseillée est cochée,
+ * les autres restent au choix, et « à la main » laisse le jour ouvert pour le régler dans le planning.
+ * Les jours sont calculés l'un après l'autre : le choix d'un jour est pris en compte pour le suivant.
+ */
+function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: string; onClose: () => void }): JSX.Element {
+  const data = useStore((s) => s.data);
+  const today = useStore((s) => s.today);
+  const resoudre = useStore((s) => s.resoudreTrou);
+  const { dire, setSemaine, aller } = useUi();
+  const [choix, setChoix] = useState<Record<string, string>>({});
+  const nom = (id: string): string => {
+    const p = data.personnes.find((x) => x.id === id);
+    return p ? nomCourt(p) : '—';
+  };
+  const plan = useMemo(() => {
+    let courant = data;
+    return trous.map((t) => {
+      const rep = optionsReparation(courant, t.shift, today);
+      const conseillee = rep.options.find((o) => o.recommande) ?? rep.options[0];
+      const voulu = choix[t.id];
+      const retenue = voulu === MAIN ? null : (rep.options.find((o) => o.id === voulu) ?? conseillee ?? null);
+      if (retenue) courant = appliquerPatch(courant, retenue.patch);
+      return { trou: t, rep, retenue, main: voulu === MAIN };
+    });
+  }, [data, trous, today, choix]);
+  const regles = plan.filter((x) => x.retenue).length;
+  const aLaMain = plan.filter((x) => x.main);
+  const appliquer = (): void => {
+    for (const x of plan) {
+      if (!x.retenue) continue;
+      // Chaque jour est recalculé sur le planning déjà corrigé, puis l'option choisie est appliquée.
+      const frais = optionsReparation(useStore.getState().data, x.trou.shift, today).options;
+      const o = frais.find((y) => y.id === x.retenue?.id) ?? frais.find((y) => y.recommande) ?? frais[0];
+      if (o) resoudre(x.trou.id, o);
+    }
+    dire(`${regles} jour${regles > 1 ? 's' : ''} réglé${regles > 1 ? 's' : ''}${aLaMain.length ? `, ${aLaMain.length} à régler à la main` : ''}.`, true);
+    if (aLaMain.length) {
+      setSemaine(mondayOf(aLaMain[0].trou.shift.date));
+      aller('construire');
+    }
+    onClose();
+  };
+  return (
+    <Dialog
+      size="wide"
+      title="Comment régler cette absence ?"
+      subtitle={`${titre} · ${trous.length} jour${trous.length > 1 ? 's' : ''}. La solution conseillée est cochée : gardez-la, changez-la, ou réglez le jour à la main.`}
+      onClose={onClose}
+      footer={
+        <>
+          <span className="grow small soft">
+            {regles} jour{regles > 1 ? 's' : ''} réglé{regles > 1 ? 's' : ''} par vos choix{aLaMain.length ? ` · ${aLaMain.length} à la main, dans le planning` : ''}. Rien n’est appliqué avant votre accord.
+          </span>
+          <button type="button" className="btn" onClick={onClose}>
+            Annuler
+          </button>
+          <button type="button" className="btn primary" disabled={!regles && !aLaMain.length} onClick={appliquer}>
+            <Check size={15} aria-hidden="true" /> Appliquer mes choix
+          </button>
+        </>
+      }
+    >
+      {plan.map(({ trou, rep, retenue, main }) => (
+        <fieldset key={trou.id} className="rs-jour">
+          <legend>
+            <b className="cap1">{fmtDateLong(trou.shift.date).replace(/ \d{4}$/, '')}</b>
+            <span className="small soft">Poste vacant : {decrireShift(trou.shift)}</span>
+          </legend>
+          {rep.impact.length ? <p className="rs-impact">{rep.impact.join(' ')}</p> : <p className="rs-impact ok">Rien n’est découvert ce jour-là.</p>}
+          {rep.options.map((o) => {
+            const on = retenue?.id === o.id;
+            return (
+              <label key={o.id} className={`rs-option${on ? ' on' : ''}`}>
+                <input type="radio" name={`reglage-${trou.id}`} checked={on} onChange={() => setChoix((c) => ({ ...c, [trou.id]: o.id }))} />
+                <span className="rs-corps">
+                  <span className="rs-tete">
+                    <b>{o.titre}</b>
+                    {o.recommande ? <span className="rs-conseil">Conseillé</span> : null}
+                    <Pill tone={COUVERTURE[o.couverture].tone}>{COUVERTURE[o.couverture].label}</Pill>
+                  </span>
+                  <span className="small soft">{o.resume}</span>
+                  {on && o.changements.length ? (
+                    <span className="rs-changements">
+                      {o.changements.map((c, i) => (
+                        <span key={i}>
+                          <b>{nom(c.personId)}</b> <span className="soft">{JOURS[weekday(c.date)]}</span> <AvantApres avant={c.avant} apres={c.apres} />
+                        </span>
+                      ))}
+                    </span>
+                  ) : null}
+                  {on ? (
+                    <span className="rs-faits small">
+                      <span>{o.personnesTouchees.length ? `Touche ${o.personnesTouchees.map(nom).join(', ')}` : 'Personne d’autre n’est touché'}</span>
+                      <span>{o.coutSupp > 0 ? `+ ${fmtEuros(o.coutSupp)}` : 'Sans coût en plus'}</span>
+                      <span>{o.regles.every((r) => r.ok) ? 'Règles respectées' : 'Une règle à regarder'}</span>
+                      {o.restant.length ? <span className="reste">Reste : {o.restant.join(' ')}</span> : null}
+                    </span>
+                  ) : null}
+                </span>
+              </label>
+            );
+          })}
+          <label className={`rs-option libre${main ? ' on' : ''}`}>
+            <input type="radio" name={`reglage-${trou.id}`} checked={main} onChange={() => setChoix((c) => ({ ...c, [trou.id]: MAIN }))} />
+            <span className="rs-corps">
+              <span className="rs-tete">
+                <b>Je règle ce jour à la main</b>
+              </span>
+              <span className="small soft">Rien n’est changé pour ce jour. Le planning de la semaine s’ouvre ensuite pour déplacer ou ajouter un poste vous-même.</span>
+            </span>
+          </label>
+        </fieldset>
+      ))}
+    </Dialog>
+  );
+}
 
 function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Element {
   const data = useStore((s) => s.data);
@@ -597,6 +714,7 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
   const dire = useUi((s) => s.dire);
   const p = data.personnes.find((x) => x.id === absence.personId);
   const sim = useMemo(() => simulerAbsence(data, absence), [data, absence]);
+  const [refus, setRefus] = useState(false);
   const jours = dayIndex(absence.to) - dayIndex(absence.from) + 1;
   return (
     <div className="decision">
@@ -641,13 +759,24 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
         <button
           type="button"
           className="btn sm"
-          onClick={() => {
-            decider(absence.id, false);
-            dire('Demande refusée.', true);
-          }}
+          onClick={() => setRefus(true)}
         >
           Refuser
         </button>
+        {refus ? (
+          <DialogueRefus
+            quoi={`${libelleAbsence(absence)} de ${p ? nomCourt(p) : '—'}, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)}`}
+            raisons={RAISONS_REFUS.absence}
+            apercu={(m) => texteRefus(`(${libelleAbsence(absence).toLowerCase()}, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)})`, m)}
+            sansMessage={`La demande sera marquée comme refusée, sans message. ${p?.prenom ?? 'La personne'} le verra dans « Mes demandes ».`}
+            pour={p?.prenom ?? 'la personne'}
+            onClose={() => setRefus(false)}
+            onConfirmer={(motif) => {
+              decider(absence.id, false, motif);
+              dire(motif !== undefined ? `Demande refusée. ${p?.prenom ?? 'La personne'} est prévenu.` : 'Demande refusée.', true);
+            }}
+          />
+        ) : null}
         <button
           type="button"
           className="btn sm primary"
@@ -677,6 +806,7 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
   const dire = useUi((s) => s.dire);
   const p = data.personnes.find((x) => x.id === besoin.personId);
   const [statut, setStatut] = useState<BesoinStatut>(besoin.statut);
+  const [refus, setRefus] = useState(false);
   const usage = usagePlafond(data, besoin.personId, today);
   const plein = statut === 'prioritaire' && usage.actifs >= usage.plafond;
   return (
@@ -712,13 +842,24 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
         <button
           type="button"
           className="btn sm"
-          onClick={() => {
-            decider(besoin.id, false);
-            dire('Demande refusée. Le refus est compté dans la mémoire d’équité.', true);
-          }}
+          onClick={() => setRefus(true)}
         >
           Refuser
         </button>
+        {refus ? (
+          <DialogueRefus
+            quoi={`${p ? nomCourt(p) : '—'} : ${decrireBesoin(besoin)}`}
+            raisons={RAISONS_REFUS.horaire}
+            apercu={(m) => texteRefus(`« ${decrireBesoin(besoin)} »`, m)}
+            sansMessage={`La demande sera marquée comme refusée, sans message. ${p?.prenom ?? 'La personne'} le verra dans « Mes demandes ».`}
+            pour={p?.prenom ?? 'la personne'}
+            onClose={() => setRefus(false)}
+            onConfirmer={(motif) => {
+              decider(besoin.id, false, undefined, motif);
+              dire('Demande refusée. Le refus est compté dans la mémoire d’équité.', true);
+            }}
+          />
+        ) : null}
         <button
           type="button"
           className="btn sm primary"
@@ -812,7 +953,11 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
   const { dire, demandeVisee, viserDemande } = useUi();
   const demandeur = data.personnes.find((p) => p.id === r.demandeur);
   const attente = r.accord === 'attente';
-  const tour = useMemo(() => (attente ? [] : tourRemplacement(data, r, today)), [data, r, today, attente]);
+  // Adressée à un collègue, la demande montre sa réponse sans attendre l'accord du titulaire.
+  const tour = useMemo(() => (attente && !r.destinataire ? [] : tourRemplacement(data, r, today)), [data, r, today, attente]);
+  const adresse = r.destinataire ? data.personnes.find((p) => p.id === r.destinataire) : undefined;
+  const refusCollegue = !!r.destinataire && (r.indisponibles ?? []).includes(r.destinataire);
+  const [refus, setRefus] = useState(false);
   const volontaires = tour.filter((c) => c.volontaire);
   const premier = aSonTour(tour);
   const urgence = r.urgence ?? 'prevu';
@@ -841,11 +986,21 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
             <PastilleUrgence urgence={urgence} />
             <Delai date={r.date} today={today} />
           </div>
-          <b>{demandeur ? nomCourt(demandeur) : '—'}</b> demande à être remplacé{' '}
+          <b>{demandeur ? nomCourt(demandeur) : '—'}</b> {adresse ? <>demande à <b>{nomCourt(adresse)}</b> de le remplacer</> : 'demande à être remplacé'}{' '}
           <b>
             {fmtDateCourt(r.date)}, {fmtHeure(r.start)} – {fmtHeure(r.end)}
           </b>
-          <div className="small soft">{attente ? 'Oui : l’équipe disponible est prévenue. Non : le poste reste le sien.' : 'Demande acceptée. Sans remplaçant confirmé, le poste reste le sien.'}</div>
+          <div className="small soft">
+            {adresse
+              ? refusCollegue
+                ? `${adresse.prenom} ne peut pas. ${demandeur ? demandeur.prenom : 'Le demandeur'} peut ouvrir la demande à toute l’équipe.`
+                : r.volontaires.includes(adresse.id)
+                  ? `${adresse.prenom} est d’accord : il reste à valider.`
+                  : `${adresse.prenom} n’a pas encore répondu.`
+              : attente
+                ? 'Oui : l’équipe disponible est prévenue. Non : le poste reste le sien.'
+                : 'Demande acceptée. Sans remplaçant confirmé, le poste reste le sien.'}
+          </div>
         </div>
         {r.justificatif ? (
           r.justificatif.data ? (
@@ -856,7 +1011,7 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
             <span className="small soft">Justificatif transmis, effacé après décision.</span>
           )
         ) : null}
-        {!attente && !volontaires.length ? (
+        {!attente && !volontaires.length && !adresse ? (
           <div className="small soft">
             {tour.filter((c) => c.ok).length} personne{tour.filter((c) => c.ok).length > 1 ? 's' : ''} prévenue{tour.filter((c) => c.ok).length > 1 ? 's' : ''}, aucun volontaire pour l’instant.
           </div>
@@ -894,13 +1049,13 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
           );
         })}
       </div>
-      {attente ? (
+      {attente && !(adresse && volontaires.some((c) => c.ok)) ? (
         <button
           type="button"
           className="btn primary sm"
           onClick={() => {
             deciderDemande(r.id, true);
-            dire('Demande acceptée : l’équipe disponible est prévenue.', true);
+            dire(adresse && !refusCollegue ? `Accord donné. Il reste à ${adresse.prenom} de répondre.` : 'Demande acceptée : l’équipe disponible est prévenue.', true);
           }}
         >
           <Check size={14} aria-hidden="true" /> Accepter
@@ -909,14 +1064,25 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
       <button
         type="button"
         className="btn sm"
-        onClick={() => {
-          if (attente) deciderDemande(r.id, false);
-          else cloreRemplacement(r.id, 'refusee');
-          dire('Demande de remplacement refusée.', true);
-        }}
+        onClick={() => setRefus(true)}
       >
         Refuser
       </button>
+      {refus ? (
+        <DialogueRefus
+          quoi={`Remplacement de ${demandeur ? nomCourt(demandeur) : '—'}, ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`}
+          raisons={RAISONS_REFUS.remplacement}
+          apercu={(m) => texteRefus(`de remplacement du ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`, m, 'Vous restez en poste.')}
+          sansMessage="Sans raison précisée, le demandeur reçoit seulement l’avis de refus."
+          pour={demandeur?.prenom ?? 'la personne'}
+          onClose={() => setRefus(false)}
+          onConfirmer={(motif) => {
+            if (attente) deciderDemande(r.id, false, motif ?? '');
+            else cloreRemplacement(r.id, 'refusee', motif ?? '');
+            dire('Demande de remplacement refusée.', true);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
