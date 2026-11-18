@@ -136,6 +136,8 @@ export interface Absence {
   type: AbsenceType;
   statut: AbsenceStatut;
   createdAt: string;
+  /** Absence imprévue, signalée par la personne elle-même le jour même ou la veille : à traiter en premier. */
+  imprevue?: boolean;
   /** Intitulé d'une formation. */
   libelle?: string;
   /** Formation interne (à la pharmacie) ou externe (dans un organisme, à l'extérieur). */
@@ -463,6 +465,8 @@ export interface AvisRetard {
   /** Facultatif, vu des seuls titulaires. */
   motif?: MotifRetard;
   note?: string;
+  /** Le retard a été noté par un titulaire, pour la personne (elle a prévenu par téléphone, par exemple). */
+  par?: string;
   at: string;
 }
 

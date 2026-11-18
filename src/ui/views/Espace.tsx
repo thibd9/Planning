@@ -2,7 +2,7 @@ import { ArrowLeftRight, ArrowRight, Award, BellRing, BookOpen, CalendarClock, C
 import { useState } from 'react';
 import { responsable } from '../../domain/acces';
 import { PROFILS, TYPE_PRODUIT_LABEL, marquesParType } from '../../domain/profils';
-import { JOURS, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtHeure, fmtJourMois, mondayOf, weekday } from '../../domain/time';
+import { JOURS, dayIndex, fmtDateCourt, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, fmtJourMois, mondayOf, weekday } from '../../domain/time';
 import type { ISODate, Person, Shift } from '../../domain/types';
 import { COMPETENCE_LABEL, nomCourt, nomGarde } from '../../domain/types';
 import { decrireBesoin, minutesSemaine } from '../../engine/core';
@@ -14,9 +14,9 @@ import { useUi } from '../../store/ui';
 import { ListeAnnonces, annoncesDe } from '../components/Annonces';
 import { DialogueDemande } from '../components/Demande';
 import { ProchainPoste } from '../components/ProchainPoste';
+import { BanniereAccueil } from '../components/Banniere';
 import { PrevenirRetard } from '../components/Retard';
 import { DialogueRendezVous, ProchainsRendezVous } from '../components/RendezVous';
-import { iconeDe } from '../icons';
 
 const jourLong = (date: ISODate): string => `${JOURS[weekday(date)]} ${fmtJourMois(date)}`;
 
@@ -35,7 +35,6 @@ export function Espace({ personId }: { personId: string }): JSX.Element | null {
   const p = data.personnes.find((x) => x.id === personId);
   if (!p) return null;
   const profil = PROFILS[p.qualification];
-  const Icone = iconeDe(p);
   const chef = responsable(data);
   const publiee = (date: ISODate): boolean => data.semaines[mondayOf(date)]?.statut === 'publie';
   const absent = (date: ISODate): boolean => data.absences.some((a) => a.personId === personId && a.statut === 'approuvee' && a.from <= date && date <= a.to);
@@ -79,19 +78,13 @@ export function Espace({ personId }: { personId: string }): JSX.Element | null {
   })();
   return (
     <div className="page page-espace">
-      <div className="page-head">
-        <span className="page-ico" aria-hidden="true">
-          <Icone size={26} />
-        </span>
-        <div className="grow">
-          <div className="eyebrow">{profil.espace}</div>
-          <h1>
-            Bonjour <span className="hl">{p.prenom}</span>
-          </h1>
-          <p>{profil.phrase}</p>
-        </div>
-        <p className="tb-resume">
-          <span>
+      <BanniereAccueil
+        personne={p}
+        date={fmtDateLong(today)}
+        role={`${profil.espace} · ${data.officine.nom || 'Ma pharmacie'}`}
+        resume={
+          <>
+            <span>
             {aRepondre ? (
               <>
                 <b>
@@ -107,8 +100,10 @@ export function Espace({ personId }: { personId: string }): JSX.Element | null {
               <>Le prochain planning n’est pas encore publié.</>
             )}
           </span>
-        </p>
-      </div>
+          </>
+        }
+      />
+      <p className="esp-phrase">{profil.phrase}</p>
 
       {priorite ? (
         <section className={`tb-priorite ${priorite.ton}`} aria-labelledby="esp-prio" data-focus="priorite" style={{ marginBottom: 20 }}>

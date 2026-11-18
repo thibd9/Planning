@@ -770,6 +770,7 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
       <div className="grow" style={{ minWidth: 280 }}>
         <div className="row wrap" style={{ gap: 8, marginBottom: 6 }}>
           <span className={`pill nature ${classeAbsence(absence.type)}`}>{libelleAbsence(absence)}</span>
+          {absence.imprevue ? <span className="pill danger">Imprévue, signalée par {p?.prenom ?? 'la personne'}</span> : null}
           <Delai date={absence.from} today={today} />
           {memeTemps.demandees.length ? (
             <span className="pill warn">

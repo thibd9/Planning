@@ -15,6 +15,7 @@ import { useStore } from '../../store/store';
 import { ListeAnnonces, annoncesDe } from '../components/Annonces';
 import { useUi } from '../../store/ui';
 import { Avatar, Frise, Graduations, Pill } from '../kit';
+import { BanniereAccueil } from '../components/Banniere';
 
 /** Part des minutes d'ouverture d'une semaine où un pharmacien est planifié ; null si rien n'est posé. */
 function couverture(data: AppData, monday: string): number | null {
@@ -146,13 +147,13 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
 
   return (
     <div className="tb">
-      <header className="tb-entete">
-        <div className="tbh-texte">
-          <div className="eyebrow">{fmtDateLong(today)}</div>
-          <h1>Bonjour {moi?.prenom}</h1>
-        </div>
-        <p className="tb-resume">
-          <span>
+      <BanniereAccueil
+        personne={moi}
+        date={fmtDateLong(today)}
+        role={`${moi ? libelleRole(data, moi) : 'Titulaire'} · ${data.officine.nom || 'Ma pharmacie'}`}
+        resume={
+          <>
+            <span>
             {d.total ? (
               <>
                 <b>
@@ -166,8 +167,52 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
               </>
             )}
           </span>
-        </p>
-      </header>
+          </>
+        }
+      >
+        <div className="tb-chiffres" aria-label="Repères">
+          <button type="button" className="tb-chiffre tb-auj" onClick={() => voirJour(today)}>
+            <span className="ico" aria-hidden="true"><UsersRound size={18} /></span>
+            <span className="grow">
+              <span className="l">L’équipe aujourd’hui</span>
+              <span className="v">{ouvertAuj ? <><span className="num">{enPoste.length}</span> en poste</> : 'Fermée'}</span>
+              <span className="d">{ouvertAuj ? `${absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'Aucun absent'} · pharmacien ${presenceAuj} %` : 'Pas d’ouverture aujourd’hui'}</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => { setSemaine(lundi); aller('construire'); }}>
+            <span className="ico" aria-hidden="true"><ShieldCheck size={18} /></span>
+            <span className="grow">
+              <span className="l">Pharmacien présent</span>
+              <span className="v num">{cetteSemaine === null ? '-' : `${cetteSemaine} %`}</span>
+              <span className="d">cette semaine</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => { setSemaine(suivante); aller('construire'); }}>
+            <span className="ico" aria-hidden="true"><CalendarRange size={18} /></span>
+            <span className="grow">
+              <span className="l">Semaine prochaine</span>
+              <span className="v">{etatSuivante}</span>
+              <span className="d">du {fmtSemaine(suivante)}</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => aller('heures')}>
+            <span className="ico" aria-hidden="true"><Hourglass size={18} /></span>
+            <span className="grow">
+              <span className="l">Compteurs d’heures</span>
+              <span className="v">{heures ? <><span className="num">{heures}</span> à régulariser</> : 'À jour'}</span>
+              <span className="d">{heures ? 'heures en plus ou en moins' : 'chacun est à son contrat'}</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => aller('gardes')}>
+            <span className="ico" aria-hidden="true"><MoonStar size={18} /></span>
+            <span className="grow">
+              <span className="l">Prochaine garde</span>
+              <span className="v cap1">{prochaineGarde ? fmtDateCourt(prochaineGarde.date) : 'Aucune'}</span>
+              <span className="d">{prochaineGarde ? (prochaineGarde.personId ? nomCourt(data.personnes.find((p) => p.id === prochaineGarde.personId) ?? data.personnes[0]) : 'À affecter') : 'rien de prévu'}</span>
+            </span>
+          </button>
+        </div>
+      </BanniereAccueil>
 
       <section className={`tb-priorite ${priorite.ton}`} aria-labelledby="tb-prio" data-focus="priorite">
         <span className="tb-prio-ico" aria-hidden="true">
@@ -212,7 +257,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
           {pub.etat === 'depasse' && pub.vides && relais ? (
             <button
               type="button"
-              className="btn primary"
+              className="btn sm"
               id="echeance-preparer"
               onClick={() => {
                 preparerMois(pub.mois);
@@ -223,55 +268,12 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
               <Sparkles size={16} aria-hidden="true" /> Laisser Solvéa préparer {nomMois}
             </button>
           ) : (
-            <button type="button" className="btn primary" id="echeance-ouvrir" onClick={versLeMois}>
+            <button type="button" className="btn sm" id="echeance-ouvrir" onClick={versLeMois}>
               {pub.vides ? `Construire ${nomMois}` : 'Relire et publier le mois'} <ArrowRight size={16} aria-hidden="true" />
             </button>
           )}
         </section>
       ) : null}
-      <div className="tb-chiffres" aria-label="Repères">
-        <button type="button" className="tb-chiffre tb-auj" onClick={() => voirJour(today)}>
-          <span className="ico" aria-hidden="true"><UsersRound size={18} /></span>
-          <span className="grow">
-            <span className="l">L’équipe aujourd’hui</span>
-            <span className="v">{ouvertAuj ? <><span className="num">{enPoste.length}</span> en poste</> : 'Fermée'}</span>
-            <span className="d">{ouvertAuj ? `${absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'Aucun absent'} · pharmacien ${presenceAuj} %` : 'Pas d’ouverture aujourd’hui'}</span>
-          </span>
-        </button>
-        <button type="button" className="tb-chiffre" onClick={() => { setSemaine(lundi); aller('construire'); }}>
-          <span className="ico" aria-hidden="true"><ShieldCheck size={18} /></span>
-          <span className="grow">
-            <span className="l">Pharmacien présent</span>
-            <span className="v num">{cetteSemaine === null ? '-' : `${cetteSemaine} %`}</span>
-            <span className="d">cette semaine</span>
-          </span>
-        </button>
-        <button type="button" className="tb-chiffre" onClick={() => { setSemaine(suivante); aller('construire'); }}>
-          <span className="ico" aria-hidden="true"><CalendarRange size={18} /></span>
-          <span className="grow">
-            <span className="l">Semaine prochaine</span>
-            <span className="v">{etatSuivante}</span>
-            <span className="d">du {fmtSemaine(suivante)}</span>
-          </span>
-        </button>
-        <button type="button" className="tb-chiffre" onClick={() => aller('heures')}>
-          <span className="ico" aria-hidden="true"><Hourglass size={18} /></span>
-          <span className="grow">
-            <span className="l">Compteurs d’heures</span>
-            <span className="v">{heures ? <><span className="num">{heures}</span> à régulariser</> : 'À jour'}</span>
-            <span className="d">{heures ? 'heures en plus ou en moins' : 'chacun est à son contrat'}</span>
-          </span>
-        </button>
-        <button type="button" className="tb-chiffre" onClick={() => aller('gardes')}>
-          <span className="ico" aria-hidden="true"><MoonStar size={18} /></span>
-          <span className="grow">
-            <span className="l">Prochaine garde</span>
-            <span className="v cap1">{prochaineGarde ? fmtDateCourt(prochaineGarde.date) : 'Aucune'}</span>
-            <span className="d">{prochaineGarde ? (prochaineGarde.personId ? nomCourt(data.personnes.find((p) => p.id === prochaineGarde.personId) ?? data.personnes[0]) : 'À affecter') : 'rien de prévu'}</span>
-          </span>
-        </button>
-      </div>
-
       <div className="tb-grille">
         <div className="tb-col">
           <section className="card tb-faire" aria-labelledby="tb-faire">

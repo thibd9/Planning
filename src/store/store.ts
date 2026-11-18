@@ -4,7 +4,7 @@ import { DEMO_VERSION, seed, vierge } from '../data/seed';
 import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
 import { MOIS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
-import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, RendezVous, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
+import type { AbsenceType, Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, RendezVous, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, MOTIF_RETARD_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
 import type { AvisRetard, CadreFormation, MotifRetard } from '../domain/types';
 import { RETARD_MAX, arriveePrevue, dureeRetard, effetsRetard, superieurs } from '../engine/retard';
@@ -217,7 +217,9 @@ export interface Store {
   signalerEcart: (e: { personId: string; date: ISODate; type: EcartType; minutes?: number }) => void;
   retirerEcart: (id: string) => void;
   /** « Je serai en retard » : la personne prévient elle-même. Ses titulaires reçoivent une notification et un message. */
-  prevenirRetard: (r: { personId: string; date: ISODate; start: number; minutes: number; motif?: MotifRetard; note?: string }) => void;
+  prevenirRetard: (r: { personId: string; date: ISODate; start: number; minutes: number; motif?: MotifRetard; note?: string; par?: string }) => void;
+  /** « Je ne pourrai pas venir » : la personne signale elle-même une absence imprévue. Ses titulaires sont prévenus et décident. */
+  signalerAbsence: (a: { personId: string; from: ISODate; to: ISODate; type: AbsenceType; note?: string }) => void;
   /** « Je serai finalement à l'heure » : l'avis est retiré, les titulaires en sont prévenus. */
   annulerRetard: (id: string) => void;
   planifierFormation: (f: { intitule: string; personnes: string[]; from: ISODate; to: ISODate; cadre?: CadreFormation; lieu?: string }) => void;
@@ -955,11 +957,13 @@ export const useStore = create<Store>((set, get) => {
     prevenirRetard: (r) =>
       commit((d, today) => {
         const p = d.personnes.find((x) => x.id === r.personId);
-        const chefs = superieurs(d, r.personId);
-        if (!p || !chefs.length) return d;
+        // Noté par un titulaire pour quelqu'un d'autre : les autres titulaires sont prévenus, pas de message « de la part » de la personne.
+        const pourAutrui = !!r.par && r.par !== r.personId;
+        const chefs = superieurs(d, r.personId).filter((c) => c !== r.par);
+        if (!p || (!chefs.length && !pourAutrui)) return d;
         const at = now();
         const note = r.note?.trim() || undefined;
-        const avis: AvisRetard = { id: uid('ret'), personId: r.personId, date: r.date, start: r.start, minutes: Math.max(1, Math.min(RETARD_MAX, Math.round(r.minutes))), motif: r.motif, note, at };
+        const avis: AvisRetard = { id: uid('ret'), personId: r.personId, date: r.date, start: r.start, minutes: Math.max(1, Math.min(RETARD_MAX, Math.round(r.minutes))), motif: r.motif, note, ...(pourAutrui ? { par: r.par } : {}), at };
         // Un nouvel avis pour le même poste remplace le précédent : on peut corriger sa durée.
         const deja = (d.retards ?? []).some((x) => x.personId === r.personId && x.date === r.date && x.start === r.start);
         const retards = (d.retards ?? []).filter((x) => !(x.personId === r.personId && x.date === r.date && x.start === r.start)).concat(avis);
@@ -967,11 +971,29 @@ export const useStore = create<Store>((set, get) => {
         const arrivee = fmtHeure(arriveePrevue(avis));
         const raison = [avis.motif ? MOTIF_RETARD_LABEL[avis.motif].toLowerCase() : '', note ?? ''].filter(Boolean).join(' : ');
         const texte = `${deja ? 'Correction : je' : 'Je'} serai en retard d’environ ${dureeRetard(avis.minutes)} ${jour}. Arrivée prévue vers ${arrivee}, au lieu de ${fmtHeure(r.start)}.${raison ? ` (${raison.charAt(0).toUpperCase()}${raison.slice(1)})` : ''}`;
-        const suite: AppData = { ...d, retards, messages: d.messages.concat(chefs.map((c) => ({ id: uid('msg'), de: r.personId, a: c, texte, at, luPar: [r.personId] }))) };
+        const suite: AppData = { ...d, retards, messages: pourAutrui ? d.messages : d.messages.concat(chefs.map((c) => ({ id: uid('msg'), de: r.personId, a: c, texte, at, luPar: [r.personId] }))) };
         return journal(
           suite,
-          { type: 'absence', titre: `${nom(d, r.personId)} prévient d’un retard de ${dureeRetard(avis.minutes)}, ${jour}`, detail: `Poste de ${fmtHeure(r.start)} : arrivée prévue vers ${arrivee}.${raison ? ` ${raison.charAt(0).toUpperCase()}${raison.slice(1)}.` : ''}` },
+          { type: 'absence', titre: pourAutrui ? `Retard de ${nom(d, r.personId)} noté : ${dureeRetard(avis.minutes)}, ${jour}` : `${nom(d, r.personId)} prévient d’un retard de ${dureeRetard(avis.minutes)}, ${jour}`, detail: `Poste de ${fmtHeure(r.start)} : arrivée prévue vers ${arrivee}.${raison ? ` ${raison.charAt(0).toUpperCase()}${raison.slice(1)}.` : ''}` },
           { pour: chefs, effets: [`Arrivée prévue vers ${arrivee}, au lieu de ${fmtHeure(r.start)}.`, ...effetsRetard(suite, avis)] },
+        );
+      }, false),
+    signalerAbsence: (a) =>
+      commit((d, today) => {
+        const p = d.personnes.find((x) => x.id === a.personId);
+        const chefs = superieurs(d, a.personId);
+        if (!p || !chefs.length) return d;
+        const at = now();
+        const note = a.note?.trim() || undefined;
+        const absence: Absence = { id: uid('a'), personId: a.personId, from: a.from, to: a.to, type: a.type, statut: 'demandee', createdAt: at, imprevue: true, ...(note ? { precision: note } : {}) };
+        const jour = (x: ISODate): string => (x === today ? 'aujourd’hui' : x === addDays(today, 1) ? 'demain' : `le ${fmtDateCourt(x)}`);
+        const periode = a.from === a.to ? jour(a.from) : `du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}`;
+        const postes = d.shifts.filter((s) => s.personId === a.personId && s.date >= a.from && s.date <= a.to).length;
+        const texte = `Je ne pourrai pas venir ${periode} (${ABSENCE_LABEL[a.type].toLowerCase()}).${note ? ` ${note}` : ''}`;
+        return journal(
+          { ...d, absences: d.absences.concat(absence), messages: d.messages.concat(chefs.map((c) => ({ id: uid('msg'), de: a.personId, a: c, texte, at, luPar: [a.personId] }))) },
+          { type: 'absence', titre: `${nom(d, a.personId)} signale une absence ${periode}`, detail: `${ABSENCE_LABEL[a.type]}.${note ? ` ${note}` : ''}` },
+          { pour: chefs, effets: [postes ? `${postes} poste${postes > 1 ? 's sont concernés' : ' est concerné'} : à décider dans « Résoudre », puis à couvrir.` : 'Aucun poste planifié sur ces dates.'] },
         );
       }, false),
     annulerRetard: (id) =>

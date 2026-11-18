@@ -3736,3 +3736,84 @@ input[list]::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer;
   .dialog-foot { flex-wrap: wrap; gap: 8px; }
   .dialog-foot .btn { flex: 1 1 auto; justify-content: center; }
 }
+
+/* ================================================================ Tableau de bord : une bannière d'accueil, puis une seule chose à faire
+   Hiérarchie : 1. la bannière accueille (qui je suis, où j'en suis, quelques repères discrets) ;
+   2. un seul bloc dominant dit quoi faire en premier, avec le seul bouton plein de la page ;
+   3. les notes (échéance) tiennent sur une ligne ; 4. le détail vient dessous, en retrait. */
+.tb-banniere { position: relative; overflow: hidden; margin-bottom: 18px; border-radius: 28px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-1); }
+.tb-couverture { position: relative; height: 124px; overflow: hidden; background: linear-gradient(112deg, var(--a-plein) 0%, var(--a-plein-2) 52%, color-mix(in srgb, var(--a-plein-2) 62%, #fff) 100%); }
+.tb-forme { position: absolute; line-height: 0; filter: brightness(0) invert(1); opacity: 0.16; pointer-events: none; }
+.tb-forme.f1 { right: 5%; top: -110px; }
+.tb-forme.f2 { right: 26%; top: 22px; opacity: 0.11; }
+.tb-forme.f3 { right: 46%; top: -30px; opacity: 0.09; }
+.tb-identite { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 22px; padding: 0 28px 20px; }
+.tb-portrait { flex: none; margin-top: -44px; }
+.tb-portrait .avatar { width: 96px; height: 96px; border-radius: 30px; font-size: 32px; box-shadow: 0 0 0 5px var(--surface), 0 14px 30px -16px rgba(var(--ink-rgb), 0.5); }
+.tb-nom { flex: 1 1 260px; min-width: 0; padding-top: 14px; }
+.tb-nom h1 { margin: 2px 0 0; font-size: clamp(26px, 2.6vw, 36px); letter-spacing: -0.035em; line-height: 1.1; }
+.tb-role { margin: 5px 0 0; font-size: 15px; color: var(--ink-2); font-weight: 550; }
+.tb-banniere .tb-resume { flex: 0 1 44ch; max-width: none; margin: 0; padding-bottom: 4px; font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+/* Les repères : une ligne discrète au pied de la bannière, plus des cartes en concurrence avec le reste. */
+.tb-banniere .tb-chiffres { display: flex; flex-wrap: wrap; gap: 0; margin: 0; border-top: 1px solid var(--line); }
+.tb-banniere .tb-chiffre, .tb-banniere .tb-chiffre.tb-auj { flex: 1 1 172px; flex-direction: row; align-items: center; gap: 12px; padding: 14px 20px; border: 0; border-left: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; transform: none; }
+.tb-banniere .tb-chiffre:first-child { border-left: 0; }
+.tb-banniere .tb-chiffre:hover { background: var(--a-tint); transform: none; box-shadow: none; }
+.tb-banniere .tb-chiffre .ico { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--a-tint); color: var(--a-text); }
+.tb-banniere .tb-chiffre .l { font-size: 12px; color: var(--ink-3); margin: 0; }
+.tb-banniere .tb-chiffre .v { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+.tb-banniere .tb-chiffre .d { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-banniere .tb-chiffre .grow { min-width: 0; }
+/* Le seul bloc dominant. */
+.tb-priorite { padding: 26px 30px; }
+.tb-priorite h2 { font-size: clamp(22px, 2.3vw, 30px); }
+.tb-priorite p { font-size: 16px; }
+.tb-priorite .btn.primary { min-height: 52px; padding-inline: 26px; font-size: 16px; }
+/* Une note : une ligne, un trait de couleur, un petit bouton. */
+.tb-echeance, .tb-echeance.depasse { margin-top: 12px; padding: 12px 16px 12px 18px; gap: 10px 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); box-shadow: inset 4px 0 0 var(--warn); }
+.tb-echeance h2 { font-size: 15px; font-weight: 700; }
+.tb-echeance p { margin-top: 2px; font-size: 13.5px; color: var(--ink-2); max-width: none; }
+.tb-echeance-ico { width: 34px; height: 34px; border-radius: 11px; background: var(--warn-soft); color: var(--warn-ink); }
+.tb-echeance .btn { flex: none; }
+/* Le détail, en retrait : des cartes sans ombre, des titres plus petits. */
+.tb-grille { margin-top: 18px; }
+.tb-grille .card { box-shadow: none; }
+.tb-faire .card-head h2, .tb-jour .card-head h2, .tb-annonces .card-head h2, .tb-col .cycle h2 { font-size: 17px; }
+.tb-jour { background: color-mix(in srgb, var(--surface) 72%, transparent); }
+.esp-phrase { margin: -6px 0 16px 4px; color: var(--ink-2); font-size: 15px; }
+@media (max-width: 760px) {
+  .tb-couverture { height: 88px; }
+  .tb-identite { padding: 0 16px 14px; gap: 4px 14px; }
+  .tb-portrait { margin-top: -34px; }
+  .tb-portrait .avatar { width: 72px; height: 72px; border-radius: 22px; font-size: 24px; box-shadow: 0 0 0 4px var(--surface); }
+  .tb-nom { flex-basis: 150px; padding-top: 8px; }
+  .tb-nom h1 { font-size: 24px; }
+  .tb-role { font-size: 13.5px; }
+  .tb-banniere .tb-resume { flex-basis: 100%; font-size: 14px; }
+  .tb-banniere .tb-chiffres { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tb-banniere .tb-chiffre, .tb-banniere .tb-chiffre.tb-auj { padding: 11px 12px; gap: 10px; border-left: 0; border-top: 1px solid var(--line); }
+  .tb-banniere .tb-chiffre:nth-child(-n+2) { border-top: 0; }
+  .tb-banniere .tb-chiffre:nth-child(even) { border-left: 1px solid var(--line); }
+  .tb-banniere .tb-chiffre:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .tb-banniere .tb-chiffre .ico { width: 30px; height: 30px; border-radius: 10px; }
+  .tb-banniere .tb-chiffre .v { font-size: 14.5px; }
+  .tb-priorite { padding: 18px; }
+  .tb-echeance .btn { width: 100%; justify-content: center; }
+}
+.tb-banniere .tb-chiffres { flex-direction: row; }
+@media (max-width: 760px) {
+  .tb-banniere .tb-chiffre .d { display: none; }
+  .tb-banniere .tb-chiffre .l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-banniere .tb-chiffre, .tb-banniere .tb-chiffre.tb-auj { padding: 9px 12px; }
+  .topbar-in .espace-officine { display: none; }
+}
+
+/* Le bouton d'aide reste lisible quel que soit ce qui passe dessous : une brume légère, de la couleur du fond, l'en détache. */
+.aide-fab { position: relative; isolation: isolate; }
+.aide-fab::before { content: ''; position: absolute; z-index: -1; inset: -16px -14px -14px -18px; border-radius: 40px; background: radial-gradient(ellipse at 38% 50%, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 78%, transparent) 46%, transparent 74%); filter: blur(5px); pointer-events: none; }
+.aide-fab .solvi-corps svg { filter: drop-shadow(0 0 2px color-mix(in srgb, var(--bg) 90%, transparent)) drop-shadow(0 6px 10px color-mix(in srgb, var(--solvi-ombre) 45%, transparent)); }
+
+/* Signaler un retard ou une absence : un bouton toujours à portée, dans la barre du haut. */
+.top-signaler { background: var(--warn-soft); color: var(--warn-ink); white-space: nowrap; }
+.top-signaler:hover { filter: brightness(0.97); }
+@media (max-width: 1180px) { .top-signaler .lib { display: none; } .top-signaler { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 50%; } }

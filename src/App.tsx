@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp, Menu, X } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp, Menu, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
@@ -10,6 +10,7 @@ import { DialogueDeconnexion } from './ui/components/Deconnexion';
 import { decisions } from './engine/decisions';
 import { useStore } from './store/store';
 import type { Vue } from './store/ui';
+import { DialogueSignaler } from './ui/components/Signaler';
 import { prefsDe, themeDuProfil, useUi } from './store/ui';
 import { EtiquetteRole, couleurDe, iconeDe } from './ui/icons';
 import { Avatar, Logo, LogoNom } from './ui/kit';
@@ -132,6 +133,8 @@ export function App(): JSX.Element {
   const [panneau, setPanneau] = useState<'creer' | 'alertes' | null>(null);
   /** Sur téléphone, toutes les rubriques s'ouvrent dans un volet ; la barre du bas garde les quatre plus utiles. */
   const [volet, setVolet] = useState(false);
+  /** Signaler un retard ou une absence : à portée depuis tous les écrans. */
+  const [signaler, setSignaler] = useState(false);
   const moi = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''));
   const espace = espaceDe(data, moi);
   // Sans collecte des préférences (modèle classique), l'entrée disparaît du menu.
@@ -387,6 +390,7 @@ export function App(): JSX.Element {
         </button>
       </nav>
 
+      {signaler && moi ? <DialogueSignaler moi={moi} onClose={() => setSignaler(false)} /> : null}
       <div className="main">
         <header className="topbar no-print" aria-label="Barre d’outils">
           <div className="topbar-in">
@@ -439,6 +443,10 @@ export function App(): JSX.Element {
                   <Plus size={16} aria-hidden="true" /> <span className="lib">Faire une demande</span>
                 </button>
               )}
+              <button type="button" className="btn sm top-signaler" id="top-signaler" onClick={() => setSignaler(true)} title="Signaler un retard ou une absence, pour vous ou pour quelqu’un d’autre">
+                <AlarmClock size={16} aria-hidden="true" /> <span className="lib">Retard ou absence</span>
+                <span className="sr">, signaler</span>
+              </button>
               <div style={{ position: 'relative' }}>
                 <button type="button" className="btn ghost icon top-ico" aria-haspopup="true" aria-expanded={panneau === 'alertes'} onClick={() => setPanneau((x) => (x === 'alertes' ? null : 'alertes'))}>
                   <Bell size={18} aria-hidden="true" />
