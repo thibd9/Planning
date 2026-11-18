@@ -278,7 +278,8 @@ export function Solvi({ size = 56, calme = false, humeur = 'neutre' }: { size?: 
             </filter>
           </defs>
           <g transform="translate(100 98)">
-            <path d={CORPS} fill={u('c')} />
+            {/* Sur un fond sombre, un fin contour blanc détache Solvi (voir --solvi-contour). */}
+            <path className="solvi-bord" d={CORPS} fill={u('c')} />
             <path d={CORPS} fill={u('b')} />
             <path d={CORPS} fill={u('v')} />
             <path d={CORPS} fill={u('r')} />

@@ -1,6 +1,10 @@
 # Solvéa — planning d'équipe pour pharmacie d'officine
 
-<img src="src/assets/solvea-logo-ciel.svg" alt="Solvéa" width="220">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="src/assets/solvea-logo-ciel-sombre.svg">
+  <source media="(prefers-color-scheme: light)" srcset="src/assets/solvea-logo-ciel.svg">
+  <img src="src/assets/solvea-logo-ciel.svg" alt="Solvéa" width="220">
+</picture>
 
 Solvéa aide une titulaire à construire le planning de son équipe, à comprendre chaque arbitrage
 et à absorber un imprévu en dérangeant le moins de monde possible.

@@ -2890,3 +2890,13 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
 :root[data-mode='sombre'] .solvi-nom.teinte, .sombre .solvi-nom.teinte { background: linear-gradient(100deg, color-mix(in srgb, var(--a-plein-2) 55%, #fff), color-mix(in srgb, var(--a-plein-2) 25%, #fff)); -webkit-background-clip: text; background-clip: text; }
 .aide-tete h2.solvi-nom { font-size: 24px; }
 .solvi-bulle-nom { font-size: 15px; margin-bottom: -2px; }
+
+/* Solvi flotte sans ombre portée : ni tache au sol, ni ombre sous son corps. */
+.solvi-ombre { display: none; }
+.solvi-corps svg, .aide-fab .solvi-corps svg { filter: none; }
+.aide-logo .solvi-corps svg, .pt-solvi .solvi-corps svg { filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.7)); }
+
+/* Sur un fond sombre (mode sombre, écran assombri par la visite), un fin contour blanc détache Solvi. */
+.solvi-bord { stroke: var(--solvi-contour, transparent); stroke-width: 4.5; stroke-linejoin: round; paint-order: stroke; }
+:root[data-mode='sombre'] .solvi, .solvi-guide .solvi { --solvi-contour: rgba(255, 255, 255, 0.92); }
+:root[data-mode='sombre'] .aide-logo .solvi-corps svg, :root[data-mode='sombre'] .pt-solvi .solvi-corps svg { filter: none; }
