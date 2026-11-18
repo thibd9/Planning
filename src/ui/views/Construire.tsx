@@ -112,9 +112,11 @@ export function Construire(): JSX.Element {
 
   const ouverts = dates.map((d) => ouverture(data.officine, d).length > 0);
   const avecSynthese = lecture !== 'heures';
-  const colonnes = `${avecSynthese ? 200 : 212}px ${dates
-    .map((d, i) => (ouverts[i] ? 'minmax(100px, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? '104px' : '40px'))
-    .join(' ')}${avecSynthese ? ' 172px' : ''}`;
+  // La semaine entière tient toujours dans la largeur, du lundi au dimanche : toutes les colonnes sont souples.
+  // Un jour fermé garde une colonne étroite mais lisible ; les noms et la synthèse se resserrent sur un petit écran.
+  const colonnes = `clamp(${avecSynthese ? 48 : 56}px, ${avecSynthese ? 16 : 19}cqi, ${avecSynthese ? 200 : 212}px) ${dates
+    .map((d, i) => (ouverts[i] ? 'minmax(0, 1fr)' : data.gardes.some((g) => g.date === d && g.personId) ? 'minmax(0, 0.72fr)' : 'minmax(0, 0.42fr)'))
+    .join(' ')}${avecSynthese ? ' clamp(62px, 14cqi, 172px)' : ''}`;
   const visibles = data.personnes.filter((p) => (seulementMoi ? p.id === moiId : !p.externe || postes.some((s) => s.personId === p.id)));
   const lignesEquite = useMemo(
     () => (lecture === 'equite' ? equite(data, periodeAvant(semaine, 8).from, addDays(semaine, 6)) : []),
@@ -296,11 +298,14 @@ export function Construire(): JSX.Element {
                     <div key={date} className={`pg-h${date === today ? ' today' : ''}${!ouverts[i] ? ' closed' : ''}`} role="columnheader" aria-current={date === today ? 'date' : undefined}>
                       <button type="button" className="jour-btn" onClick={() => voirJour(date)} title="Voir la journée : équipe, pauses, retards">
                         <span className="n">{Number(date.slice(8))}</span>
-                        <span className="d">{ouverts[i] ? JOURS[weekday(date)] : JOURS_COURT[weekday(date)]}</span>
+                        <span className="d">
+                          {ouverts[i] ? <span className="d-long">{JOURS[weekday(date)]}</span> : null}
+                          <span className={ouverts[i] ? 'd-court' : undefined}>{JOURS_COURT[weekday(date)]}</span>
+                        </span>
                         {/* L'accès à la journée se voit : un bouton écrit, sous la date. */}
                         {ouverts[i] ? (
                           <span className="jour-voir">
-                            <Eye size={13} aria-hidden="true" /> Voir la journée
+                            <Eye size={13} aria-hidden="true" /> <span className="jv-t">Voir la journée</span>
                           </span>
                         ) : (
                           <span className="sr">, voir la journée</span>

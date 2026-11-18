@@ -1,4 +1,4 @@
-import type { Person, Qualification } from './types';
+import type { AppData, Person, Qualification } from './types';
 
 /**
  * Ce qui distingue l'espace de chaque profil : les familles de produits (marques d'un animateur,
@@ -55,4 +55,20 @@ export const PROFILS: Record<Qualification, Profil> = {
 export function marquesParType(p: Pick<Person, 'marques'>): { type: TypeProduit; marques: string[] }[] {
   const liste = (p.marques ?? []).filter((m) => m.marque.trim());
   return TYPES_PRODUIT.map((type) => ({ type, marques: liste.filter((m) => m.types.includes(type)).map((m) => m.marque.trim()) })).filter((x) => x.marques.length);
+}
+
+/** Deux écritures de la même marque (majuscules, accents, espaces) désignent la même marque. */
+export const cleMarque = (nom: string): string => nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+/**
+ * Le répertoire des marques de la pharmacie : celles que le titulaire y a inscrites, et toutes celles déjà
+ * confiées à un animateur. Sans doublon, dans l'ordre alphabétique.
+ */
+export function repertoireMarques(data: Pick<AppData, 'officine' | 'personnes'>): string[] {
+  const vues = new Map<string, string>();
+  for (const nom of [...(data.officine.marques ?? []), ...data.personnes.flatMap((p) => (p.marques ?? []).map((m) => m.marque))]) {
+    const propre = nom.replace(/\s+/g, ' ').trim();
+    if (propre && !vues.has(cleMarque(propre))) vues.set(cleMarque(propre), propre);
+  }
+  return [...vues.values()].sort((a, b) => a.localeCompare(b, 'fr'));
 }

@@ -125,10 +125,19 @@ function decrire(temps: Geste[] | undefined): string {
     const nom = el ? nomDe(el) : '';
     return nom ? `Cliquez sur « ${nom} »` : 'Cliquez ici';
   }
+  // Solvi dit ce qu'on fait dans ce champ, pas ce qu'il y tape : sa saisie n'est qu'un exemple (voir `exempleDe`).
   const champ = el ? champDe(el) : '';
-  if (g.faire === 'taper') return champ ? `Écrivez « ${g.texte} » dans « ${champ} »` : `Écrivez « ${g.texte} »`;
+  if (g.faire === 'taper') return champ ? `Remplissez « ${champ} »` : 'Remplissez ce champ';
+  return champ ? `Choisissez dans la liste « ${champ} »` : 'Choisissez dans la liste';
+}
+/** Ce que Solvi saisit ou choisit lui-même pendant la démonstration : un exemple, annoncé comme tel. */
+function exempleDe(g: GesteVisible): string {
+  if (g.faire === 'cliquer') return '';
+  const el = element(g.dans);
+  if (g.faire === 'taper') return `Pour l’exemple, j’écris « ${g.texte} ».`;
   const option = el instanceof HTMLSelectElement ? [...el.options].find((o) => o.value === g.valeur)?.text : undefined;
-  return champ ? `Choisissez « ${option ?? g.valeur} » dans « ${champ} »` : `Choisissez « ${option ?? g.valeur} »`;
+  // Une heure ou un nombre réglé dans un champ se lit déjà dans la consigne.
+  return option ? `Pour l’exemple, je choisis « ${option} ».` : '';
 }
 /** À quoi sert le geste visible d'un temps, quand l'étape le dit. */
 const utilite = (temps: Geste[] | undefined): string => temps?.find(visible)?.sert ?? '';
@@ -625,7 +634,7 @@ const COMPLET_BRUT: Etape[] = [
     titre: 'Créer la pharmacie',
     texte: () => 'Trois écrans : le nom, les horaires, l’équipe. Ici, on part de zéro.',
     jouer: () => helene('nouvelle'),
-    gestes: [{ faire: 'taper', dans: '#officine-nom', texte: 'Grande Pharmacie de la Pinède', sert: 'Ce nom s’affiche en haut de l’écran et sur les plannings imprimés.' }],
+    gestes: [{ faire: 'taper', dans: '#officine-nom', texte: 'Grande Pharmacie de la Pinède', dit: 'Donnez un nom à votre pharmacie', sert: 'Il s’affiche en haut de l’écran et sur les plannings imprimés.' }],
   },
   {
     chapitre: PREPARER,
@@ -664,10 +673,10 @@ const COMPLET_BRUT: Etape[] = [
     jouer: () => helene('equipe'),
     gestes: [
       { faire: 'cliquer', sur: "[data-focus='ajouter-personne']", sert: 'Ce bouton ouvre la fiche d’une nouvelle personne.' },
-      { faire: 'taper', dans: '#personne-prenom', texte: 'Sarah', sert: 'Le prénom apparaît sur chaque ligne du planning.' },
-      { faire: 'taper', dans: '#personne-nom', texte: 'Lemoine', sert: 'Le nom sert aussi à créer son identifiant de connexion.' },
-      { faire: 'choisir', dans: '#personne-fonction', valeur: 'animateur', sert: 'La fonction fixe sa couleur et ce qu’elle peut tenir seule.' },
-      { faire: 'taper', dans: '#personne-heures', texte: '21', sert: 'Les heures du contrat servent au compteur d’heures et à l’équité.' },
+      { faire: 'taper', dans: '#personne-prenom', texte: 'Sarah', dit: 'Saisissez le prénom de votre collaborateur', sert: 'Il apparaît sur chaque ligne du planning. Ici, inventons une personne.' },
+      { faire: 'taper', dans: '#personne-nom', texte: 'Lemoine', dit: 'Puis son nom', sert: 'Il sert aussi à créer son identifiant de connexion.' },
+      { faire: 'choisir', dans: '#personne-fonction', valeur: 'animateur', dit: 'Choisissez sa fonction dans la liste déroulante', sert: 'Titulaire, pharmacien adjoint, préparateur, animateur… La fonction fixe sa couleur et ce qu’il peut tenir seul.' },
+      { faire: 'taper', dans: '#personne-heures', texte: '21', dit: 'Indiquez les heures de son contrat, par semaine', sert: 'Elles servent au compteur d’heures et à l’équité.' },
       { faire: 'cliquer', sur: VALIDER, sert: 'La personne rejoint l’équipe ; son compte est prêt.' },
       { faire: 'action', jouer: arriveeEquipe },
       { faire: 'pause', ms: 2600 },
@@ -699,8 +708,8 @@ const COMPLET_BRUT: Etape[] = [
     },
     gestes: [
       { faire: 'cliquer', sur: "[data-focus='marques'] .mq .mq-types button[aria-pressed='false']", dit: 'Touchez une famille de produits', sert: 'Sarah présente désormais cette marque pour cette famille aussi.' },
-      { faire: 'cliquer', sur: '#mq-ajouter', sert: 'Une nouvelle marque : son nom, puis ses familles de produits.' },
-      { faire: 'taper', dans: "[data-focus='marques'] .mq:last-child input", texte: 'Nouvelle gamme', sert: 'Le nom de la marque, tel qu’on le dit au comptoir.' },
+      { faire: 'taper', dans: '#mq-nom', texte: 'Nouvelle gamme', dit: 'Une marque absente du répertoire ? Écrivez son nom', sert: 'Tel qu’on le dit au comptoir.' },
+      { faire: 'cliquer', sur: '#mq-ajouter', sert: 'La marque rejoint le répertoire de la pharmacie : elle se proposera aux autres animateurs.' },
       { faire: 'cliquer', sur: "[data-focus='marques'] .mq:last-child .mq-types button", dit: 'Choisissez sa première famille de produits', sert: 'Une marque sans famille n’apparaît pas encore sur l’accueil de Sarah.' },
     ],
   },
@@ -873,7 +882,7 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'pause', ms: 2600, dit: 'Chaque ligne montre un poste et sa pause', sert: 'On y règle une pause et on y note un retard, en deux clics.' },
       { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('.dialog input[id^="pause-de-"]'), valeur: '12:45', dit: 'Décalez le début d’une pause à 12 h 45', sert: 'La frise et le contrôle « pharmacien présent » se recalculent aussitôt.', facultatif: true },
       { faire: 'cliquer', sur: parTexte('.dialog button', 'Noter un retard'), sert: 'Un retard, un départ anticipé ou une absence non prévue se note ici.' },
-      { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('.dialog select[id^="ecart-min-"]'), valeur: '15', dit: 'Choisissez « 15 min »', sert: 'Une date et une durée, jamais une raison.', facultatif: true },
+      { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('.dialog select[id^="ecart-min-"]'), valeur: '15', dit: 'Choisissez la durée du retard', sert: 'Une date et une durée, jamais une raison.', facultatif: true },
       { faire: 'cliquer', sur: parTexte('.dialog .btn.sm.primary', 'Noter'), sert: 'Le retard rejoint le suivi de la personne.', facultatif: true },
       { faire: 'cliquer', sur: parTexte('.dialog button', 'Lendemain'), sert: 'On passe d’un jour à l’autre sans refermer la fenêtre.' },
     ],
@@ -924,7 +933,7 @@ const COMPLET_BRUT: Etape[] = [
     },
     gestes: [
       { faire: 'cliquer', sur: parTexte('.content button', 'Ajouter une garde'), sert: 'On ajoute la garde du secteur : sa date et son type.' },
-      { faire: 'choisir', dans: '#garde-personne', valeur: 'p_lea', sert: 'Le pharmacien choisi est prévenu dans son espace.' },
+      { faire: 'choisir', dans: '#garde-personne', valeur: 'p_lea', dit: 'Choisissez le pharmacien de garde dans la liste', sert: 'Il est prévenu dans son espace.' },
       { faire: 'cliquer', sur: VALIDER, sert: 'Le délai de 15 jours et le repos qui suit sont contrôlés.' },
       { faire: 'action', jouer: avecGardes },
       { faire: 'cliquer', sur: '.content .g-item', dit: 'Cliquez sur une garde de la liste', sert: 'Sa fiche s’ouvre : à qui elle est confiée, le repos qui suit, ce qui part en paie.', facultatif: true },
@@ -945,7 +954,7 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: '.top-creer', sert: '« Créer » réunit tout ce que l’on peut ajouter.' },
       { faire: 'cliquer', sur: parTexte('.outils .menu button', 'Une formation'), sert: 'On ouvre la fenêtre de la formation.' },
-      { faire: 'taper', dans: '#formation-intitule', texte: 'Gestes d’urgence', sert: 'L’intitulé apparaîtra dans le planning des participants.' },
+      { faire: 'taper', dans: '#formation-intitule', texte: 'Gestes d’urgence', dit: 'Donnez un intitulé à la formation', sert: 'Il apparaîtra dans le planning des participants.' },
       { faire: 'cliquer', sur: '#formation-p_thomas', dit: 'Cochez Thomas parmi les participants', sert: 'Seuls les participants seront absents du comptoir.' },
       { faire: 'cliquer', sur: '#formation-p_ines', dit: 'Cochez Inès', sert: 'On coche autant de personnes que nécessaire.' },
       { faire: 'cliquer', sur: VALIDER, dit: 'Cliquez sur « Planifier et prévenir »', sert: 'Chacun est prévenu ; les postes à couvrir vont dans « Résoudre ».' },
@@ -1056,8 +1065,8 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'attendre', que: '.dialog' },
       { faire: 'cliquer', sur: parTexte('.dialog button', 'Sortie d’école'), sert: 'Le raccourci remplit les horaires et la raison ; on peut tout ajuster.' },
-      { faire: 'choisir', dans: '#demande-motif', valeur: 'famille', sert: 'La raison se choisit dans une liste ; seuls les titulaires la voient.' },
-      { faire: 'taper', dans: '#demande-precision', texte: 'Sortie à 16 h 30', sert: 'Une précision est possible, sans être obligatoire.' },
+      { faire: 'choisir', dans: '#demande-motif', valeur: 'famille', dit: 'Choisissez la raison dans la liste', sert: 'Seuls les titulaires la voient.' },
+      { faire: 'taper', dans: '#demande-precision', texte: 'Sortie à 16 h 30', dit: 'Ajoutez une précision, si vous le souhaitez', sert: 'Elle n’est pas obligatoire.' },
       { faire: 'cliquer', sur: VALIDER, sert: 'La demande part au titulaire, qui répond.' },
     ],
   },
@@ -1078,7 +1087,7 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgence médicale'), sert: 'L’urgence médicale passe en tête, avec un justificatif possible.' },
       { faire: 'pause', ms: 900 },
       { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgent'), sert: 'Urgent : le poste est à moins de sept jours.' },
-      { faire: 'choisir', dans: '#rempl-motif', valeur: 'famille', sert: 'Un motif est demandé ; seuls les titulaires le voient.' },
+      { faire: 'choisir', dans: '#rempl-motif', valeur: 'famille', dit: 'Choisissez le motif dans la liste', sert: 'Un motif est toujours demandé ; seuls les titulaires le voient.' },
       { faire: 'cliquer', sur: VALIDER, sert: 'La demande part au titulaire, qui décide.' },
     ],
   },
@@ -1206,8 +1215,8 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /Inès/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button'), dit: 'Cliquez sur « Refuser », sur la demande d’Inès', sert: 'Un refus s’explique toujours : la fenêtre vous y aide.' },
       { faire: 'attendre', que: '#refus-raison' },
-      { faire: 'choisir', dans: '#refus-raison', valeur: 'Plusieurs absences déjà prévues', sert: 'La raison se choisit dans une liste, pour rester factuel.' },
-      { faire: 'taper', dans: '#refus-mot', texte: 'La semaine suivante serait possible.', sert: 'Un mot libre peut proposer une autre solution.' },
+      { faire: 'choisir', dans: '#refus-raison', valeur: 'Plusieurs absences déjà prévues', dit: 'Choisissez la raison du refus dans la liste', sert: 'Une liste, pour rester factuel.' },
+      { faire: 'taper', dans: '#refus-mot', texte: 'La semaine suivante serait possible.', dit: 'Ajoutez un mot, si vous le souhaitez', sert: 'Il peut proposer une autre solution.' },
       { faire: 'cliquer', sur: '.dialog-foot .btn.danger', sert: 'Le message part à la personne ; son planning ne change pas.' },
     ],
   },
@@ -1298,7 +1307,7 @@ const COMPLET_BRUT: Etape[] = [
       helene('messages');
     },
     gestes: [
-      { faire: 'taper', dans: '#msg-texte', texte: 'Planning publié pour deux semaines.', sert: 'Un message pour toute l’équipe, ou pour une seule personne.' },
+      { faire: 'taper', dans: '#msg-texte', texte: 'Planning publié pour deux semaines.', dit: 'Écrivez votre message', sert: 'Pour toute l’équipe, ou pour une seule personne.' },
       { faire: 'cliquer', sur: parTexte('.content button', 'Envoyer'), sert: 'Il arrive aussitôt dans l’espace de chacun.' },
     ],
   },
@@ -1462,7 +1471,7 @@ const COMPLET_BRUT: Etape[] = [
     },
     gestes: [
       { faire: 'cliquer', sur: "[data-focus='assistant']", dit: 'Cliquez sur « Aide », en bas à droite', sert: 'C’est moi, Solvi ! Un clic ouvre la conversation.' },
-      { faire: 'taper', dans: '#aide-question', texte: 'Qui travaille demain ?', sert: 'Posez la question avec vos mots.' },
+      { faire: 'taper', dans: '#aide-question', texte: 'Qui travaille demain ?', dit: 'Posez votre question', sert: 'Avec vos mots, comme à un collègue.' },
       { faire: 'cliquer', sur: '.aide-envoyer', dit: 'Cliquez sur la flèche pour envoyer', sert: 'Je lis le planning et je réponds, avec un bouton vers le bon écran.' },
       { faire: 'attendre', que: () => [...document.querySelectorAll<HTMLElement>('.aide-bulle.bot:not(.attente)')][1] },
       { faire: 'pause', ms: 2600, dit: 'La réponse arrive, avec le bouton qui y mène', sert: 'Je réponds d’après votre planning du moment.' },
@@ -1480,7 +1489,7 @@ const COMPLET_BRUT: Etape[] = [
       helene('aide');
     },
     gestes: [
-      { faire: 'taper', dans: '#aide-recherche', texte: 'garde', sert: 'La recherche filtre les fiches et le lexique en même temps.' },
+      { faire: 'taper', dans: '#aide-recherche', texte: 'garde', dit: 'Cherchez un mot dans l’aide', sert: 'La recherche filtre les fiches et le lexique en même temps.' },
       { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Lexique'), sert: 'Le lexique définit le vocabulaire de Solvéa.' },
       { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Comment faire'), sert: 'Et l’on revient aux fiches : « Voir le tutoriel » rejoue la tâche, rien qu’elle.' },
     ],
@@ -1759,7 +1768,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       titre: 'Les messages',
       texte: () => 'Un fil pour l’équipe, des conversations privées.',
       jouer: () => moi('messages'),
-      gestes: [{ faire: 'taper', dans: '#msg-texte', texte: 'Bonjour à tous !', sert: 'Un message pour toute l’équipe, ou pour une seule personne.' }],
+      gestes: [{ faire: 'taper', dans: '#msg-texte', texte: 'Bonjour à tous !', dit: 'Écrivez votre message', sert: 'Pour toute l’équipe, ou pour une seule personne.' }],
     },
     {
       chapitre: MON_ESPACE,
@@ -1782,7 +1791,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       },
       gestes: [
         { faire: 'cliquer', sur: "[data-focus='assistant']", dit: 'Cliquez sur « Aide », en bas à droite', sert: 'C’est moi, Solvi ! Un clic ouvre la conversation.' },
-        { faire: 'taper', dans: '#aide-question', texte: 'Mon prochain poste ?', sert: 'Posez la question avec vos mots.' },
+        { faire: 'taper', dans: '#aide-question', texte: 'Mon prochain poste ?', dit: 'Posez votre question', sert: 'Avec vos mots, comme à un collègue.' },
         { faire: 'cliquer', sur: '.aide-envoyer', dit: 'Cliquez sur la flèche pour envoyer', sert: 'Je lis le planning et je réponds, avec un bouton vers le bon écran.' },
         { faire: 'attendre', que: '.aide-bulle.bot + .aide-bulle.moi + .aide-bulle.bot, .aide-bulle.bot .btn' },
       ],
@@ -1959,6 +1968,8 @@ export function Parcours(): JSX.Element | null {
   const [nbTemps, setNbTemps] = useState(0);
   /** Ce que le prochain temps va faire, lu à l'écran. */
   const [annonce, setAnnonce] = useState('');
+  /** Ce que Solvi saisit lui-même pour montrer : « Pour l'exemple, j'écris… ». */
+  const [exemple, setExemple] = useState('');
   /** À quoi sert le geste en cours : la deuxième ligne de la bulle de Solvi. */
   const [sert, setSert] = useState('');
   /** Où Solvi se tient pendant la démonstration : près de ce qu'il montre, sans rien cacher. */
@@ -2201,13 +2212,14 @@ export function Parcours(): JSX.Element | null {
      * Solvi prend la parole. S'il doit changer de place, il range sa bulle, vole d'un seul trait, puis la rouvre
      * avec ce qu'il a à dire : on suit un seul objet à la fois, et l'on ne lit qu'une fois arrivé.
      */
-    const parler = (vers: HTMLElement | null, dit: string, aQuoi: string, puis: () => void): void => {
+    const parler = (vers: HTMLElement | null, dit: string, aQuoi: string, puis: () => void, enExemple = ''): void => {
       const avant = poseRef.current;
       const place = vers ? placePour(vers) : degager();
       const distance = avant && place ? Math.hypot(place.x - avant.x, place.y - avant.y) : 0;
       const dire = (): void => {
         setAnnonce(dit);
         setSert(aQuoi);
+        setExemple(enExemple);
       };
       if (!avant || !place || distance < 12) {
         dire();
@@ -2265,6 +2277,7 @@ export function Parcours(): JSX.Element | null {
         if (!liste[faits].some(visible)) {
           setAnnonce(decrire(liste[faits]));
           setSert(utilite(liste[faits]));
+          setExemple('');
         }
         plusTard(() => derouler(liste[faits], 0), 160);
         return;
@@ -2329,11 +2342,12 @@ export function Parcours(): JSX.Element | null {
         plusTard(() => mesure.current(), 60);
         const dit = g.dit ?? decrire([g]);
         const aQuoi = g.sert ?? '';
+        const enExemple = exempleDe(g);
         setHumeur('neutre');
         // 2. Solvi vient se poser à côté et dit ce qu'il va faire. 3. Le temps de lire. 4. Le pointeur y va, puis agit.
         plusTard(() => {
-          parler(element(cible) ?? null, dit, aQuoi, () =>
-            patienter(tempsDeLire(`${dit} ${aQuoi}`), () => {
+          const suiteDuGeste = (): void =>
+            patienter(tempsDeLire(`${dit} ${aQuoi} ${enExemple}`), () => {
               if (!element(cible)) return derouler(gestes, i + 1);
               partir(cible);
               plusTard(() => {
@@ -2367,8 +2381,8 @@ export function Parcours(): JSX.Element | null {
                   }
                 }, 340);
               }, 780);
-            }),
-          );
+            });
+          parler(element(cible) ?? null, dit, aQuoi, suiteDuGeste, enExemple);
         }, 320);
       };
       viser();
@@ -2398,6 +2412,7 @@ export function Parcours(): JSX.Element | null {
       setPhase('demo');
       setAnnonce(decrire(liste[faits]));
       setSert(utilite(liste[faits]));
+      setExemple('');
       setHumeur('neutre');
       setAllure(rythme);
       // La fiche a le temps de s'effacer avant le premier geste.
@@ -2620,6 +2635,7 @@ export function Parcours(): JSX.Element | null {
             <span key={annonce} className="solvi-dit">
               <b>{annonce || etape.titre}</b>
               {sert ? <span className="solvi-sert">{sert}</span> : null}
+              {exemple ? <span className="solvi-exemple">{exemple}</span> : null}
             </span>
             <span className="solvi-outils">
               <button
@@ -2813,10 +2829,10 @@ export function Parcours(): JSX.Element | null {
 
 /** Une carte par visite : un mot pour le rôle, une phrase, trois repères. */
 const CARTES: Record<Scenario, { nom: string; phrase: string; mots: string[]; teinte: string; icone: JSX.Element }> = {
-  complet: { nom: 'Titulaire', phrase: 'La vie d’un planning, de la création au bilan.', mots: ['Installer', 'Construire', 'Décider'], teinte: 'v-titulaire', icone: <Crown size={30} /> },
-  pharmacien: { nom: 'Pharmacien', phrase: 'Planning et gardes.', mots: ['Planning', 'Demandes', 'Gardes'], teinte: 'v-pharmacien', icone: <PillIcon size={30} /> },
-  equipe: { nom: 'Équipe', phrase: 'Votre espace à vous.', mots: ['Planning', 'Demandes', 'Suivi'], teinte: 'v-equipe', icone: <FlaskConical size={30} /> },
-  etabli: { nom: 'Journée type', phrase: 'Du matin au soir, tous les rôles.', mots: ['Le matin', 'L’équipe', 'Le soir'], teinte: 'v-journee', icone: <Store size={30} /> },
+  complet: { nom: 'Titulaire', phrase: 'De la création au bilan.', mots: ['Installer', 'Construire', 'Décider'], teinte: 'v-titulaire', icone: <Crown size={30} /> },
+  pharmacien: { nom: 'Pharmacien', phrase: 'Votre planning et vos gardes.', mots: ['Planning', 'Demandes', 'Gardes'], teinte: 'v-pharmacien', icone: <PillIcon size={30} /> },
+  equipe: { nom: 'Équipe', phrase: 'Votre espace, pas à pas.', mots: ['Planning', 'Demandes', 'Suivi'], teinte: 'v-equipe', icone: <FlaskConical size={30} /> },
+  etabli: { nom: 'Journée type', phrase: 'Une journée, tous les rôles.', mots: ['Le matin', 'L’équipe', 'Le soir'], teinte: 'v-journee', icone: <Store size={30} /> },
 };
 
 /** Fenêtre « Découvrir Solvéa » : une visite guidée par rôle, ou une entrée libre. */

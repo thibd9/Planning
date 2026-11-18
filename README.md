@@ -241,6 +241,25 @@ journée : toute l'équipe sur une même frise, de l'ouverture à la fermeture. 
 déjeuner de chacun, voit aussitôt si un pharmacien manque pendant une pause, et note un retard, un départ
 anticipé ou une absence non prévue. Les autres lisent la journée publiée.
 
+### Prévenir d'un retard
+
+Un imprévu sur la route : la personne prévient elle-même, en deux gestes. Sous son prochain poste (sur son
+accueil et dans « Mon planning »), « Prévenir d'un retard » ouvre une fenêtre : elle touche la durée
+(5 min à 1 h, ou une autre durée), l'heure d'arrivée se calcule seule, puis elle envoie. La raison
+(transport, santé, famille, autre) et un mot sont facultatifs, et vus des seuls titulaires.
+
+- Les **titulaires**, et les personnes à qui la gestion est confiée, reçoivent aussitôt une
+  **notification** dans la cloche et un **message**, avec l'heure d'arrivée. La notification signale si
+  le comptoir reste sans pharmacien, ou sans personne, le temps du retard.
+- L'avis reste affiché sous le prochain poste : il se **corrige** (la correction repart aux titulaires)
+  ou s'**annule** (« Je serai à l'heure »).
+- Sur le tableau de bord, « Retard » et l'heure d'arrivée se lisent à côté de la personne dans l'équipe
+  du jour.
+- Le bouton concerne le poste d'aujourd'hui qui n'est pas terminé, sinon le premier de demain. Il
+  n'apparaît pas pour le titulaire principal, qui n'a personne à prévenir.
+- C'est une annonce, pas un constat : le retard réellement constaté se note toujours dans la journée,
+  par le responsable.
+
 ### Compétences et diplômes
 
 Chaque fiche coche ce que la personne sait faire, par famille : actes et diplômes (vaccination, tests,
@@ -548,6 +567,9 @@ Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défa
 - sur 32 écrans rejoués dans chacun des dix thèmes, en clair et en sombre (640 écrans), **sur la version
   hébergée elle-même** - c'est là qu'un défaut du mode sombre était passé inaperçu ;
 - sur 12 écrans à la largeur d'un téléphone.
+- **Champs** : un relevé de tous les champs de saisie (306 sur 115 écrans et fenêtres), fait avec un
+  appareil réglé à l'inverse de l'application (sombre quand elle est claire, et l'inverse), n'en trouve
+  aucun qui garde l'aspect du navigateur : tous portent le fond, le contour et les coins de la plateforme.
 
 Les quatre visites guidées sont déroulées en entier par un script : chaque étape a son projecteur, aucune
 erreur. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des contrôles

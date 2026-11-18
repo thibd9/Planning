@@ -172,7 +172,7 @@ export function vierge(): AppData {
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
 /** À augmenter quand l'exemple change (noms, équipe) : les exemples enregistrés sur l'appareil sont alors régénérés. */
-export const DEMO_VERSION = 5;
+export const DEMO_VERSION = 6;
 
 export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);
@@ -239,7 +239,8 @@ export function seed(today: ISODate, avance = 0): AppData {
   // Comptes d'exemple : identifiant prenom.nom, mot de passe « demo ».
   const personnes = EQUIPE_DEMO.map((p) => ({ ...p, identifiant: identifiantPropose(p.prenom, p.nom, []), code: empreinte('demo'), provisoire: p.id === 'p_helene' ? undefined : 'demo' }));
   let data: AppData = {
-    officine: { ...OFFICINE_DEMO, secours: 'TILL-2026' },
+    // Le répertoire des marques de l'exemple : des noms inventés, qui restent proposés même retirés d'une fiche.
+    officine: { ...OFFICINE_DEMO, secours: 'TILL-2026', marques: ['Lumaderm', 'Petit Lin', 'Verdéa'] },
     demo: true,
     demoVersion: DEMO_VERSION,
     messages: [

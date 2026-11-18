@@ -41,7 +41,9 @@ export function Tuile({
         <Icone size={14} />
       </span>
       <span className="tt num">
-        {fmtHHMM(s.start)}–{fmtHHMM(s.end)}
+        <span className="th">{fmtHHMM(s.start)}</span>
+        <span className="tsep">–</span>
+        <span className="th">{fmtHHMM(s.end)}</span>
         <span className="ts">
           {fmtDuree(minutesTravail(s))} · {ACTIVITE_COURT[s.activite].toLowerCase()}
         </span>

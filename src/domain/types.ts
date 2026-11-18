@@ -250,6 +250,8 @@ export interface Support {
 
 export interface Officine {
   nom: string;
+  /** Le répertoire des marques de la pharmacie : celles qu'on peut confier à un animateur. Il s'enrichit à l'usage. */
+  marques?: string[];
   support?: Support;
   modele?: ModelePlanning;
   /** Jour du mois précédent où la collecte des préférences se ferme (20 par défaut). */

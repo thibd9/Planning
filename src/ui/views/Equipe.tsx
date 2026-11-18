@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, ClipboardList, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lightbulb, Lock, Plus, RefreshCw, ShieldCheck, Sparkles, Stethoscope, Tags, Trash2, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { TYPES_PRODUIT, TYPE_PRODUIT_LABEL } from '../../domain/profils';
+import { TYPES_PRODUIT, TYPE_PRODUIT_LABEL, cleMarque, repertoireMarques } from '../../domain/profils';
 import type { MarqueAnimee, TypeProduit } from '../../domain/profils';
 import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
@@ -213,6 +213,67 @@ function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: ()
 const FAMILLE_ICONE: LucideIcon[] = [Stethoscope, Lightbulb, ClipboardList];
 
 /** Titre d'une rubrique de la fiche : une icône, le nom, et à droite un compteur ou une action. */
+/**
+ * Ajouter une marque à un animateur : on la prend dans le répertoire de la pharmacie d'un geste, ou on écrit
+ * son nom si elle n'y est pas encore. Une marque nouvelle rejoint le répertoire, pour les autres animateurs aussi.
+ */
+function AjoutMarque({ person, maj }: { person: Person; maj: (patch: Partial<Person>) => void }): JSX.Element {
+  const data = useStore((s) => s.data);
+  const majOfficine = useStore((s) => s.majOfficine);
+  const dire = useUi((s) => s.dire);
+  const [nom, setNom] = useState('');
+  const siennes = new Set((person.marques ?? []).map((m) => cleMarque(m.marque)));
+  const repertoire = repertoireMarques(data);
+  const disponibles = repertoire.filter((m) => !siennes.has(cleMarque(m)));
+  const propre = nom.replace(/\s+/g, ' ').trim();
+  const deja = !!propre && siennes.has(cleMarque(propre));
+  const ajouter = (marque: string): void => {
+    // Le nom du répertoire fait foi : « nhco » retrouve « NHCO » s'il y est déjà.
+    const connue = repertoire.find((m) => cleMarque(m) === cleMarque(marque));
+    if (!connue) majOfficine({ marques: [...(data.officine.marques ?? []), marque] });
+    maj({ marques: [...(person.marques ?? []), { id: uid('mq'), marque: connue ?? marque, types: [] }] });
+    dire(connue ? `${connue} ajoutée aux marques de ${person.prenom}.` : `${marque} rejoint le répertoire de la pharmacie et les marques de ${person.prenom}.`);
+    setNom('');
+  };
+  return (
+    <div className="mq-ajout">
+      {disponibles.length ? (
+        <div className="mq-repertoire" role="group" aria-label="Marques du répertoire de la pharmacie">
+          <span className="small soft">Dans le répertoire de la pharmacie :</span>
+          <div className="mq-types">
+            {disponibles.map((m) => (
+              <button key={m} type="button" className="comp" onClick={() => ajouter(m)}>
+                <Plus size={14} aria-hidden="true" />
+                <span>{m}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      <form
+        className="mq-nouvelle"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (propre && !deja) ajouter(propre);
+        }}
+      >
+        <label className="field grow" htmlFor="mq-nom">
+          {repertoire.length ? 'La marque n’est pas dans le répertoire ? Écrivez son nom' : 'Nom de la marque'}
+          <input id="mq-nom" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Nom de la marque" maxLength={60} autoComplete="off" aria-describedby={deja ? 'mq-deja' : undefined} />
+        </label>
+        <button type="submit" className="btn" id="mq-ajouter" disabled={!propre || deja}>
+          <Plus size={15} aria-hidden="true" /> Ajouter la marque
+        </button>
+        {deja ? (
+          <p className="tiny muted mq-deja" id="mq-deja" role="status">
+            {person.prenom} présente déjà cette marque.
+          </p>
+        ) : null}
+      </form>
+    </div>
+  );
+}
+
 function TitreFiche({ icone: Icone, children, note, droite }: { icone: LucideIcon; children: ReactNode; note?: string; droite?: ReactNode }): JSX.Element {
   return (
     <div className="fiche-titre">
@@ -365,9 +426,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
                 );
               })}
             </div>
-            <button type="button" className="btn" id="mq-ajouter" style={{ alignSelf: 'flex-start' }} onClick={() => maj({ marques: [...(person.marques ?? []), { id: uid('mq'), marque: '', types: [] }] })}>
-              <Plus size={15} aria-hidden="true" /> Ajouter une marque
-            </button>
+            <AjoutMarque person={person} maj={maj} />
           </section>
         ) : null}
         {person.qualification === 'rayonniste' ? (
