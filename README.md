@@ -277,6 +277,23 @@ vue mois, une garde se voit dans la case du jour.
 - **Contrôles du planning** : tuiles groupées par gravité, le constat, le détail et la règle sur des
   lignes séparées.
 
+### Messages, équité, documents, déconnexion
+
+- **Messages.** On arrive sur la conversation qui a du nouveau. Les conversations non lues sont en tête,
+  en couleur, avec un aperçu du dernier message et une pastille ; dans le fil, un trait « Nouveau message »
+  marque ce qui n'avait pas été lu.
+- **Équité.** La page répond d'abord à la question (« La charge est-elle bien répartie ? ») : combien sont
+  à l'équilibre, qui a porté plus, qui a porté moins. Puis un compteur à la fois (samedis, fermetures,
+  gardes, dépannages…), une ligne par personne : ce qu'elle a fait, sa part attendue, l'écart en mots.
+- **Mes documents.** Pour chacun : ses plannings publiés rangés par mois, ses absences et arrêts avec leur
+  état, et les fichiers qu'il dépose (arrêt de travail, attestation de formation, contrat), partagés ou
+  non avec les titulaires. Le titulaire retrouve les documents reçus de l'équipe.
+- **Déconnexion sans perte.** Tout est enregistré au fur et à mesure. Avant de se déconnecter, une fenêtre
+  rappelle ce qui reste en cours (accords à donner, postes à couvrir, demandes, plannings en brouillon,
+  messages non lus) avec un accès direct, et le navigateur demande confirmation si une fenêtre de saisie
+  est ouverte.
+- **Assistant.** Il répond aussi à « Quels sont mes droits ? » avec les règles actives et leurs seuils.
+
 ### Fiche d'une personne
 
 Chaque rubrique a son titre et son icône : poste et contrat, compétences et diplômes, droits d'accès,
@@ -444,6 +461,9 @@ src/
   changé, et le contraste a été recalculé sur le fond le plus défavorable (voir « Accessibilité »).
 - **Mouvement.** Les fonds animés, les entrées d'écran et les visites guidées s'arrêtent de bouger si
   l'appareil demande de réduire les animations.
+- **Documents sur l'appareil.** Les fichiers déposés restent dans le navigateur, 600 Ko par fichier et
+  3 Mo au total : ils ne sont ni sauvegardés ni transmis à un autre poste. Un vrai coffre de documents,
+  surtout pour des arrêts de travail, demande un hébergement adapté.
 - **Assistant à règles.** L'assistant reconnaît une dizaine de questions sur le planning et une trentaine
   de fiches d'aide. Une question formulée autrement peut ne pas être comprise : il le dit et propose des
   suggestions. Il ne rédige rien et n'apprend pas.

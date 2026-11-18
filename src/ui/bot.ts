@@ -44,6 +44,7 @@ export const FICHES: Fiche[] = [
   { id: 'difference', question: 'Préférence, demande : quelle différence ?', reponse: 'Une préférence dit ce qui vous convient pour le mois à venir : le planning s’en inspire, personne ne vous répond. Une demande (congé, horaire à tenir, remplacement) attend une réponse du titulaire.', mots: 'preferences souhaits demandes comprendre onglets', pour: MOI_SEUL, ecrans: ['demandes'], bouton: 'Ouvrir mes demandes', aller: (ui) => ui.aller('demandes') },
   { id: 'souhaits', question: 'Donner mes préférences du mois', reponse: 'Choisissez une forme (matin, journée, après-midi, repos) puis cliquez les jours. « M’assister » remplit le reste d’après vos habitudes. Aucune raison n’est demandée.', mots: 'preferences souhaits mois ideal assister matin apres-midi repos', pour: MOI_SEUL, ecrans: ['demandes', 'moi'], bouton: 'Donner mes préférences', aller: versDemandes('souhaits') },
   { id: 'conge', question: 'Poser un congé ou une contrainte d’horaires', reponse: 'Dans « Mes demandes », onglet « Absences et horaires ». Un raccourci (garde d’enfant, pratique religieuse, cours du soir) remplit les horaires ; le motif n’est jamais enregistré.', mots: 'absence vacances formation finir tot commencer tard indisponible religion enfant', pour: TOUS, ecrans: ['demandes', 'moi'], bouton: 'Faire une demande', aller: (ui) => ui.agir('demandes', 'demande') },
+  { id: 'documents', question: 'Retrouver mes anciens plannings ou déposer un document', reponse: '« Mes documents » réunit vos plannings publiés, vos absences et arrêts, et les fichiers que vous déposez (arrêt de travail, attestation de formation). Ils restent sur cet appareil.', mots: 'documents ged archive ancien planning arret attestation fichier deposer justificatif', pour: TOUS, ecrans: ['documents', 'moi'], bouton: 'Ouvrir mes documents', aller: (ui) => ui.aller('documents') },
   { id: 'remplacer', question: 'Me faire remplacer sur un poste', reponse: 'Dans « Mes demandes », carte « Me faire remplacer » : choisissez le poste, puis demandez à toute l’équipe ou à un collègue précis. Le calcul dit qui peut le reprendre, d’après les règles et ses heures de la semaine. Votre titulaire valide dans tous les cas.', mots: 'remplacement urgent medical justificatif arret malade empeche ceder echanger', pour: MOI_SEUL, ecrans: ['demandes', 'moi'], bouton: 'Demander un remplacement', aller: versDemandes('remplacements') },
   { id: 'aider', question: 'Répondre à un appel ou aider un collègue', reponse: 'L’appel apparaît en tête de « Mon planning », avec votre rang dans le tour de rôle. « Je peux » ou « Je ne peux pas » : dire non ne change pas votre rang.', mots: 'volontaire depanner tour de role appel equipe je peux', pour: MOI_SEUL, ecrans: ['moi'], bouton: 'Voir les appels', aller: (ui) => ui.aller('moi') },
   { id: 'suivi', question: 'Voir mon compteur d’heures et mon suivi', reponse: '« Mon suivi » montre vos heures en plus ou en moins, ce qui a été noté sur douze mois et votre part des contraintes. Vous ne voyez que votre position.', mots: 'heures supplementaires compteur retards equite samedis', pour: MOI_SEUL, ecrans: ['suivi'], bouton: 'Ouvrir mon suivi', aller: (ui) => ui.aller('suivi') },
@@ -176,6 +177,21 @@ function calculer(question: string, c: Contexte): Reponse | null {
     const miens = semaines.flatMap((m) => (data.semaines[m]?.statut === 'publie' ? (data.semaines[m].snapshot ?? []) : [])).filter((s) => s.personId === moi && s.date >= today).sort((x, y) => x.date.localeCompare(y.date) || x.start - y.start);
     if (!miens.length) return { texte: 'Aucun poste publié à venir pour vous.', bouton: { label: 'Ouvrir mon planning', aller: (ui: Ui) => ui.aller('moi') } };
     return { texte: `Votre prochain poste : ${quand(miens[0].date, today).toLowerCase()}, ${fmtHeure(miens[0].start)} – ${fmtHeure(miens[0].end)}.`, lignes: miens.slice(1, 4).map((s) => `Puis ${fmtDateCourt(s.date)} · ${fmtHeure(s.start)} – ${fmtHeure(s.end)}`), bouton: { label: 'Ouvrir mon planning', aller: (ui: Ui) => ui.aller('moi') } };
+  }
+
+  // Les droits et les garde-fous : les règles actives, avec leurs seuils, telles qu'elles sont réglées dans l'officine.
+  if (a('droit', 'regle', 'repos', 'maximum', 'pause', 'legal', 'convention', 'protege')) {
+    const cles = ['duree.quotidienne', 'duree.hebdo', 'duree.pause', 'repos.quotidien', 'repos.hebdo', 'equipe.heuresMax', 'equipe.samedisLibres', 'delai.remplacement'];
+    const lignes = cles
+      .map((id) => data.regles.find((r) => r.id === id && r.active))
+      .filter((r): r is NonNullable<typeof r> => !!r)
+      .map((r) => `${r.titre}${r.valeur !== undefined ? ` : ${r.valeur} ${r.unite ?? ''}`.trimEnd() : ''}`);
+    return {
+      texte: 'Ce que Solvéa vérifie pour protéger chacun, salariés comme titulaires :',
+      lignes,
+      ...(espace === 'responsable' ? { bouton: { label: 'Ouvrir les règles', aller: (ui: Ui) => ui.aller('regles') } } : {}),
+      suites: ['Me faire remplacer sur un poste'].filter(() => espace !== 'responsable'),
+    };
   }
 
   if (a('heure', 'compteur', 'supplementaire', 'recuper')) {

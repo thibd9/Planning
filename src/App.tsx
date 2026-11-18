@@ -1,9 +1,11 @@
-import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users } from 'lucide-react';
+import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { ESPACE_LABEL, espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
 import { fmtDateCourt, fmtHeure } from './domain/time';
 import { nomComplet, nomCourt } from './domain/types';
+import { Documents } from './ui/views/Documents';
+import { DialogueDeconnexion } from './ui/components/Deconnexion';
 import { decisions } from './engine/decisions';
 import { useStore } from './store/store';
 import type { Vue } from './store/ui';
@@ -47,7 +49,8 @@ interface Lien {
 const MOI: Lien = { vue: 'moi', label: 'Mon planning', question: 'Mes horaires', icon: <CalendarDays size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const DEMANDES: Lien = { vue: 'demandes', label: 'Mes demandes', question: 'Préférences, absences, remplacements', icon: <Inbox size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const SUIVI: Lien = { vue: 'suivi', label: 'Mon suivi', question: 'Compteurs et équité', icon: <Gauge size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
-const PERSO: Lien[] = [MOI, DEMANDES, SUIVI];
+const DOCUMENTS: Lien = { vue: 'documents', label: 'Mes documents', question: 'Plannings, absences, fichiers', icon: <FolderOpen size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
+const PERSO: Lien[] = [MOI, DEMANDES, SUIVI, DOCUMENTS];
 const MESSAGES: Lien = { vue: 'messages', label: 'Messages', question: 'Équipe et privé', icon: <MessageSquare size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
 // Le titulaire suit son équipe : son menu suit l'ordre du travail. On prépare, on planifie, on suit, on fait le bilan.
 const GESTION: Lien[] = [
@@ -62,6 +65,7 @@ const GESTION: Lien[] = [
   { vue: 'heures', label: 'Heures', question: 'Compteurs à régulariser', icon: <Hourglass size={18} />, couleur: 'c-clair', groupe: 'Suivre' },
   { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
   { vue: 'journal', label: 'Journal et paie', question: 'Historique, export', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
+  { ...DOCUMENTS, label: 'Documents', groupe: 'Bilan' },
 ];
 const PLANNING: Lien = { vue: 'planning', label: 'Planning de l’équipe', question: 'La version publiée', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'L’équipe' };
 const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gardes et astreintes', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
@@ -82,6 +86,16 @@ export function App(): JSX.Element {
   const undo = useStore((s) => s.undo);
   const { vue, aller, agir, setSujet, viserDemande, session, deconnecter, preferences, toast, taire, setTour, parcours, jour, voirJour, dire, setPreferences } = useUi();
   const [menu, setMenu] = useState(false);
+  /** La déconnexion passe par un point d'étape : ce qui reste en cours est rappelé avant de partir. */
+  const [quitter, setQuitter] = useState(false);
+  // Une fenêtre de saisie ouverte : le navigateur demande confirmation avant de fermer l'onglet.
+  useEffect(() => {
+    const garder = (e: BeforeUnloadEvent): void => {
+      if (document.querySelector('.dialog')) e.preventDefault();
+    };
+    window.addEventListener('beforeunload', garder);
+    return () => window.removeEventListener('beforeunload', garder);
+  }, []);
   // Sans session, l'application s'ouvre sur la connexion ; la création d'une pharmacie se lance depuis là.
   const [creation, setCreation] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -427,7 +441,7 @@ export function App(): JSX.Element {
                       <Building2 size={17} aria-hidden="true" /> Ajouter une pharmacie
                     </button>
                   ) : null}
-                  <button type="button" onClick={() => { setMenu(false); deconnecter(); }}>
+                  <button type="button" onClick={() => { setMenu(false); setQuitter(true); }}>
                     <LogOut size={17} aria-hidden="true" /> Se déconnecter
                   </button>
                 </div>
@@ -467,6 +481,8 @@ export function App(): JSX.Element {
             <Equite />
           ) : vueActive === 'regles' ? (
             <Regles />
+          ) : vueActive === 'documents' ? (
+            <Documents personId={moi.id} espace={espace} />
           ) : vueActive === 'journal' ? (
             <Journal />
           ) : (
@@ -476,6 +492,24 @@ export function App(): JSX.Element {
       </div>
 
       <Assistant espace={espace} prenom={moi.prenom} personId={moi.id} />
+      {quitter ? (
+        <DialogueDeconnexion
+          data={data}
+          today={today}
+          moi={moi}
+          espace={espace}
+          onRester={() => setQuitter(false)}
+          onPartir={() => {
+            setQuitter(false);
+            deconnecter();
+          }}
+          onVoir={(v, sujet) => {
+            setQuitter(false);
+            if (sujet) setSujet(sujet);
+            aller(v);
+          }}
+        />
+      ) : null}
       <Tour />
       <Parcours />
       <ChoixParcours />

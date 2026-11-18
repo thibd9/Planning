@@ -8,10 +8,10 @@ import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { Avatar, Dialog } from '../kit';
 
-const PDF_MAX = 600 * 1024;
+export const PDF_MAX = 600 * 1024;
 
 /** Réduit une photo à 1 400 px de côté : assez pour lire un document, assez léger pour rester sur l'appareil. */
-function reduireImage(fichier: File): Promise<Justificatif> {
+export function reduireImage(fichier: File): Promise<Justificatif> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(fichier);
     const img = new Image();
@@ -33,7 +33,7 @@ function reduireImage(fichier: File): Promise<Justificatif> {
   });
 }
 
-function lirePdf(fichier: File): Promise<Justificatif> {
+export function lirePdf(fichier: File): Promise<Justificatif> {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload = () => resolve({ nom: fichier.name, type: fichier.type, taille: fichier.size, data: String(r.result) });

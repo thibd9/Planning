@@ -378,6 +378,24 @@ export interface Justificatif {
   data: string;
 }
 
+export type CategorieDoc = 'arret' | 'formation' | 'contrat' | 'autre';
+export const CATEGORIE_DOC_LABEL: Record<CategorieDoc, string> = { arret: 'Arrêt de travail', formation: 'Attestation de formation', contrat: 'Contrat ou avenant', autre: 'Autre document' };
+/** Un document rangé dans l'espace d'une personne. */
+export interface DocumentGed {
+  id: string;
+  personId: string;
+  nom: string;
+  type: string;
+  taille: number;
+  /** Contenu (URL de données). */
+  data: string;
+  categorie: CategorieDoc;
+  /** Date du dépôt. */
+  at: string;
+  /** Visible aussi par les titulaires. */
+  partage: boolean;
+}
+
 /** Régularisation du compteur d'heures d'une personne. minutes < 0 réduit un solde positif, > 0 comble un solde négatif. */
 export type RegulType = 'paiement' | 'recuperation' | 'rattrapage' | 'solde';
 export const REGUL_LABEL: Record<RegulType, string> = { paiement: 'Heures payées', recuperation: 'Récupération', rattrapage: 'Rattrapage', solde: 'Compteur soldé' };
@@ -433,6 +451,8 @@ export interface AppData {
   /** Préférences du mois, posés jour par jour dans le modèle collaboratif. */
   souhaits?: Souhait[];
   regularisations?: Regularisation[];
+  /** Documents déposés par chacun dans son espace ; ils restent sur l'appareil. */
+  documents?: DocumentGed[];
   messages: Message[];
   remplacements: Remplacement[];
   ecarts: Ecart[];

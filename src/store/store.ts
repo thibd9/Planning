@@ -4,7 +4,7 @@ import { DEMO_VERSION, seed, vierge } from '../data/seed';
 import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
-import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, Shift, Souhait, SouhaitChoix, Urgence, Remplacement } from '../domain/types';
+import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
 import { decrireBesoin, minutesSemaine, shiftsSemaine } from '../engine/core';
 import { reposApresGarde } from '../engine/gardes';
@@ -136,6 +136,9 @@ export interface Store {
   deciderDemande: (id: string, accepter: boolean, motif?: string) => void;
   regulariser: (r: Pick<Regularisation, 'personId' | 'minutes' | 'type' | 'semaine'>) => void;
   retirerRegularisation: (id: string) => void;
+  ajouterDocument: (doc: Omit<DocumentGed, 'id' | 'at'>) => void;
+  supprimerDocument: (id: string) => void;
+  partagerDocument: (id: string, partage: boolean) => void;
   /** Résorbe tous les compteurs sur la première semaine non publiée et recalcule son brouillon. */
   regulariserAuto: () => void;
   seProposer: (id: string, personId: string, oui: boolean) => void;
@@ -439,6 +442,9 @@ export const useStore = create<Store>((set, get) => {
         ),
       ),
     retirerRegularisation: (id) => commit((d) => ({ ...d, regularisations: (d.regularisations ?? []).filter((r) => r.id !== id) })),
+    ajouterDocument: (doc) => commit((d) => ({ ...d, documents: (d.documents ?? []).concat({ ...doc, id: uid('doc'), at: now() }) }), false),
+    supprimerDocument: (id) => commit((d) => ({ ...d, documents: (d.documents ?? []).filter((x) => x.id !== id) }), false),
+    partagerDocument: (id, partage) => commit((d) => ({ ...d, documents: (d.documents ?? []).map((x) => (x.id === id ? { ...x, partage } : x)) }), false),
     regulariserAuto: () =>
       commit((d, today) => {
         const propositions = proposerRegularisations(d, today);

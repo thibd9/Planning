@@ -1,23 +1,44 @@
-import { MessageSquare, Send, Users } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { fmtHorodatage } from '../../domain/time';
+import { BellDot, MessageSquare, Send, Users } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { fmtDateCourt, fmtHeure, fmtHorodatage } from '../../domain/time';
 import { nomComplet, nomCourt } from '../../domain/types';
 import { useStore } from '../../store/store';
-import { EtiquetteRole } from '../icons';
-import { Avatar, Pill } from '../kit';
+import { Avatar } from '../kit';
 
 /** Messagerie interne : un fil pour toute l'équipe, et un fil privé avec chaque collègue. */
 export function Messages({ personId }: { personId: string }): JSX.Element {
   const { data, envoyerMessage, lireFil } = useStore();
-  const [fil, setFil] = useState('equipe');
-  const [texte, setTexte] = useState('');
-  const bas = useRef<HTMLDivElement>(null);
+  const today = useStore((st) => st.today);
   const collegues = data.personnes.filter((p) => !p.externe && p.id !== personId);
   const duFil = (f: string) => data.messages.filter((m) => (f === 'equipe' ? m.a === 'equipe' : (m.de === f && m.a === personId) || (m.de === personId && m.a === f)));
   const nonLus = (f: string): number => duFil(f).filter((m) => !m.luPar.includes(personId)).length;
+  const dernier = (f: string) => duFil(f).sort((a, b) => b.at.localeCompare(a.at))[0];
+  // On arrive sur la conversation qui a du nouveau, pas sur une conversation déjà lue.
+  const [fil, setFil] = useState(() => ['equipe', ...collegues.map((p) => p.id)].find((f) => nonLus(f) > 0) ?? 'equipe');
+  const [texte, setTexte] = useState('');
+  /** Les messages qui étaient non lus à l'ouverture de la conversation : ils restent marqués « nouveau » tant qu'on y est. */
+  const [nouveaux, setNouveaux] = useState<string[]>([]);
+  const bas = useRef<HTMLDivElement>(null);
   const messages = duFil(fil).sort((a, b) => a.at.localeCompare(b.at));
   const autre = data.personnes.find((p) => p.id === fil);
+  const totalNonLus = ['equipe', ...collegues.map((p) => p.id)].reduce((t, f) => t + (f === fil ? 0 : nonLus(f)), 0);
+  /** Les conversations, celles qui ont du nouveau d'abord, puis la plus récente en tête. */
+  const fils = useMemo(
+    () =>
+      [{ id: 'equipe', person: undefined as (typeof collegues)[number] | undefined }, ...collegues.map((p) => ({ id: p.id, person: p }))]
+        .map((f) => ({ ...f, n: f.id === fil ? 0 : nonLus(f.id), der: dernier(f.id) }))
+        .sort((a, b) => Number(b.n > 0) - Number(a.n > 0) || (b.der?.at ?? '').localeCompare(a.der?.at ?? '')),
+    [data.messages, data.personnes, fil, personId],
+  );
+  const quand = (iso: string): string => {
+    const d = new Date(iso);
+    const jour = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return jour === today ? fmtHeure(d.getHours() * 60 + d.getMinutes()) : fmtDateCourt(jour).replace(/ \d{4}$/, '');
+  };
 
+  useEffect(() => {
+    setNouveaux(duFil(fil).filter((m) => !m.luPar.includes(personId) && m.de !== personId).map((m) => m.id));
+  }, [fil]);
   useEffect(() => {
     lireFil(personId, fil);
     bas.current?.scrollIntoView({ block: 'nearest' });
@@ -34,30 +55,37 @@ export function Messages({ personId }: { personId: string }): JSX.Element {
           <h1>
             Échanger avec <span className="hl">l’équipe</span>
           </h1>
-          <p>Pour une absence ou un horaire, préférez une demande depuis « Mon planning » : elle est suivie et tracée. Les messages restent sur cet appareil.</p>
+          <p>Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.</p>
         </div>
+        {totalNonLus ? (
+          <span className="msg-alerte" role="status">
+            <BellDot size={17} aria-hidden="true" /> {totalNonLus} message{totalNonLus > 1 ? 's' : ''} non lu{totalNonLus > 1 ? 's' : ''}
+          </span>
+        ) : null}
       </div>
       <div className="split">
-        <div className="col" style={{ gap: 8 }} role="group" aria-label="Conversations">
-          <button type="button" className={`g-item${fil === 'equipe' ? ' on' : ''}`} aria-pressed={fil === 'equipe'} onClick={() => setFil('equipe')}>
-            <span className="ico" aria-hidden="true"><Users size={18} /></span>
-            <span className="grow">
-              <b>Toute l’équipe</b>
-              <span className="small soft" style={{ display: 'block' }}>Visible par tous</span>
-            </span>
-            {nonLus('equipe') ? <Pill tone="iris">{nonLus('equipe')}<span className="sr"> non lus</span></Pill> : null}
-          </button>
-          {collegues.map((p) => (
-            <button key={p.id} type="button" className={`g-item${fil === p.id ? ' on' : ''}`} aria-pressed={fil === p.id} onClick={() => setFil(p.id)}>
-              <Avatar person={p} />
-              <span className="grow">
-                <b>{nomComplet(p)}</b>
-                <span style={{ display: 'block', marginTop: 3 }}>
-                  <EtiquetteRole person={p} />
+        <div className="col msg-fils" style={{ gap: 8 }} role="group" aria-label="Conversations">
+          {fils.map((f, i) => (
+            <div key={f.id} style={{ display: 'contents' }}>
+              {i === 0 && f.n ? <div className="msg-rubrique nouveau">Non lus</div> : null}
+              {i > 0 && !f.n && fils[i - 1].n ? <div className="msg-rubrique">Conversations</div> : null}
+              <button type="button" className={`g-item msg-fil${fil === f.id ? ' on' : ''}${f.n ? ' non-lu' : ''}`} aria-pressed={fil === f.id} onClick={() => setFil(f.id)}>
+                {f.person ? <Avatar person={f.person} /> : <span className="ico" aria-hidden="true"><Users size={18} /></span>}
+                <span className="grow" style={{ minWidth: 0 }}>
+                  <span className="msg-ligne">
+                    <b>{f.person ? nomComplet(f.person) : 'Toute l’équipe'}</b>
+                    {f.der ? <span className="msg-heure num">{quand(f.der.at)}</span> : null}
+                  </span>
+                  <span className="msg-apercu">{f.der ? `${f.der.de === personId ? 'Vous : ' : ''}${f.der.texte}` : f.person ? 'Aucun message' : 'Visible par tous'}</span>
                 </span>
-              </span>
-              {nonLus(p.id) ? <Pill tone="iris">{nonLus(p.id)}<span className="sr"> non lus</span></Pill> : null}
-            </button>
+                {f.n ? (
+                  <span className="msg-pastille num">
+                    {f.n}
+                    <span className="sr"> non lu{f.n > 1 ? 's' : ''}</span>
+                  </span>
+                ) : null}
+              </button>
+            </div>
           ))}
         </div>
         <section className="card" aria-label={fil === 'equipe' ? 'Fil de toute l’équipe' : `Conversation avec ${autre ? nomComplet(autre) : ''}`}>
@@ -68,11 +96,15 @@ export function Messages({ personId }: { personId: string }): JSX.Element {
             {messages.length ? (
               messages.map((m) => {
                 const de = data.personnes.find((p) => p.id === m.de);
+                const neuf = nouveaux.includes(m.id);
                 return (
-                  <div key={m.id} className={`bulle${m.de === personId ? ' moi' : ''}`}>
+                  <div key={m.id} style={{ display: 'contents' }}>
+                  {neuf && nouveaux[0] === m.id ? <div className="msg-separateur">Nouveau{nouveaux.length > 1 ? 'x messages' : ' message'}</div> : null}
+                  <div className={`bulle${m.de === personId ? ' moi' : ''}${neuf ? ' nouveau' : ''}`}>
                     {m.de !== personId ? <span className="qui">{de ? nomCourt(de) : ''}</span> : <span className="sr">Vous : </span>}
                     {m.texte}
                     <span className="quand">{fmtHorodatage(m.at)}</span>
+                  </div>
                   </div>
                 );
               })

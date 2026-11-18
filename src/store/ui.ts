@@ -3,6 +3,7 @@ import { addDays, mondayOf, todayISO } from '../domain/time';
 import type { ISODate } from '../domain/types';
 
 export type Vue =
+  | 'documents'
   | 'heures'
   | 'demandes'
   | 'suivi'
