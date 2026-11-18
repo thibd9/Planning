@@ -54,7 +54,7 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
   if (!estCollaboratif(data.officine)) {
     return (
       <Empty icon={<CalendarHeart size={30} />} title="Le planning est construit par le responsable">
-        Cette pharmacie n’utilise pas la collecte des souhaits. Pour une contrainte d’horaires, passez par « Mon planning ».
+        Cette pharmacie n’utilise pas la collecte des préférences. Pour une contrainte d’horaires, passez par « Mon planning ».
       </Empty>
     );
   }
@@ -98,7 +98,7 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
   return (
     <div className="souhaits">
       <div className="sh-grille">
-        <section className="card sh-cal" aria-label={`Souhaits de ${titreMois(mois)}`}>
+        <section className="card sh-cal" aria-label={`Préférences de ${titreMois(mois)}`}>
           <div className="sh-barre">
             <div className="week-nav">
               <button type="button" className="btn ghost icon" onClick={() => setMois(moisDecale(mois, -1))} aria-label="Mois précédent">
@@ -176,16 +176,12 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
                     <button type="button" className={`sh-jour${choix ? ` ${choix}` : ''}${jourChoisi === date ? ' sel' : ''}`} onClick={() => cliquer(date)} aria-pressed={jourChoisi === date}>
                       <span className="n num">{n}</span>
                       <span className="c">{choix ? <>{ICONE[choix]} <span className="t">{SOUHAIT_LABEL[choix]}</span></> : <span className="t vide">À remplir</span>}</span>
-                      {e && e.matin.requis + e.soir.requis > 0 ? (
-                        <span className={`sh-eff${court ? ' court' : ''}`}>
-                          <i className={manque(e.matin) ? 'ko' : ''}>M {e.matin.present}/{e.matin.requis}</i>
-                          <i className={manque(e.soir) ? 'ko' : ''}>A {e.soir.present}/{e.soir.requis}</i>
-                        </span>
+                      {court && e ? (
+                        <span className="sh-manque">{manque(e.matin) && manque(e.soir) ? 'Manque du monde' : manque(e.matin) ? 'Manque le matin' : 'Manque l’ap.-midi'}</span>
                       ) : null}
                       {/* Le nom lu reprend d'abord ce qui est écrit, puis le précise. */}
                       <span className="sr">
                         , {JOURS[weekday(date)]}
-                        {e ? `. Annoncés sur attendus : matin ${e.matin.present} sur ${e.matin.requis}, après-midi ${e.soir.present} sur ${e.soir.requis}` : ''}
                       </span>
                     </button>
                   </span>
@@ -193,7 +189,7 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
               })}
             </div>
           </div>
-          <p className="sh-legende small soft">M = matin, A = après-midi : personnes annoncées par leurs souhaits, face au seuil de l’officine.</p>
+          <p className="sh-legende small soft"><span className="sh-manque">Manque</span> L’équipe annoncée ne suffit pas ce jour-là. Touchez le jour pour voir, et aider si vous voulez.</p>
         </section>
 
         <aside className="col" style={{ gap: 18 }}>
@@ -203,7 +199,7 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
                 <div className="eyebrow">Le jour choisi</div>
                 <h2 className="h3 cap1">{fmtDateLong(jourChoisi).replace(/ \d{4}$/, '')}</h2>
                 <p className="small soft" style={{ margin: '4px 0 14px' }}>
-                  Votre souhait : <b>{monChoix ? SOUHAIT_LABEL[monChoix] : 'aucun'}</b>
+                  Votre préférence : <b>{monChoix ? SOUHAIT_LABEL[monChoix] : 'aucune'}</b>
                 </p>
                 {(['matin', 'soir'] as const).map((demi) => {
                   const d = effectif[demi];

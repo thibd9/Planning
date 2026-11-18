@@ -1,9 +1,11 @@
-import { AlertTriangle, CalendarOff, CircleCheck, Crown, Medal, HeartHandshake, KeyRound, Lock, Plus, RefreshCw, Trash2, Users } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, ClipboardList, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lightbulb, Lock, Plus, RefreshCw, ShieldCheck, Stethoscope, Trash2, Users } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { fmtDateCourt, uid } from '../../domain/time';
 import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
 import type { AppData } from '../../domain/types';
-import { ABSENCE_LABEL, COMPETENCE_FAMILLES, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, nomComplet } from '../../domain/types';
+import { COMPETENCE_FAMILLES, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, libelleAbsence, nomComplet } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
 import { suiviDe } from '../../engine/suivi';
 import { quotaAdjoints, validateEquipe } from '../../engine/validate';
@@ -14,7 +16,7 @@ import { DialogueDemande } from '../components/Demande';
 import { DialogueFormation } from '../components/Formation';
 import { DialogueInventaire } from '../components/Inventaire';
 import { empreinte, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, responsable } from '../../domain/acces';
-import { EtiquetteRole } from '../icons';
+import { COMPETENCE_ICONE, EtiquetteRole } from '../icons';
 import { Avatar, Dialog, Empty, Pill } from '../kit';
 import { usagePlafond } from './Resoudre';
 
@@ -106,9 +108,20 @@ export function Equipe(): JSX.Element {
           <button data-focus="ajouter-personne" type="button" className="btn primary" onClick={() => setAjout(true)} style={{ alignSelf: 'stretch' }}>
             <Plus size={15} /> Ajouter une personne
           </button>
-          {internes.map((p) => (
-            <LignePersonne key={p.id} p={p} on={courant?.id === p.id} onClick={() => ouvrirPersonne(p.id)} />
-          ))}
+          {POSTES.map((g) => {
+            const membres = internes.filter((p) => g.cles.includes(p.qualification));
+            if (!membres.length) return null;
+            return (
+              <div key={g.titre} className="col" style={{ gap: 8 }}>
+                <div className="eyebrow poste-titre">
+                  {g.titre} <span className="soft">· {membres.length}</span>
+                </div>
+                {membres.map((p) => (
+                  <LignePersonne key={p.id} p={p} on={courant?.id === p.id} onClick={() => ouvrirPersonne(p.id)} />
+                ))}
+              </div>
+            );
+          })}
           {externes.length ? <div className="eyebrow" style={{ margin: '12px 4px 2px' }}>Remplaçants habituels</div> : null}
           {externes.map((p) => (
             <LignePersonne key={p.id} p={p} on={courant?.id === p.id} onClick={() => ouvrirPersonne(p.id)} />
@@ -122,6 +135,17 @@ export function Equipe(): JSX.Element {
     </div>
   );
 }
+
+/** Un groupe par poste : on ne mélange pas apprentis, étudiants et animateurs. */
+const POSTES: { titre: string; cles: Qualification[] }[] = [
+  { titre: 'Titulaires', cles: ['titulaire'] },
+  { titre: 'Pharmaciens adjoints', cles: ['adjoint'] },
+  { titre: 'Préparateurs', cles: ['preparateur'] },
+  { titre: 'Animateurs', cles: ['animateur'] },
+  { titre: 'Apprentis', cles: ['apprenti'] },
+  { titre: 'Étudiants', cles: ['etudiant'] },
+  { titre: 'Rayonnistes', cles: ['rayonniste'] },
+];
 
 function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: () => void }): JSX.Element {
   const data = useStore((s) => s.data);
@@ -137,6 +161,23 @@ function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: ()
         </span>
       </span>
     </button>
+  );
+}
+
+/** Une icône par famille de compétences, dans l'ordre de COMPETENCE_FAMILLES. */
+const FAMILLE_ICONE: LucideIcon[] = [Stethoscope, Lightbulb, ClipboardList];
+
+/** Titre d'une rubrique de la fiche : une icône, le nom, et à droite un compteur ou une action. */
+function TitreFiche({ icone: Icone, children, note, droite }: { icone: LucideIcon; children: ReactNode; note?: string; droite?: ReactNode }): JSX.Element {
+  return (
+    <div className="fiche-titre">
+      <span className="fiche-pic" aria-hidden="true">
+        <Icone size={17} />
+      </span>
+      <h3 className="grow">{children}</h3>
+      {note ? <span className="small soft">{note}</span> : null}
+      {droite}
+    </div>
   );
 }
 
@@ -173,8 +214,9 @@ function Fiche({ person }: { person: Person }): JSX.Element {
           </button>
         ) : null}
       </div>
-      <div className="card-body col" style={{ gap: 20 }}>
-        <section className="row wrap" style={{ alignItems: 'flex-end' }}>
+      <div className="card-body col fiche" style={{ gap: 26 }}>
+        <TitreFiche icone={BriefcaseBusiness}>Poste et contrat</TitreFiche>
+        <section className="row wrap" style={{ alignItems: 'flex-end', marginTop: -12 }}>
           <label className="field">
             Fonction
             <select value={person.qualification} onChange={(e) => maj({ qualification: e.target.value as Qualification, salarie: e.target.value !== 'titulaire' })}>
@@ -200,35 +242,49 @@ function Fiche({ person }: { person: Person }): JSX.Element {
         </section>
         {person.salarie ? <p className="tiny muted" style={{ marginTop: -12 }}>Le taux horaire ne sert qu'à comparer le coût de deux scénarios. Il n'est jamais visible dans l'espace salarié.</p> : null}
 
-        <section className="col" style={{ gap: 8 }}>
-          <h3>Compétences et diplômes</h3>
-          {COMPETENCE_FAMILLES.map((fam) => (
-            <div key={fam.titre} className="col" style={{ gap: 6 }}>
-              <span className="small soft" style={{ fontWeight: 600 }}>{fam.titre}</span>
-              <div className="row wrap" style={{ gap: 6 }}>
-                {fam.cles.map((c: CompetenceId) => {
-                  const on = person.competences.includes(c);
-                  return (
-                    <button
-                      key={c}
-                      type="button"
-                      className={`btn sm${on ? ' primary' : ''}`}
-                      aria-pressed={on}
-                      onClick={() => maj({ competences: on ? person.competences.filter((x) => x !== c) : [...person.competences, c] })}
-                    >
-                      {on ? <CircleCheck size={14} aria-hidden="true" /> : null} {COMPETENCE_LABEL[c]}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-          <p className="tiny muted">Une activité à rendez-vous n'est planifiable que si une personne formée est en poste et que la salle est libre.</p>
+        <section className="fiche-bloc">
+          <TitreFiche icone={Award} note={`${person.competences.length} sélectionnée${person.competences.length > 1 ? 's' : ''}`}>
+            Compétences et diplômes
+          </TitreFiche>
+          <p className="small soft">Touchez une compétence pour l’ajouter ou la retirer.</p>
+          <div className="comp-familles">
+            {COMPETENCE_FAMILLES.map((fam, i) => {
+              const Icone = FAMILLE_ICONE[i] ?? Award;
+              const acquis = fam.cles.filter((c) => person.competences.includes(c)).length;
+              return (
+                <div key={fam.titre} className="comp-famille" role="group" aria-label={fam.titre}>
+                  <div className="comp-tete">
+                    <span className="comp-pic" aria-hidden="true">
+                      <Icone size={16} />
+                    </span>
+                    <b>{fam.titre}</b>
+                    <span className="comp-nb num">
+                      {acquis}/{fam.cles.length}
+                    </span>
+                  </div>
+                  <div className="comp-liste">
+                    {fam.cles.map((c: CompetenceId) => {
+                      const on = person.competences.includes(c);
+                      const Pic = COMPETENCE_ICONE[c];
+                      return (
+                        <button key={c} type="button" className={`comp${on ? ' on' : ''}`} aria-pressed={on} onClick={() => maj({ competences: on ? person.competences.filter((x) => x !== c) : [...person.competences, c] })}>
+                          <Pic size={16} aria-hidden="true" />
+                          <span>{COMPETENCE_LABEL[c]}</span>
+                          {on ? <Check size={14} strokeWidth={3} className="comp-coche" aria-hidden="true" /> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="tiny muted">Un rendez-vous n’est planifiable que si une personne formée est en poste et la salle libre.</p>
         </section>
 
         {!person.externe ? (
-          <section className="col" style={{ gap: 8 }}>
-            <h3>Droits d’accès</h3>
+          <section className="fiche-bloc">
+            <TitreFiche icone={ShieldCheck}>Droits d’accès</TitreFiche>
             {estResponsable(data, person) ? (
               <div className="notice ok">
                 <Crown size={17} aria-hidden="true" />
@@ -264,16 +320,16 @@ function Fiche({ person }: { person: Person }): JSX.Element {
         ) : null}
 
         {!person.externe ? (
-          <section className="col" style={{ gap: 10 }}>
-            <h3>Suivi sur 12 mois</h3>
+          <section className="fiche-bloc">
+            <TitreFiche icone={ChartLine}>Suivi sur 12 mois</TitreFiche>
             <Compteurs suivi={suiviDe(data, person.id, today)} />
             <p className="tiny muted">Retards et départs se notent depuis la vue d’une journée (dans « Construire », cliquez sur un jour). Des dates et des durées, jamais une raison.</p>
           </section>
         ) : null}
 
         {!person.externe ? (
-          <section className="col" style={{ gap: 8 }}>
-            <h3>Compte de connexion</h3>
+          <section className="fiche-bloc">
+            <TitreFiche icone={KeyRound}>Compte de connexion</TitreFiche>
             <div className="notice" style={{ alignItems: 'center' }}>
               <KeyRound size={17} aria-hidden="true" />
               <div className="grow">
@@ -310,8 +366,8 @@ function Fiche({ person }: { person: Person }): JSX.Element {
         ) : null}
 
         {!person.externe ? (
-          <section className="col" style={{ gap: 8 }}>
-            <h3>Volontariat</h3>
+          <section className="fiche-bloc">
+            <TitreFiche icone={HandHelping}>Volontariat</TitreFiche>
             {person.salarie && person.heuresHebdo < 35 ? (
               <label className="check">
                 <input type="checkbox" checked={person.volontaireHeuresComp} onChange={(e) => maj({ volontaireHeuresComp: e.target.checked })} />
@@ -332,13 +388,10 @@ function Fiche({ person }: { person: Person }): JSX.Element {
         ) : null}
 
         {!person.externe ? (
-          <section className="col" style={{ gap: 8 }}>
-            <div className="row">
-              <h3 className="grow">Besoins personnels</h3>
-              <Pill title="Plafond identique pour toute l'équipe">
-                Prioritaires : {usage.actifs} / {usage.plafond}
-              </Pill>
-            </div>
+          <section className="fiche-bloc">
+            <TitreFiche icone={HeartHandshake} droite={<Pill title="Plafond identique pour toute l'équipe">Prioritaires : {usage.actifs} / {usage.plafond}</Pill>}>
+              Besoins personnels
+            </TitreFiche>
             {besoins.length ? (
               besoins.map((b) => (
                 <div key={b.id} className="row wrap" style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 11 }}>
@@ -375,14 +428,14 @@ function Fiche({ person }: { person: Person }): JSX.Element {
         ) : null}
 
         {!person.externe ? (
-          <section className="col" style={{ gap: 8 }}>
-            <h3>Absences à venir</h3>
+          <section className="fiche-bloc">
+            <TitreFiche icone={CalendarOff}>Absences à venir</TitreFiche>
             {absences.length ? (
               absences.map((a) => (
                 <div key={a.id} className="row wrap" style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 11 }}>
                   <CalendarOff size={15} />
                   <div className="grow">
-                    <b>{ABSENCE_LABEL[a.type]}</b> · du {fmtDateCourt(a.from)} au {fmtDateCourt(a.to)}
+                    <b>{libelleAbsence(a)}</b> · du {fmtDateCourt(a.from)} au {fmtDateCourt(a.to)}
                   </div>
                   {a.statut === 'demandee' ? (
                     <>

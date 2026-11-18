@@ -493,8 +493,8 @@ export const useStore = create<Store>((set, get) => {
           { ...d, shifts: c.data.shifts },
           {
             type: 'generation',
-            titre: `Mois ${mois} recalculé d’après les souhaits (${c.corrigees.length} semaine${c.corrigees.length > 1 ? 's' : ''} en brouillon)`,
-            detail: `${c.souhaitsSuivis} souhait${c.souhaitsSuivis > 1 ? 's' : ''} suivi${c.souhaitsSuivis > 1 ? 's' : ''} sur ${c.souhaitsTotal}. ${c.publiees.length ? `${c.publiees.length} semaine${c.publiees.length > 1 ? 's' : ''} déjà publiée${c.publiees.length > 1 ? 's' : ''}, non modifiée${c.publiees.length > 1 ? 's' : ''}. ` : ''}Rien n'est publié sans validation.`,
+            titre: `Mois ${mois} recalculé d’après les préférences (${c.corrigees.length} semaine${c.corrigees.length > 1 ? 's' : ''} en brouillon)`,
+            detail: `${c.souhaitsSuivis} préférence${c.souhaitsSuivis > 1 ? 's' : ''} suivie${c.souhaitsSuivis > 1 ? 's' : ''} sur ${c.souhaitsTotal}. ${c.publiees.length ? `${c.publiees.length} semaine${c.publiees.length > 1 ? 's' : ''} déjà publiée${c.publiees.length > 1 ? 's' : ''}, non modifiée${c.publiees.length > 1 ? 's' : ''}. ` : ''}Rien n'est publié sans validation.`,
             regles: true,
           },
         ),

@@ -6,7 +6,7 @@ import { semainesDuMois } from './payroll';
 import { bloquants, validateWeek } from './validate';
 
 /**
- * Souhaits du mois (modèle collaboratif).
+ * Préférences du mois (modèle collaboratif).
  * Chacun dit, jour par jour, la forme d'horaire qu'il préfère. Le calcul les traite comme de simples
  * préférences : ils ne passent jamais devant une règle impérative ni devant l'effectif attendu.
  */
@@ -29,7 +29,7 @@ export function datesDuMois(mois: string): ISODate[] {
 
 export const estCollaboratif = (o: Pick<Officine, 'modele'>): boolean => (o.modele ?? 'collaboratif') === 'collaboratif';
 
-/** Dernier jour pour poser ses souhaits d'un mois : le N du mois précédent (20 par défaut). */
+/** Dernier jour pour poser ses préférences d'un mois : le N du mois précédent (20 par défaut). */
 export function limiteSouhaits(officine: Pick<Officine, 'souhaitsLimite'>, mois: string): ISODate {
   const precedent = datesDuMois(moisDecale(mois, -1));
   const n = Math.min(Math.max(1, officine.souhaitsLimite ?? 20), precedent.length);
@@ -69,7 +69,7 @@ function requisEntre(officine: Officine, date: ISODate, de: number, a: number): 
   return r;
 }
 
-/** Effectif annoncé par les souhaits de l'équipe, matin et après-midi, face au seuil de l'officine. */
+/** Effectif annoncé par les préférences de l'équipe, matin et après-midi, face au seuil de l'officine. */
 export function effectifSouhaite(data: Pick<AppData, 'souhaits' | 'personnes' | 'officine' | 'absences'>, date: ISODate): { matin: DemiJournee; soir: DemiJournee } | null {
   const plages = ouverture(data.officine, date);
   if (!plages.length) return null;
@@ -155,6 +155,30 @@ export function heuresMois(data: AppData, person: Person, mois: string): { minut
   return { minutes, cible: Math.round(cible) };
 }
 
+/**
+ * Heures du mois, jour par jour : ce qui est planifié face au contrat.
+ * Le contrat ne compte que les jours ouvrés des semaines déjà construites, absences approuvées déduites,
+ * pour ne pas afficher un « retard » sur des semaines qui n'ont pas encore de planning.
+ */
+export function planifieMois(data: AppData, person: Person, mois: string): { minutes: number; cible: number; construit: boolean } {
+  let minutes = 0;
+  let cible = 0;
+  let construit = false;
+  for (const s of data.shifts) {
+    if (s.personId === person.id && s.date.startsWith(mois)) minutes += s.end - s.start - ((s.pauseEnd ?? 0) - (s.pauseStart ?? 0));
+  }
+  for (const monday of semainesDuMois(mois)) {
+    const fin = addDays(monday, 6);
+    if (!data.shifts.some((s) => s.date >= monday && s.date <= fin)) continue;
+    construit = true;
+    for (let i = 0; i < 5; i++) {
+      const d = addDays(monday, i);
+      if (d.startsWith(mois) && !estAbsent(data, person.id, d)) cible += (person.heuresHebdo * 60) / 5;
+    }
+  }
+  return { minutes, cible: Math.round(cible), construit };
+}
+
 /** Objectif d'équipe du jour : l'effectif au comptoir au moment le plus tendu, face au seuil de l'officine. */
 export function objectifJour(data: Pick<AppData, 'shifts' | 'missions' | 'officine'>, date: ISODate): { present: number; requis: number } | null {
   let pire: { present: number; requis: number } | null = null;
@@ -182,7 +206,7 @@ export interface Correction {
 }
 
 /**
- * Recalcule d'un coup les semaines non publiées d'un mois en suivant les souhaits au plus près.
+ * Recalcule d'un coup les semaines non publiées d'un mois en suivant les préférences au plus près.
  * Les règles impératives et l'effectif passent toujours avant ; les semaines publiées ne bougent pas.
  */
 export function corrigerMois(data: AppData, mois: string): Correction {

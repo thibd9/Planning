@@ -1,5 +1,22 @@
 import type { LucideIcon } from 'lucide-react';
 import {
+  Activity,
+  Apple,
+  Baby,
+  Bandage,
+  Bone,
+  Brush,
+  CigaretteOff,
+  Droplet,
+  House,
+  Leaf,
+  PackageCheck,
+  PawPrint,
+  Receipt,
+  ShoppingBag,
+  Sparkles,
+  Tablets,
+  LayoutGrid,
   Boxes,
   CalendarOff,
   ClipboardCheck,
@@ -25,7 +42,7 @@ import {
   TreePalm,
   UserRoundPlus,
 } from 'lucide-react';
-import type { AbsenceType, Activite, GardeType, MissionType, Person, Qualification } from '../domain/types';
+import type { AbsenceType, Activite, CompetenceId, GardeType, MissionType, Person, Qualification } from '../domain/types';
 import { estResponsable, libelleRole } from '../domain/acces';
 import { useStore } from '../store/store';
 
@@ -89,6 +106,32 @@ export const ABSENCE_ICONE: Record<AbsenceType, LucideIcon> = {
   maladie: HeartPulse,
   formation: Presentation,
   autre: CalendarOff,
+};
+
+/** Une icône par compétence : on repère un acte ou un conseil avant de lire son nom. */
+export const COMPETENCE_ICONE: Record<CompetenceId, LucideIcon> = {
+  vaccination: Syringe,
+  trod: TestTubeDiagonal,
+  entretien: MessagesSquare,
+  orthopedie: Bone,
+  contention: Bandage,
+  preparations: FlaskConical,
+  secours: HeartPulse,
+  phyto: Leaf,
+  aroma: Droplet,
+  homeo: Tablets,
+  micronutrition: Apple,
+  dermo: Sparkles,
+  beaute: Brush,
+  para: ShoppingBag,
+  puericulture: Baby,
+  veterinaire: PawPrint,
+  mad: House,
+  diabete: Activity,
+  tabac: CigaretteOff,
+  commandes: PackageCheck,
+  tierspayant: Receipt,
+  merchandising: LayoutGrid,
 };
 
 export const couleurDe = (p: Pick<Person, 'qualification' | 'externe'> | undefined): string => (!p ? 'c-gris' : p.externe ? 'c-gris' : ROLE_COULEUR[p.qualification]);

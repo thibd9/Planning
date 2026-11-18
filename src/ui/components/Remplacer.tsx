@@ -1,6 +1,6 @@
-import { FileCheck2, Paperclip, ShieldCheck, X } from 'lucide-react';
+import { FileCheck2, Hourglass, Paperclip, ShieldCheck, X } from 'lucide-react';
 import { useState } from 'react';
-import { fmtDateLong, fmtHeure } from '../../domain/time';
+import { dayIndex, fmtDateLong, fmtHeure } from '../../domain/time';
 import type { Justificatif, Shift, Urgence } from '../../domain/types';
 import { URGENCE_LABEL } from '../../domain/types';
 import { delaiRemplacement, peutDemanderRemplacement } from '../../engine/remplacement';
@@ -55,6 +55,8 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
   const demander = useStore((s) => s.demanderRemplacement);
   const dire = useUi((s) => s.dire);
   const loin = peutDemanderRemplacement(data, shift.date, today);
+  const delai = delaiRemplacement(data);
+  const jours = dayIndex(shift.date) - dayIndex(today);
   const [urgence, setUrgence] = useState<Urgence>(loin ? 'prevu' : 'urgent');
   const [piece, setPiece] = useState<Justificatif | null>(null);
   const [erreur, setErreur] = useState('');
@@ -103,6 +105,13 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
         </>
       }
     >
+      <div className={`notice ${loin ? 'info' : 'warn'} delai-info`}>
+        <Hourglass size={16} aria-hidden="true" />
+        <span>
+          <b>{jours <= 0 ? 'Poste aujourd’hui' : jours === 1 ? 'Poste demain' : `Poste dans ${jours} jours`}.</b>{' '}
+          {loin ? `Plus de ${delai} jours : vos collègues sont prévenus dans les règles.` : `Moins de ${delai} jours : seul un volontaire peut le reprendre.`}
+        </span>
+      </div>
       <fieldset className="choix urgence">
         <legend>Niveau d’urgence</legend>
         {niveaux.map((u) => (
@@ -115,7 +124,6 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
           </label>
         ))}
       </fieldset>
-      {!loin ? <p className="small soft">Ce poste est à moins de {delaiRemplacement(data)} jours : seul un collègue volontaire peut le reprendre, avec l’accord de votre titulaire.</p> : null}
 
       {urgence === 'medical' ? (
         <div className="piece">

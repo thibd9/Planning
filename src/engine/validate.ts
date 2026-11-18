@@ -57,8 +57,13 @@ export function validateWeek(data: AppData, monday: ISODate): Issue[] {
   const issues: Issue[] = [];
   const dates = weekDates(monday);
   const R = data.regles;
+  // Deux constats de la même règle, le même jour, pour la même personne : l'identifiant reste unique.
+  const vus = new Map<string, number>();
   const add = (i: Omit<Issue, 'id'>): void => {
-    issues.push({ ...i, id: `${i.regle}|${i.personId ?? ''}|${i.date ?? ''}|${i.start ?? ''}` });
+    const base = `${i.regle}|${i.personId ?? ''}|${i.date ?? ''}|${i.start ?? ''}`;
+    const n = vus.get(base) ?? 0;
+    vus.set(base, n + 1);
+    issues.push({ ...i, id: n ? `${base}|${n + 1}` : base });
   };
 
   const maxJour = valeurRegle(R, 'duree.quotidienne', 10) * 60;

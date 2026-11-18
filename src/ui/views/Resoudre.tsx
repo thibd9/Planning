@@ -15,7 +15,7 @@ import {
   weekday,
 } from '../../domain/time';
 import type { Absence, AppData, Besoin, BesoinStatut, ISODate, Remplacement, Trou } from '../../domain/types';
-import { ABSENCE_LABEL, GARDE_LABEL, URGENCE_LABEL, nomCourt } from '../../domain/types';
+import { GARDE_LABEL, classeAbsence, libelleAbsence, nomCourt } from '../../domain/types';
 import { decrireBesoin, decrireShift, minutesSemaine, shiftsSemaine } from '../../engine/core';
 import { decisions } from '../../engine/decisions';
 import { diagnosticPrealable } from '../../engine/diagnose';
@@ -29,7 +29,7 @@ import { TourDeRole } from '../components/Appel';
 import { aSonTour, tourRemplacement } from '../../engine/appel';
 import { cibleSemaine } from '../../engine/heures';
 import { useUi } from '../../store/ui';
-import { AvantApres, Avatar, Empty, Pill } from '../kit';
+import { AvantApres, Avatar, Delai, Empty, PastilleUrgence, Pill } from '../kit';
 
 const capitale = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
@@ -204,7 +204,7 @@ export function Resoudre(): JSX.Element {
                     <Avatar person={p} />
                     <div className="grow">
                       <h3>
-                        {a ? ABSENCE_LABEL[a.type] : 'Absence'} de {p ? nomCourt(p) : '—'}
+                        {a ? libelleAbsence(a) : 'Absence'} de {p ? nomCourt(p) : '—'}
                       </h3>
                       <div className="small soft">
                         {a ? `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}` : ''} · {trous.length} poste{trous.length > 1 ? 's' : ''} à couvrir
@@ -592,6 +592,7 @@ function simulerAbsence(data: AppData, a: Absence): { messages: string[]; garde:
 
 function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
   const data = useStore((s) => s.data);
+  const today = useStore((s) => s.today);
   const decider = useStore((s) => s.deciderAbsence);
   const dire = useUi((s) => s.dire);
   const p = data.personnes.find((x) => x.id === absence.personId);
@@ -601,9 +602,11 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
     <div className="decision">
       <Avatar person={p} />
       <div className="grow" style={{ minWidth: 280 }}>
-        <b>
-          {ABSENCE_LABEL[absence.type]} demandé par {p ? nomCourt(p) : '—'}
-        </b>
+        <div className="row wrap" style={{ gap: 8, marginBottom: 6 }}>
+          <span className={`pill nature ${classeAbsence(absence.type)}`}>{libelleAbsence(absence)}</span>
+          <Delai date={absence.from} today={today} />
+        </div>
+        <b>{p ? nomCourt(p) : '—'}</b>
         <div className="soft small" style={{ marginTop: 3 }}>
           Du {fmtDateCourt(absence.from)} au {fmtDateCourt(absence.to)} · {jours} jour{jours > 1 ? 's' : ''}
         </div>
@@ -696,12 +699,12 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
             </select>
           </label>
           <Pill tone={plein ? 'warn' : undefined} title="Plafond identique pour toute l'équipe">
-            Souhaits prioritaires actifs : {usage.actifs} / {usage.plafond}
+            Demandes prioritaires actives : {usage.actifs} / {usage.plafond}
           </Pill>
         </div>
         {plein ? (
           <div className="notice warn small" style={{ marginTop: 8 }}>
-            <AlertTriangle size={15} /> Le plafond de souhaits prioritaires est atteint pour {p ? nomCourt(p) : 'cette personne'}. Accordez une simple préférence, ou libérez un souhait existant.
+            <AlertTriangle size={15} /> Le plafond de demandes prioritaires est atteint pour {p ? nomCourt(p) : 'cette personne'}. Accordez une simple préférence, ou libérez une demande existante.
           </div>
         ) : null}
       </div>
@@ -830,16 +833,19 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
     return ecart > 0 ? ` · +${fmtDuree(ecart)} sur son contrat` : '';
   };
   return (
-    <div ref={ref} className={`decision demande-r${visee ? ' visee' : ''}`} style={{ alignItems: 'flex-start' }} data-focus="demande-remplacement">
+    <div ref={ref} className={`decision demande-r u-${urgence}${visee ? ' visee' : ''}`} style={{ alignItems: 'flex-start' }} data-focus="demande-remplacement">
       <Avatar person={demandeur} />
       <div className="grow col" style={{ gap: 10, minWidth: 220 }}>
         <div>
-          <Pill tone={urgence === 'medical' ? 'danger' : urgence === 'urgent' ? 'warn' : undefined}>{URGENCE_LABEL[urgence]}</Pill>{' '}
-          <b>{demandeur ? nomCourt(demandeur) : '—'}</b> souhaite être remplacé{' '}
+          <div className="row wrap" style={{ gap: 8, marginBottom: 6 }}>
+            <PastilleUrgence urgence={urgence} />
+            <Delai date={r.date} today={today} />
+          </div>
+          <b>{demandeur ? nomCourt(demandeur) : '—'}</b> demande à être remplacé{' '}
           <b>
             {fmtDateCourt(r.date)}, {fmtHeure(r.start)} – {fmtHeure(r.end)}
           </b>
-          <div className="small soft">{attente ? 'Répondez à la demande : si vous acceptez, tous ceux qui peuvent tenir le poste sont prévenus en même temps.' : 'Demande acceptée. Sans remplaçant confirmé, le poste reste le sien.'}</div>
+          <div className="small soft">{attente ? 'Oui : l’équipe disponible est prévenue. Non : le poste reste le sien.' : 'Demande acceptée. Sans remplaçant confirmé, le poste reste le sien.'}</div>
         </div>
         {r.justificatif ? (
           r.justificatif.data ? (

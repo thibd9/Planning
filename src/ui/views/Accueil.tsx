@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, CircleAlert, Crown, LogIn, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Store, Trash2, UserRound, Users } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, Boxes, Check, CircleAlert, Crown, GraduationCap, LogIn, Megaphone, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Sprout, Store, Trash2, UserRound, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { empreinte, identifiantPropose } from '../../domain/acces';
 import { fmtHHMM, fmtHeure, parseHHMM, uid } from '../../domain/time';
@@ -187,7 +187,10 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
   const [secondaires, setSecondaires] = useState<Ligne[]>([]);
   const [adjoints, setAdjoints] = useState<Ligne[]>([ligne('adjoint')]);
   const [preparateurs, setPreparateurs] = useState<Ligne[]>([ligne('preparateur'), ligne('preparateur')]);
-  const [autres, setAutres] = useState<Ligne[]>([]);
+  const [animateurs, setAnimateurs] = useState<Ligne[]>([]);
+  const [apprentis, setApprentis] = useState<Ligne[]>([]);
+  const [etudiants, setEtudiants] = useState<Ligne[]>([]);
+  const [rayonnistes, setRayonnistes] = useState<Ligne[]>([]);
   const [erreurs, setErreurs] = useState<Erreur[]>([]);
   const titre = useRef<HTMLHeadingElement>(null);
   const resume = useRef<HTMLDivElement>(null);
@@ -210,7 +213,10 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
     { id: 'tit2', lignes: secondaires, singulier: 'titulaire' },
     { id: 'adj', lignes: adjoints, singulier: 'pharmacien adjoint' },
     { id: 'prep', lignes: preparateurs, singulier: 'préparateur' },
-    { id: 'autre', lignes: autres, singulier: 'personne' },
+    { id: 'anim', lignes: animateurs, singulier: 'animateur' },
+    { id: 'appr', lignes: apprentis, singulier: 'apprenti' },
+    { id: 'etud', lignes: etudiants, singulier: 'étudiant' },
+    { id: 'rayon', lignes: rayonnistes, singulier: 'rayonniste' },
   ];
 
   const valider = (e: number): Erreur[] => {
@@ -255,7 +261,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
     setEtape(n);
   };
 
-  const equipe = [titulaire, ...secondaires, ...adjoints, ...preparateurs, ...autres].filter(complet);
+  const equipe = [titulaire, ...secondaires, ...adjoints, ...preparateurs, ...animateurs, ...apprentis, ...etudiants, ...rayonnistes].filter(complet);
   const horaireSemaine: Interval[] = coupure ? [{ start: semaine.start, end: midi.start }, { start: midi.end, end: semaine.end }] : [{ ...semaine }];
   const nbPharmaciens = 1 + secondaires.filter(complet).length + adjoints.filter(complet).length;
 
@@ -575,7 +581,13 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
               <hr className="sep" />
               <Groupe id="prep" titre="Préparateurs" aide="Indiquez les heures du contrat : un temps partiel est comparé au prorata." icone={<Users size={18} />} ton="sky" singulier="préparateur" lignes={preparateurs} onChange={setPreparateurs} ajouter={() => ligne('preparateur')} libelleAjout="Ajouter un préparateur" erreurs={erreurs} />
               <hr className="sep" />
-              <Groupe id="autre" titre="Autres postes" aide="Apprentis, étudiants en pharmacie, rayonnistes." icone={<Sparkles size={18} />} ton="sun" singulier="personne" lignes={autres} onChange={setAutres} ajouter={() => ligne('apprenti', '21')} libelleAjout="Ajouter une personne" avecFonction erreurs={erreurs} />
+              <Groupe id="anim" titre="Animateurs" aide="Conseil et animation en parapharmacie, dermocosmétique, nutrition." icone={<Megaphone size={18} />} ton="sun" singulier="animateur" lignes={animateurs} onChange={setAnimateurs} ajouter={() => ligne('animateur', '35')} libelleAjout="Ajouter un animateur" erreurs={erreurs} />
+              <hr className="sep" />
+              <Groupe id="appr" titre="Apprentis" aide="En alternance : indiquez les heures passées à la pharmacie." icone={<Sprout size={18} />} ton="sun" singulier="apprenti" lignes={apprentis} onChange={setApprentis} ajouter={() => ligne('apprenti', '21')} libelleAjout="Ajouter un apprenti" erreurs={erreurs} />
+              <hr className="sep" />
+              <Groupe id="etud" titre="Étudiants en pharmacie" aide="Quelques heures par semaine, souvent le samedi." icone={<GraduationCap size={18} />} ton="sun" singulier="étudiant" lignes={etudiants} onChange={setEtudiants} ajouter={() => ligne('etudiant', '12')} libelleAjout="Ajouter un étudiant" erreurs={erreurs} />
+              <hr className="sep" />
+              <Groupe id="rayon" titre="Rayonnistes" aide="Réception, rangement, mise en rayon." icone={<Boxes size={18} />} ton="sun" singulier="rayonniste" lignes={rayonnistes} onChange={setRayonnistes} ajouter={() => ligne('rayonniste', '35')} libelleAjout="Ajouter un rayonniste" erreurs={erreurs} />
             </div>
           ) : null}
 

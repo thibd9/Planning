@@ -28,7 +28,10 @@ export function changementsSemaine(data: AppData, monday: ISODate): Changement[]
 export interface Delai {
   id: string;
   personId: string;
+  /** Phrase complète, inscrite au journal. */
   message: string;
+  /** L'essentiel, pour l'écran. */
+  court: string;
 }
 
 export interface ControlePublication {
@@ -59,6 +62,7 @@ export function controlePublication(data: AppData, monday: ISODate, today: ISODa
           message: `${nomCourt(p)} (temps partiel) : horaires communiqués ${Math.max(0, restants)} jour${
             restants > 1 ? 's' : ''
           } ouvré${restants > 1 ? 's' : ''} avant la semaine, pour ${delaiPartiel} requis.`,
+          court: `prévenu ${Math.max(0, restants)} j avant, ${delaiPartiel} requis`,
         });
       }
     }
@@ -75,6 +79,7 @@ export function controlePublication(data: AppData, monday: ISODate, today: ISODa
             0,
             restants,
           )} jour${restants > 1 ? 's' : ''} ouvré${restants > 1 ? 's' : ''} avant, pour ${delaiPartiel} requis.`,
+          court: `${fmtDateCourt(c.date)} · prévenu ${Math.max(0, restants)} j avant, ${delaiPartiel} requis`,
         });
       }
     }
@@ -83,7 +88,7 @@ export function controlePublication(data: AppData, monday: ISODate, today: ISODa
     if (!g.personId || !weekDates(monday).includes(g.date) || g.communiqueLe) continue;
     const p = data.personnes.find((x) => x.id === g.personId);
     const d = delaiGarde(data, g, p, today);
-    if (!d.ok && p) delais.push({ id: `garde|${g.id}`, personId: p.id, message: `Garde du ${fmtDateCourt(g.date)}, ${nomCourt(p)} : ${d.message}` });
+    if (!d.ok && p) delais.push({ id: `garde|${g.id}`, personId: p.id, message: `Garde du ${fmtDateCourt(g.date)}, ${nomCourt(p)} : ${d.message}`, court: `garde du ${fmtDateCourt(g.date)}, prévenue trop tard` });
   }
   return { premiere, issues: validateWeek(data, monday), changements, delais };
 }

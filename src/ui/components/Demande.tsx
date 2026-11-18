@@ -6,6 +6,7 @@ import type { AbsenceType, BesoinForme, BesoinStatut } from '../../domain/types'
 import { ABSENCE_LABEL } from '../../domain/types';
 import { lireBesoin } from '../../engine/nlp';
 import { useStore } from '../../store/store';
+import { NomsFormations } from './Formation';
 import { useUi } from '../../store/ui';
 import { Dialog, Pill } from '../kit';
 import { usagePlafond } from '../views/Resoudre';
@@ -79,6 +80,7 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
   const [statut, setStatut] = useState<BesoinStatut>('preference');
   const [horsPlafond, setHorsPlafond] = useState(false);
   const [typeAbsence, setTypeAbsence] = useState<AbsenceType>('conge');
+  const [formation, setFormation] = useState('');
   const [phrase, setPhrase] = useState('');
   const [compris, setCompris] = useState<{ ok: string[]; manque: string[] } | null>(null);
   const [calendrier, setCalendrier] = useState(false);
@@ -130,7 +132,7 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
 
   const envoyer = (): void => {
     if (genre === 'absence') {
-      declarerAbsence({ personId, from, to, type: typeAbsence, statut: responsable ? 'approuvee' : 'demandee' });
+      declarerAbsence({ personId, from, to, type: typeAbsence, statut: responsable ? 'approuvee' : 'demandee', ...(typeAbsence === 'formation' && formation.trim() ? { libelle: formation.trim() } : {}) });
       dire(responsable ? 'Absence enregistrée. Les postes concernés sont à couvrir dans « Résoudre ».' : 'Demande d’absence envoyée au responsable.', true);
       onClose();
       return;
@@ -332,6 +334,13 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
             </select>
           </label>
         ) : null}
+        {genre === 'absence' && typeAbsence === 'formation' ? (
+          <label className="field" htmlFor="demande-formation" style={{ flex: '1 1 240px' }}>
+            Nom de la formation
+            <input id="demande-formation" value={formation} onChange={(e) => setFormation(e.target.value)} placeholder="Vaccination, gestes d’urgence…" list="formations-connues" autoComplete="off" />
+            <NomsFormations />
+          </label>
+        ) : null}
         {genre === 'jour' || genre === 'absence' ? (
           <button type="button" className="btn sm ghost" onClick={() => setCalendrier((c) => !c)} aria-expanded={calendrier}>
             <CalendarHeart size={15} /> Repères de calendrier
@@ -379,13 +388,13 @@ export function DialogueDemande({ personId, espace, onClose }: { personId: strin
           </label>
           <div className="row wrap small">
             <Pill tone={plein ? 'warn' : undefined}>
-              Souhaits prioritaires actifs : {usage.actifs} / {usage.plafond}
+              Demandes prioritaires actives : {usage.actifs} / {usage.plafond}
             </Pill>
             <span className="soft">Le même plafond s'applique à toute l'équipe.</span>
           </div>
           {plein ? (
             <div className="notice warn small">
-              <AlertTriangle size={15} /> Le plafond de souhaits prioritaires est atteint. Choisissez « simple préférence » ou retirez un souhait existant.
+              <AlertTriangle size={15} /> Le plafond de demandes prioritaires est atteint. Choisissez « simple préférence » ou retirez une demande existante.
             </div>
           ) : null}
           {responsable ? (

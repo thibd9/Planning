@@ -28,7 +28,7 @@ export type Variante = 'equite' | 'souhaits' | 'cout';
 
 export const VARIANTE_LABEL: Record<Variante, { titre: string; phrase: string }> = {
   equite: { titre: 'Équité d’abord', phrase: 'Répartit samedis et fermetures selon l’historique de chacun.' },
-  souhaits: { titre: 'Souhaits d’abord', phrase: 'Satisfait le plus de préférences possible.' },
+  souhaits: { titre: 'Préférences d’abord', phrase: 'Suit le plus de préférences possible.' },
   cout: { titre: 'Coût d’abord', phrase: 'Évite les heures au-delà des contrats.' },
 };
 
@@ -44,7 +44,7 @@ export interface Indicateurs {
   bloquants: number;
   /** Minutes d'ouverture sous l'effectif attendu. */
   sousEffectif: number;
-  /** Part des souhaits (préférences acceptées) satisfaits, de 0 à 1 ; null s'il n'y en a aucun. */
+  /** Part des préférences (préférences acceptées) satisfaits, de 0 à 1 ; null s'il n'y en a aucun. */
   souhaits: number | null;
   souhaitsTotal: number;
   /** Écart type (réel − attendu) des samedis sur 8 semaines, semaine comprise. */

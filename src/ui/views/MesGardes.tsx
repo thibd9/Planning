@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { MOIS, dayIndex, fmtDateLong, fmtDecimal, fmtDuree, fmtHHMM, fmtHeure, parseHHMM } from '../../domain/time';
 import type { Garde } from '../../domain/types';
 import { GARDE_LABEL } from '../../domain/types';
-import { HEBERGE } from '../../env';
+import { imprimer } from '../../env';
 import { gardeDuree } from '../../engine/core';
 import { delaiGarde, reposApresGarde, variablesGarde } from '../../engine/gardes';
 import { useStore } from '../../store/store';
@@ -13,6 +13,7 @@ import { Empty, Pill } from '../kit';
 
 /** Mes gardes : celles qui me sont confiées, mes interventions à déclarer, mon récapitulatif mensuel. */
 export function MesGardes({ personId }: { personId: string }): JSX.Element {
+  const dire = useUi((x) => x.dire);
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const person = data.personnes.find((p) => p.id === personId);
@@ -74,11 +75,9 @@ export function MesGardes({ personId }: { personId: string }): JSX.Element {
                 <span className="soft">Mois</span>
                 <input id="recap-mois" type="month" className="input" value={mois} onChange={(e) => setMois(e.target.value)} />
               </label>
-              {!HEBERGE ? (
-                <button type="button" className="btn sm no-print" onClick={() => window.print()}>
-                  <Printer size={15} aria-hidden="true" /> Imprimer
-                </button>
-              ) : null}
+              <button type="button" className="btn sm no-print" onClick={() => imprimer(dire)}>
+                <Printer size={15} aria-hidden="true" /> Imprimer
+              </button>
             </div>
             {lignes.length ? (
               <div style={{ overflowX: 'auto' }}>

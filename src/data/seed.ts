@@ -358,7 +358,7 @@ export function seed(today: ISODate, avance = 0): AppData {
     data.remplacements.push({ id: uid('r'), shiftId: aRemplacer.id, demandeur: aRemplacer.personId, date: aRemplacer.date, start: aRemplacer.start, end: aRemplacer.end, creeLe: new Date(`${addDays(today, -8)}T08:05:00`).toISOString(), volontaires: [], statut: 'ouverte' });
   }
 
-  // ---- Souhaits du mois à venir : sept personnes ont déjà répondu, trois n'ont encore rien posé.
+  // ---- Préférences du mois à venir : sept personnes ont déjà répondu, trois n'ont encore rien posé.
   const moisCible = moisACollecter(data.officine, today);
   const ontRepondu = ['p_camille', 'p_lea', 'p_thomas', 'p_manon', 'p_ines', 'p_jules', 'p_antoine'];
   data.souhaits = data.personnes

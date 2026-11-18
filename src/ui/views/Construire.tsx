@@ -1,32 +1,4 @@
-import {
-  AlertTriangle,
-  Ban,
-  CalendarCheck,
-  CalendarRange,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  CircleCheck,
-  Copy,
-  FlaskConical,
-  Info,
-  Lock,
-  MessageCircleQuestion,
-  Minus,
-  Pill as PillIcon,
-  Pencil,
-  Plus,
-  Printer,
-  Redo2,
-  ShieldAlert,
-  Sparkles,
-  Sprout,
-  Trash2,
-  Undo2,
-  UserRoundPlus,
-  Users,
-  X,
-} from 'lucide-react';
+import { AlertTriangle, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
@@ -50,7 +22,7 @@ import {
   weekday,
 } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
-import { HEBERGE } from '../../env';
+import { imprimer } from '../../env';
 import { ABSENCE_LABEL, ACTIVITE_LABEL, GARDE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt, classeAbsence } from '../../domain/types';
 import {
   besoinsDe,
@@ -96,7 +68,10 @@ export function echelleOfficine(data: AppData): Echelle {
 const GROUPES: { titre: string; test: (p: Person) => boolean; couleur: string; icone: JSX.Element }[] = [
   { titre: 'Pharmaciens', test: (p) => estPharmacien(p) && !p.externe, couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
   { titre: 'Préparateurs', test: (p) => p.qualification === 'preparateur' && !p.externe, couleur: 'r-prepa', icone: <FlaskConical size={14} /> },
-  { titre: 'Animateurs, apprentis, étudiants et autres postes', test: (p) => !estPharmacien(p) && p.qualification !== 'preparateur' && !p.externe, couleur: 'c-gris', icone: <Sprout size={14} /> },
+  { titre: 'Animateurs', test: (p) => p.qualification === 'animateur' && !p.externe, couleur: 'r-anim', icone: <Megaphone size={14} /> },
+  { titre: 'Apprentis', test: (p) => p.qualification === 'apprenti' && !p.externe, couleur: 'r-apprenti', icone: <Sprout size={14} /> },
+  { titre: 'Étudiants', test: (p) => p.qualification === 'etudiant' && !p.externe, couleur: 'r-etudiant', icone: <GraduationCap size={14} /> },
+  { titre: 'Rayonnistes', test: (p) => p.qualification === 'rayonniste' && !p.externe, couleur: 'r-rayon', icone: <Boxes size={14} /> },
   { titre: 'Remplaçants', test: (p) => !!p.externe, couleur: 'c-gris', icone: <UserRoundPlus size={14} /> },
 ];
 
@@ -201,11 +176,9 @@ export function Construire(): JSX.Element {
           <button type="button" className="btn ghost icon" onClick={redo} disabled={!future.length} aria-label="Rétablir" title="Rétablir (Ctrl + Maj + Z)">
             <Redo2 size={17} />
           </button>
-          {!HEBERGE ? (
-            <button type="button" className="btn ghost icon" onClick={() => window.print()} aria-label="Imprimer le planning" title="Imprimer">
-              <Printer size={17} />
-            </button>
-          ) : null}
+          <button type="button" className="btn ghost icon" onClick={() => imprimer(dire)} aria-label="Imprimer le planning" title="Imprimer">
+            <Printer size={17} />
+          </button>
         </div>
       </div>
 
@@ -426,7 +399,7 @@ export function Construire(): JSX.Element {
                                           return <I size={14} />;
                                         })()}
                                       </span>
-                                      <span className="tt">{ABSENCE_LABEL[absence.type]}</span>
+                                      <span className="tt">{absence.type === 'formation' && absence.libelle ? absence.libelle : ABSENCE_LABEL[absence.type]}</span>
                                     </span>
                                   ) : null}
                                   {duJour.map((s) => (
@@ -1014,7 +987,7 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
       ) : null}
       {calcul ? (
         <div className="row" style={{ padding: '30px 0', justifyContent: 'center' }} role="status">
-          <span className="spinner" /> Calcul des propositions : règles impératives d'abord, effectif ensuite, souhaits et équité enfin…
+          <span className="spinner" /> Calcul des propositions : règles impératives d'abord, effectif ensuite, préférences et équité enfin…
         </div>
       ) : null}
       {resultats ? (
@@ -1046,7 +1019,7 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
                     ))}
                   </span>
                   <span className="kpi">
-                    <span>Souhaits satisfaits</span>
+                    <span>Préférences suivies</span>
                     <b className={meilleur('souhaits', i) ? 'best' : ''}>{k.souhaits === null ? '—' : `${Math.round(k.souhaits * 100)} %`}</b>
                     <span title="Écart type entre samedis réels et attendus sur 8 semaines : plus il est bas, plus la répartition est équilibrée">Écart d'équité (samedis)</span>
                     <b className={meilleur('ecartSamedis', i) ? 'best' : ''}>{fmtDecimal(k.ecartSamedis, 2)}</b>
@@ -1100,7 +1073,7 @@ function DialoguePublication({ semaine, onClose }: { semaine: ISODate; onClose: 
     <Dialog
       size="mid"
       title={ctrl.premiere ? 'Publier le planning' : 'Publier les modifications'}
-      subtitle={`Semaine ${isoWeek(semaine)} · ${fmtSemaine(semaine)}. Une fois publié, le planning devient la version officielle vue par l'équipe.`}
+      subtitle={`Semaine ${isoWeek(semaine)} · ${fmtSemaine(semaine)}`}
       onClose={onClose}
       footer={
         <>
@@ -1123,39 +1096,45 @@ function DialoguePublication({ semaine, onClose }: { semaine: ISODate; onClose: 
       }
     >
       {bloquants.length ? (
-        <div className="col" style={{ gap: 8 }}>
+        <div className="col" style={{ gap: 10 }}>
           <div className="notice danger">
             <AlertTriangle size={16} />
-            <div>
-              <b>{bloquants.length} point{bloquants.length > 1 ? 's' : ''} bloquant{bloquants.length > 1 ? 's' : ''} non résolu{bloquants.length > 1 ? 's' : ''}.</b> Corrigez-les dans le brouillon, ou assumez explicitement la publication.
-            </div>
+            <b>
+              {bloquants.length} point{bloquants.length > 1 ? 's' : ''} bloquant{bloquants.length > 1 ? 's' : ''}
+            </b>
           </div>
-          <ul className="small" style={{ margin: 0, paddingLeft: 20 }}>
-            {bloquants.slice(0, 6).map((i) => (
+          <ul className="small pub-liste">
+            {bloquants.slice(0, 4).map((i) => (
               <li key={i.id}>{i.message}</li>
             ))}
-            {bloquants.length > 6 ? <li>… et {bloquants.length - 6} autre{bloquants.length - 6 > 1 ? 's' : ''}</li> : null}
+            {bloquants.length > 4 ? <li>+ {bloquants.length - 4} dans les contrôles</li> : null}
           </ul>
           <label className="check">
             <input type="checkbox" checked={assume} onChange={(e) => setAssume(e.target.checked)} />
-            Je publie en connaissance de cause. Cette décision sera inscrite au journal avec les règles en vigueur.
+            Je publie quand même
           </label>
         </div>
       ) : (
         <div className="notice ok">
-          <CircleCheck size={16} /> Aucun point bloquant. {alertes.length ? `${alertes.length} alerte${alertes.length > 1 ? 's' : ''} d'organisation reste${alertes.length > 1 ? 'nt' : ''} visible${alertes.length > 1 ? 's' : ''} dans les contrôles.` : 'Aucune alerte.'}
+          <CircleCheck size={16} /> Aucun point bloquant{alertes.length ? ` · ${alertes.length} alerte${alertes.length > 1 ? 's' : ''}` : ''}
         </div>
       )}
 
       {ctrl.delais.length ? (
-        <div className="col" style={{ gap: 8 }}>
-          <div className="eyebrow">Délais de prévenance non tenus : accord à recueillir</div>
+        <div className="col" style={{ gap: 6 }}>
+          <div className="row">
+            <div className="eyebrow grow">Accords à recueillir</div>
+            {ctrl.delais.length > 1 ? (
+              <button type="button" className="btn sm" onClick={() => setAccords(accords.length === ctrl.delais.length ? [] : ctrl.delais.map((d) => d.id))}>
+                {accords.length === ctrl.delais.length ? 'Tout décocher' : 'Tout cocher'}
+              </button>
+            ) : null}
+          </div>
           {ctrl.delais.map((d) => (
-            <label key={d.id} className="check">
+            <label key={d.id} className="check ligne">
               <input type="checkbox" checked={accords.includes(d.id)} onChange={(e) => setAccords((a) => (e.target.checked ? [...a, d.id] : a.filter((x) => x !== d.id)))} />
               <span>
-                {d.message}
-                <span className="soft" style={{ display: 'block' }}>J'ai recueilli l'accord de {nom(d.personId)} ; il sera tracé au journal.</span>
+                <b>{nom(d.personId)}</b> <span className="soft">· {d.court}</span>
               </span>
             </label>
           ))}
@@ -1164,7 +1143,9 @@ function DialoguePublication({ semaine, onClose }: { semaine: ISODate; onClose: 
 
       {!ctrl.premiere ? (
         <div className="col" style={{ gap: 6 }}>
-          <div className="eyebrow">{ctrl.changements.length} changement{ctrl.changements.length > 1 ? 's' : ''} par rapport à la version publiée</div>
+          <div className="eyebrow">
+            {ctrl.changements.length} changement{ctrl.changements.length > 1 ? 's' : ''}
+          </div>
           {ctrl.changements.map((c, i) => (
             <div key={i} className="row small" style={{ gap: 12 }}>
               <b style={{ minWidth: 150 }}>
@@ -1173,12 +1154,9 @@ function DialoguePublication({ semaine, onClose }: { semaine: ISODate; onClose: 
               <AvantApres avant={c.avant} apres={c.apres} />
             </div>
           ))}
-          <p className="tiny muted">Chaque personne concernée reçoit son changement exact, avant et après. Les autres ne sont pas dérangées.</p>
         </div>
       ) : (
-        <p className="small soft">
-          {shiftsSemaine(data, semaine).length} postes seront communiqués à l'équipe. La publication est horodatée et conservée avec la version des règles appliquées.
-        </p>
+        <p className="small soft">{shiftsSemaine(data, semaine).length} postes envoyés à l’équipe.</p>
       )}
     </Dialog>
   );

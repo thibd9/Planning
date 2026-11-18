@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, CircleAlert, Info, LogIn, Play, RotateCcw, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, CircleAlert, LogIn, Play, RotateCcw, ShieldCheck, Store } from 'lucide-react';
 import { useState } from 'react';
 import { empreinte, espaceDe, estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
@@ -57,29 +57,19 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
 
   return (
     <main className="connexion" id="contenu">
-      {/* Fond : un dégradé qui dérive et le symbole de Solvéa, en grand, qui tourne lentement. */}
+      {/* Fond : quelques formes abstraites en dégradé, immobiles. */}
       <div className="cx-fond" aria-hidden="true">
-        <span className="cx-forme f1">
-          <Logo size={620} />
-        </span>
-        <span className="cx-forme f2">
-          <Logo size={380} />
-        </span>
-        <span className="cx-forme f3">
-          <Logo size={240} />
-        </span>
+        <span className="cx-tache t1" />
+        <span className="cx-tache t2" />
+        <span className="cx-tache t3" />
+        <span className="cx-tache t4" />
       </div>
-      <header className="cx-haut">
-        <div className="cx-marque">
-          <Logo size={40} />
-          <LogoNom hauteur={24} />
-        </div>
-        <button type="button" className="btn cx-demo" onClick={() => ouvrirTutoriels(true)}>
-          <Play size={15} aria-hidden="true" /> Comment ça marche ?
-        </button>
-      </header>
       <div className="cx-panneau">
       <div className="connexion-in">
+        <div className="cx-marque">
+          <Logo size={54} />
+          <LogoNom hauteur={32} />
+        </div>
         {ecran === 'connexion' ? (
           <form
             className="card pad col"
@@ -91,8 +81,8 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             }}
           >
             <div>
-              <h1 style={{ fontSize: 30 }}>Bon retour</h1>
-              <p className="soft" style={{ marginTop: 6 }}>Connectez-vous pour retrouver votre espace.</p>
+              <h1 style={{ fontSize: 28 }}>Connexion</h1>
+              <p className="soft" style={{ marginTop: 6 }}>Votre identifiant et votre mot de passe.</p>
             </div>
             {info ? (
               <p className="notice ok small" role="status">
@@ -121,23 +111,18 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
                 Mot de passe oublié ?
               </button>
             ) : null}
-            {data.demo ? (
-              <p className="notice info small">
-                <Info size={16} aria-hidden="true" />
-                <span>
-                  Équipe d’exemple : identifiant <b>helene.marchetti</b> (titulaire principale), <b>antoine.mercier</b> (titulaire secondaire), <b>karim.benali</b> (pharmacien) ou <b>camille.roussel</b> (préparatrice), mot de passe <b>demo</b>.
-                </span>
-              </p>
-            ) : null}
+            <div className="cx-suite">
+              <span className="cx-ou">Première visite ?</span>
+              <div className="cx-actions">
+                <button type="button" className="btn" onClick={onCreer}>
+                  <Store size={16} aria-hidden="true" /> Créer ma pharmacie
+                </button>
+                <button type="button" className="btn" onClick={() => ouvrirTutoriels(true)}>
+                  <Play size={16} aria-hidden="true" /> Comment ça marche ?
+                </button>
+              </div>
+            </div>
           </form>
-        ) : null}
-        {ecran === 'connexion' ? (
-          <p className="cx-nouveau">
-            Première visite ?{' '}
-            <button type="button" className="lien" onClick={onCreer}>
-              Créer ma pharmacie <ArrowRight size={15} aria-hidden="true" />
-            </button>
-          </p>
         ) : null}
         {ecran === 'oubli' ? (
           <div className="card pad col" style={{ gap: 20 }}>
@@ -206,19 +191,6 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
         <p className="tiny muted">Sans serveur, cette connexion sépare les espaces sur cet appareil ; elle ne remplace pas de vrais comptes en ligne.</p>
       </div>
       </div>
-      <footer className="cx-etapes" aria-label="Solvéa en trois étapes">
-        <ol>
-          <li>
-            <span className="n" aria-hidden="true">1</span> Chacun donne ses souhaits
-          </li>
-          <li>
-            <span className="n" aria-hidden="true">2</span> Solvéa propose, vous décidez
-          </li>
-          <li>
-            <span className="n" aria-hidden="true">3</span> L’équipe est prévenue
-          </li>
-        </ol>
-      </footer>
       <ChoixParcours />
     </main>
   );

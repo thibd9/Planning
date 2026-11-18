@@ -11,7 +11,7 @@ export const COMPTEUR_LABEL: Record<CompteurCle, string> = {
   gardes: 'Gardes et astreintes',
   depannages: 'Dépannages assurés',
   changementsTardifs: 'Changements tardifs absorbés',
-  souhaitsRefuses: 'Souhaits refusés',
+  souhaitsRefuses: 'Demandes refusées',
 };
 
 export interface LigneEquite {

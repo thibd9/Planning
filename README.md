@@ -35,19 +35,20 @@ puis une vérification avant de créer. Un tutoriel guidé présente ensuite cha
 
 ## Tutoriels et environnement d'exemple
 
-La page de connexion est sobre : un dégradé qui dérive, le symbole de Solvéa en fond, le formulaire au
-centre et, en bas, le principe en trois étapes. En haut à droite, « Comment ça marche ? » ouvre la fenêtre
-« Découvrir Solvéa » : une visite guidée **par rôle**, jouée sur une pharmacie d'exemple (la « Pharmacie
-des Tilleuls », fictive) posée à côté des vraies, sans rien effacer.
+La page de connexion est sobre : des formes en dégradé, fixes, le logo centré au-dessus du formulaire, et
+deux boutons sous « Première visite ? » : « Créer ma pharmacie » et « Comment ça marche ? ». Ce dernier
+ouvre la fenêtre « Découvrir Solvéa » : une visite guidée **par rôle**, jouée sur une pharmacie d'exemple
+(la « Pharmacie des Tilleuls », fictive) posée à côté des vraies, sans rien effacer.
 
-- **Titulaire — Tout Solvéa, de zéro** (47 étapes, six chapitres) : la pharmacie vient d'être créée, sans
-  équipe ni planning. On installe (création, horaires, modèle de planification, équipe, fiche, règles), on
-  construit (souhaits du mois, grille, poste posé à la main, trois propositions, contrôles, vue mois,
-  journée, publication), on passe côté équipe (mon planning, calendrier, planning de l'équipe, demandes,
-  remplacement), on traite les imprévus (demande triée par urgence, volontaire, validation, congés, absence
-  imprévue, appel à l'équipe), les temps forts (gardes, formation, inventaire), puis on pilote (accord
-  entre titulaires, compteur d'heures, suivi, équité, messages, journal et paie, tableau de bord,
-  « Créer », cloche, plusieurs pharmacies, assistant, mot de passe, compte).
+- **Titulaire — Tout Solvéa, de zéro** (50 étapes, six chapitres, dans l'ordre du travail) :
+  **Préparer** (création, horaires, modèle de planification, équipe, fiche, règles), **Planifier**
+  (préférences du mois, grille, poste posé à la main, trois propositions, contrôles, vue mois, journée,
+  publication, impression, gardes, formation, inventaire), **Côté équipe** (mon planning, calendrier,
+  planning de l'équipe, mes demandes, demande sans raison, remplacement, gardes, suivi), **Suivre**
+  (demande de remplacement, volontaire, validation, urgence médicale avec justificatif, congé accepté,
+  demande refusée, absence imprévue, appel à l'équipe, personne ne se propose, accord entre titulaires,
+  messages, compteur d'heures, retards), **Bilan** (équité, journal et paie), **Au quotidien** (tableau de
+  bord, « Créer », cloche, plusieurs pharmacies, assistant, mot de passe, compte).
 - **Pharmacien adjoint** (14 étapes) et **Préparateur, animateur, apprenti…** (13 étapes) : seulement ce
   qui sert à la personne — son planning, celui de l'équipe, ses demandes, l'appel à l'équipe, ses gardes
   pour un pharmacien, son suivi, les messages, l'assistant, son compte. Rien de la gestion.
@@ -57,8 +58,11 @@ des Tilleuls », fictive) posée à côté des vraies, sans rien effacer.
 Pendant une visite :
 
 - un **projecteur** éclaire ce dont on parle, et l'écran défile pour l'amener au centre ;
-- quand l'étape comporte une action, un **repère de clic** se pose sur le bouton, puis l'action se fait
-  sous les yeux (l'équipe arrive personne par personne, une fenêtre s'ouvre, la demande est acceptée) ;
+- **l'application fait les gestes à votre place** : un pointeur se déplace, clique, coche, choisit dans
+  une liste et tape au clavier, lettre par lettre (créer la pharmacie, ajouter une personne, poser un
+  poste, publier, demander un remplacement, accepter, refuser, interroger l'assistant) ; « Revoir la
+  démonstration » la rejoue ;
+- chaque étape tient en une ou deux phrases courtes ;
 - la fiche d'explication se range dans le coin où elle cache le moins ;
 - le **sommaire** saute d'un chapitre à l'autre, et l'écran se met en place tout seul ;
 - **lecture automatique**, flèches du clavier, et « Revenir à l'étape » si l'on est parti explorer.
@@ -105,21 +109,37 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
 - **Barre du haut** : la date, « Créer » (planning, garde, formation, inventaire, personne, absence,
   message), la cloche, les messages, le tutoriel, puis le compte. La cloche donne une ligne par demande de
   remplacement, la plus urgente en tête : un clic mène droit à la demande, mise en avant.
-- **Menu personnel**, le même pour tous : « Mon planning » (mes horaires, rien d'autre), « Mes demandes »
-  et « Mon suivi » (compteur d'heures, compteurs de présence, part des contraintes). « Mes demandes » a
-  trois onglets, chacun avec sa phrase d'explication : **Souhaits du mois** (ce que je préfère, sans
-  réponse à attendre), **Absences et horaires** (ce que je demande au titulaire), **Remplacements** (un
-  poste que je ne peux pas tenir).
-- **Assistant Solvéa** : un bouton flottant au logo. On tape ce qu'on veut faire, ou on choisit parmi les
-  suggestions de l'écran en cours ; il répond en deux phrases et y emmène. Il ne propose que ce qui
-  concerne le rôle de la personne. C'est une aide intégrée (fiches et recherche par mots), pas un modèle
-  de langage : rien n'est envoyé hors de l'appareil.
+- **Menu du titulaire, dans l'ordre du travail** : tableau de bord, puis **1 Préparer** (équipe, réglages,
+  règles), **2 Planifier** (construire, gardes), **3 Suivre** (résoudre, messages, heures), **4 Bilan**
+  (équité, journal et paie). Le titulaire suit l'activité de son équipe : pas d'espace personnel dans son
+  menu (ses propres horaires restent accessibles depuis le menu du compte). Le tableau de bord montre
+  l'équipe du jour et « Où en est le planning » : préférences, brouillon, contrôles, publication.
+- **Menu de l'équipe** : « Mon planning » (mes horaires, en semaine ou en calendrier), « Mes demandes »
+  et « Mon suivi » (compteur d'heures, compteurs de présence, part des contraintes), puis le planning de
+  l'équipe et les messages.
+- **Mes demandes** s'ouvre sur trois cartes, une par chose possible, avec qui répond : **Mes
+  préférences** (ce qui m'arrange le mois prochain, sans réponse à attendre), **Absence ou horaire** (le
+  titulaire répond), **Me faire remplacer** (le titulaire, puis un collègue volontaire). Chaque demande
+  affiche ses étapes — envoyée, réponse du titulaire, au planning — et une phrase qui dit où elle en est.
+  Pour un remplacement, les postes sont séparés en deux groupes : moins de 7 jours (urgent, sur
+  volontariat) et 7 jours ou plus (délai normal).
+- **Assistant Solvéa** : un bouton flottant au logo ouvre une conversation. On pose sa question (« Qui
+  travaille demain ? », « Mon prochain poste ? », « Que dois-je décider ? », « Qui est absent ? », « Les
+  heures à régulariser ? ») : il lit le planning, répond avec les noms et les horaires, et propose le bouton
+  qui mène au bon écran. Pour le reste, il s'appuie sur une trentaine de fiches d'aide, filtrées selon le
+  rôle. C'est un moteur de règles intégré, pas un modèle de langage : il ne comprend que les formulations
+  prévues, et rien n'est envoyé hors de l'appareil.
+- **Imprimer** : chacun peut imprimer son planning, le planning de l'équipe et ses gardes ; le titulaire
+  imprime la semaine depuis « Construire ».
 - **Une couleur par poste**, la même dans tous les thèmes : titulaire, pharmacien adjoint, préparateur,
   animateur, apprenti, étudiant, rayonniste.
 - **Trois niveaux de boutons** : principal (plein), secondaire (teinté, toujours visible), discret
   (neutre). Une seule action principale par écran ou par fenêtre.
 - **Mon planning et le planning global.** Dans « Construire » et « Planning de l'équipe », « Mes postes »
-  ne garde que ma ligne ; depuis « Mon planning », « Toute l'équipe » ouvre le planning global.
+  ne garde que ma ligne ; depuis « Mon planning », le bouton « Planning de l'équipe » ouvre le planning
+  global.
+- **Postes séparés** : animateurs, apprentis, étudiants et rayonnistes ont chacun leur groupe, dans la
+  création de la pharmacie, la liste de l'équipe, la grille de la semaine et la vue mois.
 
 **Limite importante** : sans serveur, cette connexion sépare les espaces sur un appareil partagé ; ce n'est
 pas une protection des données, et seule une empreinte non cryptographique du mot de passe est conservée.
@@ -132,7 +152,7 @@ Un vrai contrôle d'accès et une vraie messagerie demandent un serveur.
 | --- | --- | --- |
 | **Tableau de bord** | Où en est la pharmacie ? | Décisions en attente, couverture pharmacien de la semaine, équipe du jour, prochains horaires, messages, mes pharmacies |
 | **Résoudre** | Que décider aujourd'hui ? | Cinq onglets, un sujet à la fois : absences (bouton « Tout régler » avec les options conseillées, ou un volet par jour avec options comparées), remplacements, demandes, gardes, plannings à publier |
-| **Construire** | Comment couvrir la semaine ? | Grille à l'échelle du temps, contrôles immédiats, trois propositions (équité, souhaits, coût), brouillon puis publication |
+| **Construire** | Comment couvrir la semaine ? | Grille à l'échelle du temps, contrôles immédiats, trois propositions (équité, préférences, coût), brouillon puis publication |
 | **Gardes** | Affecter, prévenir, payer | Ajout d'une garde avec le pharmacien à qui la confier et sa notification immédiate, délai de 15 jours, interventions, repos à protéger, variables pour le comptable |
 | **Mon planning** | Quand est-ce que je travaille ? | Aujourd'hui, demain et la suite en un coup d'œil ; vue **Semaine** (horaire écrit en grand, puis frise graduée de 8 h à 20 h avec la pause hachurée) ou vue **Calendrier** du mois, en grandes cases sur toute la largeur ; changements avant → après, demandes, remplacements, part des contraintes |
 | **Messages** | Qui prévenir ? | Fil de toute l'équipe et conversations privées |
@@ -187,23 +207,54 @@ participants. Chacun est prévenu dans son espace et retrouve la formation dans 
 calendrier ; les postes prévus ces jours-là passent dans « Résoudre », avec des options de remplacement.
 Pour quelques heures de formation pendant un poste, la tâche « Formation » se choisit sur le poste.
 
-### Souhaits du mois et vue mois
+### Préférences du mois et vue mois
 
 Dans le modèle **collaboratif** (réglable dans « Réglages », l'autre modèle étant le **classique**, où le
-responsable construit seul), chacun pose ses souhaits pour le mois à venir avant une date limite (le 20 du
-mois précédent, réglable) :
+responsable construit seul), chacun pose ses préférences pour le mois à venir avant une date limite (le
+20 du mois précédent, réglable) :
 
 - une forme par jour — matin, journée, après-midi ou repos — posée d'un clic, sans jamais de raison ;
 - « M'assister » remplit les jours vides d'après les habitudes des huit dernières semaines ;
-- sous chaque jour, l'effectif annoncé par l'équipe (matin et après-midi) face au seuil de la pharmacie ;
-  s'il manque quelqu'un, « Je peux venir » comble le créneau.
+- un jour où l'équipe annoncée ne suffit pas porte la mention « Manque le matin » ou « Manque
+  l'ap.-midi » ; en le touchant, on voit qui s'est positionné et « Je peux venir » comble le créneau.
 
-Le calcul traite un souhait comme une simple préférence : il ne passe jamais devant une règle impérative
-ni devant l'effectif attendu. Côté responsable, « Construire » a une **vue mois** : une lettre par jour et
-par personne, l'objectif d'équipe par jour (au moment le plus tendu), les heures de chacun face à son
-contrat, les souhaits déjà posés, qui a répondu et combien de jours restent. « Corriger automatiquement »
-recalcule d'un coup les semaines encore en brouillon en suivant les souhaits, et dit combien ont été
-suivis ; les semaines publiées ne bougent pas.
+Le calcul traite une préférence pour ce qu'elle est : elle ne passe jamais devant une règle impérative
+ni devant l'effectif attendu.
+
+Côté responsable, « Construire » a une **vue mois** qui se lit comme la grille de la semaine :
+
+- une ligne par personne, rangée par poste ; une case par jour du mois, avec **l'horaire écrit dedans**
+  (« 8h30 / 16h30 ») et la couleur du moment de la journée ; congé, arrêt et formation sont écrits en mots ;
+- la **légende en haut**, en mots ;
+- en tête, chaque semaine avec son état (publiée, brouillon, à construire) : un clic l'ouvre ;
+- une ligne « Équipe au complet ? » : une coche, ou le nombre de personnes qui manquent au comptoir ;
+- pour chacun, « 126 h sur 140 h » : les heures planifiées face au contrat, compté seulement sur les
+  semaines déjà construites, absences déduites ;
+- les préférences ne s'affichent que si on coche « Afficher les préférences » (un point rouge signale un
+  poste qui s'en écarte) ;
+- le mois en cours s'ouvre sur la semaine d'aujourd'hui.
+
+« Corriger automatiquement » recalcule d'un coup les semaines encore en brouillon en suivant les
+préférences, et dit combien ont été suivies ; les semaines publiées ne bougent pas.
+
+### Fiche d'une personne
+
+Chaque rubrique a son titre et son icône : poste et contrat, compétences et diplômes, droits d'accès,
+suivi sur 12 mois, compte de connexion, volontariat, besoins personnels, absences à venir. Les vingt-deux
+compétences sont rangées en trois familles (actes et habilitations, conseil, organisation), chacune avec
+son icône et son compteur ; on touche une compétence pour l'ajouter ou la retirer.
+
+### Journal et fiche navette
+
+Le **journal** est rangé par jour, du plus récent au plus ancien : l'heure, la nature de l'événement
+(publication, modification, absence, garde…) avec sa couleur, le détail, les changements avant/après, les
+accords recueillis et les règles appliquées. Trois chiffres en tête, et un filtre par nature.
+
+La **fiche navette** se parcourt mois par mois : quatre totaux (salariés, heures prévues, heures en plus
+des contrats, jours d'absence), puis une ligne par salarié — heures prévues, heures complémentaires et
+supplémentaires à 25 % et 50 % en pastilles de couleur, absences, variables de garde — et le total du
+mois. Un bandeau rappelle que ce sont des heures prévues, pas pointées. L'export pour le comptable reste
+un fichier CSV.
 
 ### Absence à couvrir : l'appel à l'équipe et le tour de rôle
 
@@ -300,10 +351,17 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Structure** : un titre de page par écran, niveaux de titres sans saut, zones de navigation et de
   contenu repérées, grille du planning exposée comme un tableau.
 
-Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut sur les 105 écrans et
-fenêtres du parcours complet, ordinateur et téléphone, ni sur les vingt écrans principaux rejoués dans
-chacun des dix thèmes, en clair et en sombre. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des
-contrôles manuels, notamment avec des lecteurs d'écran, qui restent à faire.
+Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défaut :
+
+- sur les 34 écrans et fenêtres du parcours de vérification (44 contrôles de fonctionnement), en clair et
+  en sombre ;
+- sur 32 écrans rejoués dans chacun des dix thèmes, en clair et en sombre (640 écrans), **sur la version
+  hébergée elle-même** — c'est là qu'un défaut du mode sombre était passé inaperçu ;
+- sur 12 écrans à la largeur d'un téléphone.
+
+Les quatre visites guidées sont déroulées en entier par un script : chaque étape a son projecteur, aucune
+erreur. **Ce n'est pas une déclaration de conformité** : un audit RGAA complet demande des contrôles
+manuels, notamment avec des lecteurs d'écran, qui restent à faire.
 
 ## Architecture
 
@@ -321,6 +379,7 @@ src/
 - **Impératif et souple ne se compensent pas.** Le générateur classe les solutions sur trois niveaux :
   règles impératives, effectif attendu, objectifs souples. Une préférence ne rachète jamais une règle.
 - **Moteur pur, testé.** `src/engine` ne dépend ni de React ni du navigateur (`src/engine/engine.test.ts`).
+  L'assistant a ses propres tests (`src/ui/bot.test.ts`) : 65 tests au total.
 
 ## Limites à connaître
 
@@ -344,6 +403,13 @@ src/
   changé, et le contraste a été recalculé sur le fond le plus défavorable (voir « Accessibilité »).
 - **Mouvement.** Les fonds animés, les entrées d'écran et les visites guidées s'arrêtent de bouger si
   l'appareil demande de réduire les animations.
+- **Assistant à règles.** L'assistant reconnaît une dizaine de questions sur le planning et une trentaine
+  de fiches d'aide. Une question formulée autrement peut ne pas être comprise : il le dit et propose des
+  suggestions. Il ne rédige rien et n'apprend pas.
+- **Impression.** L'impression passe par le navigateur. Dans l'aperçu hébergé sur claude.ai, la fenêtre
+  d'impression peut être bloquée : l'application le signale au lieu de rester muette.
+- **Vue mois sur petit écran.** Un mois entier dépasse la largeur d'un écran d'ordinateur portable : la
+  grille défile horizontalement, le nom des personnes restant fixe.
 - **Générateur heuristique.** La recherche locale donne de bonnes semaines en moins de deux secondes
   pour une dizaine de personnes ; elle ne prouve pas l'optimalité.
 

@@ -151,7 +151,7 @@ export interface Besoin {
   statut: BesoinStatut;
   /**
    * Droit légal ou restriction d'aptitude validée : saisi par une personne habilitée,
-   * n'entre jamais dans le plafond des souhaits prioritaires.
+   * n'entre jamais dans le plafond des préférences prioritaires.
    */
   horsPlafond: boolean;
   decision: BesoinDecision;
@@ -209,13 +209,13 @@ export interface BesoinEffectif {
   minEquipe: number;
 }
 
-/** collaboratif : chacun pose ses souhaits du mois avant la date limite ; classique : le responsable construit seul. */
+/** collaboratif : chacun pose ses préférences du mois avant la date limite ; classique : le responsable construit seul. */
 export type ModelePlanning = 'collaboratif' | 'classique';
 
 export interface Officine {
   nom: string;
   modele?: ModelePlanning;
-  /** Jour du mois précédent où la collecte des souhaits se ferme (20 par défaut). */
+  /** Jour du mois précédent où la collecte des préférences se ferme (20 par défaut). */
   souhaitsLimite?: number;
   /** Titulaire principal : il a créé l'officine, détient tous les droits et les délègue. */
   responsableId?: string;
@@ -421,7 +421,7 @@ export const SOUHAIT_LABEL: Record<SouhaitChoix, string> = { matin: 'Matin', jou
 
 export interface AppData {
   officine: Officine;
-  /** Souhaits du mois, posés jour par jour dans le modèle collaboratif. */
+  /** Préférences du mois, posés jour par jour dans le modèle collaboratif. */
   souhaits?: Souhait[];
   regularisations?: Regularisation[];
   messages: Message[];

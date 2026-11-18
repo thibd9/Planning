@@ -45,34 +45,35 @@ interface Lien {
 }
 
 const MOI: Lien = { vue: 'moi', label: 'Mon planning', question: 'Mes horaires', icon: <CalendarDays size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
-const DEMANDES: Lien = { vue: 'demandes', label: 'Mes demandes', question: 'Souhaits, absences, remplacements', icon: <Inbox size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
+const DEMANDES: Lien = { vue: 'demandes', label: 'Mes demandes', question: 'Préférences, absences, remplacements', icon: <Inbox size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const SUIVI: Lien = { vue: 'suivi', label: 'Mon suivi', question: 'Compteurs et équité', icon: <Gauge size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const PERSO: Lien[] = [MOI, DEMANDES, SUIVI];
 const MESSAGES: Lien = { vue: 'messages', label: 'Messages', question: 'Équipe et privé', icon: <MessageSquare size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
-// Trois groupes : ce qu'on regarde chaque jour, ce qui fabrique le planning, ce qui décrit la pharmacie.
+// Le titulaire suit son équipe : son menu suit l'ordre du travail. On prépare, on planifie, on suit, on fait le bilan.
 const GESTION: Lien[] = [
-  { vue: 'tableau', label: 'Tableau de bord', question: 'Vue d’ensemble', icon: <LayoutDashboard size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
-  { vue: 'resoudre', label: 'Résoudre', question: 'À décider', icon: <ListChecks size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' },
-  MESSAGES,
-  { vue: 'construire', label: 'Construire', question: 'La semaine', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
-  { vue: 'gardes', label: 'Gardes', question: 'Tours de garde', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
-  { vue: 'heures', label: 'Heures', question: 'Compteurs à régulariser', icon: <Hourglass size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
-  { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-clair', groupe: 'Plannings' },
-  { vue: 'equipe', label: 'Équipe', question: 'Fiches et accès', icon: <Users size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
-  { vue: 'officine', label: 'Réglages', question: 'Horaires, seuils', icon: <Settings2 size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
-  { vue: 'regles', label: 'Règles', question: 'Textes appliqués', icon: <BookOpenCheck size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
-  { vue: 'journal', label: 'Journal et paie', question: 'Historique, export', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Ma pharmacie' },
+  { vue: 'tableau', label: 'Tableau de bord', question: 'Vue d’ensemble', icon: <LayoutDashboard size={18} />, couleur: 'c-clair', groupe: '' },
+  { vue: 'equipe', label: 'Équipe', question: 'Fiches et accès', icon: <Users size={18} />, couleur: 'c-clair', groupe: 'Préparer' },
+  { vue: 'officine', label: 'Réglages', question: 'Horaires, seuils', icon: <Settings2 size={18} />, couleur: 'c-clair', groupe: 'Préparer' },
+  { vue: 'regles', label: 'Règles', question: 'Textes appliqués', icon: <BookOpenCheck size={18} />, couleur: 'c-clair', groupe: 'Préparer' },
+  { vue: 'construire', label: 'Construire', question: 'La semaine', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'Planifier' },
+  { vue: 'gardes', label: 'Gardes', question: 'Tours de garde', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Planifier' },
+  { vue: 'resoudre', label: 'Résoudre', question: 'À décider', icon: <ListChecks size={18} />, couleur: 'c-clair', groupe: 'Suivre' },
+  { ...MESSAGES, groupe: 'Suivre' },
+  { vue: 'heures', label: 'Heures', question: 'Compteurs à régulariser', icon: <Hourglass size={18} />, couleur: 'c-clair', groupe: 'Suivre' },
+  { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
+  { vue: 'journal', label: 'Journal et paie', question: 'Historique, export', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
 ];
 const PLANNING: Lien = { vue: 'planning', label: 'Planning de l’équipe', question: 'La version publiée', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'L’équipe' };
 const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gardes et astreintes', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 
 /** Chaque rôle a sa propre navigation ; « Mon planning » est toujours en tête. Le compte est en haut à droite. */
 const NAV: Record<Espace, Lien[]> = {
-  responsable: [...PERSO, ...GESTION],
+  responsable: GESTION,
   pharmacien: [...PERSO, MESGARDES, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }],
   equipe: [...PERSO, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }],
 };
-const HORS_MENU: Vue[] = ['compte', 'nouvelle'];
+// Le titulaire garde ses propres horaires à portée, depuis le menu du compte.
+const HORS_MENU: Vue[] = ['compte', 'nouvelle', 'moi', 'demandes'];
 
 export function App(): JSX.Element {
   const { data, autres, officineId, changerOfficine } = useStore();
@@ -88,7 +89,7 @@ export function App(): JSX.Element {
   const [panneau, setPanneau] = useState<'creer' | 'alertes' | null>(null);
   const moi = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''));
   const espace = espaceDe(data, moi);
-  // Sans collecte des souhaits (modèle classique), l'entrée disparaît du menu.
+  // Sans collecte des préférences (modèle classique), l'entrée disparaît du menu.
   const liens = NAV[espace];
   const vueActive = liens.some((l) => l.vue === vue) || HORS_MENU.includes(vue) ? vue : espace === 'responsable' ? 'tableau' : 'moi';
   const aLire = moi ? data.notifications.filter((n) => n.personId === moi.id && !n.luLe).length : 0;
@@ -251,7 +252,16 @@ export function App(): JSX.Element {
         ) : null}
         {groupes.map((g) => (
           <div key={g || 'tete'} style={{ display: 'contents' }}>
-            {g ? <div className="nav-label">{g}</div> : null}
+            {g ? (
+              <div className="nav-label">
+                {espace === 'responsable' ? (
+                  <span className="nav-etape" aria-hidden="true">
+                    {groupes.filter(Boolean).indexOf(g) + 1}
+                  </span>
+                ) : null}
+                {g}
+              </div>
+            ) : null}
             {liens
               .filter((l) => l.groupe === g)
               .map((n) => (
@@ -324,7 +334,7 @@ export function App(): JSX.Element {
                   ) : null}
                 </div>
               ) : (
-                <button type="button" className="btn sm primary top-creer" onClick={() => agir('moi', 'demande')}>
+                <button type="button" className="btn sm primary top-creer" aria-label="Faire une demande" onClick={() => agir('moi', 'demande')}>
                   <Plus size={16} aria-hidden="true" /> <span className="lib">Faire une demande</span>
                 </button>
               )}
@@ -389,6 +399,12 @@ export function App(): JSX.Element {
                   <button type="button" onClick={() => { setMenu(false); aller('compte'); }}>
                     <UserRound size={17} aria-hidden="true" /> Mon compte
                   </button>
+                  {espace === 'responsable' ? (
+                    <button type="button" onClick={() => { setMenu(false); aller('moi'); }}>
+                      <CalendarDays size={17} aria-hidden="true" /> Mes horaires
+                      {aLire ? <span className="nav-badge" aria-hidden="true">{aLire}</span> : null}
+                    </button>
+                  ) : null}
                   <button type="button" role="switch" aria-checked={sombre} onClick={() => setPreferences(session ?? '', { mode: sombre ? 'clair' : 'sombre' })}>
                     {sombre ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />} Mode sombre
                     <span className={`bascule${sombre ? ' on' : ''}`} aria-hidden="true" />
@@ -459,7 +475,7 @@ export function App(): JSX.Element {
         </main>
       </div>
 
-      <Assistant espace={espace} prenom={moi.prenom} />
+      <Assistant espace={espace} prenom={moi.prenom} personId={moi.id} />
       <Tour />
       <Parcours />
       <ChoixParcours />

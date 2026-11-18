@@ -1,9 +1,9 @@
-import { ArrowRight, Eye, EyeOff, Sparkles, X } from 'lucide-react';
+import { AlarmClock, ArrowRight, CalendarCheck, Eye, EyeOff, HeartPulse, Hourglass, Sparkles, X } from 'lucide-react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { fmtHeure } from '../domain/time';
-import type { Interval, Mission, Person, Shift } from '../domain/types';
-import { estPharmacien } from '../domain/types';
+import { dayIndex, fmtHeure } from '../domain/time';
+import type { ISODate, Interval, Mission, Person, Shift, Urgence } from '../domain/types';
+import { URGENCE_LABEL, estPharmacien } from '../domain/types';
 import { couleurDe } from './icons';
 
 export type Role = 'pharma' | 'prepa' | 'autre' | 'externe';
@@ -299,6 +299,28 @@ export function Logo({ size = 38 }: { size?: number }): JSX.Element {
 }
 
 /** Le nom « Solvéa » dans son dessin d'origine ; les lettres prennent la couleur du texte. */
+const URGENCE_TON: Record<Urgence, string> = { prevu: 'info', urgent: 'warn', medical: 'danger' };
+/** Niveau d'urgence d'une demande : bleu pour le prévu, orange pour l'urgent, rouge pour l'urgence médicale. */
+export function PastilleUrgence({ urgence }: { urgence: Urgence }): JSX.Element {
+  const Icone = urgence === 'medical' ? HeartPulse : urgence === 'urgent' ? AlarmClock : CalendarCheck;
+  return (
+    <span className={`pill ${URGENCE_TON[urgence]}`}>
+      <Icone size={13} aria-hidden="true" /> {URGENCE_LABEL[urgence]}
+    </span>
+  );
+}
+
+/** Dans combien de jours : plus c'est proche, plus la couleur est chaude. */
+export function Delai({ date, today }: { date: ISODate; today: ISODate }): JSX.Element {
+  const j = dayIndex(date) - dayIndex(today);
+  const ton = j <= 2 ? 'danger' : j < 7 ? 'warn' : 'info';
+  return (
+    <span className={`pill ${ton}`}>
+      <Hourglass size={12} aria-hidden="true" /> {j <= 0 ? 'Aujourd’hui' : j === 1 ? 'Demain' : `Dans ${j} jours`}
+    </span>
+  );
+}
+
 /** Le bouton qui lance un calcul automatique : action principale de l'écran, avec sa baguette. */
 export function BoutonAuto({ onClick, disabled, occupe, children, title, focus }: { onClick: () => void; disabled?: boolean; occupe?: boolean; children: ReactNode; title?: string; focus?: string }): JSX.Element {
   return (

@@ -1,26 +1,47 @@
-import { ArrowLeftRight, CalendarHeart, CalendarOff, CircleCheck, Gauge, Inbox, Plus } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, CalendarCheck, CalendarHeart, CalendarOff, Check, Clock, Gauge, Inbox, MessageCircleReply, Plus, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
-import { addDays, fmtDateCourt, fmtDuree, fmtHeure, fmtSemaine, mondayOf } from '../../domain/time';
+import { addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHeure, fmtSemaine, mondayOf } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
-import { URGENCE_LABEL, estPharmacien, libelleAbsence } from '../../domain/types';
+import { classeAbsence, estPharmacien, libelleAbsence } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
 import type { CompteurCle } from '../../engine/equity';
 import { COMPTEUR_LABEL, equite } from '../../engine/equity';
 import { delaiRemplacement, peutDemanderRemplacement } from '../../engine/remplacement';
 import { soldeHeures } from '../../engine/heures';
-import { estCollaboratif, moisACollecter } from '../../engine/souhaits';
+import { estCollaboratif, joursRestants, moisACollecter } from '../../engine/souhaits';
 import { suiviDe } from '../../engine/suivi';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { Compteurs } from '../components/Compteurs';
 import { DialogueDemande } from '../components/Demande';
 import { DialogueRemplacement } from '../components/Remplacer';
-import { Pill } from '../kit';
+import { ABSENCE_ICONE } from '../icons';
+import { Delai, PastilleUrgence, Pill } from '../kit';
 import { STATUT_BESOIN } from './Equipe';
 import { Ecart } from './Equite';
 import { Souhaits } from './Souhaits';
 import { usagePlafond } from './Resoudre';
+
+/** Où en est une demande : les étapes franchies sont cochées, la suivante est en cours. */
+function Etapes({ etapes, faites, refus }: { etapes: string[]; faites: number; refus?: boolean }): JSX.Element {
+  return (
+    <ol className={`etapes${refus ? ' refus' : ''}`}>
+      {etapes.map((e, i) => {
+        const etat = i < faites ? 'fait' : i === faites ? (refus ? 'non' : 'cours') : 'apres';
+        return (
+          <li key={e} className={etat}>
+            <i aria-hidden="true">{etat === 'fait' ? <Check size={11} strokeWidth={3.5} /> : etat === 'non' ? <X size={11} strokeWidth={3.5} /> : null}</i>
+            <span>
+              {e}
+              <span className="sr">{etat === 'fait' ? ' : fait' : etat === 'cours' ? ' : en cours' : etat === 'non' ? ' : refusé' : ' : à venir'}</span>
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 /** Mes demandes : absences, contraintes d'horaires et remplacements, au même endroit. */
 export function MesDemandes({ personId }: { personId: string }): JSX.Element {
@@ -57,13 +78,88 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
   const collaboratif = estCollaboratif(data.officine);
   const moisCible = moisACollecter(data.officine, today);
   const souhaitsPoses = (data.souhaits ?? []).filter((x) => x.personId === personId && x.date.startsWith(moisCible)).length;
-  // Trois onglets, trois natures : ce que je préfère, ce que je demande, ce que je cède.
-  const onglets: { cle: 'souhaits' | 'absences' | 'remplacements'; label: string; intro: string; nombre: number; icone: JSX.Element }[] = [
-    ...(collaboratif ? [{ cle: 'souhaits' as const, label: 'Souhaits du mois', intro: 'Ce que vous préférez pour le mois à venir. Le planning s’en inspire, sans réponse à attendre.', nombre: 0, icone: <CalendarHeart size={16} /> }] : []),
-    { cle: 'absences' as const, label: gere ? 'Absences et horaires' : 'Absences et horaires', intro: gere ? 'Vos congés, vos formations et vos contraintes d’horaires.' : 'Un congé, une formation, un horaire à tenir : votre titulaire répond à chaque demande.', nombre: absences.filter((a) => a.statut === 'demandee').length + besoins.filter((b) => b.decision === 'en_attente').length, icone: <CalendarOff size={16} /> },
-    { cle: 'remplacements' as const, label: 'Remplacements', intro: 'Un poste publié que vous ne pouvez pas tenir : un collègue volontaire le reprend, avec l’accord du titulaire.', nombre: mesRemplacements.length, icone: <ArrowLeftRight size={16} /> },
+  const enAttente = absences.filter((a) => a.statut === 'demandee').length + besoins.filter((b) => b.decision === 'en_attente').length;
+  const restants = joursRestants(data.officine, moisCible, today);
+  // Trois choses possibles, trois cartes : ce que je préfère, ce que je demande, le poste que je cède.
+  const choix: { cle: 'souhaits' | 'absences' | 'remplacements'; titre: string; phrase: string; reponse: string; etat: string; ton: string; teinte: string; icone: JSX.Element }[] = [
+    ...(collaboratif
+      ? [
+          {
+            cle: 'souhaits' as const,
+            titre: 'Mes préférences',
+            phrase: 'Ce qui m’arrange le mois prochain.',
+            reponse: 'Pas de réponse à attendre',
+            etat: restants < 0 ? 'Clos' : souhaitsPoses ? (restants === 0 ? 'Dernier jour' : `${restants} j pour modifier`) : restants === 0 ? 'À remplir aujourd’hui' : `À remplir · ${restants} j`,
+            ton: restants < 0 ? 'neutral' : souhaitsPoses ? 'ok' : 'warn',
+            teinte: 'v-pref',
+            icone: <CalendarHeart size={22} />,
+          },
+        ]
+      : []),
+    {
+      cle: 'absences' as const,
+      titre: 'Absence ou horaire',
+      phrase: 'Congé, formation, horaire à tenir.',
+      reponse: gere ? 'Inscrit directement' : 'Votre titulaire répond',
+      etat: enAttente ? `${enAttente} en attente` : absences.length + besoins.length ? `${absences.length + besoins.length} en cours` : 'Aucune',
+      ton: enAttente ? 'warn' : 'neutral',
+      teinte: 'v-abs',
+      icone: <CalendarOff size={22} />,
+    },
+    {
+      cle: 'remplacements' as const,
+      titre: 'Me faire remplacer',
+      phrase: 'Un poste publié que je ne peux pas tenir.',
+      reponse: 'Titulaire, puis un collègue volontaire',
+      etat: mesRemplacements.length ? `${mesRemplacements.length} en cours` : 'Aucune',
+      ton: mesRemplacements.length ? 'warn' : 'neutral',
+      teinte: 'v-rempl',
+      icone: <ArrowLeftRight size={22} />,
+    },
   ];
-  const onglet = onglets.some((o) => o.cle === demandesOnglet) ? (demandesOnglet as (typeof onglets)[number]['cle']) : collaboratif && !souhaitsPoses ? 'souhaits' : 'absences';
+  const onglet = choix.some((o) => o.cle === demandesOnglet) ? (demandesOnglet as (typeof choix)[number]['cle']) : collaboratif && !souhaitsPoses && restants >= 0 ? 'souhaits' : 'absences';
+  const urgents = aVenir.slice(0, 8).filter((x) => !peutDemanderRemplacement(data, x.date, today));
+  const prevus = aVenir.slice(0, 8).filter((x) => peutDemanderRemplacement(data, x.date, today));
+
+  const lignePoste = (x: Shift): JSX.Element => {
+    const r = mesRemplacements.find((y) => y.shiftId === x.id);
+    const possible = peutDemanderRemplacement(data, x.date, today);
+    return (
+      <div key={x.id} className={`dm${r ? ' actif' : ''}`}>
+        <span className={`dm-pic ${possible ? 'info' : 'warn'}`} aria-hidden="true">
+          <ArrowLeftRight size={18} />
+        </span>
+        <div className="dm-corps">
+          <div className="dm-titre">
+            <b className="cap1">{fmtDateCourt(x.date)}</b>
+            <span className="num soft">
+              {fmtHeure(x.start)} – {fmtHeure(x.end)}
+            </span>
+            <Delai date={x.date} today={today} />
+            {r ? <PastilleUrgence urgence={r.urgence ?? 'prevu'} /> : null}
+          </div>
+          {r ? (
+            <>
+              <Etapes etapes={['Demandé', 'Accord du titulaire', 'Un collègue reprend']} faites={r.accord === 'attente' ? 1 : r.volontaires.length ? 3 : 2} />
+              <p className="dm-etat">
+                {r.accord === 'attente' ? 'Votre titulaire n’a pas encore répondu.' : r.volontaires.length ? `${r.volontaires.length} volontaire${r.volontaires.length > 1 ? 's' : ''} : votre titulaire valide le remplacement.` : 'Accord donné. On attend un collègue volontaire.'}
+                {r.justificatif ? ' Justificatif joint.' : ''} Vous restez en poste tant que rien n’est validé.
+              </p>
+            </>
+          ) : null}
+        </div>
+        {r ? (
+          <button type="button" className="btn sm" onClick={() => cloreRemplacement(r.id, 'annulee')}>
+            Annuler
+          </button>
+        ) : (
+          <button type="button" className={`btn sm${possible ? ' primary' : ''}`} disabled={enCours(x.id)} onClick={() => setARemplacer(x)}>
+            {possible ? 'Me faire remplacer' : 'Demande urgente'}
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -72,140 +168,153 @@ export function MesDemandes({ personId }: { personId: string }): JSX.Element {
           <Inbox size={26} />
         </span>
         <div className="grow">
-          <div className="eyebrow">Mes demandes</div>
+          <div className="eyebrow">Mon espace</div>
           <h1>
-            Ce que je <span className="hl">souhaite</span>, ce que je demande
+            Mes <span className="hl">demandes</span>
           </h1>
-          <p>Souhaits du mois, absences, remplacements : tout au même endroit. Aucune raison n’est jamais demandée.</p>
+          <p>Choisissez ce que vous voulez faire. Jamais de raison à donner.</p>
         </div>
-        <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
-          <Plus size={16} aria-hidden="true" /> {gere ? 'Poser une absence' : 'Faire une demande'}
-        </button>
       </div>
-      <div className="onglets" role="tablist" aria-label="Mes demandes">
-        {onglets.map((o) => (
-          <button key={o.cle} type="button" role="tab" id={`dem-${o.cle}`} aria-selected={onglet === o.cle} aria-controls="panneau-demandes" className={`onglet${onglet === o.cle ? ' on' : ''}`} onClick={() => setDemandesOnglet(o.cle)}>
-            <span aria-hidden="true">{o.icone}</span>
-            {o.label}
-            {o.nombre ? (
-              <span className="compte">
-                {o.nombre}
-                <span className="sr"> en cours</span>
-              </span>
-            ) : null}
+      <div className="voies" role="tablist" aria-label="Mes demandes">
+        {choix.map((o) => (
+          <button key={o.cle} type="button" role="tab" id={`dem-${o.cle}`} aria-selected={onglet === o.cle} aria-controls="panneau-demandes" className={`voie ${o.teinte}${onglet === o.cle ? ' on' : ''}`} onClick={() => setDemandesOnglet(o.cle)}>
+            <span className="voie-pic" aria-hidden="true">
+              {o.icone}
+            </span>
+            <span className="voie-texte">
+              <b>{o.titre}</b>
+              <span>{o.phrase}</span>
+            </span>
+            <span className={`pill ${o.ton} voie-etat`}>{o.etat}</span>
+            <span className="voie-reponse">
+              <MessageCircleReply size={14} aria-hidden="true" /> {o.reponse}
+            </span>
           </button>
         ))}
       </div>
       <div id="panneau-demandes" role="tabpanel" aria-labelledby={`dem-${onglet}`}>
-        <p className="onglet-intro">{onglets.find((o) => o.cle === onglet)?.intro}</p>
         {onglet === 'souhaits' ? <Souhaits personId={personId} /> : null}
         {onglet === 'absences' ? (
           <div className="une">
-          <div className="card">
-            <div className="card-head">
-              <h2 className="h3 grow">{gere ? 'Mes absences et contraintes' : 'Mes demandes'}</h2>
-              <button type="button" className="btn sm" onClick={() => setDemande(true)}>
-                <Plus size={14} /> Nouvelle
-              </button>
-            </div>
-            <div className="card-body col" style={{ gap: 10 }}>
-              {!besoins.length && !absences.length ? <p className="soft small">{gere ? 'Rien de prévu.' : 'Aucune demande en cours.'}</p> : null}
-              {absences.map((a) => (
-                <div key={a.id} className="row wrap">
-                  <div className="grow">
-                    <b>{libelleAbsence(a)}</b>
-                    <div className="small soft">
-                      Du {fmtDateCourt(a.from)} au {fmtDateCourt(a.to)}
+            <div className="card">
+              <div className="card-head">
+                <div className="grow">
+                  <h2 className="h3">{gere ? 'Mes absences et mes horaires' : 'Mes demandes d’absence et d’horaire'}</h2>
+                  <div className="small soft">{gere ? 'Elles sont inscrites directement au planning.' : 'Chaque demande suit trois étapes. Vous êtes prévenu à chaque réponse.'}</div>
+                </div>
+                <button type="button" className="btn primary" onClick={() => setDemande(true)}>
+                  <Plus size={16} aria-hidden="true" /> Nouvelle demande
+                </button>
+              </div>
+              <div className="card-body col" style={{ gap: 12 }}>
+                {!besoins.length && !absences.length ? (
+                  <div className="dm-vide">
+                    <CalendarOff size={22} aria-hidden="true" />
+                    <span>{gere ? 'Rien de prévu.' : 'Aucune demande en cours.'}</span>
+                  </div>
+                ) : null}
+                {absences.map((a) => {
+                  const Icone = ABSENCE_ICONE[a.type];
+                  const jours = dayIndex(a.to) - dayIndex(a.from) + 1;
+                  return (
+                    <div key={a.id} className="dm">
+                      <span className={`dm-pic ${classeAbsence(a.type)}`} aria-hidden="true">
+                        <Icone size={18} />
+                      </span>
+                      <div className="dm-corps">
+                        <div className="dm-titre">
+                          <b>{libelleAbsence(a)}</b>
+                          <span className="soft">
+                            {a.from === a.to ? `Le ${fmtDateCourt(a.from)}` : `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}`} · {jours} jour{jours > 1 ? 's' : ''}
+                          </span>
+                          {a.from > today ? <Delai date={a.from} today={today} /> : null}
+                        </div>
+                        <Etapes etapes={['Envoyée', 'Réponse du titulaire', 'Au planning']} faites={a.statut === 'approuvee' ? 3 : 1} refus={a.statut === 'refusee'} />
+                        <p className="dm-etat">{a.statut === 'approuvee' ? 'Acceptée : c’est inscrit au planning.' : a.statut === 'refusee' ? 'Refusée par votre titulaire.' : 'Votre titulaire n’a pas encore répondu.'}</p>
+                      </div>
+                      <Pill tone={a.statut === 'approuvee' ? 'ok' : a.statut === 'refusee' ? 'danger' : 'warn'}>{a.statut === 'approuvee' ? 'Acceptée' : a.statut === 'refusee' ? 'Refusée' : 'En attente'}</Pill>
                     </div>
-                  </div>
-                  <Pill tone={a.statut === 'approuvee' ? 'ok' : a.statut === 'refusee' ? 'danger' : 'warn'}>{a.statut === 'approuvee' ? 'Approuvée' : a.statut === 'refusee' ? 'Refusée' : 'En attente'}</Pill>
-                </div>
-              ))}
-              {besoins.map((b) => (
-                <div key={b.id} className="row wrap">
-                  <div className="grow" style={{ minWidth: 180 }}>
-                    <b>{decrireBesoin(b)}</b>
-                    <div className="small soft">
-                      {b.decision === 'acceptee'
-                        ? b.statut === 'reconnue'
-                          ? 'Votre planning en tient compte à coup sûr.'
-                          : b.statut === 'prioritaire'
-                            ? 'Servie avant les autres souhaits, sans être garantie.'
-                            : 'Un souhait : satisfait quand c’est possible.'
-                        : b.decision === 'refusee'
-                          ? 'Demande refusée par votre responsable.'
-                          : 'En attente de la décision de votre responsable.'}
+                  );
+                })}
+                {besoins.map((b) => (
+                  <div key={b.id} className="dm">
+                    <span className="dm-pic horaire" aria-hidden="true">
+                      <Clock size={18} />
+                    </span>
+                    <div className="dm-corps">
+                      <div className="dm-titre">
+                        <b>{decrireBesoin(b)}</b>
+                        <span className="soft">Horaire à tenir</span>
+                      </div>
+                      <Etapes etapes={['Envoyée', 'Réponse du titulaire', 'Au planning']} faites={b.decision === 'acceptee' ? 3 : 1} refus={b.decision === 'refusee'} />
+                      <p className="dm-etat">
+                        {b.decision === 'acceptee'
+                          ? b.statut === 'reconnue'
+                            ? 'Acceptée : votre planning en tient compte à coup sûr.'
+                            : b.statut === 'prioritaire'
+                              ? 'Acceptée : servie avant les autres, sans être garantie.'
+                              : 'Acceptée : suivie quand c’est possible.'
+                          : b.decision === 'refusee'
+                            ? 'Refusée par votre titulaire.'
+                            : 'Votre titulaire n’a pas encore répondu.'}
+                      </p>
                     </div>
+                    {b.decision === 'acceptee' ? (
+                      <Pill tone={STATUT_BESOIN[b.statut].tone}>{STATUT_BESOIN[b.statut].label}</Pill>
+                    ) : (
+                      <Pill tone={b.decision === 'refusee' ? 'danger' : 'warn'}>{b.decision === 'refusee' ? 'Refusée' : 'En attente'}</Pill>
+                    )}
                   </div>
-                  {b.decision === 'acceptee' ? (
-                    <Pill tone={STATUT_BESOIN[b.statut].tone}>{STATUT_BESOIN[b.statut].label}</Pill>
-                  ) : (
-                    <Pill tone={b.decision === 'refusee' ? 'danger' : 'warn'}>{b.decision === 'refusee' ? 'Refusée' : 'En attente'}</Pill>
-                  )}
-                </div>
-              ))}
-              {!gere ? (
-                <div className="notice small">
-                  <CircleCheck size={15} />
-                  <div>
-                    Souhaits prioritaires utilisés : <b>{usage.actifs} sur {usage.plafond}</b>, comme pour tous vos collègues. On ne vous demande jamais la raison d'une demande.
-                  </div>
-                </div>
-              ) : null}
+                ))}
+                {!gere ? (
+                  <p className="tiny muted">
+                    Demandes prioritaires utilisées : <b>{usage.actifs} sur {usage.plafond}</b>. Même plafond pour toute l’équipe.
+                  </p>
+                ) : null}
+              </div>
             </div>
-          </div>
-
           </div>
         ) : null}
         {onglet === 'remplacements' ? (
           <div className="une">
-          <div className="card" data-focus="remplacer">
-            <div className="card-head">
-              <span className="ico" aria-hidden="true">
-                <ArrowLeftRight size={18} />
-              </span>
-              <div className="grow">
-                <h2 className="h3">{gere ? 'Confier un de mes postes' : 'Me faire remplacer'}</h2>
-                <div className="small soft">À moins de {delai} jours, la demande est urgente.</div>
+            <div className="card" data-focus="remplacer">
+              <div className="card-head">
+                <div className="grow">
+                  <h2 className="h3">{gere ? 'Quel poste confier ?' : 'Quel poste ne pouvez-vous pas tenir ?'}</h2>
+                  <div className="small soft">Seuls vos postes déjà publiés sont proposés.</div>
+                </div>
+              </div>
+              <div className="card-body col" style={{ gap: 12 }}>
+                {!aVenir.length ? (
+                  <div className="dm-vide">
+                    <ArrowLeftRight size={22} aria-hidden="true" />
+                    <span>Aucun poste publié à venir.</span>
+                  </div>
+                ) : null}
+                {urgents.length ? (
+                  <>
+                    <div className="dm-groupe warn">
+                      <AlarmClock size={16} aria-hidden="true" />
+                      <span>
+                        <b>Dans moins de {delai} jours : demande urgente.</b> Seul un collègue volontaire peut reprendre le poste.
+                      </span>
+                    </div>
+                    {urgents.map(lignePoste)}
+                  </>
+                ) : null}
+                {prevus.length ? (
+                  <>
+                    <div className="dm-groupe info">
+                      <CalendarCheck size={16} aria-hidden="true" />
+                      <span>
+                        <b>Dans {delai} jours ou plus : délai normal.</b> Votre titulaire a le temps de s’organiser.
+                      </span>
+                    </div>
+                    {prevus.map(lignePoste)}
+                  </>
+                ) : null}
               </div>
             </div>
-            <div className="card-body col" style={{ gap: 10 }}>
-              {!aVenir.length ? <p className="soft small">Aucun poste publié à venir.</p> : null}
-              {aVenir.slice(0, 8).map((s) => {
-                const r = mesRemplacements.find((x) => x.shiftId === s.id);
-                const possible = peutDemanderRemplacement(data, s.date, today);
-                return (
-                  <div key={s.id} className="row wrap">
-                    <div className="grow" style={{ minWidth: 150 }}>
-                      <b className="cap1">{fmtDateCourt(s.date)}</b>
-                      <div className="small soft num">
-                        {fmtHeure(s.start)} – {fmtHeure(s.end)}
-                      </div>
-                      {r ? (
-                        <div className="row wrap" style={{ gap: 6, marginTop: 4 }}>
-                          <Pill tone={r.urgence === 'medical' ? 'danger' : r.urgence === 'urgent' ? 'warn' : undefined}>{URGENCE_LABEL[r.urgence ?? 'prevu']}</Pill>
-                          <span className="small soft">
-                            {r.accord === 'attente' ? 'En attente de la réponse de votre titulaire' : r.volontaires.length ? `Acceptée · ${r.volontaires.length} volontaire${r.volontaires.length > 1 ? 's' : ''}` : 'Acceptée · en attente d’un volontaire'}
-                            {r.justificatif ? ' · justificatif joint' : ''}
-                          </span>
-                        </div>
-                      ) : null}
-                    </div>
-                    {r ? (
-                      <button type="button" className="btn sm" onClick={() => cloreRemplacement(r.id, 'annulee')}>
-                        Annuler
-                      </button>
-                    ) : (
-                      <button type="button" className={`btn sm${possible ? ' primary' : ''}`} disabled={enCours(s.id)} onClick={() => setARemplacer(s)}>
-                        {possible ? 'Me faire remplacer' : 'Demande urgente'}
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-              <p className="tiny muted">{gere ? 'Un collègue se propose, puis la validation se fait dans « Résoudre ».' : 'Votre titulaire répond oui ou non, puis prévient l’équipe. Vous restez en poste tant que personne n’a repris.'}</p>
-            </div>
-          </div>
           </div>
         ) : null}
       </div>

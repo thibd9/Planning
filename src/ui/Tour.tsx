@@ -20,13 +20,7 @@ const ETAPES: Etape[] = [
     cible: 'nav-tableau',
     vue: 'tableau',
     titre: 'Tableau de bord : la pharmacie en un écran',
-    texte: 'Votre page d’accueil. Les décisions en attente, la couverture de la semaine, l’équipe du jour, vos prochains horaires et vos pharmacies.',
-  },
-  {
-    cible: 'nav-moi',
-    vue: 'moi',
-    titre: 'Mon planning : vos horaires d’abord',
-    texte: 'Aujourd’hui, demain, la suite : vos horaires se lisent d’un coup d’œil, sur ordinateur comme sur téléphone. C’est aussi là que chacun demande un remplacement ou un aménagement d’horaires.',
+    texte: 'Votre page d’accueil : l’équipe du jour, où en est le planning, les décisions en attente.',
   },
   {
     cible: 'nav-resoudre',
@@ -44,7 +38,7 @@ const ETAPES: Etape[] = [
     cible: 'proposer',
     vue: 'construire',
     titre: 'Faites-vous proposer un planning',
-    texte: 'Solvéa calcule trois propositions comparables : équité, souhaits, coût. Vous choisissez, vous ajustez, vous publiez. Rien n’est décidé sans vous.',
+    texte: 'Solvéa calcule trois propositions comparables : équité, préférences, coût. Vous choisissez, vous ajustez, vous publiez. Rien n’est décidé sans vous.',
   },
   {
     cible: 'grille',

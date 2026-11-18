@@ -165,7 +165,7 @@ export function Officine(): JSX.Element {
                 <input type="radio" name="modele" checked={collaboratif} onChange={() => majOfficine({ modele: 'collaboratif' })} />
                 <span>
                   Collaboratif
-                  <small>Chacun pose ses souhaits du mois, puis vous ajustez.</small>
+                  <small>Chacun donne ses préférences du mois, puis vous ajustez.</small>
                 </span>
               </label>
               <label>
@@ -178,11 +178,11 @@ export function Officine(): JSX.Element {
             </fieldset>
             {collaboratif ? (
               <label className="field">
-                Souhaits à poser avant le… du mois précédent
+                Préférences à donner avant le… du mois précédent
                 <input type="number" min={1} max={28} value={officine.souhaitsLimite ?? 20} onChange={(e) => majOfficine({ souhaitsLimite: Math.min(28, Math.max(1, Number(e.target.value) || 20)) })} style={{ width: 110 }} />
               </label>
             ) : null}
-            <p className="tiny muted">Dans les deux cas, les règles impératives et l’effectif passent avant tout souhait.</p>
+            <p className="tiny muted">Dans les deux cas, les règles impératives et l’effectif passent avant toute préférence.</p>
           </div>
 
           <div className="card pad col">
@@ -193,7 +193,7 @@ export function Officine(): JSX.Element {
                 <input type="number" step="0.001" min={0} placeholder="à saisir" value={officine.valeurPoint ?? ''} onChange={(e) => majOfficine({ valeurPoint: e.target.value === '' ? null : Number(e.target.value) })} style={{ width: 170 }} />
               </label>
               <label className="field">
-                Souhaits prioritaires par personne
+                Demandes prioritaires par personne
                 <input type="number" min={0} max={6} value={officine.plafondPrioritaires} onChange={(e) => majOfficine({ plafondPrioritaires: Number(e.target.value) })} style={{ width: 170 }} />
               </label>
               <label className="field">

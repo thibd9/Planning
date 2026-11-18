@@ -1,15 +1,16 @@
 import { ArrowLeftRight, ArrowRight, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus } from 'lucide-react';
 import { useMemo } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
-import { addDays, fmtDateCourt, fmtDateLong, fmtHeure, mondayOf, totalDuree, weekDates } from '../../domain/time';
+import { addDays, fmtDateCourt, fmtDateLong, fmtHeure, fmtSemaine, mondayOf, totalDuree, weekDates } from '../../domain/time';
 import type { AppData } from '../../domain/types';
 import { nomCourt } from '../../domain/types';
 import { ouverture, shiftsSemaine, trousPharmacien } from '../../engine/core';
 import { decisions } from '../../engine/decisions';
-import { aRegulariser } from '../../engine/heures';
+import { aRegulariser, semaineLibre } from '../../engine/heures';
+import { estCollaboratif, moisDe, reponses } from '../../engine/souhaits';
+import { validateWeek } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { ProchainPoste } from '../components/ProchainPoste';
 import { Avatar, Pill, momentDe } from '../kit';
 
 /** Part des minutes d'ouverture d'une semaine où un pharmacien est planifié ; null si rien n'est posé. */
@@ -38,7 +39,6 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   const prochaineGarde = data.gardes.filter((g) => g.date >= today).sort((a, b) => a.date.localeCompare(b.date))[0];
   const duJour = data.shifts.filter((s) => s.date === today).sort((a, b) => a.start - b.start);
   const absents = data.absences.filter((a) => a.statut === 'approuvee' && a.from <= today && today <= a.to);
-  const mesPostes = data.shifts.filter((s) => s.personId === personId && s.date >= today && !absents.some((a) => a.personId === personId)).sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start).slice(0, 2);
   const pharmacies = [{ id: officineId, d: data }, ...Object.entries(autres).map(([id, x]) => ({ id, d: x }))].filter(({ d: x }) => x.personnes.some((p) => memeIdentifiant(p.identifiant, session ?? '')));
 
   // Les décisions, rangées par sujet : chaque ligne ouvre le bon onglet de « Résoudre ».
@@ -55,6 +55,37 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
     aller('resoudre');
   };
   const enPoste = [...new Map(duJour.map((s) => [s.personId, s])).values()];
+  const ouvertAuj = ouverture(data.officine, today).length > 0;
+  const presenceAuj = (() => {
+    const total = totalDuree(ouverture(data.officine, today));
+    return total ? Math.round(((total - totalDuree(trousPharmacien(data, today))) / total) * 100) : 0;
+  })();
+
+  // Le cycle d'une semaine : préférences, brouillon, contrôles, publication. On montre la première semaine à traiter.
+  const cycle = useMemo(() => {
+    const cible = semaineLibre(data, today);
+    const postes = shiftsSemaine(data, cible).length;
+    const bloquants = postes ? validateWeek(data, cible).filter((i) => i.gravite === 'bloquant').length : 0;
+    const collaboratif = estCollaboratif(data.officine);
+    const r = reponses(data, moisDe(addDays(cible, 3)));
+    const recues = r.repondu.length;
+    const attendues = recues + r.attendus.length;
+    const voir = (): void => {
+      setSemaine(cible);
+      aller('construire');
+    };
+    const etapes: { nom: string; detail: string; etat: 'fait' | 'cours' | 'attente' }[] = [
+      ...(collaboratif ? [{ nom: 'Préférences', detail: `${recues}/${attendues} reçues`, etat: recues >= attendues || postes ? ('fait' as const) : ('cours' as const) }] : []),
+      { nom: 'Brouillon', detail: postes ? `${postes} postes` : 'À construire', etat: postes ? ('fait' as const) : ('attente' as const) },
+      { nom: 'Contrôles', detail: !postes ? 'Après le brouillon' : bloquants ? `${bloquants} à corriger` : 'Tout est bon', etat: postes && !bloquants ? ('fait' as const) : ('attente' as const) },
+      { nom: 'Publication', detail: 'À envoyer à l’équipe', etat: 'attente' as const },
+    ];
+    // L'étape en cours est la première qui n'est pas faite.
+    const premiere = etapes.findIndex((e) => e.etat !== 'fait');
+    if (premiere >= 0) etapes[premiere] = { ...etapes[premiere], etat: 'cours' };
+    const bouton = !postes ? 'Construire' : bloquants ? 'Corriger' : 'Publier';
+    return { semaine: cible, etapes, bouton, action: voir };
+  }, [data, today, aller, setSemaine]);
 
   return (
     <div className="tb">
@@ -64,8 +95,50 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
           <h1>Bonjour {moi?.prenom}</h1>
           <p>{data.officine.nom}</p>
         </div>
-        <ProchainPoste postes={mesPostes} today={today} />
+        <section className="tb-auj" aria-label="L’équipe aujourd’hui">
+          <div className="eyebrow">L’équipe aujourd’hui</div>
+          {ouvertAuj ? (
+            <>
+              <div className="tb-auj-n">
+                <b className="num">{enPoste.length}</b> en poste
+              </div>
+              <div className="tb-auj-d">
+                {absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'Aucun absent'} · pharmacien présent {presenceAuj} %
+              </div>
+            </>
+          ) : (
+            <div className="tb-auj-n">Pharmacie fermée</div>
+          )}
+          <button type="button" className="btn primary" onClick={() => voirJour(today)}>
+            Voir la journée <ArrowRight size={16} aria-hidden="true" />
+          </button>
+        </section>
       </div>
+
+      <section className="card cycle" aria-labelledby="tb-cycle" data-focus="cycle">
+        <div className="cycle-tete">
+          <div className="grow">
+            <div className="eyebrow">Où en est le planning</div>
+            <h2 id="tb-cycle">Semaine du {fmtSemaine(cycle.semaine)}</h2>
+          </div>
+          <button type="button" className="btn primary" onClick={cycle.action}>
+            {cycle.bouton} <ArrowRight size={16} aria-hidden="true" />
+          </button>
+        </div>
+        <ol className="cycle-etapes">
+          {cycle.etapes.map((e, i) => (
+            <li key={e.nom} className={e.etat} aria-current={e.etat === 'cours' ? 'step' : undefined}>
+              <span className="cycle-pastille" aria-hidden="true">
+                {e.etat === 'fait' ? <Check size={15} /> : i + 1}
+              </span>
+              <span>
+                <b>{e.nom}</b>
+                <span className="small soft">{e.detail}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       <div className="tb-grille">
         <section className="card tb-faire" aria-labelledby="tb-faire">

@@ -2,7 +2,7 @@ import { CalendarRange, ChevronLeft, ChevronRight, Printer } from 'lucide-react'
 import { useMemo } from 'react';
 import { JOURS, addDays, fmtHorodatage, fmtSemaine, isoWeek, weekDates, weekday } from '../../domain/time';
 import { nomCourt } from '../../domain/types';
-import { HEBERGE } from '../../env';
+import { imprimer } from '../../env';
 import { ouverture } from '../../engine/core';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
@@ -15,7 +15,7 @@ import { echelleOfficine } from './Construire';
 export function PlanningEquipe({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
-  const { semaine, setSemaine, seulementMoi, setSeulementMoi } = useUi();
+  const { semaine, setSemaine, seulementMoi, setSeulementMoi, dire } = useUi();
   const etat = data.semaines[semaine];
   const publie = etat?.statut === 'publie';
   const postes = publie ? (etat.snapshot ?? []) : [];
@@ -36,8 +36,8 @@ export function PlanningEquipe({ personId }: { personId: string }): JSX.Element 
           </h1>
           <p>Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning ».</p>
         </div>
-        {!HEBERGE && publie ? (
-          <button type="button" className="btn no-print" onClick={() => window.print()}>
+        {publie ? (
+          <button type="button" className="btn no-print" onClick={() => imprimer(dire)}>
             <Printer size={16} aria-hidden="true" /> Imprimer
           </button>
         ) : null}

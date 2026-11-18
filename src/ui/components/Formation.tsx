@@ -52,9 +52,10 @@ export function DialogueFormation({ onClose, personId }: { onClose: () => void; 
       }
     >
       <label className="field" htmlFor="formation-intitule">
-        Intitulé de la formation
-        <input id="formation-intitule" value={intitule} onChange={(e) => setIntitule(e.target.value)} placeholder="Vaccination, entretiens pharmaceutiques, gestes d’urgence…" data-autofocus aria-required="true" />
+        Nom de la formation
+        <input id="formation-intitule" value={intitule} onChange={(e) => setIntitule(e.target.value)} placeholder="Vaccination, entretiens pharmaceutiques, gestes d’urgence…" list="formations-connues" autoComplete="off" data-autofocus aria-required="true" />
       </label>
+      <NomsFormations />
       <div className="row wrap" style={{ alignItems: 'flex-end' }}>
         <label className="field" htmlFor="formation-debut">
           Premier jour
@@ -109,5 +110,19 @@ export function DialogueFormation({ onClose, personId }: { onClose: () => void; 
       ) : null}
       <p className="tiny muted">Pour une formation de quelques heures pendant un poste, ouvrez plutôt le poste dans « Construire » et choisissez la tâche « Formation ».</p>
     </Dialog>
+  );
+}
+
+/** Noms proposés à la saisie : ceux déjà utilisés dans la pharmacie, puis les formations courantes en officine. */
+const COURANTES = ['Vaccination', 'Entretiens pharmaceutiques', 'Gestes d’urgence (AFGSU)', 'Tests angine et cystite', 'Orthopédie', 'Contention et compression', 'Dermocosmétique', 'Phytothérapie et aromathérapie', 'Micronutrition', 'Maintien à domicile', 'Diabète', 'Sevrage tabagique', 'Tiers payant', 'Merchandising'];
+export function NomsFormations(): JSX.Element {
+  const absences = useStore((s) => s.data.absences);
+  const noms = [...new Set([...absences.filter((a) => a.type === 'formation' && a.libelle).map((a) => a.libelle as string), ...COURANTES])];
+  return (
+    <datalist id="formations-connues">
+      {noms.map((n) => (
+        <option key={n} value={n} />
+      ))}
+    </datalist>
   );
 }

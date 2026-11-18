@@ -1,4 +1,4 @@
-import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset } from 'lucide-react';
+import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Moon, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
 import {
@@ -22,7 +22,7 @@ import type { ISODate, Shift } from '../../domain/types';
 import { GARDE_LABEL, MISSION_LABEL, classeAbsence, libelleAbsence, nomCourt } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
 import { peutRemplacer } from '../../engine/remplacement';
-import { HEBERGE } from '../../env';
+import { imprimer } from '../../env';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
@@ -85,11 +85,19 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
             <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
               <Plus size={16} aria-hidden="true" /> {gere ? 'Poser une absence' : 'Faire une demande'}
             </button>
-            {!HEBERGE ? (
-              <button type="button" className="btn no-print" onClick={() => window.print()}>
-                <Printer size={15} aria-hidden="true" /> Imprimer
-              </button>
-            ) : null}
+            <button type="button" className="btn no-print" onClick={() => imprimer(dire)}>
+              <Printer size={15} aria-hidden="true" /> Imprimer
+            </button>
+            <button
+              type="button"
+              className="btn no-print"
+              onClick={() => {
+                setSeulementMoi(false);
+                aller(gere ? 'construire' : 'planning');
+              }}
+            >
+              <Users size={15} aria-hidden="true" /> Planning de l’équipe
+            </button>
             {nonLus.length ? (
               <Pill tone="miel">
                 <BellRing size={13} aria-hidden="true" /> {nonLus.length} changement{nonLus.length > 1 ? 's' : ''} à lire
@@ -189,20 +197,13 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
         <div className="col" style={{ gap: 18 }}>
           <div className="row wrap">
             <h2 className="grow">{affichage === 'semaine' ? 'Mes semaines' : 'Mon calendrier'}</h2>
-            <Seg<'semaine' | 'calendrier' | 'equipe'>
+            <Seg<'semaine' | 'calendrier'>
               label="Affichage du planning"
               value={affichage}
-              onChange={(v) => {
-                // Le planning de toute l'équipe a son écran : on y va, sans filtre sur mes postes.
-                if (v === 'equipe') {
-                  setSeulementMoi(false);
-                  aller(gere ? 'construire' : 'planning');
-                } else setAffichage(v);
-              }}
+              onChange={setAffichage}
               options={[
                 { value: 'semaine', label: 'Semaine' },
                 { value: 'calendrier', label: 'Calendrier' },
-                { value: 'equipe', label: 'Toute l’équipe' },
               ]}
             />
           </div>
