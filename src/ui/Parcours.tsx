@@ -1,6 +1,6 @@
-import { ArrowLeft, ArrowRight, Crown, FlaskConical, Gauge, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Crown, FlaskConical, Gauge, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, UserRound, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { peutGerer } from '../domain/acces';
+import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
 import type { AppData, Justificatif, Remplacement } from '../domain/types';
 import { seed } from '../data/seed';
@@ -102,7 +102,7 @@ function decouper(gestes: Geste[]): Geste[][] {
 /** Le nom lisible d'un élément : son texte, sans les mentions réservées aux lecteurs d'écran ni les précisions. */
 function nomDe(el: HTMLElement): string {
   const copie = el.cloneNode(true) as HTMLElement;
-  copie.querySelectorAll('.sr, small, svg, .small, .soft, .aide, .compte, .nav-badge, select, input, textarea, ol, ul, .modele-nom, .voie-etat, .voie-reponse, .pill').forEach((x) => x.remove());
+  copie.querySelectorAll('.sr, small, svg, .small, .soft, .aide, .compte, .nav-badge, .q, select, input, textarea, ol, ul, .modele-nom, .voie-etat, .voie-reponse, .pill').forEach((x) => x.remove());
   let texte = (copie.textContent ?? '').replace(/\s+/g, ' ').trim() || el.getAttribute('aria-label') || el.getAttribute('title') || '';
   // Un bloc qui contient un titre et une phrase : on garde le titre.
   const titre = copie.querySelector('b, strong, h2, h3')?.textContent?.trim();
@@ -133,19 +133,22 @@ function decrire(temps: Geste[] | undefined): string {
 /** À quoi sert le geste visible d'un temps, quand l'étape le dit. */
 const utilite = (temps: Geste[] | undefined): string => temps?.find(visible)?.sert ?? '';
 
-/** Le rythme des démonstrations : posé par défaut, pour laisser le temps de voir et de comprendre. */
+/**
+ * Le rythme des démonstrations. Il ne change que le temps laissé pour lire et pour regarder : les déplacements
+ * (Solvi, le pointeur, le projecteur) gardent la même durée, pour rester lisibles à toute allure.
+ */
 type Rythme = 'pose' | 'normal' | 'vif';
-const RYTHMES: Record<Rythme, { nom: string; facteur: number }> = { pose: { nom: 'posé', facteur: 1 }, normal: { nom: 'normal', facteur: 0.72 }, vif: { nom: 'vif', facteur: 0.48 } };
+const RYTHMES: Record<Rythme, { nom: string; facteur: number }> = { pose: { nom: 'posé', facteur: 1.2 }, normal: { nom: 'normal', facteur: 0.92 }, vif: { nom: 'vif', facteur: 0.68 } };
 const CLE_RYTHME = 'releve.visite.rythme';
 const rythmeLu = (): Rythme => {
   try {
     const r = window.localStorage.getItem(CLE_RYTHME);
-    return r === 'normal' || r === 'vif' ? r : 'pose';
+    return r === 'pose' || r === 'vif' ? r : 'normal';
   } catch {
-    return 'pose';
+    return 'normal';
   }
 };
-let rythme: Rythme = typeof window === 'undefined' ? 'pose' : rythmeLu();
+let rythme: Rythme = typeof window === 'undefined' ? 'normal' : rythmeLu();
 /** Le rythme en cours, et de quoi le changer : la fenêtre des visites et la page d'aide le proposent avant de démarrer. */
 export const rythmeChoisi = (): Rythme => rythme;
 export function choisirRythme(r: Rythme): void {
@@ -156,7 +159,7 @@ export function choisirRythme(r: Rythme): void {
     /* le rythme reste celui de la séance */
   }
 }
-const RYTHME_PHRASE: Record<Rythme, string> = { pose: 'Le temps de tout lire et de tout voir.', normal: 'Un bon équilibre.', vif: 'Pour qui connaît déjà.' };
+const RYTHME_PHRASE: Record<Rythme, string> = { pose: 'Le temps de tout lire et de tout voir.', normal: 'Le temps de lire, sans attendre.', vif: 'Pour qui connaît déjà.' };
 
 /** Trois boutons : posé, normal, vif. À choisir avant de lancer une visite ; se change aussi en cours de route. */
 export function ChoixRythme({ compact }: { compact?: boolean }): JSX.Element {
@@ -188,10 +191,12 @@ export function ChoixRythme({ compact }: { compact?: boolean }): JSX.Element {
   );
 }
 
-/** Une durée de démonstration, au rythme choisi. */
+/** Un temps de lecture ou d'observation, au rythme choisi. */
 const tempo = (ms: number): number => Math.round(ms * RYTHMES[rythme].facteur);
-/** Le temps de lire ce que dit Solvi avant qu'il agisse : plus la bulle est longue, plus il attend. */
-const tempsDeLire = (texte: string): number => tempo(Math.min(5200, Math.max(2100, 1000 + texte.length * 36)));
+/** Le temps de lire ce que dit Solvi avant qu'il agisse, compté une fois sa bulle ouverte : plus elle est longue, plus il attend. */
+const tempsDeLire = (texte: string): number => tempo(Math.min(5000, Math.max(1400, 400 + texte.trim().length * 32)));
+/** La couleur du profil de chaque personnage de l'exemple : la pastille qui l'annonce en début de chapitre. */
+const TEINTE_DE: Record<string, string> = { 'Caroline · titulaire': '#1f6bb8', 'Nicolas · préparateur': '#3730a3', 'Léa · pharmacienne adjointe': '#0a5a63', 'Igor · pharmacien adjoint': '#0a5a63', 'Pierre · titulaire secondaire': '#1b4f7f' };
 
 interface Etape {
   /** Chapitre de la visite ; le sommaire permet de sauter de l'un à l'autre. */
@@ -404,7 +409,28 @@ function avecFormation(): void {
 const HELENE = 'Caroline · titulaire';
 const CAMILLE = 'Nicolas · préparateur';
 
-const ETABLI: Etape[] = [
+/** Un chapitre du récit : son titre, ce qu'on y fait, et ses étapes dans l'ordre où l'histoire les raconte. */
+interface Acte {
+  chapitre: string;
+  but: string;
+  etapes: string[];
+}
+/** Ce qu'on fait dans chaque chapitre, en une phrase : la visite l'annonce avant de commencer. */
+const BUTS: Record<string, string> = {};
+/** Range les étapes dans l'ordre du récit. Une étape ajoutée sans être rangée ne disparaît pas : elle vient à la fin. */
+function raconter(etapes: Etape[], recit: Acte[]): Etape[] {
+  const rangees = recit.flatMap((a) => {
+    BUTS[a.chapitre] = a.but;
+    return a.etapes
+      .map((t) => etapes.find((e) => e.titre === t))
+      .filter((e): e is Etape => !!e)
+      .map((e) => ({ ...e, chapitre: a.chapitre }));
+  });
+  const titres = new Set(recit.flatMap((a) => a.etapes));
+  return [...rangees, ...etapes.filter((e) => !titres.has(e.titre))];
+}
+
+const ETABLI_BRUT: Etape[] = [
   {
     qui: HELENE,
     cible: "[data-focus='cycle']",
@@ -569,7 +595,15 @@ const ETABLI: Etape[] = [
   },
 ];
 
-// ---------------------------------------------------------------- Visite du titulaire : tout Solvéa, dans l'ordre du menu
+/** Une journée type, du matin au soir : chaque chapitre est un moment de la journée, avec ceux qui le vivent. */
+const ETABLI: Etape[] = raconter(ETABLI_BRUT, [
+  { chapitre: 'Le matin : l’équipe du jour', but: 'Caroline ouvre Solvéa : qui est là, quel poste reste à couvrir, qui est en pause ou en retard.', etapes: ['Le tableau de bord', 'L’appel à l’équipe', 'Pauses et retards'] },
+  { chapitre: 'Un remplacement entre collègues', but: 'Nicolas ne peut pas tenir un poste. Il demande, un collègue se propose, Caroline valide.', etapes: ['Ses horaires', 'Un collègue se propose', 'Valider'] },
+  { chapitre: 'Chacun son espace', but: 'Le même Solvéa, vu par un préparateur, un pharmacien adjoint et l’autre titulaire.', etapes: ['Mes préférences', 'Ses gardes', 'Décider à deux', 'Donner son accord'] },
+  { chapitre: 'Le soir : préparer la suite', but: 'Caroline construit la semaine à venir, regarde le mois et solde les heures.', etapes: ['Construire', 'Le mois', 'Le compteur d’heures'] },
+]);
+
+// ---------------------------------------------------------------- Visite du titulaire : la vie d'un planning, de la création au bilan
 
 const PREPARER = 'Préparer';
 const PLANIFIER = 'Planifier';
@@ -651,6 +685,24 @@ const COMPLET_BRUT: Etape[] = [
       useUi.getState().ouvrirPersonne('p_camille');
     },
     gestes: [{ faire: 'cliquer', sur: parTexte('.content .split > :last-child button[aria-pressed]', 'Dermatologie'), sert: 'Une compétence cochée aide le planning à placer la bonne personne au bon moment.' }],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: "[data-focus='marques']",
+    titre: 'Les marques d’une animatrice',
+    texte: () => 'Pour une animatrice, vous choisissez les marques qu’elle présente, et pour quelles familles de produits. Elle les retrouve sur son accueil.',
+    jouer: () => {
+      avecEquipe();
+      helene('equipe');
+      useUi.getState().ouvrirPersonne('p_sarah');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: "[data-focus='marques'] .mq .mq-types button[aria-pressed='false']", dit: 'Touchez une famille de produits', sert: 'Sarah présente désormais cette marque pour cette famille aussi.' },
+      { faire: 'cliquer', sur: '#mq-ajouter', sert: 'Une nouvelle marque : son nom, puis ses familles de produits.' },
+      { faire: 'taper', dans: "[data-focus='marques'] .mq:last-child input", texte: 'Nouvelle gamme', sert: 'Le nom de la marque, tel qu’on le dit au comptoir.' },
+      { faire: 'cliquer', sur: "[data-focus='marques'] .mq:last-child .mq-types button", dit: 'Choisissez sa première famille de produits', sert: 'Une marque sans famille n’apparaît pas encore sur l’accueil de Sarah.' },
+    ],
   },
   {
     chapitre: PREPARER,
@@ -1468,75 +1520,54 @@ const COMPLET_BRUT: Etape[] = [
 ];
 
 /**
- * La visite titulaire reste dans la peau de la titulaire, rubrique après rubrique, dans l'ordre du menu :
- * Équipe, Réglages, Règles, Construire, Gardes, Résoudre, Messages, Heures, Équité, Journal, Documents,
- * puis les gestes du quotidien. Ce que voit l'équipe vient ensuite, dans un seul chapitre.
+ * La visite titulaire raconte la vie d'un planning, dans l'ordre où elle se vit : on installe la pharmacie,
+ * l'équipe dit ses souhaits, on construit et on publie, l'équipe reçoit son planning et fait ses demandes,
+ * on gère les imprévus, on fait le bilan. Quand l'histoire passe par un autre profil, la visite l'annonce
+ * et l'interface prend la couleur de ce profil.
  */
-const ORDRE_TITULAIRE = [
-  'Créer la pharmacie',
-  'Ajouter l’équipe',
-  'La fiche d’une personne',
-  'Horaires et effectif',
-  'Qui prépare le planning',
-  'Les règles',
-  'Une semaine à construire',
-  'Poser un poste',
-  'Trois propositions',
-  'La semaine est posée',
-  'Les contrôles',
-  'Une journée',
-  'Retards et suivi',
-  'Le mois',
-  'Publier',
-  'Imprimer',
-  'Une formation',
-  'Un inventaire',
-  'Les gardes',
-  'La demande arrive',
-  'Valider le remplacement',
-  'Une urgence médicale',
-  'Congés et horaires',
-  'Deux demandes sur les mêmes dates',
-  'Refuser une demande',
-  'Une absence imprévue',
-  'L’appel à l’équipe',
-  'Personne ne se propose',
-  'Donner son accord',
-  'Les messages',
-  'Le compteur d’heures',
-  'L’équité',
-  'Le journal et la paie',
-  'Les documents',
-  'Absences et justificatifs',
-  'Le tableau de bord',
-  'Le bouton « Créer »',
-  'La cloche',
-  'Plusieurs pharmacies',
-  'Solvi, votre assistant',
-  'L’aide',
-  'Mot de passe et clé de secours',
-  'Votre compte',
-];
-/** Le dernier chapitre : les mêmes sujets, vus par un préparateur, une pharmacienne, l'autre titulaire. */
-const ORDRE_EQUIPE = ['Mon planning', 'Le calendrier du mois', 'Le planning de l’équipe', 'Les préférences du mois', 'Mes demandes', 'Demander, avec sa raison', 'Se faire remplacer', 'Un collègue se propose', 'Mes gardes', 'Mon suivi', 'Décider à deux'];
-/** Quelques étapes changent de chapitre pour rester avec leur rubrique du menu. */
-const CHAPITRE_DE: Record<string, string> = { 'Créer la pharmacie': 'Démarrer', 'Retards et suivi': PLANIFIER };
-const dans = (ordre: string[], chapitre?: string): Etape[] =>
-  ordre
-    .map((t) => COMPLET_BRUT.find((e) => e.titre === t))
-    .filter((e): e is Etape => !!e)
-    .map((e) => ({ ...e, chapitre: chapitre ?? CHAPITRE_DE[e.titre] ?? e.chapitre }));
-const COMPLET: Etape[] = [
-  ...dans(ORDRE_TITULAIRE),
-  ...dans(ORDRE_EQUIPE, EQUIPE),
-  // Une étape ajoutée sans être rangée ne disparaît pas : elle vient à la fin.
-  ...COMPLET_BRUT.filter((e) => !ORDRE_TITULAIRE.includes(e.titre) && !ORDRE_EQUIPE.includes(e.titre)),
-];
+const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
+  {
+    chapitre: 'Installer la pharmacie',
+    but: 'Caroline crée sa pharmacie : son équipe, ses horaires, ses règles. C’est tout ce qu’il faut à Solvéa pour proposer un planning.',
+    etapes: ['Créer la pharmacie', 'Ajouter l’équipe', 'La fiche d’une personne', 'Les marques d’une animatrice', 'Horaires et effectif', 'Qui prépare le planning', 'Les règles'],
+  },
+  { chapitre: 'Recueillir les souhaits', but: 'Avant de construire, chacun dit ce qui l’arrange. On passe un instant dans la peau de Nicolas, préparateur.', etapes: ['Les préférences du mois'] },
+  {
+    chapitre: 'Construire et publier',
+    but: 'Caroline construit la semaine, la contrôle, y pose gardes et formations, puis l’envoie à l’équipe.',
+    etapes: ['Une semaine à construire', 'Poser un poste', 'Trois propositions', 'La semaine est posée', 'Les contrôles', 'Les gardes', 'Une formation', 'Un inventaire', 'Le mois', 'Publier', 'Imprimer'],
+  },
+  {
+    chapitre: 'L’équipe reçoit son planning',
+    but: 'Le planning est publié. Voici ce que voient Nicolas, préparateur, puis Léa, pharmacienne adjointe.',
+    etapes: ['Mon planning', 'Le calendrier du mois', 'Le planning de l’équipe', 'Mon suivi', 'Mes gardes'],
+  },
+  {
+    chapitre: 'Les demandes de l’équipe',
+    but: 'Un congé, un remplacement : la demande part de Nicolas, un collègue se propose, Caroline décide.',
+    etapes: ['Mes demandes', 'Demander, avec sa raison', 'Se faire remplacer', 'La demande arrive', 'Un collègue se propose', 'Valider le remplacement', 'Une urgence médicale', 'Congés et horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande'],
+  },
+  {
+    chapitre: 'Les imprévus',
+    but: 'Un arrêt le matin même, un retard, une décision à prendre à deux titulaires : ce qui ne se prévoit pas.',
+    etapes: ['Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Une journée', 'Retards et suivi', 'Décider à deux', 'Donner son accord', 'Les messages'],
+  },
+  { chapitre: 'Le bilan du mois', but: 'En fin de mois : les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Le journal et la paie', 'Les documents', 'Absences et justificatifs'] },
+  {
+    chapitre: 'Au quotidien',
+    but: 'Les raccourcis de tous les jours, et où trouver de l’aide.',
+    etapes: ['Le tableau de bord', 'Le bouton « Créer »', 'La cloche', 'Plusieurs pharmacies', 'Solvi, votre assistant', 'L’aide', 'Mot de passe et clé de secours', 'Votre compte'],
+  },
+]);
 
 const MON_PLANNING = 'Mon planning';
 const MES_DEMANDES = 'Mes demandes';
 const AVEC_EQUIPE = 'L’équipe et moi';
 const MON_ESPACE = 'Mon espace';
+BUTS[MON_PLANNING] = 'Votre accueil, votre prochain poste, votre semaine et celle de l’équipe.';
+BUTS[MES_DEMANDES] = 'Dire vos préférences, demander un congé, vous faire remplacer, prévenir d’un retard.';
+BUTS[AVEC_EQUIPE] = 'Aider un collègue, écrire à l’équipe, demander un rendez-vous.';
+BUTS[MON_ESPACE] = 'Votre suivi, l’aide, et votre compte.';
 
 /** Un appel à l'équipe en cours auquel cette personne peut répondre : on le lance s'il n'existe pas. */
 function appelPour(personId: string): void {
@@ -1563,7 +1594,7 @@ function appelPour(personId: string): void {
 /** La visite d'un membre de l'équipe : son planning, ses demandes, ses collègues, son espace. Rien de la gestion. */
 function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: string; pharmacien?: boolean }): Etape[] {
   const moi = (vue: Vue): void => voirComme(p.identifiant, vue);
-  return [
+  const etapes: Etape[] = [
     {
       chapitre: MON_PLANNING,
       qui: p.qui,
@@ -1584,6 +1615,20 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
         { faire: 'attendre', que: '.dialog #rdv-avis' },
         { faire: 'cliquer', sur: '.rdv-idees .comp', dit: 'Choisissez un moment proposé', sert: 'Solvéa propose des moments où vous êtes tous les deux en poste.', facultatif: true },
         { faire: 'cliquer', sur: '#rdv-envoyer', dit: 'Cliquez sur « Envoyer la demande »', sert: 'La demande part dans la conversation. Une fois acceptée, le rendez-vous est dans vos deux agendas.' },
+      ],
+    },
+    {
+      chapitre: MES_DEMANDES,
+      qui: p.qui,
+      cible: '.prochain',
+      cibleFin: '.prochain',
+      titre: 'Prévenir d’un retard',
+      texte: () => 'Un imprévu sur la route : deux gestes suffisent. Vos titulaires reçoivent aussitôt une notification et un message, avec votre heure d’arrivée.',
+      jouer: () => moi('espace'),
+      gestes: [
+        { faire: 'cliquer', sur: '#ret-prevenir', sert: 'Le bouton est sous votre prochain poste, aujourd’hui ou demain.', facultatif: true },
+        { faire: 'cliquer', sur: parTexte('#ret-durees .comp', '15 min'), dit: 'Touchez « 15 min »', sert: 'L’heure d’arrivée se calcule toute seule.', facultatif: true },
+        { faire: 'cliquer', sur: '#ret-envoyer', sert: 'Les titulaires sont prévenus. L’avis reste affiché : il se corrige ou s’annule.', facultatif: true },
       ],
     },
     {
@@ -1751,23 +1796,43 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       jouer: () => moi('compte'),
     },
   ];
+  // Le rendez-vous se demande à un collègue : il se range avec les messages, dans « L'équipe et moi ».
+  const rdv = etapes.findIndex((e) => e.titre === 'Demander un rendez-vous');
+  const [demande] = rdv >= 0 ? etapes.splice(rdv, 1) : [];
+  const messages = etapes.findIndex((e) => e.titre === 'Les messages');
+  if (demande) etapes.splice(messages >= 0 ? messages + 1 : etapes.length, 0, { ...demande, chapitre: AVEC_EQUIPE });
+  // L'avis de retard se donne depuis l'accueil, mais il se range avec les demandes : il vient après le remplacement.
+  const retard = etapes.findIndex((e) => e.titre === 'Prévenir d’un retard');
+  const [avis] = retard >= 0 ? etapes.splice(retard, 1) : [];
+  const remplacer = etapes.findIndex((e) => e.titre === 'Me faire remplacer');
+  if (avis) etapes.splice(remplacer >= 0 ? remplacer + 1 : etapes.length, 0, avis);
+  return etapes;
 }
 
 const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'Léa · pharmacienne adjointe', prenom: 'Léa', pharmacien: true });
 const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', qui: 'Nicolas · préparateur', prenom: 'Nicolas' });
 
 export const SCENARIOS = {
-  complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', duree: `30 min · ${COMPLET.length} étapes`, etapes: COMPLET },
-  pharmacien: { court: 'Pharmacien', role: 'Pharmacien adjoint', titre: 'Mon espace de pharmacien', duree: `7 min · ${PHARMACIEN.length} étapes`, etapes: PHARMACIEN },
-  equipe: { court: 'Équipe', role: 'Préparateur, animateur, apprenti…', titre: 'Mon espace dans l’équipe', duree: `7 min · ${EQUIPIER.length} étapes`, etapes: EQUIPIER },
-  etabli: { court: 'Journée type', role: 'Tous les rôles', titre: 'Une journée type', duree: `8 min · ${ETABLI.length} étapes`, etapes: ETABLI },
+  complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', fil: 'De la création de la pharmacie au bilan du mois. On suit Caroline, titulaire, et l’on passe par moments dans la peau de son équipe.', duree: `30 min · ${COMPLET.length} étapes`, etapes: COMPLET },
+  pharmacien: { court: 'Pharmacien', role: 'Pharmacien adjoint', titre: 'Mon espace de pharmacien', fil: 'Tout ce que voit Léa, pharmacienne adjointe : son planning, ses demandes, ses gardes, son compte.', duree: `7 min · ${PHARMACIEN.length} étapes`, etapes: PHARMACIEN },
+  equipe: { court: 'Équipe', role: 'Préparateur, animateur, apprenti…', titre: 'Mon espace dans l’équipe', fil: 'Tout ce que voit Nicolas, préparateur : son planning, ses demandes, ses collègues, son compte.', duree: `7 min · ${EQUIPIER.length} étapes`, etapes: EQUIPIER },
+  etabli: { court: 'Journée type', role: 'Tous les rôles', titre: 'Une journée type', fil: 'Une journée à la pharmacie, du matin au soir, avec ceux qui la vivent.', duree: `8 min · ${ETABLI.length} étapes`, etapes: ETABLI },
 } as const;
 export type Scenario = keyof typeof SCENARIOS;
+
+/**
+ * Dans une visite, chaque compte de l'exemple porte la couleur de son profil : quand l'histoire change de
+ * personne, l'interface change de couleur, et l'on sait aussitôt chez qui l'on est.
+ */
+function couleursDeProfil(): void {
+  useUi.getState().oublierCouleurs(store().data.personnes.map((x) => x.identifiant ?? '').filter(Boolean));
+}
 
 /** Lance un parcours guidé sur un environnement d'exemple remis à neuf. */
 export function lancerParcours(scenario: Scenario = 'etabli'): void {
   annulerMinuteries();
   store().chargerExemple(true, scenario === 'complet' ? 'zero' : 'etabli');
+  couleursDeProfil();
   useUi.getState().montrerAssistant(false);
   // Le parcours est remis à l'étape 1 : l'écran de la première étape est posé par le composant.
   voirComme('caroline.tellier');
@@ -1787,6 +1852,9 @@ export interface Tutoriel {
 }
 /** Pour chaque fiche d'aide : la visite et les titres de la première et de la dernière étape qui la montrent. */
 const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string, string?]; pharmacien?: [string, string?] }> = {
+  accueil: { equipe: ['Mon accueil'] },
+  'rendez-vous': { equipe: ['Demander un rendez-vous'] },
+  'retard-prevenir': { equipe: ['Prévenir d’un retard'] },
   prochain: { equipe: ['Mon prochain poste', 'Ma semaine'] },
   'equipe-planning': { equipe: ['Le planning de l’équipe'] },
   difference: { equipe: ['Mes demandes'] },
@@ -1808,6 +1876,7 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   gardes: { gestion: ['Les gardes'] },
   formation: { gestion: ['Une formation', 'Un inventaire'] },
   personne: { gestion: ['Ajouter l’équipe', 'La fiche d’une personne'] },
+  marques: { gestion: ['Les marques d’une animatrice'] },
   'mdp-equipe': { gestion: ['Mot de passe et clé de secours'] },
   heures: { gestion: ['Le compteur d’heures'] },
   retard: { gestion: ['Une journée', 'Retards et suivi'] },
@@ -1846,6 +1915,7 @@ export function lancerTutoriel(t: Tutoriel): void {
   retour = { officineId: s.data.demo ? null : s.officineId, session: useUi.getState().session };
   annulerMinuteries();
   s.chargerExemple(true, t.scenario === 'complet' ? 'zero' : 'etabli');
+  couleursDeProfil();
   useUi.getState().montrerAssistant(false);
   voirComme('caroline.tellier');
   useUi.getState().setParcours(t.de, t.scenario, { de: t.de, a: t.a });
@@ -1891,11 +1961,31 @@ export function Parcours(): JSX.Element | null {
   const [annonce, setAnnonce] = useState('');
   /** À quoi sert le geste en cours : la deuxième ligne de la bulle de Solvi. */
   const [sert, setSert] = useState('');
-  /** Où Solvi se pose pendant la démonstration, pour ne jamais cacher ce qu'il montre. */
-  const [coin, setCoin] = useState<'bas' | 'gauche' | 'haut'>('bas');
-  /** Sur grand écran, Solvi vole se poser près de ce qu'il montre : sa place, et de quel côté il arrive. */
-  const [pose, setPose] = useState<{ left: number; top: number; cote: 'droite' | 'gauche' | 'dessous' | 'dessus' } | null>(null);
+  /** Où Solvi se tient pendant la démonstration : près de ce qu'il montre, sans rien cacher. */
+  const [pose, setPose] = useState<{ x: number; y: number } | null>(null);
+  const poseRef = useRef<{ x: number; y: number } | null>(null);
+  /** Pendant qu'il vole, sa bulle est rangée : on suit un seul objet, puis on lit. */
+  const [vol, setVol] = useState(false);
+  const enVol = useRef(false);
+  /** La durée du vol en cours, selon la distance. */
+  const [dureeVol, setDureeVol] = useState(0);
   const [elan, setElan] = useState<'' | 'vers-droite' | 'vers-gauche'>('');
+  /** La démonstration de l'étape est finie : Solvi s'efface avant que la fiche ne revienne. */
+  const [sortie, setSortie] = useState(false);
+  /** Le temps laissé pour lire ou regarder, montré sur « Continuer » ; ce bouton, ou la flèche droite, l'écourte. */
+  const [compte, setCompte] = useState<{ cle: number; ms: number } | null>(null);
+  const compteCle = useRef(0);
+  const passe = useRef<(() => void) | null>(null);
+  /** Le pointeur : il part de Solvi à chaque geste, glisse jusqu'à sa cible, agit, puis s'efface. */
+  const [pointeCle, setPointeCle] = useState(0);
+  const [pointeVue, setPointeVue] = useState(false);
+  const pointee = useRef<Cible | null>(null);
+  /** Début de chapitre : la visite annonce ce qu'on va y faire, et dans la peau de qui. */
+  const [acte, setActe] = useState(false);
+  /** On change de personne en cours de chapitre : un bandeau le dit, l'interface a pris sa couleur. */
+  const [regard, setRegard] = useState<{ cle: number; qui: string } | null>(null);
+  const precedent = useRef<{ parcours: number; qui: string; scenario: Scenario } | null>(null);
+  const arrivee = useRef<{ cle: string; annonce: boolean; regard: string | null } | null>(null);
   const guide = useRef<HTMLDivElement>(null);
   const zoneVue = useRef<Zone | null>(null);
   const [allure, setAllure] = useState<Rythme>(rythme);
@@ -1947,10 +2037,22 @@ export function Parcours(): JSX.Element | null {
   };
 
   useEffect(() => {
-    if (parcours === null) return;
+    if (parcours === null) {
+      precedent.current = null;
+      arrivee.current = null;
+      setActe(false);
+      setRegard(null);
+      return;
+    }
     const e = SCENARIOS[scenario].etapes[parcours] as Etape | undefined;
     if (!e) return;
     annulerMinuteries();
+    passe.current = null;
+    pointee.current = null;
+    setCompte(null);
+    setSortie(false);
+    setPointeVue(false);
+    setRegard(null);
     setPhase('lire');
     setOuvert(false);
     setClic(false);
@@ -1974,6 +2076,26 @@ export function Parcours(): JSX.Element | null {
     e.jouer();
     // Le nouvel écran arrive en fondu, plutôt que de remplacer l'ancien d'un coup.
     adoucir();
+    // Un chapitre commence : on dit d'abord ce qu'on va y faire. Pas en revenant en arrière, ni dans le tutoriel d'une tâche.
+    // La décision est prise une fois par arrivée sur une étape : la rejouer ne ré-annonce rien.
+    const cle = `${scenario}:${parcours}:${tirage}`;
+    if (arrivee.current?.cle !== cle) {
+      const avant = precedent.current?.scenario === scenario ? precedent.current : null;
+      const suiteDe = SCENARIOS[scenario].etapes[parcours - 1] as Etape | undefined;
+      const annonce = !useUi.getState().tache && !!e.chapitre && suiteDe?.chapitre !== e.chapitre && avant?.parcours !== parcours + 1 && avant?.parcours !== parcours;
+      // On change de personne : l'interface a pris la couleur de son profil, un bandeau dit qui l'on est devenu.
+      const ici = useStore.getState().data;
+      const personne = ici.personnes.find((x) => x.identifiant === useUi.getState().session);
+      const qui = e.qui === 'Un collègue' && personne ? `${personne.prenom} · ${libelleRole(ici, personne).toLowerCase()}` : e.qui;
+      arrivee.current = { cle, annonce, regard: !annonce && avant && avant.parcours !== parcours && avant.qui !== e.qui ? qui : null };
+      precedent.current = { parcours, qui: e.qui, scenario };
+    }
+    const annoncer = arrivee.current.annonce;
+    setActe(annoncer);
+    if (arrivee.current.regard) {
+      setRegard({ cle: parcours * 1000 + tirage, qui: arrivee.current.regard });
+      plusTard(() => setRegard(null), 3400);
+    }
 
     const liste = decouper(e.gestes ?? []);
     temps.current = liste;
@@ -1983,29 +2105,183 @@ export function Parcours(): JSX.Element | null {
     setSert('');
     let faits = 0;
     const dernierePas = parcours >= (useUi.getState().tache?.a ?? SCENARIOS[scenario].etapes.length - 1);
+    /** Une attente que l'on peut écourter : « Continuer », ou la flèche droite, passe tout de suite à la suite. */
+    const patienter = (ms: number, puis: () => void): void => {
+      const fini = (): void => {
+        passe.current = null;
+        setCompte(null);
+        puis();
+      };
+      const id = window.setTimeout(fini, ms);
+      minuteries.push(id);
+      passe.current = () => {
+        window.clearTimeout(id);
+        fini();
+      };
+      setCompte({ cle: ++compteCle.current, ms });
+    };
+    const montrerBulle = (): void => {
+      if (!enVol.current) return;
+      enVol.current = false;
+      setVol(false);
+    };
+    const poser = (place: { x: number; y: number }): void => {
+      poseRef.current = place;
+      setPose(place);
+    };
+    /** Où Solvi se tient pour montrer cet élément : à côté du bloc éclairé, sinon dessous ou dessus, jamais devant. */
+    const placePour = (el: HTMLElement): { x: number; y: number } => {
+      const r = el.getBoundingClientRect();
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const w = guide.current?.offsetWidth ?? Math.min(392, W - 24);
+      const h = Math.max(guide.current?.offsetHeight ?? 0, 136);
+      const borne = (v: number, min: number, max: number): number => Math.max(min, Math.min(max, v));
+      if (W < 900) {
+        // Petit écran : en bas, au-dessus de la barre d'onglets ; en haut si ce qu'il montre est en bas.
+        const bas = H - h - 92;
+        return { x: 12, y: r.bottom > bas - 12 ? 76 : bas };
+      }
+      const z = zoneVue.current ?? { top: r.top, left: r.left, width: r.width, height: r.height };
+      const proche = (p: { x: number; y: number }, a: Zone, marge: number): boolean => p.x < a.left + a.width + marge && p.x + w > a.left - marge && p.y < a.top + a.height + marge && p.y + h > a.top - marge;
+      const cible: Zone = { top: r.top, left: r.left, width: r.width, height: r.height };
+      const haut = borne(r.top + r.height / 2 - h / 2, 84, H - h - 16);
+      const aligne = borne(r.left - 30, 16, W - w - 16);
+      const choix: { x: number; y: number; ok: boolean }[] = [
+        { x: z.left + z.width + 18, y: haut, ok: z.left + z.width + 18 + w <= W - 12 },
+        { x: z.left - 18 - w, y: haut, ok: z.left - 18 - w >= 12 },
+        { x: aligne, y: z.top + z.height + 14, ok: z.top + z.height + 14 + h <= H - 12 },
+        { x: aligne, y: z.top - 14 - h, ok: z.top - 14 - h >= 84 },
+        { x: aligne, y: r.bottom + 18, ok: r.bottom + 18 + h <= H - 12 },
+        { x: aligne, y: r.top - 18 - h, ok: r.top - 18 - h >= 84 },
+      ];
+      const avant = poseRef.current;
+      // Moins il bouge, mieux on le suit : il garde sa place tant qu'il ne cache pas ce qu'il montre et qu'il en reste proche.
+      // S'il est devant le bloc éclairé alors qu'une place est libre à côté, il s'y range.
+      if (avant && avant.x >= 12 && avant.x + w <= W - 12 && avant.y >= 76 && avant.y + h <= H - 12 && !proche(avant, cible, 12)) {
+        const ecartX = Math.max(0, cible.left - (avant.x + w), avant.x - (cible.left + cible.width));
+        const ecartY = Math.max(0, cible.top - (avant.y + h), avant.y - (cible.top + cible.height));
+        const devant = proche(avant, z, 4);
+        const aCote = choix.slice(0, 4).some((c) => c.ok);
+        if (Math.hypot(ecartX, ecartY) <= 420 && !(devant && aCote)) return avant;
+      }
+      const place = choix.find((c) => c.ok) ?? { x: borne(W / 2 - w / 2, 16, W - w - 16), y: H - h - 20 };
+      return { x: Math.round(place.x), y: Math.round(place.y) };
+    };
+    /** Une fenêtre vient de s'ouvrir sous lui : s'il y a la place à côté, Solvi s'y range ; sinon il reste où il est. */
+    const degager = (): { x: number; y: number } | null => {
+      const avant = poseRef.current;
+      const z = zoneVue.current;
+      const g = guide.current;
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      if (!avant || !z || !g || W < 900) return avant;
+      const w = g.offsetWidth;
+      const h = Math.max(g.offsetHeight, 136);
+      if (!(avant.x < z.left + z.width + 4 && avant.x + w > z.left - 4 && avant.y < z.top + z.height + 4 && avant.y + h > z.top - 4)) return avant;
+      const y = Math.max(84, Math.min(H - h - 16, avant.y));
+      const x = Math.max(16, Math.min(W - w - 16, avant.x));
+      if (z.left + z.width + 18 + w <= W - 12) return { x: Math.round(z.left + z.width + 18), y };
+      if (z.left - 18 - w >= 12) return { x: Math.round(z.left - 18 - w), y };
+      if (z.top + z.height + 14 + h <= H - 12) return { x, y: Math.round(z.top + z.height + 14) };
+      if (z.top - 14 - h >= 84) return { x, y: Math.round(z.top - 14 - h) };
+      return avant;
+    };
+    /** Une bulle plus haute que prévu ne sort pas de l'écran : Solvi remonte d'autant. */
+    const recaler = (): void => {
+      const g = guide.current;
+      const p = poseRef.current;
+      if (!g || !p) return;
+      const depasse = p.y + g.offsetHeight - (window.innerHeight - 12);
+      if (depasse <= 0) return;
+      setDureeVol(280);
+      poser({ x: p.x, y: Math.max(76, Math.round(p.y - depasse)) });
+    };
+    /**
+     * Solvi prend la parole. S'il doit changer de place, il range sa bulle, vole d'un seul trait, puis la rouvre
+     * avec ce qu'il a à dire : on suit un seul objet à la fois, et l'on ne lit qu'une fois arrivé.
+     */
+    const parler = (vers: HTMLElement | null, dit: string, aQuoi: string, puis: () => void): void => {
+      const avant = poseRef.current;
+      const place = vers ? placePour(vers) : degager();
+      const distance = avant && place ? Math.hypot(place.x - avant.x, place.y - avant.y) : 0;
+      const dire = (): void => {
+        setAnnonce(dit);
+        setSert(aQuoi);
+      };
+      if (!avant || !place || distance < 12) {
+        dire();
+        montrerBulle();
+        return plusTard(() => {
+          recaler();
+          puis();
+        }, 280);
+      }
+      const dejaRangee = enVol.current;
+      enVol.current = true;
+      setVol(true);
+      plusTard(
+        () => {
+          dire();
+          const d = Math.round(Math.min(900, Math.max(460, 360 + distance * 0.5)));
+          setDureeVol(d);
+          setElan(place.x > avant.x + 24 ? 'vers-droite' : place.x < avant.x - 24 ? 'vers-gauche' : '');
+          poser(place);
+          plusTard(() => {
+            setElan('');
+            montrerBulle();
+            plusTard(() => {
+              recaler();
+              puis();
+            }, 260);
+          }, d + 40);
+        },
+        dejaRangee ? 0 : 170,
+      );
+    };
+    /** Le pointeur part de Solvi et glisse jusqu'à sa cible : l'œil passe de la bulle au bouton sans chercher. */
+    const partir = (cible: Cible): void => {
+      const q = guide.current?.querySelector('.solvi-guide-qui')?.getBoundingClientRect();
+      pointee.current = null;
+      setPointeCle((k) => k + 1);
+      if (q) setPoint({ x: Math.round(q.left + q.width / 2), y: Math.round(q.top + q.height / 2) });
+      setPointeVue(true);
+      plusTard(() => {
+        pointee.current = cible;
+        mesure.current();
+      }, 60);
+    };
     /** Un temps est joué : le suivant s'enchaîne. Après le dernier, on laisse voir le résultat, puis l'étape suivante arrive. */
     const fin = (): void => {
       visee.current = null;
+      pointee.current = null;
+      setPointeVue(false);
       setClic(false);
       faits++;
       setJoues(faits);
       if (faits < liste.length) {
-        setAnnonce(decrire(liste[faits]));
-        setSert(utilite(liste[faits]));
         setHumeur('neutre');
-        plusTard(() => derouler(liste[faits], 0), tempo(650));
+        // Un temps sans geste visible s'annonce tout de suite ; sinon Solvi parle une fois posé près de sa cible.
+        if (!liste[faits].some(visible)) {
+          setAnnonce(decrire(liste[faits]));
+          setSert(utilite(liste[faits]));
+        }
+        plusTard(() => derouler(liste[faits], 0), 160);
         return;
       }
-      // La démonstration de l'étape est finie : Solvi est content du résultat.
+      // La démonstration de l'étape est finie : Solvi est content du résultat, puis s'efface.
       setHumeur('heureux');
-      plusTard(() => {
-        contexte.current = null;
-        if (dernierePas) {
-          setPhase('fini');
-          noter();
-          setOuvert(true);
-        } else setParcours(parcours + 1);
-      }, tempo(2600));
+      patienter(tempo(1700), () => {
+        setSortie(true);
+        plusTard(() => {
+          contexte.current = null;
+          if (dernierePas) {
+            setPhase('fini');
+            noter();
+            setOuvert(true);
+          } else setParcours(parcours + 1);
+        }, 320);
+      });
     };
     /** Joue le geste i du temps en cours, puis le suivant. Un élément introuvable est attendu un instant, puis ignoré. */
     const derouler = (gestes: Geste[], i: number): void => {
@@ -2013,18 +2289,21 @@ export function Parcours(): JSX.Element | null {
       const g = gestes[i];
       const suite = (ms: number): void => plusTard(() => derouler(gestes, i + 1), ms);
       if (g.faire === 'pause') {
-        // Une pause peut dire ce qu'on regarde pendant qu'elle dure.
+        // Une pause peut dire ce qu'on regarde pendant qu'elle dure : on laisse alors le temps de la lire.
         if (g.dit) {
-          setAnnonce(g.dit);
-          setSert(g.sert ?? '');
+          const dit = g.dit;
+          const aQuoi = g.sert ?? '';
           // Il montre un résultat : il s'en réjouit.
           setHumeur('excite');
+          return parler(null, dit, aQuoi, () => patienter(Math.max(tempo(g.ms), tempsDeLire(`${dit} ${aQuoi}`)), () => derouler(gestes, i + 1)));
         }
+        montrerBulle();
         return suite(tempo(g.ms));
       }
       if (g.faire === 'action') {
         g.jouer();
-        return suite(tempo(900));
+        montrerBulle();
+        return suite(tempo(700));
       }
       const cible = g.faire === 'cliquer' ? g.sur : g.faire === 'attendre' ? g.que : g.dans;
       let essais = 0;
@@ -2032,7 +2311,8 @@ export function Parcours(): JSX.Element | null {
       const viser = (): void => {
         const el = element(cible);
         if (!el || (el as HTMLButtonElement).disabled) {
-          // Une attente qui dure (un calcul) : Solvi réfléchit.
+          // Pendant une attente, Solvi garde sa bulle ouverte ; si elle dure (un calcul), il réfléchit.
+          if (essais === 2) montrerBulle();
           if (g.faire === 'attendre' && essais === 4) setHumeur('reflechi');
           if (++essais > (g.faire === 'attendre' ? (facultatif ? 14 : 200) : facultatif ? 6 : 14)) {
             // Un geste qui ne trouve pas sa cible est sauté : on le signale, pour qu'une étape ne se vide pas en silence.
@@ -2042,97 +2322,86 @@ export function Parcours(): JSX.Element | null {
           }
           return plusTard(viser, 150);
         }
-        if (g.faire === 'attendre') return suite(350);
+        if (g.faire === 'attendre') return suite(300);
+        // 1. L'écran défile et le projecteur se pose sur le bloc où le geste a lieu.
         el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
         visee.current = cible;
         plusTard(() => mesure.current(), 60);
-        // Solvi se pose là où il ne cache pas ce qu'il montre : en bas, sinon à gauche, sinon en haut.
+        const dit = g.dit ?? decrire([g]);
+        const aQuoi = g.sert ?? '';
+        setHumeur('neutre');
+        // 2. Solvi vient se poser à côté et dit ce qu'il va faire. 3. Le temps de lire. 4. Le pointeur y va, puis agit.
         plusTard(() => {
-          const r = element(cible)?.getBoundingClientRect();
-          if (!r) return;
-          const W = window.innerWidth;
-          const H = window.innerHeight;
-          const touche = (x1: number, y1: number, x2: number, y2: number): boolean => r.left < x2 + 16 && r.right > x1 - 16 && r.top < y2 + 16 && r.bottom > y1 - 16;
-          const large = Math.min(560, W - 32);
-          const bas = touche(W / 2 - large / 2, H - 170, W / 2 + large / 2, H);
-          const gauche = touche(0, H - 190, Math.min(440, W), H);
-          setCoin(!bas ? 'bas' : !gauche && W > 900 ? 'gauche' : 'haut');
-          // Grand écran : Solvi vole près de ce qu'il montre, à côté de la fenêtre ou du bloc éclairé, sans rien cacher.
-          if (W < 900) return setPose(null);
-          const w = Math.min(guide.current?.offsetWidth ?? 392, 392);
-          const h = guide.current?.offsetHeight ?? 150;
-          const z = zoneVue.current ?? { top: r.top, left: r.left, width: r.width, height: r.height };
-          const borne = (v: number, min: number, max: number): number => Math.max(min, Math.min(max, v));
-          const haut = borne(r.top + r.height / 2 - h / 2, 84, H - h - 16);
-          const aligne = borne(r.left - 30, 16, W - w - 16);
-          const choix: { left: number; top: number; cote: 'droite' | 'gauche' | 'dessous' | 'dessus'; ok: boolean }[] = [
-            { left: z.left + z.width + 18, top: haut, cote: 'droite', ok: z.left + z.width + 18 + w <= W - 12 },
-            { left: z.left - 18 - w, top: haut, cote: 'gauche', ok: z.left - 18 - w >= 12 },
-            { left: aligne, top: z.top + z.height + 14, cote: 'dessous', ok: z.top + z.height + 14 + h <= H - 12 },
-            { left: aligne, top: z.top - 14 - h, cote: 'dessus', ok: z.top - 14 - h >= 84 },
-            { left: aligne, top: r.bottom + 18, cote: 'dessous', ok: r.bottom + 18 + h <= H - 12 },
-            { left: aligne, top: r.top - 18 - h, cote: 'dessus', ok: r.top - 18 - h >= 84 },
-          ];
-          const place = choix.find((c) => c.ok) ?? { left: borne(W / 2 - w / 2, 16, W - w - 16), top: H - h - 20, cote: 'dessous' as const };
-          setPose((avant) => {
-            if (avant && Math.abs(avant.left - place.left) < 6 && Math.abs(avant.top - place.top) < 6) return avant;
-            // Il penche dans le sens du trajet, le temps d'arriver.
-            if (avant) {
-              setElan(place.left > avant.left + 20 ? 'vers-droite' : place.left < avant.left - 20 ? 'vers-gauche' : '');
-              plusTard(() => setElan(''), 750);
-            }
-            return { left: Math.round(place.left), top: Math.round(place.top), cote: place.cote };
-          });
-        }, 420);
-        const aLire = tempsDeLire(`${g.dit ?? decrire([g])} ${g.sert ?? ''}`);
-        // Le pointeur glisse jusqu'à la cible, s'y pose, puis agit.
-        plusTard(() => {
-          setClic(true);
-          // Un clin d'œil au moment d'agir ; il se concentre pour écrire.
-          setHumeur(g.faire === 'taper' ? 'concentre' : g.faire === 'choisir' ? 'content' : 'confiant');
-          plusTard(() => {
-            setClic(false);
-            const cibleFinale = element(cible);
-            if (!cibleFinale) return derouler(gestes, i + 1);
-            if (g.faire === 'cliquer') {
-              cibleFinale.click();
-              // Le temps de voir ce que le clic a changé.
-              suite(tempo(1900));
-            } else if (g.faire === 'choisir') {
-              ecrire(cibleFinale, g.valeur);
-              suite(tempo(1700));
-            } else {
-              cibleFinale.focus();
-              const taper = (n: number): void => {
-                const champ = element(cible);
-                if (!champ) return derouler(gestes, i + 1);
-                ecrire(champ, g.texte.slice(0, n));
-                if (n >= g.texte.length) return suite(tempo(1300));
-                plusTard(() => taper(n + 1), tempo(90));
-              };
-              taper(1);
-            }
-          }, 520);
-        }, aLire);
+          parler(element(cible) ?? null, dit, aQuoi, () =>
+            patienter(tempsDeLire(`${dit} ${aQuoi}`), () => {
+              if (!element(cible)) return derouler(gestes, i + 1);
+              partir(cible);
+              plusTard(() => {
+                setClic(true);
+                // Un clin d'œil au moment d'agir ; il se concentre pour écrire.
+                setHumeur(g.faire === 'taper' ? 'concentre' : g.faire === 'choisir' ? 'content' : 'confiant');
+                plusTard(() => {
+                  setClic(false);
+                  const cibleFinale = element(cible);
+                  if (!cibleFinale) return derouler(gestes, i + 1);
+                  // Le geste est fait : le pointeur s'efface, on regarde ce qui a changé.
+                  plusTard(() => setPointeVue(false), 520);
+                  if (g.faire === 'cliquer') {
+                    cibleFinale.click();
+                    suite(tempo(950));
+                  } else if (g.faire === 'choisir') {
+                    ecrire(cibleFinale, g.valeur);
+                    suite(tempo(850));
+                  } else {
+                    cibleFinale.focus({ preventScroll: true });
+                    // Une saisie longue ne s'éternise pas : elle tient en deux secondes environ.
+                    const pas = Math.max(22, Math.min(tempo(58), Math.round(tempo(2000) / Math.max(1, g.texte.length))));
+                    const taper = (n: number): void => {
+                      const champ = element(cible);
+                      if (!champ) return derouler(gestes, i + 1);
+                      ecrire(champ, g.texte.slice(0, n));
+                      if (n >= g.texte.length) return suite(tempo(700));
+                      plusTard(() => taper(n + 1), pas);
+                    };
+                    taper(1);
+                  }
+                }, 340);
+              }, 780);
+            }),
+          );
+        }, 320);
       };
       viser();
     };
     demarrer.current = (): void => {
       if (faits >= liste.length) return;
       annulerMinuteries();
+      passe.current = null;
+      setCompte(null);
       attendu.current = null;
       setLibre(false);
       setSommaire(false);
+      // Solvi quitte la fiche : il apparaît là où il s'y tenait, bulle rangée, puis vole vers ce qu'il montre.
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const w = Math.min(392, W - 24);
+      const s = panneau.current?.querySelector('.pt-solvi')?.getBoundingClientRect();
+      const depart = W >= 900 && s && s.width > 0 ? { x: Math.round(Math.max(12, Math.min(W - w - 12, s.left - 5))), y: Math.round(Math.max(76, Math.min(H - 160, s.top - 42))) } : { x: W < 900 ? 12 : Math.round((W - w) / 2), y: H - 150 - (W < 900 ? 92 : 26) };
+      setDureeVol(0);
+      poser(depart);
+      enVol.current = true;
+      setVol(true);
+      setSortie(false);
+      setPointeVue(false);
+      pointee.current = null;
       setOuvert(false);
       setPhase('demo');
       setAnnonce(decrire(liste[faits]));
       setSert(utilite(liste[faits]));
       setHumeur('neutre');
       setAllure(rythme);
-      setCoin('bas');
-      setPose(null);
       // La fiche a le temps de s'effacer avant le premier geste.
-      plusTard(() => derouler(liste[faits], 0), 800);
+      plusTard(() => derouler(liste[faits], 0), 460);
     };
     plusTard(() => {
       const ici = document.querySelector<HTMLElement>('.side .nav-item.on, .tabbar .on');
@@ -2143,7 +2412,7 @@ export function Parcours(): JSX.Element | null {
         return nom;
       });
       noter();
-      setOuvert(true);
+      if (!annoncer) setOuvert(true);
     }, 520);
     return annulerMinuteries;
   }, [parcours, scenario, tirage]);
@@ -2209,10 +2478,12 @@ export function Parcours(): JSX.Element | null {
         zoneVue.current = z;
         setZone((avant) => (memeZone(avant, z) ? avant : z));
       } else setZone(null);
-      const v = visee.current ? element(visee.current) : null;
+      // Le pointeur : tant qu'il n'a pas de cible, il reste où il est (au départ, sur Solvi).
+      const v = phase === 'demo' && pointee.current ? element(pointee.current) : null;
       const p = v?.getBoundingClientRect();
       const pt = p && p.width > 2 && p.bottom > 0 && p.top < window.innerHeight ? { x: Math.round(p.left + Math.min(p.width / 2, 120)), y: Math.round(p.top + p.height / 2) } : null;
-      setPoint((avant) => (avant?.x === pt?.x && avant?.y === pt?.y ? avant : pt));
+      if (phase !== 'demo') setPoint(null);
+      else if (pt) setPoint((avant) => (avant?.x === pt.x && avant?.y === pt.y ? avant : pt));
     };
     mesure.current = mesurer;
     mesurer();
@@ -2263,6 +2534,18 @@ export function Parcours(): JSX.Element | null {
   // Lecture automatique : le temps de lire, un geste, le temps de voir, puis la suite.
   const duree = etape ? Math.min(9000, Math.max(4500, 2200 + etape.texte(data).length * 45)) : 0;
   const attente = phase === 'fini' ? Math.max(3200, duree * 0.6) : duree;
+  /** Le chapitre est annoncé : on entre dans sa première étape. */
+  const ouvrirChapitre = (): void => {
+    setActe(false);
+    noter();
+    setOuvert(true);
+  };
+  // Lecture automatique : l'annonce d'un chapitre se referme d'elle-même.
+  useEffect(() => {
+    if (!acte || !lecture) return;
+    const t = window.setTimeout(ouvrirChapitre, 6500);
+    return () => window.clearTimeout(t);
+  }, [acte, lecture]);
   useEffect(() => {
     if (!lecture || parcours === null || libre || sommaire || phase === 'demo' || !ouvert) return;
     if (!reste && parcours >= terme) return setLecture(false);
@@ -2286,13 +2569,21 @@ export function Parcours(): JSX.Element | null {
     const onKey = (e: KeyboardEvent): void => {
       const origine = e.target instanceof Element ? e.target : null;
       if (!e.isTrusted || e.altKey || e.ctrlKey || e.metaKey || origine?.closest('input, textarea, select, [contenteditable]')) return;
-      if (phase === 'demo') return;
+      // Pendant une démonstration, la flèche droite écourte l'attente en cours.
+      if (phase === 'demo') {
+        if (e.key === 'ArrowRight') passe.current?.();
+        return;
+      }
+      if (acte) {
+        if (e.key === 'ArrowRight') ouvrirChapitre();
+        return;
+      }
       if (e.key === 'ArrowRight') avancer();
       if (e.key === 'ArrowLeft' && parcours > 0) setParcours(parcours - 1);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [parcours, N, setParcours, phase, reste]);
+  }, [parcours, N, setParcours, phase, reste, acte]);
 
   if (!etape || parcours === null || !data.demo) return null;
   const rang = chapitres.findIndex((c) => parcours >= c.debut && parcours < c.debut + c.n);
@@ -2301,16 +2592,19 @@ export function Parcours(): JSX.Element | null {
     <>
       {zone ? <div className={`focus-parcours${phase === 'demo' ? ' demo' : ''}`} style={zone} aria-hidden="true" /> : null}
       {point && phase === 'demo' && !libre ? (
-        <div className={`pointe-parcours${clic ? ' clic' : ''}`} style={{ left: point.x, top: point.y }} aria-hidden="true">
+        <div key={pointeCle} className={`pointe-parcours${clic ? ' clic' : ''}${pointeVue && !sortie ? '' : ' efface'}`} style={{ left: point.x, top: point.y }} aria-hidden="true">
           <i className="pointe-halo" />
           <MousePointer2 size={26} />
         </div>
       ) : null}
       {phase === 'demo' ? (
-        <div ref={guide} className={`solvi-guide no-print ${pose ? `vole c-${pose.cote}` : coin} ${elan}`} style={pose ? { left: pose.left, top: pose.top } : undefined}>
-          {/* Solvi reprend la parole à chaque geste : un petit bond le signale. */}
-          <span key={annonce} className="solvi-guide-qui">
-            <Solvi size={pose ? 64 : 72} humeur={humeur} />
+        <div
+          ref={guide}
+          className={`solvi-guide no-print${vol ? ' en-vol' : ''}${sortie ? ' part' : ''}${elan ? ` ${elan}` : ''}`}
+          style={{ transform: `translate3d(${pose?.x ?? 12}px, ${pose?.y ?? 84}px, 0)`, transitionDuration: `${dureeVol}ms, 300ms` }}
+        >
+          <span className="solvi-guide-qui">
+            <Solvi size={64} humeur={humeur} />
           </span>
           <div className="solvi-bulle" role="status">
             <span className="solvi-bulle-tete" aria-hidden="true">
@@ -2331,20 +2625,92 @@ export function Parcours(): JSX.Element | null {
               <button
                 type="button"
                 className="solvi-rythme"
-                title="Changer le rythme de la démonstration"
+                title="Changer le temps laissé pour lire et regarder"
                 onClick={() => {
                   const suivant: Rythme = allure === 'pose' ? 'normal' : allure === 'normal' ? 'vif' : 'pose';
                   choisirRythme(suivant);
                   setAllure(suivant);
                 }}
               >
-                <Gauge size={13} aria-hidden="true" /> Rythme {RYTHMES[allure].nom}
+                <Gauge size={13} aria-hidden="true" />
+                <span className="sr">Rythme </span>
+                <span className="cap1">{RYTHMES[allure].nom}</span>
               </button>
-              <button type="button" className="solvi-passer" onClick={() => (dernier ? setParcours(null) : setParcours(parcours + 1))}>
+              <button type="button" className="solvi-passer" title="Passer à l’étape suivante sans voir la fin de la démonstration" onClick={() => (dernier ? setParcours(null) : setParcours(parcours + 1))}>
                 Passer
+              </button>
+              <button type="button" className="solvi-continuer" disabled={!compte} title="Ne pas attendre : passer tout de suite à la suite (flèche droite)" onClick={() => passe.current?.()}>
+                {compte ? <i key={compte.cle} style={{ animationDuration: `${compte.ms}ms` }} aria-hidden="true" /> : null}
+                <span>Continuer</span>
+                <ArrowRight size={13} aria-hidden="true" />
               </button>
             </span>
           </div>
+        </div>
+      ) : null}
+      {regard && !acte ? (
+        <>
+          <div key={`rideau-${regard.cle}`} className="pt-rideau no-print" aria-hidden="true" />
+          <div key={regard.cle} className="pt-regard no-print" role="status">
+            <span className="pt-regard-av" aria-hidden="true">
+              <UserRound size={19} />
+            </span>
+            <span className="pt-regard-texte">
+              <span className="tiny">Changement de regard : vous êtes maintenant</span>
+              <b>{regard.qui}</b>
+            </span>
+          </div>
+        </>
+      ) : null}
+      {acte && etape.chapitre ? (
+        <div className="pt-acte-fond no-print">
+          <section className="pt-acte" role="dialog" aria-labelledby="pt-acte-titre">
+            <div className="pt-acte-tete">
+              <Solvi size={66} humeur="heureux" />
+              <div className="grow">
+                <div className="eyebrow">
+                  {SCENARIOS[scenario].titre} · chapitre {rang + 1} sur {chapitres.length}
+                </div>
+                <h2 id="pt-acte-titre">{etape.chapitre}</h2>
+              </div>
+            </div>
+            <div className="pt-acte-corps">
+              {rang === 0 ? <p className="pt-acte-fil">{SCENARIOS[scenario].fil}</p> : null}
+              <p className="pt-acte-but">{BUTS[etape.chapitre] ?? ''}</p>
+              <p className="pt-acte-qui">
+                <span className="soft">Dans la peau de</span>
+                {[...new Set(ETAPES.filter((x) => x.chapitre === etape.chapitre).map((x) => x.qui))].map((q, i) => (
+                  <span key={q} className="pt-acte-regard">
+                    {i > 0 ? <span className="soft">puis</span> : null}
+                    <i style={{ background: TEINTE_DE[q] ?? 'var(--n-4)' }} aria-hidden="true" />
+                    <b>{q.toLowerCase() === 'un collègue' ? 'un collègue' : q}</b>
+                  </span>
+                ))}
+              </p>
+              <ol className="pt-acte-plan" aria-label="Les chapitres de la visite">
+                {chapitres.map((c, i) => (
+                  <li key={c.titre} className={i < rang ? 'fait' : i === rang ? 'on' : ''} aria-current={i === rang ? 'step' : undefined}>
+                    <span className="num" aria-hidden="true">
+                      {i < rang ? <Check size={13} /> : i + 1}
+                    </span>
+                    <span className="grow">{c.titre}</span>
+                    <span className="tiny soft">
+                      {c.n} étape{c.n > 1 ? 's' : ''}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className="pt-acte-pied">
+              <button type="button" className="btn sm ghost" onClick={() => setParcours(null)}>
+                Quitter la visite
+              </button>
+              <span className="grow" />
+              <button type="button" className="btn primary" data-acte="go" onClick={ouvrirChapitre} autoFocus>
+                {rang === 0 ? 'Commencer' : 'Continuer'} <ArrowRight size={16} aria-hidden="true" />
+              </button>
+            </div>
+          </section>
         </div>
       ) : null}
       <aside ref={panneau} className={`parcours-test no-print${ferme ? ' ferme' : ''}`} aria-label="Parcours guidé" aria-hidden={ferme} {...(ferme ? { inert: '' } : {})} style={place ? { left: place.left, top: place.top, right: 'auto', bottom: 'auto' } : undefined}>
@@ -2447,10 +2813,10 @@ export function Parcours(): JSX.Element | null {
 
 /** Une carte par visite : un mot pour le rôle, une phrase, trois repères. */
 const CARTES: Record<Scenario, { nom: string; phrase: string; mots: string[]; teinte: string; icone: JSX.Element }> = {
-  complet: { nom: 'Titulaire', phrase: 'Tout, en partant de zéro.', mots: ['Créer', 'Planifier', 'Piloter'], teinte: 'v-titulaire', icone: <Crown size={30} /> },
+  complet: { nom: 'Titulaire', phrase: 'La vie d’un planning, de la création au bilan.', mots: ['Installer', 'Construire', 'Décider'], teinte: 'v-titulaire', icone: <Crown size={30} /> },
   pharmacien: { nom: 'Pharmacien', phrase: 'Planning et gardes.', mots: ['Planning', 'Demandes', 'Gardes'], teinte: 'v-pharmacien', icone: <PillIcon size={30} /> },
   equipe: { nom: 'Équipe', phrase: 'Votre espace à vous.', mots: ['Planning', 'Demandes', 'Suivi'], teinte: 'v-equipe', icone: <FlaskConical size={30} /> },
-  etabli: { nom: 'Journée type', phrase: 'Tous les rôles, en action.', mots: ['Décider', 'Remplacer', 'Valider'], teinte: 'v-journee', icone: <Store size={30} /> },
+  etabli: { nom: 'Journée type', phrase: 'Du matin au soir, tous les rôles.', mots: ['Le matin', 'L’équipe', 'Le soir'], teinte: 'v-journee', icone: <Store size={30} /> },
 };
 
 /** Fenêtre « Découvrir Solvéa » : une visite guidée par rôle, ou une entrée libre. */
@@ -2480,7 +2846,7 @@ export function ChoixParcours(): JSX.Element | null {
           </span>
           <div className="grow">
             <h2 id="decouvrir-titre">Découvrir Solvéa</h2>
-            <p>Choisissez votre rôle. La visite s’adapte.</p>
+            <p>Choisissez une visite. Chacune raconte une histoire, chapitre après chapitre.</p>
           </div>
           <button type="button" className="dialog-fermer" onClick={() => ouvrirTutoriels(false)} aria-label="Fermer" autoFocus>
             <X size={18} aria-hidden="true" />

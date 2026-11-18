@@ -221,7 +221,7 @@ export function optionsReparation(data: AppData, retire: Shift, today: ISODate):
       const [personId, d2] = k.split('|');
       const a = data.shifts.filter((s) => s.personId === personId && s.date === d2);
       const b = d.shifts.filter((s) => s.personId === personId && s.date === d2);
-      const activite = b.some((s) => patch.auComptoir.includes(s.id)) ? ' — au comptoir' : '';
+      const activite = b.some((s) => patch.auComptoir.includes(s.id)) ? ' - au comptoir' : '';
       return { personId, date: d2, avant: decrireJournee(a), apres: decrireJournee(b) + activite };
     });
   };

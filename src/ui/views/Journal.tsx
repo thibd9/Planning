@@ -61,7 +61,7 @@ export function Journal(): JSX.Element {
   const lignes = useMemo(() => ficheNavette(data, mois), [data, mois]);
   const nom = (id: string): string => {
     const p = data.personnes.find((x) => x.id === id);
-    return p ? nomCourt(p) : '—';
+    return p ? nomCourt(p) : '-';
   };
   const lus = data.notifications.filter((n) => n.luLe).length;
 

@@ -448,7 +448,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
               <KeyRound size={17} aria-hidden="true" />
               <div className="grow">
                 <div>
-                  Identifiant : <b>{person.identifiant ?? '—'}</b>
+                  Identifiant : <b>{person.identifiant ?? '-'}</b>
                 </div>
                 <div className="small soft">
                   {person.provisoire ? (

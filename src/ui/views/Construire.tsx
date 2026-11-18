@@ -631,7 +631,7 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
   if (lecture === 'equite') {
     const l = lignes.find((x) => x.personId === person.id);
     const f = fatigue(data, person.id, semaine);
-    if (!l) return <div className="pg-sum muted" role="cell">—</div>;
+    if (!l) return <div className="pg-sum muted" role="cell">-</div>;
     return (
       <div className="pg-sum" role="cell" tabIndex={0} data-aide-pos="fin" data-aide={f.facteurs.length ? `Fatigue ${f.niveau} :\n${f.facteurs.map((x) => `• ${x.label}`).join('\n')}` : 'Aucun facteur de fatigue relevé.'}>
         <span className="num sum-l">
@@ -660,7 +660,7 @@ function Resume({ data, person, semaine, lecture, lignes }: { data: AppData; per
   const d = decompteSemaine(data, person, minutes);
   return (
     <div className="pg-sum" role="cell">
-      <b className="num">{d.cout !== null ? fmtEuros(d.cout) : '—'}</b>
+      <b className="num">{d.cout !== null ? fmtEuros(d.cout) : '-'}</b>
       <span className="muted tiny">{!person.salarie ? 'titulaire' : person.tauxHoraire === null ? 'taux non saisi' : d.auDela ? `dont ${fmtDuree(d.auDela)} en plus` : 'sans dépassement'}</span>
     </div>
   );
@@ -713,7 +713,7 @@ export function CarteBlocage({ b, data, ouvert }: { b: Blocage; data: AppData; o
               const p = data.personnes.find((x) => x.id === r.personId);
               return (
                 <span key={i} className="src" style={{ display: 'block' }}>
-                  <b style={{ color: 'var(--ink)' }}>{p ? nomCourt(p) : '—'}</b> : {r.raison}
+                  <b style={{ color: 'var(--ink)' }}>{p ? nomCourt(p) : '-'}</b> : {r.raison}
                 </span>
               );
             })}
@@ -1066,7 +1066,7 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
                   </span>
                   <span className="kpi">
                     <span>Préférences suivies</span>
-                    <b className={meilleur('souhaits', i) ? 'best' : ''}>{k.souhaits === null ? '—' : `${Math.round(k.souhaits * 100)} %`}</b>
+                    <b className={meilleur('souhaits', i) ? 'best' : ''}>{k.souhaits === null ? '-' : `${Math.round(k.souhaits * 100)} %`}</b>
                     <span title="Écart type entre samedis réels et attendus sur 8 semaines : plus il est bas, plus la répartition est équilibrée">Écart d'équité (samedis)</span>
                     <b className={meilleur('ecartSamedis', i) ? 'best' : ''}>{fmtDecimal(k.ecartSamedis, 2)}</b>
                     <span>Heures au-delà des contrats</span>

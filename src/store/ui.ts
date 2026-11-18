@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { addDays, mondayOf, todayISO } from '../domain/time';
-import type { ISODate } from '../domain/types';
+import { estResponsable } from '../domain/acces';
+import type { AppData, ISODate, Person, Qualification } from '../domain/types';
 
 export type Vue =
   | 'aide'
@@ -34,8 +35,35 @@ export interface Preferences {
   mode: Mode;
 }
 const PREFS_DEFAUT: Preferences = { theme: 'ciel', texte: 'normal', mode: 'clair' };
+/** Ce qu'une personne a réglé elle-même ; le reste suit les valeurs par défaut, dont la couleur de son profil. */
+export type PrefsChoisies = Partial<Preferences>;
+
+/** Chaque profil a sa couleur de base : on sait d'un coup d'œil dans quel espace on se trouve. */
+const THEME_PROFIL: Record<Qualification, Theme> = { titulaire: 'bleu', adjoint: 'sarcelle', preparateur: 'indigo', animateur: 'rose', apprenti: 'emeraude', etudiant: 'ambre', rayonniste: 'corail' };
+/**
+ * La couleur de base d'une personne : bleu ciel pour le titulaire principal, bleu marine pour un autre titulaire,
+ * bleu-vert pour un pharmacien adjoint, indigo pour un préparateur, framboise pour un animateur, vert pour un
+ * apprenti, ambre pour un étudiant, terracotta pour un rayonniste. Chacun peut en choisir une autre dans son compte.
+ */
+export function themeDuProfil(data: Pick<AppData, 'officine' | 'personnes'>, p: Person | undefined): Theme {
+  if (!p || estResponsable(data, p)) return 'ciel';
+  return THEME_PROFIL[p.qualification] ?? 'ciel';
+}
 const CLE_SESSION = 'releve.session';
 const CLE_PREFS = 'releve.preferences';
+const CLE_PREFS_VERSION = 'releve.preferences.version';
+/**
+ * Avant les couleurs par profil, chaque réglage enregistrait aussi le bleu ciel par défaut :
+ * ce bleu-là n'était pas un choix, il est retiré une fois pour que la couleur du profil s'applique.
+ */
+function prefsLues(): Record<string, PrefsChoisies> {
+  const prefs = lire<Record<string, PrefsChoisies>>(CLE_PREFS, {});
+  if (lire<number>(CLE_PREFS_VERSION, 1) >= 2) return prefs;
+  const propres = Object.fromEntries(Object.entries(prefs).map(([cle, p]) => [cle, p.theme === 'ciel' ? { texte: p.texte, mode: p.mode } : p]));
+  ecrire(CLE_PREFS, propres);
+  ecrire(CLE_PREFS_VERSION, 2);
+  return propres;
+}
 
 /** Les comptes de l'exemple ont changé de nom : une session ouverte avec un ancien identifiant suit. */
 const ANCIENS_COMPTES: Record<string, string> = { 'helene.marchetti': 'caroline.tellier', 'antoine.mercier': 'pierre.fiandino', 'karim.benali': 'igor.lerusse', 'camille.roussel': 'nicolas.lesyndicaliste' };
@@ -65,7 +93,7 @@ interface Ui {
   /** Identifiant de connexion de la personne connectée ; null quand personne n'est connecté. */
   session: string | null;
   /** Préférences d'affichage, propres à chaque personne. */
-  preferences: Record<string, Preferences>;
+  preferences: Record<string, PrefsChoisies>;
   /** Message bref en bas d'écran, avec annulation possible. */
   toast: { message: string; annulable: boolean } | null;
   focus: { personId?: string; date?: ISODate } | null;
@@ -121,6 +149,8 @@ interface Ui {
   /** Remise à zéro : rien ne doit rester sur l'appareil, pas même un identifiant dans les préférences. */
   toutOublier: () => void;
   setPreferences: (personId: string, p: Partial<Preferences>) => void;
+  /** Ces personnes retrouvent la couleur de leur profil : la visite guidée repart ainsi des couleurs par défaut. */
+  oublierCouleurs: (identifiants: string[]) => void;
   dire: (message: string, annulable?: boolean) => void;
   taire: () => void;
   setFocus: (f: Ui['focus']) => void;
@@ -129,14 +159,17 @@ interface Ui {
   setTour: (etape: number | null) => void;
 }
 
-// Les préférences enregistrées avant l'arrivée d'un réglage reçoivent sa valeur par défaut.
-export const prefsDe = (prefs: Record<string, Preferences>, personId: string | null): Preferences => ({ ...PREFS_DEFAUT, ...(personId ? prefs[personId] : undefined) });
+// Ce qui n'a pas été réglé reçoit sa valeur par défaut ; pour la couleur, c'est celle du profil.
+export const prefsDe = (prefs: Record<string, PrefsChoisies>, personId: string | null, themeProfil: Theme = PREFS_DEFAUT.theme): Preferences => {
+  const choisies = personId ? prefs[personId] : undefined;
+  return { theme: choisies?.theme ?? themeProfil, texte: choisies?.texte ?? PREFS_DEFAUT.texte, mode: choisies?.mode ?? PREFS_DEFAUT.mode };
+};
 
 export const useUi = create<Ui>((set) => ({
   vue: 'tableau',
   semaine: addDays(mondayOf(todayISO()), 7),
   session: sessionAJour(lire<string | null>(CLE_SESSION, null)),
-  preferences: lire<Record<string, Preferences>>(CLE_PREFS, {}),
+  preferences: prefsLues(),
   toast: null,
   focus: null,
   gardeId: null,
@@ -186,7 +219,13 @@ export const useUi = create<Ui>((set) => ({
   },
   setPreferences: (personId, p) =>
     set((s) => {
-      const preferences = { ...s.preferences, [personId]: { ...prefsDe(s.preferences, personId), ...p } };
+      const preferences = { ...s.preferences, [personId]: { ...s.preferences[personId], ...p } };
+      ecrire(CLE_PREFS, preferences);
+      return { preferences };
+    }),
+  oublierCouleurs: (identifiants) =>
+    set((s) => {
+      const preferences = Object.fromEntries(Object.entries(s.preferences).map(([cle, p]) => (identifiants.includes(cle) ? [cle, { texte: p.texte, mode: p.mode }] : [cle, p])));
       ecrire(CLE_PREFS, preferences);
       return { preferences };
     }),

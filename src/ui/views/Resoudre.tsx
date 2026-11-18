@@ -57,7 +57,7 @@ export function Resoudre(): JSX.Element {
   const dire = useUi((s) => s.dire);
   const nom = (id: string | null): string => {
     const p = data.personnes.find((x) => x.id === id);
-    return p ? nomCourt(p) : '—';
+    return p ? nomCourt(p) : '-';
   };
 
   // Les trous sont regroupés par absence : une décision par jour à couvrir.
@@ -150,7 +150,7 @@ export function Resoudre(): JSX.Element {
                   <div className="grow" style={{ minWidth: 220 }}>
                     <b>{a.titre}</b>
                     <div className="small soft">
-                      Proposé par {auteur ? nomCourt(auteur) : '—'}, titulaire secondaire · {fmtDateCourt(a.at.slice(0, 10))}
+                      Proposé par {auteur ? nomCourt(auteur) : '-'}, titulaire secondaire · {fmtDateCourt(a.at.slice(0, 10))}
                     </div>
                   </div>
                   {principal ? (
@@ -209,7 +209,7 @@ export function Resoudre(): JSX.Element {
                     <Avatar person={p} />
                     <div className="grow">
                       <h3>
-                        {a ? libelleAbsence(a) : 'Absence'} de {p ? nomCourt(p) : '—'}
+                        {a ? libelleAbsence(a) : 'Absence'} de {p ? nomCourt(p) : '-'}
                       </h3>
                       <div className="small soft">
                         {a ? `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}` : ''} · {trous.length} poste{trous.length > 1 ? 's' : ''} à couvrir
@@ -409,7 +409,7 @@ export function Resoudre(): JSX.Element {
         </>
       ) : null}
       </div>
-      {reglage ? <DialogueReglage trous={data.trous.filter((t) => t.absenceId === reglage && t.statut === 'ouvert')} titre={(() => { const a = data.absences.find((x) => x.id === reglage); const p = data.personnes.find((x) => x.id === a?.personId); return `${a ? libelleAbsence(a) : 'Absence'} de ${p ? nomCourt(p) : '—'}`; })()} onClose={() => setReglage(null)} /> : null}
+      {reglage ? <DialogueReglage trous={data.trous.filter((t) => t.absenceId === reglage && t.statut === 'ouvert')} titre={(() => { const a = data.absences.find((x) => x.id === reglage); const p = data.personnes.find((x) => x.id === a?.personId); return `${a ? libelleAbsence(a) : 'Absence'} de ${p ? nomCourt(p) : '-'}`; })()} onClose={() => setReglage(null)} /> : null}
     </div>
   );
 }
@@ -444,7 +444,7 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
   };
   const nom = (id: string): string => {
     const p = data.personnes.find((x) => x.id === id);
-    return p ? nomCourt(p) : '—';
+    return p ? nomCourt(p) : '-';
   };
   const plan = useMemo(() => {
     let courant = data;
@@ -561,7 +561,7 @@ function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Eleme
   const publie = data.semaines[mondayOf(trou.shift.date)]?.statut === 'publie';
   const nom = (id: string): string => {
     const p = data.personnes.find((x) => x.id === id);
-    return p ? nomCourt(p) : '—';
+    return p ? nomCourt(p) : '-';
   };
   if (!rep.impact.length && rep.options.length === 1) {
     const o = rep.options[0];
@@ -767,7 +767,7 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
             </span>
           ) : null}
         </div>
-        <b>{p ? nomCourt(p) : '—'}</b>
+        <b>{p ? nomCourt(p) : '-'}</b>
         <div className="soft small" style={{ marginTop: 3 }}>
           Du {fmtDateCourt(absence.from)} au {fmtDateCourt(absence.to)} · {jours} jour{jours > 1 ? 's' : ''}
         </div>
@@ -828,7 +828,7 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
         </button>
         {refus ? (
           <DialogueRefus
-            quoi={`${libelleAbsence(absence)} de ${p ? nomCourt(p) : '—'}, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)}`}
+            quoi={`${libelleAbsence(absence)} de ${p ? nomCourt(p) : '-'}, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)}`}
             raisons={RAISONS_REFUS.absence}
             apercu={(m) => texteRefus(`(${libelleAbsence(absence).toLowerCase()}, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)})`, m)}
             sansMessage={`La demande sera marquée comme refusée, sans message. ${p?.prenom ?? 'La personne'} le verra dans « Mes demandes ».`}
@@ -876,7 +876,7 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
     <div className="decision">
       <Avatar person={p} />
       <div className="grow" style={{ minWidth: 280 }}>
-        <b>Demande de {p ? nomCourt(p) : '—'} à arbitrer</b>
+        <b>Demande de {p ? nomCourt(p) : '-'} à arbitrer</b>
         <div style={{ marginTop: 3 }}>{decrireBesoin(besoin)}</div>
         <div className="soft small" style={{ marginTop: 3 }}>
           {besoin.from ? `À partir du ${fmtDateCourt(besoin.from)}` : 'Sans date de début'}
@@ -912,7 +912,7 @@ function DemandeBesoin({ besoin }: { besoin: Besoin }): JSX.Element {
         </button>
         {refus ? (
           <DialogueRefus
-            quoi={`${p ? nomCourt(p) : '—'} : ${decrireBesoin(besoin)}`}
+            quoi={`${p ? nomCourt(p) : '-'} : ${decrireBesoin(besoin)}`}
             raisons={RAISONS_REFUS.horaire}
             apercu={(m) => texteRefus(`« ${decrireBesoin(besoin)} »`, m)}
             sansMessage={`La demande sera marquée comme refusée, sans message. ${p?.prenom ?? 'La personne'} le verra dans « Mes demandes ».`}
@@ -1052,7 +1052,7 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
             <PastilleUrgence urgence={urgence} />
             <Delai date={r.date} today={today} />
           </div>
-          <b>{demandeur ? nomCourt(demandeur) : '—'}</b> {adresse ? <>demande à <b>{nomCourt(adresse)}</b> de le remplacer</> : 'demande à être remplacé'}{' '}
+          <b>{demandeur ? nomCourt(demandeur) : '-'}</b> {adresse ? <>demande à <b>{nomCourt(adresse)}</b> de le remplacer</> : 'demande à être remplacé'}{' '}
           <b>
             {fmtDateCourt(r.date)}, {fmtHeure(r.start)} – {fmtHeure(r.end)}
           </b>
@@ -1082,7 +1082,7 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
         <div className="rm-faits">
           <span className={r.motif ? 'motif' : 'motif absent'}>
             Motif : <b>{r.motif ? MOTIF_REMPLACEMENT_LABEL[r.motif] : 'non précisé'}</b>
-            {r.precision ? ` — « ${r.precision} »` : ''}
+            {r.precision ? ` - « ${r.precision} »` : ''}
           </span>
           <span title="Demandes de remplacement de cette personne sur les trois derniers mois, celle-ci comprise">
             {deja <= 1 ? '1re demande en 3 mois' : `${deja}e demande en 3 mois`}
@@ -1112,7 +1112,7 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
             <div key={c.personId} className="row wrap" style={{ gap: 10 }}>
               <Avatar person={p} />
               <div className="grow" style={{ minWidth: 180 }}>
-                <b>{p ? nomCourt(p) : '—'}</b> se propose
+                <b>{p ? nomCourt(p) : '-'}</b> se propose
                 <div className="small soft">
                   {c.ok ? `Règles respectées${enPlus(c.personId)} · ${c.depannages ? `${c.depannages} dépannage${c.depannages > 1 ? 's' : ''} sur 3 mois` : 'aucun dépannage sur 3 mois'}` : c.raisons.join(' · ')}
                 </div>
@@ -1159,7 +1159,7 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
       </button>
       {refus ? (
         <DialogueRefus
-          quoi={`Remplacement de ${demandeur ? nomCourt(demandeur) : '—'}, ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`}
+          quoi={`Remplacement de ${demandeur ? nomCourt(demandeur) : '-'}, ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`}
           raisons={RAISONS_REFUS.remplacement}
           apercu={(m) => texteRefus(`de remplacement du ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`, m, 'Vous restez en poste.')}
           sansMessage="Sans raison précisée, le demandeur reçoit seulement l’avis de refus."

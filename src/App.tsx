@@ -10,7 +10,7 @@ import { DialogueDeconnexion } from './ui/components/Deconnexion';
 import { decisions } from './engine/decisions';
 import { useStore } from './store/store';
 import type { Vue } from './store/ui';
-import { prefsDe, useUi } from './store/ui';
+import { prefsDe, themeDuProfil, useUi } from './store/ui';
 import { EtiquetteRole, couleurDe, iconeDe } from './ui/icons';
 import { Avatar, Logo, LogoNom } from './ui/kit';
 import { DialogueJour } from './ui/components/Jour';
@@ -176,7 +176,8 @@ export function App(): JSX.Element {
   ];
   // Tant que ni le nom ni l'équipe ne sont saisis, l'application s'ouvre sur l'écran de création.
   const aCreer = !data.officine.nom.trim() && !data.personnes.length;
-  const prefs = prefsDe(preferences, session);
+  // Sans choix de sa part, chacun voit Solvéa dans la couleur de son profil.
+  const prefs = prefsDe(preferences, session, themeDuProfil(data, moi));
   const sombre = prefs.mode === 'sombre' || (prefs.mode === 'auto' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {

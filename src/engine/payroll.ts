@@ -86,7 +86,7 @@ export interface LignePaie {
 /**
  * Fiche navette du mois : heures PRÉVUES (non pointées) et variables de garde.
  * Les semaines à cheval sur deux mois sont décomptées en entier sur le mois de leur lundi
- * pour les heures supplémentaires — convention à confirmer avec le cabinet comptable.
+ * pour les heures supplémentaires - convention à confirmer avec le cabinet comptable.
  */
 export function ficheNavette(data: AppData, mois: string): LignePaie[] {
   const semaines = semainesDuMois(mois);
@@ -141,7 +141,7 @@ const csv = (v: string | number): string => {
 export function ficheNavetteCSV(data: AppData, mois: string): string {
   const lignes = ficheNavette(data, mois);
   const rows: (string | number)[][] = [
-    [`Fiche navette — ${data.officine.nom} — ${mois} — heures PRÉVUES, à rapprocher des heures réalisées`],
+    [`Fiche navette - ${data.officine.nom} - ${mois} - heures PRÉVUES, à rapprocher des heures réalisées`],
     ['Salarié', 'Fonction', 'Contrat hebdo (h)', 'Heures prévues', 'Heures compl.', 'Heures supp. 25 %', 'Heures supp. 50 %', 'Absences', 'Variable', 'Quantité', 'Unité'],
   ];
   for (const l of lignes) {

@@ -1,4 +1,4 @@
-# Solvéa — planning d'équipe pour pharmacie d'officine
+# Solvéa - planning d'équipe pour pharmacie d'officine
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="src/assets/solvea-logo-ciel-sombre.svg">
@@ -44,20 +44,35 @@ deux boutons sous « Première visite ? » : « Créer ma pharmacie » et « Com
 ouvre la fenêtre « Découvrir Solvéa » : une visite guidée **par rôle**, jouée sur une pharmacie d'exemple
 (la « Grande Pharmacie de la Pinède », fictive) posée à côté des vraies, sans rien effacer.
 
-- **Titulaire — Tout Solvéa, de zéro** (54 étapes et près de 110 gestes, environ 30 minutes au rythme posé) : la visite suit **l'ordre du menu**, sans changer de
-  personnage en cours de route. **Préparer** (création, équipe, fiche d'une personne, horaires et
-  effectif, qui prépare le planning, règles), **Planifier** (grille, poste posé à la main, trois
-  propositions, contrôles, journée, retards, mois, publication, impression, formation, inventaire,
-  gardes), **Suivre** (demande de remplacement, validation, urgence médicale, congés et horaires, refus
-  motivé, absence imprévue, appel à l'équipe, accord entre titulaires, messages, compteur d'heures),
-  **Bilan** (équité, journal et paie, documents, absences et justificatifs), **Au quotidien** (tableau
-  de bord, « Créer », cloche, plusieurs pharmacies, assistant, mot de passe, compte), puis un dernier
-  chapitre **Vu par l'équipe**.
-- **Pharmacien adjoint** (14 étapes) et **Préparateur, animateur, apprenti…** (13 étapes) : seulement ce
-  qui sert à la personne — son planning, celui de l'équipe, ses demandes, l'appel à l'équipe, ses gardes
-  pour un pharmacien, son suivi, les messages, l'assistant, son compte. Rien de la gestion.
-- **Une journée type** (13 étapes, tous les rôles) : huit semaines d'historique, un arrêt à couvrir, des
-  demandes en attente ; on suit la titulaire et son équipe.
+Chaque visite **raconte une histoire**, découpée en chapitres. Au début de chaque chapitre, une annonce dit
+ce qu'on va y faire en une phrase, dans la peau de qui, et où l'on en est dans le plan de la visite.
+
+- **Titulaire - Tout Solvéa, de zéro** (55 étapes, environ 30 minutes) : la vie d'un planning, dans
+  l'ordre où elle se vit. **Installer la pharmacie** (création, équipe, fiche d'une personne, marques d'une animatrice, horaires et
+  effectif, qui prépare le planning, règles), **Recueillir les souhaits** (les préférences du mois, vues
+  par un préparateur), **Construire et publier** (grille, poste posé à la main, trois propositions,
+  contrôles, gardes, formation, inventaire, mois, publication, impression), **L'équipe reçoit son
+  planning** (mon planning, calendrier, planning de l'équipe, suivi, gardes d'une pharmacienne), **Les
+  demandes de l'équipe** (la demande part d'un préparateur, un collègue se propose, la titulaire
+  valide ; urgence médicale, congés, demandes sur les mêmes dates, refus motivé), **Les imprévus**
+  (absence du matin, appel à l'équipe, journée, retards, décision à deux titulaires, messages), **Le
+  bilan du mois** (compteur d'heures, équité, journal et paie, documents, justificatifs), **Au
+  quotidien** (tableau de bord, « Créer », cloche, plusieurs pharmacies, assistant, aide, mot de passe,
+  compte).
+- **Pharmacien adjoint** (16 étapes) et **Préparateur, animateur, apprenti…** (15 étapes) : seulement ce
+  qui sert à la personne, en quatre chapitres - **Mon planning**, **Mes demandes**, **L'équipe et moi**
+  (appel à l'équipe, gardes pour un pharmacien, messages, rendez-vous), **Mon espace**. Rien de la gestion.
+- **Une journée type** (13 étapes, tous les rôles) : **le matin** (l'équipe du jour, un poste à couvrir,
+  pauses et retards), **un remplacement entre collègues**, **chacun son espace** (préparateur,
+  pharmacien adjoint, second titulaire), **le soir** (construire la suite, le mois, les heures).
+
+**Une couleur par profil.** Sans choix de sa part, chacun voit Solvéa dans la couleur de base de son profil :
+bleu ciel pour le titulaire principal, bleu marine pour un autre titulaire, bleu-vert pour un pharmacien
+adjoint, indigo pour un préparateur, framboise pour un animateur, vert pour un apprenti, ambre pour un
+étudiant, terracotta pour un rayonniste. Dans une visite, quand l'histoire passe d'une personne à une
+autre, toute l'interface change de couleur, un voile de la nouvelle couleur passe sur l'écran et un
+bandeau dit qui l'on est devenu : on sait aussitôt chez qui l'on se trouve. « Mon compte » permet de
+choisir une autre couleur ; celle du profil y est signalée.
 
 **Solvi**, la mascotte de l'aide, accompagne la visite et tient l'assistant. Il prend la couleur du
 thème, flotte sur place, cligne des yeux, et change d'humeur selon ce qu'il fait : un clin d'œil quand il
@@ -67,17 +82,20 @@ intrigué, réfléchi, satisfait, confiant, concentré, inquiet, triste, fatigu�
 Solvi n'apparaît que dans l'aide (le bouton « Aide », l'assistant, la page d'aide) et dans la visite
 guidée : le tableau de bord, les accueils et les fenêtres de travail restent sans mascotte.
 
-Pendant une visite, **on lit, puis on regarde** — un clic par étape :
+Pendant une visite, **on lit, puis on regarde** - un clic par étape, et **une seule chose bouge à la fois** :
 
 - un **projecteur** éclaire ce dont on parle ; rien ne bouge tant que la fiche d'explication est ouverte ;
-- « Suivant » referme la fiche et joue **toute la démonstration de l'étape** : un pointeur se déplace,
-  clique, coche, choisit dans une liste ou tape au clavier. À chaque geste, Solvi dit dans une bulle
-  **quoi faire et à quoi cela sert** (« Cliquez sur “Ajouter une personne” — ce bouton ouvre la fiche
-  d'une nouvelle personne »), laisse le temps de lire, agit, puis laisse voir le résultat ;
-- le **rythme** se choisit **avant de démarrer** — posé, normal ou vif — dans la fenêtre des visites,
-  sur la page d'aide et sur chaque fiche d'étape ; il se change aussi en cours de route, depuis la bulle ;
-- Solvi **vole se poser près de ce qu'il montre**, à côté de la fenêtre ou du bloc éclairé, et parle
-  dans une bulle à pointe qui rappelle où l'on en est dans les gestes de l'étape ;
+- « Suivant » referme la fiche et joue **toute la démonstration de l'étape**. Chaque geste se déroule dans
+  le même ordre : le projecteur se pose sur le bloc concerné ; **Solvi vole s'y poser** d'un seul trait,
+  bulle rangée, puis l'ouvre pour dire **quoi faire et à quoi cela sert** ; on a le temps de lire ; le
+  **pointeur part de Solvi**, glisse jusqu'au bouton et agit ; on regarde le résultat ;
+- Solvi part de l'endroit où il se tenait sur la fiche et **ne bouge que s'il le faut** : tant qu'il ne
+  cache rien et qu'il reste à côté de ce qu'il montre, il garde sa place. La durée d'un vol suit la
+  distance ; aucun déplacement ne saute d'un bord à l'autre de l'écran ;
+- le **rythme** - posé, normal (par défaut) ou vif - ne change que le **temps laissé pour lire et pour
+  regarder** : les déplacements gardent la même durée à toute allure. Ce temps se remplit sur le bouton
+  **« Continuer »** de la bulle : un clic, ou la flèche droite, passe à la suite sans attendre. Le rythme
+  se choisit avant de démarrer et se change en cours de route, depuis la bulle ;
 - ce que le projecteur éclaire **reste à l'écran** : s'il sort du champ, la page défile pour le ramener ;
 - la visite joue les interactions de chaque écran : horaires et coupure du midi, fiches de règles,
   navigation entre les semaines, poste type, lectures heures / coût / équité, modification puis annulation
@@ -162,7 +180,7 @@ Chacun se connecte avec un **identifiant et un mot de passe** et arrive dans un 
 - **Mes demandes** s'ouvre sur trois cartes, une par chose possible, avec qui répond : **Mes
   préférences** (ce qui m'arrange le mois prochain, sans réponse à attendre), **Absence ou horaire** (le
   titulaire répond), **Me faire remplacer** (le titulaire, puis un collègue volontaire). Chaque demande
-  affiche ses étapes — envoyée, réponse du titulaire, au planning — et une phrase qui dit où elle en est.
+  affiche ses étapes - envoyée, réponse du titulaire, au planning - et une phrase qui dit où elle en est.
   Pour un remplacement, les postes sont séparés en deux groupes : moins de 7 jours (urgent, sur
   volontariat) et 7 jours ou plus (délai normal).
 - **Assistant Solvéa** : un bouton flottant au logo ouvre une conversation. On pose sa question (« Qui
@@ -255,7 +273,7 @@ Dans le modèle **collaboratif** (réglable dans « Réglages », l'autre modèl
 responsable construit seul), chacun pose ses préférences pour le mois à venir avant une date limite (le
 20 du mois précédent, réglable) :
 
-- une forme par jour — matin, journée, après-midi ou repos — posée d'un clic, sans jamais de raison ;
+- une forme par jour - matin, journée, après-midi ou repos - posée d'un clic, sans jamais de raison ;
 - « M'assister » remplit les jours vides d'après les habitudes des huit dernières semaines ;
 - un jour où l'équipe annoncée ne suffit pas porte la mention « Manque le matin » ou « Manque
   l'ap.-midi » ; en le touchant, on voit qui s'est positionné et « Je peux venir » comble le créneau.
@@ -352,9 +370,9 @@ vue mois, une garde se voit dans la case du jour.
   faits des douze derniers mois : toujours à l'heure, dépanne l'équipe, répond aux appels, prend sa part
   des samedis et fermetures. Ni note ni classement (ordre alphabétique) ; **les arrêts, les congés et les
   absences n'entrent jamais en compte**. Chacun voit ses propres points forts dans « Mon suivi ».
-- **Décisions annoncées.** Dès qu'une décision est prise — congé accepté ou refusé, demande de
+- **Décisions annoncées.** Dès qu'une décision est prise - congé accepté ou refusé, demande de
   remplacement, remplacement validé, absence réglée, contrainte d'horaires, publication, garde confiée,
-  formation, inventaire, accord entre titulaires — une annonce part sous la cloche aux personnes
+  formation, inventaire, accord entre titulaires - une annonce part sous la cloche aux personnes
   concernées et à tous les titulaires, avec **ce que cela change dans les plannings** (« Igor : en poste →
   repos le 21 », « 3 postes à couvrir »). « Vu » la range ; le tableau de bord garde les six dernières.
 - **Espaces par rôle.** La barre du haut porte un badge de rôle avec son icône et sa couleur (titulaire,
@@ -364,7 +382,7 @@ vue mois, une garde se voit dans la case du jour.
 - **Grille : des alertes en mots.** La ligne « Équipe au complet ? » écrit « Complet », « Pharmacien
   absent », « Aucun pharmacien », « Manque du monde » ou « Rien de posé ». **Titulaires et adjoints
   comptent tous comme pharmaciens** (le groupe le rappelle) : une plage sans pharmacien dit donc ce qui la
-  crée — « 12 h 30 – 13 h 30, pause de Caroline », « après le départ de Caroline ». Les contrôles et la
+  crée - « 12 h 30 – 13 h 30, pause de Caroline », « après le départ de Caroline ». Les contrôles et la
   vue d'une journée reprennent la même explication.
 - **Mes semaines.** Une tuile par jour, colorée selon le moment de la journée, avec la pause et la durée.
 - **Menu du titulaire.** Les rubriques n'ont plus de numéro : des titres plus grands, et un fil qui les
@@ -397,8 +415,8 @@ Le **journal** est rangé par jour, du plus récent au plus ancien : l'heure, la
 accords recueillis et les règles appliquées. Trois chiffres en tête, et un filtre par nature.
 
 La **fiche navette** se parcourt mois par mois : quatre totaux (salariés, heures prévues, heures en plus
-des contrats, jours d'absence), puis une ligne par salarié — heures prévues, heures complémentaires et
-supplémentaires à 25 % et 50 % en pastilles de couleur, absences, variables de garde — et le total du
+des contrats, jours d'absence), puis une ligne par salarié - heures prévues, heures complémentaires et
+supplémentaires à 25 % et 50 % en pastilles de couleur, absences, variables de garde - et le total du
 mois. Un bandeau rappelle que ce sont des heures prévues, pas pointées. L'export pour le comptable reste
 un fichier CSV.
 
@@ -447,15 +465,15 @@ mais comme demande urgente : elle passe d'abord par le titulaire, et seul un vol
 L'objectif affiché est clair : **le moins d'heures en plus possible**. La page ouvre sur trois totaux
 (heures en plus, heures en moins, personnes à jour) et une alerte dès qu'un contrat est dépassé ; la
 cloche signale les compteurs à régulariser. « Heures » compare, pour chaque salarié, les heures planifiées et publiées à son contrat (absences
-approuvées déduites). Le titulaire régularise à la main — payer, faire récupérer, faire rattraper,
-solder — ou clique sur « Régulariser automatiquement » : chaque écart d'au moins une heure est résorbé sur
+approuvées déduites). Le titulaire régularise à la main - payer, faire récupérer, faire rattraper,
+solder - ou clique sur « Régulariser automatiquement » : chaque écart d'au moins une heure est résorbé sur
 la première semaine non publiée, par demi-heures et sans dépasser 8 h d'écart au contrat, et le brouillon
 de cette semaine est recalculé. Chacun voit son propre compteur dans « Mon suivi ».
 
 **Faire rattraper ou faire récupérer, en gardant la main.** Le bouton ouvre une fenêtre en trois temps :
 
-1. *Combien d'heures ?* — par demi-heures, jusqu'au solde ; la fenêtre dit ce qu'il restera au compteur.
-2. *Où et quand ?* — **le planning de la personne s'affiche**, semaine par semaine (flèches précédente /
+1. *Combien d'heures ?* - par demi-heures, jusqu'au solde ; la fenêtre dit ce qu'il restera au compteur.
+2. *Où et quand ?* - **le planning de la personne s'affiche**, semaine par semaine (flèches précédente /
    suivante, état de la semaine : communiquée, brouillon, pas encore construite) : ses postes, les manques
    au comptoir, les créneaux proposés en pointillés. **Un clic sur une plage libre y place les heures** ;
    le créneau se colle au poste voisin et s'arrête à la fermeture. Pour une récupération, on clique au
@@ -466,7 +484,7 @@ de cette semaine est recalculé. Chacun voit son propre compteur dans « Mon sui
    tôt, arriver plus tard, prendre la journée. Le titulaire en retient un, **fixe lui-même le jour et
    l'horaire** (le contrôle se refait à chaque changement et dit pourquoi un créneau est refusé),
    revient à « Laisser Solvéa choisir », ou laisse la semaine à construire s'en charger, sans date précise.
-3. *Le message* — un texte proposé, modifiable, part dans la messagerie de la personne ; l'annonce arrive
+3. *Le message* - un texte proposé, modifiable, part dans la messagerie de la personne ; l'annonce arrive
    aussi sous sa cloche. Si le planning est déjà communiqué, la version vue par l'équipe est mise à jour et
    la personne est notifiée ; à moins de sept jours, la fenêtre rappelle que son accord est nécessaire.
 
@@ -479,7 +497,7 @@ Une demande d'absence ou d'horaires porte **toujours sa raison** : une catégori
 (congés et repos, famille, santé, études, démarche administrative, raison personnelle) et, si la personne
 le souhaite, une précision. Seuls les titulaires la voient ; les collègues ne voient que des horaires.
 Quand le titulaire saisit lui-même un besoin, la raison est facultative. Trois statuts ne sont jamais
-confondus — indisponibilité reconnue (impérative), préférence prioritaire (plafonnée de la même façon
+confondus - indisponibilité reconnue (impérative), préférence prioritaire (plafonnée de la même façon
 pour tous), simple préférence. Un droit ou un aménagement validé n'entre pas dans le plafond. Les
 **préférences du mois**, elles, ne sont pas des demandes : aucune raison n'y est attachée.
 
@@ -489,9 +507,9 @@ semaines, une ligne par personne, demandes en pointillés) accompagne les décis
 décision rappelle la demande restée en attente sur ces dates. L'équipe voit la même frise dans « Mes
 demandes », sans la nature des absences ni les demandes des autres.
 
-Des **préréglages** remplissent le formulaire en un clic — Chabbat (finir plus tôt le vendredi, ne pas
+Des **préréglages** remplissent le formulaire en un clic - Chabbat (finir plus tôt le vendredi, ne pas
 travailler le samedi), prière du vendredi, office du dimanche, rupture du jeûne, sortie d'école, mercredi,
-cours du soir — et s'ajustent ensuite librement. Le nom du préréglage n'est **jamais enregistré** : il
+cours du soir - et s'ajustent ensuite librement. Le nom du préréglage n'est **jamais enregistré** : il
 présélectionne seulement une raison générale (« famille », « études », « raison personnelle »). La
 religion et la santé sont des données sensibles (RGPD, article 9) : la liste des raisons reste donc
 volontairement générale, et la précision est facultative. Une indisponibilité peut aussi porter sur une plage horaire
@@ -502,7 +520,7 @@ précise (de 12 h à 14 h 30, par exemple).
 L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 
 - **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ au moins 3:1, dans
-  chacun des dix thèmes (bleu ciel par défaut, bleu marine, indigo, violet, framboise, terracotta, ambre,
+  chacun des dix thèmes (bleu ciel, bleu marine, indigo, violet, framboise, terracotta, ambre,
   émeraude, bleu-vert, ardoise), en **mode clair comme en mode sombre**. Le logo suit la couleur du thème.
 - **Surfaces pleines** : plus aucun flou d'arrière-plan ; cartes et fenêtres sont opaques (94 % au moins),
   ce qui rend l'application fluide et les contrastes mesurables tels quels.
@@ -528,7 +546,7 @@ Un audit automatique (axe-core, règles WCAG 2.1 A et AA) ne relève aucun défa
 - sur les 34 écrans et fenêtres du parcours de vérification (44 contrôles de fonctionnement), en clair et
   en sombre ;
 - sur 32 écrans rejoués dans chacun des dix thèmes, en clair et en sombre (640 écrans), **sur la version
-  hébergée elle-même** — c'est là qu'un défaut du mode sombre était passé inaperçu ;
+  hébergée elle-même** - c'est là qu'un défaut du mode sombre était passé inaperçu ;
 - sur 12 écrans à la largeur d'un téléphone.
 
 Les quatre visites guidées sont déroulées en entier par un script : chaque étape a son projecteur, aucune
@@ -603,7 +621,7 @@ src/
 
 1. Serveur et comptes (hébergement dans l'Union européenne) : vraie authentification, messages et
    remplacements reçus sur le téléphone de chacun, notifications.
-2. Pointage simple (code ou QR code — ni photo ni biométrie) pour distinguer prévu, réalisé, validé.
+2. Pointage simple (code ou QR code - ni photo ni biométrie) pour distinguer prévu, réalisé, validé.
 3. Échanges de postes à deux sens entre collègues, validés automatiquement s'ils respectent règles,
    couverture et équité.
 4. Simulation de résistance avant publication ; salle de confidentialité et rendez-vous.

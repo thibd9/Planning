@@ -187,7 +187,7 @@ export function Heures(): JSX.Element {
             return (
               <div key={r.id} className="decision" style={{ alignItems: 'center' }}>
                 <div className="grow">
-                  <b>{p ? nomCourt(p) : '—'}</b> · {REGUL_LABEL[r.type]} <span className="num">{signe(r.minutes)}</span>
+                  <b>{p ? nomCourt(p) : '-'}</b> · {REGUL_LABEL[r.type]} <span className="num">{signe(r.minutes)}</span>
                   <div className="small soft">
                     {r.date && r.start !== undefined && r.end !== undefined ? `${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)} · ` : r.semaine ? `Semaine du ${fmtSemaine(r.semaine)} · ` : ''}
                     {fmtHorodatage(r.at)}

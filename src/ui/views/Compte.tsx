@@ -4,7 +4,7 @@ import { ESPACE_LABEL, empreinte, espaceDe, estResponsable, libelleRole, respons
 import { nomComplet, nomCourt } from '../../domain/types';
 import { useStore } from '../../store/store';
 import type { Mode, Theme } from '../../store/ui';
-import { prefsDe, useUi } from '../../store/ui';
+import { prefsDe, themeDuProfil, useUi } from '../../store/ui';
 import { EtiquetteRole } from '../icons';
 import { Avatar, MotDePasse, Pill } from '../kit';
 
@@ -34,7 +34,8 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
   const { preferences, setPreferences, deconnecter, dire, setTour, aller } = useUi();
   const person = data.personnes.find((p) => p.id === personId);
   const cle = person?.identifiant ?? personId;
-  const prefs = prefsDe(preferences, cle);
+  const couleurProfil = themeDuProfil(data, person);
+  const prefs = prefsDe(preferences, cle, couleurProfil);
   const [actuel, setActuel] = useState('');
   const [nouveau, setNouveau] = useState('');
   const [erreurCode, setErreurCode] = useState('');
@@ -121,11 +122,12 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
                     <input id={`theme-${t.cle}`} type="radio" name="theme" checked={prefs.theme === t.cle} onChange={() => setPreferences(cle, { theme: t.cle })} />
                     <span className="pastille" style={{ background: `linear-gradient(135deg, ${t.a}, ${t.b})` }} aria-hidden="true" />
                     {t.nom}
+                    {t.cle === couleurProfil ? <span className="tiny soft theme-profil">votre profil</span> : null}
                     <Check size={16} className="coche" aria-hidden="true" />
                   </label>
                 ))}
               </div>
-              <p className="tiny muted" style={{ marginTop: 8 }}>Le logo, les boutons et les bannières suivent la couleur choisie. Chaque thème reste lisible, en clair comme en sombre.</p>
+              <p className="tiny muted" style={{ marginTop: 8 }}>Chaque profil a sa couleur de base : on reconnaît d’un coup d’œil l’espace où l’on se trouve. Vous pouvez en choisir une autre. Le logo, les boutons et les bannières la suivent, en clair comme en sombre.</p>
             </fieldset>
             <fieldset>
               <legend className="field" style={{ marginBottom: 8 }}>

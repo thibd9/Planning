@@ -37,7 +37,7 @@ export function DialogueJour({ date: initiale, moi, onClose }: { date: ISODate; 
   const personne = (id: string | null): (typeof data.personnes)[number] | undefined => data.personnes.find((p) => p.id === id);
   const nomDe = (id: string | null): string => {
     const p = personne(id);
-    return p ? nomCourt(p) : '—';
+    return p ? nomCourt(p) : '-';
   };
 
   const reglerPause = (s: Shift, debut: string, fin: string): void => {

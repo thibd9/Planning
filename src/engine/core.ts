@@ -182,12 +182,12 @@ export function decrireBesoin(b: Besoin): string {
   switch (b.forme) {
     case 'indisponible':
       return b.plageStart !== undefined && b.plageEnd !== undefined
-        ? `Indisponible de ${fmtHeure(b.plageStart)} à ${fmtHeure(b.plageEnd)} — ${quand}${rythme}`
-        : `Indisponible — ${quand}${rythme}`;
+        ? `Indisponible de ${fmtHeure(b.plageStart)} à ${fmtHeure(b.plageEnd)} - ${quand}${rythme}`
+        : `Indisponible - ${quand}${rythme}`;
     case 'finir_avant':
-      return `Finir avant ${fmtHeure(b.heure ?? 0)} — ${quand}${rythme}`;
+      return `Finir avant ${fmtHeure(b.heure ?? 0)} - ${quand}${rythme}`;
     case 'commencer_apres':
-      return `Commencer après ${fmtHeure(b.heure ?? 0)} — ${quand}${rythme}`;
+      return `Commencer après ${fmtHeure(b.heure ?? 0)} - ${quand}${rythme}`;
   }
 }
 
