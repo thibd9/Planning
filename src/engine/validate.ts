@@ -53,6 +53,18 @@ function instant(abs: number): string {
  * Contrôle une semaine. Les règles de durée et de repos ne s'appliquent qu'aux salariés :
  * le titulaire est hors décompte.
  */
+/**
+ * Pourquoi une plage reste sans pharmacien alors qu'un pharmacien travaille ce jour-là, et quoi faire.
+ * Les titulaires sont pharmaciens : quand l'un d'eux est en poste, il ne manque personne. Ce qui manque,
+ * c'est un pharmacien sur le reste de l'ouverture.
+ */
+function suitePharmacien(raison: string): string {
+  if (raison.startsWith('après le départ')) return ` : la pharmacie reste ouverte ${raison}. Prolongez son poste ou posez un autre pharmacien sur cette plage.`;
+  if (raison.startsWith('avant l’arrivée')) return ` : la pharmacie ouvre ${raison}. Avancez son poste ou posez un autre pharmacien sur cette plage.`;
+  if (raison.startsWith('pause')) return ` pendant la ${raison}. Décalez cette pause ou posez un autre pharmacien sur cette plage.`;
+  return raison ? ` (${raison}). Posez un pharmacien sur cette plage.` : '.';
+}
+
 export function validateWeek(data: AppData, monday: ISODate): Issue[] {
   const issues: Issue[] = [];
   const dates = weekDates(monday);
@@ -85,7 +97,7 @@ export function validateWeek(data: AppData, monday: ISODate): Issue[] {
           start: t.start,
           end: t.end,
           // Titulaires et adjoints comptent : le message dit ce qui laisse la plage sans pharmacien.
-          message: `${Jour(date)}, de ${fmtHeure(t.start)} à ${fmtHeure(t.end)}, aucun pharmacien n'est ${expliques.aucun ? 'planifié' : `présent${t.raison ? ` (${t.raison})` : ''}`}.`,
+          message: `${Jour(date)}, de ${fmtHeure(t.start)} à ${fmtHeure(t.end)}, aucun pharmacien n'est ${expliques.aucun ? 'planifié' : 'présent'}${expliques.aucun ? '.' : suitePharmacien(t.raison)}`,
         });
       }
     }

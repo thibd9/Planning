@@ -2598,7 +2598,7 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
 .annonce-vu { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600; font-size: 13px; white-space: nowrap; }
 .annonce-vu:hover { border-color: var(--a); color: var(--a-text); }
 /* Sous la cloche : la même liste, plus compacte. */
-.menu.cloche { width: min(420px, calc(100vw - 24px)); max-height: min(76vh, 640px); overflow-y: auto; }
+.menu.cloche { width: min(440px, calc(100vw - 24px)); max-height: min(76vh, 640px); overflow-y: auto; }
 .menu.cloche .annonces { padding: 4px 6px 6px; gap: 8px; }
 .menu.cloche .annonce { padding: 11px 12px; gap: 10px; }
 .menu.cloche .annonce-vu { width: auto; padding: 5px 10px; border: 1px solid var(--line); background: var(--surface); }
@@ -2734,7 +2734,7 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
 
 /* Visite : Solvi accompagne chaque geste. Il reste posé au même endroit et dit quoi faire, et à quoi cela sert. */
 /* Solvi tient en un seul bloc placé par un déplacement : d'où qu'il parte, il glisse jusqu'à sa nouvelle place, sans saut. */
-.solvi-guide { position: fixed; z-index: 62; left: 0; top: 0; display: flex; align-items: center; gap: 8px; width: min(392px, calc(100vw - 24px)); pointer-events: none; animation: solvi-parait 0.32s ease; transition: transform 0.7s cubic-bezier(0.62, 0, 0.2, 1), opacity 0.3s ease; will-change: transform; }
+.solvi-guide { position: fixed; z-index: 62; left: 0; top: 0; display: flex; align-items: center; gap: 8px; width: min(440px, calc(100vw - 24px)); pointer-events: none; animation: solvi-parait 0.32s ease; transition: transform 0.7s cubic-bezier(0.62, 0, 0.2, 1), opacity 0.3s ease; will-change: transform; }
 .solvi-guide-qui { flex: none; margin: 0; }
 .solvi-guide-qui .solvi-corps { animation: solvi-flotte 3.8s ease-in-out infinite; }
 .solvi-bulle { position: relative; flex: 1; min-width: 0; display: grid; gap: 4px; padding: 14px 16px 12px 18px; border-radius: 22px 22px 22px 6px; background: var(--surface); color: var(--ink); box-shadow: 0 22px 54px -18px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--line); pointer-events: auto; }
@@ -3521,3 +3521,52 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill { -we
 .mq-nouvelle .field { min-width: 200px; }
 .mq-nouvelle .field input { width: 100%; }
 .mq-deja { flex-basis: 100%; margin: 0; }
+
+/* ---------------------------------------------------------------- Visite : la pause, et l'encadré qui annonce la démonstration */
+.solvi-pause { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border: 0; border-radius: 999px; background: var(--n-2); color: var(--ink-2); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.solvi-pause:hover { color: var(--ink); }
+.solvi-pause[aria-pressed='true'] { background: var(--warn-soft); color: var(--warn-ink); }
+.solvi-pause:focus-visible { outline: 2px solid var(--a-deep); outline-offset: 2px; }
+/* En pause, le temps qui se remplit sur « Continuer » s'arrête, et Solvi ne flotte plus. */
+.solvi-guide.pause .solvi-continuer > i { animation-play-state: paused; }
+.solvi-guide.pause .solvi-corps, .solvi-guide.pause .solvi-ombre { animation-play-state: paused; }
+.solvi-outils { gap: 5px; }
+/* L'encadré de la fiche : le pictogramme dans une pastille, aligné sur la première ligne du texte. */
+.pt-annonce { align-items: flex-start; gap: 12px; margin-top: 14px; padding: 12px 14px; border-radius: 16px; font-size: 14px; font-weight: 500; line-height: 1.45; background: var(--a-tint); color: var(--ink-2); }
+.pt-annonce b { display: block; color: var(--a-text); font-weight: 700; }
+.pt-annonce-ico { flex: none; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--a-deep); color: var(--on-a); margin-top: 1px; }
+.parcours-test .pt-voir { white-space: nowrap; }
+
+/* Réglages : ce que change « avec l'équipe » ou « vous seul », écrit sous le choix. */
+.qp-effets { display: grid; gap: 12px; padding: 16px 18px; border-radius: 18px; background: var(--n-1); }
+.qp-effets h3 { margin: 0; font-size: 15px; letter-spacing: -0.01em; }
+.qp-effets-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px 24px; }
+.qp-effets ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.qp-effets p { margin: 0; }
+
+/* La bulle de Solvi ne déborde jamais : son contenu tient dans sa largeur, le rythme se règle dans son en-tête. */
+.solvi-guide .solvi-bulle { grid-template-columns: minmax(0, 1fr); }
+.solvi-bulle-tete { gap: 8px; }
+.solvi-bulle-tete .solvi-rythme { margin-left: auto; padding: 3px 9px; font-size: 12px; background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.solvi-bulle-tete .solvi-pas { flex: none; }
+.solvi-dit, .solvi-sert, .solvi-exemple { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 520px) {
+  .solvi-pause span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .solvi-pause { padding: 6px 9px; }
+  .solvi-bulle-tete .solvi-rythme .cap1 { display: none; }
+}
+
+/* ---------------------------------------------------------------- Postes types : des cartes à la couleur du moment de la journée */
+.ptc-bloc { display: grid; gap: 10px; }
+.ptc-tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.ptc-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 8px; }
+.tile.ptc { width: auto; min-height: 0; padding: 12px 14px; gap: 12px; align-items: center; border-radius: 16px; cursor: pointer; text-align: left; font: inherit; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.tile.ptc:hover { transform: translateY(-1px); box-shadow: 0 10px 22px -14px rgba(17, 28, 39, 0.5); }
+.tile.ptc .ti { width: 36px; height: 36px; border-radius: 12px; }
+.ptc-texte { display: grid; gap: 1px; min-width: 0; color: var(--tile-ink); line-height: 1.3; }
+.ptc-texte b { font-size: 14.5px; letter-spacing: -0.01em; }
+.ptc-texte .num { font-size: 13px; font-weight: 600; }
+.ptc-texte .ptc-duree { font-size: 11.5px; font-weight: 500; opacity: 0.82; }
+.tile.ptc.on { box-shadow: inset 0 0 0 2.5px #111c27; }
+.ptc-coche { position: absolute; top: 8px; right: 9px; color: #111c27; }
+.tile.ptc:focus-visible { outline: 3px solid var(--a-deep); outline-offset: 2px; }

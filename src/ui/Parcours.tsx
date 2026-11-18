@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, Crown, FlaskConical, Gauge, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, UserRound, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, CirclePause, CirclePlay, Crown, FlaskConical, Gauge, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, UserRound, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -237,13 +237,59 @@ function ecrire(el: HTMLElement, valeur: string): void {
 }
 
 /** Minuteries d'une étape : annulées dès qu'on change d'étape. */
-let minuteries: number[] = [];
+interface Minuterie {
+  id: number;
+  /** Ce qu'il reste à attendre : mis à jour quand la démonstration est suspendue. */
+  reste: number;
+  fin: number;
+  lancer: () => void;
+}
+let minuteries: Minuterie[] = [];
+let suspendu = false;
+const minuter = (fn: () => void, ms: number): Minuterie => {
+  const m: Minuterie = {
+    id: 0,
+    reste: ms,
+    fin: 0,
+    lancer: () => {
+      m.fin = Date.now() + m.reste;
+      m.id = window.setTimeout(() => {
+        minuteries = minuteries.filter((x) => x !== m);
+        fn();
+      }, m.reste);
+    },
+  };
+  minuteries.push(m);
+  // Pendant une pause, rien ne part : la minuterie attend la reprise.
+  if (!suspendu) m.lancer();
+  return m;
+};
 const plusTard = (fn: () => void, ms: number): void => {
-  minuteries.push(window.setTimeout(fn, ms));
+  minuter(fn, ms);
+};
+const annulerUne = (m: Minuterie): void => {
+  window.clearTimeout(m.id);
+  minuteries = minuteries.filter((x) => x !== m);
 };
 const annulerMinuteries = (): void => {
-  minuteries.forEach((t) => window.clearTimeout(t));
+  minuteries.forEach((m) => window.clearTimeout(m.id));
   minuteries = [];
+  suspendu = false;
+};
+/** Pause : chaque attente en cours s'arrête là où elle en est. Reprise : elle repart pour ce qu'il lui restait. */
+const suspendre = (): void => {
+  if (suspendu) return;
+  suspendu = true;
+  const t = Date.now();
+  minuteries.forEach((m) => {
+    window.clearTimeout(m.id);
+    m.reste = Math.max(0, m.fin - t);
+  });
+};
+const reprendre = (): void => {
+  if (!suspendu) return;
+  suspendu = false;
+  minuteries.forEach((m) => m.lancer());
 };
 
 const semaineDans = (n: number): string => addDays(mondayOf(store().today), 7 * n);
@@ -444,14 +490,14 @@ const ETABLI_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='cycle']",
     titre: 'Le tableau de bord',
-    texte: () => 'L’équipe du jour, où en est le planning, les décisions qui attendent.',
+    texte: () => 'Caroline ouvre Solvéa : l’équipe du jour, où en est le planning, et les décisions qui l’attendent.',
     jouer: () => voirComme('caroline.tellier', 'tableau'),
   },
   {
     qui: HELENE,
     cible: "[data-focus='appel']",
     titre: 'L’appel à l’équipe',
-    texte: () => 'Un poste à couvrir : tous ceux qui peuvent sont prévenus ensemble. Le moins sollicité passe d’abord.',
+    texte: () => 'Un poste reste à couvrir. Tous ceux qui peuvent le tenir sont prévenus ensemble ; celui qui a le moins dépanné passe d’abord.',
     jouer: () => {
       appelEnCours();
       useUi.getState().setSujet('absences');
@@ -462,7 +508,7 @@ const ETABLI_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.prochain',
     titre: 'Ses horaires',
-    texte: () => 'Nicolas voit d’abord son prochain poste. Il vient de demander un remplacement.',
+    texte: () => 'Nicolas voit d’abord son prochain poste. Il vient de demander à être remplacé.',
     jouer: () => {
       const s = store();
       if (!demandeDeCamille(s.data)) {
@@ -479,7 +525,7 @@ const ETABLI_BRUT: Etape[] = [
     qui: 'Un collègue',
     cible: "[data-focus='aider']",
     titre: 'Un collègue se propose',
-    texte: () => 'La demande arrive en tête de son planning. Se proposer n’engage à rien.',
+    texte: () => 'La demande arrive en tête du planning d’un collègue. Se proposer n’engage à rien : la titulaire valide.',
     jouer: () => {
       const s = store();
       const r = demandeDeCamille(s.data);
@@ -495,7 +541,7 @@ const ETABLI_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='demande-remplacement']",
     titre: 'Valider',
-    texte: () => 'Les règles sont relues, les heures en plus annoncées. Un clic valide.',
+    texte: () => 'Solvéa relit les règles et annonce les heures en plus. Un clic de Caroline valide le remplacement.',
     jouer: () => {
       useUi.getState().setSujet('remplacements');
       voirComme('caroline.tellier', 'resoudre');
@@ -505,21 +551,21 @@ const ETABLI_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.sh-cal',
     titre: 'Mes préférences',
-    texte: () => 'Une forme par jour. « M’assister » remplit le reste.',
+    texte: () => 'Nicolas indique une forme d’horaire par jour. « M’assister » complète le reste du mois.',
     jouer: () => versDemandes('nicolas.lesyndicaliste', 'souhaits'),
   },
   {
     qui: 'Igor · pharmacien adjoint',
     cible: '.content .card',
     titre: 'Ses gardes',
-    texte: () => 'Dates, repos qui suit, récupérations. Pas d’accès à la gestion.',
+    texte: () => 'Igor retrouve ses gardes, le repos qui suit et ses récupérations. Il n’a pas accès à la gestion.',
     jouer: () => voirComme('igor.lerusse', 'mesgardes'),
   },
   {
     qui: 'Pierre · titulaire secondaire',
     cible: '.panneau',
     titre: 'Décider à deux',
-    texte: () => 'Mêmes écrans que Caroline. Sa décision attend son accord.',
+    texte: () => 'Pierre, second titulaire, a les mêmes écrans que Caroline. Sa décision attend son accord.',
     jouer: () => {
       const s = store();
       if (!(s.data.accords ?? []).some((x) => x.auteur === 'p_antoine')) {
@@ -534,7 +580,7 @@ const ETABLI_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.panneau',
     titre: 'Donner son accord',
-    texte: () => 'Caroline accepte ou refuse. Pierre est prévenu.',
+    texte: () => 'Caroline accepte ou refuse la décision de Pierre. Il est prévenu aussitôt.',
     jouer: () => {
       useUi.getState().setSujet('accords');
       voirComme('caroline.tellier', 'resoudre');
@@ -545,7 +591,7 @@ const ETABLI_BRUT: Etape[] = [
     cible: '.plan-grid .pg-h.today',
     cibleFin: '.dialog',
     titre: 'Pauses et retards',
-    texte: () => 'Sous chaque date, « Voir la journée » ouvre toute l’équipe sur une ligne de temps.',
+    texte: () => 'Sous chaque date, « Voir la journée » montre toute l’équipe sur une ligne de temps : pauses et retards.',
     jouer: () => {
       voirComme('caroline.tellier', 'construire');
       useUi.getState().setSemaine(mondayOf(store().today));
@@ -561,7 +607,7 @@ const ETABLI_BRUT: Etape[] = [
     cible: "[data-tour='proposer']",
     cibleFin: '.content .plan',
     titre: 'Construire',
-    texte: () => '« Proposer un planning » calcule trois semaines comparables. Vous choisissez.',
+    texte: () => '« Proposer un planning » calcule trois semaines complètes et comparables. C’est vous qui choisissez.',
     jouer: () => {
       voirComme('caroline.tellier', 'construire');
       // L'exemple a deux semaines publiées d'avance : la semaine à construire est la troisième.
@@ -582,7 +628,7 @@ const ETABLI_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='mois']",
     titre: 'Le mois',
-    texte: () => 'Objectif d’équipe, heures face au contrat, préférences données.',
+    texte: () => 'La vue « Mois » réunit l’objectif de l’équipe, les heures de chacun face à son contrat et les préférences données.',
     jouer: () => {
       voirComme('caroline.tellier', 'construire');
       useUi.getState().setPlanVue('mois');
@@ -632,7 +678,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.accueil-form',
     titre: 'Créer la pharmacie',
-    texte: () => 'Trois écrans : le nom, les horaires, l’équipe. Ici, on part de zéro.',
+    texte: () => 'Tout commence ici : vous donnez un nom à votre pharmacie, puis ses horaires et son équipe. Dans cette visite, on part de zéro.',
     jouer: () => helene('nouvelle'),
     gestes: [{ faire: 'taper', dans: '#officine-nom', texte: 'Grande Pharmacie de la Pinède', dit: 'Donnez un nom à votre pharmacie', sert: 'Il s’affiche en haut de l’écran et sur les plannings imprimés.' }],
   },
@@ -641,7 +687,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .split',
     titre: 'Horaires et effectif',
-    texte: () => 'Les horaires jour par jour. À droite, le nombre de personnes attendues au comptoir.',
+    texte: () => 'Vous réglez les horaires d’ouverture, jour par jour. À côté, vous indiquez combien de personnes vous attendez au comptoir.',
     jouer: () => helene('officine'),
     gestes: [
       { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('[aria-label="Fermeture le samedi"]'), valeur: '18:00', dit: 'Réglez la fermeture du samedi à 18 h', sert: 'Chaque jour a ses heures d’ouverture et de fermeture.' },
@@ -656,12 +702,13 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='modele']",
     titre: 'Qui prépare le planning',
-    texte: () => 'Avec l’équipe : chacun donne ses préférences. Vous seul : vous construisez sans les demander.',
+    texte: () => 'Deux façons de faire. « Avec l’équipe », chacun dit ce qui l’arrange avant que vous construisiez. « Vous seul », vous construisez directement. Sous le choix, Solvéa écrit ce que cela change pour l’équipe et pour vous.',
     jouer: () => helene('officine'),
     gestes: [
-      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Vous seul'), sert: 'Planning classique : vous construisez sans recueillir de préférences.' },
-      { faire: 'pause', ms: 900 },
-      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Avec l’équipe'), sert: 'Planning collaboratif : chacun donne ses préférences avant le calcul.' },
+      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Vous seul'), sert: 'Vous construisez directement, sans recueillir de préférences.' },
+      { faire: 'pause', ms: 2600, dit: 'Dessous : ce que ce choix change', sert: 'Pour l’équipe, la carte « Mes préférences » disparaît. Pour vous, plus de date limite à attendre.' },
+      { faire: 'cliquer', sur: parTexte("[data-focus='modele'] label", 'Avec l’équipe'), sert: 'L’équipe reçoit une carte « Mes préférences » ; vos propositions de planning en tiennent compte.' },
+      { faire: 'pause', ms: 2600, dit: 'Avec l’équipe, le planning se prépare à plusieurs', sert: 'Chacun dit ce qui l’arrange jusqu’à la date limite ; le tableau de bord compte les préférences reçues.' },
     ],
   },
   {
@@ -669,7 +716,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .split > :first-child',
     titre: 'Ajouter l’équipe',
-    texte: (d) => (d.personnes.length > 2 ? `${d.personnes.length} personnes, rangées par poste. Chacune a sa couleur et son compte.` : 'Prénom, nom, poste, heures du contrat. Regardez.'),
+    texte: (d) => (d.personnes.length > 2 ? `Votre équipe compte ${d.personnes.length} personnes, rangées par fonction. Chacune a sa couleur et son compte.` : 'Vous ajoutez vos collaborateurs un par un : prénom, nom, fonction, heures du contrat. Regardez.'),
     jouer: () => helene('equipe'),
     gestes: [
       { faire: 'cliquer', sur: "[data-focus='ajouter-personne']", sert: 'Ce bouton ouvre la fiche d’une nouvelle personne.' },
@@ -687,7 +734,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .split > :last-child',
     titre: 'La fiche d’une personne',
-    texte: () => 'Contrat, compétences et diplômes, compte de connexion. Un clic coche une compétence.',
+    texte: () => 'La fiche réunit le contrat, les compétences et diplômes, et le compte de connexion. Un clic suffit pour cocher une compétence.',
     jouer: () => {
       avecEquipe();
       helene('equipe');
@@ -718,7 +765,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .card',
     titre: 'Les règles',
-    texte: () => 'Durées, repos, pauses, délais : chaque contrôle a sa source. Vos seuils se règlent ici.',
+    texte: () => 'Durées de travail, repos, pauses, délais : chaque contrôle indique sa source. C’est ici que vous réglez vos seuils.',
     jouer: () => {
       avecEquipe();
       helene('regles');
@@ -736,7 +783,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.sh-cal',
     titre: 'Les préférences du mois',
-    texte: () => 'Nicolas choisit une forme, clique les jours. « M’assister » remplit le reste.',
+    texte: () => 'Nicolas indique ce qui l’arrange : il choisit une forme d’horaire, puis touche les jours. « M’assister » complète le reste.',
     jouer: () => {
       avecSouhaits(false);
       // Son mois repart vide : sinon « M’assister » n’aurait plus rien à remplir.
@@ -755,7 +802,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .plan',
     titre: 'Une semaine à construire',
-    texte: () => 'Une ligne par personne, un groupe par poste, une colonne par jour.',
+    texte: () => 'Voici la grille de la semaine : une ligne par personne, une colonne par jour, les fonctions regroupées.',
     jouer: () => {
       avecSouhaits();
       semaineUne();
@@ -771,7 +818,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .plan',
     cibleFin: '.content .plan',
     titre: 'Poser un poste',
-    texte: () => 'Un « + » ouvre le poste : horaires, pause, activité. On enregistre.',
+    texte: () => 'Le « + » d’une case ouvre un poste : vous réglez ses horaires, sa pause et son activité, puis vous enregistrez.',
     jouer: () => {
       avecSouhaits();
       semaineUne();
@@ -790,7 +837,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .plan',
     cibleFin: '.content .plan',
     titre: 'Trois propositions',
-    texte: () => 'Solvéa calcule trois plannings : équité, préférences ou coût d’abord. Les règles passent toujours avant. Vous comparez, vous choisissez.',
+    texte: () => 'Solvéa calcule trois plannings complets : l’un privilégie l’équité, l’autre les préférences, le dernier le coût. Les règles passent toujours avant. Vous comparez, puis vous choisissez.',
     jouer: () => {
       avecSouhaits();
       semaineUne();
@@ -818,7 +865,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .plan',
     titre: 'La semaine est posée',
-    texte: () => 'Jaune le matin, bleu la journée, violet l’après-midi. Chaque tuile se déplace ou se corrige.',
+    texte: () => 'La semaine est remplie. La couleur dit le moment de la journée : jaune le matin, bleu la journée, violet l’après-midi. Chaque tuile se déplace ou se corrige.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
@@ -840,7 +887,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-tour='controles']",
     titre: 'Les contrôles',
-    texte: () => 'Ce qui bloque, ce qui alerte. Un clic montre la personne et le jour.',
+    texte: () => 'Solvéa relit le planning : ce qui bloque, et ce qui mérite votre attention. Un clic vous montre la personne et le jour concernés.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
@@ -855,7 +902,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='mois']",
     titre: 'Le mois',
-    texte: () => 'Le mois d’un coup d’œil : horaires, équipe au complet ou non, heures de chacun. Et les préférences reçues.',
+    texte: () => 'La vue « Mois » montre quatre semaines d’un coup d’œil : les horaires, l’équipe au complet ou non, les heures de chacun et les préférences reçues.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
@@ -870,7 +917,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.plan-grid .pg-h:nth-child(3)',
     cibleFin: '.dialog',
     titre: 'Une journée',
-    texte: () => 'Sous chaque date, « Voir la journée » ouvre toute l’équipe sur une ligne de temps : pauses, retards.',
+    texte: () => 'Sous chaque date, « Voir la journée » montre toute l’équipe sur une ligne de temps. Vous y réglez les pauses et notez les retards.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
@@ -914,7 +961,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "button[aria-label='Imprimer le planning']",
     titre: 'Imprimer',
-    texte: () => 'Une feuille propre pour l’affichage. Chacun peut aussi imprimer son planning.',
+    texte: () => 'Vous imprimez une feuille propre pour l’affichage. Chacun peut aussi imprimer son propre planning.',
     jouer: () => {
       avecPlanning();
       semaineUne();
@@ -926,7 +973,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .card',
     cibleFin: '.content .card',
     titre: 'Les gardes',
-    texte: () => 'On ajoute la garde, on la confie, le pharmacien est prévenu. Délai et repos sont contrôlés.',
+    texte: () => 'Vous ajoutez une garde et la confiez à un pharmacien : il est prévenu. Le délai de prévenance et le repos qui suit sont contrôlés.',
     jouer: () => {
       avecPlanning();
       helene('gardes');
@@ -945,7 +992,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.topbar-in',
     cibleFin: "[data-tour='grille']",
     titre: 'Une formation',
-    texte: () => 'Depuis « Créer » : un nom, des dates, des participants. Chacun est prévenu.',
+    texte: () => 'Depuis « Créer », vous planifiez une formation : son intitulé, ses dates, ses participants. Chacun est prévenu.',
     jouer: () => {
       avecPlanning();
       helene('construire');
@@ -973,7 +1020,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.topbar-in',
     cibleFin: "[data-tour='grille']",
     titre: 'Un inventaire',
-    texte: () => 'Une date, un horaire, les personnes mobilisées. Il compte dans leurs heures.',
+    texte: () => 'Même principe pour un inventaire : une date, un horaire, les personnes mobilisées. Il compte dans leurs heures.',
     jouer: () => {
       avecFormation();
       helene('construire');
@@ -1000,7 +1047,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.prochain',
     titre: 'Mon planning',
-    texte: () => 'Le prochain poste en grand, puis la semaine. Jamais un brouillon.',
+    texte: () => 'Voici ce que voit Nicolas : son prochain poste en grand, puis sa semaine. Il ne voit jamais un brouillon.',
     jouer: () => {
       avecPlanning();
       voirComme('nicolas.lesyndicaliste', 'moi');
@@ -1012,7 +1059,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.me-grid',
     cibleFin: 'table.cal',
     titre: 'Le calendrier du mois',
-    texte: () => 'Le mois entier, les horaires dans chaque case.',
+    texte: () => 'Le calendrier montre le mois entier, avec les horaires dans chaque case.',
     jouer: () => {
       avecPlanning();
       voirComme('nicolas.lesyndicaliste', 'moi');
@@ -1024,7 +1071,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.content .plan',
     titre: 'Le planning de l’équipe',
-    texte: () => 'Qui travaille quand. « Mes postes » ne garde que sa ligne.',
+    texte: () => 'Chacun voit qui travaille quand. « Mes postes » ne garde que sa propre ligne.',
     jouer: () => {
       avecPlanning();
       voirComme('nicolas.lesyndicaliste', 'planning');
@@ -1041,7 +1088,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.voies',
     titre: 'Mes demandes',
-    texte: () => 'Trois cartes : mes préférences, une absence, un remplacement.',
+    texte: () => '« Mes demandes » tient en trois cartes : mes préférences, une absence ou un horaire, un remplacement.',
     jouer: () => {
       avecPlanning();
       versDemandes('nicolas.lesyndicaliste', 'absences');
@@ -1056,7 +1103,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.dialog',
     titre: 'Demander, avec sa raison',
-    texte: () => 'Un raccourci remplit les horaires et la raison. Une raison est toujours demandée ; seuls les titulaires la voient.',
+    texte: () => 'Un raccourci remplit les horaires et la raison. Une raison est toujours demandée : seuls les titulaires la voient.',
     jouer: () => {
       avecPlanning();
       versDemandes('nicolas.lesyndicaliste', 'absences');
@@ -1076,7 +1123,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: "[data-focus='remplacer']",
     cibleFin: "[data-focus='remplacer']",
     titre: 'Se faire remplacer',
-    texte: () => 'Un motif, un niveau d’urgence, à toute l’équipe ou à un collègue. La titulaire décide.',
+    texte: () => 'Nicolas indique un motif et un niveau d’urgence, puis s’adresse à toute l’équipe ou à un collègue. La titulaire décide.',
     jouer: () => {
       avecPlanning();
       versDemandes('nicolas.lesyndicaliste', 'remplacements');
@@ -1096,7 +1143,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: 'Léa · pharmacienne adjointe',
     cible: '.content .card',
     titre: 'Mes gardes',
-    texte: () => 'Ses gardes, le repos qui suit, ce qui part en paie.',
+    texte: () => 'Léa retrouve ses gardes, le repos qui suit chacune, et ce qui part en paie.',
     jouer: () => {
       avecGardes();
       voirComme('lea.fontaine', 'mesgardes');
@@ -1107,7 +1154,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: CAMILLE,
     cible: '.content .deux',
     titre: 'Mon suivi',
-    texte: () => 'Son compteur d’heures, ce qui a été noté, sa part des contraintes. Aucun classement.',
+    texte: () => 'Son compteur d’heures, ce qui a été noté, sa part des contraintes de l’équipe. Aucun classement entre collègues.',
     jouer: () => {
       avecPlanning();
       voirComme('nicolas.lesyndicaliste', 'suivi');
@@ -1134,7 +1181,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: "[data-focus='aider']",
     cibleFin: "[data-focus='aider']",
     titre: 'Un collègue se propose',
-    texte: () => 'La demande est en tête de son planning. Se proposer n’engage à rien.',
+    texte: () => 'La demande apparaît en tête du planning des collègues qui peuvent la reprendre. Se proposer n’engage à rien : la titulaire valide.',
     jouer: () => {
       avecDemandeAcceptee();
       const v = volontaire();
@@ -1175,7 +1222,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.panneau',
     titre: 'Congés et horaires',
-    texte: () => 'Jules demande un congé. Avant de répondre, on voit ce que l’absence découvre.',
+    texte: () => 'Jules demande un congé. Avant de répondre, vous voyez ce que son absence découvrirait.',
     jouer: () => {
       avecPlanning();
       const s = store();
@@ -1190,7 +1237,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .fc',
     titre: 'Deux demandes sur les mêmes dates',
-    texte: () => 'Inès et Thomas demandent les mêmes jours. La frise le montre, chaque demande le signale : vous répondez aux deux.',
+    texte: () => 'Inès et Thomas demandent les mêmes jours. La frise le montre et chaque demande le signale : à vous de répondre aux deux.',
     jouer: () => {
       avecCongeARefuser();
       const s = store();
@@ -1274,7 +1321,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: 'Pierre · titulaire secondaire',
     cible: '.panneau',
     titre: 'Décider à deux',
-    texte: () => 'Pierre a les mêmes écrans. Sa décision attend l’accord de Caroline.',
+    texte: () => 'Pierre, second titulaire, a les mêmes écrans que Caroline. Sa décision attend l’accord de Caroline avant d’être appliquée.',
     jouer: () => {
       avecAccordEnAttente();
       useUi.getState().setSujet('accords');
@@ -1301,7 +1348,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.fil',
     cibleFin: '.fil',
     titre: 'Les messages',
-    texte: () => 'Un fil pour l’équipe, des conversations privées.',
+    texte: () => 'La messagerie réunit un fil pour toute l’équipe et des conversations privées.',
     jouer: () => {
       avecEquipe();
       helene('messages');
@@ -1316,7 +1363,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='compteurs-heures']",
     titre: 'Le compteur d’heures',
-    texte: () => 'Heures en plus ou en moins. Payer, faire récupérer, ou régulariser automatiquement.',
+    texte: () => 'Le compteur compare les heures publiées au contrat de chacun. Vous payez, faites récupérer ou rattraper, ou laissez Solvéa régulariser.',
     jouer: () => {
       avecPlanning();
       helene('heures');
@@ -1335,7 +1382,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.compteurs',
     titre: 'Retards et suivi',
-    texte: () => 'Un retard de Jules est noté. Sa fiche compte des dates et des durées, jamais une raison.',
+    texte: () => 'Un retard de Jules est noté. Sa fiche ne garde que des dates et des durées, jamais une raison.',
     jouer: () => {
       avecPlanning();
       const s = store();
@@ -1350,7 +1397,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .card',
     titre: 'L’équité',
-    texte: () => 'Samedis, fermetures, gardes, dépannages : qui a porté quoi, face à sa part.',
+    texte: () => 'Samedis, fermetures, gardes, dépannages : vous voyez qui a porté quoi, face à sa part.',
     jouer: () => {
       avecPlanning();
       helene('equite');
@@ -1366,7 +1413,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .card',
     titre: 'Le journal et la paie',
-    texte: () => 'Chaque décision est tracée. La fiche navette du mois s’exporte pour le comptable.',
+    texte: () => 'Chaque décision est tracée dans le journal. La fiche navette du mois s’exporte pour votre comptable.',
     jouer: () => {
       avecPlanning();
       helene('journal');
@@ -1382,7 +1429,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .jr-barre',
     cibleFin: '.content .doc-liste, .content .card',
     titre: 'Les documents',
-    texte: () => 'Plannings publiés, absences, fichiers déposés : chacun retrouve tout au même endroit.',
+    texte: () => 'Plannings publiés, absences, fichiers déposés : chacun retrouve ses documents au même endroit.',
     jouer: () => {
       avecPlanning();
       helene('documents');
@@ -1395,7 +1442,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .jr-barre',
     cibleFin: '.content .doc-liste, .content .hist-tete',
     titre: 'Absences et justificatifs',
-    texte: () => 'L’historique de l’équipe : arrêts, congés, remplacements, par personne. « Joindre » conserve un justificatif, vu des seuls titulaires.',
+    texte: () => 'L’historique de l’équipe, personne par personne : arrêts, congés, remplacements. « Joindre » conserve un justificatif, visible des seuls titulaires.',
     jouer: () => {
       avecAbsenceImprevue();
       helene('documents');
@@ -1408,7 +1455,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='cycle']",
     titre: 'Le tableau de bord',
-    texte: () => 'L’équipe du jour, puis où en est le planning : la prochaine étape est toujours indiquée.',
+    texte: () => 'Chaque matin, le tableau de bord vous dit quoi faire en premier, qui est là aujourd’hui et où en est le planning.',
     jouer: () => {
       avecAbsenceImprevue();
       helene('tableau');
@@ -1426,7 +1473,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.topbar-in',
     cibleFin: '.outils .menu',
     titre: 'Le bouton « Créer »',
-    texte: () => 'Planning, garde, formation, inventaire, personne, absence, message : depuis partout.',
+    texte: () => 'Depuis n’importe quel écran, « Créer » ouvre un planning, une garde, une formation, un inventaire, une personne, une absence ou un message.',
     jouer: () => {
       avecPlanning();
       helene('tableau');
@@ -1439,7 +1486,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.topbar-in',
     cibleFin: '.outils .menu',
     titre: 'La cloche',
-    texte: () => 'Chaque décision prise y est annoncée, avec ce qu’elle change au planning. Dessous, ce qui vous attend, le plus urgent en tête.',
+    texte: () => 'La cloche annonce chaque décision prise et ce qu’elle change au planning. Dessous, ce qui vous attend, le plus urgent en tête.',
     jouer: () => {
       avecAbsenceImprevue();
       helene('tableau');
@@ -1451,7 +1498,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '#officine-choix',
     titre: 'Plusieurs pharmacies',
-    texte: () => 'Autant de pharmacies que vous voulez. Ce sélecteur passe de l’une à l’autre.',
+    texte: () => 'Vous gérez autant de pharmacies que vous voulez : ce sélecteur passe de l’une à l’autre.',
     jouer: () => {
       avecPlanning();
       helene('tableau');
@@ -1463,7 +1510,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: "[data-focus='assistant']",
     cibleFin: '.aide-panneau',
     titre: 'Solvi, votre assistant',
-    texte: () => 'Posez une question : il lit le planning, répond, et vous emmène au bon écran.',
+    texte: () => 'Posez-lui une question avec vos mots : il lit le planning, répond, et vous emmène au bon écran.',
     jouer: () => {
       avecPlanning();
       helene('tableau');
@@ -1483,7 +1530,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .ad-recherche',
     cibleFin: '.content',
     titre: 'L’aide',
-    texte: () => 'Toutes les fonctions sont répertoriées. Chaque fiche a sa réponse, son bouton et son tutoriel.',
+    texte: () => 'L’aide répertorie toutes les fonctions. Chaque fiche donne la réponse, un bouton pour y aller et un tutoriel.',
     jouer: () => {
       avecPlanning();
       helene('aide');
@@ -1499,7 +1546,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[aria-labelledby='c-code']",
     titre: 'Mot de passe et clé de secours',
-    texte: () => 'Chacun change son mot de passe. La clé de secours sert en cas d’oubli.',
+    texte: () => 'Chacun choisit son mot de passe. La clé de secours vous sert en cas d’oubli.',
     jouer: () => {
       avecPlanning();
       helene('compte');
@@ -1510,7 +1557,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[aria-labelledby='c-apparence']",
     titre: 'Votre compte',
-    texte: () => 'Dix couleurs, clair ou sombre. La visite est terminée : tout reste à essayer.',
+    texte: () => 'Dix couleurs, mode clair ou sombre, taille du texte. La visite est terminée : tout reste à essayer.',
     jouer: () => {
       avecPlanning();
       helene('compte');
@@ -1645,7 +1692,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.prochain',
       titre: 'Mon prochain poste',
-      texte: () => 'La première chose qu’on cherche, la première qu’on voit.',
+      texte: () => 'Votre prochain poste : c’est la première chose qu’on cherche, et la première qu’on voit.',
       jouer: () => moi('moi'),
     },
     {
@@ -1653,7 +1700,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.me-grid .card',
       titre: 'Ma semaine',
-      texte: () => 'Horaires, pause, durée. Seul le planning publié s’affiche.',
+      texte: () => 'Votre semaine, jour par jour : horaires, pause, durée. Seul le planning publié s’affiche.',
       jouer: () => moi('moi'),
     },
     {
@@ -1662,7 +1709,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       cible: '.me-grid',
       cibleFin: 'table.cal',
       titre: 'Le calendrier du mois',
-      texte: () => 'Le mois entier, les mêmes couleurs que partout.',
+      texte: () => 'Le calendrier montre le mois entier, avec les mêmes couleurs que partout ailleurs.',
       jouer: () => moi('moi'),
       gestes: [{ faire: 'cliquer', sur: parTexte('.me-grid .seg button', 'Calendrier'), sert: 'Le calendrier montre le mois entier, avec la couleur de chaque horaire.' }],
     },
@@ -1671,7 +1718,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.content .plan',
       titre: 'Le planning de l’équipe',
-      texte: () => 'Qui travaille quand. « Mes postes » ne garde que votre ligne.',
+      texte: () => 'Vous voyez qui travaille quand. « Mes postes » ne garde que votre ligne.',
       jouer: () => {
         moi('planning');
         useUi.getState().setSemaine(mondayOf(store().today));
@@ -1683,7 +1730,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.voies',
       titre: 'Mes demandes',
-      texte: () => 'Trois cartes : mes préférences, une absence, un remplacement.',
+      texte: () => '« Mes demandes » tient en trois cartes : mes préférences, une absence ou un horaire, un remplacement.',
       jouer: () => versDemandes(p.identifiant, 'absences'),
       gestes: [
         { faire: 'cliquer', sur: parTexte('#contenu .voie', 'remplacer'), sert: 'Chaque carte ouvre un type de demande. Ici : se faire remplacer.' },
@@ -1695,7 +1742,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.sh-cal',
       titre: 'Mes préférences',
-      texte: () => 'Une forme, puis les jours. « M’assister » remplit le reste.',
+      texte: () => 'Dites ce qui vous arrange pour le mois suivant : une forme d’horaire, puis les jours. « M’assister » complète le reste.',
       jouer: () => {
         // Son mois repart vide : sinon « M’assister » n’aurait plus rien à remplir.
         poser((d) => ({ ...d, souhaits: (d.souhaits ?? []).filter((x) => x.personId !== p.id) }));
@@ -1713,7 +1760,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.dialog',
       titre: 'Demander un congé',
-      texte: () => 'Des dates et une raison, choisie dans une liste. Seuls les titulaires la voient.',
+      texte: () => 'Vous indiquez des dates et une raison, choisie dans une liste. Seuls les titulaires la voient.',
       jouer: () => {
         versDemandes(p.identifiant, 'absences');
         useUi.getState().agir('demandes', 'demande');
@@ -1729,7 +1776,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       cible: "[data-focus='remplacer']",
       cibleFin: '.dialog',
       titre: 'Me faire remplacer',
-      texte: () => 'Prévu, urgent ou urgence médicale, avec justificatif. Votre titulaire répond.',
+      texte: () => 'Vous choisissez le poste et le niveau d’urgence : prévu, urgent ou urgence médicale, avec un justificatif. Votre titulaire répond.',
       jouer: () => versDemandes(p.identifiant, 'remplacements'),
       gestes: [
         { faire: 'cliquer', sur: "[data-focus='remplacer'] .btn", sert: 'On choisit le poste à faire reprendre par un collègue.' },
@@ -1742,7 +1789,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: "[data-focus='aider']",
       titre: 'Un appel à l’équipe',
-      texte: () => 'Tous prévenus ensemble. Vous voyez votre rang. Dire non ne le change pas.',
+      texte: () => 'Quand un poste est à couvrir, tous ceux qui peuvent le tenir sont prévenus ensemble. Vous voyez votre rang ; dire non ne le change pas.',
       jouer: () => {
         appelPour(p.id);
         moi('moi');
@@ -1766,7 +1813,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       cible: '.fil',
       cibleFin: '.fil',
       titre: 'Les messages',
-      texte: () => 'Un fil pour l’équipe, des conversations privées.',
+      texte: () => 'La messagerie réunit un fil pour toute l’équipe et des conversations privées.',
       jouer: () => moi('messages'),
       gestes: [{ faire: 'taper', dans: '#msg-texte', texte: 'Bonjour à tous !', dit: 'Écrivez votre message', sert: 'Pour toute l’équipe, ou pour une seule personne.' }],
     },
@@ -1775,7 +1822,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.content .deux',
       titre: 'Mon suivi',
-      texte: () => 'Votre compteur d’heures et votre part des contraintes. Aucun classement.',
+      texte: () => 'Votre compteur d’heures et votre part des contraintes de l’équipe. Aucun classement entre collègues.',
       jouer: () => moi('suivi'),
     },
     {
@@ -1784,7 +1831,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       cible: "[data-focus='assistant']",
       cibleFin: '.aide-panneau',
       titre: 'Solvi, votre assistant',
-      texte: () => 'Posez une question : il lit votre planning et vous répond.',
+      texte: () => 'Posez-lui une question avec vos mots : il lit votre planning et vous répond.',
       jouer: () => {
         moi('moi');
         useUi.getState().montrerAssistant(true);
@@ -1801,7 +1848,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.choix.themes',
       titre: 'Mon compte',
-      texte: () => 'Dix couleurs, clair ou sombre, mot de passe. À vous de jouer.',
+      texte: () => 'Dix couleurs, mode clair ou sombre, mot de passe : votre compte se règle ici. À vous de jouer.',
       jouer: () => moi('compte'),
     },
   ];
@@ -1983,6 +2030,13 @@ export function Parcours(): JSX.Element | null {
   const [elan, setElan] = useState<'' | 'vers-droite' | 'vers-gauche'>('');
   /** La démonstration de l'étape est finie : Solvi s'efface avant que la fiche ne revienne. */
   const [sortie, setSortie] = useState(false);
+  /** La démonstration est en pause : plus rien ne bouge tant qu'on ne la reprend pas. */
+  const [pause, setPause] = useState(false);
+  const basculerPause = (): void => {
+    if (suspendu) reprendre();
+    else suspendre();
+    setPause(suspendu);
+  };
   /** Le temps laissé pour lire ou regarder, montré sur « Continuer » ; ce bouton, ou la flèche droite, l'écourte. */
   const [compte, setCompte] = useState<{ cle: number; ms: number } | null>(null);
   const compteCle = useRef(0);
@@ -2058,6 +2112,7 @@ export function Parcours(): JSX.Element | null {
     const e = SCENARIOS[scenario].etapes[parcours] as Etape | undefined;
     if (!e) return;
     annulerMinuteries();
+    setPause(false);
     passe.current = null;
     pointee.current = null;
     setCompte(null);
@@ -2123,10 +2178,9 @@ export function Parcours(): JSX.Element | null {
         setCompte(null);
         puis();
       };
-      const id = window.setTimeout(fini, ms);
-      minuteries.push(id);
+      const m = minuter(fini, ms);
       passe.current = () => {
-        window.clearTimeout(id);
+        annulerUne(m);
         fini();
       };
       setCompte({ cle: ++compteCle.current, ms });
@@ -2145,7 +2199,7 @@ export function Parcours(): JSX.Element | null {
       const r = el.getBoundingClientRect();
       const W = window.innerWidth;
       const H = window.innerHeight;
-      const w = guide.current?.offsetWidth ?? Math.min(392, W - 24);
+      const w = guide.current?.offsetWidth ?? Math.min(440, W - 24);
       const h = Math.max(guide.current?.offsetHeight ?? 0, 136);
       const borne = (v: number, min: number, max: number): number => Math.max(min, Math.min(max, v));
       if (W < 900) {
@@ -2390,6 +2444,7 @@ export function Parcours(): JSX.Element | null {
     demarrer.current = (): void => {
       if (faits >= liste.length) return;
       annulerMinuteries();
+      setPause(false);
       passe.current = null;
       setCompte(null);
       attendu.current = null;
@@ -2398,7 +2453,7 @@ export function Parcours(): JSX.Element | null {
       // Solvi quitte la fiche : il apparaît là où il s'y tenait, bulle rangée, puis vole vers ce qu'il montre.
       const W = window.innerWidth;
       const H = window.innerHeight;
-      const w = Math.min(392, W - 24);
+      const w = Math.min(440, W - 24);
       const s = panneau.current?.querySelector('.pt-solvi')?.getBoundingClientRect();
       const depart = W >= 900 && s && s.width > 0 ? { x: Math.round(Math.max(12, Math.min(W - w - 12, s.left - 5))), y: Math.round(Math.max(76, Math.min(H - 160, s.top - 42))) } : { x: W < 900 ? 12 : Math.round((W - w) / 2), y: H - 150 - (W < 900 ? 92 : 26) };
       setDureeVol(0);
@@ -2549,6 +2604,14 @@ export function Parcours(): JSX.Element | null {
   // Lecture automatique : le temps de lire, un geste, le temps de voir, puis la suite.
   const duree = etape ? Math.min(9000, Math.max(4500, 2200 + etape.texte(data).length * 45)) : 0;
   const attente = phase === 'fini' ? Math.max(3200, duree * 0.6) : duree;
+  /** « Continuer » : on n'attend pas la fin du temps de lecture ; une démonstration en pause repart. */
+  const continuer = (): void => {
+    if (suspendu) {
+      reprendre();
+      setPause(false);
+    }
+    passe.current?.();
+  };
   /** Le chapitre est annoncé : on entre dans sa première étape. */
   const ouvrirChapitre = (): void => {
     setActe(false);
@@ -2586,7 +2649,11 @@ export function Parcours(): JSX.Element | null {
       if (!e.isTrusted || e.altKey || e.ctrlKey || e.metaKey || origine?.closest('input, textarea, select, [contenteditable]')) return;
       // Pendant une démonstration, la flèche droite écourte l'attente en cours.
       if (phase === 'demo') {
-        if (e.key === 'ArrowRight') passe.current?.();
+        if (e.key === ' ' && !origine?.closest('button, a')) {
+          e.preventDefault();
+          basculerPause();
+        }
+        if (e.key === 'ArrowRight') continuer();
         return;
       }
       if (acte) {
@@ -2615,29 +2682,15 @@ export function Parcours(): JSX.Element | null {
       {phase === 'demo' ? (
         <div
           ref={guide}
-          className={`solvi-guide no-print${vol ? ' en-vol' : ''}${sortie ? ' part' : ''}${elan ? ` ${elan}` : ''}`}
+          className={`solvi-guide no-print${vol ? ' en-vol' : ''}${sortie ? ' part' : ''}${pause ? ' pause' : ''}${elan ? ` ${elan}` : ''}`}
           style={{ transform: `translate3d(${pose?.x ?? 12}px, ${pose?.y ?? 84}px, 0)`, transitionDuration: `${dureeVol}ms, 300ms` }}
         >
           <span className="solvi-guide-qui">
             <Solvi size={64} humeur={humeur} />
           </span>
           <div className="solvi-bulle" role="status">
-            <span className="solvi-bulle-tete" aria-hidden="true">
+            <span className="solvi-bulle-tete">
               <NomSolvi className="solvi-bulle-nom" />
-              {nbTemps > 1 ? (
-                <span className="solvi-pas">
-                  {Array.from({ length: nbTemps }, (_, i) => (
-                    <i key={i} className={i < joues ? 'fait' : i === joues ? 'on' : ''} />
-                  ))}
-                </span>
-              ) : null}
-            </span>
-            <span key={annonce} className="solvi-dit">
-              <b>{annonce || etape.titre}</b>
-              {sert ? <span className="solvi-sert">{sert}</span> : null}
-              {exemple ? <span className="solvi-exemple">{exemple}</span> : null}
-            </span>
-            <span className="solvi-outils">
               <button
                 type="button"
                 className="solvi-rythme"
@@ -2652,10 +2705,28 @@ export function Parcours(): JSX.Element | null {
                 <span className="sr">Rythme </span>
                 <span className="cap1">{RYTHMES[allure].nom}</span>
               </button>
+              {nbTemps > 1 ? (
+                <span className="solvi-pas" aria-hidden="true">
+                  {Array.from({ length: nbTemps }, (_, i) => (
+                    <i key={i} className={i < joues ? 'fait' : i === joues ? 'on' : ''} />
+                  ))}
+                </span>
+              ) : null}
+            </span>
+            <span key={annonce} className="solvi-dit">
+              <b>{annonce || etape.titre}</b>
+              {sert ? <span className="solvi-sert">{sert}</span> : null}
+              {exemple ? <span className="solvi-exemple">{exemple}</span> : null}
+            </span>
+            <span className="solvi-outils">
+              <button type="button" className="solvi-pause" aria-pressed={pause} title={pause ? 'Reprendre la démonstration (barre d’espace)' : 'Mettre la démonstration en pause (barre d’espace)'} onClick={basculerPause}>
+                {pause ? <CirclePlay size={15} aria-hidden="true" /> : <CirclePause size={15} aria-hidden="true" />}
+                <span>{pause ? 'Reprendre' : 'Pause'}</span>
+              </button>
               <button type="button" className="solvi-passer" title="Passer à l’étape suivante sans voir la fin de la démonstration" onClick={() => (dernier ? setParcours(null) : setParcours(parcours + 1))}>
                 Passer
               </button>
-              <button type="button" className="solvi-continuer" disabled={!compte} title="Ne pas attendre : passer tout de suite à la suite (flèche droite)" onClick={() => passe.current?.()}>
+              <button type="button" className="solvi-continuer" disabled={!compte} title="Ne pas attendre : passer tout de suite à la suite (flèche droite)" onClick={continuer}>
                 {compte ? <i key={compte.cle} style={{ animationDuration: `${compte.ms}ms` }} aria-hidden="true" /> : null}
                 <span>Continuer</span>
                 <ArrowRight size={13} aria-hidden="true" />
@@ -2784,8 +2855,13 @@ export function Parcours(): JSX.Element | null {
                 </button>
               </div>
             ) : reste ? (
-              <div className="pt-annonce small">
-                <MousePointer2 size={15} aria-hidden="true" /> « Suivant » : Solvi vous le montre à l’écran{nbTemps > 1 ? `, en ${nbTemps} gestes` : ''}.
+              <div className="pt-annonce">
+                <span className="pt-annonce-ico" aria-hidden="true">
+                  <MousePointer2 size={16} />
+                </span>
+                <span>
+                  <b>Démonstration en {nbTemps > 1 ? `${nbTemps} gestes` : 'un geste'}.</b> Solvi le fait à l’écran, vous regardez. Vous pouvez la mettre en pause à tout moment.
+                </span>
               </div>
             ) : null}
           </div>
@@ -2804,13 +2880,13 @@ export function Parcours(): JSX.Element | null {
           </button>
           <span className="grow" />
           {reste && !dernier ? (
-            <button type="button" className="btn sm ghost pt-passer" onClick={() => setParcours(parcours + 1)}>
+            <button type="button" className="btn sm ghost pt-passer" title="Aller à l’étape suivante sans voir la démonstration" onClick={() => setParcours(parcours + 1)}>
               Passer
             </button>
           ) : null}
           {reste ? (
             <button ref={action} type="button" className="btn sm primary pt-voir" data-suite="geste" onClick={avancer}>
-              Suivant <ArrowRight size={15} aria-hidden="true" />
+              <Play size={15} aria-hidden="true" /> Voir la démonstration
             </button>
           ) : dernier ? (
             <button ref={action} type="button" className="btn sm primary" data-suite="fin" onClick={() => setParcours(null)}>

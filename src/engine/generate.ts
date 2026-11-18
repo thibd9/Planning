@@ -123,7 +123,10 @@ const slotsDe = (segs: Interval[]): number[] => {
  * 3. objectifs souples (contrats, souhaits, équité, fatigue, coût).
  * Une bonne préférence ne rachète donc jamais la violation d'une règle impérative.
  */
-export function generer(data: AppData, monday: ISODate, opts: GenOptions): GenResult {
+export function generer(source: AppData, monday: ISODate, opts: GenOptions): GenResult {
+  // Quand le titulaire prépare seul le planning, les préférences du mois ne sont pas recueillies : le calcul
+  // n'en tient pas compte, même s'il en reste d'une période où l'équipe en donnait.
+  const data: AppData = (source.officine.modele ?? 'collaboratif') === 'collaboratif' ? source : { ...source, souhaits: [] };
   const W = POIDS[opts.variante];
   const rand = mulberry32(opts.graine ?? 1);
   const personnes = equipeInterne(data);

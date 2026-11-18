@@ -268,9 +268,10 @@ export function pharmacienSeulEnRendezVous(
   const pharmaciens = data.personnes.filter(estPharmacien);
   const libres: Interval[] = [];
   for (const p of pharmaciens) {
+    // Même lecture que la présence : un titulaire reste sur place et disponible pendant sa pause.
     const presence = data.shifts
       .filter((s) => s.date === date && s.personId === p.id && surPlace(s))
-      .flatMap(segmentsTravail);
+      .flatMap((s) => (p.qualification === 'titulaire' ? [{ start: s.start, end: s.end }] : segmentsTravail(s)));
     libres.push(...subtract(presence, missionsDe(data.missions, p.id, date)));
   }
   const present = presencePharmaciens(data, date);

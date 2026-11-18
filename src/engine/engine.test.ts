@@ -73,7 +73,7 @@ describe('contrôles', () => {
     const issue = validateWeek(d, SUIVANT).find((i) => i.regle === 'pharmacie.presence' && i.date === SUIVANT);
     expect(issue?.message).toContain('de 12 h 30 à 13 h, aucun pharmacien');
     // Le message dit ce qui laisse la plage sans pharmacien : la pause de l'adjoint.
-    expect(issue?.message).toContain('présent (pause d’Igor)');
+    expect(issue?.message).toContain('présent pendant la pause d’Igor');
     // Avec une titulaire à la place de l'adjoint, sa pause ne manque à personne.
     const avecTitulaire: AppData = { ...d, shifts: [poste('p_helene', SUIVANT, 510, 1170, { pauseStart: 750, pauseEnd: 780 })] };
     expect(trousPharmacien(avecTitulaire, SUIVANT)).toEqual([]);

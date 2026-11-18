@@ -1,4 +1,4 @@
-import { AlertTriangle, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users, X, BookOpenCheck , Eye } from 'lucide-react';
+import { AlertTriangle, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users, X, BookOpenCheck, Eye, Sun, Sunrise, Sunset } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
@@ -51,7 +51,7 @@ import { useUi } from '../../store/ui';
 import type { Echelle } from '../kit';
 import { Tuile } from '../components/Tuile';
 import { ABSENCE_ICONE, ACTIVITE_COULEUR, ACTIVITE_COURT, ACTIVITE_ICONE, GARDE_ICONE } from '../icons';
-import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, Track, roleDe, Ferie } from '../kit';
+import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, Track, momentDe, roleDe, Ferie } from '../kit';
 
 type Lecture = 'heures' | 'cout' | 'equite';
 
@@ -593,7 +593,11 @@ function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISO
   const sous = vide ? [] : sousEffectifs(data, date);
   /** « 12 h 30 – 13 h 30 (pause de Caroline) » : la plage et ce qui la crée. */
   const dire = (t: { start: number; end: number; raison?: string }): string => `${fmtHeure(t.start)} – ${fmtHeure(t.end)}${t.raison ? ` (${t.raison})` : ''}`;
-  const titre = vide ? 'Rien de posé' : trous.length ? (aucun ? 'Aucun pharmacien' : 'Pharmacien absent') : sous.length ? 'Manque du monde' : 'Complet';
+  // Un pharmacien en poste n'est jamais « absent » : ce qui manque, c'est un pharmacien sur le reste de l'ouverture.
+  const titre = vide ? 'Rien de posé' : trous.length ? (aucun ? 'Aucun pharmacien' : 'Pharmacien à prévoir') : sous.length ? 'Manque du monde' : 'Complet';
+  /** « après 16 h 30 », « avant 10 h », ou la plage : où il manque un pharmacien, dit par rapport au poste déjà posé. */
+  const ou = (t: { start: number; end: number; raison?: string }): string =>
+    t.raison?.startsWith('après le départ') ? `après ${fmtHeure(t.start)}` : t.raison?.startsWith('avant l’arrivée') ? `avant ${fmtHeure(t.end)}` : `${fmtHeure(t.start)} – ${fmtHeure(t.end)}`;
   const etat = vide ? 'off' : trous.length ? 'bad' : sous.length ? 'warn' : 'ok';
   const texte = vide
     ? 'Aucun poste posé ce jour-là'
@@ -609,7 +613,7 @@ function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISO
     : trous.length
       ? aucun
         ? `Aucun pharmacien n’a de poste ce jour-là :\n${plages(trous)}\nPosez le poste d’un titulaire ou d’un adjoint.`
-        : `Aucun pharmacien présent sur :\n${plages(trous)}\nDécalez une pause, allongez un poste ou posez un autre pharmacien (titulaire ou adjoint).`
+        : `La pharmacie est ouverte sans pharmacien sur :\n${plages(trous)}\nProlongez un poste, décalez une pause ou posez un autre pharmacien (titulaire ou adjoint).`
       : sous.length
         ? `Sous l’effectif attendu sur :\n${plages(sous)}\nAjoutez une personne au comptoir.`
         : 'Pharmacien présent sur toute l’ouverture, effectif atteint.';
@@ -621,9 +625,11 @@ function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISO
         <b>{titre}</b>
         {/* Une seule ligne de détail, la même hauteur pour toutes les cases : la cause se lit au survol et dans la journée. */}
         <span className="num pg-o-detail">
-          {!vide && (trous.length || sous.length)
-            ? `${fmtHeure((trous.length ? trous : sous)[0].start)} – ${fmtHeure((trous.length ? trous : sous)[0].end)}${(trous.length ? trous : sous).length > 1 ? ` +${(trous.length ? trous : sous).length - 1}` : ''}`
-            : ''}
+          {!vide && trous.length
+            ? `${aucun ? `${fmtHeure(trous[0].start)} – ${fmtHeure(trous[0].end)}` : ou(trous[0])}${trous.length > 1 ? ` +${trous.length - 1}` : ''}`
+            : !vide && sous.length
+              ? `${fmtHeure(sous[0].start)} – ${fmtHeure(sous[0].end)}${sous.length > 1 ? ` +${sous.length - 1}` : ''}`
+              : ''}
         </span>
       </span>
       <span className="sr">{texte}</span>
@@ -835,14 +841,23 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
         </div>
       ) : null}
       {postes.length ? (
-        <div>
-          <div className="eyebrow" style={{ marginBottom: 6 }}>Postes types</div>
-          <div className="row wrap" style={{ gap: 6 }}>
-            {postes.map((p) => (
+        <div className="ptc-bloc">
+          <div className="ptc-tete">
+            <span className="eyebrow">Partir d’un poste type</span>
+            <span className="small soft">Un clic remplit les horaires et la pause.</span>
+          </div>
+          <div className="ptc-liste" role="group" aria-label="Postes types">
+            {postes.map((p) => {
+              const teinte = p.couleur ? `k-${p.couleur}` : momentDe(p);
+              const moment = momentDe(p);
+              const Picto = moment === 'matin' ? Sunrise : moment === 'soir' ? Sunset : Sun;
+              const choisi = debut === fmtHHMM(p.start) && fin === fmtHHMM(p.end);
+              return (
               <button
                 key={p.id}
                 type="button"
-                className="btn sm"
+                className={`tile ptc ${teinte}${choisi ? ' on' : ''}`}
+                aria-pressed={choisi}
                 onClick={() => {
                   setDebut(fmtHHMM(p.start));
                   setFin(fmtHHMM(p.end));
@@ -853,9 +868,22 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
                   }
                 }}
               >
-                {p.label} <span className="muted num">{fmtDuree(minutesTravail(p))}</span>
+                <span className="ti" aria-hidden="true">
+                  <Picto size={17} />
+                </span>
+                <span className="ptc-texte">
+                  <b>{p.label}</b>
+                  <span className="num">
+                    {fmtHeure(p.start)} – {fmtHeure(p.end)}
+                  </span>
+                  <span className="num ptc-duree">
+                    {fmtDuree(minutesTravail(p))} de travail{p.pauseStart !== undefined ? ' · avec pause' : ''}
+                  </span>
+                </span>
+                {choisi ? <Check size={16} strokeWidth={3} className="ptc-coche" aria-hidden="true" /> : null}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : null}

@@ -204,7 +204,7 @@ export function Officine(): JSX.Element {
                 </span>
                 <span className="qp-texte">
                   <b>Avec l’équipe</b>
-                  <span>Chacun donne ses préférences, vous ajustez.</span>
+                  <span>Chacun dit ce qui l’arrange pour le mois suivant, puis vous construisez.</span>
                 </span>
                 <span className="qp-coche" aria-hidden="true">
                   <Check size={15} strokeWidth={3} />
@@ -217,7 +217,7 @@ export function Officine(): JSX.Element {
                 </span>
                 <span className="qp-texte">
                   <b>Vous seul</b>
-                  <span>Vous construisez, l’équipe consulte.</span>
+                  <span>Vous construisez sans recueillir de préférences ; l’équipe consulte le planning publié.</span>
                 </span>
                 <span className="qp-coche" aria-hidden="true">
                   <Check size={15} strokeWidth={3} />
@@ -240,7 +240,45 @@ export function Officine(): JSX.Element {
                 </span>
               </div>
             ) : null}
-            <p className="tiny muted">Les règles et le nombre minimum de personnes passent toujours avant les préférences.</p>
+            <div className="qp-effets" id="qp-effets" role="status">
+              <h3>Ce que ce choix change dans l’application</h3>
+              <div className="qp-effets-cols">
+                <div>
+                  <span className="eyebrow">Pour l’équipe</span>
+                  {collaboratif ? (
+                    <ul>
+                      <li>« Mes demandes » propose la carte « Mes préférences » : chacun y indique, jour par jour, s’il préfère le matin, la journée, l’après-midi ou un repos.</li>
+                      <li>Les préférences du mois suivant se donnent jusqu’à la date limite ci-dessus.</li>
+                    </ul>
+                  ) : (
+                    <ul>
+                      <li>La carte « Mes préférences » disparaît de « Mes demandes ».</li>
+                      <li>L’équipe consulte le planning publié, sans donner d’avis avant.</li>
+                    </ul>
+                  )}
+                </div>
+                <div>
+                  <span className="eyebrow">Pour vous</span>
+                  {collaboratif ? (
+                    <ul>
+                      <li>Le tableau de bord compte les préférences reçues avant de construire.</li>
+                      <li>La vue « Mois » les affiche, personne par personne.</li>
+                      <li>« Proposer un planning » en tient compte, et l’une des trois propositions les suit en priorité.</li>
+                    </ul>
+                  ) : (
+                    <ul>
+                      <li>Vous construisez quand vous voulez, sans date limite à attendre.</li>
+                      <li>Le tableau de bord n’a plus d’étape « Préférences » ; la vue « Mois » ne les affiche plus.</li>
+                      <li>« Proposer un planning » s’appuie sur les contrats, les règles, l’équité et les contraintes saisies dans les fiches, sans préférences du mois.</li>
+                    </ul>
+                  )}
+                </div>
+              </div>
+              <p className="tiny muted">
+                Dans les deux cas : les règles et le nombre minimum de personnes passent avant tout, les demandes d’absence, d’horaires et de remplacement restent ouvertes à l’équipe, et vous seul publiez. Vous pouvez changer d’avis à tout
+                moment : rien n’est effacé.
+              </p>
+            </div>
           </div>
 
         </div>
