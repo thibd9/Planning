@@ -1,4 +1,4 @@
-import { Check, Plus, RotateCcw, Settings2, Store, Trash2, UserRound, Users } from 'lucide-react';
+import { Check, DoorClosed, DoorOpen, Plus, RotateCcw, Settings2, Store, Trash2, UserRound, Users, Utensils, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { JOURS, MOIS, fmtDateCourt, fmtDuree, fmtHHMM, parseHHMM, fmtDateLong, joursFeries } from '../../domain/time';
 import type { CouleurPoste, Interval, PosteType } from '../../domain/types';
@@ -96,20 +96,21 @@ export function Officine(): JSX.Element {
                           {plages.length === 1 && plages[0].end - plages[0].start > 240 ? (
                             <button
                               type="button"
-                              className="btn sm"
+                              className="btn icon sm jl-outil"
+                              data-bulle="Ajouter une coupure le midi"
                               aria-label={`Coupure le midi : ${j}`}
                               onClick={() => setPlages([{ start: plages[0].start, end: Math.max(plages[0].start + 60, Math.min(750, plages[0].end - 120)) }, { start: Math.max(plages[0].start + 120, Math.min(840, plages[0].end - 60)), end: plages[0].end }])}
                             >
-                              Coupure le midi
+                              <Utensils size={17} aria-hidden="true" />
                             </button>
                           ) : null}
                           {plages.length === 2 ? (
-                            <button type="button" className="btn sm" aria-label={`Sans coupure : ${j}`} onClick={() => setPlages([{ start: plages[0].start, end: plages[1].end }])}>
-                              Sans coupure
+                            <button type="button" className="btn icon sm jl-outil" data-bulle="Retirer la coupure du midi" aria-label={`Sans coupure : ${j}`} onClick={() => setPlages([{ start: plages[0].start, end: plages[1].end }])}>
+                              <UtensilsCrossed size={17} aria-hidden="true" />
                             </button>
                           ) : null}
-                          <button type="button" className="btn sm" aria-label={plages.length ? `Fermer ce jour : ${j}` : `Ouvrir : ${j}`} onClick={() => setPlages(plages.length ? [] : [{ start: 9 * 60, end: 19 * 60 }])}>
-                            {plages.length ? 'Fermer ce jour' : 'Ouvrir'}
+                          <button type="button" className="btn icon sm jl-outil" data-bulle={plages.length ? 'Fermer la pharmacie ce jour-là' : 'Ouvrir la pharmacie ce jour-là'} aria-label={plages.length ? `Fermer ce jour : ${j}` : `Ouvrir : ${j}`} onClick={() => setPlages(plages.length ? [] : [{ start: 9 * 60, end: 19 * 60 }])}>
+                            {plages.length ? <DoorClosed size={17} aria-hidden="true" /> : <DoorOpen size={17} aria-hidden="true" />}
                           </button>
                       </div>
                     </div>
