@@ -1,4 +1,4 @@
-import { CircleCheck, Hourglass, Trash2 } from 'lucide-react';
+import { AlertTriangle, CircleCheck, Hourglass, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { fmtDuree, fmtHorodatage, fmtSemaine } from '../../domain/time';
 import type { RegulType } from '../../domain/types';
@@ -24,6 +24,11 @@ export function Heures(): JSX.Element {
   const semaine = semaineLibre(data, today);
   const historique = [...(data.regularisations ?? [])].sort((a, b) => b.at.localeCompare(a.at));
   const personne = (id: string) => data.personnes.find((p) => p.id === id);
+  // L'objectif : le moins d'heures en plus possible. On compte ce qui dépasse d'au moins une heure.
+  const enPlus = liste.filter((x) => x.solde >= 60);
+  const enMoins = liste.filter((x) => x.solde <= -60);
+  const totalPlus = enPlus.reduce((t, x) => t + x.solde, 0);
+  const totalMoins = enMoins.reduce((t, x) => t - x.solde, 0);
 
   const agir = (s: Solde, type: RegulType): void => {
     // Payer ou solder efface le solde ; récupérer ou rattraper le planifie sur la prochaine semaine à construire.
@@ -58,28 +63,55 @@ export function Heures(): JSX.Element {
         <div className="grow">
           <div className="eyebrow">Compteur d’heures</div>
           <h1>
-            Qui a fait <span className="hl">plus ou moins</span> ?
+            Le moins d’<span className="hl">heures en plus</span> possible
           </h1>
-          <p>Heures planifiées et publiées, face au contrat. Vous régularisez à la main, ou d’un clic sur la prochaine semaine à construire.</p>
+          <p>L’objectif : que chacun reste à son contrat. Solvéa signale tout dépassement et propose comment le résorber.</p>
         </div>
         <BoutonAuto onClick={laisserFaire} disabled={calcul || !propositions.length} occupe={calcul} focus="auto-heures" title="Calcul fait sur cet appareil : règles impératives d’abord, puis équilibre des heures.">
           {calcul ? 'Calcul en cours…' : 'Régulariser automatiquement'}
         </BoutonAuto>
       </div>
 
-      {propositions.length ? (
-        <div className="notice info" style={{ marginBottom: 18 }}>
+      <div className="chiffres">
+        <div className="chiffre">
+          <span className={`chiffre-pic${enPlus.length ? ' warn' : ' ok'}`} aria-hidden="true"><TrendingUp size={18} /></span>
+          <b className="num">{fmtDuree(totalPlus)}</b>
+          <span>en plus des contrats{enPlus.length ? ` · ${enPlus.length} personne${enPlus.length > 1 ? 's' : ''}` : ''}</span>
+        </div>
+        <div className="chiffre">
+          <span className={`chiffre-pic${enMoins.length ? ' info' : ''}`} aria-hidden="true"><TrendingDown size={18} /></span>
+          <b className="num">{fmtDuree(totalMoins)}</b>
+          <span>en moins des contrats{enMoins.length ? ` · ${enMoins.length} personne${enMoins.length > 1 ? 's' : ''}` : ''}</span>
+        </div>
+        <div className="chiffre">
+          <span className="chiffre-pic ok" aria-hidden="true"><CircleCheck size={18} /></span>
+          <b className="num">{liste.length - enPlus.length - enMoins.length}</b>
+          <span>à jour, à moins d’une heure du contrat</span>
+        </div>
+      </div>
+      {enPlus.length ? (
+        <div className="notice warn hc-alerte" role="status">
+          <AlertTriangle size={18} aria-hidden="true" />
+          <span>
+            <b>
+              Alerte heures supplémentaires : {enPlus.map((x) => personne(x.personId)?.prenom).filter(Boolean).join(', ')}.
+            </b>{' '}
+            Faites-les récupérer sur la semaine du {fmtSemaine(semaine)} plutôt que de les payer : « Régulariser automatiquement » s’en charge, par demi-heures, sans rien publier.
+          </span>
+        </div>
+      ) : propositions.length ? (
+        <div className="notice info hc-alerte">
           <Hourglass size={16} aria-hidden="true" />
           <span>
             <b>
               {propositions.length} compteur{propositions.length > 1 ? 's' : ''} à régulariser.
             </b>{' '}
-            « Régulariser automatiquement » les résorbe sur la semaine du {fmtSemaine(semaine)}, la première qui n’est pas publiée, par demi-heures et sans dépasser 8 h d’écart au contrat. Le brouillon de cette semaine est recalculé ; vous le relisez avant de publier.
+            « Régulariser automatiquement » les résorbe sur la semaine du {fmtSemaine(semaine)}, sans rien publier.
           </span>
         </div>
       ) : (
-        <div className="notice ok" style={{ marginBottom: 18 }}>
-          <CircleCheck size={16} aria-hidden="true" /> Tous les compteurs sont à moins d’une heure du contrat.
+        <div className="notice ok hc-alerte">
+          <CircleCheck size={16} aria-hidden="true" /> Aucune heure supplémentaire à résorber : tous les compteurs sont à moins d’une heure du contrat.
         </div>
       )}
 
@@ -91,12 +123,26 @@ export function Heures(): JSX.Element {
           return (
             <div key={s.personId} className="decision hc" style={{ alignItems: 'center' }}>
               <Avatar person={p} />
-              <div className="grow" style={{ minWidth: 190 }}>
-                <b>{nomCourt(p)}</b> <EtiquetteRole person={p} />
-                <div className="small soft num">
-                  {fmtDuree(s.realise)} planifiées pour {fmtDuree(s.contrat)} au contrat
-                  {s.prevues.map((r) => ` · ${signe(r.minutes)} prévu semaine du ${fmtSemaine(r.semaine ?? '')}`).join('')}
-                </div>
+              <div className="grow hc-qui" style={{ minWidth: 220 }}>
+                <span className="hc-nom">
+                  <b>{nomCourt(p)}</b> <EtiquetteRole person={p} />
+                </span>
+                <span className="hc-faits num">
+                  <span>
+                    <b>{fmtDuree(s.realise)}</b> planifiées
+                  </span>
+                  <span>
+                    contrat <b>{fmtDuree(s.contrat)}</b>
+                  </span>
+                  {s.prevues.map((r) => (
+                    <span key={r.semaine ?? r.minutes} className="prevu">
+                      {signe(r.minutes)} prévu semaine du {fmtSemaine(r.semaine ?? '')}
+                    </span>
+                  ))}
+                </span>
+                <span className="hc-jauge" aria-hidden="true">
+                  <i className={s.solde >= 60 ? 'plus' : s.solde <= -60 ? 'moins' : ''} style={{ width: `${Math.min(100, s.contrat ? (s.realise / s.contrat) * 100 : 0)}%` }} />
+                </span>
               </div>
               <span className={`hc-solde num ${!ecart ? 'pile' : s.solde > 0 ? 'plus' : 'moins'}`} aria-label={`Solde : ${ecart ? signe(s.solde) : 'à jour'}`}>
                 {ecart ? signe(s.solde) : 'À jour'}

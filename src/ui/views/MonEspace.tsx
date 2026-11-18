@@ -10,10 +10,10 @@ import { COMPTEUR_LABEL, equite } from '../../engine/equity';
 import { delaiRemplacement, peutDemanderRemplacement } from '../../engine/remplacement';
 import { soldeHeures } from '../../engine/heures';
 import { estCollaboratif, joursRestants, moisACollecter } from '../../engine/souhaits';
-import { suiviDe } from '../../engine/suivi';
+import { pointsForts, suiviDe } from '../../engine/suivi';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { Compteurs } from '../components/Compteurs';
+import { Compteurs, PointsForts } from '../components/Compteurs';
 import { DialogueDemande } from '../components/Demande';
 import { DialogueRemplacement } from '../components/Remplacer';
 import { ABSENCE_ICONE } from '../icons';
@@ -358,6 +358,7 @@ export function MonSuivi({ personId }: { personId: string }): JSX.Element {
   const person = data.personnes.find((p) => p.id === personId);
   const lundi = mondayOf(today);
   const suivi = suiviDe(data, personId, today);
+  const forts = useMemo(() => (person && person.qualification !== 'titulaire' ? pointsForts(data, personId, today) : []), [data, person, personId, today]);
   const solde = useMemo(() => (person?.salarie ? soldeHeures(data, person, today) : null), [data, person, today]);
   const ligne = useMemo(() => equite(data, addDays(lundi, -56), addDays(lundi, 6)).find((l) => l.personId === personId), [data, lundi, personId]);
   const compteurs: CompteurCle[] = person && estPharmacien(person) ? ['samedis', 'fermetures', 'gardes', 'depannages', 'changementsTardifs'] : ['samedis', 'fermetures', 'depannages', 'changementsTardifs'];
@@ -402,6 +403,12 @@ export function MonSuivi({ personId }: { personId: string }): JSX.Element {
               <span className="small soft">12 mois</span>
             </div>
             <div className="card-body">
+              {forts.length ? (
+                <div className="pf-fiche">
+                  <div className="eyebrow">Vos points forts, vus par vos titulaires</div>
+                  <PointsForts points={forts} />
+                </div>
+              ) : null}
               <Compteurs suivi={suivi} />
               <p className="tiny muted" style={{ marginTop: 12 }}>Ce que votre responsable a noté, et rien d’autre : des dates et des durées, jamais une raison.</p>
             </div>

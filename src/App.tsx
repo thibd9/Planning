@@ -1,16 +1,17 @@
-import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen } from 'lucide-react';
+import { ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
-import { ESPACE_LABEL, espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
+import { espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
 import { fmtDateCourt, fmtHeure } from './domain/time';
-import { nomComplet, nomCourt } from './domain/types';
+import { nomComplet, nomCourt, QUALIFICATION_COURT } from './domain/types';
 import { Documents } from './ui/views/Documents';
+import { ListeAnnonces, annoncesDe } from './ui/components/Annonces';
 import { DialogueDeconnexion } from './ui/components/Deconnexion';
 import { decisions } from './engine/decisions';
 import { useStore } from './store/store';
 import type { Vue } from './store/ui';
 import { prefsDe, useUi } from './store/ui';
-import { EtiquetteRole } from './ui/icons';
+import { EtiquetteRole, couleurDe, iconeDe } from './ui/icons';
 import { Avatar, Logo, LogoNom } from './ui/kit';
 import { DialogueJour } from './ui/components/Jour';
 import { BandeauTest, ChoixParcours, Parcours } from './ui/Parcours';
@@ -26,6 +27,7 @@ import { Journal } from './ui/views/Journal';
 import { MesGardes } from './ui/views/MesGardes';
 import { Messages } from './ui/views/Messages';
 import { MonPlanning } from './ui/views/MonPlanning';
+import { Aide } from './ui/views/Aide';
 import { Officine } from './ui/views/Officine';
 import { MesDemandes, MonSuivi } from './ui/views/MonEspace';
 import { PlanningEquipe } from './ui/views/PlanningEquipe';
@@ -51,6 +53,7 @@ const DEMANDES: Lien = { vue: 'demandes', label: 'Mes demandes', question: 'Pré
 const SUIVI: Lien = { vue: 'suivi', label: 'Mon suivi', question: 'Compteurs et équité', icon: <Gauge size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const DOCUMENTS: Lien = { vue: 'documents', label: 'Mes documents', question: 'Plannings, absences, fichiers', icon: <FolderOpen size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
 const PERSO: Lien[] = [MOI, DEMANDES, SUIVI, DOCUMENTS];
+const AIDE: Lien = { vue: 'aide', label: 'Aide et tutoriels', question: 'Comment faire, lexique', icon: <LifeBuoy size={18} />, couleur: 'c-clair', groupe: 'Besoin d’aide ?' };
 const MESSAGES: Lien = { vue: 'messages', label: 'Messages', question: 'Équipe et privé', icon: <MessageSquare size={18} />, couleur: 'c-clair', groupe: 'Au quotidien' };
 // Le titulaire suit son équipe : son menu suit l'ordre du travail. On prépare, on planifie, on suit, on fait le bilan.
 const GESTION: Lien[] = [
@@ -66,6 +69,7 @@ const GESTION: Lien[] = [
   { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
   { vue: 'journal', label: 'Journal et paie', question: 'Historique, export', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
   { ...DOCUMENTS, label: 'Documents', groupe: 'Bilan' },
+  AIDE,
 ];
 const PLANNING: Lien = { vue: 'planning', label: 'Planning de l’équipe', question: 'La version publiée', icon: <CalendarRange size={18} />, couleur: 'c-clair', groupe: 'L’équipe' };
 const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gardes et astreintes', icon: <MoonStar size={18} />, couleur: 'c-clair', groupe: 'Mon espace' };
@@ -73,8 +77,8 @@ const MESGARDES: Lien = { vue: 'mesgardes', label: 'Mes gardes', question: 'Gard
 /** Chaque rôle a sa propre navigation ; « Mon planning » est toujours en tête. Le compte est en haut à droite. */
 const NAV: Record<Espace, Lien[]> = {
   responsable: GESTION,
-  pharmacien: [...PERSO, MESGARDES, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }],
-  equipe: [...PERSO, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }],
+  pharmacien: [...PERSO, MESGARDES, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
+  equipe: [...PERSO, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
 };
 // Le titulaire garde ses propres horaires à portée, depuis le menu du compte.
 const HORS_MENU: Vue[] = ['compte', 'nouvelle', 'moi', 'demandes'];
@@ -84,7 +88,7 @@ export function App(): JSX.Element {
   const today = useStore((s) => s.today);
   const sauvegarde = useStore((s) => s.derniereSauvegarde);
   const undo = useStore((s) => s.undo);
-  const { vue, aller, agir, setSujet, viserDemande, session, deconnecter, preferences, toast, taire, setTour, parcours, jour, voirJour, dire, setPreferences } = useUi();
+  const { vue, aller, agir, setSujet, viserDemande, session, deconnecter, preferences, toast, taire, parcours, jour, voirJour, dire, setPreferences } = useUi();
   const [menu, setMenu] = useState(false);
   /** La déconnexion passe par un point d'étape : ce qui reste en cours est rappelé avant de partir. */
   const [quitter, setQuitter] = useState(false);
@@ -134,7 +138,14 @@ export function App(): JSX.Element {
   const aAider = moi ? data.remplacements.filter((r) => r.statut === 'ouverte' && r.date >= today && r.demandeur !== moi.id && r.accord !== 'attente' && !r.volontaires.includes(moi.id) && (!r.trouId || ((r.sollicites ?? []).includes(moi.id) && !(r.indisponibles ?? []).includes(moi.id)))).length : 0;
   // Chaque demande de remplacement a sa ligne : un clic mène droit à elle, la plus urgente en tête.
   const demandes = useMemo(() => (espace === 'responsable' ? decisions(data, today).remplacements : []), [data, today, espace]);
-  const heuresARegler = useMemo(() => (espace === 'responsable' ? aRegulariser(data, today).length : 0), [data, today, espace]);
+  const compteurs = useMemo(() => (espace === 'responsable' ? aRegulariser(data, today) : []), [data, today, espace]);
+  // Les heures en plus sont signalées à part : l'objectif est d'en avoir le moins possible.
+  const heuresEnPlus = compteurs.filter((x) => x.solde > 0).length;
+  const heuresARegler = compteurs.length - heuresEnPlus;
+  // Les décisions prises depuis ma dernière visite, avec ce qu'elles changent dans les plannings.
+  const annonces = annoncesDe(data, moi?.id, true);
+  const lireAnnonces = useStore((s) => s.lireAnnonces);
+  const IconeRole = secondaire ? Medal : estResponsable(data, moi) ? Crown : iconeDe(moi);
   const alertes: { cle: string; vue: Vue; texte: string; nombre: number; icone: JSX.Element; avant?: () => void }[] = [
     ...demandes.map((r) => {
       const p = data.personnes.find((x) => x.id === r.demandeur);
@@ -152,7 +163,8 @@ export function App(): JSX.Element {
       };
     }),
     ...(aDecider - demandes.length > 0 ? [{ cle: 'decisions', vue: 'resoudre' as Vue, texte: `Autre${aDecider - demandes.length > 1 ? 's' : ''} décision${aDecider - demandes.length > 1 ? 's' : ''} à prendre`, nombre: aDecider - demandes.length, icone: <ListChecks size={17} aria-hidden="true" /> }] : []),
-    ...(heuresARegler ? [{ cle: 'heures', vue: 'heures' as Vue, texte: `Compteur${heuresARegler > 1 ? 's' : ''} d’heures à régulariser`, nombre: heuresARegler, icone: <Hourglass size={17} aria-hidden="true" /> }] : []),
+    ...(heuresEnPlus ? [{ cle: 'heures-plus', vue: 'heures' as Vue, texte: `Personne${heuresEnPlus > 1 ? 's' : ''} en heures supplémentaires`, nombre: heuresEnPlus, icone: <TrendingUp size={17} aria-hidden="true" /> }] : []),
+    ...(heuresARegler ? [{ cle: 'heures', vue: 'heures' as Vue, texte: `Compteur${heuresARegler > 1 ? 's' : ''} d’heures en dessous du contrat`, nombre: heuresARegler, icone: <Hourglass size={17} aria-hidden="true" /> }] : []),
     ...(aLire ? [{ cle: 'lire', vue: 'moi' as Vue, texte: `Changement${aLire > 1 ? 's' : ''} de mon planning à lire`, nombre: aLire, icone: <CalendarDays size={17} aria-hidden="true" /> }] : []),
     ...(espace !== 'responsable' && aAider ? [{ cle: 'aider', vue: 'moi' as Vue, texte: 'Collègue qui cherche un remplaçant', nombre: aAider, icone: <Users size={17} aria-hidden="true" /> }] : []),
   ];
@@ -306,9 +318,12 @@ export function App(): JSX.Element {
       <div className="main">
         <header className="topbar no-print" aria-label="Barre d’outils">
           <div className="topbar-in">
-            <span className="small soft grow">
-              <span className="esp">{secondaire ? `Titulaire secondaire · décisions soumises à l’accord de ${chef?.prenom ?? 'la titulaire principale'}` : ESPACE_LABEL[espace]} · </span>
-              {data.officine.nom || 'Mon officine'}
+            <span className="espace-qui grow">
+              <span className={`espace-badge ${couleurDe(moi)}`} title={secondaire ? `Vos décisions attendent l’accord de ${chef?.prenom ?? 'la titulaire principale'}` : undefined}>
+                <IconeRole size={16} aria-hidden="true" />
+                <span className="esp">{secondaire ? 'Espace titulaire secondaire' : estResponsable(data, moi) ? 'Espace titulaire' : espace === 'responsable' ? 'Espace gestion' : `Espace ${QUALIFICATION_COURT[moi.qualification].toLowerCase()}`}</span>
+              </span>
+              <span className="small soft espace-officine">{data.officine.nom || 'Mon officine'}</span>
             </span>
             <span className="top-date cap1" aria-hidden="true">
               <CalendarDays size={15} /> {fmtDateCourt(today)}
@@ -355,12 +370,21 @@ export function App(): JSX.Element {
               <div style={{ position: 'relative' }}>
                 <button type="button" className="btn ghost icon top-ico" aria-haspopup="true" aria-expanded={panneau === 'alertes'} onClick={() => setPanneau((x) => (x === 'alertes' ? null : 'alertes'))}>
                   <Bell size={18} aria-hidden="true" />
-                  {alertes.length ? <span className="pastille-n">{alertes.reduce((t, a) => t + a.nombre, 0)}</span> : null}
-                  <span className="sr">{alertes.length ? ' notifications, ouvrir la liste' : 'Aucune notification'}</span>
+                  {alertes.length + annonces.length ? <span className="pastille-n">{alertes.reduce((t, a) => t + a.nombre, 0) + annonces.length}</span> : null}
+                  <span className="sr">{alertes.length + annonces.length ? ' notifications, ouvrir la liste' : 'Aucune notification'}</span>
                 </button>
                 {panneau === 'alertes' ? (
-                  <div className="menu" style={{ minWidth: 300 }}>
-                    <div className="titre-menu">À voir</div>
+                  <div className="menu cloche" style={{ minWidth: 300 }}>
+                    {annonces.length ? (
+                      <>
+                        <div className="titre-menu">Décidé récemment</div>
+                        <ListeAnnonces data={data} annonces={annonces.slice(0, 4)} moi={moi.id} onLu={(id) => lireAnnonces(moi.id, id)} />
+                        <button type="button" className="annonce-tout" onClick={() => lireAnnonces(moi.id)}>
+                          <CheckCheck size={15} aria-hidden="true" /> {annonces.length > 4 ? `Tout marquer comme lu (${annonces.length})` : 'Tout marquer comme lu'}
+                        </button>
+                      </>
+                    ) : null}
+                    {alertes.length || !annonces.length ? <div className="titre-menu">À voir</div> : null}
                     {alertes.length ? (
                       alertes.map((a) => (
                         <button key={a.cle} type="button" onClick={() => { setPanneau(null); a.avant?.(); aller(a.vue); }}>
@@ -369,9 +393,9 @@ export function App(): JSX.Element {
                           <span className="nav-badge" aria-hidden="true">{a.nombre}</span>
                         </button>
                       ))
-                    ) : (
+                    ) : !annonces.length ? (
                       <p className="small soft" style={{ padding: '8px 14px 12px' }}>Vous êtes à jour : rien à lire, rien à décider.</p>
-                    )}
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -379,21 +403,9 @@ export function App(): JSX.Element {
                 <MessageSquare size={18} aria-hidden="true" />
                 {nonLus ? <span className="pastille-n" aria-hidden="true">{nonLus}</span> : null}
               </button>
-              {espace === 'responsable' ? (
-                <button
-                  type="button"
-                  className="btn ghost icon top-ico"
-                  data-tour="aide"
-                  aria-label="Tutoriel"
-                  title="Tutoriel"
-                  onClick={() => {
-                    aller('tableau');
-                    setTour(0);
-                  }}
-                >
-                  <CircleHelp size={18} aria-hidden="true" />
-                </button>
-              ) : null}
+              <button type="button" className="btn ghost icon top-ico" data-tour="aide" aria-label="Aide et tutoriels" title="Aide et tutoriels" aria-current={vueActive === 'aide' ? 'page' : undefined} onClick={() => aller('aide')}>
+                <CircleHelp size={18} aria-hidden="true" />
+              </button>
             </div>
             <div style={{ position: 'relative' }} ref={menuRef}>
               <button type="button" className="compte-btn" data-tour="compte" aria-haspopup="true" aria-expanded={menu} onClick={() => setMenu((m) => !m)}>
@@ -481,6 +493,8 @@ export function App(): JSX.Element {
             <Equite />
           ) : vueActive === 'regles' ? (
             <Regles />
+          ) : vueActive === 'aide' ? (
+            <Aide espace={espace} />
           ) : vueActive === 'documents' ? (
             <Documents personId={moi.id} espace={espace} />
           ) : vueActive === 'journal' ? (

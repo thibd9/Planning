@@ -3,6 +3,7 @@ import { addDays, mondayOf, todayISO } from '../domain/time';
 import type { ISODate } from '../domain/types';
 
 export type Vue =
+  | 'aide'
   | 'documents'
   | 'heures'
   | 'demandes'
@@ -75,6 +76,8 @@ interface Ui {
   parcours: number | null;
   /** Parcours guidé en cours : la visite complète, ou la journée d'une pharmacie déjà en place. */
   scenario: 'complet' | 'etabli' | 'pharmacien' | 'equipe';
+  /** Tutoriel d'une seule tâche : la visite ne joue que ces étapes, de la première à la dernière incluse. */
+  tache: { de: number; a: number } | null;
   /** Fenêtre de choix des tutoriels. */
   tutoriels: boolean;
   ouvrirTutoriels: (o: boolean) => void;
@@ -105,7 +108,8 @@ interface Ui {
   setSujet: (s: string | null) => void;
   agir: (vue: Vue, intention: Ui['intention']) => void;
   setIntention: (i: Ui['intention']) => void;
-  setParcours: (etape: number | null, scenario?: Ui['scenario']) => void;
+  /** `tache` absente : on reste dans le tutoriel en cours ; null : la visite entière. */
+  setParcours: (etape: number | null, scenario?: Ui['scenario'], tache?: Ui['tache']) => void;
   aller: (vue: Vue) => void;
   setSemaine: (s: ISODate) => void;
   connecter: (personId: string, vue: Vue) => void;
@@ -155,9 +159,10 @@ export const useUi = create<Ui>((set) => ({
   agir: (vue, intention) => set({ vue, intention, focus: null }),
   setIntention: (intention) => set({ intention }),
   scenario: 'etabli',
+  tache: null,
   tutoriels: false,
   ouvrirTutoriels: (tutoriels) => set({ tutoriels }),
-  setParcours: (parcours, scenario) => set((s) => ({ parcours, tour: null, tutoriels: false, scenario: scenario ?? s.scenario })),
+  setParcours: (parcours, scenario, tache) => set((s) => ({ parcours, tour: null, tutoriels: false, scenario: scenario ?? s.scenario, tache: parcours === null ? null : tache === undefined ? s.tache : tache })),
   aller: (vue) => set({ vue, focus: null }),
   setSemaine: (semaine) => set({ semaine, focus: null }),
   connecter: (session, vue) => {

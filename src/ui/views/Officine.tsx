@@ -1,6 +1,6 @@
 import { Check, Plus, RotateCcw, Settings2, Store, Trash2, UserRound, Users } from 'lucide-react';
 import { useState } from 'react';
-import { JOURS, MOIS, fmtDateCourt, fmtDuree, fmtHHMM, parseHHMM } from '../../domain/time';
+import { JOURS, MOIS, fmtDateCourt, fmtDuree, fmtHHMM, parseHHMM, fmtDateLong, joursFeries } from '../../domain/time';
 import type { CouleurPoste, Interval, PosteType } from '../../domain/types';
 import { COULEUR_POSTE_LABEL } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
@@ -34,6 +34,8 @@ export function Officine(): JSX.Element {
   const [nouveauPoste, setNouveauPoste] = useState(false);
   const today = useStore((s) => s.today);
   const moisSuivant = moisDecale(moisDe(today), 1);
+  // Les jours fériés des douze prochains mois.
+  const feries = [Number(today.slice(0, 4)), Number(today.slice(0, 4)) + 1].flatMap((y) => [...joursFeries(y).entries()]).filter(([d]) => d >= today && d < `${Number(today.slice(0, 4)) + 1}${today.slice(4)}`).sort((a, b) => a[0].localeCompare(b[0]));
   const dire = useUi((s) => s.dire);
   const setPoste = (id: string, patch: Partial<PosteType>): void => {
     majOfficine({ postes: officine.postes.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
@@ -239,6 +241,26 @@ export function Officine(): JSX.Element {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="card pad col" style={{ marginTop: 18 }}>
+        <div className="row wrap">
+          <div className="grow">
+            <h2 className="h3">Jours fériés</h2>
+            <p className="small soft" style={{ margin: '3px 0 0' }}>
+              {officine.fermeJoursFeries ? 'L’officine est fermée ces jours-là, hors gardes : aucun poste n’y est proposé.' : 'L’officine reste ouverte ces jours-là : ils sont signalés dans les plannings.'}
+            </p>
+          </div>
+          <span className={`pill ${officine.fermeJoursFeries ? 'neutral' : 'warn'}`}>{officine.fermeJoursFeries ? 'Fermée les jours fériés' : 'Ouverte les jours fériés'}</span>
+        </div>
+        <ul className="feries">
+          {feries.map(([date, nom]) => (
+            <li key={date}>
+              <b>{nom}</b>
+              <span className="cap1">{fmtDateLong(date).replace(/ \d{4}$/, '')}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="card" style={{ marginTop: 18, overflowX: 'auto' }}>

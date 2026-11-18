@@ -30,8 +30,6 @@ import {
   minutesSemaine,
   minutesTravail,
   ouverture,
-  pharmacienSeulEnRendezVous,
-  presencePharmaciens,
   shiftsSemaine,
   sousEffectifs,
   trousPharmacien,
@@ -52,7 +50,7 @@ import { useUi } from '../../store/ui';
 import type { Echelle } from '../kit';
 import { Tuile } from '../components/Tuile';
 import { ABSENCE_ICONE, ACTIVITE_COULEUR, ACTIVITE_COURT, ACTIVITE_ICONE, GARDE_ICONE } from '../icons';
-import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, Strip, Track, roleDe } from '../kit';
+import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, Track, roleDe, Ferie } from '../kit';
 
 type Lecture = 'heures' | 'cout' | 'equite';
 
@@ -300,6 +298,7 @@ export function Construire(): JSX.Element {
                         <span className="d">{ouverts[i] ? JOURS[weekday(date)] : JOURS_COURT[weekday(date)]}</span>
                         <span className="sr">, voir la journée</span>
                       </button>
+                      <Ferie date={date} court />
                       {!ouverts[i] ? <span className="sr"> (fermé)</span> : null}
                     </div>
                   ))}
@@ -313,7 +312,7 @@ export function Construire(): JSX.Element {
 
                 <div role="row" style={{ display: 'contents' }}>
                   <div className="pg-o lab" role="rowheader">
-                    Couverture
+                    Équipe au complet ?
                   </div>
                   {dates.map((date, i) => (
                     <Objectif key={date} data={data} date={date} echelle={echelle} ouvert={ouverts[i]} vide={!postes.some((s) => s.date === date)} flag={!!focus && focus.date === date && !focus.personId} />
@@ -566,7 +565,7 @@ export function Construire(): JSX.Element {
 }
 
 /** Ligne « Couverture » : un coup d'œil par jour sur la présence d'un pharmacien et l'effectif. */
-function Objectif({ data, date, echelle, ouvert, vide, flag }: { data: AppData; date: ISODate; echelle: Echelle; ouvert: boolean; vide: boolean; flag: boolean }): JSX.Element {
+function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISODate; echelle?: Echelle; ouvert: boolean; vide: boolean; flag: boolean }): JSX.Element {
   if (!ouvert) {
     return (
       <div className="pg-o" role="cell">
@@ -598,18 +597,17 @@ function Objectif({ data, date, echelle, ouvert, vide, flag }: { data: AppData; 
   return (
     <div className={`pg-o${flag ? ' flag' : ''}`} role="cell" data-aide={aide} data-aide-ton={etat === 'bad' || etat === 'warn' ? etat : undefined} data-aide-pos={weekday(date) >= 5 ? 'fin' : undefined} tabIndex={etat === 'bad' || etat === 'warn' ? 0 : undefined}>
       <span className={`mark ${etat}`}>{etat === 'ok' ? <Check size={15} /> : etat === 'bad' ? <X size={14} /> : etat === 'warn' ? <AlertTriangle size={13} /> : <Minus size={14} />}</span>
+      {/* Le constat est écrit, avec l'heure : pas besoin de survoler pour comprendre. */}
+      <span className={`pg-o-mot ${etat}`}>
+        <b>{vide ? 'Rien de posé' : trous.length ? 'Sans pharmacien' : sous.length ? 'Manque du monde' : 'Complet'}</b>
+        {!vide && (trous.length || sous.length) ? (
+          <span className="num">
+            {fmtHeure((trous.length ? trous : sous)[0].start)} – {fmtHeure((trous.length ? trous : sous)[0].end)}
+            {(trous.length ? trous : sous).length > 1 ? ` +${(trous.length ? trous : sous).length - 1}` : ''}
+          </span>
+        ) : null}
+      </span>
       <span className="sr">{texte}</span>
-      {vide ? null : (
-        <Strip
-          echelle={echelle}
-          parts={[
-            { cls: 'open', list: ouverture(data.officine, date) },
-            { cls: 'ph', list: presencePharmaciens(data, date) },
-            { cls: 'rdv', list: pharmacienSeulEnRendezVous(data, date) },
-            { cls: 'gap', list: trous },
-          ]}
-        />
-      )}
     </div>
   );
 }

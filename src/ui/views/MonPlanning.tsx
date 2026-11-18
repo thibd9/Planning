@@ -1,23 +1,7 @@
 import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
-import {
-  JOURS,
-  addDays,
-  dayIndex,
-  fmtDateCourt,
-  fmtDateLong,
-  fmtDuree,
-  fmtHHMM,
-  fmtHeure,
-  fmtHorodatage,
-  fmtJourMois,
-  fmtSemaine,
-  isoWeek,
-  mondayOf,
-  weekDates,
-  weekday,
-} from '../../domain/time';
+import { JOURS, addDays, dayIndex, fmtDateCourt, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, weekDates, weekday, ferie } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
 import { MISSION_LABEL, classeAbsence, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
@@ -29,7 +13,7 @@ import { DialogueRefus } from '../components/Refus';
 import { useStore } from '../../store/store';
 import { DialogueDemande } from '../components/Demande';
 import { useUi } from '../../store/ui';
-import { AvantApres, Pill, Seg, momentDe } from '../kit';
+import { AvantApres, Pill, Seg, momentDe, Ferie } from '../kit';
 import { Calendrier } from '../components/Calendrier';
 import { ProchainPoste } from '../components/ProchainPoste';
 import { AppelRecu } from '../components/Appel';
@@ -263,10 +247,18 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                       <h3 style={{ fontSize: 17 }}>
                         {monday === lundi ? 'Cette semaine' : 'Semaine prochaine'} · {fmtSemaine(monday)}
                       </h3>
-                      <div className="small soft">
-                        {postes ? `Semaine ${isoWeek(monday)} · ${fmtDuree(total)} prévues · publié le ${fmtHorodatage(statut?.publishedAt ?? '')}` : 'Planning pas encore publié'}
-                      </div>
+                      <div className="small soft">{postes ? `Semaine ${isoWeek(monday)} · publié le ${fmtHorodatage(statut?.publishedAt ?? '')}` : 'Planning pas encore publié'}</div>
                     </div>
+                    {postes ? (
+                      <div className="jh-bilan">
+                        <span>
+                          <b className="num">{fmtDuree(total)}</b> prévues
+                        </span>
+                        <span>
+                          <b className="num">{new Set(postes.filter((x) => !absentLe(x.date)).map((x) => x.date)).size}</b> jours
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                   {postes ? (
                     <div className="jours-h">
@@ -279,7 +271,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                         if (weekday(date) === 6 && !duJour.length && !gardes.length) return null;
                         const moment = duJour.length ? momentDe({ start: duJour[0].start, end: duJour[duJour.length - 1].end }) : null;
                         return (
-                          <div key={date} className={`jour-h${date === today ? ' today' : ''}`}>
+                          <div key={date} className={`jour-h ${duJour.length ? `t-${moment}` : absence ? `t-${classeAbsence(absence.type)}` : 't-repos'}${date === today ? ' today' : ''}`}>
                             <div className="jh-date">
                               <button type="button" className="lien-jour cap1" onClick={() => voirJour(date)} title="Voir toute l’équipe ce jour-là">
                                 {JOURS[weekday(date)]}
@@ -289,6 +281,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                 {fmtJourMois(date)}
                                 {date === today ? ' · aujourd’hui' : ''}
                               </span>
+                              <Ferie date={date} />
                             </div>
                             <div className="jh-corps">
                               {duJour.length ? (
@@ -303,10 +296,13 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                           <b className="jh-heures num">
                                             {fmtHeure(x.start)} – {fmtHeure(x.end)}
                                           </b>
-                                          <span className="small soft">
-                                            {' '}
-                                            {fmtDuree(minutesTravail(x))} de travail
-                                            {x.pauseStart !== undefined && x.pauseEnd !== undefined ? ` · pause de ${fmtHeure(x.pauseStart)} à ${fmtHeure(x.pauseEnd)}` : ''}
+                                          <span className="jh-meta">
+                                            <span>{fmtDuree(minutesTravail(x))} de travail</span>
+                                            {x.pauseStart !== undefined && x.pauseEnd !== undefined ? (
+                                              <span>
+                                                Pause {fmtHeure(x.pauseStart)} – {fmtHeure(x.pauseEnd)}
+                                              </span>
+                                            ) : null}
                                           </span>
                                         </div>
                                       ))}
@@ -318,7 +314,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                   <span className={`moment ${absence ? classeAbsence(absence.type) : 'repos'}`} aria-hidden="true">
                                     {absence ? <Ban size={17} /> : <Coffee size={17} />}
                                   </span>
-                                  <b className="jh-heures" style={{ color: 'var(--ink-2)' }}>{absence ? libelleAbsence(absence) : 'Repos'}</b>
+                                  <b className="jh-heures" style={{ color: 'var(--ink-2)' }}>{absence ? libelleAbsence(absence) : ferie(date) ? 'Jour férié' : 'Repos'}</b>
                                 </div>
                               )}
                               {missions.length || gardes.length ? (
@@ -341,7 +337,10 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                       })}
                     </div>
                   ) : (
-                    <div className="card-body soft">{gere ? 'Cette semaine n’est pas encore publiée : construisez-la, puis publiez-la.' : 'Votre responsable prépare encore cette semaine. Vous serez prévenu dès la publication.'}</div>
+                    <div className="jh-attente">
+                      <CalendarClock size={26} aria-hidden="true" />
+                      <span>{gere ? 'Cette semaine n’est pas encore publiée : construisez-la, puis publiez-la.' : 'Votre responsable prépare encore cette semaine. Vous serez prévenu dès la publication.'}</span>
+                    </div>
                   )}
                 </div>
               );

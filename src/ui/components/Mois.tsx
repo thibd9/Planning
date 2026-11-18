@@ -1,6 +1,6 @@
 import { Boxes, CalendarHeart, Check, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, History, Hourglass, Lock, Megaphone, Pill as PillIcon, Plus, Sprout } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { JOURS, JOURS_COURT, MOIS, addDays, fmtDateCourt, fmtHeure, isoWeek, mondayOf, weekday } from '../../domain/time';
+import { JOURS, JOURS_COURT, MOIS, addDays, fmtDateCourt, fmtHeure, isoWeek, mondayOf, weekday, ferie } from '../../domain/time';
 import type { ISODate, Person, Qualification } from '../../domain/types';
 import { ABSENCE_LABEL, SOUHAIT_LABEL, classeAbsence, couleurDuPoste, libelleGarde, nomCourt, nomGarde } from '../../domain/types';
 import { IconeGarde } from '../icons';
@@ -268,6 +268,7 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
         <span><i className="mo-pastille arret" /> Arrêt</span>
         <span><i className="mo-pastille formation" /> Formation</span>
         <span><i className="mo-pastille garde" /> Garde</span>
+        {dates.some((d) => ferie(d)) ? <span><i className="mo-ferie">F</i> Jour férié</span> : null}
         {passees.length && !toutPasse ? (
           <button type="button" className={`btn sm mo-anciennes no-print${anciennes ? ' on' : ''}`} aria-pressed={anciennes} onClick={() => setAnciennes(!anciennes)}>
             <History size={15} aria-hidden="true" /> {anciennes ? 'Masquer les semaines passées' : `Semaines passées (${passees.length})`}
@@ -339,7 +340,8 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
                   <button type="button" className="mo-jour" onClick={() => voirJour(d)} title="Voir la journée">
                     <span>{JOURS_COURT[weekday(d)].slice(0, 3)}</span>
                     <b className="num">{Number(d.slice(8))}</b>
-                    <span className="sr">, {JOURS[weekday(d)]} : voir la journée</span>
+                    <span className="sr">, {JOURS[weekday(d)]}{ferie(d) ? `, jour férié (${ferie(d)})` : ''} : voir la journée</span>
+                    {ferie(d) ? <i className="mo-ferie" title={`Jour férié : ${ferie(d)}`} aria-hidden="true">F</i> : null}
                   </button>
                 </th>
                 );

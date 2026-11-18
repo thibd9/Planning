@@ -44,7 +44,8 @@ describe('assistant : répondre d’après le planning', () => {
 
   it('ne montre les décisions en attente qu’au titulaire', () => {
     expect(repondre('Que dois-je décider ?', titulaire).texte).toMatch(/décision|Rien n’attend/);
-    expect(repondre('Que dois-je décider ?', camille).texte).not.toMatch(/décision/);
+    // L'équipe peut lire comment les décisions lui sont annoncées, jamais la liste de ce qui attend le titulaire.
+    expect(repondre('Que dois-je décider ?', camille).texte).not.toMatch(/vous attend|Rien n’attend/);
   });
 
   it('retombe sur une fiche d’aide, puis sur des suggestions quand rien ne correspond', () => {

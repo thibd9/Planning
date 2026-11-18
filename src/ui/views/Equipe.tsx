@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, ClipboardList, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lightbulb, Lock, Plus, RefreshCw, ShieldCheck, Stethoscope, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, ClipboardList, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lightbulb, Lock, Plus, RefreshCw, ShieldCheck, Sparkles, Stethoscope, Trash2, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { fmtDateCourt, uid } from '../../domain/time';
@@ -7,11 +7,11 @@ import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/t
 import type { AppData } from '../../domain/types';
 import { COMPETENCE_FAMILLES, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, libelleAbsence, nomComplet } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
-import { suiviDe } from '../../engine/suivi';
+import { pointsForts, suiviDe } from '../../engine/suivi';
 import { quotaAdjoints, validateEquipe } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
-import { Compteurs } from '../components/Compteurs';
+import { Compteurs, PointsForts } from '../components/Compteurs';
 import { DialogueDemande } from '../components/Demande';
 import { DialogueFormation } from '../components/Formation';
 import { DialogueInventaire } from '../components/Inventaire';
@@ -59,6 +59,21 @@ export function Equipe(): JSX.Element {
   const internes = data.personnes.filter((p) => !p.externe);
   const externes = data.personnes.filter((p) => p.externe);
   const courant = data.personnes.find((p) => p.id === personneId) ?? internes[0];
+  // Les points forts de l'équipe ne sont montrés qu'aux titulaires ; eux-mêmes n'y figurent pas.
+  const today = useStore((s) => s.today);
+  const session = useUi((s) => s.session);
+  const titulaire = data.personnes.find((p) => memeIdentifiant(p.identifiant, session ?? ''))?.qualification === 'titulaire';
+  const enAvant = useMemo(
+    () =>
+      titulaire
+        ? data.personnes
+            .filter((p) => !p.externe && p.qualification !== 'titulaire')
+            .map((p) => ({ p, points: pointsForts(data, p.id, today) }))
+            .filter((x) => x.points.length)
+            .sort((a, b) => a.p.prenom.localeCompare(b.p.prenom))
+        : [],
+    [data, today, titulaire],
+  );
 
   return (
     <div>
@@ -102,6 +117,34 @@ export function Equipe(): JSX.Element {
         >
           Commencez par le titulaire et les pharmaciens adjoints, puis les préparateurs et les autres postes.
         </Empty>
+      ) : null}
+      {enAvant.length ? (
+        <section className="card pf-carte" data-focus="points-forts">
+          <div className="card-head">
+            <span className="pf-ico" aria-hidden="true">
+              <Sparkles size={18} />
+            </span>
+            <div className="grow">
+              <h2 className="h3">Sur qui compter</h2>
+              <p className="small soft" style={{ margin: 0 }}>Ce que chacun apporte, d’après les faits des 12 derniers mois. Ni note, ni classement.</p>
+            </div>
+          </div>
+          <ul className="pf-equipe">
+            {enAvant.map(({ p, points }) => (
+              <li key={p.id}>
+                <button type="button" className="pf-qui" onClick={() => ouvrirPersonne(p.id)} title="Ouvrir sa fiche">
+                  <Avatar person={p} />
+                  <span className="pf-nom">
+                    <b>{nomComplet(p)}</b>
+                    <span className="small soft">{libelleRole(data, p)}</span>
+                  </span>
+                </button>
+                <PointsForts points={points} court />
+              </li>
+            ))}
+          </ul>
+          <p className="tiny muted pf-note">Classés par prénom. Les arrêts, les congés et les absences n’entrent jamais en compte.</p>
+        </section>
       ) : null}
       <div className="split" style={{ gridTemplateColumns: '340px minmax(0, 1fr)', display: data.personnes.length ? undefined : 'none' }}>
         <div className="col" style={{ gap: 8 }}>
@@ -190,6 +233,8 @@ function Fiche({ person }: { person: Person }): JSX.Element {
   const session = useUi((s) => s.session);
   const chef = responsable(data);
   const jeSuisResponsable = !!chef && memeIdentifiant(chef.identifiant, session ?? '');
+  const jeSuisTitulaire = data.personnes.find((p) => memeIdentifiant(p.identifiant, session ?? ''))?.qualification === 'titulaire';
+  const forts = useMemo(() => (person.externe || person.qualification === 'titulaire' ? [] : pointsForts(data, person.id, today)), [data, person, today]);
   const dire = useUi((s) => s.dire);
   const [demande, setDemande] = useState(false);
   const besoins = data.besoins.filter((b) => b.personId === person.id && b.decision !== 'refusee' && (!b.to || b.to >= today));
@@ -322,6 +367,12 @@ function Fiche({ person }: { person: Person }): JSX.Element {
         {!person.externe ? (
           <section className="fiche-bloc">
             <TitreFiche icone={ChartLine}>Suivi sur 12 mois</TitreFiche>
+            {jeSuisTitulaire && forts.length ? (
+              <div className="pf-fiche" data-focus="points-forts-fiche">
+                <div className="eyebrow">Points forts</div>
+                <PointsForts points={forts} />
+              </div>
+            ) : null}
             <Compteurs suivi={suiviDe(data, person.id, today)} />
             <p className="tiny muted">Retards et départs se notent depuis la vue d’une journée (dans « Construire », cliquez sur un jour). Des dates et des durées, jamais une raison.</p>
           </section>

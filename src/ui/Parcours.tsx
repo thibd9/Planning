@@ -945,7 +945,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.demande-r.u-medical',
     cibleFin: '.demande-r.u-medical, .onglets',
     titre: 'Une urgence médicale',
-    texte: (d) => (urgenceMedicale(d)?.accord === 'attente' ? 'En tête de liste, en rouge. Le justificatif n’est visible que des titulaires.' : 'Acceptée. Le justificatif est effacé dès que le remplacement est réglé.'),
+    texte: (d) => (urgenceMedicale(d)?.accord === 'attente' ? 'En tête de liste, en rouge. Le justificatif n’est visible que des titulaires.' : 'Acceptée. Le justificatif est conservé dans « Mes documents », pour les seuls titulaires.'),
     jouer: () => {
       avecUrgenceMedicale();
       useUi.getState().setSujet('remplacements');
@@ -1139,6 +1139,19 @@ const COMPLET_BRUT: Etape[] = [
     },
     gestes: [{ faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'absences') }, { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Mes fichiers') }],
   },
+  {
+    chapitre: BILAN,
+    qui: HELENE,
+    cible: '.content .jr-barre',
+    cibleFin: '.content .doc-liste, .content .hist-tete',
+    titre: 'Absences et justificatifs',
+    texte: () => 'L’historique de l’équipe : arrêts, congés, remplacements, par personne. « Joindre » conserve un justificatif, vu des seuls titulaires.',
+    jouer: () => {
+      avecAbsenceImprevue();
+      helene('documents');
+    },
+    gestes: [{ faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Absences de l’équipe') }],
+  },
   // ---- 6. Au quotidien
   {
     chapitre: QUOTIDIEN,
@@ -1170,7 +1183,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.topbar-in',
     cibleFin: '.outils .menu',
     titre: 'La cloche',
-    texte: () => 'Une ligne par demande, la plus urgente en tête. Un clic y mène.',
+    texte: () => 'Chaque décision prise y est annoncée, avec ce qu’elle change au planning. Dessous, ce qui vous attend, le plus urgent en tête.',
     jouer: () => {
       avecAbsenceImprevue();
       helene('tableau');
@@ -1275,6 +1288,7 @@ const ORDRE_TITULAIRE = [
   'L’équité',
   'Le journal et la paie',
   'Les documents',
+  'Absences et justificatifs',
   'Le tableau de bord',
   'Le bouton « Créer »',
   'La cloche',
@@ -1511,9 +1525,84 @@ export function lancerParcours(scenario: Scenario = 'etabli'): void {
   useUi.getState().montrerAssistant(false);
   // Le parcours est remis à l'étape 1 : l'écran de la première étape est posé par le composant.
   voirComme('caroline.tellier');
-  useUi.getState().setParcours(0, scenario);
+  useUi.getState().setParcours(0, scenario, null);
   // Relancé depuis l'étape 1, le parcours ne change pas d'étape : son écran est reposé ici.
   SCENARIOS[scenario].etapes[0].jouer();
+}
+
+/** Où revenir une fois le tutoriel d'une tâche terminé : la pharmacie et le compte d'où il a été lancé. */
+let retour: { officineId: string | null; session: string | null } | null = null;
+
+/** Tutoriel d'une tâche, pour la rubrique d'aide : les étapes de la visite qui la montrent, et rien d'autre. */
+export interface Tutoriel {
+  scenario: Scenario;
+  de: number;
+  a: number;
+}
+/** Pour chaque fiche d'aide : la visite et les titres de la première et de la dernière étape qui la montrent. */
+const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string, string?]; pharmacien?: [string, string?] }> = {
+  prochain: { equipe: ['Mon prochain poste', 'Ma semaine'] },
+  'equipe-planning': { equipe: ['Le planning de l’équipe'] },
+  difference: { equipe: ['Mes demandes'] },
+  souhaits: { equipe: ['Mes préférences'] },
+  conge: { equipe: ['Demander un congé'] },
+  remplacer: { equipe: ['Me faire remplacer'] },
+  aider: { equipe: ['Un appel à l’équipe'] },
+  suivi: { equipe: ['Mon suivi'] },
+  'gardes-moi': { pharmacien: ['Mes gardes'] },
+  documents: { gestion: ['Les documents'] },
+  message: { gestion: ['Les messages'], equipe: ['Les messages'] },
+  compte: { gestion: ['Votre compte'], equipe: ['Mon compte'] },
+  construire: { gestion: ['Une semaine à construire', 'La semaine est posée'] },
+  publier: { gestion: ['Publier', 'Imprimer'] },
+  mois: { gestion: ['Le mois'] },
+  absence: { gestion: ['Une absence imprévue', 'Personne ne se propose'] },
+  'demande-remplacement': { gestion: ['La demande arrive', 'Valider le remplacement'] },
+  'demandes-equipe': { gestion: ['Congés et horaires', 'Refuser une demande'] },
+  gardes: { gestion: ['Les gardes'] },
+  formation: { gestion: ['Une formation', 'Un inventaire'] },
+  personne: { gestion: ['Ajouter l’équipe', 'La fiche d’une personne'] },
+  'mdp-equipe': { gestion: ['Mot de passe et clé de secours'] },
+  heures: { gestion: ['Le compteur d’heures'] },
+  retard: { gestion: ['Une journée', 'Retards et suivi'] },
+  reglages: { gestion: ['Horaires et effectif', 'Qui prépare le planning'] },
+  regles: { gestion: ['Les règles'] },
+  paie: { gestion: ['Le journal et la paie'] },
+  equite: { gestion: ['L’équité'] },
+  accord: { gestion: ['Donner son accord'] },
+  pharmacie: { gestion: ['Plusieurs pharmacies'] },
+  historique: { gestion: ['Absences et justificatifs'] },
+  feries: { gestion: ['Horaires et effectif'] },
+  decisions: { gestion: ['La cloche'] },
+  assistant: { gestion: ['L’assistant Solvéa'], equipe: ['L’assistant Solvéa'] },
+  controles: { gestion: ['Les contrôles'] },
+};
+
+/** Le tutoriel d'une fiche d'aide pour ce rôle, s'il existe. */
+export function tutorielDe(ficheId: string, espace: 'responsable' | 'pharmacien' | 'equipe'): Tutoriel | null {
+  const t = TUTORIELS[ficheId];
+  if (!t) return null;
+  const essais: [Scenario, [string, string?] | undefined][] =
+    espace === 'responsable' ? [['complet', t.gestion], ['equipe', t.equipe], ['pharmacien', t.pharmacien]] : espace === 'pharmacien' ? [['pharmacien', t.pharmacien ?? t.equipe]] : [['equipe', t.equipe]];
+  for (const [scenario, titres] of essais) {
+    if (!titres) continue;
+    const etapes: readonly Etape[] = SCENARIOS[scenario].etapes;
+    const de = etapes.findIndex((e) => e.titre === titres[0]);
+    const a = titres[1] ? etapes.findIndex((e, i) => i >= de && e.titre === titres[1]) : de;
+    if (de >= 0 && a >= de) return { scenario, de, a };
+  }
+  return null;
+}
+
+/** Lance le tutoriel d'une tâche sur l'exemple ; à la fin, on retrouve sa pharmacie et la rubrique d'aide. */
+export function lancerTutoriel(t: Tutoriel): void {
+  const s = store();
+  retour = { officineId: s.data.demo ? null : s.officineId, session: useUi.getState().session };
+  annulerMinuteries();
+  s.chargerExemple(true, t.scenario === 'complet' ? 'zero' : 'etabli');
+  useUi.getState().montrerAssistant(false);
+  voirComme('caroline.tellier');
+  useUi.getState().setParcours(t.de, t.scenario, { de: t.de, a: t.a });
 }
 
 /** Le nouvel écran d'une étape arrive en fondu. Rien si l'appareil demande moins d'animations. */
@@ -1540,7 +1629,7 @@ const memeZone = (a: Zone | null, b: Zone | null): boolean => (!a || !b ? a === 
 
 /** Parcours guidé : chaque étape pose l'écran, éclaire ce qu'elle montre, joue les gestes elle-même et l'explique en une phrase. */
 export function Parcours(): JSX.Element | null {
-  const { parcours, setParcours, scenario, session, vue } = useUi();
+  const { parcours, setParcours, scenario, session, vue, tache } = useUi();
   const data = useStore((s) => s.data);
   const ETAPES: readonly Etape[] = SCENARIOS[scenario].etapes;
   const etape = parcours !== null ? ETAPES[parcours] : null;
@@ -1573,6 +1662,15 @@ export function Parcours(): JSX.Element | null {
   /** Ce que le projecteur éclaire pendant une démonstration : la fenêtre ou le bloc où se passe le geste. */
   const contexte = useRef<HTMLElement | null>(null);
   const action = useRef<HTMLButtonElement>(null);
+  // Le tutoriel d'une tâche est terminé ou quitté : on retrouve sa pharmacie, son compte et la rubrique d'aide.
+  useEffect(() => {
+    if (parcours !== null || !retour) return;
+    const r = retour;
+    retour = null;
+    annulerMinuteries();
+    if (r.officineId) store().changerOfficine(r.officineId);
+    if (r.session) voirComme(r.session, 'aide');
+  }, [parcours]);
 
 
   const chapitres = useMemo(() => {
@@ -1625,7 +1723,7 @@ export function Parcours(): JSX.Element | null {
     setJoues(0);
     setAnnonce('');
     let faits = 0;
-    const dernierePas = parcours >= SCENARIOS[scenario].etapes.length - 1;
+    const dernierePas = parcours >= (useUi.getState().tache?.a ?? SCENARIOS[scenario].etapes.length - 1);
     /** Un temps est joué : le suivant s'enchaîne. Après le dernier, on laisse voir le résultat, puis l'étape suivante arrive. */
     const fin = (): void => {
       visee.current = null;
@@ -1809,7 +1907,10 @@ export function Parcours(): JSX.Element | null {
   }, [zone, parcours, phase, sommaire, libre, data, ouvert]);
 
   const N = ETAPES.length;
-  const dernier = parcours === N - 1;
+  // Tutoriel d'une tâche : la visite s'arrête à la dernière étape de la tâche.
+  const debut = tache?.de ?? 0;
+  const terme = tache?.a ?? N - 1;
+  const dernier = parcours === terme;
   const demonstration = nbTemps > 0;
   /** Il reste un geste à montrer dans cette étape. */
   const reste = demonstration && joues < nbTemps && !libre;
@@ -1817,17 +1918,17 @@ export function Parcours(): JSX.Element | null {
   const avancer = (): void => {
     if (parcours === null) return;
     if (reste) return demarrer.current();
-    if (parcours < N - 1) setParcours(parcours + 1);
+    if (parcours < terme) setParcours(parcours + 1);
   };
   // Lecture automatique : le temps de lire, un geste, le temps de voir, puis la suite.
   const duree = etape ? Math.min(9000, Math.max(4500, 2200 + etape.texte(data).length * 45)) : 0;
   const attente = phase === 'fini' ? Math.max(3200, duree * 0.6) : duree;
   useEffect(() => {
     if (!lecture || parcours === null || libre || sommaire || phase === 'demo' || !ouvert) return;
-    if (!reste && parcours >= N - 1) return setLecture(false);
+    if (!reste && parcours >= terme) return setLecture(false);
     const t = window.setTimeout(() => (reste ? demarrer.current() : setParcours(parcours + 1)), attente);
     return () => window.clearTimeout(t);
-  }, [lecture, parcours, libre, sommaire, phase, ouvert, reste, N, attente, setParcours]);
+  }, [lecture, parcours, libre, sommaire, phase, ouvert, reste, terme, attente, setParcours]);
 
   // La fiche revient : le bouton principal reprend le focus, pour continuer au clavier.
   useEffect(() => {
@@ -1885,7 +1986,7 @@ export function Parcours(): JSX.Element | null {
           </span>
           <div className="grow">
             <div className="eyebrow">
-              {SCENARIOS[scenario].court} · {parcours + 1} sur {N}
+              {tache ? `Tutoriel · ${parcours - debut + 1} sur ${terme - debut + 1}` : `${SCENARIOS[scenario].court} · ${parcours + 1} sur ${N}`}
             </div>
             <div className="small" style={{ fontWeight: 650 }}>{etape.qui}</div>
           </div>
@@ -1916,7 +2017,7 @@ export function Parcours(): JSX.Element | null {
           </nav>
         ) : (
           <div aria-live="polite" key={parcours} className="pt-corps">
-            {etape.chapitre ? (
+            {etape.chapitre && !tache ? (
               <button type="button" className="pt-chapitre" onClick={() => setSommaire(true)} title="Ouvrir le sommaire">
                 <ListTree size={14} aria-hidden="true" /> {etape.chapitre}
                 {section && section !== etape.chapitre ? <span className="pt-section">{section}</span> : null}
@@ -1940,14 +2041,14 @@ export function Parcours(): JSX.Element | null {
           </div>
         )}
         <div className="pt-segments" aria-hidden="true">
-          {chapitres.map((c) => (
+          {(tache ? [{ titre: 'Tutoriel', debut, n: terme - debut + 1 }] : chapitres).map((c) => (
             <span key={c.titre} style={{ flexGrow: c.n }}>
               <i style={{ width: `${Math.max(0, Math.min(1, (parcours + 1 - c.debut) / c.n)) * 100}%` }} />
             </span>
           ))}
         </div>
         <div className="row" style={{ gap: 8 }}>
-          <button type="button" className="btn sm" disabled={parcours === 0} onClick={() => setParcours(parcours - 1)}>
+          <button type="button" className="btn sm" disabled={parcours === debut} onClick={() => setParcours(parcours - 1)}>
             <ArrowLeft size={15} aria-hidden="true" /> Précédent
           </button>
           <span className="grow" />

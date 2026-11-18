@@ -10,6 +10,7 @@ import { aRegulariser, semaineLibre } from '../../engine/heures';
 import { estCollaboratif, moisDe, reponses } from '../../engine/souhaits';
 import { validateWeek } from '../../engine/validate';
 import { useStore } from '../../store/store';
+import { ListeAnnonces, annoncesDe } from '../components/Annonces';
 import { useUi } from '../../store/ui';
 import { Avatar, Pill, momentDe } from '../kit';
 
@@ -32,6 +33,9 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   const moi = data.personnes.find((p) => p.id === personId);
   const lundi = mondayOf(today);
   const d = useMemo(() => decisions(data, today), [data, today]);
+  const lireAnnonces = useStore((x) => x.lireAnnonces);
+  // Les six dernières décisions annoncées, lues ou non.
+  const recentes = annoncesDe(data, personId).slice(0, 6);
   const cetteSemaine = couverture(data, lundi);
   const heures = useMemo(() => aRegulariser(data, today).length, [data, today]);
   const suivante = addDays(lundi, 7);
@@ -201,6 +205,23 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
           </button>
         </div>
       </div>
+
+      {recentes.length ? (
+        <section className="card tb-annonces" aria-labelledby="tb-annonces" data-focus="annonces" style={{ marginTop: 24 }}>
+          <div className="card-head">
+            <div className="grow">
+              <h2 id="tb-annonces">Décisions récentes</h2>
+              <div className="small soft">Ce qui a été décidé, et ce que cela change dans les plannings. Les personnes concernées sont prévenues.</div>
+            </div>
+            {recentes.some((a) => !a.luPar.includes(personId)) ? (
+              <button type="button" className="btn sm" onClick={() => lireAnnonces(personId)}>
+                Tout marquer comme lu
+              </button>
+            ) : null}
+          </div>
+          <ListeAnnonces data={data} annonces={recentes} moi={personId} onLu={(id) => lireAnnonces(personId, id)} />
+        </section>
+      ) : null}
 
       <section className="card" aria-labelledby="tb-jour" style={{ marginTop: 24 }}>
         <div className="card-head">

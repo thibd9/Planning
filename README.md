@@ -40,33 +40,39 @@ deux boutons sous « Première visite ? » : « Créer ma pharmacie » et « Com
 ouvre la fenêtre « Découvrir Solvéa » : une visite guidée **par rôle**, jouée sur une pharmacie d'exemple
 (la « Grande Pharmacie de la Pinède », fictive) posée à côté des vraies, sans rien effacer.
 
-- **Titulaire — Tout Solvéa, de zéro** (50 étapes, six chapitres, dans l'ordre du travail) :
-  **Préparer** (création, horaires, modèle de planification, équipe, fiche, règles), **Planifier**
-  (préférences du mois, grille, poste posé à la main, trois propositions, contrôles, vue mois, journée,
-  publication, impression, gardes, formation, inventaire), **Côté équipe** (mon planning, calendrier,
-  planning de l'équipe, mes demandes, demande sans raison, remplacement, gardes, suivi), **Suivre**
-  (demande de remplacement, volontaire, validation, urgence médicale avec justificatif, congé accepté,
-  demande refusée, absence imprévue, appel à l'équipe, personne ne se propose, accord entre titulaires,
-  messages, compteur d'heures, retards), **Bilan** (équité, journal et paie), **Au quotidien** (tableau de
-  bord, « Créer », cloche, plusieurs pharmacies, assistant, mot de passe, compte).
+- **Titulaire — Tout Solvéa, de zéro** (52 étapes) : la visite suit **l'ordre du menu**, sans changer de
+  personnage en cours de route. **Préparer** (création, équipe, fiche d'une personne, horaires et
+  effectif, qui prépare le planning, règles), **Planifier** (grille, poste posé à la main, trois
+  propositions, contrôles, journée, retards, mois, publication, impression, formation, inventaire,
+  gardes), **Suivre** (demande de remplacement, validation, urgence médicale, congés et horaires, refus
+  motivé, absence imprévue, appel à l'équipe, accord entre titulaires, messages, compteur d'heures),
+  **Bilan** (équité, journal et paie, documents, absences et justificatifs), **Au quotidien** (tableau
+  de bord, « Créer », cloche, plusieurs pharmacies, assistant, mot de passe, compte), puis un dernier
+  chapitre **Vu par l'équipe**.
 - **Pharmacien adjoint** (14 étapes) et **Préparateur, animateur, apprenti…** (13 étapes) : seulement ce
   qui sert à la personne — son planning, celui de l'équipe, ses demandes, l'appel à l'équipe, ses gardes
   pour un pharmacien, son suivi, les messages, l'assistant, son compte. Rien de la gestion.
 - **Une journée type** (13 étapes, tous les rôles) : huit semaines d'historique, un arrêt à couvrir, des
   demandes en attente ; on suit la titulaire et son équipe.
 
-Pendant une visite, **on lit, puis on regarde** :
+Pendant une visite, **on lit, puis on regarde** — un clic par étape :
 
 - un **projecteur** éclaire ce dont on parle ; rien ne bouge tant que la fiche d'explication est ouverte ;
-- la fiche annonce le prochain geste en clair (« Cliquer sur “Ajouter une personne” », « Écrire “Sarah”
-  dans “Prénom” ») ; « Suivant » referme la fiche et joue **ce seul geste** : un pointeur entouré d'un halo
-  se déplace, clique, coche, choisit dans une liste ou tape au clavier ; puis la fiche revient pour le geste
-  suivant. La visite titulaire compte 50 étapes et 69 gestes ;
-- pendant le geste, le projecteur suit la fenêtre ou le bloc où il se passe, et un bandeau rappelle ce
-  qui est montré ; « Passer » saute la démonstration ;
-- les transitions sont lentes et douces (fiche, projecteur, pointeur, changement d'écran) ;
+- « Suivant » referme la fiche et joue **toute la démonstration de l'étape** : un pointeur se déplace,
+  clique, coche, choisit dans une liste ou tape au clavier, un bandeau nomme chaque geste (« Cliquer sur
+  “Ajouter une personne” », « Écrire “Sarah” dans “Prénom” »), puis l'étape suivante arrive seule ;
+- le projecteur suit la fenêtre ou le bloc où se passe le geste ; « Passer » saute la démonstration ;
 - le **sommaire** saute d'un chapitre à l'autre ; **lecture automatique** et flèches du clavier restent
   disponibles, ainsi que « Revenir à l'étape » si l'on est parti explorer.
+
+### Aide : chaque tâche a sa réponse et son tutoriel
+
+« Aide et tutoriels » (dans le menu, et le « ? » de la barre du haut) répertorie toutes les fonctions
+utiles au rôle connecté, rangées par thème. Une recherche filtre en même temps les fiches et le lexique.
+Chaque fiche donne la réponse en deux lignes, le bouton qui mène à l'écran, et **« Voir le tutoriel »** :
+la visite guidée ne joue alors que les étapes de cette tâche (une à quatre), sur la pharmacie d'exemple,
+puis ramène à sa propre pharmacie et à la page d'aide. Le **lexique** définit le vocabulaire (brouillon,
+publié, tour de rôle, indisponibilité reconnue, fiche navette…).
 
 La même fenêtre permet d'entrer librement dans la peau de quatre personnes :
 
@@ -288,6 +294,29 @@ vue mois, une garde se voit dans la case du jour.
 - **Mes documents.** Pour chacun : ses plannings publiés rangés par mois, ses absences et arrêts avec leur
   état, et les fichiers qu'il dépose (arrêt de travail, attestation de formation, contrat), partagés ou
   non avec les titulaires. Le titulaire retrouve les documents reçus de l'équipe.
+- **Justificatifs conservés, historique des absences.** Un justificatif joint à une demande n'est plus
+  effacé : une fois la demande tranchée, il est rangé dans les documents de la personne, visible d'elle
+  et des seuls titulaires (pas d'une personne à qui la gestion est déléguée). Dans « Documents », l'onglet
+  « Absences de l'équipe » réunit arrêts, congés, formations, remplacements demandés et absences non
+  prévues, par mois, avec un filtre par personne et par nature et les totaux des douze derniers mois ;
+  « Joindre » y rattache la pièce qu'on a reçue en main propre. Une demande annulée par la personne
+  emporte son justificatif.
+- **Sur qui compter.** En haut de « Équipe », les titulaires voient ce que chacun apporte d'après les
+  faits des douze derniers mois : toujours à l'heure, dépanne l'équipe, répond aux appels, prend sa part
+  des samedis et fermetures. Ni note ni classement (ordre alphabétique) ; **les arrêts, les congés et les
+  absences n'entrent jamais en compte**. Chacun voit ses propres points forts dans « Mon suivi ».
+- **Décisions annoncées.** Dès qu'une décision est prise — congé accepté ou refusé, demande de
+  remplacement, remplacement validé, absence réglée, contrainte d'horaires, publication, garde confiée,
+  formation, inventaire, accord entre titulaires — une annonce part sous la cloche aux personnes
+  concernées et à tous les titulaires, avec **ce que cela change dans les plannings** (« Igor : en poste →
+  repos le 21 », « 3 postes à couvrir »). « Vu » la range ; le tableau de bord garde les six dernières.
+- **Espaces par rôle.** La barre du haut porte un badge de rôle avec son icône et sa couleur (titulaire,
+  pharmacien, préparateur…).
+- **Jours fériés.** Marqués dans la grille, la vue mois, « Mes semaines » et le calendrier des
+  préférences ; « Réglages » liste ceux des douze prochains mois.
+- **Grille : des alertes en mots.** La ligne « Équipe au complet ? » écrit « Complet », « Sans
+  pharmacien », « Manque du monde » ou « Rien de posé », avec les heures concernées.
+- **Mes semaines.** Une tuile par jour, colorée selon le moment de la journée, avec la pause et la durée.
 - **Déconnexion sans perte.** Tout est enregistré au fur et à mesure. Avant de se déconnecter, une fenêtre
   rappelle ce qui reste en cours (accords à donner, postes à couvrir, demandes, plannings en brouillon,
   messages non lus) avec un accès direct, et le navigateur demande confirmation si une fenêtre de saisie
@@ -333,10 +362,11 @@ Pour qu'une absence urgente ne retombe pas toujours sur les mêmes et que person
 ### Demandes de remplacement, par niveau d'urgence
 
 Depuis « Mes demandes », chacun demande à être remplacé sur un poste publié et choisit un niveau :
-**prévu** (poste à 7 jours ou plus), **urgent** (moins de 7 jours) ou **urgence médicale**. Aucune raison
-n'est à écrire. Pour une urgence médicale, un **justificatif** peut être joint (photo réduite sur
-l'appareil, ou PDF de 600 Ko au plus) : seuls les titulaires le voient, et son contenu est effacé dès que
-la demande est réglée. La consigne affichée demande le volet destiné à l'employeur, qui ne mentionne pas
+**prévu** (poste à 7 jours ou plus), **urgent** (moins de 7 jours) ou **urgence médicale**. Un **motif**
+est obligatoire (santé, famille, administratif, formation, transport, autre), visible des seuls
+titulaires ; la précision libre est effacée une fois la demande réglée. Pour une urgence médicale, un
+**justificatif** peut être joint (photo réduite sur l'appareil, ou PDF de 600 Ko au plus) : seuls les
+titulaires le voient, et il est conservé dans les documents une fois la demande réglée. La consigne affichée demande le volet destiné à l'employeur, qui ne mentionne pas
 le diagnostic.
 
 1. Le titulaire reçoit la demande, triée par urgence, et répond **oui ou non**.
@@ -354,7 +384,9 @@ mais comme demande urgente : elle passe d'abord par le titulaire, et seul un vol
 
 ### Compteur d'heures et régularisation
 
-« Heures » compare, pour chaque salarié, les heures planifiées et publiées à son contrat (absences
+L'objectif affiché est clair : **le moins d'heures en plus possible**. La page ouvre sur trois totaux
+(heures en plus, heures en moins, personnes à jour) et une alerte dès qu'un contrat est dépassé ; la
+cloche signale les compteurs à régulariser. « Heures » compare, pour chaque salarié, les heures planifiées et publiées à son contrat (absences
 approuvées déduites). Le titulaire régularise à la main — payer, faire récupérer, faire rattraper,
 solder — ou clique sur « Régulariser automatiquement » : chaque écart d'au moins une heure est résorbé sur
 la première semaine non publiée, par demi-heures et sans dépasser 8 h d'écart au contrat, et le brouillon
@@ -387,10 +419,8 @@ L'interface est conçue pour le RGAA (niveau AA des WCAG 2.1) :
 - **Contrastes** : tout texte tient au moins 4,5:1 sur son fond, tout contour de champ au moins 3:1, dans
   chacun des dix thèmes (bleu ciel par défaut, bleu marine, indigo, violet, framboise, terracotta, ambre,
   émeraude, bleu-vert, ardoise), en **mode clair comme en mode sombre**. Le logo suit la couleur du thème.
-- **Surfaces translucides** : cartes à 76 %, menu latéral à 68 %, fenêtres à 90 % d'opacité. Les contrôles
-  automatiques ne savent pas mesurer un texte posé sur un fond translucide ; le contraste des couleurs de
-  texte a donc été calculé à part, sur le fond le plus défavorable, pour les dix thèmes et les deux modes :
-  5,6:1 au minimum.
+- **Surfaces pleines** : plus aucun flou d'arrière-plan ; cartes et fenêtres sont opaques (94 % au moins),
+  ce qui rend l'application fluide et les contrastes mesurables tels quels.
 - **Repères de couleur dans les plannings**, les mêmes dans la grille, la frise et le calendrier : jaune
   pour le matin, orange pour la journée, bleu pour la journée longue, violet pour le soir, indigo pour la
   garde, vert d'eau pour le congé, rouge doux pour l'arrêt, turquoise pour la formation. L'horaire est toujours écrit dans la tuile : la couleur aide, elle n'est jamais seule.
@@ -444,8 +474,14 @@ src/
 - **Aide à la conformité, pas une garantie.** Les fiches marquées « à valider » viennent de sources
   secondaires. À faire relire par un avocat en droit social et un spécialiste de la paie officinale
   avant tout usage réel. Les montants des indemnités de garde ne sont pas renseignés.
-- **Notifications dans l'application.** Prévenir un pharmacien d'une garde dépose un avis dans son espace,
-  avec accusé de lecture ; aucun courriel ni SMS ne part, faute de serveur.
+- **Notifications dans l'application.** Les annonces de décision et les avis de garde s'affichent dans
+  l'espace de chacun ; aucun courriel ni SMS ne part, faute de serveur.
+- **Points forts.** Ils reposent sur ce qui a été noté dans l'application (retards, départs anticipés,
+  dépannages, réponses aux appels) : un retard jamais saisi ne se voit pas. Ce n'est pas une évaluation.
+- **Conservation des justificatifs.** La durée de conservation d'un justificatif d'absence relève de vos
+  obligations (paie, RGPD) : l'application ne supprime rien toute seule, c'est au titulaire de le faire.
+- **Jours fériés.** Les onze jours fériés nationaux sont calculés (dont les dates mobiles de Pâques) ; les jours propres à l'Alsace-Moselle
+  ou à l'outre-mer ne le sont pas.
 - **Données sur l'appareil.** Cette version enregistre dans le navigateur (`localStorage`) : pas de
   serveur, donc pas de partage entre postes. Connexion, messages et demandes de remplacement fonctionnent
   entre les personnes qui utilisent le même appareil ; ils ne sont ni envoyés ni synchronisés ailleurs.
@@ -457,15 +493,13 @@ src/
 - **Justificatifs sur l'appareil.** Faute de serveur, un justificatif joint reste dans le navigateur où il
   a été déposé : il n'est pas transmis à un autre poste. Un vrai dépôt de documents de santé demande un
   hébergement adapté.
-- **Surfaces translucides.** Les cartes laissent passer le fond animé. Les couleurs de texte n'ont pas
-  changé, et le contraste a été recalculé sur le fond le plus défavorable (voir « Accessibilité »).
-- **Mouvement.** Les fonds animés, les entrées d'écran et les visites guidées s'arrêtent de bouger si
-  l'appareil demande de réduire les animations.
+- **Mouvement.** Aucune animation décorative ne tourne en continu. Les entrées d'écran et les visites
+  guidées s'arrêtent de bouger si l'appareil demande de réduire les animations.
 - **Documents sur l'appareil.** Les fichiers déposés restent dans le navigateur, 600 Ko par fichier et
   3 Mo au total : ils ne sont ni sauvegardés ni transmis à un autre poste. Un vrai coffre de documents,
   surtout pour des arrêts de travail, demande un hébergement adapté.
 - **Assistant à règles.** L'assistant reconnaît une dizaine de questions sur le planning et une trentaine
-  de fiches d'aide. Une question formulée autrement peut ne pas être comprise : il le dit et propose des
+  de fiches d'aide (les mêmes que la rubrique « Aide »). Une question formulée autrement peut ne pas être comprise : il le dit et propose des
   suggestions. Il ne rédige rien et n'apprend pas.
 - **Impression.** L'impression passe par le navigateur. Dans l'aperçu hébergé sur claude.ai, la fenêtre
   d'impression peut être bloquée : l'application le signale au lieu de rester muette.

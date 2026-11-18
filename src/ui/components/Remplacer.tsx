@@ -237,7 +237,7 @@ export function DialogueRemplacement({ shift, onClose }: { shift: Shift; onClose
           ) : null}
           <p className="notice small" style={{ margin: 0 }}>
             <ShieldCheck size={15} aria-hidden="true" />
-            <span>Joignez le volet destiné à l’employeur : il ne mentionne pas le diagnostic. Seuls les titulaires le voient, et il est effacé dès que la demande est réglée.</span>
+            <span>Joignez le volet destiné à l’employeur : il ne mentionne pas le diagnostic. Seuls les titulaires le voient. Une fois la demande réglée, il est rangé dans vos documents.</span>
           </p>
         </div>
       ) : null}

@@ -293,6 +293,23 @@ export interface Notification {
   luLe?: string;
 }
 
+/**
+ * Décision annoncée aux personnes concernées et aux titulaires : ce qui a été décidé,
+ * et ce que cela change dans les plannings.
+ */
+export interface Annonce {
+  id: string;
+  at: string;
+  titre: string;
+  /** Ce que la décision change dans les plannings, une phrase par ligne. */
+  effets: string[];
+  /** Personnes concernées ; les titulaires en font toujours partie. */
+  pour: string[];
+  /** Qui a décidé. */
+  auteur?: string;
+  luPar: string[];
+}
+
 /** Trou ouvert dans un planning par une absence approuvée. */
 export interface Trou {
   id: string;
@@ -369,17 +386,17 @@ export const URGENCE_LABEL: Record<Urgence, string> = { prevu: 'Prévu', urgent:
 /** Ordre de traitement : l'urgence médicale d'abord. */
 export const URGENCE_RANG: Record<Urgence, number> = { medical: 0, urgent: 1, prevu: 2 };
 
-/** Justificatif joint à une demande urgente : vu des seuls titulaires, effacé dès que la demande est tranchée. */
+/** Justificatif joint à une demande urgente : vu des seuls titulaires. Une fois la demande tranchée, il est rangé dans les documents du demandeur. */
 export interface Justificatif {
   nom: string;
   type: string;
   taille: number;
-  /** Contenu (URL de données) ; vide une fois la demande tranchée. */
+  /** Contenu (URL de données) ; vide une fois la demande tranchée : le fichier vit alors dans les documents. */
   data: string;
 }
 
-export type CategorieDoc = 'arret' | 'formation' | 'contrat' | 'autre';
-export const CATEGORIE_DOC_LABEL: Record<CategorieDoc, string> = { arret: 'Arrêt de travail', formation: 'Attestation de formation', contrat: 'Contrat ou avenant', autre: 'Autre document' };
+export type CategorieDoc = 'arret' | 'justificatif' | 'formation' | 'contrat' | 'autre';
+export const CATEGORIE_DOC_LABEL: Record<CategorieDoc, string> = { arret: 'Arrêt de travail', justificatif: 'Justificatif d’absence', formation: 'Attestation de formation', contrat: 'Contrat ou avenant', autre: 'Autre document' };
 /** Un document rangé dans l'espace d'une personne. */
 export interface DocumentGed {
   id: string;
@@ -394,6 +411,10 @@ export interface DocumentGed {
   at: string;
   /** Visible aussi par les titulaires. */
   partage: boolean;
+  /** Pièce conservée par les titulaires : d'où elle vient, en clair (« Remplacement du 12 nov. · accepté »). La personne la voit sans pouvoir la retirer. */
+  origine?: string;
+  /** Absence ou demande de remplacement à laquelle la pièce est rattachée. */
+  source?: string;
 }
 
 /** Régularisation du compteur d'heures d'une personne. minutes < 0 réduit un solde positif, > 0 comble un solde négatif. */
@@ -478,6 +499,8 @@ export interface AppData {
   regles: Regle[];
   journal: JournalEntry[];
   notifications: Notification[];
+  /** Décisions annoncées, la plus récente en tête. */
+  annonces?: Annonce[];
   trous: Trou[];
 }
 

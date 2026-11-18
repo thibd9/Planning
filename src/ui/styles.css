@@ -2475,3 +2475,175 @@ button.issue:hover .issue-voir { transform: translateX(3px); color: var(--a-text
 .dialog.wide .dialog-foot { padding: 20px 34px; gap: 14px; align-items: center; }
 .dialog.mid .dialog-body { padding: 28px 32px 30px; gap: 20px; }
 .refus-apercu { padding: 16px 18px; }
+
+/* Grille de la semaine : le constat du jour est écrit sous le signe */
+.pg-o { flex-direction: column; gap: 5px; padding-top: 10px; padding-bottom: 10px; }
+.pg-o-mot { display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 12px; line-height: 1.25; text-align: center; color: var(--ink-2); }
+.pg-o-mot b { font-weight: 700; }
+.pg-o-mot.ok b { color: var(--ok-ink); }
+.pg-o-mot.bad b { color: var(--danger-ink); }
+.pg-o-mot.warn b { color: var(--warn); }
+.pg-o-mot .num { font-size: 11.5px; }
+
+/* ================================================================ Mes semaines : une tuile par jour, la couleur du moment */
+/* Trois jours par ligne : la semaine tient en deux rangées égales ; six de front sur un très grand écran. */
+.jours-h { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 18px 22px 22px; }
+@media (min-width: 1700px) {
+  .jours-h { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+.jour-h { --tj: var(--n-1); position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 16px 16px 18px; border: 0; border-bottom: 0; border-radius: 20px; background: var(--n-1); overflow: hidden; }
+.jour-h::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--tj); }
+.jour-h.t-matin { --tj: var(--p-matin); } .jour-h.t-journee { --tj: var(--p-journee); } .jour-h.t-milieu { --tj: var(--p-milieu); } .jour-h.t-soir { --tj: var(--p-soir); }
+.jour-h.t-conge { --tj: var(--p-conge); } .jour-h.t-arret { --tj: var(--p-arret); } .jour-h.t-formation { --tj: var(--p-formation); }
+.jour-h.t-repos { background: transparent; box-shadow: inset 0 0 0 1.5px var(--n-3); }
+.jour-h.t-repos::before { display: none; }
+.jour-h.today { background: var(--a-soft); box-shadow: inset 0 0 0 2px var(--a-deep); }
+.jour-h:last-child { border-bottom: 0; }
+.jh-date { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 8px; }
+.jh-date .lien-jour { font-size: 16px; font-weight: 700; }
+.jh-corps { gap: 12px; }
+.jh-titre { align-items: flex-start; gap: 10px; }
+.jh-titre > div { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.jh-heures { display: block; margin: 0; font-size: 18px; line-height: 1.25; white-space: nowrap; }
+.jh-meta { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; font-size: 13px; color: var(--ink-2); }
+.jour-h.t-repos .jh-heures { font-size: 16px; }
+.jh-bilan { display: flex; gap: 8px; }
+.jh-bilan span { padding: 6px 13px; border-radius: 999px; background: var(--n-1); font-size: 13.5px; color: var(--ink-2); white-space: nowrap; }
+.jh-bilan b { color: var(--ink); font-size: 15px; }
+.jh-attente { display: flex; align-items: center; gap: 14px; margin: 18px 22px 22px; padding: 20px 22px; border-radius: 18px; background: var(--n-1); color: var(--ink-2); font-size: 14.5px; }
+.jh-attente svg { flex: none; color: var(--a-text); }
+@media (max-width: 760px) {
+  .jours-h { grid-template-columns: 1fr; padding: 14px 14px 16px; gap: 10px; }
+  .jour-h { flex-direction: row; align-items: center; padding: 14px 16px 14px 20px; }
+  .jour-h::before { right: auto; bottom: 0; width: 6px; height: auto; }
+  .jh-date { flex-direction: column; min-width: 92px; gap: 2px; }
+  .jh-bilan { display: none; }
+}
+
+/* Jours fériés */
+.ferie-tag { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.pg-h .ferie-tag { margin-top: 4px; }
+.mo-ferie { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 5px; background: var(--warn-soft); color: var(--warn); font-size: 10px; font-weight: 800; font-style: normal; }
+.mo-jour .mo-ferie { margin-top: 2px; }
+.feries { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.feries li { display: flex; flex-direction: column; gap: 1px; padding: 11px 14px; border-radius: 14px; background: var(--n-1); font-size: 13.5px; }
+.feries li b { font-size: 14.5px; }
+.feries li span { color: var(--ink-2); }
+
+/* ================================================================ Compteur d'heures : de l'air, et le dépassement qui se voit */
+.hc-alerte { margin-bottom: 20px; align-items: flex-start; }
+.decision.hc { padding: 22px 26px; gap: 18px; }
+.hc-qui { display: flex; flex-direction: column; gap: 9px; }
+.hc-nom { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 16px; }
+.hc-faits { display: flex; flex-wrap: wrap; gap: 6px 8px; font-size: 13.5px; color: var(--ink-2); }
+.hc-faits > span { padding: 3px 11px; border-radius: 999px; background: var(--n-1); white-space: nowrap; }
+.hc-faits b { color: var(--ink); }
+.hc-faits .prevu { background: var(--info-soft); color: var(--info); }
+.hc-jauge { display: block; height: 6px; max-width: 360px; border-radius: 4px; background: var(--n-2); overflow: hidden; }
+.hc-jauge i { display: block; height: 100%; border-radius: 4px; background: var(--ok); }
+.hc-jauge i.plus { background: var(--warn); }
+.hc-jauge i.moins { background: var(--info); }
+.hc-solde { min-width: 96px; padding: 9px 16px; font-size: 16px; }
+.decision.hc .btn.sm { min-height: 40px; padding-inline: 16px; }
+
+/* ================================================================ Chaque espace porte la marque de son rôle */
+.espace-qui { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.espace-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px 6px 9px; border-radius: 999px; font-size: 13.5px; font-weight: 700; white-space: nowrap; background: var(--c1, var(--a-soft)); color: var(--ct, var(--a-text)); }
+.espace-badge.c-fort { background: var(--a-deep); color: var(--on-a); }
+.espace-badge svg { flex: none; }
+.espace-officine { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 900px) { .espace-badge { padding: 7px; } .espace-officine { font-weight: 650; color: var(--ink); } }
+
+/* Documents : pièces conservées et historique des absences de l'équipe. */
+.doc-pic.justificatif { background: var(--p-arret); color: #111c27; }
+.doc-pic.planning { background: var(--a-soft); color: var(--a-text); }
+.doc-garde { display: inline-flex; align-items: center; gap: 5px; margin-top: 3px; color: var(--a-text); font-weight: 600; }
+.hist-tete { display: grid; gap: 12px; margin-bottom: 16px; }
+.hist-tete > .field { max-width: 300px; }
+.hist-tete .hist-chiffres { margin: 0; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.hist-tete .hist-chiffres .chiffre { grid-template-columns: 1fr; row-gap: 2px; }
+.hist-tete .hist-note { margin: 0; }
+
+/* Points forts : des faits mis en avant, sans note ni classement. */
+.pforts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.pfort { display: flex; align-items: center; gap: 11px; padding: 10px 14px; border-radius: 14px; background: var(--ok-soft); color: var(--ink); }
+.pfort-pic { flex: none; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--surface); color: var(--ok); }
+.pfort-corps { display: grid; gap: 1px; min-width: 0; }
+.pfort-corps b { font-weight: 650; }
+.pforts.court { display: flex; flex-wrap: wrap; gap: 6px; }
+.pforts.court .pfort { padding: 4px 11px 4px 5px; gap: 7px; border-radius: 999px; font-size: 13px; }
+.pforts.court .pfort-pic { width: 22px; height: 22px; border-radius: 50%; }
+.pf-carte { margin-bottom: 16px; }
+.pf-ico { flex: none; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--ok-soft); color: var(--ok); }
+.pf-equipe { list-style: none; margin: 0; padding: 4px 18px 6px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.pf-equipe > li { display: grid; gap: 10px; align-content: start; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); }
+.pf-qui { display: flex; align-items: center; gap: 11px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 10px; }
+.pf-qui:hover b { color: var(--a-text); }
+.pf-nom { display: grid; min-width: 0; }
+.pf-note { margin: 0; padding: 4px 18px 16px; }
+.pf-fiche { display: grid; gap: 8px; margin-bottom: 14px; }
+
+/* Décisions annoncées : ce qui a été décidé, et ce que cela change dans les plannings. */
+.annonces { list-style: none; margin: 0; padding: 6px 18px 18px; display: grid; gap: 10px; }
+.annonce { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); }
+.annonce.neuve { border-color: var(--a-line, var(--a)); background: var(--a-soft); }
+.annonce-pic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--n-2); color: var(--ink-2); }
+.annonce.neuve .annonce-pic { background: var(--surface); color: var(--a-text); }
+.annonce-corps { display: grid; gap: 6px; min-width: 0; }
+.annonce-titre { font-weight: 650; line-height: 1.35; }
+.annonce-effets { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13.5px; color: var(--ink-2); }
+.annonce-effets li { display: flex; gap: 7px; align-items: flex-start; line-height: 1.4; }
+.annonce-effets svg { flex: none; margin-top: 3px; color: var(--a-text); }
+.annonce-vu { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.annonce-vu:hover { border-color: var(--a); color: var(--a-text); }
+/* Sous la cloche : la même liste, plus compacte. */
+.menu.cloche { width: min(420px, calc(100vw - 24px)); max-height: min(76vh, 640px); overflow-y: auto; }
+.menu.cloche .annonces { padding: 4px 6px 6px; gap: 8px; }
+.menu.cloche .annonce { padding: 11px 12px; gap: 10px; }
+.menu.cloche .annonce-vu { width: auto; padding: 5px 10px; border: 1px solid var(--line); background: var(--surface); }
+.menu.cloche .annonce-tout { justify-content: center; color: var(--a-text); font-size: 13.5px; margin-bottom: 4px; }
+@media (max-width: 560px) {
+  .annonce { grid-template-columns: auto 1fr; }
+  .annonce-vu { grid-column: 2; justify-self: start; }
+}
+
+/* Aide : recherche, fiches par thème avec leur tutoriel, lexique. */
+.ad-recherche { display: flex; align-items: center; gap: 12px; padding: 6px 12px 6px 18px; margin-bottom: 16px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--surface); box-shadow: var(--shadow-1); color: var(--ink-2); }
+.ad-recherche:focus-within { border-color: var(--a); }
+.ad-recherche input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 17px; padding: 12px 0; box-shadow: none; }
+.ad-groupe { margin-bottom: 26px; }
+.ad-theme { font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin: 0 4px 10px; }
+.ad-fiches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+.ad-fiche { display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-1); }
+.ad-fiche h3 { margin: 0; font-size: 16.5px; font-weight: 650; line-height: 1.3; }
+.ad-fiche p { margin: 0; color: var(--ink-2); line-height: 1.55; font-size: 14.5px; flex: 1; }
+.ad-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ad-duree { font-weight: 500; opacity: 0.85; padding-left: 8px; margin-left: 2px; border-left: 1px solid currentColor; }
+.lex { margin: 0; padding: 6px 22px; }
+.lex-terme { display: grid; grid-template-columns: minmax(180px, 240px) 1fr; gap: 6px 22px; padding: 15px 0; border-bottom: 1px solid var(--line); }
+.lex-terme:last-child { border-bottom: 0; }
+.lex-terme dt { font-weight: 650; }
+.lex-terme dd { margin: 0; color: var(--ink-2); line-height: 1.55; }
+.ad-pied { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-top: 26px; }
+.ad-autre { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.ad-autre:hover { border-color: var(--a); }
+.ad-autre .grow { display: grid; gap: 2px; }
+.ad-autre-pic { flex: none; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: var(--a-soft); color: var(--a-text); }
+@media (max-width: 640px) {
+  .ad-fiches { grid-template-columns: 1fr; }
+  .lex-terme { grid-template-columns: 1fr; }
+  .ad-actions .btn { flex: 1 1 auto; justify-content: center; }
+}
+
+.piece-bloc { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+
+/* Téléphone : le panneau de la cloche prend la largeur de l'écran, sous la barre du haut. */
+@media (max-width: 640px) {
+  .menu.cloche { position: fixed; left: 12px; right: 12px; top: 68px; width: auto; min-width: 0 !important; max-height: calc(100dvh - 160px); }
+}
+
+/* Téléphone : « Sur qui compter » défile de côté, pour laisser l'équipe à portée de pouce. */
+@media (max-width: 760px) {
+  .pf-equipe { display: flex; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 12px; }
+  .pf-equipe > li { flex: 0 0 78%; scroll-snap-align: start; }
+}

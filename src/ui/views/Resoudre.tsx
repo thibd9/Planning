@@ -1042,11 +1042,14 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
         </div>
         {r.justificatif ? (
           r.justificatif.data ? (
-            <a className="btn sm piece-lien" href={r.justificatif.data} download={r.justificatif.nom}>
-              <Paperclip size={14} aria-hidden="true" /> Justificatif : {r.justificatif.nom}
-            </a>
+            <span className="piece-bloc">
+              <a className="btn sm piece-lien" href={r.justificatif.data} download={r.justificatif.nom}>
+                <Paperclip size={14} aria-hidden="true" /> Justificatif : {r.justificatif.nom}
+              </a>
+              <span className="small soft">Conservé dans « Documents » après votre décision.</span>
+            </span>
           ) : (
-            <span className="small soft">Justificatif transmis, effacé après décision.</span>
+            <span className="small soft">Justificatif rangé dans « Documents ».</span>
           )
         ) : null}
         {!attente && !volontaires.length && !adresse ? (

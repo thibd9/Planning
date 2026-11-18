@@ -1,6 +1,6 @@
 import { CalendarHeart, Check, ChevronLeft, ChevronRight, Eraser, HandHeart, Hourglass, Lock, Sparkles, Sun, Sunrise, Sunset, TreePalm } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { JOURS, JOURS_COURT, MOIS, dayIndex, fmtDateCourt, fmtDateLong, weekday } from '../../domain/time';
+import { JOURS, JOURS_COURT, MOIS, dayIndex, fmtDateCourt, fmtDateLong, weekday, ferie } from '../../domain/time';
 import type { ISODate, SouhaitChoix } from '../../domain/types';
 import { SOUHAIT_LABEL, nomCourt } from '../../domain/types';
 import { estAbsent, ouverture } from '../../engine/core';
@@ -168,7 +168,7 @@ export function Souhaits({ personId }: { personId: string }): JSX.Element {
                   return (
                     <span key={date} role="gridcell" className="sh-jour off">
                       <span className="n num">{n}</span>
-                      <span className="small">{ferme ? 'Fermé' : 'Absent'}</span>
+                      <span className="small">{ferme ? (ferie(date) ? `Férié · ${ferie(date)}` : 'Fermé') : 'Absent'}</span>
                     </span>
                   );
                 }

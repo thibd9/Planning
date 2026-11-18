@@ -1,4 +1,31 @@
-import type { Suivi } from '../../engine/suivi';
+import type { LucideIcon } from 'lucide-react';
+import { AlarmClockCheck, HandHelping, Hand, Scale } from 'lucide-react';
+import type { PointFort, PointFortCle, Suivi } from '../../engine/suivi';
+
+const ICONE_FORT: Record<PointFortCle, LucideIcon> = { ponctuel: AlarmClockCheck, entraide: HandHelping, volontaire: Hand, part: Scale };
+
+/** Points forts d'une personne : des faits, sans note ni classement. `court` ne garde que les titres. */
+export function PointsForts({ points, court }: { points: PointFort[]; court?: boolean }): JSX.Element | null {
+  if (!points.length) return null;
+  return (
+    <ul className={`pforts${court ? ' court' : ''}`}>
+      {points.map((p) => {
+        const Icone = ICONE_FORT[p.cle];
+        return (
+          <li key={p.cle} className="pfort" title={court ? p.detail : undefined}>
+            <span className="pfort-pic" aria-hidden="true">
+              <Icone size={court ? 14 : 17} />
+            </span>
+            <span className="pfort-corps">
+              <b>{p.titre}</b>
+              {court ? <span className="sr"> : {p.detail}</span> : <span className="small soft">{p.detail}</span>}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 /** Compteurs de présence d'une personne : retards, départs, absences par nature, remplacements assurés. */
 export function Compteurs({ suivi }: { suivi: Suivi }): JSX.Element {

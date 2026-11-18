@@ -72,7 +72,7 @@ const ETAPES: Etape[] = [
   {
     cible: 'aide',
     titre: 'C’est parti',
-    texte: 'Le tutoriel reste disponible ici. Commencez par « Construire » pour préparer votre première semaine.',
+    texte: 'L’aide reste ici : chaque fonction y a sa réponse et son tutoriel. Commencez par « Construire » pour préparer votre première semaine.',
   },
 ];
 

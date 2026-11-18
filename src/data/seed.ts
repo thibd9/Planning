@@ -1,5 +1,5 @@
 import { REGLES_INITIALES } from '../domain/rules';
-import { addDays, dayIndex, decalageParis, ferie, fromDayIndex, mondayOf, uid, weekDates } from '../domain/time';
+import { addDays, dayIndex, decalageParis, ferie, fmtDateCourt, fromDayIndex, mondayOf, uid, weekDates } from '../domain/time';
 import { empreinte, identifiantPropose } from '../domain/acces';
 import type { AppData, Besoin, Garde, ISODate, Mission, Officine, Person, Shift } from '../domain/types';
 import { decrireJournee, shiftsSemaine } from '../engine/core';
@@ -164,7 +164,7 @@ export function vierge(): AppData {
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
 /** À augmenter quand l'exemple change (noms, équipe) : les exemples enregistrés sur l'appareil sont alors régénérés. */
-export const DEMO_VERSION = 2;
+export const DEMO_VERSION = 3;
 
 export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);
@@ -344,6 +344,20 @@ export function seed(today: ISODate, avance = 0): AppData {
     detail: `Du ${from.split('-').reverse().join('/')} au ${to.split('-').reverse().join('/')} : ${retires.length} poste${retires.length > 1 ? 's' : ''} à couvrir.`,
     semaine: lundi,
   });
+  // La décision est annoncée à Igor et aux titulaires, avec ce qu'elle change au planning.
+  data.annonces = [
+    {
+      id: uid('an'),
+      at: new Date(`${today}T07:40:00`).toISOString(),
+      titre: 'Arrêt d’Igor L. enregistré',
+      effets: [
+        `${retires.length} poste${retires.length > 1 ? 's' : ''} d’Igor L. retiré${retires.length > 1 ? 's' : ''} du planning, du ${fmtDateCourt(from)} au ${fmtDateCourt(to)}.`,
+        `${retires.length} poste${retires.length > 1 ? 's' : ''} à couvrir : les titulaires s’en chargent dans « Résoudre ».`,
+      ],
+      pour: ['p_karim', 'p_helene', 'p_antoine'],
+      luPar: [],
+    },
+  ];
 
   // ---- Une demande de congé en attente, dans deux semaines
   data.absences.push({

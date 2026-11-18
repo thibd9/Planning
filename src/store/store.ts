@@ -4,7 +4,7 @@ import { DEMO_VERSION, seed, vierge } from '../data/seed';
 import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
 import { addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
-import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement } from '../domain/types';
+import type { Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
 import { decrireBesoin, minutesSemaine, shiftsSemaine } from '../engine/core';
 import { reposApresGarde } from '../engine/gardes';
@@ -54,7 +54,24 @@ function charger(): { officineId: string; data: AppData; autres: Record<string, 
 
 const now = (): string => new Date().toISOString();
 
-function journal(d: AppData, e: Omit<JournalEntry, 'id' | 'at' | 'regles'> & { regles?: boolean }): AppData {
+/** La personne connectée : elle signe les décisions annoncées et n'a pas à les relire. */
+let acteurCourant: string | null = null;
+
+/** Ce qu'une décision change, pour qui : l'annonce part aux personnes concernées et à tous les titulaires. */
+interface Portee {
+  pour: (string | null | undefined)[];
+  effets: string[];
+}
+
+function annoncer(d: AppData, titre: string, portee: Portee): AppData {
+  const titulaires = d.personnes.filter((p) => p.qualification === 'titulaire' && !p.externe).map((p) => p.id);
+  const connus = new Set(d.personnes.map((p) => p.id));
+  const pour = [...new Set([...portee.pour, ...titulaires])].filter((x): x is string => !!x && connus.has(x));
+  const annonce: Annonce = { id: uid('an'), at: now(), titre, effets: portee.effets.filter(Boolean), pour, ...(acteurCourant ? { auteur: acteurCourant } : {}), luPar: acteurCourant ? [acteurCourant] : [] };
+  return { ...d, annonces: [annonce, ...(d.annonces ?? [])].slice(0, 80) };
+}
+
+function journal(d: AppData, e: Omit<JournalEntry, 'id' | 'at' | 'regles'> & { regles?: boolean }, portee?: Portee): AppData {
   const { regles, ...rest } = e;
   const entry: JournalEntry = {
     id: uid('j'),
@@ -62,7 +79,16 @@ function journal(d: AppData, e: Omit<JournalEntry, 'id' | 'at' | 'regles'> & { r
     ...rest,
     ...(regles ? { regles: d.regles.map((r) => `${r.id}@${r.version}`) } : {}),
   };
-  return { ...d, journal: [entry, ...d.journal] };
+  const suite = { ...d, journal: [entry, ...d.journal] };
+  return portee ? annoncer(suite, e.titre, portee) : suite;
+}
+
+/** Le justificatif d'une demande tranchée est rangé dans les documents de la personne : seuls les titulaires le voient avec elle. */
+function archiver(d: AppData, r: Remplacement, issue: string): DocumentGed[] {
+  const docs = d.documents ?? [];
+  const j = r.justificatif;
+  if (!j?.data) return docs;
+  return docs.concat({ id: uid('doc'), personId: r.demandeur, nom: j.nom, type: j.type, taille: j.taille, data: j.data, categorie: 'justificatif', at: now(), partage: true, origine: `Remplacement du ${fmtDateCourt(r.date)} · ${issue}`, source: r.id });
 }
 
 const nom = (d: AppData, id: string | null | undefined): string => {
@@ -136,6 +162,8 @@ export interface Store {
   deciderDemande: (id: string, accepter: boolean, motif?: string) => void;
   regulariser: (r: Pick<Regularisation, 'personId' | 'minutes' | 'type' | 'semaine'>) => void;
   retirerRegularisation: (id: string) => void;
+  /** Marque comme lues les annonces de décision d'une personne ; `id` absent : toutes. */
+  lireAnnonces: (personId: string, id?: string) => void;
   ajouterDocument: (doc: Omit<DocumentGed, 'id' | 'at'>) => void;
   supprimerDocument: (id: string) => void;
   partagerDocument: (id: string, partage: boolean) => void;
@@ -410,11 +438,13 @@ export const useStore = create<Store>((set, get) => {
           return journal(
             {
               ...d,
-              // Une demande tranchée ne garde pas son justificatif.
+              // Une demande tranchée range son justificatif dans les documents : les titulaires le conservent.
+              documents: archiver(d, r, 'refusé'),
               remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut: 'refusee' as const, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined, precision: undefined } : x)),
               messages: d.messages.concat(r.demandeur !== de ? [msg(r.demandeur, texteRefus(`de remplacement du ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`, motif ?? '', 'Vous restez en poste.'))] : []),
             },
             { type: 'modification', titre: `Demande de remplacement de ${nom(d, r.demandeur)} du ${fmtDateCourt(r.date)} refusée`, ...(motif ? { detail: motif } : {}) },
+            { pour: [r.demandeur], effets: [`Aucun changement au planning : ${nom(d, r.demandeur)} reste en poste le ${quand}.`] },
           );
         }
         // Acceptée : tous ceux qui peuvent tenir le poste sont prévenus en même temps.
@@ -432,6 +462,7 @@ export const useStore = create<Store>((set, get) => {
             ),
           },
           { type: 'modification', titre: `Demande de remplacement de ${nom(d, r.demandeur)} du ${fmtDateCourt(r.date)} acceptée : ${sollicites.length} personne${sollicites.length > 1 ? 's' : ''} prévenue${sollicites.length > 1 ? 's' : ''}` },
+          { pour: [r.demandeur, ...sollicites], effets: [`Rien ne change encore : ${nom(d, r.demandeur)} reste en poste le ${quand} tant qu’un remplaçant n’est pas validé.`] },
         );
       }),
     regulariser: (r) =>
@@ -481,11 +512,15 @@ export const useStore = create<Store>((set, get) => {
         const r = d.remplacements.find((x) => x.id === id);
         const de = get().acteur ?? d.officine.responsableId ?? '';
         const prevenir = !!r && statut === 'refusee' && motif !== undefined && !!de && r.demandeur !== de;
-        return {
+        const suite = (x: AppData): AppData =>
+          r && statut === 'refusee' ? annoncer(x, `Demande de remplacement de ${nom(d, r.demandeur)} du ${fmtDateCourt(r.date)} refusée`, { pour: [r.demandeur, ...r.volontaires], effets: [`Aucun changement au planning : ${nom(d, r.demandeur)} reste en poste le ${fmtDateCourt(r.date)}, ${fmtHHMM(r.start)} – ${fmtHHMM(r.end)}.`] }) : x;
+        return suite({
           ...d,
+          // Refusée : la pièce est conservée. Annulée par la personne : elle disparaît avec la demande.
+          documents: r && statut === 'refusee' ? archiver(d, r, 'refusé') : d.documents,
           remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined, precision: undefined } : x)),
           messages: prevenir && r ? d.messages.concat({ id: uid('msg'), de, a: r.demandeur, texte: texteRefus(`de remplacement du ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`, motif ?? '', 'Vous restez en poste.'), at: now(), luPar: [de] }) : d.messages,
-        };
+        });
       }),
     declinerAppel: (id, personId, motif) =>
       commit((d) => {
@@ -582,6 +617,10 @@ export const useStore = create<Store>((set, get) => {
               ),
             },
             { type: 'reparation', titre: `Absence de ${nom(d, s.personId)} du ${fmtDateCourt(s.date)} couverte par ${nom(d, remplacantId)} (appel à l’équipe${horsTour ? ', hors tour de rôle' : ', selon le tour de rôle'})`, regles: true },
+            {
+              pour: [remplacantId, s.personId, ...autres],
+              effets: [`${nom(d, remplacantId)} : repos → en poste le ${fmtDateCourt(s.date)}, ${fmtHHMM(s.start)} – ${fmtHHMM(s.end)}${ecartContrat({ ...d, shifts: d.shifts.concat(nouveau) }, remplacantId, monday)}.`, `Le poste laissé par ${nom(d, s.personId)} est de nouveau tenu.`],
+            },
           );
         }
         const poste = d.shifts.find((x) => x.id === r?.shiftId);
@@ -598,6 +637,7 @@ export const useStore = create<Store>((set, get) => {
             shifts: passer(d.shifts),
             // Le remplacement validé vaut publication : les deux personnes voient aussitôt leur changement.
             semaines: semaine?.snapshot ? { ...d.semaines, [monday]: { ...semaine, snapshot: passer(semaine.snapshot) } } : d.semaines,
+            documents: archiver(d, r, 'accepté'),
             remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut: 'acceptee' as const, remplacantId, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined, precision: undefined } : x)),
             notifications: [
               { id: uid('n'), personId: r.demandeur, at, date: poste.date, avant: 'En poste', apres: `Remplacé par ${nom(d, remplacantId)}`, tardif: dayIndex(poste.date) - dayIndex(today) < 7 },
@@ -606,11 +646,23 @@ export const useStore = create<Store>((set, get) => {
             ],
           },
           { type: 'reparation', titre: `Remplacement validé le ${horaire} : ${nom(d, remplacantId)} remplace ${nom(d, r.demandeur)}${plus}`, regles: true },
+          {
+            pour: [r.demandeur, remplacantId, ...r.volontaires],
+            effets: [`${nom(d, r.demandeur)} : en poste → repos le ${horaire}.`, `${nom(d, remplacantId)} : repos → en poste, ${fmtHHMM(poste.start)} – ${fmtHHMM(poste.end)}${plus}.`],
+          },
         );
       }),
     direct: false,
     acteur: null,
-    setActeur: (acteur) => set({ acteur }),
+    setActeur: (acteur) => {
+      acteurCourant = acteur;
+      set({ acteur });
+    },
+    lireAnnonces: (personId, id) =>
+      commit((d) => {
+        const aLire = (d.annonces ?? []).some((a) => (!id || a.id === id) && a.pour.includes(personId) && !a.luPar.includes(personId));
+        return aLire ? { ...d, annonces: (d.annonces ?? []).map((a) => ((!id || a.id === id) && a.pour.includes(personId) && !a.luPar.includes(personId) ? { ...a, luPar: a.luPar.concat(personId) } : a)) } : d;
+      }, false),
     proposer: (auteur, action, args) =>
       set((s) => ({
         data: { ...s.data, accords: [...(s.data.accords ?? []), { id: uid('ok'), auteur, at: now(), action, args: JSON.parse(JSON.stringify(args)) as unknown[], titre: titreAccord(s.data, action, args) }] },
@@ -624,7 +676,7 @@ export const useStore = create<Store>((set, get) => {
       const action = (get() as unknown as Record<string, (...x: unknown[]) => void>)[a.action];
       if (typeof action === 'function') action(...a.args);
       set({ direct: false });
-      commit((d) => journal({ ...d, messages: d.messages.concat({ id: uid('msg'), de: chef, a: a.auteur, texte: `Accord donné : ${a.titre}.`, at: now(), luPar: [chef] }) }, { type: 'regle', titre: `Accord donné à ${nom(d, a.auteur)} : ${a.titre}` }), false);
+      commit((d) => journal({ ...d, messages: d.messages.concat({ id: uid('msg'), de: chef, a: a.auteur, texte: `Accord donné : ${a.titre}.`, at: now(), luPar: [chef] }) }, { type: 'regle', titre: `Accord donné à ${nom(d, a.auteur)} : ${a.titre}` }, { pour: [a.auteur], effets: ['La décision est appliquée telle qu’elle était proposée.'] }), false);
     },
     ecarterAccord: (id, refus) =>
       commit((d) => {
@@ -632,7 +684,7 @@ export const useStore = create<Store>((set, get) => {
         if (!a) return d;
         const chef = d.officine.responsableId ?? '';
         const reste = { ...d, accords: (d.accords ?? []).filter((x) => x.id !== id) };
-        return refus ? journal({ ...reste, messages: d.messages.concat({ id: uid('msg'), de: chef, a: a.auteur, texte: `Accord refusé : ${a.titre}.`, at: now(), luPar: [chef] }) }, { type: 'regle', titre: `Accord refusé à ${nom(d, a.auteur)} : ${a.titre}` }) : reste;
+        return refus ? journal({ ...reste, messages: d.messages.concat({ id: uid('msg'), de: chef, a: a.auteur, texte: `Accord refusé : ${a.titre}.`, at: now(), luPar: [chef] }) }, { type: 'regle', titre: `Accord refusé à ${nom(d, a.auteur)} : ${a.titre}` }, { pour: [a.auteur], effets: ['Rien n’est appliqué : les plannings ne changent pas.'] }) : reste;
       }, false),
     chargerExemple: (neuf = true, depart = 'etabli') =>
       set((s) => {
@@ -732,6 +784,13 @@ export const useStore = create<Store>((set, get) => {
           changements: ctrl.changements,
           accords,
           regles: true,
+        }, {
+          pour: ctrl.premiere ? [...new Set(snapshot.map((x) => x.personId))] : ctrl.changements.map((c) => c.personId),
+          effets: ctrl.premiere
+            ? [`${snapshot.length} postes pour ${new Set(snapshot.map((x) => x.personId)).size} personnes : chacun voit sa semaine dans « Mon planning ».`]
+            : ctrl.changements.length
+              ? ctrl.changements.slice(0, 4).map((c) => `${nom(d, c.personId)}, ${fmtDateCourt(c.date)} : ${c.avant} → ${c.apres}.`).concat(ctrl.changements.length > 4 ? [`Et ${ctrl.changements.length - 4} autre${ctrl.changements.length > 5 ? 's' : ''} changement${ctrl.changements.length > 5 ? 's' : ''}.`] : [])
+              : ['Aucun poste ne change.'],
         });
       }, false),
 
@@ -766,6 +825,13 @@ export const useStore = create<Store>((set, get) => {
         return journal(
           { ...next, notifications: [...personnes.map((personId) => ({ id: uid('n'), personId, at, date: from, avant: 'Planning habituel', apres: `Formation « ${intitule} » ${quand}`, tardif: dayIndex(from) - dayIndex(today) < 7 })), ...next.notifications] },
           { type: 'absence', titre: `Formation « ${intitule} » planifiée ${quand}`, detail: `Participants : ${personnes.map((id) => nom(d, id)).join(', ')}. Chacun a été prévenu dans son espace.` },
+          {
+            pour: personnes,
+            effets: [
+              `En formation ${quand} : ${personnes.map((id) => nom(d, id)).join(', ')}.`,
+              next.trous.length > d.trous.length ? `${next.trous.length - d.trous.length} poste${next.trous.length - d.trous.length > 1 ? 's' : ''} à couvrir : les titulaires s’en chargent dans « Résoudre ».` : 'Aucun poste à couvrir.',
+            ],
+          },
         );
       }),
     planifierInventaire: ({ date, start, end, personnes }) =>
@@ -786,6 +852,7 @@ export const useStore = create<Store>((set, get) => {
             notifications: [...personnes.map((personId) => ({ id: uid('n'), personId, at, date, avant: 'Planning habituel', apres: `Inventaire, ${horaire}`, tardif: dayIndex(date) - dayIndex(today) < 7 })), ...d.notifications],
           },
           { type: 'modification', titre: `Inventaire planifié le ${fmtDateCourt(date)}, ${horaire}`, detail: `Participants : ${personnes.map((id) => nom(d, id)).join(', ')}. Chacun a été prévenu dans son espace.`, regles: true },
+          { pour: personnes, effets: [`Un poste « Inventaire » est ajouté le ${fmtDateCourt(date)}, ${horaire}, pour ${personnes.map((id) => nom(d, id)).join(', ')}.`] },
         );
       }),
     deciderAbsence: (id, approuver, motif) =>
@@ -800,16 +867,34 @@ export const useStore = create<Store>((set, get) => {
         if (!approuver && motif !== undefined && de && a.personId !== de) {
           next = { ...next, messages: next.messages.concat({ id: uid('msg'), de, a: a.personId, texte: texteRefus(`(${libelleAbsence(a).toLowerCase()}, du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)})`, motif), at: now(), luPar: [de] }) };
         }
-        return journal(next, {
-          type: 'absence',
-          titre: `${ABSENCE_LABEL[a.type]} de ${nom(d, a.personId)} ${approuver ? 'approuvé' : 'refusé'}`,
-          detail: `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}.${!approuver && motif ? ` ${motif}` : ''}`,
-        });
+        const periode = a.from === a.to ? `le ${fmtDateCourt(a.from)}` : `du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}`;
+        const ouverts = next.trous.filter((t) => t.absenceId === a.id && !d.trous.some((x) => x.id === t.id));
+        const retires = d.shifts.length - next.shifts.length;
+        return journal(
+          next,
+          {
+            type: 'absence',
+            titre: `${ABSENCE_LABEL[a.type]} de ${nom(d, a.personId)} ${approuver ? 'approuvé' : 'refusé'}`,
+            detail: `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}.${!approuver && motif ? ` ${motif}` : ''}`,
+          },
+          {
+            pour: [a.personId],
+            effets: !approuver
+              ? [`Aucun changement au planning : ${nom(d, a.personId)} garde ses postes ${periode}.`]
+              : retires
+                ? [
+                    `${retires} poste${retires > 1 ? 's' : ''} de ${nom(d, a.personId)} retiré${retires > 1 ? 's' : ''} du planning, ${periode}.`,
+                    ouverts.length ? `${ouverts.length} poste${ouverts.length > 1 ? 's' : ''} à couvrir (${ouverts.slice(0, 4).map((t) => fmtDateCourt(t.shift.date)).join(', ')}${ouverts.length > 4 ? '…' : ''}) : les titulaires s’en chargent dans « Résoudre ».` : '',
+                  ]
+                : [`${nom(d, a.personId)} sera absent ${periode}. Aucun poste n’était posé sur ces dates : rien à couvrir.`],
+          },
+        );
       }),
     resoudreAbsence: (absenceId) =>
       commit((d, today) => {
         let next = d;
         const titres: string[] = [];
+        const touches: string[] = [];
         for (const t of d.trous.filter((x) => x.absenceId === absenceId && x.statut === 'ouvert')) {
           // Chaque jour est recalculé sur le planning déjà corrigé : une option ne défait pas la précédente.
           const rep = optionsReparation(next, t.shift, today);
@@ -818,9 +903,15 @@ export const useStore = create<Store>((set, get) => {
           next = appliquerPatch(next, o.patch);
           next = { ...next, trous: next.trous.map((x) => (x.id === t.id ? { ...x, statut: 'resolu' as const, resolution: o.titre } : x)), remplacements: next.remplacements.map((r) => (r.trouId === t.id && r.statut === 'ouverte' ? { ...r, statut: 'annulee' as const } : r)) };
           titres.push(`${fmtDateCourt(t.shift.date)} : ${o.titre.toLowerCase()}`);
+          touches.push(...o.changements.map((c) => c.personId));
         }
         if (!titres.length) return d;
-        return journal(next, { type: 'reparation', titre: `Absence réglée avec les options conseillées (${titres.length} jour${titres.length > 1 ? 's' : ''})`, detail: titres.join(' ; '), regles: true });
+        const absent = d.absences.find((x) => x.id === absenceId)?.personId;
+        return journal(
+          next,
+          { type: 'reparation', titre: `Absence${absent ? ` de ${nom(d, absent)}` : ''} réglée avec les options conseillées (${titres.length} jour${titres.length > 1 ? 's' : ''})`, detail: titres.join(' ; '), regles: true },
+          { pour: [absent, ...touches], effets: titres.map((t) => `${t.charAt(0).toUpperCase()}${t.slice(1)}.`) },
+        );
       }),
     resoudreTrou: (id, option) =>
       commit((d) => {
@@ -837,6 +928,12 @@ export const useStore = create<Store>((set, get) => {
               .join(' '),
             changements: option.changements,
             regles: true,
+          },
+          {
+            pour: [trou.shift.personId, ...option.changements.map((c) => c.personId)],
+            effets: option.changements.length
+              ? option.changements.slice(0, 4).map((c) => `${nom(d, c.personId)}, ${fmtDateCourt(c.date)} : ${c.avant} → ${c.apres}.`).concat(option.changements.length > 4 ? [`Et ${option.changements.length - 4} autre${option.changements.length > 5 ? 's' : ''} changement${option.changements.length > 5 ? 's' : ''}.`] : [])
+              : [option.resume],
           },
         );
       }),
@@ -866,6 +963,12 @@ export const useStore = create<Store>((set, get) => {
             type: 'besoin',
             titre: `Demande de ${nom(d, b.personId)} ${accepter ? `acceptée (${libelle})` : 'refusée'}`,
             detail: `${decrireBesoin(maj)}${!accepter && motif ? `. ${motif}` : ''}`,
+          },
+          {
+            pour: [b.personId],
+            effets: accepter
+              ? [`${decrireBesoin(maj)}.`, maj.statut === 'reconnue' ? 'Les prochains plannings la respectent toujours.' : 'Les prochains plannings en tiennent compte autant que possible.']
+              : ['Aucun changement : les plannings se construisent sans cette contrainte.'],
           },
         );
       }),
@@ -906,6 +1009,12 @@ export const useStore = create<Store>((set, get) => {
               : `${GARDE_LABEL[g.type]} du ${fmtDateCourt(g.date)} : affectation retirée`,
             detail: personId ? `Programmation communiquée ${dayIndex(g.date) - dayIndex(get().today)} jours avant la garde. ${nom(d, personId)} a été prévenu dans son espace.` : undefined,
             regles: true,
+          },
+          {
+            pour: [personId, g.personId],
+            effets: personId
+              ? [`${nom(d, personId)} tient la garde du ${fmtDateCourt(g.date)} ; le repos qui suit est contrôlé.`, ...(g.personId && g.personId !== personId ? [`${nom(d, g.personId)} n’est plus de garde ce jour-là.`] : [])]
+              : ['La garde est de nouveau à confier.'],
           },
         );
       }),

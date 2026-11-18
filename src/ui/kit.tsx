@@ -2,7 +2,7 @@ import { createPortal } from 'react-dom';
 import { AlarmClock, ArrowRight, CalendarCheck, Eye, EyeOff, HeartPulse, Hourglass, Sparkles, X } from 'lucide-react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { dayIndex, fmtHeure } from '../domain/time';
+import { dayIndex, fmtHeure, ferie } from '../domain/time';
 import type { ISODate, Interval, Mission, Person, Shift, Urgence } from '../domain/types';
 import { URGENCE_LABEL, estPharmacien } from '../domain/types';
 import { couleurDe } from './icons';
@@ -354,5 +354,17 @@ export function Empty({ icon, title, children, action }: { icon: ReactNode; titl
       {children ? <p>{children}</p> : null}
       {action}
     </div>
+  );
+}
+
+/** Un jour férié se signale par son nom, partout où une date est affichée. */
+export function Ferie({ date, court }: { date: ISODate; court?: boolean }): JSX.Element | null {
+  const nom = ferie(date);
+  if (!nom) return null;
+  return (
+    <span className="ferie-tag" title={`Jour férié : ${nom}`}>
+      {court ? 'Férié' : nom}
+      {court ? <span className="sr"> : {nom}</span> : null}
+    </span>
   );
 }

@@ -1,15 +1,29 @@
-import { CalendarCheck, CalendarOff, Download, Eye, FileText, FolderOpen, Lock, Paperclip, Trash2, Upload, Users } from 'lucide-react';
+import { CalendarCheck, CalendarOff, Download, Eye, FileText, FolderOpen, History, Lock, Paperclip, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { Espace } from '../../domain/acces';
-import { MOIS, addDays, fmtDateCourt, fmtDuree, fmtSemaine } from '../../domain/time';
-import type { CategorieDoc, DocumentGed } from '../../domain/types';
-import { CATEGORIE_DOC_LABEL, classeAbsence, libelleAbsence, nomCourt } from '../../domain/types';
+import { MOIS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHeure, fmtSemaine } from '../../domain/time';
+import type { CategorieDoc, DocumentGed, ISODate } from '../../domain/types';
+import { CATEGORIE_DOC_LABEL, ECART_LABEL, MOTIF_REMPLACEMENT_LABEL, URGENCE_LABEL, classeAbsence, libelleAbsence, nomCourt } from '../../domain/types';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { PDF_MAX, lirePdf, reduireImage } from '../components/Remplacer';
 import { Avatar } from '../kit';
 
-type Onglet = 'plannings' | 'absences' | 'fichiers' | 'equipe';
+type Onglet = 'plannings' | 'absences' | 'fichiers' | 'equipe' | 'historique';
+/** Ce que l'historique de l'équipe distingue. */
+type Nature = 'arret' | 'conge' | 'formation' | 'remplacement' | 'imprevu' | 'autre';
+const NATURE_LABEL: Record<Nature, string> = { arret: 'Arrêts', conge: 'Congés', formation: 'Formations', remplacement: 'Remplacements', imprevu: 'Absences non prévues', autre: 'Autres' };
+interface Evenement {
+  cle: string;
+  personId: string;
+  from: ISODate;
+  to: ISODate;
+  nature: Nature;
+  classe: string;
+  titre: string;
+  detail: string;
+  issue: { mot: string; ton: 'ok' | 'danger' | 'warn' } | null;
+}
 /** Place totale laissée aux documents sur l'appareil : au-delà, le navigateur refuserait d'enregistrer. */
 const PLACE_MAX = 3 * 1024 * 1024;
 const poids = (o: number): string => (o >= 1024 * 1024 ? `${(o / 1024 / 1024).toFixed(1).replace('.', ',')} Mo` : `${Math.max(1, Math.round(o / 1024))} Ko`);
@@ -26,6 +40,10 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
   const [categorie, setCategorie] = useState<CategorieDoc>('arret');
   const [partage, setPartage] = useState(true);
   const [erreur, setErreur] = useState('');
+  const [qui, setQui] = useState('');
+  const [nature, setNature] = useState<Nature | ''>('');
+  // Les pièces justificatives ne regardent que les titulaires, pas une personne à qui la gestion est confiée.
+  const titulaire = data.personnes.find((p) => p.id === personId)?.qualification === 'titulaire';
 
   // Mes plannings publiés, du plus récent au plus ancien, rangés par mois.
   const plannings = useMemo(() => {
@@ -45,22 +63,98 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
   const absences = data.absences.filter((a) => a.personId === personId).sort((a, b) => b.from.localeCompare(a.from));
   const documents = data.documents ?? [];
   const miens = documents.filter((d) => d.personId === personId).sort((a, b) => b.at.localeCompare(a.at));
-  const recus = gestion ? documents.filter((d) => d.personId !== personId && d.partage).sort((a, b) => b.at.localeCompare(a.at)) : [];
+  const recus = gestion
+    ? documents
+        .filter((d) => d.personId !== personId && d.partage && (titulaire || d.categorie !== 'justificatif'))
+        .sort((a, b) => a.personId.localeCompare(b.personId) || b.at.localeCompare(a.at))
+    : [];
+
+  // L'historique de l'équipe : absences, arrêts, formations, remplacements demandés et absences non prévues.
+  const historique = useMemo((): Evenement[] => {
+    if (!gestion) return [];
+    const nomDe = (id: string | undefined): string => {
+      const p = data.personnes.find((x) => x.id === id);
+      return p ? nomCourt(p) : 'quelqu’un';
+    };
+    const liste: Evenement[] = [];
+    for (const a of data.absences) {
+      const jours = dayIndex(a.to) - dayIndex(a.from) + 1;
+      liste.push({
+        cle: a.id,
+        personId: a.personId,
+        from: a.from,
+        to: a.to,
+        nature: a.type === 'maladie' ? 'arret' : a.type,
+        classe: classeAbsence(a.type),
+        titre: libelleAbsence(a),
+        detail: `${a.from === a.to ? `Le ${fmtDateCourt(a.from)}` : `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}`} · ${jours} jour${jours > 1 ? 's' : ''}`,
+        issue: a.statut === 'approuvee' ? { mot: 'Acceptée', ton: 'ok' } : a.statut === 'refusee' ? { mot: 'Refusée', ton: 'danger' } : { mot: 'En attente', ton: 'warn' },
+      });
+    }
+    for (const r of data.remplacements) {
+      if (r.trouId || r.statut === 'annulee') continue;
+      const motif = titulaire && r.motif ? ` · ${MOTIF_REMPLACEMENT_LABEL[r.motif]}` : '';
+      liste.push({
+        cle: r.id,
+        personId: r.demandeur,
+        from: r.date,
+        to: r.date,
+        nature: 'remplacement',
+        classe: r.urgence === 'medical' ? 'arret' : 'planning',
+        titre: `Remplacement demandé${r.urgence && r.urgence !== 'prevu' ? ` · ${URGENCE_LABEL[r.urgence]}` : ''}`,
+        detail: `Le ${fmtDateCourt(r.date)}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}${motif}${r.statut === 'acceptee' ? ` · remplacé par ${nomDe(r.remplacantId)}` : ''}`,
+        issue: r.statut === 'acceptee' ? { mot: 'Accepté', ton: 'ok' } : r.statut === 'refusee' ? { mot: 'Refusé', ton: 'danger' } : { mot: 'En attente', ton: 'warn' },
+      });
+    }
+    for (const e of data.ecarts ?? []) {
+      if (e.type !== 'absence') continue;
+      liste.push({ cle: e.id, personId: e.personId, from: e.date, to: e.date, nature: 'imprevu', classe: 'absence', titre: ECART_LABEL.absence, detail: `Le ${fmtDateCourt(e.date)}`, issue: null });
+    }
+    return liste.sort((a, b) => b.from.localeCompare(a.from));
+  }, [data.absences, data.remplacements, data.ecarts, data.personnes, gestion, titulaire]);
+  const duChoix = historique.filter((e) => !qui || e.personId === qui);
+  const visibles = duChoix.filter((e) => !nature || e.nature === nature);
+  const parMoisHist = useMemo(() => {
+    const m = new Map<string, Evenement[]>();
+    for (const e of visibles) m.set(e.from.slice(0, 7), (m.get(e.from.slice(0, 7)) ?? []).concat(e));
+    return [...m.entries()];
+  }, [visibles]);
+  // Douze derniers mois, pour la personne choisie ou pour toute l'équipe.
+  const debut = addDays(today, -365);
+  const joursDe = (n: Nature): number =>
+    duChoix
+      .filter((e) => e.nature === n && e.issue?.ton === 'ok' && e.to >= debut && e.from <= today)
+      .reduce((t, e) => t + dayIndex(e.to < today ? e.to : today) - dayIndex(e.from > debut ? e.from : debut) + 1, 0);
+  const pieces = documents.filter((d) => d.categorie === 'justificatif' || d.categorie === 'arret').filter((d) => d.partage && (!qui || d.personId === qui));
   const place = documents.reduce((t, d) => t + d.taille, 0);
 
-  const deposer = async (fichier: File | undefined): Promise<void> => {
+  /** Lit une photo ou un PDF ; dit pourquoi quand le fichier ne convient pas. */
+  const lire = async (fichier: File | undefined): Promise<{ nom: string; type: string; taille: number; data: string } | null> => {
     setErreur('');
-    if (!fichier) return;
+    if (!fichier) return null;
     try {
       const lu = fichier.type.startsWith('image/') ? await reduireImage(fichier) : fichier.type === 'application/pdf' ? (fichier.size > PDF_MAX ? null : await lirePdf(fichier)) : undefined;
-      if (lu === undefined) return setErreur('Déposez une photo ou un PDF.');
-      if (lu === null) return setErreur('Ce PDF dépasse 600 Ko : photographiez plutôt le document.');
-      if (place + lu.taille > PLACE_MAX) return setErreur('Il n’y a plus assez de place sur cet appareil : supprimez un ancien document.');
-      ajouterDocument({ personId, nom: lu.nom, type: lu.type, taille: lu.taille, data: lu.data, categorie, partage: gestion ? false : partage });
-      dire('Document rangé dans votre espace.', true);
+      if (lu === undefined) setErreur('Déposez une photo ou un PDF.');
+      else if (lu === null) setErreur('Ce PDF dépasse 600 Ko : photographiez plutôt le document.');
+      else if (place + lu.taille > PLACE_MAX) setErreur('Il n’y a plus assez de place sur cet appareil : supprimez un ancien document.');
+      else return lu;
     } catch {
       setErreur('Ce fichier n’a pas pu être lu. Essayez une photo.');
     }
+    return null;
+  };
+  const deposer = async (fichier: File | undefined): Promise<void> => {
+    const lu = await lire(fichier);
+    if (!lu) return;
+    ajouterDocument({ personId, ...lu, categorie, partage: gestion ? false : partage });
+    dire('Document rangé dans votre espace.', true);
+  };
+  /** Le titulaire range la pièce qu'on lui a remise, rattachée à l'absence ou à la demande. */
+  const joindre = async (e: Evenement, fichier: File | undefined): Promise<void> => {
+    const lu = await lire(fichier);
+    if (!lu) return;
+    ajouterDocument({ personId: e.personId, ...lu, categorie: e.nature === 'arret' ? 'arret' : 'justificatif', partage: true, origine: `${e.titre} · ${fmtDateCourt(e.from)}`, source: e.cle });
+    dire('Justificatif conservé.', true);
   };
   const ouvrirSemaine = (lundi: string): void => {
     setSemaine(lundi);
@@ -70,12 +164,19 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
 
   const onglets: { cle: Onglet; nom: string; n: number; icone: JSX.Element }[] = [
     { cle: 'plannings', nom: gestion ? 'Plannings publiés' : 'Mes plannings', n: plannings.reduce((t, [, l]) => t + l.length, 0), icone: <CalendarCheck size={15} /> },
-    { cle: 'absences', nom: 'Mes absences et arrêts', n: absences.length, icone: <CalendarOff size={15} /> },
+    { cle: 'absences', nom: 'Mes absences', n: absences.length, icone: <CalendarOff size={15} /> },
     { cle: 'fichiers', nom: 'Mes fichiers', n: miens.length, icone: <Paperclip size={15} /> },
-    ...(gestion ? [{ cle: 'equipe' as const, nom: 'Reçus de l’équipe', n: recus.length, icone: <Users size={15} /> }] : []),
+    ...(gestion
+      ? [
+          { cle: 'equipe' as const, nom: 'Reçus de l’équipe', n: recus.length, icone: <Users size={15} /> },
+          { cle: 'historique' as const, nom: 'Absences de l’équipe', n: historique.length, icone: <History size={15} /> },
+        ]
+      : []),
   ];
   const ligneDoc = (d: DocumentGed, aMoi: boolean): JSX.Element => {
     const p = data.personnes.find((x) => x.id === d.personId);
+    // Une pièce conservée par les titulaires : la personne la voit, sans pouvoir la retirer.
+    const conserve = aMoi && !gestion && !!d.origine;
     return (
       <li key={d.id} className="doc">
         <span className={`doc-pic ${d.categorie}`} aria-hidden="true">
@@ -84,11 +185,16 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
         <span className="doc-corps">
           <b>{d.nom}</b>
           <span className="small soft">
-            {CATEGORIE_DOC_LABEL[d.categorie]} · déposé le {jour(d.at)} · {poids(d.taille)}
+            {CATEGORIE_DOC_LABEL[d.categorie]} · {d.origine ? `${d.origine} · conservé` : 'déposé'} le {jour(d.at)} · {poids(d.taille)}
             {!aMoi && p ? ` · ${nomCourt(p)}` : ''}
           </span>
+          {conserve ? (
+            <span className="doc-garde small">
+              <ShieldCheck size={13} aria-hidden="true" /> Conservé par vos titulaires
+            </span>
+          ) : null}
         </span>
-        {aMoi && !gestion ? (
+        {aMoi && !gestion && !d.origine ? (
           <label className="check doc-partage">
             <input type="checkbox" checked={d.partage} onChange={(e) => partagerDocument(d.id, e.target.checked)} />
             <span className="small">Visible par les titulaires</span>
@@ -97,7 +203,7 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
         <a className="btn sm" href={d.data} download={d.nom}>
           <Download size={14} aria-hidden="true" /> Ouvrir
         </a>
-        {aMoi ? (
+        {(aMoi && !conserve) || (titulaire && !!d.origine) ? (
           <button
             type="button"
             className="btn ghost icon"
@@ -115,7 +221,7 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
   };
 
   return (
-    <div style={{ maxWidth: 1000 }}>
+    <div style={{ maxWidth: 1110 }}>
       <div className="page-head">
         <span className="page-ico" aria-hidden="true">
           <FolderOpen size={26} />
@@ -261,6 +367,125 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
         ) : (
           <div className="card empty">Aucun document partagé par l’équipe.</div>
         )
+      ) : null}
+
+      {onglet === 'historique' ? (
+        <>
+          <div className="hist-tete">
+            <label className="field" htmlFor="hist-personne">
+              Personne
+              <select id="hist-personne" value={qui} onChange={(e) => setQui(e.target.value)}>
+                <option value="">Toute l’équipe</option>
+                {data.personnes
+                  .filter((p) => !p.externe)
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {nomCourt(p)}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <div className="chiffres hist-chiffres" aria-label="Sur les douze derniers mois">
+              <div className="chiffre">
+                <b className="num">{joursDe('arret')}</b>
+                <span>jour{joursDe('arret') > 1 ? 's' : ''} d’arrêt</span>
+              </div>
+              <div className="chiffre">
+                <b className="num">{joursDe('conge')}</b>
+                <span>jour{joursDe('conge') > 1 ? 's' : ''} de congé</span>
+              </div>
+              <div className="chiffre">
+                <b className="num">{duChoix.filter((e) => e.nature === 'imprevu' && e.from >= debut).length}</b>
+                <span>absence{duChoix.filter((e) => e.nature === 'imprevu' && e.from >= debut).length > 1 ? 's' : ''} non prévue{duChoix.filter((e) => e.nature === 'imprevu' && e.from >= debut).length > 1 ? 's' : ''}</span>
+              </div>
+              {titulaire ? (
+                <div className="chiffre">
+                  <b className="num">{pieces.length}</b>
+                  <span>pièce{pieces.length > 1 ? 's' : ''} conservée{pieces.length > 1 ? 's' : ''}</span>
+                </div>
+              ) : null}
+            </div>
+            <p className="tiny muted hist-note">Chiffres des douze derniers mois. Des faits datés, jamais un diagnostic.</p>
+          </div>
+          <div className="jr-barre">
+            <div className="jr-filtres" role="group" aria-label="Nature">
+              <button type="button" aria-pressed={!nature} className={`jr-filtre${!nature ? ' on' : ''}`} onClick={() => setNature('')}>
+                Tout <span className="rg-nb num">{duChoix.length}</span>
+              </button>
+              {(Object.keys(NATURE_LABEL) as Nature[])
+                .filter((n) => duChoix.some((e) => e.nature === n))
+                .map((n) => (
+                  <button key={n} type="button" aria-pressed={nature === n} className={`jr-filtre${nature === n ? ' on' : ''}`} onClick={() => setNature(nature === n ? '' : n)}>
+                    {NATURE_LABEL[n]} <span className="rg-nb num">{duChoix.filter((e) => e.nature === n).length}</span>
+                  </button>
+                ))}
+            </div>
+          </div>
+          {erreur ? (
+            <p className="small" role="alert" style={{ color: 'var(--danger-ink)', margin: '0 0 10px' }}>
+              {erreur}
+            </p>
+          ) : null}
+          {parMoisHist.length ? (
+            parMoisHist.map(([mois, liste]) => (
+              <section key={mois} className="jr-jour">
+                <h2 className="jr-date cap1">
+                  {MOIS[Number(mois.slice(5)) - 1]} {mois.slice(0, 4)}
+                </h2>
+                <ul className="card doc-liste">
+                  {liste.map((e) => {
+                    const p = data.personnes.find((x) => x.id === e.personId);
+                    const jointes = titulaire ? documents.filter((d) => d.source === e.cle) : [];
+                    return (
+                      <li key={e.cle} className="doc">
+                        <span className={`doc-pic ${e.classe}`} aria-hidden="true">
+                          <CalendarOff size={18} />
+                        </span>
+                        <span className="doc-corps">
+                          <b>
+                            {p ? nomCourt(p) : 'Ancien membre'} · {e.titre}
+                          </b>
+                          <span className="small soft">
+                            {e.detail}
+                            {e.to < today ? ' · passé' : ''}
+                          </span>
+                        </span>
+                        {e.issue ? <span className={`pill ${e.issue.ton}`}>{e.issue.mot}</span> : null}
+                        {jointes.map((d) => (
+                          <a key={d.id} className="btn sm" href={d.data} download={d.nom} aria-label={`Ouvrir le justificatif ${d.nom}`}>
+                            <Paperclip size={14} aria-hidden="true" /> Justificatif
+                          </a>
+                        ))}
+                        {titulaire && !jointes.length && e.nature !== 'formation' && e.nature !== 'conge' ? (
+                          <label className="btn sm ghost doc-bouton">
+                            <Upload size={14} aria-hidden="true" /> Joindre
+                            <input
+                              type="file"
+                              accept="image/*,application/pdf"
+                              className="sr"
+                              aria-label={`Joindre un justificatif : ${p ? nomCourt(p) : ''}, ${e.titre}`}
+                              onChange={(ev) => {
+                                void joindre(e, ev.target.files?.[0]);
+                                ev.target.value = '';
+                              }}
+                            />
+                          </label>
+                        ) : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))
+          ) : (
+            <div className="card empty">Rien à afficher pour ce choix.</div>
+          )}
+          {titulaire ? (
+            <p className="tiny muted doc-note" style={{ marginTop: 12 }}>
+              <Lock size={12} aria-hidden="true" /> Les justificatifs ne sont visibles que des titulaires et de la personne concernée. Supprimez-les quand vous n’en avez plus besoin pour la paie.
+            </p>
+          ) : null}
+        </>
       ) : null}
     </div>
   );
