@@ -190,6 +190,11 @@ export interface Store {
   /** `motif` : la raison du refus, envoyée au demandeur. */
   cloreRemplacement: (id: string, statut: 'refusee' | 'annulee', motif?: string) => void;
   validerRemplacement: (id: string, remplacantId: string) => void;
+  /**
+   * Dernier recours : aucun collègue ne peut reprendre le poste. Un titulaire l'assure. S'il est libre sur l'horaire,
+   * il reprend le poste ; s'il y travaille déjà, la personne est libérée et le titulaire tient le comptoir.
+   */
+  assurerParTitulaire: (id: string, titulaireId: string) => void;
   /** Absence à couvrir : prévient en même temps tous ceux qui peuvent tenir le poste. */
   appelerEquipe: (trouId: string) => void;
   /** Répondre « je ne peux pas » à un appel : sans effet sur le rang dans le tour de rôle. */
@@ -273,7 +278,7 @@ function avisGarde(g: Pick<Garde, 'date' | 'start' | 'end' | 'type'>, personId: 
  * Décisions qui engagent l'équipe : venant d'un titulaire secondaire, elles attendent l'accord du principal.
  * Les brouillons de planning et la saisie des fiches restent libres.
  */
-const SOUMISES = ['deciderDemande', 'regulariser', 'planifierRegularisation', 'regulariserAuto', 'publier', 'resoudreTrou', 'resoudreAbsence', 'deciderAbsence', 'deciderBesoin', 'validerRemplacement', 'affecterGarde', 'affecterGardes', 'ajouterGardes', 'planifierFormation', 'planifierInventaire', 'declarerAbsence', 'supprimerPersonne', 'signalerEcart', 'majPersonne'] as const;
+const SOUMISES = ['deciderDemande', 'regulariser', 'planifierRegularisation', 'regulariserAuto', 'publier', 'resoudreTrou', 'resoudreAbsence', 'deciderAbsence', 'deciderBesoin', 'validerRemplacement', 'assurerParTitulaire', 'affecterGarde', 'affecterGardes', 'ajouterGardes', 'planifierFormation', 'planifierInventaire', 'declarerAbsence', 'supprimerPersonne', 'signalerEcart', 'majPersonne'] as const;
 
 function titreAccord(d: AppData, action: string, args: unknown[]): string {
   const a = args as never[];
@@ -308,6 +313,10 @@ function titreAccord(d: AppData, action: string, args: unknown[]): string {
     case 'validerRemplacement': {
       const r = d.remplacements.find((y) => y.id === a[0]);
       return `Remplacement${r ? ` du ${fmtDateCourt(r.date)}` : ''} : ${qui(a[1])} remplace ${qui(r?.demandeur)}`;
+    }
+    case 'assurerParTitulaire': {
+      const r = d.remplacements.find((y) => y.id === a[0]);
+      return `Remplacement${r ? ` du ${fmtDateCourt(r.date)}` : ''} : ${qui(a[1])}, titulaire, assure le poste de ${qui(r?.demandeur)}`;
     }
     case 'affecterGarde': {
       const g = d.gardes.find((y) => y.id === a[0]);
@@ -791,6 +800,39 @@ export const useStore = create<Store>((set, get) => {
           {
             pour: [r.demandeur, remplacantId, ...r.volontaires],
             effets: [`${nom(d, r.demandeur)} : en poste → repos le ${horaire}.`, `${nom(d, remplacantId)} : repos → en poste, ${fmtHHMM(poste.start)} – ${fmtHHMM(poste.end)}${plus}.`],
+          },
+        );
+      }),
+    assurerParTitulaire: (id, titulaireId) =>
+      commit((d, today) => {
+        const r = d.remplacements.find((x) => x.id === id);
+        const poste = d.shifts.find((x) => x.id === r?.shiftId);
+        const t = d.personnes.find((p) => p.id === titulaireId);
+        if (!r || !poste || !t || t.qualification !== 'titulaire' || t.externe) return d;
+        const at = now();
+        const quand = fmtDateCourt(poste.date);
+        // Déjà au comptoir sur cet horaire : il n'y a pas de poste à lui donner, il tient simplement la place.
+        const dejaLa = d.shifts.some((x) => x.personId === titulaireId && x.date === poste.date && x.start < poste.end && poste.start < x.end);
+        const shifts = dejaLa
+          ? d.shifts.filter((x) => x.id !== poste.id)
+          : d.shifts.map((x) => (x.id === poste.id ? { ...x, personId: titulaireId, origine: 'reparation' as const, explication: `Assure le poste de ${nom(d, r.demandeur)} : aucun collègue ne pouvait le reprendre.` } : x));
+        const tardif = dayIndex(poste.date) - dayIndex(today) < 7;
+        return journal(
+          {
+            ...d,
+            shifts,
+            documents: archiver(d, r, 'accepté'),
+            remplacements: d.remplacements.map((x) => (x.id === id ? { ...x, statut: 'acceptee' as const, accord: 'accepte' as const, remplacantId: titulaireId, justificatif: x.justificatif ? { ...x.justificatif, data: '' } : undefined, precision: undefined } : x)),
+            notifications: [{ id: uid('n'), personId: r.demandeur, at, date: poste.date, avant: 'En poste', apres: `Libéré : ${nom(d, titulaireId)} assure`, tardif }, ...d.notifications],
+          },
+          { type: 'reparation', titre: `Remplacement du ${quand} : ${nom(d, titulaireId)}, titulaire, assure le poste de ${nom(d, r.demandeur)}`, regles: true },
+          {
+            pour: [r.demandeur, titulaireId, ...r.volontaires],
+            effets: [
+              `${nom(d, r.demandeur)} : en poste → repos le ${quand}.`,
+              dejaLa ? `${nom(d, titulaireId)}, déjà en poste sur cet horaire, assure le comptoir.` : `${nom(d, titulaireId)} : repos → en poste, ${fmtHHMM(poste.start)} – ${fmtHHMM(poste.end)}.`,
+              'Aucun collègue ne pouvait reprendre ce poste : c’est aux titulaires de l’assurer.',
+            ],
           },
         );
       }),

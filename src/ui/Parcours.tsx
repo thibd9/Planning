@@ -1,5 +1,5 @@
-import { ArrowLeft, ArrowRight, CalendarCheck, Check, CirclePause, CirclePlay, Crown, FlaskConical, Gauge, GraduationCap, ListTree, Megaphone, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sparkles, Sprout, Store, Undo2, UserRound, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, BookOpen, CalendarCheck, Check, CirclePause, CirclePlay, Clock3, Crown, FlaskConical, Gauge, GraduationCap, ListChecks, ListTree, Megaphone, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sparkles, Sprout, Store, Undo2, UserRound, UsersRound, X } from 'lucide-react';
+import { cloneElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
 import type { AppData, Justificatif, Remplacement } from '../domain/types';
@@ -867,9 +867,10 @@ const COMPLET_BRUT: Etape[] = [
   {
     chapitre: PREPARER,
     qui: HELENE,
-    cible: '.content .split',
+    cible: '#acc-horaires',
+    cibleFin: '#acc-effectif',
     titre: 'Horaires et effectif',
-    texte: () => 'Les réglages se rangent en rubriques qui se replient. Vous réglez les horaires d’ouverture, jour par jour ; « Recopier » applique un jour aux autres. Plus bas, vous indiquez combien de personnes vous attendez au comptoir.',
+    texte: () => 'Les réglages tiennent en cinq onglets : Pharmacie, Horaires, Comptoir, Planning, Paramètres. Dans « Horaires », vous réglez l’ouverture jour par jour ; « Recopier » applique un jour aux autres. Dans « Comptoir », vous indiquez combien de personnes vous attendez.',
     jouer: () => helene('officine'),
     gestes: [
       { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('[aria-label="Fermeture le samedi"]'), valeur: '18:00', dit: 'Réglez la fermeture du samedi à 18 h', sert: 'Chaque jour a ses heures d’ouverture et de fermeture.' },
@@ -1398,7 +1399,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.demande-r.u-medical',
     cibleFin: '.demande-r.u-medical, .onglets',
     titre: 'Une urgence médicale',
-    texte: (d) => (urgenceMedicale(d)?.accord === 'attente' ? 'En tête de liste, en rouge. Le justificatif n’est visible que des titulaires.' : 'Acceptée. Le justificatif est conservé dans « Mes documents », pour les seuls titulaires.'),
+    texte: (d) => (urgenceMedicale(d)?.accord === 'attente' ? 'En tête de liste, en rouge. Le justificatif n’est visible que des titulaires. Une urgence médicale ne se refuse pas faute de remplaçant : si personne ne peut reprendre le poste, un titulaire l’assure.' : 'Acceptée. Le justificatif est conservé dans « Mes documents », pour les seuls titulaires.'),
     jouer: () => {
       avecUrgenceMedicale();
       useUi.getState().setSujet('remplacements');
@@ -1407,8 +1408,14 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: parTexte('.demande-r.u-medical button', 'Décider'), sert: 'Une demande médicale se traite toujours en premier.' },
       { faire: 'attendre', que: '.dialog .dr' },
-      { faire: 'cliquer', sur: 'label[for="dr-equipe"]', dit: 'Choisissez « Accepter et prévenir l’équipe »', sert: 'Le justificatif est conservé pour les seuls titulaires.', facultatif: true },
-      { faire: 'cliquer', sur: '#dr-confirmer', sert: 'L’équipe disponible est prévenue aussitôt.', facultatif: true },
+      {
+        faire: 'cliquer',
+        sur: () => document.querySelector<HTMLElement>(document.querySelector('#dr-equipe:not(:disabled)') ? 'label[for="dr-equipe"]' : 'label[for="dr-titulaire"]'),
+        dit: 'Choisissez comment accepter la demande',
+        sert: 'Si un collègue peut reprendre le poste, l’équipe est prévenue. Sinon, c’est aux titulaires de l’assurer : c’est le dernier recours.',
+        facultatif: true,
+      },
+      { faire: 'cliquer', sur: '#dr-confirmer', sert: 'La personne est libérée, et chacun est prévenu aussitôt. Le justificatif reste réservé aux titulaires.', facultatif: true },
     ],
   },
   {
@@ -1841,12 +1848,15 @@ const COMPLET_BRUT: Etape[] = [
     cible: '#stats-cles',
     cibleFin: '#stats-points-forts',
     titre: 'Les statistiques de l’équipe',
-    texte: () => 'L’équipe en chiffres : sa composition, les compétences couvertes et celles qui reposent sur une seule personne, les points forts de chacun, les heures planifiées face aux contrats. Tout est calculé d’après ce qui est déjà saisi : ni note, ni classement.',
+    texte: () => 'L’équipe en chiffres, en quatre onglets : sa composition, les compétences couvertes et celles qui reposent sur une seule personne, les points forts de chacun, les heures planifiées face aux contrats. Tout est calculé d’après ce qui est déjà saisi : ni note, ni classement.',
     jouer: () => {
       avecPlanning();
       helene('stats');
     },
-    gestes: [{ faire: 'cliquer', sur: '#stats-competences-2 > summary', dit: 'Ouvrez la famille « Conseil »', sert: 'Chaque compétence dit qui la détient. Une seule personne : elle se perd dès qu’elle est absente.', facultatif: true }],
+    gestes: [
+      { faire: 'cliquer', sur: '#stats-onglet-competences', dit: 'Ouvrez l’onglet « Compétences »', sert: 'Les compétences couvertes, celles qui reposent sur une seule personne, celles que personne ne détient.', facultatif: true },
+      { faire: 'cliquer', sur: '#stats-onglet-points-forts', dit: 'Puis l’onglet « Points forts »', sert: 'Ce qui a été noté de positif pour chacun sur douze mois, par ordre alphabétique.', facultatif: true },
+    ],
   },
   {
     chapitre: QUOTIDIEN,
@@ -2292,6 +2302,7 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   contrat: { gestion: ['La fiche d’une personne'] },
   repercussion: { gestion: ['Une absence imprévue', 'Personne ne se propose'] },
   'semaine-vide': { gestion: ['Une semaine à construire'] },
+  'dernier-recours': { gestion: ['Une urgence médicale'] },
   'points-forts': { gestion: ['Les statistiques de l’équipe'] },
 };
 
@@ -3321,6 +3332,8 @@ export function ChoixParcours(): JSX.Element | null {
   // Une seule visite à l'écran : on passe de l'une à l'autre avec les flèches, ou l'on saute à une famille par les onglets.
   const [onglet, setOnglet] = useState<Famille>('parcours');
   const [montree, setMontree] = useState<Scenario>('complet');
+  const [sens, setSens] = useState<'avant' | 'arriere'>('avant');
+  const glisse = useRef<number | null>(null);
   if (!tutoriels) return null;
   const entrer = (identifiant: string): void => {
     store().chargerExemple(false);
@@ -3329,6 +3342,8 @@ export function ChoixParcours(): JSX.Element | null {
   };
   const toutes = Object.keys(SCENARIOS) as Scenario[];
   const montrer = (cle: Scenario): void => {
+    // Le sens du passage : la visite suivante arrive par la droite, la précédente par la gauche.
+    setSens(toutes.indexOf(cle) >= toutes.indexOf(montree) ? 'avant' : 'arriere');
     setMontree(cle);
     setOnglet(SCENARIOS[cle].groupe);
   };
@@ -3337,6 +3352,8 @@ export function ChoixParcours(): JSX.Element | null {
   const carte = CARTES[montree];
   const visite = SCENARIOS[montree];
   const chapitres = [...new Set(visite.etapes.map((e) => e.chapitre).filter((c): c is string => !!c))];
+  // Ceux que l'on suit dans la visite, dans l'ordre où ils apparaissent (« Un collègue » n'est pas un personnage).
+  const personnages = [...new Set(visite.etapes.map((e) => e.qui))].filter((q) => q.includes(' · ')).slice(0, 5);
   return (
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && ouvrirTutoriels(false)}>
       <div className="decouvrir" role="dialog" aria-modal="true" aria-labelledby="decouvrir-titre">
@@ -3399,47 +3416,79 @@ export function ChoixParcours(): JSX.Element | null {
                 if (e.key === 'ArrowLeft') voisine(-1);
               }}
             >
-              <p className="dc-famille small soft">{GROUPES.find((g) => g.cle === onglet)?.phrase}</p>
-              <div className="dc-scene">
-                <button type="button" className="dc-fleche" onClick={() => voisine(-1)} aria-label="Visite précédente">
-                  <ArrowLeft size={20} aria-hidden="true" />
-                </button>
-                <article key={montree} className={`cp-carte dc-diapo ${carte.teinte}`} data-scenario={montree} aria-roledescription="diapositive" aria-label={`${carte.nom}, visite ${toutes.indexOf(montree) + 1} sur ${toutes.length}`} aria-live="polite">
+              {/* Les visites de la famille, juste au-dessus de la visite montrée : un pictogramme et un nom. */}
+              <div className="dc-points" role="group" aria-label="Visites de cette famille">
+                {famille.map((cle) => (
+                  <button key={cle} type="button" className={`dc-point ${CARTES[cle].teinte}${cle === montree ? ' on' : ''}`} data-nom={CARTES[cle].nom} aria-current={cle === montree ? 'true' : undefined} onClick={() => montrer(cle)}>
+                    <span className="dc-point-ico" aria-hidden="true">
+                      {cloneElement(CARTES[cle].icone, { size: 16 })}
+                    </span>
+                    {CARTES[cle].nom}
+                  </button>
+                ))}
+              </div>
+              {/* Une visite à la fois. On passe à la suivante par son nom, les flèches du clavier, ou en glissant le doigt. */}
+              <div
+                className="dc-scene"
+                onTouchStart={(e) => {
+                  glisse.current = e.touches[0].clientX;
+                }}
+                onTouchEnd={(e) => {
+                  const dx = e.changedTouches[0].clientX - (glisse.current ?? e.changedTouches[0].clientX);
+                  glisse.current = null;
+                  if (Math.abs(dx) > 48) voisine(dx < 0 ? 1 : -1);
+                }}
+              >
+                <article key={montree} className={`cp-carte dc-diapo ${carte.teinte} ${sens}`} data-scenario={montree} aria-roledescription="diapositive" aria-label={`${carte.nom}, visite ${toutes.indexOf(montree) + 1} sur ${toutes.length}`} aria-live="polite">
                   <div className="cp-visuel">
                     <span className="cp-ico" aria-hidden="true">
                       {carte.icone}
                     </span>
+                    <ul className="dc-reperes" aria-label="En bref">
+                      <li>
+                        <Clock3 size={14} aria-hidden="true" /> {visite.duree.split(' · ')[0]}
+                      </li>
+                      <li>
+                        <ListChecks size={14} aria-hidden="true" /> {visite.duree.split(' · ')[1]}
+                      </li>
+                      <li>
+                        <BookOpen size={14} aria-hidden="true" /> {chapitres.length} chapitre{chapitres.length > 1 ? 's' : ''}
+                      </li>
+                    </ul>
                   </div>
                   <div className="dc-diapo-texte">
                     <span className="eyebrow">
                       {visite.role} · {famille.indexOf(montree) + 1} sur {famille.length}
                     </span>
-                    <h3>{carte.nom}</h3>
+                    <h3>{visite.titre}</h3>
                     <p className="dc-fil">{visite.fil}</p>
-                    <ul className="cp-mots" aria-label="Chapitres">
-                      {chapitres.map((c) => (
-                        <li key={c}>{c}</li>
+                    <ol className="dc-chapitres" aria-label="Chapitres">
+                      {chapitres.map((c, n) => (
+                        <li key={c}>
+                          <span className="dc-num" aria-hidden="true">
+                            {n + 1}
+                          </span>
+                          {c}
+                        </li>
                       ))}
-                    </ul>
+                    </ol>
                     <div className="dc-diapo-pied">
-                      <span className="cp-duree num">{visite.duree}</span>
+                      <span className="dc-avec">
+                        <UsersRound size={15} aria-hidden="true" />
+                        <span className="sr">Avec </span>
+                        {personnages.map((q) => (
+                          <span key={q} className="dc-perso">
+                            <i style={{ background: TEINTE_DE[q] ?? 'var(--n-4)' }} aria-hidden="true" />
+                            {q.split(' · ')[0]}
+                          </span>
+                        ))}
+                      </span>
                       <button type="button" className="btn primary" onClick={() => lancerParcours(montree)}>
                         <Play size={16} aria-hidden="true" /> Lancer <span className="sr">la visite {carte.nom}</span>
                       </button>
                     </div>
                   </div>
                 </article>
-                <button type="button" className="dc-fleche" onClick={() => voisine(1)} aria-label="Visite suivante">
-                  <ArrowRight size={20} aria-hidden="true" />
-                </button>
-              </div>
-              {/* Un point par visite de la famille : on voit où l'on est, et l'on saute à celle que l'on veut. */}
-              <div className="dc-points" role="group" aria-label="Visites de cette famille">
-                {famille.map((cle) => (
-                  <button key={cle} type="button" className={`dc-point${cle === montree ? ' on' : ''}`} data-nom={CARTES[cle].nom} aria-current={cle === montree ? 'true' : undefined} onClick={() => montrer(cle)}>
-                    {CARTES[cle].nom}
-                  </button>
-                ))}
               </div>
               <ChoixRythme compact />
             </div>

@@ -13,7 +13,7 @@ absorber un imprévu en dérangeant le moins de monde possible.
 
 ![React 18](https://img.shields.io/badge/React-18-1f6bb8?style=flat-square)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-1f6bb8?style=flat-square)
-![170 tests](https://img.shields.io/badge/tests-170-0b5a3f?style=flat-square)
+![173 tests](https://img.shields.io/badge/tests-173-0b5a3f?style=flat-square)
 ![Sans serveur](https://img.shields.io/badge/donn%C3%A9es-sur%20l'appareil-52606c?style=flat-square)
 
 [Démarrer](#démarrer) · [Ce que fait Solvéa](#ce-que-fait-solvéa) · [Guide détaillé](docs/GUIDE.md) · [Bilan UX et UI](docs/BILAN-UX-UI.md)
@@ -122,7 +122,7 @@ Dix **visites guidées** complètent l'aide, avec un tutoriel par tâche : un pa
 
 ## Sous le capot
 
-React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (170 tests), sans dépendance à un
+React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (173 tests), sans dépendance à un
 service extérieur.
 
 ```

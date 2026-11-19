@@ -78,7 +78,7 @@ export function Dimensionnement(): JSX.Element {
       focus="dimensionnement"
       icone={Scale}
       titre={
-        <span id="dim-titre" role="heading" aria-level={3}>
+        <span id="dim-titre" role="heading" aria-level={2}>
           L’équipe est-elle bien dimensionnée ?
         </span>
       }

@@ -182,3 +182,10 @@
 @media print {
   .page-stats .st-bloc, .page-stats .st-cles { box-shadow: none; break-inside: avoid; }
 }
+
+/* Compétences qui reposent sur une seule personne : deux colonnes fixes, pour que les personnes soient toutes au même niveau. */
+.page-stats .st-fragiles > li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 250px); align-items: center; justify-content: stretch; }
+.page-stats .st-fragiles > li > .st-qui { justify-self: start; }
+@media (max-width: 560px) {
+  .page-stats .st-fragiles > li { grid-template-columns: minmax(0, 1fr); }
+}

@@ -14,6 +14,7 @@ import type { PointFortCle } from '../../engine/suivi';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { Accordeon } from '../components/Accordeon';
+import { Onglets } from '../components/Onglets';
 import { Avatar, Empty, Pill } from '../kit';
 
 /** Une icône par nature de point fort : les mêmes que sur la fiche d'une personne. */
@@ -45,12 +46,13 @@ function Barre({ valeur, max, alerte }: { valeur: number; max: number; alerte?: 
 /** Une personne, cliquable : le clic ouvre sa fiche dans « Équipe ». */
 function Qui({ p, sous, onOuvrir }: { p: Person; sous?: string; onOuvrir: (id: string) => void }): JSX.Element {
   return (
-    <button type="button" className="st-qui" data-personne={p.id} onClick={() => onOuvrir(p.id)} aria-label={`${nomComplet(p)}${sous ? `, ${sous}` : ''} : ouvrir sa fiche`}>
+    <button type="button" className="st-qui" data-personne={p.id} onClick={() => onOuvrir(p.id)} title="Ouvrir sa fiche">
       <Avatar person={p} />
       <span className="st-qui-nom">
         <b>{nomComplet(p)}</b>
         {sous ? <span className="small soft">{sous}</span> : null}
       </span>
+      <span className="sr"> : ouvrir sa fiche</span>
     </button>
   );
 }
@@ -170,6 +172,12 @@ export function Stats(): JSX.Element {
         </li>
       </ul>
 
+      {/* Quatre onglets plutôt qu'une longue page : une famille de chiffres à la fois, sous les chiffres clés. */}
+      <Onglets
+        id="stats"
+        label="Familles de statistiques"
+        onglets={[
+          { cle: 'composition', titre: 'Composition', icone: UsersRound, contenu: <>
       <Bloc id="stats-composition" icone={UsersRound} titre="La composition de l’équipe" sous="Les personnes de l’officine, hors remplaçants extérieurs. Un temps plein compte pour 35 heures par semaine.">
         <div className="st-colonnes">
           <div>
@@ -237,7 +245,8 @@ export function Stats(): JSX.Element {
           </div>
         </div>
       </Bloc>
-
+          </> },
+          { cle: 'competences', titre: 'Compétences', icone: GraduationCap, note: `${k.couvertes} / ${k.total}`, contenu: <>
       <Bloc
         id="stats-competences"
         icone={GraduationCap}
@@ -308,7 +317,8 @@ export function Stats(): JSX.Element {
           ))}
         </div>
       </Bloc>
-
+          </> },
+          { cle: 'points-forts', titre: 'Points forts', icone: Sparkles, note: f.total, contenu: <>
       <Bloc id="stats-points-forts" icone={Sparkles} titre="Les points forts de l’équipe" sous="Ce qui a été noté de positif pour chacun sur douze mois. Ce n’est ni une note, ni un classement.">
         <div>
           <h3 className="st-h3">Par nature</h3>
@@ -364,7 +374,8 @@ export function Stats(): JSX.Element {
           </Accordeon>
         </div>
       </Bloc>
-
+          </> },
+          { cle: 'activite', titre: 'Activité', icone: Activity, contenu: <>
       <Bloc id="stats-activite" icone={Activity} titre="Les repères d’activité" sous="Les heures planifiées face aux contrats, puis ce que l’équipe a porté sur douze mois.">
         <div id="stats-heures" data-focus="stats-heures">
           <h3 className="st-h3">Heures planifiées face aux contrats</h3>
@@ -451,6 +462,9 @@ export function Stats(): JSX.Element {
           </div>
         </div>
       </Bloc>
+          </> },
+        ]}
+      />
     </div>
   );
 }

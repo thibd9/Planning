@@ -18,7 +18,7 @@ const THEMES: { titre: string; ids: string[] }[] = [
   { titre: 'Au quotidien', ids: ['tableau', 'semaine-vide', 'creer', 'signaler', 'echeance', 'repercussion'] },
   { titre: 'Préparer', ids: ['personne', 'contrat', 'marques', 'mdp-equipe', 'reglages', 'qui-prepare', 'postes-types', 'officine-chiffres', 'dimensionnement', 'feries', 'regles', 'pharmacie'] },
   { titre: 'Construire et publier', ids: ['construire', 'propositions', 'pauses', 'controles', 'mois', 'retard', 'publier', 'formation', 'gardes'] },
-  { titre: 'Absences et remplacements', ids: ['absence', 'accident', 'demande-remplacement', 'demandes-equipe', 'accord', 'decisions'] },
+  { titre: 'Absences et remplacements', ids: ['absence', 'accident', 'demande-remplacement', 'dernier-recours', 'demandes-equipe', 'accord', 'decisions'] },
   { titre: 'Suivre et faire le bilan', ids: ['heures', 'equite', 'points-forts', 'paie', 'historique', 'documents'] },
   { titre: 'Messages, compte et support', ids: ['message', 'rendez-vous', 'compte', 'mes-competences', 'support'] },
 ];

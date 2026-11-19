@@ -1,7 +1,7 @@
 import { illustrationDuProfil } from '../components/Illustration';
 import { CIBLE, viser } from '../viser';
 import { AlarmClock, ArrowLeftRight, ArrowRight, BellRing, BriefcaseMedical, Building2, CalendarDays, CalendarRange, Check, Handshake, History, Hourglass, ListChecks, MoonStar, ShieldCheck, Sparkles, Store, UserMinus, UsersRound } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
 import { MOIS, addDays, fmtDateCourt, fmtDateLong, fmtHeure, fmtSemaine, mondayOf, todayISO, totalDuree, weekDates } from '../../domain/time';
 import type { AppData } from '../../domain/types';
@@ -211,8 +211,18 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   const ouvertures = ouverture(data.officine, today);
   const echelle = ouvertures.length ? { start: Math.floor(ouvertures[0].start / 60) * 60, end: Math.ceil(ouvertures[ouvertures.length - 1].end / 60) * 60 } : { start: 8 * 60, end: 20 * 60 };
   const parPersonne = [...new Set(duJour.map((s) => s.personId))].map((id) => ({ p: data.personnes.find((x) => x.id === id), postes: duJour.filter((s) => s.personId === id) })).filter((x) => x.p);
+  // Le repère de l'heure avance tout seul : la page se rafraîchit chaque minute.
+  const [, setMinute] = useState(0);
+  useEffect(() => {
+    const t = window.setInterval(() => setMinute((x) => x + 1), 60_000);
+    return () => window.clearInterval(t);
+  }, []);
   const maintenant = new Date().getHours() * 60 + new Date().getMinutes();
-  const aiguille = today === todayISO() && maintenant > echelle.start && maintenant < echelle.end ? ((maintenant - echelle.start) / (echelle.end - echelle.start)) * 100 : null;
+  // Toujours visible un jour d'ouverture : avant l'ouverture il attend au début, après la fermeture il reste à la fin.
+  const avantOuverture = maintenant <= echelle.start;
+  const apresFermeture = maintenant >= echelle.end;
+  const aiguille = today === todayISO() && ouvertures.length ? Math.min(100, Math.max(0, ((maintenant - echelle.start) / (echelle.end - echelle.start)) * 100)) : null;
+  const libelleMaintenant = avantOuverture ? `Ouverture à ${fmtHeure(ouvertures[0]?.start ?? echelle.start)}` : apresFermeture ? `Journée terminée · ${fmtHeure(maintenant)}` : `Maintenant · ${fmtHeure(maintenant)}`;
 
   // Les blocs du tableau de bord. Leur contenu ne change pas d'une disposition à l'autre : seule leur place change.
   const blocPriorite = (
@@ -475,7 +485,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
                   {aiguille !== null ? (
                     <>
                       <span className={`tbj-maintenant${aiguille < 12 ? ' debut' : aiguille > 88 ? ' fin' : ''}`} style={{ left: `${aiguille}%` }}>
-                        Maintenant · {fmtHeure(maintenant)}
+                        {libelleMaintenant}
                       </span>
                       <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} />
                     </>

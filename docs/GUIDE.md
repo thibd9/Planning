@@ -307,6 +307,14 @@ Deux gestes différents changent un planning, et Solvéa les traite différemmen
 À la publication, le message dit quelle semaine vient d'être publiée et quand elle commence ; si la semaine
 en cours n'a pas de planning, il propose de la construire.
 
+**Dernier recours.** Quand aucun collègue ne peut reprendre un poste sans enfreindre une règle, et toujours pour
+une urgence médicale, la fenêtre « Décider » propose « Accepter : un titulaire assure le poste ». Le titulaire
+libre sur l'horaire reprend le poste ; s'il y travaille déjà, la personne est libérée et il tient le comptoir.
+
+Les pages chargées se rangent en **onglets** (réglages : Pharmacie, Horaires, Comptoir, Planning, Paramètres ;
+statistiques : Composition, Compétences, Points forts, Activité) et la fenêtre « Comment ça marche ? » montre
+une visite à la fois, en carrousel.
+
 ## L'équipe : la fiche, les compétences, les statistiques
 
 - **La fiche d'une personne** prend la couleur de son rôle et se range en rubriques qui se replient. « Poste et

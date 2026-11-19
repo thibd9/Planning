@@ -1,6 +1,7 @@
 import './officine.css';
 import { memeIdentifiant } from '../../domain/acces';
 import { Accordeon } from '../components/Accordeon';
+import { Onglets } from '../components/Onglets';
 import { Dimensionnement, joursEnClair } from '../components/Dimensionnement';
 import { ArrowDownToLine, CalendarCheck, CalendarDays, Check, Clock, Copy, CopyPlus, DoorClosed, DoorOpen, LayoutList, Plus, RotateCcw, Ruler, Settings2, SlidersHorizontal, Store, Trash2, UserRound, UserRoundCheck, Users, Utensils, UtensilsCrossed } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -36,7 +37,7 @@ function Heure({ value, onChange, label }: { value: number; onChange: (v: number
 /** Le titre d'une rubrique : un intertitre de niveau 3, pour passer de l'une à l'autre au lecteur d'écran. */
 function Titre({ id, children }: { id?: string; children: ReactNode }): JSX.Element {
   return (
-    <span id={id} role="heading" aria-level={3}>
+    <span id={id} role="heading" aria-level={2}>
       {children}
     </span>
   );
@@ -123,14 +124,23 @@ export function Officine(): JSX.Element {
           <div className="eyebrow">Officine</div>
           <h1>{officine.nom || 'Mon officine'}</h1>
           {chiffres.length ? <p className="page-fait num">{chiffres.slice(0, 3).join(' · ')}</p> : null}
-          <p>Horaires d'ouverture, effectif attendu et postes types. Ces réglages sont des choix d'organisation : ils se modifient librement. Dépliez une rubrique pour la régler.</p>
+          <p>Horaires d'ouverture, effectif attendu et postes types. Ces réglages sont des choix d'organisation : ils se modifient librement. Un onglet par famille de réglages.</p>
         </div>
       </div>
 
-      <h2 className="of-groupe" id="of-g-pharmacie">
-        La pharmacie
-      </h2>
-      <section className="card of-carte" aria-labelledby="of-g-pharmacie">
+
+      {/* Cinq onglets plutôt qu'une longue page : une famille de réglages à la fois. Chaque rubrique garde son résumé et se replie. */}
+      <section className="card of-carte" aria-label="Réglages de l’officine">
+        <Onglets
+          id="reglages"
+          label="Familles de réglages"
+          onglets={[
+            {
+              cle: 'pharmacie',
+              titre: 'Pharmacie',
+              icone: Store,
+              contenu: (
+            <>
         <Accordeon id="acc-identite" icone={Store} ouvert titre={<Titre>Nom de la pharmacie</Titre>} resume={officine.nom || 'Nom à renseigner'}>
           <label className="field of-nom">
             Nom de la pharmacie
@@ -138,9 +148,63 @@ export function Officine(): JSX.Element {
             <span className="aide">Il s’affiche en haut de l’écran et sur les plannings imprimés.</span>
           </label>
         </Accordeon>
-
-        {/* « .split » : le repère de la visite guidée « Horaires et effectif ». Il réunit les horaires, les jours fériés et le minimum au comptoir. */}
-        <div className="split of-duo">
+        <Accordeon id="acc-chiffres" focus="infos-officine" icone={Ruler} titre={<Titre id="of-infos">L’officine en chiffres</Titre>} resume={resumeChiffres}>
+          <p className="of-intro">Facultatif. Ces repères décrivent vos locaux ; complétez ceux que vous connaissez.</p>
+          <div className="of-grille">
+            {(
+              [
+                { cle: 'surface', nom: 'Surface totale', unite: 'm²', max: 5000, valeur: officine.surface, ecrire: (v: number | undefined) => majOfficine({ surface: v }) },
+                { cle: 'surfaceVente', nom: 'Surface de vente', unite: 'm²', max: 5000, valeur: infos.surfaceVente, ecrire: (v: number | undefined) => majInfos({ surfaceVente: v }) },
+                { cle: 'reserve', nom: 'Réserve et préparatoire', unite: 'm²', max: 5000, valeur: infos.reserve, ecrire: (v: number | undefined) => majInfos({ reserve: v }) },
+                { cle: 'caisses', nom: 'Caisses', unite: '', max: 40, valeur: infos.caisses, ecrire: (v: number | undefined) => majInfos({ caisses: v }) },
+                { cle: 'comptoirs', nom: 'Postes de comptoir', unite: '', max: 40, valeur: infos.comptoirs, ecrire: (v: number | undefined) => majInfos({ comptoirs: v }) },
+                { cle: 'confidentialite', nom: 'Espaces de confidentialité', unite: '', max: 20, valeur: infos.confidentialite, ecrire: (v: number | undefined) => majInfos({ confidentialite: v }) },
+              ] as const
+            ).map((c) => (
+              <label key={c.cle} className="field" htmlFor={`officine-${c.cle}`}>
+                {c.nom}
+                <span className={c.unite ? 'champ-unite' : undefined}>
+                  <input
+                    id={`officine-${c.cle}`}
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={c.max}
+                    step={1}
+                    className="num"
+                    value={c.valeur ?? ''}
+                    onChange={(e) => {
+                      const v = Math.round(Number(e.target.value));
+                      c.ecrire(e.target.value.trim() && v > 0 ? Math.min(v, c.max) : undefined);
+                    }}
+                    placeholder="-"
+                  />
+                  {c.unite ? <span className="unite">{c.unite}</span> : null}
+                </span>
+              </label>
+            ))}
+            <label className="check of-robot" htmlFor="officine-robot">
+              <input id="officine-robot" type="checkbox" checked={!!infos.robot} onChange={(e) => majInfos({ robot: e.target.checked || undefined })} />
+              <span>Robot ou automate de dispensation</span>
+            </label>
+          </div>
+          {remarques.length ? (
+            <ul className="of-remarques" id="of-remarques">
+              {remarques.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          ) : null}
+        </Accordeon>
+            </>
+              ),
+            },
+            {
+              cle: 'horaires',
+              titre: 'Horaires',
+              icone: Clock,
+              contenu: (
+            <>
           <Accordeon id="acc-horaires" icone={Clock} ouvert titre={<Titre>Horaires d'ouverture</Titre>} resume={resumeHoraires(officine.horaires)}>
             <p className="of-intro">Une ligne par jour. « Recopier » reprend les horaires de la veille, ou applique ceux du jour aux autres jours ouverts.</p>
             <div className="horaires" role="list" aria-label="Horaires d’ouverture par jour">
@@ -273,7 +337,6 @@ export function Officine(): JSX.Element {
               })}
             </div>
           </Accordeon>
-
           <Accordeon id="acc-feries" icone={CalendarDays} titre={<Titre>Jours fériés</Titre>} resume={resumeFeries}>
             <label className="check">
               <input type="checkbox" checked={officine.fermeJoursFeries} onChange={(e) => majOfficine({ fermeJoursFeries: e.target.checked })} />
@@ -289,8 +352,16 @@ export function Officine(): JSX.Element {
               ))}
             </ul>
           </Accordeon>
-
-          <Accordeon id="acc-effectif" icone={Users} titre={<Titre>Combien de personnes au comptoir ?</Titre>} resume={resumeEffectifs(officine.effectifs)}>
+            </>
+              ),
+            },
+            {
+              cle: 'comptoir',
+              titre: 'Comptoir',
+              icone: Users,
+              contenu: (
+                <>
+          <Accordeon ouvert id="acc-effectif" icone={Users} titre={<Titre>Combien de personnes au comptoir ?</Titre>} resume={resumeEffectifs(officine.effectifs)}>
             <p className="of-intro">Le minimum à tenir, selon le jour et l’heure. En dessous, le planning vous prévient.</p>
             <div className="of-defile">
               <table className="t of-effectifs">
@@ -330,138 +401,18 @@ export function Officine(): JSX.Element {
             </div>
             <p className="tiny muted of-note">Un pharmacien doit être présent à chaque minute d’ouverture : c’est contrôlé à part, quel que soit ce minimum.</p>
           </Accordeon>
-        </div>
-
-        {/* L'officine en chiffres : des repères facultatifs, que l'on complète quand on les connaît. */}
-        <Accordeon id="acc-chiffres" focus="infos-officine" icone={Ruler} titre={<Titre id="of-infos">L’officine en chiffres</Titre>} resume={resumeChiffres}>
-          <p className="of-intro">Facultatif. Ces repères décrivent vos locaux ; complétez ceux que vous connaissez.</p>
-          <div className="of-grille">
-            {(
-              [
-                { cle: 'surface', nom: 'Surface totale', unite: 'm²', max: 5000, valeur: officine.surface, ecrire: (v: number | undefined) => majOfficine({ surface: v }) },
-                { cle: 'surfaceVente', nom: 'Surface de vente', unite: 'm²', max: 5000, valeur: infos.surfaceVente, ecrire: (v: number | undefined) => majInfos({ surfaceVente: v }) },
-                { cle: 'reserve', nom: 'Réserve et préparatoire', unite: 'm²', max: 5000, valeur: infos.reserve, ecrire: (v: number | undefined) => majInfos({ reserve: v }) },
-                { cle: 'caisses', nom: 'Caisses', unite: '', max: 40, valeur: infos.caisses, ecrire: (v: number | undefined) => majInfos({ caisses: v }) },
-                { cle: 'comptoirs', nom: 'Postes de comptoir', unite: '', max: 40, valeur: infos.comptoirs, ecrire: (v: number | undefined) => majInfos({ comptoirs: v }) },
-                { cle: 'confidentialite', nom: 'Espaces de confidentialité', unite: '', max: 20, valeur: infos.confidentialite, ecrire: (v: number | undefined) => majInfos({ confidentialite: v }) },
-              ] as const
-            ).map((c) => (
-              <label key={c.cle} className="field" htmlFor={`officine-${c.cle}`}>
-                {c.nom}
-                <span className={c.unite ? 'champ-unite' : undefined}>
-                  <input
-                    id={`officine-${c.cle}`}
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    max={c.max}
-                    step={1}
-                    className="num"
-                    value={c.valeur ?? ''}
-                    onChange={(e) => {
-                      const v = Math.round(Number(e.target.value));
-                      c.ecrire(e.target.value.trim() && v > 0 ? Math.min(v, c.max) : undefined);
-                    }}
-                    placeholder="-"
-                  />
-                  {c.unite ? <span className="unite">{c.unite}</span> : null}
-                </span>
-              </label>
-            ))}
-            <label className="check of-robot" htmlFor="officine-robot">
-              <input id="officine-robot" type="checkbox" checked={!!infos.robot} onChange={(e) => majInfos({ robot: e.target.checked || undefined })} />
-              <span>Robot ou automate de dispensation</span>
-            </label>
-          </div>
-          {remarques.length ? (
-            <ul className="of-remarques" id="of-remarques">
-              {remarques.map((r) => (
-                <li key={r}>{r}</li>
-              ))}
-            </ul>
-          ) : null}
-        </Accordeon>
-
-        {/* Le dimensionnement de l'équipe : un repère réservé aux titulaires. */}
-        {titulaire ? <Dimensionnement /> : null}
-      </section>
-
-      <h2 className="of-groupe" id="of-g-planning">
-        Le planning et les données
-      </h2>
-      <section className="card of-carte" aria-labelledby="of-g-planning">
-        <Accordeon id="acc-postes" icone={LayoutList} titre={<Titre>Postes types</Titre>} resume={resumePostes}>
-          <div className="of-entete">
-            <p className="of-intro">Vos horaires habituels, chacun avec sa couleur. Ils servent à la saisie rapide et aux propositions de planning.</p>
-            <button type="button" className="btn primary sm" onClick={() => setNouveauPoste(true)}>
-              <Plus size={14} aria-hidden="true" /> Ajouter un poste type
-            </button>
-          </div>
-          <div className="of-defile">
-            <table className="t pt-table">
-              <thead>
-                <tr>
-                  <th scope="col">Poste</th>
-                  <th scope="col">Couleur</th>
-                  <th scope="col">Horaires</th>
-                  <th scope="col">Pause</th>
-                  <th scope="col">Jours</th>
-                  <th scope="col" style={{ textAlign: 'right' }}>Travail effectif</th>
-                  <td />
-                </tr>
-              </thead>
-              <tbody>
-                {officine.postes.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <input className="input pt-nom" aria-label="Nom du poste" value={p.label} onChange={(e) => setPoste(p.id, { label: e.target.value })} />
-                    </td>
-                    <td>
-                      <span className="pt-couleur">
-                        <i className={`pt-pastille ${classePoste(p)}`} aria-hidden="true" />
-                        <select aria-label={`Couleur du poste ${p.label}`} value={p.couleur ?? ''} onChange={(e) => setPoste(p.id, { couleur: (e.target.value || undefined) as CouleurPoste | undefined })}>
-                          <option value="">Automatique</option>
-                          {COULEURS_POSTE.map((c) => (
-                            <option key={c} value={c}>
-                              {COULEUR_POSTE_LABEL[c]}
-                            </option>
-                          ))}
-                        </select>
-                      </span>
-                    </td>
-                    <td>
-                      <div className="row" style={{ gap: 6 }}>
-                        <Heure label={`Début du poste ${p.label}`} value={p.start} onChange={(v) => setPoste(p.id, { start: v })} />
-                        <span className="muted" aria-hidden="true">→</span>
-                        <Heure label={`Fin du poste ${p.label}`} value={p.end} onChange={(v) => setPoste(p.id, { end: v })} />
-                      </div>
-                    </td>
-                    <td>
-                      {p.pauseStart !== undefined && p.pauseEnd !== undefined ? (
-                        <div className="row" style={{ gap: 6 }}>
-                          <Heure label={`Début de pause du poste ${p.label}`} value={p.pauseStart} onChange={(v) => setPoste(p.id, { pauseStart: v })} />
-                          <span className="muted" aria-hidden="true">→</span>
-                          <Heure label={`Fin de pause du poste ${p.label}`} value={p.pauseEnd} onChange={(v) => setPoste(p.id, { pauseEnd: v })} />
-                        </div>
-                      ) : (
-                        <span className="muted">Sans pause</span>
-                      )}
-                    </td>
-                    <td className="small cap1">{p.jours.length === 5 && p.jours[0] === 0 ? 'Lundi à vendredi' : p.jours.map((j) => JOURS[j]).join(', ')}</td>
-                    <td className="num" style={{ textAlign: 'right' }}>{fmtDuree(minutesTravail(p))}</td>
-                    <td style={{ textAlign: 'right', width: 48 }}>
-                      <button type="button" className="btn ghost icon" aria-label={`Retirer le poste ${p.label}`} title={`Retirer le poste ${p.label}`} onClick={() => majOfficine({ postes: officine.postes.filter((x) => x.id !== p.id) })}>
-                        <Trash2 size={15} aria-hidden="true" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Accordeon>
-
-        <Accordeon id="acc-modele" focus="modele" icone={UserRoundCheck} titre={<Titre>Qui prépare le planning ?</Titre>} resume={resumeModele}>
+                  {/* Le dimensionnement de l'équipe : un repère réservé aux titulaires. */}
+                  {titulaire ? <Dimensionnement /> : null}
+                </>
+              ),
+            },
+            {
+              cle: 'planning',
+              titre: 'Planning',
+              icone: CalendarCheck,
+              contenu: (
+            <>
+        <Accordeon ouvert id="acc-modele" focus="modele" icone={UserRoundCheck} titre={<Titre>Qui prépare le planning ?</Titre>} resume={resumeModele}>
           <fieldset className="qui-prepare">
             <legend className="sr">Façon de construire le planning</legend>
             <label className={collaboratif ? 'on' : ''}>
@@ -547,7 +498,6 @@ export function Officine(): JSX.Element {
             </p>
           </div>
         </Accordeon>
-
         <Accordeon id="acc-publication" focus="publication" icone={CalendarCheck} titre={<Titre>Publication du planning, au mois</Titre>} resume={resumePublication}>
           <div className="pub-regles">
             <span>Le planning d’un mois est transmis à l’équipe au plus tard</span>
@@ -580,8 +530,86 @@ export function Officine(): JSX.Element {
           </label>
           <p className="tiny muted of-note">Solvéa fonctionne sur cet appareil, sans serveur : le rappel et la préparation se font à l’ouverture de l’application par un titulaire.</p>
         </Accordeon>
-
-        <Accordeon id="acc-parametres" icone={SlidersHorizontal} titre={<Titre>Paramètres et coûts</Titre>} resume={resumeParametres}>
+        <Accordeon id="acc-postes" icone={LayoutList} titre={<Titre>Postes types</Titre>} resume={resumePostes}>
+          <div className="of-entete">
+            <p className="of-intro">Vos horaires habituels, chacun avec sa couleur. Ils servent à la saisie rapide et aux propositions de planning.</p>
+            <button type="button" className="btn primary sm" onClick={() => setNouveauPoste(true)}>
+              <Plus size={14} aria-hidden="true" /> Ajouter un poste type
+            </button>
+          </div>
+          <div className="of-defile">
+            <table className="t pt-table">
+              <thead>
+                <tr>
+                  <th scope="col">Poste</th>
+                  <th scope="col">Couleur</th>
+                  <th scope="col">Horaires</th>
+                  <th scope="col">Pause</th>
+                  <th scope="col">Jours</th>
+                  <th scope="col" style={{ textAlign: 'right' }}>Travail effectif</th>
+                  <td />
+                </tr>
+              </thead>
+              <tbody>
+                {officine.postes.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <input className="input pt-nom" aria-label="Nom du poste" value={p.label} onChange={(e) => setPoste(p.id, { label: e.target.value })} />
+                    </td>
+                    <td>
+                      <span className="pt-couleur">
+                        <i className={`pt-pastille ${classePoste(p)}`} aria-hidden="true" />
+                        <select aria-label={`Couleur du poste ${p.label}`} value={p.couleur ?? ''} onChange={(e) => setPoste(p.id, { couleur: (e.target.value || undefined) as CouleurPoste | undefined })}>
+                          <option value="">Automatique</option>
+                          {COULEURS_POSTE.map((c) => (
+                            <option key={c} value={c}>
+                              {COULEUR_POSTE_LABEL[c]}
+                            </option>
+                          ))}
+                        </select>
+                      </span>
+                    </td>
+                    <td>
+                      <div className="row" style={{ gap: 6 }}>
+                        <Heure label={`Début du poste ${p.label}`} value={p.start} onChange={(v) => setPoste(p.id, { start: v })} />
+                        <span className="muted" aria-hidden="true">→</span>
+                        <Heure label={`Fin du poste ${p.label}`} value={p.end} onChange={(v) => setPoste(p.id, { end: v })} />
+                      </div>
+                    </td>
+                    <td>
+                      {p.pauseStart !== undefined && p.pauseEnd !== undefined ? (
+                        <div className="row" style={{ gap: 6 }}>
+                          <Heure label={`Début de pause du poste ${p.label}`} value={p.pauseStart} onChange={(v) => setPoste(p.id, { pauseStart: v })} />
+                          <span className="muted" aria-hidden="true">→</span>
+                          <Heure label={`Fin de pause du poste ${p.label}`} value={p.pauseEnd} onChange={(v) => setPoste(p.id, { pauseEnd: v })} />
+                        </div>
+                      ) : (
+                        <span className="muted">Sans pause</span>
+                      )}
+                    </td>
+                    <td className="small cap1">{p.jours.length === 5 && p.jours[0] === 0 ? 'Lundi à vendredi' : p.jours.map((j) => JOURS[j]).join(', ')}</td>
+                    <td className="num" style={{ textAlign: 'right' }}>{fmtDuree(minutesTravail(p))}</td>
+                    <td style={{ textAlign: 'right', width: 48 }}>
+                      <button type="button" className="btn ghost icon" aria-label={`Retirer le poste ${p.label}`} title={`Retirer le poste ${p.label}`} onClick={() => majOfficine({ postes: officine.postes.filter((x) => x.id !== p.id) })}>
+                        <Trash2 size={15} aria-hidden="true" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Accordeon>
+            </>
+              ),
+            },
+            {
+              cle: 'parametres',
+              titre: 'Paramètres',
+              icone: SlidersHorizontal,
+              contenu: (
+            <>
+        <Accordeon ouvert id="acc-parametres" icone={SlidersHorizontal} titre={<Titre>Paramètres et coûts</Titre>} resume={resumeParametres}>
           <div className="champs">
             <label className="field">
               Valeur du point conventionnel (€)
@@ -608,7 +636,6 @@ export function Officine(): JSX.Element {
             </span>
           </label>
         </Accordeon>
-
         <Accordeon id="acc-zero" icone={RotateCcw} titre={<Titre>Repartir de zéro</Titre>} resume="Efface l’officine, l’équipe et les plannings enregistrés sur cet appareil">
           <div className="of-zero">
             <p className="of-intro">Réinitialiser efface l’officine, l’équipe et les plannings enregistrés sur cet appareil, et ramène à l’écran de création.</p>
@@ -637,6 +664,11 @@ export function Officine(): JSX.Element {
             )}
           </div>
         </Accordeon>
+            </>
+              ),
+            },
+          ]}
+        />
       </section>
       {nouveauPoste ? <DialoguePosteType onClose={() => setNouveauPoste(false)} onAjouter={(p) => { majOfficine({ postes: officine.postes.concat(p) }); dire(`Poste type « ${p.label} » ajouté.`, true); }} /> : null}
     </div>

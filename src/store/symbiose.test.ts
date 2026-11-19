@@ -124,3 +124,43 @@ describe('tout le monde lit le même planning', () => {
     expect((s().data.annonces ?? [])[0].titre).toMatch(/publié/);
   });
 });
+
+describe('dernier recours : un titulaire assure le poste', () => {
+  const demande = () => {
+    const d = s().data;
+    const poste = d.shifts.filter((x) => x.personId === 'p_thomas' && x.date > s().today && d.semaines[mondayOf(x.date)]?.statut === 'publie').sort((a, b) => a.date.localeCompare(b.date))[0];
+    s().demanderRemplacement(poste, 'medical', undefined, undefined, { motif: 'sante' as never });
+    return { poste, r: s().data.remplacements.find((x) => x.shiftId === poste.id)! };
+  };
+
+  it('un titulaire libre sur l’horaire reprend le poste, et la version publiée suit', () => {
+    const { poste, r } = demande();
+    const libre = ['p_helene', 'p_antoine'].find((id) => !s().data.shifts.some((x) => x.personId === id && x.date === poste.date && x.start < poste.end && poste.start < x.end));
+    if (!libre) return;
+    s().deciderDemande(r.id, true);
+    s().assurerParTitulaire(r.id, libre);
+    expect(reel('p_thomas', poste.date).some((x) => x.start === poste.start)).toBe(false);
+    expect(reel(libre, poste.date).some((x) => x.start === poste.start && x.end === poste.end)).toBe(true);
+    expect(ecarts()).toEqual([]);
+    expect(s().data.remplacements.find((x) => x.id === r.id)).toMatchObject({ statut: 'acceptee', remplacantId: libre });
+  });
+
+  it('un titulaire déjà en poste libère la personne sans se retrouver avec deux postes', () => {
+    const { poste, r } = demande();
+    const pris = ['p_helene', 'p_antoine'].find((id) => s().data.shifts.some((x) => x.personId === id && x.date === poste.date && x.start < poste.end && poste.start < x.end));
+    if (!pris) return;
+    const avant = reel(pris, poste.date).length;
+    s().deciderDemande(r.id, true);
+    s().assurerParTitulaire(r.id, pris);
+    expect(reel('p_thomas', poste.date).some((x) => x.start === poste.start)).toBe(false);
+    expect(reel(pris, poste.date)).toHaveLength(avant);
+    expect(ecarts()).toEqual([]);
+    expect((s().data.annonces ?? [])[0].effets.join(' ')).toMatch(/déjà en poste sur cet horaire, assure le comptoir/);
+  });
+
+  it('seul un titulaire peut être ce dernier recours', () => {
+    const { poste, r } = demande();
+    s().assurerParTitulaire(r.id, 'p_ines');
+    expect(reel('p_thomas', poste.date).some((x) => x.start === poste.start)).toBe(true);
+  });
+});
