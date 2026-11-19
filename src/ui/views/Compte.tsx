@@ -1,4 +1,5 @@
-import { Check, CircleHelp, KeyRound, LogOut, Moon, Palette, Type, UserRound } from 'lucide-react';
+import { Check, CircleHelp, KeyRound, LayoutDashboard, LogOut, Moon, Palette, Type, UserRound } from 'lucide-react';
+import { ChoixDisposition } from '../components/Disposition';
 import { ChoixApparence } from '../components/Apparence';
 import { useState } from 'react';
 import { ESPACE_LABEL, empreinte, espaceDe, estResponsable, libelleRole, responsable } from '../../domain/acces';
@@ -128,6 +129,17 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
                 </span>
               </div>
             )}
+            {espace === 'responsable' ? (
+              <fieldset>
+                <legend className="field" style={{ marginBottom: 8 }}>
+                  <span className="row" style={{ gap: 6 }}>
+                    <LayoutDashboard size={15} aria-hidden="true" /> Disposition du tableau de bord
+                  </span>
+                </legend>
+                <ChoixDisposition valeur={prefs.tableau} onChange={(d) => setPreferences(cle, { tableau: d })} />
+                <p className="tiny muted" style={{ marginTop: 8 }}>Les mêmes informations, placées autrement. Le choix ne vaut que pour vous.</p>
+              </fieldset>
+            ) : null}
             <fieldset>
               <legend className="field" style={{ marginBottom: 8 }}>
                 <span className="row" style={{ gap: 6 }}>

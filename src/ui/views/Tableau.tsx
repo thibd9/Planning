@@ -18,7 +18,7 @@ import { estCollaboratif, moisDe, reponses } from '../../engine/souhaits';
 import { validateWeek } from '../../engine/validate';
 import { useStore } from '../../store/store';
 import { ListeAnnonces, annoncesDe } from '../components/Annonces';
-import { useUi } from '../../store/ui';
+import { prefsDe, useUi } from '../../store/ui';
 import { Avatar, Frise, Graduations, Pill } from '../kit';
 import { BanniereAccueil } from '../components/Banniere';
 
@@ -43,7 +43,9 @@ const moisAbrege = (texte: string): string => texte.replace(/(janvier|février|a
 
 export function Tableau({ personId }: { personId: string }): JSX.Element {
   const { data, autres, officineId, today, changerOfficine } = useStore();
-  const { aller, setSemaine, session, setSujet, voirJour, dire } = useUi();
+  const { aller, setSemaine, session, setSujet, voirJour, dire, preferences } = useUi();
+  // La disposition choisie dans « Mon compte » : le comptoir et les décisions côte à côte, ou la priorité d'abord.
+  const disposition = prefsDe(preferences, session).tableau;
   const preparerMois = useStore((st) => st.preparerMois);
   const moi = data.personnes.find((p) => p.id === personId);
   const lundi = mondayOf(today);
@@ -195,8 +197,293 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   const maintenant = new Date().getHours() * 60 + new Date().getMinutes();
   const aiguille = today === todayISO() && maintenant > echelle.start && maintenant < echelle.end ? ((maintenant - echelle.start) / (echelle.end - echelle.start)) * 100 : null;
 
+  // Les blocs du tableau de bord. Leur contenu ne change pas d'une disposition à l'autre : seule leur place change.
+  const blocPriorite = (
+          <section className={`tb-priorite ${priorite.ton}`} aria-labelledby="tb-prio" data-focus="priorite">
+            <span className="tb-prio-ico" aria-hidden="true">
+              {priorite.icone}
+            </span>
+            <div className="tb-prio-texte">
+              <div className="eyebrow">{priorite.ton === 'ok' ? 'Aujourd’hui' : 'À faire en premier'}</div>
+              <h2 id="tb-prio">{priorite.titre}</h2>
+              <p>{priorite.detail}</p>
+            </div>
+            {priorite.action && priorite.bouton ? (
+              <button type="button" className="btn primary" onClick={priorite.action}>
+                {priorite.bouton} <ArrowRight size={16} aria-hidden="true" />
+              </button>
+            ) : null}
+          </section>
+  );
+  const blocEcheance =
+          pub.etat === 'rappel' || pub.etat === 'depasse' ? (
+            <section className={`tb-priorite note tb-echeance ${pub.etat}`} aria-labelledby="tb-echeance" data-focus="echeance">
+              <span className="tb-prio-ico" aria-hidden="true">
+                {pub.etat === 'depasse' && prepares ? <Sparkles size={20} /> : <BellRing size={20} />}
+              </span>
+              <div className="tb-prio-texte">
+                <div className="eyebrow">Planning de {nomMois}</div>
+                <h3 id="tb-echeance">
+                  {pub.etat === 'rappel'
+                    ? `À transmettre avant le ${fmtDateCourt(pub.echeance)}`
+                    : prepares && !pub.vides
+                      ? 'Préparé par Solvéa d’après vos habitudes'
+                      : `En retard depuis le ${fmtDateCourt(pub.echeance)}`}
+                </h3>
+                <p>
+                  {pub.etat === 'rappel'
+                    ? `${pub.jours === 0 ? 'C’est aujourd’hui.' : `Il reste ${pub.jours} jour${pub.jours > 1 ? 's' : ''}.`} ${pub.restantes} semaine${pub.restantes > 1 ? 's ne sont' : ' n’est'} pas encore publiée${pub.restantes > 1 ? 's' : ''}${pub.vides ? `, dont ${pub.vides} vide${pub.vides > 1 ? 's' : ''}` : ''}.`
+                    : pub.vides
+                      ? relais
+                        ? `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}. Solvéa peut ${pub.vides > 1 ? 'les' : 'la'} préparer en brouillon d’après vos habitudes ; rien n’est publié sans vous.`
+                        : `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}, ${pub.restantes} à publier.`
+                      : `${pub.restantes} semaine${pub.restantes > 1 ? 's' : ''} en brouillon${prepares ? `, dont ${prepares} préparée${prepares > 1 ? 's' : ''} par Solvéa` : ''} : relisez, corrigez, puis publiez le mois.`}
+                </p>
+              </div>
+              {pub.etat === 'depasse' && pub.vides && relais ? (
+                <button
+                  type="button"
+                  className="btn"
+                  id="echeance-preparer"
+                  onClick={() => {
+                    preparerMois(pub.mois);
+                    dire(`Solvéa a préparé ${nomMois} en brouillon d’après vos habitudes. Relisez, puis publiez le mois.`, true);
+                    versLeMois();
+                  }}
+                >
+                  <Sparkles size={16} aria-hidden="true" /> Préparer {nomMois}
+                </button>
+              ) : (
+                <button type="button" className="btn" id="echeance-ouvrir" onClick={versLeMois}>
+                  {pub.vides ? `Construire ${nomMois}` : 'Relire et publier'} <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              )}
+            </section>
+          ) : null;
+  // Mon agenda : un titulaire a lui aussi un planning et des rendez-vous.
+  const blocAgenda = (
+        <section className="card tb-agenda" aria-labelledby="tb-agenda" data-focus="mon-agenda">
+          <div className="card-head">
+            <span className="ico carte-ico" aria-hidden="true"><CalendarDays size={20} /></span>
+            <div className="grow">
+              <div className="eyebrow">Mon agenda</div>
+              <h2 id="tb-agenda">
+                {monPoste ? (
+                  <>
+                    {capitale(monPoste.date === today ? 'Aujourd’hui' : monPoste.date === addDays(today, 1) ? 'Demain' : fmtDateCourt(monPoste.date))} :{' '}
+                    <span className="num sans-coupure">
+                      {fmtHeure(monPoste.start)} – {fmtHeure(monPoste.end)}
+                    </span>
+                  </>
+                ) : (
+                  'Pas de poste à venir'
+                )}
+              </h2>
+            </div>
+            <button type="button" className="btn sm" onClick={() => aller('moi')}>
+              Mon planning <ArrowRight size={15} aria-hidden="true" />
+            </button>
+          </div>
+          <div className="card-body tb-agenda-corps">
+            {mesSuivants.length || maGarde ? (
+              <div>
+                <h3 className="tb-agenda-titre">Ensuite</h3>
+                <ul className="tb-agenda-liste">
+                  {mesSuivants.map((x) => (
+                    <li key={x.id}>
+                      <span className="jour">{x.date === addDays(today, 1) ? 'Demain' : capitale(fmtDateCourt(x.date))}</span>
+                      <span className="num">
+                        {fmtHeure(x.start)} – {fmtHeure(x.end)}
+                      </span>
+                    </li>
+                  ))}
+                  {maGarde ? (
+                    <li className="garde">
+                      <span className="jour">
+                        <MoonStar size={14} aria-hidden="true" /> {capitale(fmtDateCourt(maGarde.date))}
+                      </span>
+                      <span>{libelleGarde(maGarde)}</span>
+                    </li>
+                  ) : null}
+                </ul>
+              </div>
+            ) : null}
+            <h3 className="tb-agenda-titre">Rendez-vous</h3>
+            {mesRdv.length ? (
+              <ProchainsRendezVous data={data} personId={moi?.id ?? ''} today={today} onOuvrir={(autre) => { useUi.getState().viserFil(autre); aller('messages'); }} />
+            ) : (
+              <p className="soft small" style={{ margin: 0 }}>Aucun rendez-vous à venir. Une demande acceptée se fixe ici et dans « Mon planning ».</p>
+            )}
+          </div>
+        </section>
+  );
+  const blocFaire = (
+          <section className="card tb-faire" aria-labelledby="tb-faire">
+            <div className="card-head">
+              <span className="ico carte-ico" aria-hidden="true"><ListChecks size={20} /></span>
+              <div className="grow">
+                <div className="eyebrow">À décider</div>
+                <h2 id="tb-faire">{d.total ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre` : aDeclarer.length ? `${aDeclarer.length} déclaration${aDeclarer.length > 1 ? 's' : ''} à faire` : 'Tout est à jour'}</h2>
+              </div>
+              {d.total ? (
+                <button type="button" className="btn" onClick={() => aller('resoudre')}>
+                  Tout voir <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              ) : null}
+            </div>
+            {aDeclarer.length ? (
+              <ul className="tb-declarer" id="tb-declarer" aria-label="Accidents du travail à déclarer">
+                {aDeclarer.map((x) => {
+                  const qui = data.personnes.find((y) => y.id === x.absence.personId);
+                  return (
+                    <li key={x.absence.id} className={x.jours <= 0 ? 'presse' : undefined}>
+                      <span className="ico" aria-hidden="true">
+                        <BriefcaseMedical size={18} />
+                      </span>
+                      <span className="grow">
+                        <b>
+                          Déclarer l’{libelleAbsence(x.absence).toLowerCase()} de {qui ? nomCourt(qui) : 'la personne'}
+                        </b>
+                        <span className="small">
+                          À la caisse d’assurance maladie, au plus tard le {fmtDateCourt(x.echeance)} : {delaiDeclaration(x.jours)}.
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        className="btn sm"
+                        data-declare={x.absence.id}
+                        onClick={() => {
+                          noterDeclaration(x.absence.id);
+                          useUi.getState().dire('Déclaration notée comme faite : le rappel est retiré.');
+                        }}
+                      >
+                        <Check size={14} aria-hidden="true" /> C’est fait
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+            {sujets.length ? (
+              <div className="tb-sujets">
+                {sujets.map((x, i) => (
+                  <button key={x.cle} type="button" className={`tb-sujet${i === 0 ? ' premier' : ''}`} onClick={() => ouvrir(x.cle)}>
+                    <span className="ico" aria-hidden="true">{x.icone}</span>
+                    <span className="grow">{x.label}</span>
+                    <span className="compte num">{x.nombre}</span>
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
+            ) : aDeclarer.length ? null : (
+              <p className="card-body soft tb-ajour">
+                <span className="tb-ajour-ico" aria-hidden="true">
+                  <Check size={22} />
+                </span>
+                <span>Absences couvertes, demandes arbitrées, plannings publiés.</span>
+              </p>
+            )}
+          </section>
+  );
+  const blocCycle = (
+          <section className="card cycle" aria-labelledby="tb-cycle" data-focus="cycle">
+            <div className="cycle-tete">
+              <span className="ico carte-ico" aria-hidden="true"><CalendarRange size={20} /></span>
+              <div className="grow">
+                <div className="eyebrow">Le prochain planning</div>
+                <h2 id="tb-cycle">Semaine du {fmtSemaine(cycle.semaine)}</h2>
+              </div>
+              <button type="button" className="btn" onClick={cycle.action}>
+                {cycle.bouton} <ArrowRight size={16} aria-hidden="true" />
+              </button>
+            </div>
+            <ol className="cycle-etapes">
+              {cycle.etapes.map((e, i) => (
+                <li key={e.nom} className={e.etat} aria-current={e.etat === 'cours' ? 'step' : undefined}>
+                  <span className="cycle-pastille" aria-hidden="true">
+                    {e.etat === 'fait' ? <Check size={15} /> : i + 1}
+                  </span>
+                  <span>
+                    <b>{e.nom}</b>
+                    <span className="small soft">{e.detail}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+  );
+  const blocJour = (
+        <section className="card tb-jour" aria-labelledby="tb-jour">
+          <div className="card-head">
+            <span className="ico carte-ico" aria-hidden="true"><Store size={20} /></span>
+            <div className="grow">
+              <div className="eyebrow">Aujourd’hui au comptoir</div>
+              <h2 id="tb-jour">
+                {enPoste.length ? `${enPoste.length} personne${enPoste.length > 1 ? 's' : ''} en poste` : 'Aucun poste planifié'}
+                {absents.length ? ` · ${absents.length} absent${absents.length > 1 ? 's' : ''}` : ''}
+              </h2>
+            </div>
+            <button type="button" className="btn" onClick={() => voirJour(today)}>
+              Voir la journée <ArrowRight size={16} aria-hidden="true" />
+            </button>
+          </div>
+          {parPersonne.length ? (
+            <div className="tbj">
+              {/* L'heure qu'il est : une étiquette au-dessus des heures, puis un trait continu à travers toutes les lignes. */}
+              <div className={`tbj-ligne tete${aiguille !== null ? ' avec-maintenant' : ''}`} aria-hidden="true">
+                <span />
+                <span className="tbj-piste">
+                  <Graduations echelle={echelle} />
+                  {aiguille !== null ? (
+                    <>
+                      <span className={`tbj-maintenant${aiguille < 12 ? ' debut' : aiguille > 88 ? ' fin' : ''}`} style={{ left: `${aiguille}%` }}>
+                        Maintenant · {fmtHeure(maintenant)}
+                      </span>
+                      <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} />
+                    </>
+                  ) : null}
+                </span>
+              </div>
+              {parPersonne.map(({ p, postes }) =>
+                p ? (
+                  <div key={p.id} className="tbj-ligne">
+                    <span className="tbj-qui">
+                      <Avatar person={p} />
+                      <span style={{ minWidth: 0 }}>
+                        <b>{nomCourt(p)}</b>
+                        <span className="small soft">{libelleRole(data, p)}</span>
+                        {retards
+                          .filter((r) => r.personId === p.id)
+                          .map((r) => (
+                            <span key={r.id} className="tbj-retard" title={[r.motif ? MOTIF_RETARD_LABEL[r.motif] : '', r.note ?? ''].filter(Boolean).join(' : ') || undefined}>
+                              <AlarmClock size={12} aria-hidden="true" /> Retard<span className="sr"> annoncé</span> · arrivée {fmtHeure(arriveePrevue(r))}
+                            </span>
+                          ))}
+                      </span>
+                    </span>
+                    <span className="tbj-piste">
+                      <Frise shifts={postes} echelle={echelle} />
+                      {aiguille !== null ? <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} aria-hidden="true" /> : null}
+                      <span className="sr">{postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(', ')}</span>
+                    </span>
+                  </div>
+                ) : null,
+              )}
+              {absents.length ? (
+                <p className="tbj-absents">
+                  <UserMinus size={15} aria-hidden="true" /> Absent{absents.length > 1 ? 's' : ''} :{' '}
+                  {absents.map((a) => { const q = data.personnes.find((x) => x.id === a.personId); return q ? nomCourt(q) : ''; }).filter(Boolean).join(', ')}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <p className="card-body soft">Construisez ou publiez la semaine pour voir ici l’équipe du jour.</p>
+          )}
+        </section>
+  );
+
   return (
-    <div className="tb">
+    <div className={`tb dispo-${disposition}`}>
       <BanniereAccueil
         illustration={illustrationDuProfil(data, moi)}
         personne={moi}
@@ -266,293 +553,48 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
         </div>
       </BanniereAccueil>
 
-      <div className="tb-duo">
-        {/* À gauche : ce qu'il faut faire, une chose par bloc, la plus pressée d'abord. Les deux blocs ont la même forme. */}
-        <div className="tb-avant">
-          <section className={`tb-priorite ${priorite.ton}`} aria-labelledby="tb-prio" data-focus="priorite">
-            <span className="tb-prio-ico" aria-hidden="true">
-              {priorite.icone}
-            </span>
-            <div className="tb-prio-texte">
-              <div className="eyebrow">{priorite.ton === 'ok' ? 'Aujourd’hui' : 'À faire en premier'}</div>
-              <h2 id="tb-prio">{priorite.titre}</h2>
-              <p>{priorite.detail}</p>
+      {disposition === 'comptoir' ? (
+        <>
+          {/* L'équipe du jour à gauche, ce qui attend une décision à droite ; dessous, le planning à préparer et mon agenda. */}
+          <div className="tb-grille tb-rang">
+            {blocJour}
+            <div className="tb-col tb-decider">
+              <div className="tb-avant">{blocPriorite}</div>
+              {blocFaire}
             </div>
-            {priorite.action && priorite.bouton ? (
-              <button type="button" className="btn primary" onClick={priorite.action}>
-                {priorite.bouton} <ArrowRight size={16} aria-hidden="true" />
-              </button>
-            ) : null}
-          </section>
-
-          {pub.etat === 'rappel' || pub.etat === 'depasse' ? (
-            <section className={`tb-priorite note tb-echeance ${pub.etat}`} aria-labelledby="tb-echeance" data-focus="echeance">
-              <span className="tb-prio-ico" aria-hidden="true">
-                {pub.etat === 'depasse' && prepares ? <Sparkles size={20} /> : <BellRing size={20} />}
-              </span>
-              <div className="tb-prio-texte">
-                <div className="eyebrow">Planning de {nomMois}</div>
-                <h3 id="tb-echeance">
-                  {pub.etat === 'rappel'
-                    ? `À transmettre avant le ${fmtDateCourt(pub.echeance)}`
-                    : prepares && !pub.vides
-                      ? 'Préparé par Solvéa d’après vos habitudes'
-                      : `En retard depuis le ${fmtDateCourt(pub.echeance)}`}
-                </h3>
-                <p>
-                  {pub.etat === 'rappel'
-                    ? `${pub.jours === 0 ? 'C’est aujourd’hui.' : `Il reste ${pub.jours} jour${pub.jours > 1 ? 's' : ''}.`} ${pub.restantes} semaine${pub.restantes > 1 ? 's ne sont' : ' n’est'} pas encore publiée${pub.restantes > 1 ? 's' : ''}${pub.vides ? `, dont ${pub.vides} vide${pub.vides > 1 ? 's' : ''}` : ''}.`
-                    : pub.vides
-                      ? relais
-                        ? `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}. Solvéa peut ${pub.vides > 1 ? 'les' : 'la'} préparer en brouillon d’après vos habitudes ; rien n’est publié sans vous.`
-                        : `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}, ${pub.restantes} à publier.`
-                      : `${pub.restantes} semaine${pub.restantes > 1 ? 's' : ''} en brouillon${prepares ? `, dont ${prepares} préparée${prepares > 1 ? 's' : ''} par Solvéa` : ''} : relisez, corrigez, puis publiez le mois.`}
-                </p>
-              </div>
-              {pub.etat === 'depasse' && pub.vides && relais ? (
-                <button
-                  type="button"
-                  className="btn"
-                  id="echeance-preparer"
-                  onClick={() => {
-                    preparerMois(pub.mois);
-                    dire(`Solvéa a préparé ${nomMois} en brouillon d’après vos habitudes. Relisez, puis publiez le mois.`, true);
-                    versLeMois();
-                  }}
-                >
-                  <Sparkles size={16} aria-hidden="true" /> Préparer {nomMois}
-                </button>
-              ) : (
-                <button type="button" className="btn" id="echeance-ouvrir" onClick={versLeMois}>
-                  {pub.vides ? `Construire ${nomMois}` : 'Relire et publier'} <ArrowRight size={16} aria-hidden="true" />
-                </button>
-              )}
-            </section>
-          ) : null}
-        </div>
-        {/* Mon agenda : un titulaire a lui aussi un planning et des rendez-vous. */}
-        <section className="card tb-agenda" aria-labelledby="tb-agenda" data-focus="mon-agenda">
-          <div className="card-head">
-            <span className="ico carte-ico" aria-hidden="true"><CalendarDays size={20} /></span>
-            <div className="grow">
-              <div className="eyebrow">Mon agenda</div>
-              <h2 id="tb-agenda">
-                {monPoste ? (
-                  <>
-                    {capitale(monPoste.date === today ? 'Aujourd’hui' : monPoste.date === addDays(today, 1) ? 'Demain' : fmtDateCourt(monPoste.date))} :{' '}
-                    <span className="num sans-coupure">
-                      {fmtHeure(monPoste.start)} – {fmtHeure(monPoste.end)}
-                    </span>
-                  </>
-                ) : (
-                  'Pas de poste à venir'
-                )}
-              </h2>
-            </div>
-            <button type="button" className="btn sm" onClick={() => aller('moi')}>
-              Mon planning <ArrowRight size={15} aria-hidden="true" />
-            </button>
           </div>
-          <div className="card-body tb-agenda-corps">
-            {mesSuivants.length || maGarde ? (
-              <div>
-                <h3 className="tb-agenda-titre">Ensuite</h3>
-                <ul className="tb-agenda-liste">
-                  {mesSuivants.map((x) => (
-                    <li key={x.id}>
-                      <span className="jour">{x.date === addDays(today, 1) ? 'Demain' : capitale(fmtDateCourt(x.date))}</span>
-                      <span className="num">
-                        {fmtHeure(x.start)} – {fmtHeure(x.end)}
-                      </span>
-                    </li>
-                  ))}
-                  {maGarde ? (
-                    <li className="garde">
-                      <span className="jour">
-                        <MoonStar size={14} aria-hidden="true" /> {capitale(fmtDateCourt(maGarde.date))}
-                      </span>
-                      <span>{libelleGarde(maGarde)}</span>
-                    </li>
-                  ) : null}
-                </ul>
+          <div className="tb-grille tb-rang">
+            {/* L'échéance du mois va avec le prochain planning : les étapes se lisent alors en ligne, sinon en colonne. */}
+            {blocEcheance ? (
+              <div className="tb-suite">
+                {blocEcheance}
+                {blocCycle}
               </div>
-            ) : null}
-            <h3 className="tb-agenda-titre">Rendez-vous</h3>
-            {mesRdv.length ? (
-              <ProchainsRendezVous data={data} personId={moi?.id ?? ''} today={today} onOuvrir={(autre) => { useUi.getState().viserFil(autre); aller('messages'); }} />
             ) : (
-              <p className="soft small" style={{ margin: 0 }}>Aucun rendez-vous à venir. Une demande acceptée se fixe ici et dans « Mon planning ».</p>
+              <div className="tb-col">{blocCycle}</div>
             )}
+            {blocAgenda}
           </div>
-        </section>
-      </div>
-
-
-      <div className="tb-grille">
-        <div className="tb-col">
-          <section className="card tb-faire" aria-labelledby="tb-faire">
-            <div className="card-head">
-              <span className="ico carte-ico" aria-hidden="true"><ListChecks size={20} /></span>
-              <div className="grow">
-                <div className="eyebrow">À décider</div>
-                <h2 id="tb-faire">{d.total ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre` : aDeclarer.length ? `${aDeclarer.length} déclaration${aDeclarer.length > 1 ? 's' : ''} à faire` : 'Tout est à jour'}</h2>
-              </div>
-              {d.total ? (
-                <button type="button" className="btn" onClick={() => aller('resoudre')}>
-                  Tout voir <ArrowRight size={16} aria-hidden="true" />
-                </button>
-              ) : null}
+        </>
+      ) : (
+        <>
+          {/* La priorité et mon agenda d'abord ; dessous, les décisions et le prochain planning, puis l'équipe du jour. */}
+          <div className="tb-duo">
+            <div className="tb-avant">
+              {blocPriorite}
+              {blocEcheance}
             </div>
-            {aDeclarer.length ? (
-              <ul className="tb-declarer" id="tb-declarer" aria-label="Accidents du travail à déclarer">
-                {aDeclarer.map((x) => {
-                  const qui = data.personnes.find((y) => y.id === x.absence.personId);
-                  return (
-                    <li key={x.absence.id} className={x.jours <= 0 ? 'presse' : undefined}>
-                      <span className="ico" aria-hidden="true">
-                        <BriefcaseMedical size={18} />
-                      </span>
-                      <span className="grow">
-                        <b>
-                          Déclarer l’{libelleAbsence(x.absence).toLowerCase()} de {qui ? nomCourt(qui) : 'la personne'}
-                        </b>
-                        <span className="small">
-                          À la caisse d’assurance maladie, au plus tard le {fmtDateCourt(x.echeance)} : {delaiDeclaration(x.jours)}.
-                        </span>
-                      </span>
-                      <button
-                        type="button"
-                        className="btn sm"
-                        data-declare={x.absence.id}
-                        onClick={() => {
-                          noterDeclaration(x.absence.id);
-                          useUi.getState().dire('Déclaration notée comme faite : le rappel est retiré.');
-                        }}
-                      >
-                        <Check size={14} aria-hidden="true" /> C’est fait
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
-            {sujets.length ? (
-              <div className="tb-sujets">
-                {sujets.map((x, i) => (
-                  <button key={x.cle} type="button" className={`tb-sujet${i === 0 ? ' premier' : ''}`} onClick={() => ouvrir(x.cle)}>
-                    <span className="ico" aria-hidden="true">{x.icone}</span>
-                    <span className="grow">{x.label}</span>
-                    <span className="compte num">{x.nombre}</span>
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
-            ) : aDeclarer.length ? null : (
-              <p className="card-body soft tb-ajour">
-                <span className="tb-ajour-ico" aria-hidden="true">
-                  <Check size={22} />
-                </span>
-                <span>Absences couvertes, demandes arbitrées, plannings publiés.</span>
-              </p>
-            )}
-          </section>
-
-
-          <section className="card cycle" aria-labelledby="tb-cycle" data-focus="cycle">
-            <div className="cycle-tete">
-              <span className="ico carte-ico" aria-hidden="true"><CalendarRange size={20} /></span>
-              <div className="grow">
-                <div className="eyebrow">Le prochain planning</div>
-                <h2 id="tb-cycle">Semaine du {fmtSemaine(cycle.semaine)}</h2>
-              </div>
-              <button type="button" className="btn" onClick={cycle.action}>
-                {cycle.bouton} <ArrowRight size={16} aria-hidden="true" />
-              </button>
-            </div>
-            <ol className="cycle-etapes">
-              {cycle.etapes.map((e, i) => (
-                <li key={e.nom} className={e.etat} aria-current={e.etat === 'cours' ? 'step' : undefined}>
-                  <span className="cycle-pastille" aria-hidden="true">
-                    {e.etat === 'fait' ? <Check size={15} /> : i + 1}
-                  </span>
-                  <span>
-                    <b>{e.nom}</b>
-                    <span className="small soft">{e.detail}</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
-        </div>
-
-        <section className="card tb-jour" aria-labelledby="tb-jour">
-          <div className="card-head">
-            <span className="ico carte-ico" aria-hidden="true"><Store size={20} /></span>
-            <div className="grow">
-              <div className="eyebrow">Aujourd’hui au comptoir</div>
-              <h2 id="tb-jour">
-                {enPoste.length ? `${enPoste.length} personne${enPoste.length > 1 ? 's' : ''} en poste` : 'Aucun poste planifié'}
-                {absents.length ? ` · ${absents.length} absent${absents.length > 1 ? 's' : ''}` : ''}
-              </h2>
-            </div>
-            <button type="button" className="btn" onClick={() => voirJour(today)}>
-              Voir la journée <ArrowRight size={16} aria-hidden="true" />
-            </button>
+            {blocAgenda}
           </div>
-          {parPersonne.length ? (
-            <div className="tbj">
-              {/* L'heure qu'il est : une étiquette au-dessus des heures, puis un trait continu à travers toutes les lignes. */}
-              <div className={`tbj-ligne tete${aiguille !== null ? ' avec-maintenant' : ''}`} aria-hidden="true">
-                <span />
-                <span className="tbj-piste">
-                  <Graduations echelle={echelle} />
-                  {aiguille !== null ? (
-                    <>
-                      <span className={`tbj-maintenant${aiguille < 12 ? ' debut' : aiguille > 88 ? ' fin' : ''}`} style={{ left: `${aiguille}%` }}>
-                        Maintenant · {fmtHeure(maintenant)}
-                      </span>
-                      <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} />
-                    </>
-                  ) : null}
-                </span>
-              </div>
-              {parPersonne.map(({ p, postes }) =>
-                p ? (
-                  <div key={p.id} className="tbj-ligne">
-                    <span className="tbj-qui">
-                      <Avatar person={p} />
-                      <span style={{ minWidth: 0 }}>
-                        <b>{nomCourt(p)}</b>
-                        <span className="small soft">{libelleRole(data, p)}</span>
-                        {retards
-                          .filter((r) => r.personId === p.id)
-                          .map((r) => (
-                            <span key={r.id} className="tbj-retard" title={[r.motif ? MOTIF_RETARD_LABEL[r.motif] : '', r.note ?? ''].filter(Boolean).join(' : ') || undefined}>
-                              <AlarmClock size={12} aria-hidden="true" /> Retard<span className="sr"> annoncé</span> · arrivée {fmtHeure(arriveePrevue(r))}
-                            </span>
-                          ))}
-                      </span>
-                    </span>
-                    <span className="tbj-piste">
-                      <Frise shifts={postes} echelle={echelle} />
-                      {aiguille !== null ? <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} aria-hidden="true" /> : null}
-                      <span className="sr">{postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(', ')}</span>
-                    </span>
-                  </div>
-                ) : null,
-              )}
-              {absents.length ? (
-                <p className="tbj-absents">
-                  <UserMinus size={15} aria-hidden="true" /> Absent{absents.length > 1 ? 's' : ''} :{' '}
-                  {absents.map((a) => { const q = data.personnes.find((x) => x.id === a.personId); return q ? nomCourt(q) : ''; }).filter(Boolean).join(', ')}
-                </p>
-              ) : null}
+          <div className="tb-grille">
+            <div className="tb-col">
+              {blocFaire}
+              {blocCycle}
             </div>
-          ) : (
-            <p className="card-body soft">Construisez ou publiez la semaine pour voir ici l’équipe du jour.</p>
-          )}
-        </section>
-      </div>
+            {blocJour}
+          </div>
+        </>
+      )}
 
       {recentes.length ? (
         <section className="card tb-annonces" aria-labelledby="tb-annonces" data-focus="annonces" style={{ marginTop: 24 }}>

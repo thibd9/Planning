@@ -256,6 +256,20 @@ Le **tableau de bord du titulaire** suit une hiérarchie simple : la bannière a
 dit quoi faire en premier (c'est le seul bouton plein de la page), les notes tiennent sur une ligne, le
 détail vient dessous, en retrait.
 
+Chaque titulaire choisit la **disposition** de son tableau de bord dans « Mon compte », sur de petites
+maquettes. Les blocs et leur style sont les mêmes, seule leur place change :
+
+| Disposition | Ce que l'on voit, de haut en bas |
+| --- | --- |
+| **Comptoir et décisions** (par défaut) | L'équipe du jour à gauche, la priorité et les décisions à droite. Dessous, le planning à préparer (échéance du mois, prochaine semaine) et « Mon agenda ». Puis les décisions récentes. |
+| **Priorité d'abord** | La priorité, l'échéance du mois et « Mon agenda » en tête. Dessous, les décisions et le prochain planning à gauche, l'équipe du jour à droite. Puis les décisions récentes. |
+
+Sur un écran étroit, tout passe sur une colonne et ce qui attend une décision reste avant l'équipe du jour.
+
+Dans la bannière, une icône au trait suit le **moment de la journée** : soleil levant le matin (dès 5 h),
+plein soleil à midi (dès 11 h), soleil plus doux l'après-midi (dès 14 h), soleil couchant le soir (dès 18 h),
+lune en fin de journée (dès 21 h). Le salut passe à « Bonsoir » à partir de 18 h. Aucun émoji dans l'interface.
+
 ---
 
 ## Solvi, l'aide et les visites guidées

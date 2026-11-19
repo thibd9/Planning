@@ -29,13 +29,17 @@ export type Vue =
 export type Theme = 'ciel' | 'solvea' | 'indigo' | 'bleu' | 'sarcelle' | 'emeraude' | 'ambre' | 'corail' | 'rose' | 'ardoise';
 /** Clair ; mixte : le menu foncé, le contenu clair ; sombre ; auto : comme l'appareil. */
 export type Mode = 'clair' | 'mixte' | 'sombre' | 'auto';
+/** Comptoir : l'équipe du jour et les décisions côte à côte. Classique : la priorité d'abord, puis le détail. */
+export type Disposition = 'comptoir' | 'classique';
 export interface Preferences {
   theme: Theme;
   texte: 'normal' | 'grand';
   /** Clair, sombre, ou comme l'appareil. */
   mode: Mode;
+  /** La disposition du tableau de bord d'un titulaire. */
+  tableau: Disposition;
 }
-const PREFS_DEFAUT: Preferences = { theme: 'ciel', texte: 'normal', mode: 'clair' };
+const PREFS_DEFAUT: Preferences = { theme: 'ciel', texte: 'normal', mode: 'clair', tableau: 'comptoir' };
 /** Ce qu'une personne a réglé elle-même ; le reste suit les valeurs par défaut, dont la couleur de son profil. */
 export type PrefsChoisies = Partial<Preferences>;
 
@@ -172,7 +176,7 @@ interface Ui {
 // quoi qu'ils aient pu enregistrer auparavant.
 export const prefsDe = (prefs: Record<string, PrefsChoisies>, personId: string | null, themeProfil: Theme = PREFS_DEFAUT.theme, couleurLibre = true): Preferences => {
   const choisies = personId ? prefs[personId] : undefined;
-  return { theme: (couleurLibre ? choisies?.theme : undefined) ?? themeProfil, texte: choisies?.texte ?? PREFS_DEFAUT.texte, mode: choisies?.mode ?? PREFS_DEFAUT.mode };
+  return { theme: (couleurLibre ? choisies?.theme : undefined) ?? themeProfil, texte: choisies?.texte ?? PREFS_DEFAUT.texte, mode: choisies?.mode ?? PREFS_DEFAUT.mode, tableau: choisies?.tableau ?? PREFS_DEFAUT.tableau };
 };
 
 export const useUi = create<Ui>((set) => ({
@@ -239,7 +243,7 @@ export const useUi = create<Ui>((set) => ({
     }),
   oublierCouleurs: (identifiants) =>
     set((s) => {
-      const preferences = Object.fromEntries(Object.entries(s.preferences).map(([cle, p]) => (identifiants.includes(cle) ? [cle, { texte: p.texte, mode: p.mode }] : [cle, p])));
+      const preferences = Object.fromEntries(Object.entries(s.preferences).map(([cle, p]) => (identifiants.includes(cle) ? [cle, { texte: p.texte, mode: p.mode, tableau: p.tableau }] : [cle, p])));
       ecrire(CLE_PREFS, preferences);
       return { preferences };
     }),

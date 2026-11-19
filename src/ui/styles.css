@@ -4349,17 +4349,14 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .tb-nom { flex: 0 1 auto; min-width: 0; padding: 0; }
 .tb-nom .eyebrow { color: rgba(255, 255, 255, 0.86); font-size: 11.5px; letter-spacing: 0.1em; }
 .tb-nom h1 { margin: 4px 0 4px; font-size: 30px; line-height: 1.12; font-weight: 750; letter-spacing: -0.02em; color: #fff; }
-.tb-salut { display: inline-block; margin-left: 2px; font-size: 0.86em; transform-origin: 70% 80%; }
+/* Le moment de la journée, à côté du salut : une icône au trait, de la couleur du texte. */
+.tb-moment { display: inline-flex; margin-left: 4px; vertical-align: -0.1em; color: rgba(255, 255, 255, 0.92); line-height: 0; }
 .tb-role { margin: 0; font-size: 15px; color: rgba(255, 255, 255, 0.92); }
 /* L'emplacement de l'illustration : il prend la place libre, et rien s'il est vide. */
 .tb-illus { flex: 1 1 0; min-width: 0; align-self: stretch; height: auto; max-height: 150px; margin: -22px 0; object-fit: contain; object-position: center bottom; }
 .tb-resume { flex: 0 0 248px; align-self: center; margin: 0 0 0 auto; padding: 6px 0 6px 28px; border-left: 1px solid rgba(255, 255, 255, 0.34); font-size: 13.5px; line-height: 1.5; text-align: left; color: rgba(255, 255, 255, 0.92); }
 .tb-resume b { display: block; margin-bottom: 4px; font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; color: #fff; }
 :root[data-mode='sombre'] .tb-couverture { background: linear-gradient(105deg, color-mix(in srgb, var(--a-plein) 52%, #070d18) 0%, color-mix(in srgb, var(--a-plein) 74%, #070d18) 45%, color-mix(in srgb, var(--a-plein-2) 70%, #070d18) 100%); box-shadow: none; }
-@media (prefers-reduced-motion: no-preference) {
-  .tb-salut { animation: tb-salut 1.6s ease-in-out 0.4s 1 both; }
-}
-@keyframes tb-salut { 0%, 100% { transform: rotate(0deg); } 15% { transform: rotate(16deg); } 30% { transform: rotate(-8deg); } 45% { transform: rotate(14deg); } 60% { transform: rotate(-4deg); } 75% { transform: rotate(8deg); } }
 
 /* Les repères : une carte chacun, le pictogramme dans une case de couleur, bien centré. */
 .tb-chiffres { gap: 12px; border: 0; background: none; }
@@ -4655,3 +4652,38 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   filter: drop-shadow(0 0 2px var(--solvi-flou, #fff)) drop-shadow(0 0 9px var(--solvi-flou, #fff)) drop-shadow(0 0 20px color-mix(in srgb, var(--solvi-flou, #fff) 75%, transparent)) drop-shadow(0 6px 8px color-mix(in srgb, var(--solvi-ombre) 30%, transparent));
 }
 :root[data-mode='sombre'] { --solvi-flou: color-mix(in srgb, #fff 26%, var(--bg)); }
+
+/* === Tableau de bord, disposition « comptoir » ===
+   Les mêmes blocs que la disposition classique, placés autrement : l'équipe du jour à gauche et ce qui attend
+   une décision à droite ; dessous, le prochain planning et mon agenda ; puis les décisions récentes. */
+.tb-grille.tb-rang { grid-template-columns: minmax(0, 1.75fr) minmax(340px, 1fr); margin-top: 0; margin-bottom: 20px; }
+.tb-rang .tb-col { gap: 16px; }
+.tb-rang .tb-col > .cycle { flex: 1; }
+.tb-rang .tb-avant > .tb-priorite:first-child { flex: none; }
+/* Le planning à préparer : l'échéance du mois, puis les étapes de la prochaine semaine. */
+.tb-suite { display: flex; flex-direction: column; gap: 16px; min-width: 0; container-type: inline-size; }
+.tb-suite > .cycle { margin: 0; flex: 1; display: flex; flex-direction: column; }
+.tb-suite .cycle h2 { font-size: 17px; }
+.tb-suite .cycle-etapes { margin-block: auto; }
+@container (max-width: 620px) {
+  .tb-suite .cycle-etapes { grid-auto-flow: row; grid-auto-columns: auto; gap: 14px; }
+  .tb-suite .cycle-etapes li { padding-right: 0; }
+  .tb-suite .cycle-etapes li:not(:last-child)::after { content: none; }
+}
+/* L'équipe du jour occupe toute la hauteur de sa carte : les lignes se partagent la place, sans vide en bas. */
+.tb-rang .tb-jour { display: flex; flex-direction: column; }
+.tb-rang .tb-jour .tbj { flex: 1; }
+.tb-rang .tb-jour .tbj-ligne:not(.tete) { flex: 1 1 auto; max-height: 84px; }
+.dispo-comptoir .tb-annonces .annonce:only-child { grid-column: 1 / -1; }
+.dispo-comptoir .tb-annonces { margin-top: 0 !important; }
+/* Dans la colonne étroite, le bouton de l'agenda passe sous le titre plutôt que de le recouvrir. */
+.tb-rang .tb-agenda .card-head { flex-wrap: wrap; }
+.tb-rang .tb-agenda .card-head .grow { flex: 1 1 150px; }
+@media (min-width: 1201px) {
+  .dispo-comptoir .tb-annonces .annonces { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Écran étroit : une seule colonne, et ce qui attend une décision passe avant l'équipe du jour. */
+@media (max-width: 1200px) {
+  .tb-grille.tb-rang { grid-template-columns: minmax(0, 1fr); }
+  .tb-rang .tb-decider { order: -1; }
+}

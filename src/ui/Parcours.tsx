@@ -1576,7 +1576,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[aria-labelledby='c-apparence']",
     titre: 'Votre compte',
-    texte: () => 'Trois apparences (claire, mixte, sombre), taille du texte, et pour vous seule, titulaire principale, dix couleurs. La visite est terminée : tout reste à essayer.',
+    texte: () => 'Trois apparences (claire, mixte, sombre), la disposition de votre tableau de bord, la taille du texte, et pour vous seule, titulaire principale, dix couleurs. La visite est terminée : tout reste à essayer.',
     jouer: () => {
       avecPlanning();
       helene('compte');

@@ -274,3 +274,14 @@ export function uid(prefix = 'id'): string {
   counter += 1;
   return `${prefix}_${Date.now().toString(36)}_${counter.toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`;
 }
+
+/** Les cinq moments de la journée, pour l'accueil : chacun a son icône, et le salut passe à « Bonsoir » le soir. */
+export type Moment = 'matin' | 'midi' | 'apres-midi' | 'soir' | 'nuit';
+/** Le moment qu'il est, d'après l'heure (0 à 23) : matin dès 5 h, midi dès 11 h, après-midi dès 14 h, soir dès 18 h, fin de journée dès 21 h. */
+export function momentDuJour(heure: number): Moment {
+  if (heure >= 5 && heure < 11) return 'matin';
+  if (heure >= 11 && heure < 14) return 'midi';
+  if (heure >= 14 && heure < 18) return 'apres-midi';
+  if (heure >= 18 && heure < 21) return 'soir';
+  return 'nuit';
+}
