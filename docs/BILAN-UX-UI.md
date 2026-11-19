@@ -7,7 +7,7 @@ cohérence), audit d'accessibilité WCAG 2.1 AA, audit technique en cinq dimensi
 performance, thèmes, adaptation aux écrans, intégrité du code), audit du système de design (jetons,
 composants), relecture des textes d'interface. Les constats viennent de mesures faites dans un navigateur
 piloté par script, pas d'impressions : 22 écrans relevés à 5 tailles (360, 390, 768, 1024 et 1440 px),
-analyse automatique d'accessibilité (axe-core) sur une centaine d'écrans, mesure des temps, lecture du code.
+analyse automatique d'accessibilité (axe-core) sur 110 écrans en clair et 40 en sombre, mesure des temps, lecture du code.
 
 > [!IMPORTANT]
 > Ce bilan ne remplace pas trois vérifications qui restent à faire : des essais sur de vrais téléphones
@@ -30,7 +30,7 @@ montrent ce qu'elles impliquent avant d'être prises.
 
 **Trois faiblesses.** Il n'y a pas de serveur : chaque appareil garde ses propres données, donc l'équipe ne
 voit pas réellement le planning du titulaire. Le téléphone est utilisable mais pas encore confortable
-(grille de la semaine en caractères de 10 px, boutons de 34 à 40 px). Le style a été écrit par couches
+(grille de la semaine en caractères de 10 px, écrans denses). Le style a été écrit par couches
 successives : 41 tailles de texte, 124 ombres, 176 couleurs écrites en dur.
 
 ---
@@ -41,7 +41,7 @@ successives : 41 tailles de texte, 124 ombres, 176 couleurs écrites en dur.
 | --- | --- |
 | **Aucun débordement** | Sur 22 écrans et 5 largeurs, la page ne défile jamais à l'horizontale. |
 | **La semaine tient** | « Construire » et « Planning de l'équipe » affichent tous les jours ouverts sans défilement, de 2000 à 360 px. |
-| **Accessibilité de base** | 0 défaut détecté par axe-core en mode clair sur 127 écrans contrôlés. Lien d'évitement, langue déclarée, un seul titre de niveau 1 par écran, aucun saut de niveau de titre. |
+| **Accessibilité de base** | 0 défaut détecté par axe-core sur 110 écrans en mode clair, 40 en mode sombre et 6 sur téléphone. Lien d'évitement, langue déclarée, un seul titre de niveau 1 par écran, aucun saut de niveau de titre. |
 | **Fenêtres** | Le focus y est enfermé, Échap les ferme, le focus revient au bouton d'origine. |
 | **Clavier** | L'ordre de tabulation suit le menu puis la page ; chaque arrêt a un indicateur visible. |
 | **Mode sombre et couleurs** | Dix couleurs, un mode sombre complet, une couleur de base par profil. |
@@ -73,7 +73,7 @@ Gravité : **P0** bloque un usage réel, **P1** gêne fortement, **P2** agace, *
 | # | Problème | Où | Piste |
 | --- | --- | --- | --- |
 | 5 | **Grille de la semaine sur téléphone.** Sept jours dans 390 px : 72 textes sur 106 font moins de 11 px. Lisible, pas confortable. | Construire, Planning de l'équipe | Sur téléphone, une vue « jour par jour » par défaut (on balaie d'un jour à l'autre) ; la semaine reste en aperçu. |
-| 6 | **Cibles tactiles trop petites.** 8 à 35 éléments par écran font moins de 44 px ; les petits boutons font 34 px. Aucun n'est sous le minimum légal de 24 px. | Partout | 44 px pour tout bouton quand l'écran est tactile. |
+| 6 | **Cibles tactiles.** Mesuré avant correction : 8 à 35 éléments par écran sous 44 px. **Corrigé pendant ce bilan** : sur écran tactile, boutons, listes et champs font 44 px ; il reste les tuiles de la grille, étroites par nature sur téléphone. | Construire, Planning de l'équipe | Réglé par la vue « jour par jour » du point 5. À confirmer sur de vrais téléphones. |
 | 7 | **Calculs qui figent l'écran.** Les trois propositions prennent 1,4 s sur ordinateur, sans progression ; plusieurs secondes sur un téléphone. | Proposer un planning | Calcul dans un fil séparé, avec une vraie barre de progression. |
 | 8 | **« Résoudre » est lent sur téléphone** : 0,75 s d'écran figé à l'ouverture (0,2 s sur ordinateur). | Résoudre | Ne calculer les options d'un poste que lorsqu'on l'ouvre. |
 | 9 | **Déplacer un poste ne marche qu'à la souris.** Le glisser-déposer n'existe pas au doigt ni au clavier. | Construire | Une action « Déplacer vers… » dans la fenêtre du poste. |
@@ -81,21 +81,20 @@ Gravité : **P0** bloque un usage réel, **P1** gêne fortement, **P2** agace, *
 | 11 | **Trop de place prise avant le contenu.** Sur un écran de 900 px de haut, la grille commence à 390 px. | Construire | Regrouper titre et commandes sur une ligne ; barre de test repliable. |
 | 12 | **Deux moteurs de visite guidée** (le tutoriel en 11 étapes et les visites avec Solvi). | Aide | N'en garder qu'un. |
 | 13 | **La visite « Titulaire » dure 30 minutes** (55 étapes). | Visites | La proposer par chapitres indépendants ; les tutoriels par tâche existent déjà. |
-| 14 | **Les visites ne sont pas revérifiées de bout en bout sur la dernière version.** Trois sur quatre l'ont été sur la version précédente. | Visites | Les rejouer à chaque livraison. |
+| 14 | **Les visites guidées sont longues à revérifier** : les rejouer en entier prend près d'une heure de machine. Sur cette version, les quatre visites ont été déroulées en entier sans erreur (13, 16, 17 et 55 étapes). Dans la visite « Titulaire », douze gestes de démonstration facultatifs ne se jouaient pas : l'étape s'explique, mais Solvi ne montre pas le geste. Deux sont corrigés (les postes types), sans avoir été rejoués ; dix restent à reprendre (contrôles, compteur d'heures, tableau de bord). | Visites | Les rejouer à chaque livraison, de façon automatique. |
 
 ### P2 : agacements
 
 | # | Problème | Piste |
 | --- | --- | --- |
-| 15 | **Défaut de mode sombre à recontrôler** : l'analyse automatique doit être relancée en sombre après la réduction des arrondis. | Relancer l'analyse sur les deux modes à chaque livraison. |
-| 16 | **Tailles de texte en pixels.** Le réglage « texte plus grand » du téléphone est ignoré (l'option interne « texte grand » existe). | Passer aux unités relatives. |
-| 17 | **Mouvement réduit : tout est coupé d'un bloc**, y compris les retours utiles. | Garder les changements d'état, retirer seulement les déplacements. |
-| 18 | **Champs de date et d'heure du navigateur** : leur format dépend de l'appareil (vu en format américain dans les essais). | À vérifier sur appareils réglés en français ; sinon, champs maison. |
-| 19 | **Trois tableaux défilent encore dans leur cadre sur téléphone** : postes types, points forts, frise des congés. | Les présenter en listes sur téléphone. |
-| 20 | **Barre du haut sur téléphone : cinq icônes sans libellé.** | Libellés courts, ou regroupement. |
-| 21 | **Vocabulaire à unifier** : « responsable » et « titulaire » désignent la même personne selon l'écran. | Un seul mot : titulaire. |
-| 22 | **Pas d'états d'attente ni d'erreur de réseau** (logique : pas de réseau aujourd'hui). | À dessiner avec le serveur. |
-| 23 | **Changement d'écran sans retour en haut** : corrigé pendant ce bilan. | Fait. |
+| 15 | **Tailles de texte en pixels.** Le réglage « texte plus grand » du téléphone est ignoré (l'option interne « texte grand » existe). | Passer aux unités relatives. |
+| 16 | **Mouvement réduit : tout est coupé d'un bloc**, y compris les retours utiles. | Garder les changements d'état, retirer seulement les déplacements. |
+| 17 | **Champs de date et d'heure du navigateur** : leur format dépend de l'appareil (vu en format américain dans les essais). | À vérifier sur appareils réglés en français ; sinon, champs maison. |
+| 18 | **Trois tableaux défilent encore dans leur cadre sur téléphone** : postes types, points forts, frise des congés. | Les présenter en listes sur téléphone. |
+| 19 | **Barre du haut sur téléphone : des icônes sans libellé.** | Libellés courts, ou regroupement. |
+| 20 | **Vocabulaire à unifier** : « responsable » et « titulaire » désignent la même personne selon l'écran. | Un seul mot : titulaire. |
+| 21 | **Pas d'états d'attente ni d'erreur de réseau** (logique : pas de réseau aujourd'hui). | À dessiner avec le serveur. |
+| 22 | **Changement d'écran sans retour en haut** : corrigé pendant ce bilan. | Fait. |
 
 ### P3 : finition
 
@@ -152,8 +151,8 @@ les valeurs en dur. Un seul composant « bouton » avec ses tailles et ses état
 
 | Largeur | Débordement de page | Éléments coupés | Cibles sous 44 px (par écran) | Textes sous 12 px |
 | --- | --- | --- | --- | --- |
-| 360 px | aucun | aucun | 8 à 35 | forte dans les grilles |
-| 390 px | aucun | aucun | 8 à 35 | 72 sur 106 dans le planning de l'équipe |
+| 360 px | aucun | aucun | 8 à 35 (0 à 2 sur écran tactile, hors grilles) | forte dans les grilles |
+| 390 px | aucun | aucun | 8 à 35 (0 à 2 sur écran tactile, hors grilles) | 72 sur 106 dans le planning de l'équipe |
 | 768 px | aucun | aucun | 8 à 35 | 78 sur 121 dans « Construire » |
 | 1024 px | aucun | aucun | 14 à 31 | 14 sur 53 dans « Construire » |
 | 1440 px | aucun | aucun | 14 à 43 | 28 sur 127 dans « Construire » |
@@ -188,6 +187,19 @@ comptes. Un planning publié à l'ordinateur apparaît sur les téléphones ; un
 s'affiche chez le titulaire dans la seconde. Avec la voie proposée ci-dessus, ce n'est d'ailleurs pas « deux
 applications » mais une seule, affichée sur deux écrans.
 
+### Avec quelles briques ?
+
+| Brique | Avis | Pourquoi |
+| --- | --- | --- |
+| **React** | À garder | L'application est déjà écrite avec ; rien à refaire. |
+| **Supabase** | Recommandé pour le serveur | Il apporte d'un bloc ce qui manque : comptes, base PostgreSQL, droits vérifiés ligne par ligne selon le rôle, mises à jour en temps réel, hébergement possible en région européenne. Le moteur de règles de Solvéa, lui, ne change pas. |
+| **Application installable**, puis **coquille native** | Recommandé pour le téléphone | La même application, installée ; les magasins d'applications seulement s'ils sont exigés. |
+| **Three.js** | Non | Rien dans un planning n'appelle la 3D. Elle alourdirait une application déjà lourde (1 Mo) sans rien apporter à la lecture d'une semaine. |
+
+Le passage à Supabase est un vrai chantier : créer le projet, décrire les tables et les droits, remplacer le
+stockage local par des appels au serveur, puis migrer les écrans un à un. Il demande un compte Supabase et
+ses clés, que seul le propriétaire du projet peut créer.
+
 Ce que le serveur doit apporter : des comptes avec un vrai mot de passe, des droits par rôle vérifiés côté
 serveur, une base partagée, l'envoi des notifications, une sauvegarde, un hébergement en France ou dans
 l'Union européenne. Les données d'absence, d'arrêt et d'accident du travail sont des données personnelles
@@ -206,7 +218,7 @@ sensibles : le cadre (RGPD, durée de conservation, accès) est à faire valider
 | Exactitude des règles de droit du travail | Les seuils sont réglables, mais leur justesse doit être validée par un professionnel. |
 | Délai de déclaration d'un accident du travail | Calculé d'après la règle des 48 heures hors dimanches et jours fériés : à faire confirmer. |
 | Impression | Feuille de style prévue, jamais contrôlée sur papier. |
-| Les quatre visites guidées sur la dernière version | À rejouer en entier. |
+| Les gestes facultatifs de la visite « Titulaire » | Dix gestes ne trouvent pas leur cible à ce moment de l'histoire : à reprendre un par un. |
 | Gros volumes | Une équipe de 30 personnes, deux ans d'historique : temps de calcul et place dans le navigateur. |
 
 ---

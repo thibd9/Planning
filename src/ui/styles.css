@@ -3996,3 +3996,9 @@ table.lecture td { min-width: 0; padding: 6px 3px; }
   .skip { min-height: 44px; display: inline-flex; align-items: center; }
 }
 table.lecture th[scope='col']:first-child { padding-left: 16px; }
+
+/* Petit téléphone (moins de 400 px) : l'aide reste dans « Menu » et auprès de Solvi ; son icône quitte la barre du haut,
+   pour que le compte reste entièrement visible avec des boutons de 44 px. */
+@media (max-width: 400px) { .topbar .top-ico[data-tour='aide'] { display: none; } }
+/* Très petit téléphone (320 px) : les messages ont déjà leur onglet dans la barre du bas. */
+@media (max-width: 340px) { .topbar .top-ico[aria-label^='Messages'] { display: none; } }

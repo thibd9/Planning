@@ -826,7 +826,7 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: '.plan-grid .add', dit: 'Cliquez sur le « + » d’une case', sert: 'Il ouvre un poste pour cette personne, ce jour-là.' },
       { faire: 'attendre', que: '.dialog' },
-      { faire: 'cliquer', sur: parTexte('.dialog .btn.sm', 'Ouverture'), dit: 'Cliquez sur le poste type « Ouverture »', sert: 'Un poste type remplit les horaires et la pause d’un seul geste.', facultatif: true },
+      { faire: 'cliquer', sur: parTexte('.dialog .ptc', 'Ouverture'), dit: 'Cliquez sur le poste type « Ouverture »', sert: 'Un poste type remplit les horaires et la pause d’un seul geste.', facultatif: true },
       { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('label[for="tache-comptoir"], #tache-comptoir'), dit: 'Choisissez l’activité « Comptoir »', sert: 'Comptoir, réserve, administratif : l’activité compte pour l’effectif.', facultatif: true },
       { faire: 'cliquer', sur: VALIDER, sert: 'Horaires, pause et activité sont enregistrés dans le brouillon.' },
     ],
@@ -876,7 +876,7 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: parTexte('.plan-bar .seg button', 'Heures'), sert: 'Retour aux heures de la semaine, face au contrat.' },
       { faire: 'cliquer', sur: '.plan-grid .tile', dit: 'Cliquez sur une tuile', sert: 'Un poste s’ouvre pour être corrigé ou supprimé.' },
       { faire: 'attendre', que: '.dialog' },
-      { faire: 'cliquer', sur: parTexte('.dialog .btn.sm', 'Journée longue'), dit: 'Cliquez sur le poste type « Journée longue »', sert: 'Les horaires et la pause changent d’un coup.', facultatif: true },
+      { faire: 'cliquer', sur: parTexte('.dialog .ptc', 'Journée longue'), dit: 'Cliquez sur le poste type « Journée longue »', sert: 'Les horaires et la pause changent d’un coup.', facultatif: true },
       { faire: 'cliquer', sur: VALIDER, sert: 'La tuile change de couleur avec son horaire.' },
       { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Annuler la dernière manipulation"]'), dit: 'Cliquez sur « Annuler »', sert: 'Chaque manipulation de la grille peut être annulée, puis rétablie.' },
     ],
