@@ -1,4 +1,4 @@
-import { AlarmClock, ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp, Menu, X } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, CheckCheck, ChevronDown, ChevronRight, CircleHelp, ClipboardCheck, Crown, FolderOpen, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, LifeBuoy, Lightbulb, ListChecks, LogOut, Medal, Menu, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, TrendingUp, UserRound, Users, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
@@ -35,6 +35,7 @@ import { MesDemandes, MonSuivi } from './ui/views/MonEspace';
 import { PlanningEquipe } from './ui/views/PlanningEquipe';
 import { Heures } from './ui/views/Heures';
 import { Assistant } from './ui/Assistant';
+import { appliquerApparence } from './ui/components/Apparence';
 import { PiedSupport } from './ui/components/Support';
 import { aRegulariser } from './engine/heures';
 import { autreDuRdv, rdvARepondre } from './engine/rdv';
@@ -243,9 +244,7 @@ export function App(): JSX.Element {
   // Mode clair ou sombre ; « auto » suit le réglage de l'appareil, et son changement en direct.
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const appliquer = (): void => {
-      document.documentElement.dataset.mode = prefs.mode === 'auto' ? (media.matches ? 'sombre' : 'clair') : prefs.mode;
-    };
+    const appliquer = (): void => appliquerApparence(prefs.mode, media.matches);
     appliquer();
     media.addEventListener('change', appliquer);
     return () => media.removeEventListener('change', appliquer);
@@ -341,7 +340,7 @@ export function App(): JSX.Element {
             </select>
           </div>
         ) : null}
-        {groupes.map((g) => (
+        {groupes.filter((g) => g !== AIDE.groupe).map((g) => (
           <div key={g || 'tete'} className={`nav-groupe${ordre.includes(g) ? ` ordre${ordre.indexOf(g) === ordre.length - 1 ? ' fin' : ''}` : ''}`}>
             {g ? (
               <div className="nav-label">
@@ -376,6 +375,18 @@ export function App(): JSX.Element {
               ))}
           </div>
         ))}
+        {liens.some((l) => l.vue === 'aide') ? (
+          <button type="button" data-tour="nav-aide" className={`nav-item nav-aide${vueActive === 'aide' ? ' on' : ''}`} onClick={() => { aller('aide'); setVolet(false); }} aria-current={vueActive === 'aide' ? 'page' : undefined}>
+            <span className="ni" aria-hidden="true">
+              <Lightbulb size={20} />
+            </span>
+            <span className="grow">
+              <b>Besoin d’aide ?</b>
+              <span className="nav-aide-sous">Aide, tutoriels et lexique</span>
+            </span>
+            <ChevronRight size={16} aria-hidden="true" className="nav-aide-fleche" />
+          </button>
+        ) : null}
         <div className="side-foot">
           <i aria-hidden="true" />
           <span>Enregistré sur cet appareil à {fmtHeure(heure.getHours() * 60 + heure.getMinutes())}</span>
@@ -556,10 +567,19 @@ export function App(): JSX.Element {
                       {aLire ? <span className="nav-badge" aria-hidden="true">{aLire}</span> : null}
                     </button>
                   ) : null}
-                  <button type="button" role="switch" aria-checked={sombre} onClick={() => setPreferences(session ?? '', { mode: sombre ? 'clair' : 'sombre' })}>
-                    {sombre ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />} Mode sombre
-                    <span className={`bascule${sombre ? ' on' : ''}`} aria-hidden="true" />
-                  </button>
+                  {/* L'apparence se change d'ici, en un geste : clair, mixte (menu foncé) ou sombre. */}
+                  <div className="menu-apparence" role="group" aria-label="Apparence">
+                    <span className="menu-apparence-nom">
+                      {sombre ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />} Apparence
+                    </span>
+                    <span className="seg petit">
+                      {(['clair', 'mixte', 'sombre'] as const).map((m) => (
+                        <button key={m} type="button" id={`apparence-${m}`} className={(m === 'sombre' ? sombre : !sombre && (prefs.mode === 'mixte') === (m === 'mixte')) ? 'on' : ''} aria-pressed={m === 'sombre' ? sombre : !sombre && (prefs.mode === 'mixte') === (m === 'mixte')} onClick={() => setPreferences(session ?? '', { mode: m })}>
+                          {m === 'clair' ? 'Clair' : m === 'mixte' ? 'Mixte' : 'Sombre'}
+                        </button>
+                      ))}
+                    </span>
+                  </div>
                   <button type="button" onClick={() => { setMenu(false); aller('compte'); window.setTimeout(() => document.getElementById('c-apparence')?.scrollIntoView({ block: 'start' }), 60); }}>
                     <Settings size={17} aria-hidden="true" /> Paramètres
                   </button>

@@ -443,3 +443,23 @@ Quand ni l'aide, ni le lexique, ni Solvi ne répondent, on contacte le support :
 bas de chaque écran, sur la page de connexion, sur la page d'aide et dans les réponses de Solvi. Le support est
 celui de Solvéa : les titulaires n'ont rien à renseigner. Les coordonnées affichées aujourd'hui sont
 provisoires et fictives (`src/domain/support.ts`) ; elles sont à remplacer avant toute mise en service.
+
+## Trois apparences : claire, mixte, sombre
+
+- **Claire** : tout l'écran est clair.
+- **Mixte** : le menu passe en bleu nuit, le contenu reste clair.
+- **Sombre** : tout l'écran est foncé.
+
+Le titulaire choisit dès la création de son espace : chaque option est montrée par une petite maquette, et
+l'écran prend aussitôt l'apparence choisie. Ensuite, chacun règle la sienne dans « Mon compte » (une quatrième
+option suit le réglage de l'appareil) ou d'un geste depuis son nom, en haut à droite.
+
+Le menu est compact : la rubrique ouverte est un aplat de couleur, l'aide est une carte en bas du menu. La
+bannière d'accueil est un seul bloc ; les cinq repères sont des cartes de même hauteur.
+
+### Illustrations
+
+Des emplacements sont prévus pour des illustrations (bannière d'accueil, agenda, comptoir, prochain planning,
+priorité). Tant qu'aucun dessin n'est fourni, rien ne s'affiche et la mise en page n'en dépend pas. Pour en
+ajouter un : déposer le fichier dans `src/assets/illustrations/` et l'inscrire dans
+`src/ui/components/Illustration.tsx`.

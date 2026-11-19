@@ -27,7 +27,8 @@ export type Vue =
   | 'compte';
 
 export type Theme = 'ciel' | 'solvea' | 'indigo' | 'bleu' | 'sarcelle' | 'emeraude' | 'ambre' | 'corail' | 'rose' | 'ardoise';
-export type Mode = 'clair' | 'sombre' | 'auto';
+/** Clair ; mixte : le menu foncé, le contenu clair ; sombre ; auto : comme l'appareil. */
+export type Mode = 'clair' | 'mixte' | 'sombre' | 'auto';
 export interface Preferences {
   theme: Theme;
   texte: 'normal' | 'grand';

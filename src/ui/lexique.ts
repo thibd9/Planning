@@ -45,6 +45,7 @@ export const LEXIQUE: Terme[] = [
   { mot: 'Régularisation', sens: 'Façon de solder un compteur d’heures : payer, faire récupérer ou faire rattraper.', gestion: true },
   { mot: 'Support', sens: `L’équipe de Solvéa qui répond quand l’aide ne suffit pas : ${SUPPORT.telephone}, ${SUPPORT.email}. Les coordonnées sont en bas de chaque écran.` },
   { mot: 'Surface de vente', sens: 'La partie de l’officine ouverte au public, en mètres carrés. À ne pas confondre avec la surface totale, qui compte aussi la réserve et le préparatoire.', gestion: true },
+  { mot: 'Thème mixte', sens: 'Une des trois apparences : le menu est foncé, le contenu reste clair. Les deux autres sont le thème clair et le thème sombre. Chacun choisit la sienne, à la création de son espace ou dans « Mon compte ».' },
   { mot: 'Titulaire principal', sens: 'Le titulaire qui a créé la pharmacie. Il donne son accord aux décisions des autres titulaires.' },
   { mot: 'Tour de rôle', sens: 'Ordre dans lequel un dépannage est proposé : il revient d’abord à celui qui a le moins dépanné sur trois mois.' },
 ];

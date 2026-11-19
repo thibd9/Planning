@@ -1,9 +1,10 @@
 import { Check, CircleHelp, KeyRound, LogOut, Moon, Palette, Type, UserRound } from 'lucide-react';
+import { ChoixApparence } from '../components/Apparence';
 import { useState } from 'react';
 import { ESPACE_LABEL, empreinte, espaceDe, estResponsable, libelleRole, responsable } from '../../domain/acces';
 import { nomComplet, nomCourt } from '../../domain/types';
 import { useStore } from '../../store/store';
-import type { Mode, Theme } from '../../store/ui';
+import type { Theme } from '../../store/ui';
 import { prefsDe, themeDuProfil, useUi } from '../../store/ui';
 import { EtiquetteRole } from '../icons';
 import { Avatar, MotDePasse, Pill } from '../kit';
@@ -20,11 +21,6 @@ const THEMES: { cle: Theme; nom: string; a: string; b: string }[] = [
   { cle: 'emeraude', nom: 'Émeraude', a: '#17694a', b: '#1e7d59' },
   { cle: 'sarcelle', nom: 'Bleu-vert', a: '#0a5a63', b: '#127680' },
   { cle: 'ardoise', nom: 'Ardoise', a: '#2f4858', b: '#446579' },
-];
-const MODES: { cle: Mode; nom: string }[] = [
-  { cle: 'clair', nom: 'Clair' },
-  { cle: 'sombre', nom: 'Sombre' },
-  { cle: 'auto', nom: 'Comme l’appareil' },
 ];
 
 /** Mon compte : profil, apparence, code d'accès, déconnexion. Accessible à tous les rôles. */
@@ -104,15 +100,7 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
                   <Moon size={15} aria-hidden="true" /> Mode
                 </span>
               </legend>
-              <div className="choix" style={{ maxWidth: 560 }}>
-                {MODES.map((m) => (
-                  <label key={m.cle} htmlFor={`mode-${m.cle}`}>
-                    <input id={`mode-${m.cle}`} type="radio" name="mode" checked={prefs.mode === m.cle} onChange={() => setPreferences(cle, { mode: m.cle })} />
-                    {m.nom}
-                    <Check size={16} className="coche" aria-hidden="true" />
-                  </label>
-                ))}
-              </div>
+              <ChoixApparence valeur={prefs.mode} onChange={(m) => setPreferences(cle, { mode: m })} nom="mode" auto />
             </fieldset>
             <fieldset>
               <legend className="field" style={{ marginBottom: 8 }}>Couleur du thème</legend>

@@ -1,5 +1,5 @@
 import { CIBLE, viser } from '../viser';
-import { AlarmClock, ArrowLeftRight, ArrowRight, BriefcaseMedical, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus, UsersRound, BellRing, Sparkles } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, ArrowRight, BellRing, BriefcaseMedical, Building2, CalendarDays, CalendarRange, Check, Handshake, History, Hourglass, ListChecks, MoonStar, ShieldCheck, Sparkles, Store, UserMinus, UsersRound } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
 import { MOIS, addDays, fmtDateCourt, fmtDateLong, fmtHeure, fmtSemaine, mondayOf, todayISO, totalDuree, weekDates } from '../../domain/time';
@@ -36,6 +36,10 @@ function couverture(data: AppData, monday: string): number | null {
 const capitale = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
 /** Tableau de bord du responsable : l'état de l'officine en un écran. */
+/** Dans une petite carte, le mois s'abrège à la française : « 29 nov. », « 3 déc. ». */
+const ABREGES: Record<string, string> = { janvier: 'janv.', février: 'févr.', avril: 'avr.', juillet: 'juil.', septembre: 'sept.', octobre: 'oct.', novembre: 'nov.', décembre: 'déc.' };
+const moisAbrege = (texte: string): string => texte.replace(/(janvier|février|avril|juillet|septembre|octobre|novembre|décembre)/, (m) => ABREGES[m]);
+
 export function Tableau({ personId }: { personId: string }): JSX.Element {
   const { data, autres, officineId, today, changerOfficine } = useStore();
   const { aller, setSemaine, session, setSujet, voirJour, dire } = useUi();
@@ -237,7 +241,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <span className="grow">
               <span className="l">Semaine prochaine</span>
               <span className="v">{etatSuivante}</span>
-              <span className="d">à partir du {fmtDateCourt(suivante).replace(/^\S+ /, '')}</span>
+              <span className="d">à partir du {moisAbrege(fmtDateCourt(suivante).replace(/^\S+ /, ''))}</span>
             </span>
           </button>
           <button type="button" className="tb-chiffre" onClick={() => aller('heures')}>
@@ -252,7 +256,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <span className="ico" aria-hidden="true"><MoonStar size={18} /></span>
             <span className="grow">
               <span className="l">Prochaine garde</span>
-              <span className="v cap1">{prochaineGarde ? fmtDateCourt(prochaineGarde.date) : 'Aucune'}</span>
+              <span className="v cap1">{prochaineGarde ? moisAbrege(fmtDateCourt(prochaineGarde.date)) : 'Aucune'}</span>
               <span className="d">{prochaineGarde ? (prochaineGarde.personId ? nomCourt(data.personnes.find((p) => p.id === prochaineGarde.personId) ?? data.personnes[0]) : 'À affecter') : 'rien de prévu'}</span>
             </span>
           </button>
@@ -326,6 +330,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
         {/* Mon agenda : un titulaire a lui aussi un planning et des rendez-vous. */}
         <section className="card tb-agenda" aria-labelledby="tb-agenda" data-focus="mon-agenda">
           <div className="card-head">
+            <span className="ico carte-ico" aria-hidden="true"><CalendarDays size={20} /></span>
             <div className="grow">
               <div className="eyebrow">Mon agenda</div>
               <h2 id="tb-agenda">
@@ -384,6 +389,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
         <div className="tb-col">
           <section className="card tb-faire" aria-labelledby="tb-faire">
             <div className="card-head">
+              <span className="ico carte-ico" aria-hidden="true"><ListChecks size={20} /></span>
               <div className="grow">
                 <div className="eyebrow">À décider</div>
                 <h2 id="tb-faire">{d.total ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre` : aDeclarer.length ? `${aDeclarer.length} déclaration${aDeclarer.length > 1 ? 's' : ''} à faire` : 'Tout est à jour'}</h2>
@@ -451,6 +457,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
 
           <section className="card cycle" aria-labelledby="tb-cycle" data-focus="cycle">
             <div className="cycle-tete">
+              <span className="ico carte-ico" aria-hidden="true"><CalendarRange size={20} /></span>
               <div className="grow">
                 <div className="eyebrow">Le prochain planning</div>
                 <h2 id="tb-cycle">Semaine du {fmtSemaine(cycle.semaine)}</h2>
@@ -477,6 +484,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
 
         <section className="card tb-jour" aria-labelledby="tb-jour">
           <div className="card-head">
+            <span className="ico carte-ico" aria-hidden="true"><Store size={20} /></span>
             <div className="grow">
               <div className="eyebrow">Aujourd’hui au comptoir</div>
               <h2 id="tb-jour">
@@ -535,6 +543,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
       {recentes.length ? (
         <section className="card tb-annonces" aria-labelledby="tb-annonces" data-focus="annonces" style={{ marginTop: 24 }}>
           <div className="card-head">
+            <span className="ico carte-ico" aria-hidden="true"><History size={20} /></span>
             <div className="grow">
               <div className="eyebrow">Déjà décidé</div>
               <h2 id="tb-annonces">Décisions récentes</h2>

@@ -51,9 +51,12 @@ créer, rien à saisir. On y passe d'un profil à l'autre en un clic.
 | **Publier au mois** | Une échéance, un rappel, et un brouillon préparé d'après vos habitudes si le temps manque. Rien n'est publié sans vous. |
 | **Décider** | Congé, remplacement, horaires : chaque demande montre ce qu'elle implique avant qu'on tranche. Jamais un simple oui ou non. |
 | **Absorber l'imprévu** | Retard, absence, accident du travail : signalés en deux gestes, pour soi ou pour quelqu'un. Les postes à couvrir arrivent avec leurs options. |
+| **Aller droit au but** | Depuis « Résoudre », chaque façon de régler mène à l'endroit exact du planning, mis en évidence : la case, le bouton « Publier », la grille. |
 | **Imprimer** | Un aperçu avant impression : à la semaine ou au mois, en couleur ou en noir et blanc, pour l'équipe ou pour soi, avec la pause déjeuner et les pauses courtes. |
 | **Suivre** | Compteurs d'heures, équité des samedis et des fermetures, gardes, formations, fiche navette pour la paie. |
 | **Se parler** | Messages, rendez-vous fixés dans l'agenda de chacun, annonces de chaque décision. |
+| **Se faire aider** | Une aide qui couvre chaque fonction, un tutoriel par tâche, un lexique, Solvi, et le support en bas de chaque écran. |
+| **Choisir son apparence** | Trois thèmes : clair, mixte (menu foncé, contenu clair) et sombre. On choisit dès la création de son espace, sur de petites maquettes. |
 
 <div align="center">
 <table>
@@ -77,6 +80,7 @@ créer, rien à saisir. On y passe d'un profil à l'autre en un clic.
 ## Un espace par profil
 
 Chaque profil a sa couleur de base et son accueil : on sait d'un coup d'œil où l'on se trouve.
+Chacun choisit aussi son apparence, claire, mixte ou sombre, sans rien changer pour les autres.
 
 | Profil | Couleur | Son espace |
 | --- | --- | --- |

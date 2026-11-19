@@ -8,8 +8,8 @@
 :root {
   color-scheme: light;
   /* Le thème tient en deux couleurs : l'accent plein et sa variante un peu plus claire. Tout le reste en découle. */
-  --a-plein: #1f6bb8;
-  --a-plein-2: #2474c4;
+  --a-plein: #1257c0;
+  --a-plein-2: #1a6ddb;
   /* Neutres, à peine bleutés. */
   --bg: #f5f8fb;
   --surface: #ffffff;
@@ -4273,3 +4273,193 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .toast .toast-suite { font-weight: 700; }
 @media (max-width: 720px) { .of-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 420px) { .of-grille { grid-template-columns: minmax(0, 1fr); } }
+
+/* =====================================================================================================
+   Présentation 2026 : thème clair, thème mixte (menu foncé), thème sombre.
+   Le menu est calme et compact, la rubrique ouverte est un aplat de l'accent. La bannière d'accueil est
+   un seul bloc de couleur ; les repères sont des cartes. Les rayons restent mesurés : 8, 10 et 12 px.
+   ===================================================================================================== */
+
+/* ---------- Le menu ---------- */
+.side { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; padding: 20px 14px 14px; gap: 2px; }
+.brand { padding: 2px 8px 18px; }
+.officine-sel { padding: 0 4px 12px; }
+.officine-sel .nav-label { padding: 0 4px 2px !important; }
+.officine-sel .nav-label::after { display: none; }
+.officine-sel select { border-color: var(--line); border-radius: 8px; min-height: 38px; font-size: 13.5px; box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.05); }
+
+/* Un intitulé de groupe : petites capitales, puis un filet jusqu'au bord. Plus de fil ni de pastilles. */
+.nav-label { display: flex; align-items: center; gap: 10px; padding: 16px 10px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--ink-3); }
+.nav-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.nav-etape { display: none !important; }
+.nav-groupe.ordre::before, .nav-groupe.ordre::after, .nav-groupe.ordre .nav-item::before, .nav-groupe.ordre .nav-item::after, .nav-groupe.ordre .nav-label::before { display: none !important; content: none !important; }
+
+.nav-item { gap: 12px; padding: 4px 10px 4px 6px; min-height: 40px; border-radius: 8px; font-size: 14.5px; font-weight: 550; color: var(--ink-2); animation: none; background-image: none; }
+.nav-item .ni { width: 30px; height: 30px; border-radius: 8px; background: var(--a-tint); color: var(--a-text); box-shadow: none; }
+.nav-item .ni svg { width: 18px; height: 18px; }
+.nav-item:hover:not(.on) { background: var(--n-hover); color: var(--ink); transform: none; }
+.nav-item.on { background: linear-gradient(135deg, var(--a-plein-2), var(--a-plein)); background-size: auto; animation: none; color: #fff; font-weight: 650; box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--a-plein) 75%, transparent); }
+.nav-item.on .ni { background: transparent; color: #fff; box-shadow: none; }
+.nav-badge { background: var(--a-plein); color: #fff; min-width: 22px; height: 22px; font-size: 11.5px; }
+.nav-item.on .nav-badge { background: #fff; color: var(--a-plein); }
+
+/* L'aide, en bas du menu : une carte, pas une rubrique de plus. */
+.nav-aide { margin-top: auto; padding: 10px 10px 10px 8px; min-height: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); text-align: left; line-height: 1.25; }
+.nav-aide .ni { width: 34px; height: 34px; background: transparent; color: var(--a-text); }
+.nav-aide .ni svg { width: 22px; height: 22px; }
+.nav-aide b { display: block; font-size: 14px; font-weight: 700; color: var(--ink); }
+.nav-aide-sous { display: block; font-size: 12px; font-weight: 450; color: var(--ink-3); }
+.nav-aide-fleche { flex: none; color: var(--ink-3); }
+.nav-aide.on b, .nav-aide.on .nav-aide-sous, .nav-aide.on .nav-aide-fleche { color: #fff; }
+.nav-aide.on { border-color: transparent; }
+.nav-aide + .side-foot { margin-top: 0; }
+.side-foot { padding: 12px 10px 2px; }
+.side-foot i { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+
+/* ---------- Thème mixte : le menu passe en bleu nuit, le contenu reste clair ---------- */
+:root[data-menu='sombre'] .side {
+  color-scheme: dark;
+  --menu-1: color-mix(in srgb, var(--a-plein) 58%, #050c22);
+  --menu-2: color-mix(in srgb, var(--a-plein) 34%, #050c22);
+  --ink: #ffffff; --ink-2: #dfe8fa; --ink-3: #b4c5e6; --line: rgba(255, 255, 255, 0.16); --n-hover: rgba(255, 255, 255, 0.09);
+  --surface: var(--menu-2); --surface-2: rgba(255, 255, 255, 0.07); --a-tint: transparent; --a-text: #ffffff; --a-deep: #bcd6ff; --ctl: rgba(255, 255, 255, 0.4);
+  --logo-1: #ffffff; --logo-2: color-mix(in srgb, var(--a-plein-2) 45%, #fff); --logo-3: color-mix(in srgb, var(--a-plein-2) 62%, #fff); --logo-4: color-mix(in srgb, var(--a-plein-2) 80%, #fff);
+  --ok: #7fe0b3; --ok-soft: rgba(127, 224, 179, 0.22);
+  background: linear-gradient(180deg, var(--menu-1) 0%, var(--menu-2) 100%); border-right: 0; color: var(--ink);
+}
+:root[data-menu='sombre'] .side .brand-mark { filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35)); }
+:root[data-menu='sombre'] .side .officine-sel select { background-color: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.24); color: #fff; box-shadow: none; --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+:root[data-menu='sombre'] .side .nav-item.on { background: linear-gradient(135deg, color-mix(in srgb, var(--a-plein-2) 86%, #fff), var(--a-plein-2)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 10px 22px -12px rgba(0, 0, 0, 0.6); }
+:root[data-menu='sombre'] .side .nav-badge { background: #fff; color: var(--menu-2); }
+:root[data-menu='sombre'] .side .nav-aide { background: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.2); }
+:root[data-menu='sombre'] .side :focus-visible { outline-color: #fff; }
+:root[data-menu='sombre'] .side .btn.ghost { color: #fff; }
+
+/* ---------- La bannière d'accueil : un seul bloc de couleur ---------- */
+.tb-banniere { display: grid; gap: 14px; margin-bottom: 16px; border: 0; border-radius: 0; background: none; overflow: visible; }
+.tb-couverture { position: relative; isolation: isolate; display: flex; align-items: center; gap: 22px; height: auto; min-height: 132px; padding: 22px 28px; border-radius: 12px; overflow: hidden; color: #fff;
+  background: linear-gradient(105deg, color-mix(in srgb, var(--a-plein) 82%, #030b24) 0%, var(--a-plein) 42%, color-mix(in srgb, var(--a-plein-2) 88%, var(--a-plein)) 100%);
+  box-shadow: 0 18px 34px -24px color-mix(in srgb, var(--a-plein) 85%, transparent); }
+.tb-decor { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.tb-forme.f1 { right: 180px; top: -120px; opacity: 0.09; }
+.tb-forme.f2 { right: 420px; top: 20px; opacity: 0.07; }
+.tb-forme.f3 { right: 330px; top: -30px; opacity: 0.1; }
+.tb-portrait { flex: none; margin: 0; padding: 0; background: none; border-radius: 12px; }
+.tb-portrait .avatar, .tb-portrait .avatar.lg { width: 64px; height: 64px; border-radius: 12px; font-size: 22px; font-weight: 700; color: #fff; background: rgba(255, 255, 255, 0.16); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38), 0 10px 24px -14px rgba(0, 0, 0, 0.5); }
+.tb-nom { flex: 0 1 auto; min-width: 0; padding: 0; }
+.tb-nom .eyebrow { color: rgba(255, 255, 255, 0.86); font-size: 11.5px; letter-spacing: 0.1em; }
+.tb-nom h1 { margin: 4px 0 4px; font-size: 30px; line-height: 1.12; font-weight: 750; letter-spacing: -0.02em; color: #fff; }
+.tb-salut { display: inline-block; margin-left: 2px; font-size: 0.86em; transform-origin: 70% 80%; }
+.tb-role { margin: 0; font-size: 15px; color: rgba(255, 255, 255, 0.92); }
+/* L'emplacement de l'illustration : il prend la place libre, et rien s'il est vide. */
+.tb-illus { flex: 1 1 0; min-width: 0; align-self: stretch; height: auto; max-height: 150px; margin: -22px 0; object-fit: contain; object-position: center bottom; }
+.tb-resume { flex: 0 0 248px; align-self: center; margin: 0 0 0 auto; padding: 6px 0 6px 28px; border-left: 1px solid rgba(255, 255, 255, 0.34); font-size: 13.5px; line-height: 1.5; text-align: left; color: rgba(255, 255, 255, 0.92); }
+.tb-resume b { display: block; margin-bottom: 4px; font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; color: #fff; }
+:root[data-mode='sombre'] .tb-couverture { background: linear-gradient(105deg, color-mix(in srgb, var(--a-plein) 52%, #070d18) 0%, color-mix(in srgb, var(--a-plein) 74%, #070d18) 45%, color-mix(in srgb, var(--a-plein-2) 70%, #070d18) 100%); box-shadow: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .tb-salut { animation: tb-salut 1.6s ease-in-out 0.4s 1 both; }
+}
+@keyframes tb-salut { 0%, 100% { transform: rotate(0deg); } 15% { transform: rotate(16deg); } 30% { transform: rotate(-8deg); } 45% { transform: rotate(14deg); } 60% { transform: rotate(-4deg); } 75% { transform: rotate(8deg); } }
+
+/* Les repères : une carte chacun, le pictogramme dans une case de couleur, bien centré. */
+.tb-chiffres { gap: 12px; border: 0; background: none; }
+.tb-chiffre { gap: 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.04), 0 10px 24px -22px rgba(var(--ink-rgb), 0.5); transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+.tb-chiffre:hover { background: var(--surface); border-color: var(--pastel-line); transform: translateY(-1px); }
+.tb-chiffre:focus-visible { outline-offset: 2px; }
+.tb-chiffre .ico { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; background: var(--a-soft); color: var(--a-text); }
+.tb-chiffre .ico svg { width: 22px; height: 22px; }
+.tb-chiffre:nth-child(2) .ico, .tb-chiffre:nth-child(5) .ico { background: var(--night-soft); color: var(--night-ink); }
+.tb-chiffre:nth-child(3) .ico { background: var(--info-soft); color: var(--info); }
+.tb-chiffre:nth-child(4) .ico { background: var(--ok-soft); color: var(--ok-ink); }
+.tb-chiffre .l { font-size: 12.5px; }
+.tb-chiffre .v { font-size: 17px; }
+
+/* Les cartes du tableau de bord : un pictogramme en tête, la même case partout. */
+.carte-ico { width: 40px; height: 40px; border-radius: 10px; background: var(--a-soft); color: var(--a-text); }
+.cycle-tete { align-items: center; }
+.cycle-tete > .carte-ico { align-self: flex-start; }
+.tb-prio-ico { display: grid; place-items: center; align-self: center; width: 48px; height: 48px; margin: 0; border-radius: 10px; background: color-mix(in srgb, var(--prio) 14%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--prio) 22%, transparent); }
+.tb-prio-ico svg { width: 24px; height: 24px; }
+.tb-priorite.note .tb-prio-ico { background: var(--a-soft); color: var(--a-text); box-shadow: none; }
+.tb-priorite.note .eyebrow { color: var(--ink-2); }
+.tb-priorite { border-radius: 12px; padding: 18px 20px; }
+.card { border-radius: 12px; }
+
+/* ---------- Le bouton d'aide : une pastille pleine, en bas à droite ---------- */
+.aide-fab { gap: 8px; min-height: 52px; padding: 6px 20px 6px 8px; border-radius: 26px; color: #fff; background: linear-gradient(135deg, var(--a-plein-2), var(--a-plein)); box-shadow: 0 14px 28px -14px color-mix(in srgb, var(--a-plein) 90%, transparent), 0 2px 6px rgba(var(--ink-rgb), 0.16); }
+.aide-fab:hover { background: linear-gradient(135deg, var(--a-plein-2), var(--a-plein)); transform: translateY(-2px); }
+.aide-fab .aide-mot { padding: 0; border-radius: 0; background: none; box-shadow: none; color: #fff; font-size: 16px; font-weight: 700; }
+.aide-fab .solvi-corps svg { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); }
+:root[data-mode='sombre'] .aide-fab { background: linear-gradient(135deg, color-mix(in srgb, var(--a-plein-2) 80%, #0b1118), color-mix(in srgb, var(--a-plein) 80%, #0b1118)); box-shadow: 0 14px 28px -14px #000, inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+
+/* ---------- Le choix de l'apparence : une carte et sa maquette par thème ---------- */
+.app-choix { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; max-width: 860px; }
+.app-carte { position: relative; display: grid; gap: 4px; align-content: start; padding: 10px 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.app-carte:hover { border-color: var(--pastel-line); }
+.app-carte input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.app-carte.on { border-color: var(--a-deep); box-shadow: 0 0 0 3px var(--a-soft); }
+.app-carte:has(input:focus-visible) { outline: 3px solid var(--a-deep); outline-offset: 2px; }
+.app-maquette { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 0 0 1px var(--line); margin-bottom: 6px; }
+/* « Comme l'appareil » : la moitié claire et la moitié sombre de la même maquette. */
+.app-duo { position: relative; display: block; margin-bottom: 6px; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px var(--line); }
+.app-duo .app-maquette { margin: 0; border-radius: 0; box-shadow: none; }
+.app-duo .app-maquette:last-child { position: absolute; inset: 0; clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%); }
+.app-nom { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700; color: var(--ink); }
+.app-nom .coche { color: var(--a-deep); opacity: 0; }
+.app-carte.on .coche { opacity: 1; }
+.app-phrase { font-size: 12.5px; line-height: 1.35; color: var(--ink-3); }
+.menu-apparence { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; }
+.menu-apparence-nom { display: inline-flex; align-items: center; gap: 10px; font-weight: 550; color: var(--ink-2); }
+.seg.petit button { min-height: 30px; padding: 4px 9px; font-size: 12.5px; }
+
+@media (max-width: 1100px) {
+  .tb-resume { flex-basis: 210px; padding-left: 20px; }
+  .tb-nom h1 { font-size: 26px; }
+}
+@media (max-width: 760px) {
+  .tb-couverture { flex-wrap: wrap; gap: 12px 14px; min-height: 0; padding: 16px; height: auto; }
+  .tb-portrait { margin: 0; }
+  .tb-portrait .avatar, .tb-portrait .avatar.lg { width: 52px; height: 52px; font-size: 18px; }
+  .tb-nom { flex: 1 1 0; padding: 0; }
+  .tb-nom h1 { font-size: 22px; }
+  .tb-role { font-size: 13.5px; }
+  .tb-illus { display: none; }
+  .tb-resume { flex: 1 1 100%; margin: 0; padding: 10px 0 0; border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.3); }
+  .tb-resume b { display: inline; font-size: inherit; margin: 0; }
+  .tb-chiffres { gap: 8px; }
+  .tb-chiffre { padding: 11px 12px; gap: 10px; }
+  .tb-chiffre .ico { width: 38px; height: 38px; }
+  .tb-chiffre .v { font-size: 15.5px; }
+  .aide-fab { padding: 4px 16px 4px 6px; min-height: 48px; }
+}
+
+/* Repères : même hauteur pour tous, et le texte tient sur une ligne. */
+.tb-chiffres { align-items: stretch; }
+.tb-chiffre { height: 100%; gap: 12px; padding: 14px 12px 14px 14px; }
+.tb-chiffre .v { font-size: 16px; }
+.tb-chiffre .d, .tb-chiffre .l { font-size: 12px; }
+/* Thème mixte : dans le menu foncé, les pictogrammes sont nus. */
+:root[data-menu='sombre'] .side .nav-item .ni { --c1: transparent; --ct: #fff; background: transparent; color: #fff; }
+:root[data-menu='sombre'] .side .nav-item:not(.on) .ni { color: #d5e2fb; }
+
+/* Plus de fil entre les rubriques : les pictogrammes n'ont plus d'anneau pour le masquer. */
+.nav-groupe.ordre .nav-item .ni { box-shadow: none; }
+.nav-groupe.ordre { gap: 2px; }
+.side-foot { font-size: 11.5px; white-space: nowrap; }
+.side-foot span { overflow: hidden; text-overflow: ellipsis; }
+/* Écran peu haut : le menu se resserre pour tenir sans défiler. */
+@media (min-width: 901px) and (max-height: 980px) {
+  .side { padding-top: 16px; }
+  .brand { padding-bottom: 12px; }
+  .nav-item { min-height: 36px; padding-top: 2px; padding-bottom: 2px; }
+  .nav-label { padding-top: 11px; padding-bottom: 4px; }
+  .nav-aide { padding: 7px 10px 7px 8px; }
+}
+@media (min-width: 901px) and (max-height: 820px) {
+  .nav-item { min-height: 32px; font-size: 14px; }
+  .nav-item .ni { width: 26px; height: 26px; }
+  .nav-label { padding-top: 8px; padding-bottom: 2px; }
+  .officine-sel { padding-bottom: 6px; }
+  .nav-aide-sous { display: none; }
+}
+.app-bloc .app-choix { margin-top: 4px; }

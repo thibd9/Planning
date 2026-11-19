@@ -1,11 +1,13 @@
-import { AlertTriangle, ArrowLeft, ArrowRight, Boxes, Check, CircleAlert, Crown, GraduationCap, LogIn, Megaphone, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Sprout, Store, Trash2, UserRound, Users } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, Boxes, Check, CircleAlert, Crown, GraduationCap, LogIn, Megaphone, Palette, Pill as PillIcon, Plus, ShieldCheck, Sparkles, Sprout, Store, Trash2, UserRound, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { empreinte, identifiantPropose } from '../../domain/acces';
 import { fmtHHMM, fmtHeure, parseHHMM, uid } from '../../domain/time';
 import type { Interval, Person, Qualification } from '../../domain/types';
 import { QUALIFICATION_COURT } from '../../domain/types';
 import { useStore } from '../../store/store';
+import type { Mode } from '../../store/ui';
 import { useUi } from '../../store/ui';
+import { ChoixApparence, appliquerApparence } from '../components/Apparence';
 import { Logo, LogoNom, MotDePasse } from '../kit';
 
 interface Ligne {
@@ -172,7 +174,13 @@ function Groupe({
 export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnuler?: () => void; garder?: boolean } = {}): JSX.Element {
   const { creerOfficine, data, autres: autresPharmacies } = useStore();
   const dejaPris = [data, ...Object.values(autresPharmacies)].flatMap((d) => d.personnes.map((p) => (p.identifiant ?? '').trim().toLowerCase())).filter(Boolean);
-  const { setTour, connecter } = useUi();
+  const { setTour, connecter, setPreferences } = useUi();
+  // L'apparence de l'espace se choisit dès la création ; l'écran la montre aussitôt.
+  const [apparence, setApparence] = useState<Mode>('clair');
+  useEffect(() => {
+    if (ajout) return;
+    appliquerApparence(apparence, window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }, [apparence, ajout]);
   const [etape, setEtape] = useState(0);
   const [nom, setNom] = useState('');
   const [surface, setSurface] = useState('');
@@ -300,6 +308,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
     const metres = Math.round(Number(surface));
     creerOfficine(nom.trim(), horaires, personnes, !!ajout || !!garder, !ajout, metres > 0 ? Math.min(metres, 5000) : undefined);
     // Celui qui crée la pharmacie en est le titulaire principal : il est connecté d'emblée à son espace.
+    if (!ajout) setPreferences(personnes[0].identifiant as string, { mode: apparence });
     connecter(personnes[0].identifiant as string, 'tableau');
     if (!ajout) setTour(0);
   };
@@ -513,6 +522,21 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
                   </p>
                 ) : null}
               </fieldset>
+              {!ajout ? <hr className="sep" /> : null}
+              {!ajout ? (
+                <fieldset className="bloc app-bloc" id="choix-apparence">
+                  <legend>
+                    <span className="ico sky" aria-hidden="true">
+                      <Palette size={18} />
+                    </span>
+                    <span>
+                      <b>L’apparence de votre espace</b>
+                      <span className="aide">Trois présentations, les mêmes fonctions. Vous en changerez quand vous voulez dans « Mon compte » ; chacun choisit la sienne.</span>
+                    </span>
+                  </legend>
+                  <ChoixApparence valeur={apparence} onChange={setApparence} />
+                </fieldset>
+              ) : null}
             </div>
           ) : null}
 

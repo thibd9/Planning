@@ -1576,12 +1576,13 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[aria-labelledby='c-apparence']",
     titre: 'Votre compte',
-    texte: () => 'Dix couleurs, mode clair ou sombre, taille du texte. La visite est terminée : tout reste à essayer.',
+    texte: () => 'Trois apparences (claire, mixte, sombre), dix couleurs, taille du texte. La visite est terminée : tout reste à essayer.',
     jouer: () => {
       avecPlanning();
       helene('compte');
     },
     gestes: [
+      { faire: 'cliquer', sur: 'label[for="mode-mixte"]', sert: 'Le thème mixte fonce le menu et garde le contenu clair.' },
       { faire: 'cliquer', sur: 'label[for="mode-sombre"]', sert: 'Le mode sombre repose les yeux le soir.' },
       { faire: 'pause', ms: 1600 },
       { faire: 'cliquer', sur: 'label[for="mode-clair"]', sert: 'Et l’on revient au mode clair d’un clic.' },
@@ -1867,7 +1868,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.choix.themes',
       titre: 'Mon compte',
-      texte: () => 'Dix couleurs, mode clair ou sombre, mot de passe : votre compte se règle ici. À vous de jouer.',
+      texte: () => 'Trois apparences, dix couleurs, mot de passe : votre compte se règle ici. À vous de jouer.',
       jouer: () => moi('compte'),
     },
   ];
