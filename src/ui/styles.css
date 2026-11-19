@@ -4655,3 +4655,116 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   filter: drop-shadow(0 0 2px var(--solvi-flou, #fff)) drop-shadow(0 0 9px var(--solvi-flou, #fff)) drop-shadow(0 0 20px color-mix(in srgb, var(--solvi-flou, #fff) 75%, transparent)) drop-shadow(0 6px 8px color-mix(in srgb, var(--solvi-ombre) 30%, transparent));
 }
 :root[data-mode='sombre'] { --solvi-flou: color-mix(in srgb, #fff 26%, var(--bg)); }
+
+/* =====================================================================================================
+   Tableau de bord en trois zones : « À traiter », « Aujourd'hui », « À venir ».
+   Chaque zone a un titre ; ce qui demande une intervention pèse plus lourd que ce qui informe.
+   ===================================================================================================== */
+.tb-zone { margin-top: 22px; }
+.tb-zone-tete { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin: 0 2px 10px; }
+.tb-zone-tete h2 { margin: 0; font-size: 19px; line-height: 1.2; font-weight: 750; letter-spacing: -0.02em; color: var(--ink); }
+.tb-zone-note { font-size: 13.5px; color: var(--ink-3); }
+.tb-zone-lien { margin-left: auto; align-self: center; }
+
+/* La bannière : à peine abaissée, pour laisser monter l'essentiel. */
+.tb-banniere { margin-bottom: 0; }
+.tb-couverture.illustree { min-height: clamp(128px, 9cqw, 184px); padding-top: 16px; padding-bottom: 16px; }
+.tb-couverture.illustree .tb-nom h1 { font-size: 30px; margin: 4px 0 5px; }
+.tb-couverture.illustree .tb-portrait .avatar, .tb-couverture.illustree .tb-portrait .avatar.lg { width: 58px; height: 58px; font-size: 22px; }
+
+/* 1. À traiter : l'action mise en avant à gauche, tout ce qui attend à droite. */
+.tb-traiter { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+.tb-traiter.seul { grid-template-columns: minmax(0, 1fr); }
+.tb-traiter > .tb-priorite { margin: 0; padding: 20px 22px; border-radius: 12px; background: color-mix(in srgb, var(--prio) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--prio) 38%, var(--line)); box-shadow: 0 14px 30px -24px color-mix(in srgb, var(--prio) 80%, transparent); }
+.tb-traiter > .tb-priorite.urgent .tb-prio-ico, .tb-traiter > .tb-priorite.attention .tb-prio-ico { background: var(--prio); color: #fff; box-shadow: none; }
+:root[data-mode='sombre'] .tb-traiter > .tb-priorite.urgent .tb-prio-ico, :root[data-mode='sombre'] .tb-traiter > .tb-priorite.attention .tb-prio-ico { color: #10161c; }
+.tb-traiter > .tb-priorite h3 { font-size: 21px; font-weight: 750; letter-spacing: -0.02em; }
+.tb-traiter > .tb-priorite .eyebrow { font-size: 12px; letter-spacing: 0.08em; }
+.tb-traiter > .tb-priorite p { font-size: 14.5px; }
+.tb-traiter > .tb-priorite.calme, .tb-traiter > .tb-priorite.ok { background: var(--surface); border-color: var(--line); box-shadow: none; }
+.tb-traiter.seul > .tb-priorite { padding: 16px 20px; }
+.tb-traiter > .tb-faire { margin: 0; display: flex; flex-direction: column; }
+.tb-faire-titre { margin: 0; padding: 14px 18px 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.tb-traiter .tb-sujets { padding: 0 8px 8px; }
+.tb-traiter .tb-sujet { padding-top: 9px; padding-bottom: 9px; }
+.tb-traiter .tb-declarer { margin: 0 8px 6px; }
+
+/* 2. Aujourd'hui : la frise du jour en grand, les repères et l'agenda à côté. */
+.tb-jour-grille { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(280px, 1fr); gap: 14px; align-items: start; }
+.tb-venir { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; align-items: start; }
+.tb-cote { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.tb-jour-grille > .tb-jour, .tb-venir > .cycle, .tb-cote > .tb-agenda, .tb-cote > .tb-priorite { margin: 0; }
+.tb-zone .card-head h3, .tb-zone .cycle-tete h3 { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 700; letter-spacing: -0.015em; }
+.tb-chiffres.deux { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tb-chiffres.trois { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tb-chiffres.deux .tb-chiffre, .tb-chiffres.trois .tb-chiffre { grid-column: auto; }
+/* Un repère dit son état : vert quand tout va bien, orange quand il faut regarder, rouge quand c'est grave. Sinon, neutre. */
+.tb-zone .tb-chiffre .ico, .tb-zone .tb-chiffre:nth-child(n) .ico { background: var(--n-2); color: var(--ink-2); }
+.tb-zone .tb-chiffre.etat-ok .ico { background: var(--ok-soft); color: var(--ok-ink); }
+.tb-zone .tb-chiffre.etat-attention .ico { background: var(--warn-soft); color: var(--warn); }
+.tb-zone .tb-chiffre.etat-alerte .ico { background: var(--danger-soft); color: var(--danger-ink); }
+.tb-zone .tb-chiffre .v { font-size: 18px; font-weight: 750; letter-spacing: -0.015em; }
+.tb-zone .tb-chiffre .l { font-size: 12px; color: var(--ink-3); }
+.tb-chiffres.deux .tb-chiffre { flex-direction: column; align-items: flex-start; gap: 10px; }
+/* Le bleu est la couleur de l'action : les pictogrammes d'en-tête restent neutres. */
+.tb-zone .carte-ico { background: var(--n-2); color: var(--ink-2); }
+.tb-zone .tb-priorite.note .tb-prio-ico { background: var(--n-2); color: var(--ink-2); }
+.tb-zone .tb-priorite.note.depasse .tb-prio-ico { background: var(--warn-soft); color: var(--warn); }
+.tb-cote > .tb-priorite.note { padding: 16px 18px; }
+/* La frise du jour : une légende, car la couleur ne doit pas être seule à dire les choses. */
+.tbj-legende { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 12px 0 0; font-size: 12.5px; color: var(--ink-3); }
+.tbj-legende span { display: inline-flex; align-items: center; gap: 6px; }
+.tbj-legende i { display: inline-block; width: 18px; height: 10px; border-radius: 3px; }
+.tbj-legende .l-poste { background: var(--p-journee); box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), 0.12); }
+.tbj-legende .l-pause { background: repeating-linear-gradient(135deg, rgba(var(--ink-rgb), 0.16) 0 2px, transparent 2px 5px), var(--surface); box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), 0.16); }
+.tbj-legende .l-maintenant { width: 2px; height: 14px; border-radius: 0; background: var(--a-deep); margin: 0 8px; }
+:root[data-mode='sombre'] .tbj-legende .l-pause { background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); }
+.tb-annonces { margin-top: 22px !important; }
+
+@media (max-width: 1180px) {
+  .tb-jour-grille { grid-template-columns: minmax(0, 1fr); }
+  .tb-jour-grille > .tb-cote { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: start; }
+  .tb-venir { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .tb-traiter { grid-template-columns: minmax(0, 1fr); }
+  .tb-jour-grille > .tb-cote { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .tb-zone { margin-top: 18px; }
+  .tb-zone-tete h2 { font-size: 17px; }
+  .tb-chiffres.trois { grid-template-columns: minmax(0, 1fr); }
+  .tb-chiffres.deux .tb-chiffre { flex-direction: row; align-items: center; }
+  .tb-traiter > .tb-priorite { padding: 16px; }
+  .tb-traiter > .tb-priorite h3 { font-size: 18px; }
+}
+
+/* À traiter, en deux temps : l'action mise en avant sur toute la largeur, puis tout ce qui attend, en une rangée de sujets. */
+.tb-traiter { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.tb-traiter > .tb-priorite { padding: 18px 22px; }
+.tb-traiter > .tb-faire { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 0; border: 0; background: none; box-shadow: none; }
+.tb-faire-titre { padding: 0 6px 0 2px; white-space: nowrap; }
+.tb-traiter .tb-sujets { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; flex: 1 1 auto; }
+.tb-traiter .tb-sujet, .tb-traiter .tb-sujet.premier { width: auto; flex: 0 1 auto; gap: 8px; padding: 6px 10px 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.04); }
+.tb-traiter .tb-sujet:hover { border-color: var(--pastel-line); background: var(--surface); }
+.tb-traiter .tb-sujet .ico { width: 26px; height: 26px; border-radius: 6px; background: var(--n-2); color: var(--ink-2); }
+.tb-traiter .tb-sujet .ico svg { width: 15px; height: 15px; }
+.tb-traiter .tb-sujet .grow { flex: 0 1 auto; }
+.tb-traiter .tb-sujet .compte { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 6px; font-size: 12.5px; }
+.tb-traiter .tb-sujet > svg:last-child { width: 14px; height: 14px; color: var(--ink-3); }
+.tb-traiter .tb-declarer { flex: 1 1 100%; margin: 0; }
+/* Les deux repères du jour : compacts, côte à côte. */
+.tb-chiffres.deux .tb-chiffre { flex-direction: row; align-items: center; gap: 12px; }
+.tb-traiter .tb-sujets { flex-direction: row; }
+.tb-traiter .tb-sujet:hover { transform: none; }
+/* À venir : les étapes du prochain planning se lisent de haut en bas. */
+.tb-venir .cycle-tete { margin-bottom: 16px; }
+.tb-venir .cycle-etapes { grid-auto-flow: row; grid-auto-columns: auto; gap: 14px; }
+.tb-venir .cycle-etapes li { padding-right: 0; }
+.tb-venir .cycle-etapes li:not(:last-child)::after { content: none; }
+.tb-venir .cycle-etapes li:not(:last-child)::before { content: ''; position: absolute; left: 14px; top: 34px; width: 2px; height: 10px; border-radius: 2px; background: var(--track); }
+.tb-venir .cycle-etapes li.fait:not(:last-child)::before { background: var(--a-deep); }
+.tb-chiffres.trois .tb-chiffre { gap: 10px; padding: 12px 10px 12px 12px; }
+.tb-chiffres.trois .tb-chiffre .ico { width: 38px; height: 38px; }
+.tb-chiffres.trois .tb-chiffre .ico svg { width: 19px; height: 19px; }
+.tb-chiffres.trois .tb-chiffre .v { font-size: 16px; }

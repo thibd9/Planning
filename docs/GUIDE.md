@@ -514,3 +514,20 @@ Les hypothèses sont affichées sur place (« D'où vient ce calcul ») et écri
 servir, une pointe à 1,6 fois la moyenne, 20 % de travail hors comptoir, 12 % d'absences. Sans nombre de
 clients, le calcul se rabat sur la surface de vente et le dit : c'est grossier. C'est un repère
 d'organisation, pas une norme. Solvi répond aussi à « ai-je assez de préparateurs ? », aux titulaires seulement.
+
+## Le tableau de bord en trois zones
+
+Le tableau de bord du titulaire répond à trois questions, dans cet ordre :
+
+1. **À traiter** : qu'est-ce qui demande mon intervention ? Une seule action est mise en avant, en couleur
+   selon sa gravité (rouge pour un poste sans personne, orange pour ce qui attend une réponse), avec le bouton
+   qui y mène. Dessous, tout ce qui attend, par sujet, en une rangée ; « Toutes les actions » ouvre « Résoudre ».
+2. **Aujourd'hui** : comment tourne l'équipe ? La frise du comptoir, heure par heure, avec sa légende (en
+   poste, pause, maintenant), les deux repères du jour et l'agenda du titulaire.
+3. **À venir** : que faut-il anticiper ? Le prochain planning et ses étapes, l'échéance du mois, la semaine
+   prochaine, les compteurs d'heures, la prochaine garde.
+
+Les décisions récentes et les autres pharmacies viennent après. Les zones ne changent pas de place d'un jour à
+l'autre : c'est leur contenu qui s'adapte. Les repères disent leur état par la couleur de leur pictogramme
+(vert : normal, orange : à regarder, rouge : grave) et le bleu reste la couleur des boutons. Une échéance
+interne dépassée est dite « dépassée », pas « en retard » : elle n'a pas la gravité d'un poste découvert.
