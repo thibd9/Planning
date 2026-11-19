@@ -4524,3 +4524,10 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 /* Le résumé se lit en trois temps, comme sur la maquette : le nombre, « vous attendent. », puis le conseil. */
 .tb-resume-ligne { display: block; }
 @media (max-width: 760px) { .tb-resume-ligne { display: inline; } }
+
+/* Repères sur une largeur moyenne : trois cartes, puis deux, pour que chaque texte tienne sur une ligne. */
+@container banniere (min-width: 620px) and (max-width: 1000px) {
+  .tb-chiffres { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .tb-chiffre { grid-column: span 2; }
+  .tb-chiffre:nth-child(n + 4) { grid-column: span 3; }
+}

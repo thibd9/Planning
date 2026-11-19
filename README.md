@@ -91,6 +91,10 @@ Chacun choisit aussi son apparence, claire, mixte ou sombre, sans rien changer p
 | Animateur | Framboise | Les marques qu'il présente |
 | Apprenti, étudiant | Vert, ambre | Alternance, études et horaires |
 
+<div align="center">
+<img src="docs/images/themes.png" alt="Le même tableau de bord dans les trois apparences : claire, mixte et sombre" width="880">
+</div>
+
 ## Solvi, l'assistant
 
 <img align="right" src="docs/images/telephone.png" alt="L'accueil d'un préparateur sur téléphone" width="220">
