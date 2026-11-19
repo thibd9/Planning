@@ -13,7 +13,7 @@ absorber un imprévu en dérangeant le moins de monde possible.
 
 ![React 18](https://img.shields.io/badge/React-18-1f6bb8?style=flat-square)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-1f6bb8?style=flat-square)
-![152 tests](https://img.shields.io/badge/tests-152-0b5a3f?style=flat-square)
+![170 tests](https://img.shields.io/badge/tests-170-0b5a3f?style=flat-square)
 ![Sans serveur](https://img.shields.io/badge/donn%C3%A9es-sur%20l'appareil-52606c?style=flat-square)
 
 [Démarrer](#démarrer) · [Ce que fait Solvéa](#ce-que-fait-solvéa) · [Guide détaillé](docs/GUIDE.md) · [Bilan UX et UI](docs/BILAN-UX-UI.md)
@@ -54,7 +54,10 @@ créer, rien à saisir. On y passe d'un profil à l'autre en un clic.
 | **Aller droit au but** | Depuis « Résoudre », chaque façon de régler mène à l'endroit exact du planning, mis en évidence : la case, le bouton « Publier », la grille. |
 | **Imprimer** | Un aperçu avant impression : à la semaine ou au mois, en couleur ou en noir et blanc, pour l'équipe ou pour soi, avec la pause déjeuner et les pauses courtes. |
 | **Dimensionner** | L'équipe est-elle assez nombreuse ? Un repère pour les titulaires, d'après les clients à servir et non d'après le nombre de caisses, avec tout le calcul à découvert. |
+| **Lire le même planning** | Une décision (absence, poste couvert, formation, remplacement) met aussitôt à jour le planning publié et prévient chacun. Une retouche à la main reste un brouillon jusqu'à « Publier les modifications ». |
 | **Suivre** | Compteurs d'heures, équité des samedis et des fermetures, gardes, formations, fiche navette pour la paie. |
+| **Connaître son équipe** | Une fiche par personne, aux couleurs de son rôle : contrat, ancienneté, compétences et diplômes, que chacun tient à jour. Des statistiques d'équipe : composition, compétences couvertes, points forts. |
+| **S'adapter à l'écran** | Du téléphone au grand écran. Sur un portable, tout se resserre pour montrer l'essentiel sans défiler ; les pages chargées se rangent en rubriques qui se replient. |
 | **Se parler** | Messages, rendez-vous fixés dans l'agenda de chacun, annonces de chaque décision. |
 | **Se faire aider** | Une aide qui couvre chaque fonction, un tutoriel par tâche, un lexique, Solvi, et le support en bas de chaque écran. |
 | **Choisir son apparence** | Trois thèmes : clair, mixte (menu foncé, contenu clair) et sombre. On choisit dès la création de son espace, sur de petites maquettes. |
@@ -113,13 +116,13 @@ attend une décision. Il agit aussi : « je suis en retard » ouvre la bonne fen
 Il garde ses limites : ce n'est pas une intelligence artificielle qui improvise. Il répond d'après des
 règles, sur l'appareil, et rien de ce qu'on lui écrit ne quitte le navigateur.
 
-Quatre **visites guidées** et un tutoriel par tâche complètent l'aide.
+Dix **visites guidées** complètent l'aide, avec un tutoriel par tâche : un parcours complet, un par rôle (titulaire, pharmacien, préparateur, animatrice, apprentie, étudiant) et trois journées types (ordinaire, sous tension, veille de publication). On peut aussi entrer librement, en testeur, dans la peau de chaque profil.
 
 <br clear="right">
 
 ## Sous le capot
 
-React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (152 tests), sans dépendance à un
+React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (170 tests), sans dépendance à un
 service extérieur.
 
 ```
