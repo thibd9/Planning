@@ -4385,12 +4385,7 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .tb-priorite { border-radius: 12px; padding: 18px 20px; }
 .card { border-radius: 12px; }
 
-/* ---------- Le bouton d'aide : une pastille pleine, en bas à droite ---------- */
-.aide-fab { gap: 8px; min-height: 52px; padding: 6px 20px 6px 8px; border-radius: 26px; color: #fff; background: linear-gradient(135deg, var(--a-plein-2), var(--a-plein)); box-shadow: 0 14px 28px -14px color-mix(in srgb, var(--a-plein) 90%, transparent), 0 2px 6px rgba(var(--ink-rgb), 0.16); }
-.aide-fab:hover { background: linear-gradient(135deg, var(--a-plein-2), var(--a-plein)); transform: translateY(-2px); }
-.aide-fab .aide-mot { padding: 0; border-radius: 0; background: none; box-shadow: none; color: #fff; font-size: 16px; font-weight: 700; }
-.aide-fab .solvi-corps svg { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.75)); }
-:root[data-mode='sombre'] .aide-fab { background: linear-gradient(135deg, color-mix(in srgb, var(--a-plein-2) 80%, #0b1118), color-mix(in srgb, var(--a-plein) 80%, #0b1118)); box-shadow: 0 14px 28px -14px #000, inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+/* Le bouton d'aide reste sans cadre : Solvi flotte librement, avec son étiquette « Aide ». */
 
 /* ---------- Le choix de l'apparence : une carte et sa maquette par thème ---------- */
 .app-choix { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; max-width: 860px; }
@@ -4430,7 +4425,6 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .tb-chiffre { padding: 11px 12px; gap: 10px; }
   .tb-chiffre .ico { width: 38px; height: 38px; }
   .tb-chiffre .v { font-size: 15.5px; }
-  .aide-fab { padding: 4px 16px 4px 6px; min-height: 48px; }
 }
 
 /* Repères : même hauteur pour tous, et le texte tient sur une ligne. */
