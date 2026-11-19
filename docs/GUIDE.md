@@ -459,7 +459,11 @@ bannière d'accueil est un seul bloc ; les cinq repères sont des cartes de mêm
 
 ### Illustrations
 
-Des emplacements sont prévus pour des illustrations (bannière d'accueil, agenda, comptoir, prochain planning,
-priorité). Tant qu'aucun dessin n'est fourni, rien ne s'affiche et la mise en page n'en dépend pas. Pour en
-ajouter un : déposer le fichier dans `src/assets/illustrations/` et l'inscrire dans
-`src/ui/components/Illustration.tsx`.
+La bannière d'accueil des titulaires porte l'illustration de la pharmacie de quartier, révélée au centre entre
+deux fondus bleus, comme sur la maquette. Elle s'efface quand la bannière devient trop étroite pour ne jamais
+passer sous le texte, et quand le titulaire choisit une couleur de thème qui n'est pas un bleu (la bannière
+reprend alors l'aplat de sa couleur). Les autres profils gardent l'aplat de leur couleur.
+
+D'autres emplacements sont prévus (agenda, comptoir, prochain planning, priorité). Tant qu'aucun dessin n'est
+fourni, rien ne s'affiche et la mise en page n'en dépend pas. Pour en ajouter un : déposer le fichier dans
+`src/assets/illustrations/` et l'inscrire dans `src/ui/components/Illustration.tsx`.

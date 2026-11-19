@@ -6,13 +6,23 @@ import { Illustration } from './Illustration';
 /**
  * La bannière d'accueil : un aplat aux couleurs du profil, qui porte le portrait de la personne, son nom,
  * son rôle et sa pharmacie, puis ce qui l'attend. Dessous, une ligne de repères, chacun dans sa carte.
- * Une illustration peut s'y loger (voir `Illustration`).
+ * Pour les titulaires (`illustree`), elle porte l'illustration de la pharmacie (voir `Illustration`).
  */
-export function BanniereAccueil({ personne, date, role, resume, children }: { personne: Person | undefined; date: string; role: string; resume?: ReactNode; children?: ReactNode }): JSX.Element {
+export function BanniereAccueil({ personne, date, role, resume, illustree, children }: { personne: Person | undefined; date: string; role: string; resume?: ReactNode; illustree?: boolean; children?: ReactNode }): JSX.Element {
   return (
     <header className="tb-banniere">
       {/* Le bloc d'accueil : un seul aplat aux couleurs du profil, qui porte le nom, le rôle et ce qui attend. */}
-      <div className="tb-couverture">
+      <div className={`tb-couverture${illustree ? ' illustree' : ''}`}>
+        {/* Titulaires : la pharmacie de quartier, révélée au centre entre deux fondus bleus (maquette « Bannière 01 »). */}
+        {illustree ? (
+          <span className="tb-scene" aria-hidden="true">
+            <Illustration nom="banniere" className="tb-scene-image" />
+            <span className="tb-scene-harmonie" />
+            <span className="tb-scene-fondu" />
+            <span className="tb-scene-lumiere" />
+            <span className="tb-scene-lisible" />
+          </span>
+        ) : null}
         <span className="tb-decor" aria-hidden="true">
           <span className="tb-forme f1">
             <Logo size={300} />
@@ -34,7 +44,6 @@ export function BanniereAccueil({ personne, date, role, resume, children }: { pe
           </h1>
           <p className="tb-role">{role}</p>
         </div>
-        <Illustration nom="banniere" className="tb-illus" />
         {resume ? <p className="tb-resume">{resume}</p> : null}
       </div>
       {children}

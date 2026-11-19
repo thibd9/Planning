@@ -197,6 +197,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   return (
     <div className="tb">
       <BanniereAccueil
+        illustree
         personne={moi}
         date={fmtDateLong(today)}
         role={`${moi ? libelleRole(data, moi) : 'Titulaire'} · ${data.officine.nom || 'Ma pharmacie'}`}
@@ -208,7 +209,8 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
                 <b>
                   {d.total} décision{d.total > 1 ? 's' : ''}
                 </b>{' '}
-                vous {d.total > 1 ? 'attendent' : 'attend'}. Commencez par la première, le reste suit dans l’ordre.
+                <span className="tb-resume-ligne">vous {d.total > 1 ? 'attendent' : 'attend'}.</span>{' '}
+                {d.total > 1 ? <>Concentrez-vous sur la priorité, <span className="sans-coupure">le reste suit dans l’ordre.</span></> : 'Elle est en tête, juste dessous.'}
               </>
             ) : (
               <>

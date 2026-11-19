@@ -4463,3 +4463,64 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .nav-aide-sous { display: none; }
 }
 .app-bloc .app-choix { margin-top: 4px; }
+
+/* Le prochain planning : les étapes sont des pastilles rondes ; celle en cours est pleine. */
+.cycle-pastille { width: 30px; height: 30px; border-radius: 50%; font-size: 13.5px; background: var(--n-2); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
+.cycle-etapes li.fait .cycle-pastille { background: var(--a-soft); color: var(--a-text); box-shadow: inset 0 0 0 1px var(--pastel-line); }
+.cycle-etapes li.cours .cycle-pastille { background: linear-gradient(135deg, var(--a-plein-2), var(--a-plein)); color: #fff; box-shadow: 0 8px 16px -10px color-mix(in srgb, var(--a-plein) 85%, transparent); transform: none; }
+.tb-col .cycle-etapes { gap: 14px; }
+
+/* ---------- Bannière des titulaires : la pharmacie de quartier (maquette « Bannière 01 ») ----------
+   Les positions sont celles de la maquette, en pourcentage de la bannière : l'illustration au centre droit,
+   un fondu bleu qui la révèle, une lumière en haut, un fondu de lisibilité sous le résumé des décisions. */
+.tb-couverture.illustree { min-height: 148px; padding: 20px 26px 20px 34px; gap: 22px; background: linear-gradient(90deg, #265dae 0%, #5da3f6 48%, #2863ae 100%); box-shadow: 0 18px 34px -24px rgba(38, 93, 174, 0.9); }
+.tb-couverture.illustree .tb-decor { display: none; }
+.tb-scene { position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.tb-scene > * { position: absolute; top: 0; bottom: 0; }
+.tb-scene-image { top: 50%; bottom: auto; left: 54.83%; height: 134%; width: auto; max-width: none; aspect-ratio: 3 / 1; transform: translate(-50%, -50%); object-fit: cover; user-select: none; }
+.tb-scene-harmonie { left: 46%; width: 49.67%; background: rgba(40, 112, 202, 0.03); }
+.tb-scene-fondu { left: -18.95%; width: 118.95%; background: linear-gradient(90deg, rgb(43, 100, 184) 0%, rgb(53, 123, 213) 34%, rgb(66, 139, 226) 44%, rgb(74, 146, 230) 51.2%, rgba(74, 146, 230, 0.32) 56%, rgba(74, 146, 230, 0) 60.5%, rgba(54, 116, 189, 0) 72%, rgba(43, 100, 173, 0.04) 78%, rgba(41, 95, 170, 0.96) 84.5%, rgb(41, 95, 170) 100%); }
+.tb-scene-lumiere { left: 0; right: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0)); }
+.tb-scene-lisible { left: 67.09%; right: 0; background: linear-gradient(90deg, rgba(41, 95, 170, 0), #295faa 29%, #295faa); }
+.tb-couverture.illustree .tb-portrait .avatar, .tb-couverture.illustree .tb-portrait .avatar.lg { width: 62px; height: 62px; border-radius: 12px; font-size: 24px; font-weight: 600; color: #fff; background: linear-gradient(90deg, #7bb6ff, #3a83de); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 10px 22px -14px rgba(10, 40, 100, 0.7); }
+/* Le texte s'arrête avant que la pharmacie n'apparaisse (44 % de la bannière, portrait compris). */
+.tb-couverture.illustree .tb-nom { max-width: calc(44% - 120px); }
+.tb-couverture.illustree .tb-nom .eyebrow { color: #e5f0ff; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-shadow: 0 1px 2px rgba(16, 52, 110, 0.4); }
+.tb-couverture.illustree .tb-nom h1 { margin: 5px 0 6px; font-size: 32px; line-height: 1.16; font-weight: 700; }
+.tb-couverture.illustree .tb-role { color: #ecf4ff; font-size: 14px; text-shadow: 0 1px 2px rgba(16, 52, 110, 0.45); }
+.tb-couverture.illustree .tb-resume { flex: 0 0 max(20.94%, 232px); padding: 4px 0 4px max(2.2%, 20px); border-left: 1px solid rgba(255, 255, 255, 0.26); color: #f2f7ff; font-size: 13px; line-height: 1.45; }
+.tb-couverture.illustree .tb-resume b { margin-bottom: 8px; font-size: 20px; font-weight: 600; }
+:root[data-mode='sombre'] .tb-couverture.illustree { background: linear-gradient(90deg, #265dae 0%, #5da3f6 48%, #2863ae 100%); }
+:root[data-mode='sombre'] .tb-couverture.illustree .tb-scene { filter: brightness(0.86) saturate(0.95); }
+/* L'illustration est bleue : avec une autre couleur de thème, la bannière revient à l'aplat du profil. */
+:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree { background: linear-gradient(105deg, color-mix(in srgb, var(--a-plein) 82%, #030b24) 0%, var(--a-plein) 42%, color-mix(in srgb, var(--a-plein-2) 88%, var(--a-plein)) 100%); }
+:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree .tb-scene { display: none; }
+:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree .tb-decor { display: block; }
+:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree .tb-portrait .avatar { background: rgba(255, 255, 255, 0.16); }
+@media (max-width: 1100px) {
+  .tb-couverture.illustree .tb-resume { flex-basis: 214px; }
+  .tb-couverture.illustree .tb-nom h1 { font-size: 27px; }
+}
+/* Bannière étroite (petit écran, ou menu ouvert sur un écran moyen) : plus la place de révéler la pharmacie
+   sans passer sous le texte ; il reste l'aplat bleu de la maquette et le texte. La mesure est celle de la
+   bannière elle-même, pas de la fenêtre. */
+.tb-banniere { container: banniere / inline-size; }
+@container banniere (max-width: 1000px) {
+  .tb-couverture.illustree .tb-nom h1 { font-size: 25px; }
+}
+@container banniere (max-width: 900px) {
+  .tb-scene-image, .tb-scene-fondu, .tb-scene-lisible, .tb-scene-harmonie { display: none; }
+  .tb-couverture.illustree { background: linear-gradient(105deg, #265dae 0%, #3f85dc 100%); }
+  .tb-couverture.illustree .tb-nom { max-width: none; }
+}
+@media (max-width: 760px) {
+  .tb-couverture.illustree { padding: 16px; gap: 12px 14px; min-height: 0; }
+  .tb-couverture.illustree .tb-portrait .avatar, .tb-couverture.illustree .tb-portrait .avatar.lg { width: 52px; height: 52px; font-size: 19px; }
+  .tb-couverture.illustree .tb-nom h1 { font-size: 22px; }
+  .tb-couverture.illustree .tb-resume { flex: 1 1 100%; padding: 10px 0 0; border-left: 0; }
+  .tb-couverture.illustree .tb-resume b { display: inline; font-size: inherit; margin: 0; }
+}
+
+/* Le résumé se lit en trois temps, comme sur la maquette : le nombre, « vous attendent. », puis le conseil. */
+.tb-resume-ligne { display: block; }
+@media (max-width: 760px) { .tb-resume-ligne { display: inline; } }
