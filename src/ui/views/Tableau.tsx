@@ -1,6 +1,6 @@
 import { illustrationDuProfil } from '../components/Illustration';
 import { CIBLE, viser } from '../viser';
-import { AlarmClock, ArrowLeftRight, ArrowRight, BellRing, BriefcaseMedical, Building2, CalendarDays, CalendarRange, Check, Handshake, History, Hourglass, MoonStar, ShieldCheck, Sparkles, Store, UserMinus, UsersRound } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, ArrowRight, BellRing, BriefcaseMedical, Building2, CalendarDays, CalendarRange, Check, Handshake, History, Hourglass, ListChecks, MoonStar, ShieldCheck, Sparkles, Store, UserMinus, UsersRound } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
 import { MOIS, addDays, fmtDateCourt, fmtDateLong, fmtHeure, fmtSemaine, mondayOf, todayISO, totalDuree, weekDates } from '../../domain/time';
@@ -109,7 +109,6 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   // Les accidents du travail signalés dont la déclaration reste à faire : un délai légal court, donc un rappel bien visible.
   const aDeclarer = useMemo(() => declarationsAFaire(data, today), [data, today]);
   const noterDeclaration = useStore((s) => s.noterDeclarationAccident);
-  const actions = d.total + aDeclarer.length;
   // Ce qui passe avant tout le reste : une seule chose, dite en clair, avec le bouton qui y mène.
   const priorite = ((): { ton: 'urgent' | 'attention' | 'calme' | 'ok'; icone: JSX.Element; titre: string; detail: string; bouton?: string; action?: () => void } => {
     const pluriel = (n: number, un: string, plusieurs: string): string => `${n} ${n > 1 ? plusieurs : un}`;
@@ -222,27 +221,61 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
           </span>
           </>
         }
-      />
-
-      {/* 1. À traiter : ce qui demande une intervention. Une action mise en avant, puis tout ce qui attend, par sujet. */}
-      <section className="tb-zone z-traiter" aria-labelledby="z-traiter">
-        <div className="tb-zone-tete">
-          <h2 id="z-traiter">À traiter</h2>
-          {actions ? null : <span className="tb-zone-note">Rien n’attend votre intervention</span>}
-          {d.total ? (
-            <button type="button" className="btn sm tb-zone-lien" id="tb-toutes" onClick={() => aller('resoudre')}>
-              Toutes les actions <ArrowRight size={15} aria-hidden="true" />
-            </button>
-          ) : null}
+      >
+        <div className="tb-chiffres" aria-label="Repères">
+          <button type="button" className="tb-chiffre tb-auj" onClick={() => voirJour(today)}>
+            <span className="ico" aria-hidden="true"><UsersRound size={18} /></span>
+            <span className="grow">
+              <span className="l">L’équipe aujourd’hui</span>
+              <span className="v">{ouvertAuj ? <><span className="num">{enPoste.length}</span> en poste</> : 'Fermée'}</span>
+              <span className="d">{ouvertAuj ? (absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'aucun absent') : 'pas d’ouverture'}</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => { setSemaine(lundi); aller('construire'); }}>
+            <span className="ico" aria-hidden="true"><ShieldCheck size={18} /></span>
+            <span className="grow">
+              <span className="l">Pharmacien présent</span>
+              <span className="v num">{cetteSemaine === null ? '-' : `${cetteSemaine} %`}</span>
+              <span className="d">cette semaine</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => { setSemaine(suivante); aller('construire'); }}>
+            <span className="ico" aria-hidden="true"><CalendarRange size={18} /></span>
+            <span className="grow">
+              <span className="l">Semaine prochaine</span>
+              <span className="v">{etatSuivante}</span>
+              <span className="d">à partir du {moisAbrege(fmtDateCourt(suivante).replace(/^\S+ /, ''))}</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => aller('heures')}>
+            <span className="ico" aria-hidden="true"><Hourglass size={18} /></span>
+            <span className="grow">
+              <span className="l">Compteurs d’heures</span>
+              <span className="v">{heures ? <><span className="num">{heures}</span> à régulariser</> : 'À jour'}</span>
+              <span className="d">{heures ? 'en plus ou en moins' : 'chacun à son contrat'}</span>
+            </span>
+          </button>
+          <button type="button" className="tb-chiffre" onClick={() => aller('gardes')}>
+            <span className="ico" aria-hidden="true"><MoonStar size={18} /></span>
+            <span className="grow">
+              <span className="l">Prochaine garde</span>
+              <span className="v cap1">{prochaineGarde ? moisAbrege(fmtDateCourt(prochaineGarde.date)) : 'Aucune'}</span>
+              <span className="d">{prochaineGarde ? (prochaineGarde.personId ? nomCourt(data.personnes.find((p) => p.id === prochaineGarde.personId) ?? data.personnes[0]) : 'À affecter') : 'rien de prévu'}</span>
+            </span>
+          </button>
         </div>
-        <div className={`tb-traiter${sujets.length || aDeclarer.length ? '' : ' seul'}`}>
+      </BanniereAccueil>
+
+      <div className="tb-duo">
+        {/* À gauche : ce qu'il faut faire, une chose par bloc, la plus pressée d'abord. Les deux blocs ont la même forme. */}
+        <div className="tb-avant">
           <section className={`tb-priorite ${priorite.ton}`} aria-labelledby="tb-prio" data-focus="priorite">
             <span className="tb-prio-ico" aria-hidden="true">
               {priorite.icone}
             </span>
             <div className="tb-prio-texte">
               <div className="eyebrow">{priorite.ton === 'ok' ? 'Aujourd’hui' : 'À faire en premier'}</div>
-              <h3 id="tb-prio">{priorite.titre}</h3>
+              <h2 id="tb-prio">{priorite.titre}</h2>
               <p>{priorite.detail}</p>
             </div>
             {priorite.action && priorite.bouton ? (
@@ -251,249 +284,186 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
               </button>
             ) : null}
           </section>
-          {sujets.length || aDeclarer.length ? (
-            <section className="card tb-faire" aria-labelledby="tb-faire">
-              <h3 id="tb-faire" className="tb-faire-titre">Tout ce qui attend</h3>
-              {aDeclarer.length ? (
-                <ul className="tb-declarer" id="tb-declarer" aria-label="Accidents du travail à déclarer">
-                  {aDeclarer.map((x) => {
-                    const qui = data.personnes.find((y) => y.id === x.absence.personId);
-                    return (
-                      <li key={x.absence.id} className={x.jours <= 0 ? 'presse' : undefined}>
-                        <span className="ico" aria-hidden="true">
-                          <BriefcaseMedical size={18} />
-                        </span>
-                        <span className="grow">
-                          <b>
-                            Déclarer l’{libelleAbsence(x.absence).toLowerCase()} de {qui ? nomCourt(qui) : 'la personne'}
-                          </b>
-                          <span className="small">
-                            À la caisse d’assurance maladie, au plus tard le {fmtDateCourt(x.echeance)} : {delaiDeclaration(x.jours)}.
-                          </span>
-                        </span>
-                        <button
-                          type="button"
-                          className="btn sm"
-                          data-declare={x.absence.id}
-                          onClick={() => {
-                            noterDeclaration(x.absence.id);
-                            useUi.getState().dire('Déclaration notée comme faite : le rappel est retiré.');
-                          }}
-                        >
-                          <Check size={14} aria-hidden="true" /> C’est fait
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : null}
-              {sujets.length ? (
-                <div className="tb-sujets">
-                  {sujets.map((x, i) => (
-                    <button key={x.cle} type="button" className={`tb-sujet${i === 0 ? ' premier' : ''}`} onClick={() => ouvrir(x.cle)}>
-                      <span className="ico" aria-hidden="true">{x.icone}</span>
-                      <span className="grow">{x.label}</span>
-                      <span className="compte num">{x.nombre}</span>
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </button>
-                  ))}
-                </div>
-              ) : aDeclarer.length ? null : (
-                <p className="card-body soft tb-ajour">
-                  <span className="tb-ajour-ico" aria-hidden="true">
-                    <Check size={22} />
-                  </span>
-                  <span>Absences couvertes, demandes arbitrées, plannings publiés.</span>
+
+          {pub.etat === 'rappel' || pub.etat === 'depasse' ? (
+            <section className={`tb-priorite note tb-echeance ${pub.etat}`} aria-labelledby="tb-echeance" data-focus="echeance">
+              <span className="tb-prio-ico" aria-hidden="true">
+                {pub.etat === 'depasse' && prepares ? <Sparkles size={20} /> : <BellRing size={20} />}
+              </span>
+              <div className="tb-prio-texte">
+                <div className="eyebrow">Planning de {nomMois}</div>
+                <h3 id="tb-echeance">
+                  {pub.etat === 'rappel'
+                    ? `À transmettre avant le ${fmtDateCourt(pub.echeance)}`
+                    : prepares && !pub.vides
+                      ? 'Préparé par Solvéa d’après vos habitudes'
+                      : `En retard depuis le ${fmtDateCourt(pub.echeance)}`}
+                </h3>
+                <p>
+                  {pub.etat === 'rappel'
+                    ? `${pub.jours === 0 ? 'C’est aujourd’hui.' : `Il reste ${pub.jours} jour${pub.jours > 1 ? 's' : ''}.`} ${pub.restantes} semaine${pub.restantes > 1 ? 's ne sont' : ' n’est'} pas encore publiée${pub.restantes > 1 ? 's' : ''}${pub.vides ? `, dont ${pub.vides} vide${pub.vides > 1 ? 's' : ''}` : ''}.`
+                    : pub.vides
+                      ? relais
+                        ? `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}. Solvéa peut ${pub.vides > 1 ? 'les' : 'la'} préparer en brouillon d’après vos habitudes ; rien n’est publié sans vous.`
+                        : `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}, ${pub.restantes} à publier.`
+                      : `${pub.restantes} semaine${pub.restantes > 1 ? 's' : ''} en brouillon${prepares ? `, dont ${prepares} préparée${prepares > 1 ? 's' : ''} par Solvéa` : ''} : relisez, corrigez, puis publiez le mois.`}
                 </p>
+              </div>
+              {pub.etat === 'depasse' && pub.vides && relais ? (
+                <button
+                  type="button"
+                  className="btn"
+                  id="echeance-preparer"
+                  onClick={() => {
+                    preparerMois(pub.mois);
+                    dire(`Solvéa a préparé ${nomMois} en brouillon d’après vos habitudes. Relisez, puis publiez le mois.`, true);
+                    versLeMois();
+                  }}
+                >
+                  <Sparkles size={16} aria-hidden="true" /> Préparer {nomMois}
+                </button>
+              ) : (
+                <button type="button" className="btn" id="echeance-ouvrir" onClick={versLeMois}>
+                  {pub.vides ? `Construire ${nomMois}` : 'Relire et publier'} <ArrowRight size={16} aria-hidden="true" />
+                </button>
               )}
             </section>
           ) : null}
         </div>
-      </section>
-
-      {/* 2. Aujourd'hui : l'équipe au comptoir, en grand ; les deux repères du jour et mon agenda à côté. */}
-      <section className="tb-zone z-jour" aria-labelledby="z-jour">
-        <div className="tb-zone-tete">
-          <h2 id="z-jour">Aujourd’hui</h2>
-          <span className="tb-zone-note">{capitale(fmtDateLong(today)).replace(/ \d{4}$/, '')}</span>
-        </div>
-        <div className="tb-jour-grille">
-          <section className="card tb-jour" aria-labelledby="tb-jour">
-            <div className="card-head">
-              <span className="ico carte-ico" aria-hidden="true"><Store size={20} /></span>
-              <div className="grow">
-                <div className="eyebrow">Aujourd’hui au comptoir</div>
-                <h3 id="tb-jour">
-                  {enPoste.length ? `${enPoste.length} personne${enPoste.length > 1 ? 's' : ''} en poste` : 'Aucun poste planifié'}
-                  {absents.length ? ` · ${absents.length} absent${absents.length > 1 ? 's' : ''}` : ''}
-                </h3>
-              </div>
-              <button type="button" className="btn" onClick={() => voirJour(today)}>
-                Voir la journée <ArrowRight size={16} aria-hidden="true" />
-              </button>
-            </div>
-            {parPersonne.length ? (
-              <div className="tbj">
-                {/* L'heure qu'il est : une étiquette au-dessus des heures, puis un trait continu à travers toutes les lignes. */}
-                <div className={`tbj-ligne tete${aiguille !== null ? ' avec-maintenant' : ''}`} aria-hidden="true">
-                  <span />
-                  <span className="tbj-piste">
-                    <Graduations echelle={echelle} />
-                    {aiguille !== null ? (
-                      <>
-                        <span className={`tbj-maintenant${aiguille < 12 ? ' debut' : aiguille > 88 ? ' fin' : ''}`} style={{ left: `${aiguille}%` }}>
-                          Maintenant · {fmtHeure(maintenant)}
-                        </span>
-                        <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} />
-                      </>
-                    ) : null}
-                  </span>
-                </div>
-                {parPersonne.map(({ p, postes }) =>
-                  p ? (
-                    <div key={p.id} className="tbj-ligne">
-                      <span className="tbj-qui">
-                        <Avatar person={p} />
-                        <span style={{ minWidth: 0 }}>
-                          <b>{nomCourt(p)}</b>
-                          <span className="small soft">{libelleRole(data, p)}</span>
-                          {retards
-                            .filter((r) => r.personId === p.id)
-                            .map((r) => (
-                              <span key={r.id} className="tbj-retard" title={[r.motif ? MOTIF_RETARD_LABEL[r.motif] : '', r.note ?? ''].filter(Boolean).join(' : ') || undefined}>
-                                <AlarmClock size={12} aria-hidden="true" /> Retard<span className="sr"> annoncé</span> · arrivée {fmtHeure(arriveePrevue(r))}
-                              </span>
-                            ))}
-                        </span>
-                      </span>
-                      <span className="tbj-piste">
-                        <Frise shifts={postes} echelle={echelle} />
-                        {aiguille !== null ? <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} aria-hidden="true" /> : null}
-                        <span className="sr">{postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(', ')}</span>
-                      </span>
-                    </div>
-                  ) : null,
+        {/* Mon agenda : un titulaire a lui aussi un planning et des rendez-vous. */}
+        <section className="card tb-agenda" aria-labelledby="tb-agenda" data-focus="mon-agenda">
+          <div className="card-head">
+            <span className="ico carte-ico" aria-hidden="true"><CalendarDays size={20} /></span>
+            <div className="grow">
+              <div className="eyebrow">Mon agenda</div>
+              <h2 id="tb-agenda">
+                {monPoste ? (
+                  <>
+                    {capitale(monPoste.date === today ? 'Aujourd’hui' : monPoste.date === addDays(today, 1) ? 'Demain' : fmtDateCourt(monPoste.date))} :{' '}
+                    <span className="num sans-coupure">
+                      {fmtHeure(monPoste.start)} – {fmtHeure(monPoste.end)}
+                    </span>
+                  </>
+                ) : (
+                  'Pas de poste à venir'
                 )}
-                {/* La couleur ne dit pas tout : la légende nomme ce que l'on voit. */}
-                <p className="tbj-legende" id="tbj-legende">
-                  <span>
-                    <i className="l-poste" aria-hidden="true" /> En poste
-                  </span>
-                  <span>
-                    <i className="l-pause" aria-hidden="true" /> Pause
-                  </span>
-                  {aiguille !== null ? (
-                    <span>
-                      <i className="l-maintenant" aria-hidden="true" /> Maintenant
-                    </span>
+              </h2>
+            </div>
+            <button type="button" className="btn sm" onClick={() => aller('moi')}>
+              Mon planning <ArrowRight size={15} aria-hidden="true" />
+            </button>
+          </div>
+          <div className="card-body tb-agenda-corps">
+            {mesSuivants.length || maGarde ? (
+              <div>
+                <h3 className="tb-agenda-titre">Ensuite</h3>
+                <ul className="tb-agenda-liste">
+                  {mesSuivants.map((x) => (
+                    <li key={x.id}>
+                      <span className="jour">{x.date === addDays(today, 1) ? 'Demain' : capitale(fmtDateCourt(x.date))}</span>
+                      <span className="num">
+                        {fmtHeure(x.start)} – {fmtHeure(x.end)}
+                      </span>
+                    </li>
+                  ))}
+                  {maGarde ? (
+                    <li className="garde">
+                      <span className="jour">
+                        <MoonStar size={14} aria-hidden="true" /> {capitale(fmtDateCourt(maGarde.date))}
+                      </span>
+                      <span>{libelleGarde(maGarde)}</span>
+                    </li>
                   ) : null}
-                  {retards.length ? (
-                    <span>
-                      <AlarmClock size={13} aria-hidden="true" /> Retard annoncé
-                    </span>
-                  ) : null}
-                </p>
-                {absents.length ? (
-                  <p className="tbj-absents">
-                    <UserMinus size={15} aria-hidden="true" /> Absent{absents.length > 1 ? 's' : ''} :{' '}
-                    {absents.map((a) => { const q = data.personnes.find((x) => x.id === a.personId); return q ? nomCourt(q) : ''; }).filter(Boolean).join(', ')}
-                  </p>
-                ) : null}
+                </ul>
               </div>
+            ) : null}
+            <h3 className="tb-agenda-titre">Rendez-vous</h3>
+            {mesRdv.length ? (
+              <ProchainsRendezVous data={data} personId={moi?.id ?? ''} today={today} onOuvrir={(autre) => { useUi.getState().viserFil(autre); aller('messages'); }} />
             ) : (
-              <p className="card-body soft">Construisez ou publiez la semaine pour voir ici l’équipe du jour.</p>
+              <p className="soft small" style={{ margin: 0 }}>Aucun rendez-vous à venir. Une demande acceptée se fixe ici et dans « Mon planning ».</p>
+            )}
+          </div>
+        </section>
+      </div>
+
+
+      <div className="tb-grille">
+        <div className="tb-col">
+          <section className="card tb-faire" aria-labelledby="tb-faire">
+            <div className="card-head">
+              <span className="ico carte-ico" aria-hidden="true"><ListChecks size={20} /></span>
+              <div className="grow">
+                <div className="eyebrow">À décider</div>
+                <h2 id="tb-faire">{d.total ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre` : aDeclarer.length ? `${aDeclarer.length} déclaration${aDeclarer.length > 1 ? 's' : ''} à faire` : 'Tout est à jour'}</h2>
+              </div>
+              {d.total ? (
+                <button type="button" className="btn" onClick={() => aller('resoudre')}>
+                  Tout voir <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              ) : null}
+            </div>
+            {aDeclarer.length ? (
+              <ul className="tb-declarer" id="tb-declarer" aria-label="Accidents du travail à déclarer">
+                {aDeclarer.map((x) => {
+                  const qui = data.personnes.find((y) => y.id === x.absence.personId);
+                  return (
+                    <li key={x.absence.id} className={x.jours <= 0 ? 'presse' : undefined}>
+                      <span className="ico" aria-hidden="true">
+                        <BriefcaseMedical size={18} />
+                      </span>
+                      <span className="grow">
+                        <b>
+                          Déclarer l’{libelleAbsence(x.absence).toLowerCase()} de {qui ? nomCourt(qui) : 'la personne'}
+                        </b>
+                        <span className="small">
+                          À la caisse d’assurance maladie, au plus tard le {fmtDateCourt(x.echeance)} : {delaiDeclaration(x.jours)}.
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        className="btn sm"
+                        data-declare={x.absence.id}
+                        onClick={() => {
+                          noterDeclaration(x.absence.id);
+                          useUi.getState().dire('Déclaration notée comme faite : le rappel est retiré.');
+                        }}
+                      >
+                        <Check size={14} aria-hidden="true" /> C’est fait
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+            {sujets.length ? (
+              <div className="tb-sujets">
+                {sujets.map((x, i) => (
+                  <button key={x.cle} type="button" className={`tb-sujet${i === 0 ? ' premier' : ''}`} onClick={() => ouvrir(x.cle)}>
+                    <span className="ico" aria-hidden="true">{x.icone}</span>
+                    <span className="grow">{x.label}</span>
+                    <span className="compte num">{x.nombre}</span>
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
+            ) : aDeclarer.length ? null : (
+              <p className="card-body soft tb-ajour">
+                <span className="tb-ajour-ico" aria-hidden="true">
+                  <Check size={22} />
+                </span>
+                <span>Absences couvertes, demandes arbitrées, plannings publiés.</span>
+              </p>
             )}
           </section>
-          <div className="tb-cote">
-            <div className="tb-chiffres deux" aria-label="Repères du jour">
-              <button type="button" className={`tb-chiffre tb-auj${absents.length ? ' etat-attention' : ' etat-ok'}`} onClick={() => voirJour(today)}>
-                <span className="ico" aria-hidden="true"><UsersRound size={18} /></span>
-                <span className="grow">
-                  <span className="l">L’équipe aujourd’hui</span>
-                  <span className="v">{ouvertAuj ? <><span className="num">{enPoste.length}</span> en poste</> : 'Fermée'}</span>
-                  <span className="d">{ouvertAuj ? (absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'aucun absent') : 'pas d’ouverture'}</span>
-                </span>
-              </button>
-              <button type="button" className={`tb-chiffre${cetteSemaine !== null && cetteSemaine < 100 ? ' etat-alerte' : cetteSemaine === null ? '' : ' etat-ok'}`} onClick={() => { setSemaine(lundi); aller('construire'); }}>
-                <span className="ico" aria-hidden="true"><ShieldCheck size={18} /></span>
-                <span className="grow">
-                  <span className="l">Pharmacien présent</span>
-                  <span className="v num">{cetteSemaine === null ? '-' : `${cetteSemaine} %`}</span>
-                  <span className="d">cette semaine</span>
-                </span>
-              </button>
-            </div>
-            <section className="card tb-agenda" aria-labelledby="tb-agenda" data-focus="mon-agenda">
-              <div className="card-head">
-                <span className="ico carte-ico" aria-hidden="true"><CalendarDays size={20} /></span>
-                <div className="grow">
-                  <div className="eyebrow">Mon agenda</div>
-                  <h3 id="tb-agenda">
-                    {monPoste ? (
-                      <>
-                        {capitale(monPoste.date === today ? 'Aujourd’hui' : monPoste.date === addDays(today, 1) ? 'Demain' : fmtDateCourt(monPoste.date))} :{' '}
-                        <span className="num sans-coupure">
-                          {fmtHeure(monPoste.start)} – {fmtHeure(monPoste.end)}
-                        </span>
-                      </>
-                    ) : (
-                      'Pas de poste à venir'
-                    )}
-                  </h3>
-                </div>
-                <button type="button" className="btn sm" onClick={() => aller('moi')}>
-                  Mon planning <ArrowRight size={15} aria-hidden="true" />
-                </button>
-              </div>
-              <div className="card-body tb-agenda-corps">
-                {mesSuivants.length || maGarde ? (
-                  <div>
-                    <h3 className="tb-agenda-titre">Ensuite</h3>
-                    <ul className="tb-agenda-liste">
-                      {mesSuivants.map((x) => (
-                        <li key={x.id}>
-                          <span className="jour">{x.date === addDays(today, 1) ? 'Demain' : capitale(fmtDateCourt(x.date))}</span>
-                          <span className="num">
-                            {fmtHeure(x.start)} – {fmtHeure(x.end)}
-                          </span>
-                        </li>
-                      ))}
-                      {maGarde ? (
-                        <li className="garde">
-                          <span className="jour">
-                            <MoonStar size={14} aria-hidden="true" /> {capitale(fmtDateCourt(maGarde.date))}
-                          </span>
-                          <span>{libelleGarde(maGarde)}</span>
-                        </li>
-                      ) : null}
-                    </ul>
-                  </div>
-                ) : null}
-                <h3 className="tb-agenda-titre">Rendez-vous</h3>
-                {mesRdv.length ? (
-                  <ProchainsRendezVous data={data} personId={moi?.id ?? ''} today={today} onOuvrir={(autre) => { useUi.getState().viserFil(autre); aller('messages'); }} />
-                ) : (
-                  <p className="soft small" style={{ margin: 0 }}>Aucun rendez-vous à venir. Une demande acceptée se fixe ici et dans « Mon planning ».</p>
-                )}
-              </div>
-            </section>
-          </div>
-        </div>
-      </section>
 
-      {/* 3. À venir : le prochain planning, l'échéance du mois, puis trois repères. */}
-      <section className="tb-zone z-venir" aria-labelledby="z-venir">
-        <div className="tb-zone-tete">
-          <h2 id="z-venir">À venir</h2>
-          <span className="tb-zone-note">Ce qu’il vaut mieux préparer maintenant</span>
-        </div>
-        <div className="tb-venir">
+
           <section className="card cycle" aria-labelledby="tb-cycle" data-focus="cycle">
             <div className="cycle-tete">
               <span className="ico carte-ico" aria-hidden="true"><CalendarRange size={20} /></span>
               <div className="grow">
                 <div className="eyebrow">Le prochain planning</div>
-                <h3 id="tb-cycle">Semaine du {fmtSemaine(cycle.semaine)}</h3>
+                <h2 id="tb-cycle">Semaine du {fmtSemaine(cycle.semaine)}</h2>
               </div>
               <button type="button" className="btn" onClick={cycle.action}>
                 {cycle.bouton} <ArrowRight size={16} aria-hidden="true" />
@@ -513,81 +483,76 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
               ))}
             </ol>
           </section>
-          <div className="tb-cote">
-            {pub.etat === 'rappel' || pub.etat === 'depasse' ? (
-              <section className={`tb-priorite note tb-echeance ${pub.etat}`} aria-labelledby="tb-echeance" data-focus="echeance">
-                <span className="tb-prio-ico" aria-hidden="true">
-                  {pub.etat === 'depasse' && prepares ? <Sparkles size={20} /> : <BellRing size={20} />}
-                </span>
-                <div className="tb-prio-texte">
-                  <div className="eyebrow">Planning de {nomMois}</div>
-                  <h3 id="tb-echeance">
-                    {pub.etat === 'rappel'
-                      ? `À transmettre avant le ${fmtDateCourt(pub.echeance)}`
-                      : prepares && !pub.vides
-                        ? 'Préparé par Solvéa d’après vos habitudes'
-                        : `Échéance du ${fmtDateCourt(pub.echeance)} dépassée`}
-                  </h3>
-                  <p>
-                    {pub.etat === 'rappel'
-                      ? `${pub.jours === 0 ? 'C’est aujourd’hui.' : `Il reste ${pub.jours} jour${pub.jours > 1 ? 's' : ''}.`} ${pub.restantes} semaine${pub.restantes > 1 ? 's ne sont' : ' n’est'} pas encore publiée${pub.restantes > 1 ? 's' : ''}${pub.vides ? `, dont ${pub.vides} vide${pub.vides > 1 ? 's' : ''}` : ''}.`
-                      : pub.vides
-                        ? relais
-                          ? `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}. Solvéa peut ${pub.vides > 1 ? 'les' : 'la'} préparer en brouillon d’après vos habitudes ; rien n’est publié sans vous.`
-                          : `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}, ${pub.restantes} à publier.`
-                        : `${pub.restantes} semaine${pub.restantes > 1 ? 's' : ''} en brouillon${prepares ? `, dont ${prepares} préparée${prepares > 1 ? 's' : ''} par Solvéa` : ''} : relisez, corrigez, puis publiez le mois.`}
-                  </p>
-                </div>
-                {pub.etat === 'depasse' && pub.vides && relais ? (
-                  <button
-                    type="button"
-                    className="btn"
-                    id="echeance-preparer"
-                    onClick={() => {
-                      preparerMois(pub.mois);
-                      dire(`Solvéa a préparé ${nomMois} en brouillon d’après vos habitudes. Relisez, puis publiez le mois.`, true);
-                      versLeMois();
-                    }}
-                  >
-                    <Sparkles size={16} aria-hidden="true" /> Préparer {nomMois}
-                  </button>
-                ) : (
-                  <button type="button" className="btn" id="echeance-ouvrir" onClick={versLeMois}>
-                    {pub.vides ? `Construire ${nomMois}` : 'Relire et publier'} <ArrowRight size={16} aria-hidden="true" />
-                  </button>
-                )}
-              </section>
-            ) : null}
-            <div className="tb-chiffres trois" aria-label="Repères à venir">
-              <button type="button" className={`tb-chiffre${etatSuivante === 'Publiée' ? ' etat-ok' : ' etat-attention'}`} onClick={() => { setSemaine(suivante); aller('construire'); }}>
-                <span className="ico" aria-hidden="true"><CalendarRange size={18} /></span>
-                <span className="grow">
-                  <span className="l">Semaine prochaine</span>
-                  <span className="v">{etatSuivante}</span>
-                  <span className="d">à partir du {moisAbrege(fmtDateCourt(suivante).replace(/^\S+ /, ''))}</span>
-                </span>
-              </button>
-              <button type="button" className={`tb-chiffre${heures ? ' etat-attention' : ' etat-ok'}`} onClick={() => aller('heures')}>
-                <span className="ico" aria-hidden="true"><Hourglass size={18} /></span>
-                <span className="grow">
-                  <span className="l">Compteurs d’heures</span>
-                  <span className="v">{heures ? <><span className="num">{heures}</span> à régulariser</> : 'À jour'}</span>
-                  <span className="d">{heures ? 'en plus ou en moins' : 'chacun à son contrat'}</span>
-                </span>
-              </button>
-              <button type="button" className={`tb-chiffre${prochaineGarde && !prochaineGarde.personId ? ' etat-attention' : ''}`} onClick={() => aller('gardes')}>
-                <span className="ico" aria-hidden="true"><MoonStar size={18} /></span>
-                <span className="grow">
-                  <span className="l">Prochaine garde</span>
-                  <span className="v cap1">{prochaineGarde ? moisAbrege(fmtDateCourt(prochaineGarde.date)) : 'Aucune'}</span>
-                  <span className="d">{prochaineGarde ? (prochaineGarde.personId ? nomCourt(data.personnes.find((p) => p.id === prochaineGarde.personId) ?? data.personnes[0]) : 'À affecter') : 'rien de prévu'}</span>
-                </span>
-              </button>
-            </div>
-          </div>
         </div>
-      </section>
 
+        <section className="card tb-jour" aria-labelledby="tb-jour">
+          <div className="card-head">
+            <span className="ico carte-ico" aria-hidden="true"><Store size={20} /></span>
+            <div className="grow">
+              <div className="eyebrow">Aujourd’hui au comptoir</div>
+              <h2 id="tb-jour">
+                {enPoste.length ? `${enPoste.length} personne${enPoste.length > 1 ? 's' : ''} en poste` : 'Aucun poste planifié'}
+                {absents.length ? ` · ${absents.length} absent${absents.length > 1 ? 's' : ''}` : ''}
+              </h2>
+            </div>
+            <button type="button" className="btn" onClick={() => voirJour(today)}>
+              Voir la journée <ArrowRight size={16} aria-hidden="true" />
+            </button>
+          </div>
+          {parPersonne.length ? (
+            <div className="tbj">
+              {/* L'heure qu'il est : une étiquette au-dessus des heures, puis un trait continu à travers toutes les lignes. */}
+              <div className={`tbj-ligne tete${aiguille !== null ? ' avec-maintenant' : ''}`} aria-hidden="true">
+                <span />
+                <span className="tbj-piste">
+                  <Graduations echelle={echelle} />
+                  {aiguille !== null ? (
+                    <>
+                      <span className={`tbj-maintenant${aiguille < 12 ? ' debut' : aiguille > 88 ? ' fin' : ''}`} style={{ left: `${aiguille}%` }}>
+                        Maintenant · {fmtHeure(maintenant)}
+                      </span>
+                      <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} />
+                    </>
+                  ) : null}
+                </span>
+              </div>
+              {parPersonne.map(({ p, postes }) =>
+                p ? (
+                  <div key={p.id} className="tbj-ligne">
+                    <span className="tbj-qui">
+                      <Avatar person={p} />
+                      <span style={{ minWidth: 0 }}>
+                        <b>{nomCourt(p)}</b>
+                        <span className="small soft">{libelleRole(data, p)}</span>
+                        {retards
+                          .filter((r) => r.personId === p.id)
+                          .map((r) => (
+                            <span key={r.id} className="tbj-retard" title={[r.motif ? MOTIF_RETARD_LABEL[r.motif] : '', r.note ?? ''].filter(Boolean).join(' : ') || undefined}>
+                              <AlarmClock size={12} aria-hidden="true" /> Retard<span className="sr"> annoncé</span> · arrivée {fmtHeure(arriveePrevue(r))}
+                            </span>
+                          ))}
+                      </span>
+                    </span>
+                    <span className="tbj-piste">
+                      <Frise shifts={postes} echelle={echelle} />
+                      {aiguille !== null ? <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} aria-hidden="true" /> : null}
+                      <span className="sr">{postes.map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`).join(', ')}</span>
+                    </span>
+                  </div>
+                ) : null,
+              )}
+              {absents.length ? (
+                <p className="tbj-absents">
+                  <UserMinus size={15} aria-hidden="true" /> Absent{absents.length > 1 ? 's' : ''} :{' '}
+                  {absents.map((a) => { const q = data.personnes.find((x) => x.id === a.personId); return q ? nomCourt(q) : ''; }).filter(Boolean).join(', ')}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <p className="card-body soft">Construisez ou publiez la semaine pour voir ici l’équipe du jour.</p>
+          )}
+        </section>
+      </div>
 
       {recentes.length ? (
         <section className="card tb-annonces" aria-labelledby="tb-annonces" data-focus="annonces" style={{ marginTop: 24 }}>

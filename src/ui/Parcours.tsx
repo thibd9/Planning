@@ -1474,7 +1474,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='cycle']",
     titre: 'Le tableau de bord',
-    texte: () => 'Chaque matin, le tableau de bord se lit en trois zones : ce qu’il faut traiter, l’équipe d’aujourd’hui, puis ce qui se prépare.',
+    texte: () => 'Chaque matin, le tableau de bord vous dit quoi faire en premier, qui est là aujourd’hui et où en est le planning.',
     jouer: () => {
       avecAbsenceImprevue();
       helene('tableau');
@@ -1483,7 +1483,7 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: parTexte('.content .tb-jour .btn', 'Voir la journée'), sert: 'La journée d’aujourd’hui, avec toute l’équipe.', facultatif: true },
       { faire: 'attendre', que: '.dialog', facultatif: true },
       { faire: 'cliquer', sur: '.dialog .dialog-fermer', dit: 'Fermez la fenêtre', sert: 'On revient au tableau de bord.', facultatif: true },
-      { faire: 'cliquer', sur: '.content .tb-sujet', dit: 'Cliquez sur un sujet en attente', sert: 'Elle mène droit à ce qui attend votre réponse, dans « Résoudre ».' },
+      { faire: 'cliquer', sur: '.content .tb-sujet', dit: 'Cliquez sur une ligne de décisions', sert: 'Elle mène droit à ce qui attend votre réponse, dans « Résoudre ».' },
     ],
   },
   {
