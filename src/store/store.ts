@@ -16,7 +16,7 @@ import type { Creneau, SensRegul } from '../engine/rattrapage';
 import { reposApresGarde } from '../engine/gardes';
 import type { GenResult } from '../engine/generate';
 import { VARIANTE_LABEL } from '../engine/generate';
-import { changementsSemaine, controlePublication } from '../engine/publish';
+import { changementsSemaine, controlePublication, repercuter } from '../engine/publish';
 import type { RepairOption } from '../engine/repair';
 import { appliquerPatch, optionsReparation } from '../engine/repair';
 import { depannagesDe, tourDeRole, tourRemplacement } from '../engine/appel';
@@ -353,10 +353,15 @@ function soumettre(m: Store, get: () => Store): Store {
 
 export const useStore = create<Store>((set, get) => {
   /** Applique un changement ; `annulable` l'ajoute à l'historique des manipulations. */
-  const commit = (fn: (d: AppData, today: ISODate) => AppData, annulable = true): void => {
+  /**
+   * `brouillon` : une retouche de la grille (poser, déplacer, effacer, proposer, copier). Elle attend « Publier ».
+   * Tout le reste est une décision : si elle change des postes d'une semaine publiée, la version publiée suit aussitôt.
+   */
+  const commit = (fn: (d: AppData, today: ISODate) => AppData, annulable = true, brouillon = false): void => {
     set((s) => {
-      const data = fn(s.data, s.today);
-      if (data === s.data) return s;
+      const brut = fn(s.data, s.today);
+      if (brut === s.data) return s;
+      const data = brouillon ? brut : repercuter(s.data, brut, s.today, now());
       return {
         data,
         past: annulable ? [...s.past.slice(-40), s.data] : s.past,
@@ -364,6 +369,9 @@ export const useStore = create<Store>((set, get) => {
       };
     });
   };
+
+  /** Une retouche de la grille : elle reste un brouillon, la version publiée ne bouge pas avant « Publier ». */
+  const retouche = (fn: (d: AppData, today: ISODate) => AppData): void => commit(fn, true, true);
 
   const magasin: Store = {
     ...charger(),
@@ -699,7 +707,7 @@ export const useStore = create<Store>((set, get) => {
         return { ...d, souhaits: (d.souhaits ?? []).filter((s) => !cles.has(`${s.personId}|${s.date}`)).concat(liste) };
       }, false),
     appliquerCorrection: (mois, c) =>
-      commit((d) =>
+      retouche((d) =>
         journal(
           { ...d, shifts: c.data.shifts },
           {
@@ -832,13 +840,13 @@ export const useStore = create<Store>((set, get) => {
       }),
 
     saveShift: (shift) =>
-      commit((d) => ({
+      retouche((d) => ({
         ...d,
         shifts: d.shifts.some((s) => s.id === shift.id) ? d.shifts.map((s) => (s.id === shift.id ? shift : s)) : d.shifts.concat(shift),
       })),
-    deleteShift: (id) => commit((d) => ({ ...d, shifts: d.shifts.filter((s) => s.id !== id) })),
+    deleteShift: (id) => retouche((d) => ({ ...d, shifts: d.shifts.filter((s) => s.id !== id) })),
     moveShift: (id, personId, date) =>
-      commit((d) => {
+      retouche((d) => {
         const s = d.shifts.find((x) => x.id === id);
         if (!s || (s.personId === personId && s.date === date)) return d;
         return {
@@ -847,7 +855,7 @@ export const useStore = create<Store>((set, get) => {
         };
       }),
     appliquerGeneration: (monday, res) =>
-      commit((d) => {
+      retouche((d) => {
         const anciens = shiftsSemaine(d, monday);
         const next = { ...d, shifts: d.shifts.filter((s) => !anciens.includes(s)).concat(res.shifts) };
         return journal(next, {
@@ -859,12 +867,12 @@ export const useStore = create<Store>((set, get) => {
         });
       }),
     viderSemaine: (monday) =>
-      commit((d) => {
+      retouche((d) => {
         const anciens = shiftsSemaine(d, monday);
         return { ...d, shifts: d.shifts.filter((s) => !anciens.includes(s)) };
       }),
     copierSemaine: (source, cible) =>
-      commit((d) => {
+      retouche((d) => {
         const anciens = shiftsSemaine(d, cible);
         const decalage = dayIndex(cible) - dayIndex(source);
         const copies = shiftsSemaine(d, source)

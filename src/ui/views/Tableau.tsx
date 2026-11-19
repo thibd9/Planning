@@ -13,6 +13,7 @@ import { rdvAVenir } from '../../engine/rdv';
 import { ProchainsRendezVous } from '../components/RendezVous';
 import { etatPublication, reglagePublication } from '../../engine/echeance';
 import { decisions } from '../../engine/decisions';
+import { changementsSemaine } from '../../engine/publish';
 import { aRegulariser, semaineLibre } from '../../engine/heures';
 import { estCollaboratif, moisDe, reponses } from '../../engine/souhaits';
 import { validateWeek } from '../../engine/validate';
@@ -80,6 +81,9 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   const ouvertAuj = ouverture(data.officine, today).length > 0;
   // Une pharmacie qui débute, ou une semaine jamais construite : aucun poste cette semaine. On le dit, plutôt qu'un « 0 en poste » muet.
   const semaineVide = !shiftsSemaine(data, lundi).length;
+  // Ce que le titulaire voit ici, l'équipe ne le voit qu'une fois publié : on le dit quand ce n'est pas le cas.
+  const semaineEnBrouillon = !semaineVide && data.semaines[lundi]?.statut !== 'publie';
+  const retouchesEnAttente = data.semaines[lundi]?.statut === 'publie' ? changementsSemaine(data, lundi).length : 0;
   const construireCetteSemaine = (): void => {
     setSemaine(lundi);
     aller('construire');
@@ -440,6 +444,27 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
               Voir la journée <ArrowRight size={16} aria-hidden="true" />
             </button>
           </div>
+          {semaineEnBrouillon || retouchesEnAttente ? (
+            <div className="notice warn tb-nonpublie" id="tb-nonpublie">
+              <CalendarRange size={16} aria-hidden="true" />
+              <span className="grow">
+                {semaineEnBrouillon
+                  ? 'Le planning de cette semaine est un brouillon : l’équipe ne le voit pas encore.'
+                  : `${retouchesEnAttente} retouche${retouchesEnAttente > 1 ? 's' : ''} de cette semaine ${retouchesEnAttente > 1 ? 'ne sont pas encore publiées' : 'n’est pas encore publiée'} : l’équipe lit toujours l’ancienne version.`}
+              </span>
+              <button
+                type="button"
+                className="btn sm"
+                onClick={() => {
+                  setSemaine(lundi);
+                  aller('construire');
+                  viser(CIBLE.publier);
+                }}
+              >
+                {semaineEnBrouillon ? 'Relire et publier' : 'Publier les modifications'} <ArrowRight size={15} aria-hidden="true" />
+              </button>
+            </div>
+          ) : null}
           {parPersonne.length ? (
             <div className="tbj">
               {/* L'heure qu'il est : une étiquette au-dessus des heures, puis un trait continu à travers toutes les lignes. */}
@@ -548,7 +573,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <span className="grow">
               <span className="l">L’équipe aujourd’hui</span>
               <span className="v">{!ouvertAuj ? 'Fermée' : semaineVide ? 'Pas de planning' : <><span className="num">{enPoste.length}</span> en poste</>}</span>
-              <span className="d">{!ouvertAuj ? 'pas d’ouverture' : semaineVide ? 'semaine à construire' : absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'aucun absent'}</span>
+              <span className="d">{!ouvertAuj ? 'pas d’ouverture' : semaineVide ? 'semaine à construire' : semaineEnBrouillon ? 'brouillon, non publié' : absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'aucun absent'}</span>
             </span>
           </button>
           <button type="button" className="tb-chiffre" onClick={() => { setSemaine(lundi); aller('construire'); }}>

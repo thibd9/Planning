@@ -177,7 +177,7 @@ export function vierge(): AppData {
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
 /** À augmenter quand l'exemple change (noms, équipe) : les exemples enregistrés sur l'appareil sont alors régénérés. */
-export const DEMO_VERSION = 9;
+export const DEMO_VERSION = 10;
 
 export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);
@@ -350,6 +350,11 @@ export function seed(today: ISODate, avance = 0): AppData {
   });
   const retires = data.shifts.filter((s) => s.personId === 'p_karim' && s.date >= from && s.date <= to);
   data.shifts = data.shifts.filter((s) => !retires.includes(s));
+  // L'arrêt est une décision : la version publiée suit, chacun lit le même planning.
+  for (const m of new Set(retires.map((s) => mondayOf(s.date)))) {
+    const semaine = data.semaines[m];
+    if (semaine?.snapshot) data.semaines[m] = { ...semaine, snapshot: semaine.snapshot.filter((s) => !(s.personId === 'p_karim' && s.date >= from && s.date <= to)) };
+  }
   data.trous = retires.map((shift: Shift) => ({ id: uid('t'), absenceId: arretId, shift, statut: 'ouvert' as const }));
   data.journal.push({
     id: uid('j'),

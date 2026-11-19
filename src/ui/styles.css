@@ -4719,3 +4719,7 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .jh-attente { flex-wrap: wrap; }
 .jh-attente > span { flex: 1 1 260px; }
 .jh-attente .btn { flex: none; background: var(--surface); }
+
+/* Tableau de bord : la semaine montrée n'est pas (ou plus tout à fait) celle que lit l'équipe. */
+.tb-nonpublie { margin: 14px 22px 0; align-items: center; flex-wrap: wrap; }
+.tb-nonpublie .btn { flex: none; background: var(--surface); }
