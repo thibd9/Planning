@@ -3299,10 +3299,11 @@ const CARTES: Record<Scenario, { nom: string; phrase: string; mots: string[]; te
   tension: { nom: 'Journée sous tension', phrase: 'Un arrêt, un retard, un accident.', mots: [], teinte: 'v-tension', icone: <Siren size={22} /> },
   publication: { nom: 'Veille de publication', phrase: 'Construire, publier, faire le bilan.', mots: [], teinte: 'v-publication', icone: <CalendarCheck size={22} /> },
 };
+type Famille = (typeof SCENARIOS)[Scenario]['groupe'] | 'libre';
 const GROUPES: { cle: (typeof SCENARIOS)[Scenario]['groupe']; titre: string; phrase: string }[] = [
-  { cle: 'parcours', titre: 'Les parcours', phrase: 'Le plus complet d’abord, puis un parcours par rôle.' },
-  { cle: 'metiers', titre: 'Les autres métiers', phrase: 'Chaque profil a son accueil : animatrice, apprentie, étudiant.' },
-  { cle: 'journees', titre: 'Une journée type, trois scénarios', phrase: 'La pharmacie tourne déjà : on la suit du matin au soir.' },
+  { cle: 'parcours', titre: 'Parcours', phrase: 'Le plus complet d’abord, puis un parcours par rôle.' },
+  { cle: 'metiers', titre: 'Autres métiers', phrase: 'Chaque profil a son accueil : animatrice, apprentie, étudiant.' },
+  { cle: 'journees', titre: 'Journées types', phrase: 'Trois scénarios pour une journée : la pharmacie tourne déjà, on la suit du matin au soir.' },
 ];
 
 /** Fenêtre « Découvrir Solvéa » : une visite guidée par rôle, ou une entrée libre. */
@@ -3317,12 +3318,25 @@ export function ChoixParcours(): JSX.Element | null {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [tutoriels, ouvrirTutoriels]);
+  // Une seule visite à l'écran : on passe de l'une à l'autre avec les flèches, ou l'on saute à une famille par les onglets.
+  const [onglet, setOnglet] = useState<Famille>('parcours');
+  const [montree, setMontree] = useState<Scenario>('complet');
   if (!tutoriels) return null;
   const entrer = (identifiant: string): void => {
     store().chargerExemple(false);
     ouvrirTutoriels(false);
     voirComme(identifiant);
   };
+  const toutes = Object.keys(SCENARIOS) as Scenario[];
+  const montrer = (cle: Scenario): void => {
+    setMontree(cle);
+    setOnglet(SCENARIOS[cle].groupe);
+  };
+  const voisine = (pas: number): void => montrer(toutes[(toutes.indexOf(montree) + pas + toutes.length) % toutes.length]);
+  const famille = toutes.filter((cle) => SCENARIOS[cle].groupe === SCENARIOS[montree].groupe);
+  const carte = CARTES[montree];
+  const visite = SCENARIOS[montree];
+  const chapitres = [...new Set(visite.etapes.map((e) => e.chapitre).filter((c): c is string => !!c))];
   return (
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && ouvrirTutoriels(false)}>
       <div className="decouvrir" role="dialog" aria-modal="true" aria-labelledby="decouvrir-titre">
@@ -3339,89 +3353,97 @@ export function ChoixParcours(): JSX.Element | null {
           </button>
         </div>
         <div className="dc-corps">
-          <ChoixRythme />
-          {GROUPES.map((g) => {
-            const cles = (Object.keys(SCENARIOS) as Scenario[]).filter((cle) => SCENARIOS[cle].groupe === g.cle);
-            const grandes = g.cle === 'parcours';
-            return (
-              <section key={g.cle} className="dc-groupe" aria-labelledby={`dc-${g.cle}`}>
-                <div className="dc-groupe-tete">
-                  <h3 className="dc-sous" id={`dc-${g.cle}`}>
-                    {g.titre}
-                  </h3>
-                  <span className="small soft">{g.phrase}</span>
-                </div>
-                <div className={`choix-parcours${grandes ? '' : ' compactes'}`}>
-                  {cles.map((cle) => {
-                    const c = CARTES[cle];
-                    const [temps, etapes] = SCENARIOS[cle].duree.split(' · ');
-                    return grandes ? (
-                      <article key={cle} className={`cp-carte ${c.teinte}`} data-scenario={cle}>
-                        <div className="cp-visuel">
-                          <span className="cp-temps">
-                            {temps}
-                            <span className="cp-etapes"> · {etapes}</span>
-                          </span>
-                          <span className="cp-ico" aria-hidden="true">
-                            {c.icone}
-                          </span>
-                        </div>
-                        <div className="cp-texte">
-                          <h3>{c.nom}</h3>
-                          <p className="cp-phrase">{c.phrase}</p>
-                          <ul className="cp-mots">
-                            {c.mots.map((m) => (
-                              <li key={m}>{m}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="cp-pied">
-                          <button type="button" className={`btn${cle === 'complet' ? ' primary' : ''}`} onClick={() => lancerParcours(cle)}>
-                            <Play size={15} aria-hidden="true" /> Lancer <span className="sr">la visite {c.nom}</span>
-                          </button>
-                        </div>
-                      </article>
-                    ) : (
-                      <article key={cle} className={`cp-carte cp-compacte ${c.teinte}`} data-scenario={cle}>
-                        <span className="cp-ico" aria-hidden="true">
-                          {c.icone}
-                        </span>
-                        <div className="cp-texte">
-                          <h3>{c.nom}</h3>
-                          <p className="cp-phrase">{c.phrase}</p>
-                          <span className="cp-duree">
-                            {temps} · {etapes}
-                          </span>
-                        </div>
-                        <button type="button" className="btn sm" onClick={() => lancerParcours(cle)}>
-                          <Play size={14} aria-hidden="true" /> Lancer <span className="sr">la visite {c.nom}</span>
-                        </button>
-                      </article>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-          <div className="dc-libre">
-            <div className="dc-groupe-tete">
-              <h3 className="dc-sous">Ou entrer librement, en testeur</h3>
-              <span className="small soft">Sans guide : choisissez un profil et essayez tout. Les données d’exemple se remettent à neuf quand vous voulez.</span>
-            </div>
-            <div className="dc-roles">
-              {exemple.map((r) => (
-                <button key={r.cle} type="button" className="dc-role" onClick={() => entrer(r.identifiant)} title={r.detail}>
-                  <span className="dc-av" aria-hidden="true">
-                    {r.nom.split(' ').map((x) => x.charAt(0)).join('')}
-                  </span>
-                  <span>
-                    <b>{r.nom.split(' ')[0]}</b>
-                    <span className="small soft">{r.titre}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
+          {/* Les familles : trois de visites, puis l'entrée libre. */}
+          <div className="dc-onglets" role="tablist" aria-label="Familles de visites">
+            {GROUPES.map((g) => (
+              <button key={g.cle} type="button" role="tab" id={`dc-onglet-${g.cle}`} aria-selected={onglet === g.cle} aria-controls="dc-panneau" className={`dc-onglet${onglet === g.cle ? ' on' : ''}`} onClick={() => montrer(toutes.find((cle) => SCENARIOS[cle].groupe === g.cle) ?? 'complet')}>
+                {g.titre}
+                <span className="dc-onglet-nb num">{toutes.filter((cle) => SCENARIOS[cle].groupe === g.cle).length}</span>
+              </button>
+            ))}
+            <button type="button" role="tab" id="dc-onglet-libre" aria-selected={onglet === 'libre'} aria-controls="dc-panneau" className={`dc-onglet${onglet === 'libre' ? ' on' : ''}`} onClick={() => setOnglet('libre')}>
+              Entrer librement
+            </button>
           </div>
+          {onglet === 'libre' ? (
+            <div id="dc-panneau" role="tabpanel" aria-labelledby="dc-onglet-libre">
+          <div className="dc-libre">
+              <div className="dc-groupe-tete">
+                <h3 className="dc-sous">Ou entrer librement, en testeur</h3>
+                <span className="small soft">Sans guide : choisissez un profil et essayez tout. Les données d’exemple se remettent à neuf quand vous voulez.</span>
+              </div>
+              <div className="dc-roles">
+                {exemple.map((r) => (
+                  <button key={r.cle} type="button" className="dc-role" onClick={() => entrer(r.identifiant)} title={r.detail}>
+                    <span className="dc-av" aria-hidden="true">
+                      {r.nom.split(' ').map((x) => x.charAt(0)).join('')}
+                    </span>
+                    <span>
+                      <b>{r.nom.split(' ')[0]}</b>
+                      <span className="small soft">{r.titre}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            </div>
+          ) : (
+            <div
+              id="dc-panneau"
+              role="tabpanel"
+              aria-labelledby={`dc-onglet-${onglet}`}
+              className="dc-carrousel"
+              aria-roledescription="carrousel"
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight') voisine(1);
+                if (e.key === 'ArrowLeft') voisine(-1);
+              }}
+            >
+              <p className="dc-famille small soft">{GROUPES.find((g) => g.cle === onglet)?.phrase}</p>
+              <div className="dc-scene">
+                <button type="button" className="dc-fleche" onClick={() => voisine(-1)} aria-label="Visite précédente">
+                  <ArrowLeft size={20} aria-hidden="true" />
+                </button>
+                <article key={montree} className={`cp-carte dc-diapo ${carte.teinte}`} data-scenario={montree} aria-roledescription="diapositive" aria-label={`${carte.nom}, visite ${toutes.indexOf(montree) + 1} sur ${toutes.length}`} aria-live="polite">
+                  <div className="cp-visuel">
+                    <span className="cp-ico" aria-hidden="true">
+                      {carte.icone}
+                    </span>
+                  </div>
+                  <div className="dc-diapo-texte">
+                    <span className="eyebrow">
+                      {visite.role} · {famille.indexOf(montree) + 1} sur {famille.length}
+                    </span>
+                    <h3>{carte.nom}</h3>
+                    <p className="dc-fil">{visite.fil}</p>
+                    <ul className="cp-mots" aria-label="Chapitres">
+                      {chapitres.map((c) => (
+                        <li key={c}>{c}</li>
+                      ))}
+                    </ul>
+                    <div className="dc-diapo-pied">
+                      <span className="cp-duree num">{visite.duree}</span>
+                      <button type="button" className="btn primary" onClick={() => lancerParcours(montree)}>
+                        <Play size={16} aria-hidden="true" /> Lancer <span className="sr">la visite {carte.nom}</span>
+                      </button>
+                    </div>
+                  </div>
+                </article>
+                <button type="button" className="dc-fleche" onClick={() => voisine(1)} aria-label="Visite suivante">
+                  <ArrowRight size={20} aria-hidden="true" />
+                </button>
+              </div>
+              {/* Un point par visite de la famille : on voit où l'on est, et l'on saute à celle que l'on veut. */}
+              <div className="dc-points" role="group" aria-label="Visites de cette famille">
+                {famille.map((cle) => (
+                  <button key={cle} type="button" className={`dc-point${cle === montree ? ' on' : ''}`} data-nom={CARTES[cle].nom} aria-current={cle === montree ? 'true' : undefined} onClick={() => montrer(cle)}>
+                    {CARTES[cle].nom}
+                  </button>
+                ))}
+              </div>
+              <ChoixRythme compact />
+            </div>
+          )}
         </div>
       </div>
     </div>

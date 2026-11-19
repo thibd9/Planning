@@ -4867,3 +4867,67 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 
 /* Équipe : le renvoi vers les statistiques, en bas de page. */
 .eq-vers-stats { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 22px 2px 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-2); }
+
+/* === « Découvrir Solvéa » en carrousel : une visite à la fois, des flèches pour passer de l'une à l'autre === */
+.decouvrir { width: min(880px, 100%); }
+.dc-onglets { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.dc-onglet { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px 12px; border: 0; background: none; color: var(--ink-2); font: inherit; font-size: 14.5px; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; }
+.dc-onglet:hover { color: var(--ink); }
+.dc-onglet.on { color: var(--a-text); border-bottom-color: var(--a-deep); }
+.dc-onglet-nb { font-size: 12px; font-weight: 650; color: var(--ink-3); }
+.dc-onglet.on .dc-onglet-nb { color: inherit; }
+.dc-carrousel { display: grid; gap: 16px; }
+.dc-famille { margin: 0; }
+.dc-scene { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.dc-fleche { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; }
+.dc-fleche:hover { background: var(--a-tint); border-color: var(--pastel-line); }
+.dc-fleche:active { transform: scale(0.96); }
+/* La visite montrée : le visuel à gauche, l'histoire à droite. */
+.cp-carte.dc-diapo { display: grid; grid-template-columns: minmax(180px, 0.42fr) minmax(0, 1fr); align-items: stretch; min-height: 280px; animation: monte 0.3s var(--fluide) both; }
+.cp-carte.dc-diapo:hover { transform: none; box-shadow: 0 1px 0 var(--line), 0 18px 40px -30px rgba(var(--ink-rgb), 0.6); }
+.dc-diapo .cp-visuel { height: auto; padding: 0; align-items: center; }
+.dc-diapo .cp-ico { width: 76px; height: 76px; }
+.dc-diapo .cp-ico svg { width: 36px; height: 36px; }
+.dc-diapo-texte { display: flex; flex-direction: column; gap: 8px; padding: 22px 24px 20px; min-width: 0; }
+.dc-diapo-texte .eyebrow { color: color-mix(in srgb, var(--v1) 78%, var(--ink)); }
+.cp-carte.dc-diapo h3 { font-size: 26px; white-space: normal; }
+.dc-fil { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); max-width: 56ch; }
+.dc-diapo .cp-mots { flex-wrap: wrap; margin-top: 4px; }
+.dc-diapo-pied { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: auto; padding-top: 14px; }
+.dc-diapo-pied .cp-duree { font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+.cp-carte.dc-diapo .dc-diapo-pied .btn { min-height: 44px; padding: 8px 22px; align-self: auto; margin: 0; }
+/* Les visites de la famille, par leur nom : on voit où l'on est. */
+.dc-points { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.dc-point { padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.dc-point:hover { border-color: var(--pastel-line); color: var(--ink); }
+.dc-point.on { border-color: var(--a-deep); background: var(--a-soft); color: var(--a-text); }
+.dc-carrousel .rythme.compact { justify-self: center; }
+@media (max-width: 720px) {
+  .dc-tete p { display: none; }
+  .dc-onglets { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .dc-onglet { white-space: nowrap; padding-inline: 10px; }
+  /* Sur téléphone, les flèches passent sous la visite. */
+  .dc-scene { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dc-scene > .cp-carte { grid-column: 1 / -1; grid-row: 1; }
+  .dc-scene > .dc-fleche { grid-row: 2; }
+  .dc-scene > .dc-fleche:first-child { justify-self: end; }
+  .dc-scene > .dc-fleche:last-child { justify-self: start; }
+  .cp-carte.dc-diapo { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .dc-diapo .cp-visuel { height: 96px; }
+  .dc-diapo .cp-ico { width: 56px; height: 56px; }
+}
+@media (min-width: 901px) and (max-height: 820px) {
+  .dc-tete h2 { font-size: 24px; }
+  .dc-tete p { font-size: 14px; }
+  .dc-logo { width: 46px; height: 46px; }
+  .dc-corps { padding-top: 8px; padding-bottom: 10px; gap: 8px; }
+  .dc-onglet { padding: 8px 12px 9px; }
+  .dc-carrousel { gap: 10px; }
+  .cp-carte.dc-diapo { min-height: 196px; }
+  .dc-diapo .cp-visuel { height: auto; padding: 0; }
+  .dc-diapo .cp-ico { width: 60px; height: 60px; }
+  .dc-diapo-texte { padding: 14px 20px 12px; gap: 6px; }
+  .cp-carte.dc-diapo h3 { font-size: 22px; }
+  .dc-diapo-pied { padding-top: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .cp-carte.dc-diapo { animation: none; } }
