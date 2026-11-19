@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, CirclePause, CirclePlay, Crown, FlaskConical, Gauge, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, UserRound, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarCheck, Check, CirclePause, CirclePlay, Crown, FlaskConical, Gauge, GraduationCap, ListTree, Megaphone, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sparkles, Sprout, Store, Undo2, UserRound, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -205,7 +205,7 @@ const tempo = (ms: number): number => Math.round(ms * RYTHMES[rythme].facteur);
 /** Le temps de lire ce que dit Solvi avant qu'il agisse, compté une fois sa bulle ouverte : plus elle est longue, plus il attend. */
 const tempsDeLire = (texte: string): number => tempo(Math.min(5000, Math.max(1400, 400 + texte.trim().length * 32)));
 /** La couleur du profil de chaque personnage de l'exemple : la pastille qui l'annonce en début de chapitre. */
-const TEINTE_DE: Record<string, string> = { 'Caroline · titulaire': '#1f6bb8', 'Nicolas · préparateur': '#3730a3', 'Léa · pharmacienne': '#0a5a63', 'Igor · pharmacien': '#0a5a63', 'Pierre · titulaire secondaire': '#1b4f7f' };
+const TEINTE_DE: Record<string, string> = { 'Caroline · titulaire': '#1f6bb8', 'Nicolas · préparateur': '#3730a3', 'Léa · pharmacienne': '#0a5a63', 'Igor · pharmacien': '#0a5a63', 'Pierre · titulaire secondaire': '#1b4f7f', 'Sarah · animatrice': '#a8326b', 'Manon · apprentie': '#17694a', 'Yanis · étudiant': '#8a5a00' };
 
 interface Etape {
   /** Chapitre de la visite ; le sommaire permet de sauter de l'un à l'autre. */
@@ -346,6 +346,8 @@ function avecSouhaits(camille = true): void {
 }
 function avecPlanning(): void {
   avecSouhaits();
+  // La semaine en cours aussi : sans elle, le tableau de bord et « Mon planning » n'auraient personne aujourd'hui.
+  publierSemaine(semaineDans(0));
   publierSemaine(semaineDans(1));
   publierSemaine(semaineDans(2));
 }
@@ -459,6 +461,22 @@ function avecFormation(): void {
   if (!s.data.absences.some((x) => x.type === 'formation')) s.planifierFormation({ intitule: 'Gestes d’urgence', personnes: ['p_thomas', 'p_ines'], from: jour, to: jour, cadre: 'externe', lieu: 'Centre de formation, à Lyon' });
 }
 
+/** Un collègue a prévenu d'un retard sur son poste du jour : la frise du tableau de bord le montre. */
+function avecRetard(): void {
+  const s = store();
+  if (s.data.retards?.some((r) => r.date === s.today)) return;
+  const postes = s.data.shifts.filter((x) => x.date === s.today && s.data.semaines[mondayOf(x.date)]?.statut === 'publie').sort((a, b) => b.start - a.start);
+  const poste = postes.find((x) => x.personId === 'p_camille') ?? postes.find((x) => x.personId !== 'p_helene' && x.personId !== 'p_antoine');
+  if (poste) s.prevenirRetard({ personId: poste.personId, date: s.today, start: poste.start, minutes: 10, motif: 'transport' });
+}
+/** Un accident du travail signalé ce matin : sa déclaration reste à faire, dans un délai légal. */
+function avecAccident(): void {
+  const s = store();
+  if (s.data.absences.some((a) => a.type === 'accident')) return;
+  const qui = ['p_jules', 'p_thomas', 'p_ines'].find((id) => s.data.personnes.some((p) => p.id === id) && !s.data.absences.some((a) => a.personId === id && a.to >= s.today)) ?? 'p_jules';
+  s.signalerAbsence({ personId: qui, from: s.today, to: addDays(s.today, 2), type: 'accident', accident: { jour: s.today, ou: 'travail', circonstances: 'Chute dans la réserve, en rangeant une commande.' } });
+}
+
 // ---------------------------------------------------------------- Une journée type : la pharmacie tourne déjà
 
 const HELENE = 'Caroline · titulaire';
@@ -473,7 +491,7 @@ interface Acte {
 /** Ce qu'on fait dans chaque chapitre, en une phrase : la visite l'annonce avant de commencer. */
 const BUTS: Record<string, string> = {};
 /** Range les étapes dans l'ordre du récit. Une étape ajoutée sans être rangée ne disparaît pas : elle vient à la fin. */
-function raconter(etapes: Etape[], recit: Acte[]): Etape[] {
+function raconter(etapes: Etape[], recit: Acte[], strict = false): Etape[] {
   const rangees = recit.flatMap((a) => {
     BUTS[a.chapitre] = a.but;
     return a.etapes
@@ -481,6 +499,8 @@ function raconter(etapes: Etape[], recit: Acte[]): Etape[] {
       .filter((e): e is Etape => !!e)
       .map((e) => ({ ...e, chapitre: a.chapitre }));
   });
+  // `strict` : la visite ne garde que les étapes nommées ; sinon, celles qui restent suivent, pour n'en perdre aucune.
+  if (strict) return rangees;
   const titres = new Set(recit.flatMap((a) => a.etapes));
   return [...rangees, ...etapes.filter((e) => !titres.has(e.titre))];
 }
@@ -648,15 +668,171 @@ const ETABLI_BRUT: Etape[] = [
       { faire: 'cliquer', sur: '#rat-valider', dit: 'Cliquez sur « Planifier et prévenir »', sert: 'Le planning est mis à jour, et le message part à la personne.', facultatif: true },
     ],
   },
+  // ---- Une journée sous tension
+  {
+    qui: HELENE,
+    cible: '.panneau',
+    titre: 'Un arrêt ce matin',
+    texte: (d) => `${absent(d)} est en arrêt depuis ce matin. « Résoudre » liste chaque poste laissé libre, jour par jour : ce qui manque, et les façons de le couvrir.`,
+    jouer: () => {
+      useUi.getState().setSujet('absences');
+      voirComme('caroline.tellier', 'resoudre');
+    },
+  },
+  {
+    qui: HELENE,
+    cible: '.panneau',
+    cibleFin: '.panneau',
+    titre: 'Choisir une solution',
+    texte: (d) => (d.trous.some((t) => t.statut === 'ouvert') ? 'Pour chaque jour, la solution conseillée est cochée : un collègue qui allonge sa journée, un remplaçant, ou accepter le manque. Vous gardez la main.' : 'Réglé : chaque jour a sa solution. Le planning publié est à jour et chacun est prévenu.'),
+    jouer: () => {
+      useUi.getState().setSujet('absences');
+      voirComme('caroline.tellier', 'resoudre');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.panneau button', 'Voir et choisir la solution'), sert: 'Solvéa montre comment régler chaque jour, option par option.', facultatif: true },
+      { faire: 'attendre', que: '.rs-jour', facultatif: true },
+      { faire: 'cliquer', sur: '.dialog-foot .btn.primary', sert: 'Les changements sont appliqués au planning publié, et annoncés aux personnes concernées.', facultatif: true },
+    ],
+  },
+  {
+    qui: CAMILLE,
+    cible: '.prochain',
+    cibleFin: '.prochain',
+    titre: 'Un retard annoncé',
+    texte: () => 'Nicolas est retenu sur la route. Deux gestes suffisent : 5, 10, 15 minutes, ou plus de 20. Ses titulaires reçoivent aussitôt une notification et un message, avec son heure d’arrivée.',
+    jouer: () => voirComme('nicolas.lesyndicaliste', 'espace'),
+    gestes: [
+      { faire: 'cliquer', sur: '#ret-prevenir', sert: 'Le bouton est sous son prochain poste, aujourd’hui ou demain.', facultatif: true },
+      { faire: 'cliquer', sur: parTexte('#ret-durees .comp', '10 min'), dit: 'Touchez « 10 min »', sert: 'L’heure d’arrivée se calcule toute seule.', facultatif: true },
+      { faire: 'cliquer', sur: '#ret-envoyer', sert: 'Les titulaires sont prévenus. L’avis reste affiché : il se corrige ou s’annule.', facultatif: true },
+    ],
+  },
+  {
+    qui: HELENE,
+    cible: '.tb-jour',
+    titre: 'Le retard, vu du comptoir',
+    texte: () => 'Caroline n’a rien à ressaisir : sur la frise du jour, l’étiquette « Retard » apparaît sous le nom, avec l’heure d’arrivée. Le trait bleu marque l’heure qu’il est.',
+    jouer: () => {
+      avecRetard();
+      voirComme('caroline.tellier', 'tableau');
+    },
+  },
+  {
+    qui: HELENE,
+    cible: '#tb-declarer',
+    titre: 'Un accident du travail',
+    texte: () => 'Un accident signalé ouvre un délai légal de déclaration à la caisse d’assurance maladie. Solvéa le rappelle en tête du tableau de bord jusqu’à ce que vous notiez « C’est fait ».',
+    jouer: () => {
+      avecAccident();
+      voirComme('caroline.tellier', 'tableau');
+    },
+    gestes: [{ faire: 'cliquer', sur: '[data-declare]', dit: 'Cliquez sur « C’est fait »', sert: 'Le rappel est retiré : la déclaration est notée au dossier.', facultatif: true }],
+  },
+  {
+    qui: HELENE,
+    cible: '.content',
+    titre: 'Prévenir l’équipe',
+    texte: () => 'Un mot à une personne ou à tous : les messages restent dans Solvéa, à côté du planning. Chaque décision y laisse aussi sa trace.',
+    jouer: () => voirComme('caroline.tellier', 'messages'),
+  },
+  {
+    qui: HELENE,
+    cible: "[data-focus='annonces']",
+    titre: 'Les décisions du jour',
+    texte: () => 'Le soir, tout est écrit : chaque décision prise, et ce qu’elle a changé aux plannings. Les personnes concernées ont été prévenues au moment même.',
+    jouer: () => voirComme('caroline.tellier', 'tableau'),
+  },
+  // ---- Une veille de publication
+  {
+    qui: HELENE,
+    cible: "[data-focus='echeance'], [data-focus='cycle']",
+    titre: 'L’échéance du mois',
+    texte: () => 'Le planning se transmet au mois. Solvéa calcule la date limite et la rappelle ici. Passé ce jour, il peut préparer les semaines vides en brouillon d’après vos habitudes : rien n’est publié sans vous.',
+    jouer: () => voirComme('caroline.tellier', 'tableau'),
+  },
+  {
+    qui: HELENE,
+    cible: '.plan-bar',
+    cibleFin: '.plan-bar',
+    titre: 'Publier la semaine',
+    texte: (d) => (d.semaines[addDays(mondayOf(store().today), 21)]?.statut === 'publie' ? 'C’est publié : toute l’équipe voit la semaine, et le message dit quand elle commence.' : 'Un dernier contrôle, les accords à recueillir, puis l’envoi à l’équipe.'),
+    jouer: () => {
+      const semaine = addDays(mondayOf(store().today), 21);
+      proposerSemaine(semaine);
+      enBrouillon(semaine);
+      voirComme('caroline.tellier', 'construire');
+      useUi.getState().setPlanVue('semaine');
+      useUi.getState().setSemaine(semaine);
+    },
+    gestes: [
+      { faire: 'cliquer', sur: "[data-focus='publier']", sert: 'Solvéa relit les règles et les délais avant d’envoyer.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'cliquer', sur: parTexte('.dialog button', 'Tout cocher'), facultatif: true, sert: 'Les accords à recueillir sont notés d’un seul geste.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Toute l’équipe voit maintenant sa semaine.' },
+      { faire: 'action', jouer: () => publierSemaine(addDays(mondayOf(store().today), 21)) },
+    ],
+  },
+  {
+    qui: CAMILLE,
+    cible: '.me',
+    titre: 'L’équipe reçoit son planning',
+    texte: () => 'Dès la publication, chacun lit sa semaine dans « Mon planning » et reçoit une annonce. Personne ne voit jamais un brouillon.',
+    jouer: () => {
+      publierSemaine(addDays(mondayOf(store().today), 21));
+      voirComme('nicolas.lesyndicaliste', 'moi');
+    },
+  },
+  {
+    qui: HELENE,
+    cible: '.content',
+    titre: 'L’équité du mois',
+    texte: () => 'Samedis, fermetures, gardes, dépannages : qui a porté quoi, face à sa part. Un clic sur une ligne détaille ce qui est compté et d’où vient la part attendue.',
+    jouer: () => voirComme('caroline.tellier', 'equite'),
+    gestes: [{ faire: 'cliquer', sur: '.eq-detail summary', dit: 'Cliquez sur une ligne', sert: 'Le détail s’ouvre : les dates comptées, et le calcul de la part.', facultatif: true }],
+  },
+  {
+    qui: HELENE,
+    cible: '.content',
+    titre: 'Ce qui part en paie',
+    texte: () => 'Le journal garde chaque publication et chaque décision. L’export du mois reprend les heures, les absences et les gardes pour la paie.',
+    jouer: () => voirComme('caroline.tellier', 'journal'),
+  },
 ];
 
-/** Une journée type, du matin au soir : chaque chapitre est un moment de la journée, avec ceux qui le vivent. */
-const ETABLI: Etape[] = raconter(ETABLI_BRUT, [
-  { chapitre: 'Le matin : l’équipe du jour', but: 'Caroline ouvre Solvéa : qui est là, quel poste reste à couvrir, qui est en pause ou en retard.', etapes: ['Le tableau de bord', 'L’appel à l’équipe', 'Pauses et retards'] },
-  { chapitre: 'Un remplacement entre collègues', but: 'Nicolas ne peut pas tenir un poste. Il demande, un collègue se propose, Caroline valide.', etapes: ['Ses horaires', 'Un collègue se propose', 'Valider'] },
-  { chapitre: 'Chacun son espace', but: 'Le même Solvéa, vu par un préparateur, un pharmacien et l’autre titulaire.', etapes: ['Mes préférences', 'Ses gardes', 'Décider à deux', 'Donner son accord'] },
-  { chapitre: 'Le soir : préparer la suite', but: 'Caroline construit la semaine à venir, regarde le mois et solde les heures.', etapes: ['Construire', 'Le mois', 'Le compteur d’heures'] },
-]);
+/** Une journée ordinaire, du matin au soir : chaque chapitre est un moment de la journée, avec ceux qui le vivent. */
+const ETABLI: Etape[] = raconter(
+  ETABLI_BRUT,
+  [
+    { chapitre: 'Le matin : l’équipe du jour', but: 'Caroline ouvre Solvéa : qui est là, quel poste reste à couvrir, qui est en pause ou en retard.', etapes: ['Le tableau de bord', 'L’appel à l’équipe', 'Pauses et retards'] },
+    { chapitre: 'Un remplacement entre collègues', but: 'Nicolas ne peut pas tenir un poste. Il demande, un collègue se propose, Caroline valide.', etapes: ['Ses horaires', 'Un collègue se propose', 'Valider'] },
+    { chapitre: 'Chacun son espace', but: 'Le même Solvéa, vu par un préparateur, un pharmacien et l’autre titulaire.', etapes: ['Mes préférences', 'Ses gardes', 'Décider à deux', 'Donner son accord'] },
+    { chapitre: 'Le soir : préparer la suite', but: 'Caroline construit la semaine à venir, regarde le mois et solde les heures.', etapes: ['Construire', 'Le mois', 'Le compteur d’heures'] },
+  ],
+  true,
+);
+
+/** Une journée sous tension : un arrêt le matin, un retard, un accident du travail. Tout se règle, et tout le monde est prévenu. */
+const TENSION: Etape[] = raconter(
+  ETABLI_BRUT,
+  [
+    { chapitre: 'Le matin : un arrêt', but: 'Un pharmacien est en arrêt depuis ce matin. Caroline voit ce qui manque, appelle l’équipe et choisit une solution pour chaque jour.', etapes: ['Le tableau de bord', 'Un arrêt ce matin', 'L’appel à l’équipe', 'Choisir une solution'] },
+    { chapitre: 'Dans la journée : les aléas', but: 'Un retard annoncé depuis la route, une pause à décaler, un accident du travail à déclarer.', etapes: ['Un retard annoncé', 'Le retard, vu du comptoir', 'Pauses et retards', 'Un accident du travail'] },
+    { chapitre: 'Le soir : tout le monde est prévenu', but: 'Chaque décision a été annoncée à ceux qu’elle concerne. Caroline relit la journée.', etapes: ['Prévenir l’équipe', 'Les décisions du jour'] },
+  ],
+  true,
+);
+
+/** Une veille de publication : l'échéance du mois approche, on construit, on publie, on fait le bilan. */
+const PUBLICATION: Etape[] = raconter(
+  ETABLI_BRUT,
+  [
+    { chapitre: 'Le matin : l’échéance approche', but: 'Le planning du mois doit partir. Solvéa rappelle la date, et l’équipe a donné ses préférences.', etapes: ['L’échéance du mois', 'Mes préférences'] },
+    { chapitre: 'L’après-midi : construire et publier', but: 'Caroline compare trois propositions, relit le mois, publie. L’équipe reçoit aussitôt son planning.', etapes: ['Construire', 'Le mois', 'Publier la semaine', 'L’équipe reçoit son planning'] },
+    { chapitre: 'Le soir : le bilan', but: 'Les heures de chacun, l’équité entre collègues, et ce qui part en paie.', etapes: ['Le compteur d’heures', 'L’équité du mois', 'Ce qui part en paie'] },
+  ],
+  true,
+);
 
 // ---------------------------------------------------------------- Visite du titulaire : la vie d'un planning, de la création au bilan
 
@@ -1425,6 +1601,7 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: parTexte('.content button', '12 semaines'), sert: 'La période se choisit : 8 semaines, 12 semaines ou 6 mois.' },
       { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Fermetures en semaine'), sert: 'Un compteur à la fois : ici, qui ferme le soir.' },
       { faire: 'cliquer', sur: parTexte('.content summary', 'Comment c’est calculé'), sert: 'La part de chacun suit son temps de travail.', facultatif: true },
+      { faire: 'cliquer', sur: '.eq-detail summary', dit: 'Cliquez sur une ligne de l’équipe', sert: 'Le détail s’ouvre : les dates comptées, et d’où vient la part attendue.', facultatif: true },
     ],
   },
   {
@@ -1591,7 +1768,77 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: 'label[for="theme-ciel"]', dit: 'Revenez au bleu ciel', sert: 'Dix couleurs sont proposées.', facultatif: true },
       { faire: 'cliquer', sur: 'label[for="texte-grand"]', dit: 'Passez le texte en grand', sert: 'Pour lire plus confortablement.', facultatif: true },
       { faire: 'cliquer', sur: 'label[for="texte-normal"]', dit: 'Revenez à la taille normale', sert: 'Chaque personne garde ses propres préférences.', facultatif: true },
+      { faire: 'cliquer', sur: 'label[for="disposition-classique"]', dit: 'Choisissez la disposition « Priorité d’abord »', sert: 'Le tableau de bord se range autrement : la priorité et votre agenda en tête.', facultatif: true },
+      { faire: 'cliquer', sur: 'label[for="disposition-comptoir"]', dit: 'Revenez à « Comptoir et décisions »', sert: 'Les mêmes informations, placées autrement. Le choix ne vaut que pour vous.', facultatif: true },
     ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '#dimensionnement',
+    titre: 'L’équipe est-elle assez nombreuse ?',
+    texte: () => 'Indiquez le nombre de clients servis par jour : Solvéa en déduit combien de personnes il faut au comptoir, à l’heure ordinaire et à la pointe, puis le compare à vos contrats. Les caisses ne fixent qu’un plafond.',
+    jouer: () => {
+      avecEquipe();
+      helene('officine');
+    },
+    gestes: [
+      { faire: 'taper', dans: '#dim-passages', texte: '240', dit: 'Indiquez 240 clients par jour', sert: 'Le besoin se recalcule aussitôt : les pharmaciens d’un côté, le reste du comptoir de l’autre.', facultatif: true },
+      { faire: 'cliquer', sur: '.dim-calcul summary', dit: 'Ouvrez « Comment c’est calculé »', sert: 'Chaque hypothèse est écrite : c’est un repère, pas une norme.', facultatif: true },
+    ],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: CAMILLE,
+    cible: '.prochain',
+    cibleFin: '.prochain',
+    titre: 'Un retard annoncé',
+    texte: () => 'Nicolas est retenu sur la route. Deux gestes suffisent : 5, 10, 15 minutes, ou plus de 20. Ses titulaires reçoivent aussitôt une notification et un message, avec son heure d’arrivée.',
+    jouer: () => {
+      avecPlanning();
+      voirComme('nicolas.lesyndicaliste', 'espace');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: '#ret-prevenir', sert: 'Le bouton est sous son prochain poste, aujourd’hui ou demain.', facultatif: true },
+      { faire: 'cliquer', sur: parTexte('#ret-durees .comp', '10 min'), dit: 'Touchez « 10 min »', sert: 'L’heure d’arrivée se calcule toute seule.', facultatif: true },
+      { faire: 'cliquer', sur: '#ret-envoyer', sert: 'Les titulaires sont prévenus. L’avis reste affiché : il se corrige ou s’annule.', facultatif: true },
+    ],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: HELENE,
+    cible: '.tb-jour',
+    titre: 'Le retard, vu du comptoir',
+    texte: () => 'Caroline n’a rien à ressaisir : sur la frise du jour, l’étiquette « Retard » apparaît sous le nom, avec l’heure d’arrivée. Le trait bleu marque l’heure qu’il est.',
+    jouer: () => {
+      avecPlanning();
+      avecRetard();
+      helene('tableau');
+    },
+  },
+  {
+    chapitre: SUIVRE,
+    qui: HELENE,
+    cible: '#tb-declarer',
+    titre: 'Un accident du travail',
+    texte: () => 'Un accident signalé ouvre un délai légal de déclaration à la caisse d’assurance maladie. Solvéa le rappelle en tête du tableau de bord jusqu’à ce que vous notiez « C’est fait ».',
+    jouer: () => {
+      avecPlanning();
+      avecAccident();
+      helene('tableau');
+    },
+    gestes: [{ faire: 'cliquer', sur: '[data-declare]', dit: 'Cliquez sur « C’est fait »', sert: 'Le rappel est retiré : la déclaration est notée au dossier.', facultatif: true }],
+  },
+  {
+    chapitre: QUOTIDIEN,
+    qui: HELENE,
+    cible: '.mp-prochain',
+    titre: 'Mes horaires de titulaire',
+    texte: () => 'Un titulaire a lui aussi un planning. « Mon planning » montre vos semaines publiées, exactement comme chaque membre de l’équipe voit les siennes.',
+    jouer: () => {
+      avecPlanning();
+      helene('moi');
+    },
   },
 ];
 
@@ -1605,7 +1852,7 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
   {
     chapitre: 'Installer la pharmacie',
     but: 'Caroline crée sa pharmacie : son équipe, ses horaires, ses règles. C’est tout ce qu’il faut à Solvéa pour proposer un planning.',
-    etapes: ['Créer la pharmacie', 'Ajouter l’équipe', 'La fiche d’une personne', 'Les marques d’une animatrice', 'Horaires et effectif', 'Qui prépare le planning', 'Les règles'],
+    etapes: ['Créer la pharmacie', 'Ajouter l’équipe', 'La fiche d’une personne', 'Les marques d’une animatrice', 'Horaires et effectif', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'Les règles'],
   },
   { chapitre: 'Recueillir les souhaits', but: 'Avant de construire, chacun dit ce qui l’arrange. On passe un instant dans la peau de Nicolas, préparateur.', etapes: ['Les préférences du mois'] },
   {
@@ -1626,15 +1873,32 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
   {
     chapitre: 'Les imprévus',
     but: 'Un arrêt le matin même, un retard, une décision à prendre à deux titulaires : ce qui ne se prévoit pas.',
-    etapes: ['Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Une journée', 'Retards et suivi', 'Décider à deux', 'Donner son accord', 'Les messages'],
+    etapes: ['Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Une journée', 'Retards et suivi', 'Un retard annoncé', 'Le retard, vu du comptoir', 'Un accident du travail', 'Décider à deux', 'Donner son accord', 'Les messages'],
   },
   { chapitre: 'Le bilan du mois', but: 'En fin de mois : les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Le journal et la paie', 'Les documents', 'Absences et justificatifs'] },
   {
     chapitre: 'Au quotidien',
     but: 'Les raccourcis de tous les jours, et où trouver de l’aide.',
-    etapes: ['Le tableau de bord', 'Le bouton « Créer »', 'La cloche', 'Plusieurs pharmacies', 'Solvi, votre assistant', 'L’aide', 'Mot de passe et clé de secours', 'Votre compte'],
+    etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'Le bouton « Créer »', 'La cloche', 'Plusieurs pharmacies', 'Solvi, votre assistant', 'L’aide', 'Mot de passe et clé de secours', 'Votre compte'],
   },
 ]);
+
+/**
+ * La visite du titulaire : gérer la pharmacie, sans l'installation ni les écrans de l'équipe. Les mêmes étapes
+ * que la visite complète, rangées par tâche : construire, décider, suivre, faire le bilan, régler.
+ */
+const TITULAIRE: Etape[] = raconter(
+  COMPLET_BRUT,
+  [
+    { chapitre: 'Construire la semaine', but: 'La grille, un poste posé à la main, trois propositions comparées, les contrôles, puis la publication.', etapes: ['Une semaine à construire', 'Poser un poste', 'Trois propositions', 'La semaine est posée', 'Les contrôles', 'Le mois', 'Publier', 'Imprimer'] },
+    { chapitre: 'Gardes, formation, inventaire', but: 'Ce qui s’ajoute au planning ordinaire, et qui prévient chacun tout seul.', etapes: ['Les gardes', 'Une formation', 'Un inventaire'] },
+    { chapitre: 'Décider', but: 'Remplacements, congés, absences imprévues : chaque demande arrive au même endroit, avec de quoi trancher.', etapes: ['La demande arrive', 'Valider le remplacement', 'Une urgence médicale', 'Congés et horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande', 'Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Donner son accord'] },
+    { chapitre: 'Suivre l’équipe', but: 'La journée en cours, les retards, un accident du travail, les messages.', etapes: ['Une journée', 'Retards et suivi', 'Le retard, vu du comptoir', 'Un accident du travail', 'Les messages'] },
+    { chapitre: 'Faire le bilan', but: 'Les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Le journal et la paie', 'Les documents'] },
+    { chapitre: 'Piloter au quotidien', but: 'Le tableau de bord, vos propres horaires, les raccourcis, et les réglages de la pharmacie.', etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'La cloche', 'Le bouton « Créer »', 'Horaires et effectif', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'Les règles', 'Votre compte'] },
+  ],
+  true,
+);
 
 const MON_PLANNING = 'Mon planning';
 const MES_DEMANDES = 'Mes demandes';
@@ -1887,12 +2151,28 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
 
 const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'Léa · pharmacienne', prenom: 'Léa', pharmacien: true });
 const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', qui: 'Nicolas · préparateur', prenom: 'Nicolas' });
+const ANIMATRICE = visiteDe({ id: 'p_sarah', identifiant: 'sarah.lemoine', qui: 'Sarah · animatrice', prenom: 'Sarah' });
+const APPRENTIE = visiteDe({ id: 'p_manon', identifiant: 'manon.girard', qui: 'Manon · apprentie', prenom: 'Manon' });
+const ETUDIANT = visiteDe({ id: 'p_yanis', identifiant: 'yanis.morel', qui: 'Yanis · étudiant', prenom: 'Yanis' });
 
+/** La durée annoncée : une demi-minute par étape, au rythme normal. */
+const minutes = (etapes: Etape[]): string => `${Math.max(3, Math.round(etapes.length * 0.5))} min · ${etapes.length} étapes`;
+
+/**
+ * Le catalogue des visites. `depart` : « zero » part d'une pharmacie qui vient d'être créée, « etabli » d'une pharmacie
+ * qui tourne déjà. `groupe` range les cartes dans « Découvrir Solvéa » : les parcours, les autres métiers, les journées types.
+ */
 export const SCENARIOS = {
-  complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', fil: 'De la création de la pharmacie au bilan du mois. On suit Caroline, titulaire, et l’on passe par moments dans la peau de son équipe.', duree: `30 min · ${COMPLET.length} étapes`, etapes: COMPLET },
-  pharmacien: { court: 'Pharmacien', role: 'Pharmacien', titre: 'Mon espace de pharmacien', fil: 'Tout ce que voit Léa, pharmacienne : son planning, ses demandes, ses gardes, son compte.', duree: `7 min · ${PHARMACIEN.length} étapes`, etapes: PHARMACIEN },
-  equipe: { court: 'Équipe', role: 'Préparateur, animateur, apprenti…', titre: 'Mon espace dans l’équipe', fil: 'Tout ce que voit Nicolas, préparateur : son planning, ses demandes, ses collègues, son compte.', duree: `7 min · ${EQUIPIER.length} étapes`, etapes: EQUIPIER },
-  etabli: { court: 'Journée type', role: 'Tous les rôles', titre: 'Une journée type', fil: 'Une journée à la pharmacie, du matin au soir, avec ceux qui la vivent.', duree: `8 min · ${ETABLI.length} étapes`, etapes: ETABLI },
+  complet: { groupe: 'parcours', depart: 'zero', court: 'Complet', role: 'Tous les rôles', titre: 'Tout Solvéa, de zéro', fil: 'De la création de la pharmacie au bilan du mois. On suit Caroline, titulaire, et l’on passe par moments dans la peau de son équipe.', duree: minutes(COMPLET), etapes: COMPLET },
+  titulaire: { groupe: 'parcours', depart: 'zero', court: 'Titulaire', role: 'Titulaire', titre: 'Gérer la pharmacie', fil: 'Construire, publier, décider, suivre, faire le bilan : tout ce que fait Caroline, titulaire, une fois la pharmacie installée.', duree: minutes(TITULAIRE), etapes: TITULAIRE },
+  pharmacien: { groupe: 'parcours', depart: 'etabli', court: 'Pharmacien', role: 'Pharmacien', titre: 'Mon espace de pharmacien', fil: 'Tout ce que voit Léa, pharmacienne : son planning, ses demandes, ses gardes, son compte.', duree: minutes(PHARMACIEN), etapes: PHARMACIEN },
+  equipe: { groupe: 'parcours', depart: 'etabli', court: 'Préparateur', role: 'Préparateur', titre: 'Mon espace de préparateur', fil: 'Tout ce que voit Nicolas, préparateur : son planning, ses demandes, ses collègues, son compte.', duree: minutes(EQUIPIER), etapes: EQUIPIER },
+  animateur: { groupe: 'metiers', depart: 'etabli', court: 'Animatrice', role: 'Animateur', titre: 'Mon espace d’animatrice', fil: 'Tout ce que voit Sarah, animatrice : ses jours d’animation, les marques qu’elle présente, ses demandes.', duree: minutes(ANIMATRICE), etapes: ANIMATRICE },
+  apprenti: { groupe: 'metiers', depart: 'etabli', court: 'Apprentie', role: 'Apprenti', titre: 'Mon espace d’apprentie', fil: 'Tout ce que voit Manon, apprentie : son alternance, ses jours d’école, ses horaires à la pharmacie.', duree: minutes(APPRENTIE), etapes: APPRENTIE },
+  etudiant: { groupe: 'metiers', depart: 'etabli', court: 'Étudiant', role: 'Étudiant', titre: 'Mon espace d’étudiant', fil: 'Tout ce que voit Yanis, étudiant : ses horaires autour de ses cours, ses demandes, son suivi.', duree: minutes(ETUDIANT), etapes: ETUDIANT },
+  etabli: { groupe: 'journees', depart: 'etabli', court: 'Journée ordinaire', role: 'Tous les rôles', titre: 'Une journée ordinaire', fil: 'Une journée à la pharmacie, du matin au soir, avec ceux qui la vivent.', duree: minutes(ETABLI), etapes: ETABLI },
+  tension: { groupe: 'journees', depart: 'etabli', court: 'Journée sous tension', role: 'Tous les rôles', titre: 'Une journée sous tension', fil: 'Un arrêt le matin, un retard, un accident du travail : tout se règle, et tout le monde est prévenu.', duree: minutes(TENSION), etapes: TENSION },
+  publication: { groupe: 'journees', depart: 'etabli', court: 'Veille de publication', role: 'Tous les rôles', titre: 'Une veille de publication', fil: 'L’échéance du mois approche : on construit, on publie, l’équipe reçoit son planning, on fait le bilan.', duree: minutes(PUBLICATION), etapes: PUBLICATION },
 } as const;
 export type Scenario = keyof typeof SCENARIOS;
 
@@ -1907,7 +2187,7 @@ function couleursDeProfil(): void {
 /** Lance un parcours guidé sur un environnement d'exemple remis à neuf. */
 export function lancerParcours(scenario: Scenario = 'etabli'): void {
   annulerMinuteries();
-  store().chargerExemple(true, scenario === 'complet' ? 'zero' : 'etabli');
+  store().chargerExemple(true, SCENARIOS[scenario].depart);
   couleursDeProfil();
   useUi.getState().montrerAssistant(false);
   // Le parcours est remis à l'étape 1 : l'écran de la première étape est posé par le composant.
@@ -2004,7 +2284,7 @@ export function lancerTutoriel(t: Tutoriel): void {
   const s = store();
   retour = { officineId: s.data.demo ? null : s.officineId, session: useUi.getState().session };
   annulerMinuteries();
-  s.chargerExemple(true, t.scenario === 'complet' ? 'zero' : 'etabli');
+  s.chargerExemple(true, SCENARIOS[t.scenario].depart);
   couleursDeProfil();
   useUi.getState().montrerAssistant(false);
   voirComme('caroline.tellier');
@@ -2976,11 +3256,22 @@ export function Parcours(): JSX.Element | null {
 
 /** Une carte par visite : un mot pour le rôle, une phrase, trois repères. */
 const CARTES: Record<Scenario, { nom: string; phrase: string; mots: string[]; teinte: string; icone: JSX.Element }> = {
-  complet: { nom: 'Titulaire', phrase: 'De la création au bilan.', mots: ['Installer', 'Construire', 'Décider'], teinte: 'v-titulaire', icone: <Crown size={30} /> },
+  complet: { nom: 'Complet', phrase: 'Tout Solvéa, de la création au bilan.', mots: ['Installer', 'Construire', 'Décider'], teinte: 'v-titulaire', icone: <Sparkles size={30} /> },
+  titulaire: { nom: 'Titulaire', phrase: 'Gérer la pharmacie au quotidien.', mots: ['Construire', 'Décider', 'Bilan'], teinte: 'v-titulaire2', icone: <Crown size={30} /> },
   pharmacien: { nom: 'Pharmacien', phrase: 'Votre planning et vos gardes.', mots: ['Planning', 'Demandes', 'Gardes'], teinte: 'v-pharmacien', icone: <PillIcon size={30} /> },
-  equipe: { nom: 'Équipe', phrase: 'Votre espace, pas à pas.', mots: ['Planning', 'Demandes', 'Suivi'], teinte: 'v-equipe', icone: <FlaskConical size={30} /> },
-  etabli: { nom: 'Journée type', phrase: 'Une journée, tous les rôles.', mots: ['Le matin', 'L’équipe', 'Le soir'], teinte: 'v-journee', icone: <Store size={30} /> },
+  equipe: { nom: 'Préparateur', phrase: 'Votre espace, pas à pas.', mots: ['Planning', 'Demandes', 'Suivi'], teinte: 'v-equipe', icone: <FlaskConical size={30} /> },
+  animateur: { nom: 'Animatrice', phrase: 'Ses jours d’animation et ses marques.', mots: [], teinte: 'v-animateur', icone: <Megaphone size={22} /> },
+  apprenti: { nom: 'Apprentie', phrase: 'Son alternance, ses jours d’école.', mots: [], teinte: 'v-apprenti', icone: <Sprout size={22} /> },
+  etudiant: { nom: 'Étudiant', phrase: 'Ses horaires autour de ses cours.', mots: [], teinte: 'v-etudiant', icone: <GraduationCap size={22} /> },
+  etabli: { nom: 'Journée ordinaire', phrase: 'Du matin au soir, tous les rôles.', mots: [], teinte: 'v-journee', icone: <Store size={22} /> },
+  tension: { nom: 'Journée sous tension', phrase: 'Un arrêt, un retard, un accident.', mots: [], teinte: 'v-tension', icone: <Siren size={22} /> },
+  publication: { nom: 'Veille de publication', phrase: 'Construire, publier, faire le bilan.', mots: [], teinte: 'v-publication', icone: <CalendarCheck size={22} /> },
 };
+const GROUPES: { cle: (typeof SCENARIOS)[Scenario]['groupe']; titre: string; phrase: string }[] = [
+  { cle: 'parcours', titre: 'Les parcours', phrase: 'Le plus complet d’abord, puis un parcours par rôle.' },
+  { cle: 'metiers', titre: 'Les autres métiers', phrase: 'Chaque profil a son accueil : animatrice, apprentie, étudiant.' },
+  { cle: 'journees', titre: 'Une journée type, trois scénarios', phrase: 'La pharmacie tourne déjà : on la suit du matin au soir.' },
+];
 
 /** Fenêtre « Découvrir Solvéa » : une visite guidée par rôle, ou une entrée libre. */
 export function ChoixParcours(): JSX.Element | null {
@@ -3009,7 +3300,7 @@ export function ChoixParcours(): JSX.Element | null {
           </span>
           <div className="grow">
             <h2 id="decouvrir-titre">Découvrir Solvéa</h2>
-            <p>Choisissez une visite. Chacune raconte une histoire, chapitre après chapitre.</p>
+            <p>Choisissez une visite : chacune raconte une histoire, chapitre après chapitre. Ou entrez librement.</p>
           </div>
           <button type="button" className="dialog-fermer" onClick={() => ouvrirTutoriels(false)} aria-label="Fermer" autoFocus>
             <X size={18} aria-hidden="true" />
@@ -3017,40 +3308,74 @@ export function ChoixParcours(): JSX.Element | null {
         </div>
         <div className="dc-corps">
           <ChoixRythme />
-          <div className="choix-parcours">
-            {(Object.keys(SCENARIOS) as Scenario[]).map((cle) => {
-              const c = CARTES[cle];
-              return (
-                <article key={cle} className={`cp-carte ${c.teinte}`}>
-                  <div className="cp-visuel">
-                    <span className="cp-temps">
-                      {SCENARIOS[cle].duree.split(' · ')[0]}
-                      <span className="cp-etapes"> · {SCENARIOS[cle].duree.split(' · ')[1]}</span>
-                    </span>
-                    <span className="cp-ico" aria-hidden="true">
-                      {c.icone}
-                    </span>
-                  </div>
-                  <div className="cp-texte">
-                    <h3>{c.nom}</h3>
-                    <p className="cp-phrase">{c.phrase}</p>
-                    <ul className="cp-mots">
-                      {c.mots.map((m) => (
-                        <li key={m}>{m}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="cp-pied">
-                    <button type="button" className={`btn${cle === 'complet' ? ' primary' : ''}`} onClick={() => lancerParcours(cle)}>
-                      <Play size={15} aria-hidden="true" /> Lancer <span className="sr">la visite {c.nom}</span>
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          {GROUPES.map((g) => {
+            const cles = (Object.keys(SCENARIOS) as Scenario[]).filter((cle) => SCENARIOS[cle].groupe === g.cle);
+            const grandes = g.cle === 'parcours';
+            return (
+              <section key={g.cle} className="dc-groupe" aria-labelledby={`dc-${g.cle}`}>
+                <div className="dc-groupe-tete">
+                  <h3 className="dc-sous" id={`dc-${g.cle}`}>
+                    {g.titre}
+                  </h3>
+                  <span className="small soft">{g.phrase}</span>
+                </div>
+                <div className={`choix-parcours${grandes ? '' : ' compactes'}`}>
+                  {cles.map((cle) => {
+                    const c = CARTES[cle];
+                    const [temps, etapes] = SCENARIOS[cle].duree.split(' · ');
+                    return grandes ? (
+                      <article key={cle} className={`cp-carte ${c.teinte}`} data-scenario={cle}>
+                        <div className="cp-visuel">
+                          <span className="cp-temps">
+                            {temps}
+                            <span className="cp-etapes"> · {etapes}</span>
+                          </span>
+                          <span className="cp-ico" aria-hidden="true">
+                            {c.icone}
+                          </span>
+                        </div>
+                        <div className="cp-texte">
+                          <h3>{c.nom}</h3>
+                          <p className="cp-phrase">{c.phrase}</p>
+                          <ul className="cp-mots">
+                            {c.mots.map((m) => (
+                              <li key={m}>{m}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="cp-pied">
+                          <button type="button" className={`btn${cle === 'complet' ? ' primary' : ''}`} onClick={() => lancerParcours(cle)}>
+                            <Play size={15} aria-hidden="true" /> Lancer <span className="sr">la visite {c.nom}</span>
+                          </button>
+                        </div>
+                      </article>
+                    ) : (
+                      <article key={cle} className={`cp-carte cp-compacte ${c.teinte}`} data-scenario={cle}>
+                        <span className="cp-ico" aria-hidden="true">
+                          {c.icone}
+                        </span>
+                        <div className="cp-texte">
+                          <h3>{c.nom}</h3>
+                          <p className="cp-phrase">{c.phrase}</p>
+                          <span className="cp-duree">
+                            {temps} · {etapes}
+                          </span>
+                        </div>
+                        <button type="button" className="btn sm" onClick={() => lancerParcours(cle)}>
+                          <Play size={14} aria-hidden="true" /> Lancer <span className="sr">la visite {c.nom}</span>
+                        </button>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
           <div className="dc-libre">
-            <h3 className="dc-sous">Ou entrer librement</h3>
+            <div className="dc-groupe-tete">
+              <h3 className="dc-sous">Ou entrer librement, en testeur</h3>
+              <span className="small soft">Sans guide : choisissez un profil et essayez tout. Les données d’exemple se remettent à neuf quand vous voulez.</span>
+            </div>
             <div className="dc-roles">
               {exemple.map((r) => (
                 <button key={r.cle} type="button" className="dc-role" onClick={() => entrer(r.identifiant)} title={r.detail}>

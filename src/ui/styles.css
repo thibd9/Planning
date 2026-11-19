@@ -4723,3 +4723,28 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 /* Tableau de bord : la semaine montrée n'est pas (ou plus tout à fait) celle que lit l'équipe. */
 .tb-nonpublie { margin: 14px 22px 0; align-items: center; flex-wrap: wrap; }
 .tb-nonpublie .btn { flex: none; background: var(--surface); }
+
+/* === « Découvrir Solvéa » : trois familles de visites, puis l'entrée libre === */
+.dc-groupe { display: grid; gap: 12px; }
+.dc-groupe-tete { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
+.dc-groupe-tete .dc-sous { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.015em; color: var(--ink); }
+.dc-libre .dc-groupe-tete { margin-bottom: 12px; }
+.cp-carte.v-titulaire2 { --v1: #17335f; --v2: #2b5aa0; }
+.cp-carte.v-animateur { --v1: #a8326b; --v2: #cf5b93; }
+.cp-carte.v-apprenti { --v1: #17694a; --v2: #2c9a70; }
+.cp-carte.v-etudiant { --v1: #8a5a00; --v2: #b98416; }
+.cp-carte.v-tension { --v1: #a8402c; --v2: #d0694f; }
+.cp-carte.v-publication { --v1: #0a5a63; --v2: #1f8b96; }
+/* Les visites courtes : une carte sur une ligne, le pictogramme dans la couleur de la visite. */
+.choix-parcours.compactes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.cp-carte.cp-compacte { flex-direction: row; align-items: center; gap: 12px; padding: 12px 14px 12px 12px; }
+.cp-carte.cp-compacte:hover { transform: translateY(-2px); }
+.cp-carte.cp-compacte .cp-ico { flex: none; width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, var(--v1), var(--v2)); box-shadow: none; }
+.cp-carte.cp-compacte .cp-texte { padding: 0; gap: 1px; min-width: 0; }
+.cp-carte.cp-compacte h3 { font-size: 15.5px; letter-spacing: -0.015em; white-space: normal; }
+.cp-carte.cp-compacte .cp-phrase { margin: 0; font-size: 12.5px; line-height: 1.35; color: var(--ink-2); }
+.cp-carte.cp-compacte .cp-duree { font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.cp-carte.cp-compacte .btn { flex: none; align-self: center; margin: 0; }
+@media (max-width: 900px) {
+  .choix-parcours.compactes { grid-template-columns: minmax(0, 1fr); }
+}
