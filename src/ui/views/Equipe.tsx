@@ -1,24 +1,24 @@
-import type { LucideIcon } from 'lucide-react';
-import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, ClipboardList, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lightbulb, Lock, Plus, RefreshCw, ShieldCheck, Sparkles, Stethoscope, Tags, Trash2, Users } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lock, Plus, RefreshCw, ShieldCheck, Sparkles, Tags, Trash2, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { TYPES_PRODUIT, TYPE_PRODUIT_LABEL, cleMarque, repertoireMarques } from '../../domain/profils';
 import type { MarqueAnimee, TypeProduit } from '../../domain/profils';
-import { fmtDateCourt, uid } from '../../domain/time';
-import type { Besoin, CompetenceId, Person, Qualification } from '../../domain/types';
+import { anciennete, fmtDateCourt, uid } from '../../domain/time';
+import type { Besoin, Person, Qualification, TypeContrat } from '../../domain/types';
 import type { AppData } from '../../domain/types';
-import { COMPETENCE_FAMILLES, COMPETENCE_LABEL, QUALIFICATION_LABEL, estPharmacien, libelleAbsence, nomComplet } from '../../domain/types';
+import { CONTRAT_LABEL, QUALIFICATION_LABEL, contratDe, estPharmacien, libelleAbsence, nomComplet } from '../../domain/types';
 import { decrireBesoin } from '../../engine/core';
 import { pointsForts, suiviDe } from '../../engine/suivi';
 import { quotaAdjoints, validateEquipe } from '../../engine/validate';
 import { useStore } from '../../store/store';
-import { useUi } from '../../store/ui';
+import { themeDuProfil, useUi } from '../../store/ui';
+import { Accordeon } from '../components/Accordeon';
+import { ChoixCompetences } from '../components/Competences';
 import { Compteurs, PointsForts } from '../components/Compteurs';
 import { DialogueDemande } from '../components/Demande';
 import { DialogueFormation } from '../components/Formation';
 import { DialogueInventaire } from '../components/Inventaire';
 import { empreinte, estResponsable, identifiantPropose, libelleRole, memeIdentifiant, responsable } from '../../domain/acces';
-import { COMPETENCE_ICONE, EtiquetteRole } from '../icons';
+import { EtiquetteRole } from '../icons';
 import { Avatar, Dialog, Empty, Pill, SiCouts } from '../kit';
 import { usagePlafond } from './Resoudre';
 
@@ -196,7 +196,7 @@ function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: ()
   const data = useStore((s) => s.data);
   const couts = !!data.officine.couts;
   return (
-    <button type="button" className={`g-item${on ? ' on' : ''}`} onClick={onClick} aria-pressed={on}>
+    <button type="button" className={`g-item teinte t-${themeDuProfil(data, p)}${on ? ' on' : ''}`} onClick={onClick} aria-pressed={on}>
       <Avatar person={p} lg />
       <span className="grow">
         <b>{nomComplet(p)}</b>
@@ -210,10 +210,7 @@ function LignePersonne({ p, on, onClick }: { p: Person; on: boolean; onClick: ()
   );
 }
 
-/** Une icône par famille de compétences, dans l'ordre de COMPETENCE_FAMILLES. */
-const FAMILLE_ICONE: LucideIcon[] = [Stethoscope, Lightbulb, ClipboardList];
 
-/** Titre d'une rubrique de la fiche : une icône, le nom, et à droite un compteur ou une action. */
 /**
  * Ajouter une marque à un animateur : on la prend dans le répertoire de la pharmacie d'un geste, ou on écrit
  * son nom si elle n'y est pas encore. Une marque nouvelle rejoint le répertoire, pour les autres animateurs aussi.
@@ -275,19 +272,6 @@ function AjoutMarque({ person, maj }: { person: Person; maj: (patch: Partial<Per
   );
 }
 
-function TitreFiche({ icone: Icone, children, note, droite }: { icone: LucideIcon; children: ReactNode; note?: string; droite?: ReactNode }): JSX.Element {
-  return (
-    <div className="fiche-titre">
-      <span className="fiche-pic" aria-hidden="true">
-        <Icone size={17} />
-      </span>
-      <h3 className="grow">{children}</h3>
-      {note ? <span className="small soft">{note}</span> : null}
-      {droite}
-    </div>
-  );
-}
-
 function Fiche({ person }: { person: Person }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
@@ -307,7 +291,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
   const maj = (patch: Partial<Person>): void => majPersonne({ ...person, ...patch });
 
   return (
-    <div className="card">
+    <div className={`card teinte t-${themeDuProfil(data, person)}`} data-role={person.qualification}>
       <div className="card-head">
         <Avatar person={person} lg />
         <div className="grow">
@@ -323,9 +307,9 @@ function Fiche({ person }: { person: Person }): JSX.Element {
           </button>
         ) : null}
       </div>
-      <div className="card-body col fiche" style={{ gap: 26 }}>
-        <TitreFiche icone={BriefcaseBusiness}>Poste et contrat</TitreFiche>
-        <section className="row wrap" style={{ alignItems: 'flex-end', marginTop: -12 }}>
+      <div className="card-body fiche">
+        <Accordeon icone={BriefcaseBusiness} titre="Poste et contrat" ouvert resume={`${QUALIFICATION_LABEL[person.qualification]} · ${CONTRAT_LABEL[contratDe(person)]}${person.entreeLe ? ` · ${anciennete(person.entreeLe, today)} d’ancienneté` : ''}`}>
+        <section className="fiche-contrat">
           <label className="field">
             Fonction
             <select value={person.qualification} onChange={(e) => maj({ qualification: e.target.value as Qualification, salarie: e.target.value !== 'titulaire' })}>
@@ -342,6 +326,27 @@ function Fiche({ person }: { person: Person }): JSX.Element {
               <input type="number" min={0} max={48} step={0.5} value={person.heuresHebdo} onChange={(e) => maj({ heuresHebdo: Number(e.target.value) })} style={{ width: 130 }} />
             </label>
           ) : null}
+          <label className="field">
+            Type de contrat
+            <select id="fiche-contrat" value={contratDe(person)} onChange={(e) => maj({ contrat: e.target.value as TypeContrat })}>
+              {(Object.keys(CONTRAT_LABEL) as TypeContrat[])
+                .filter((c) => (person.qualification === 'titulaire' ? c === 'non_salarie' : c !== 'non_salarie'))
+                .map((c) => (
+                  <option key={c} value={c}>
+                    {CONTRAT_LABEL[c]}
+                  </option>
+                ))}
+            </select>
+          </label>
+          {!person.externe ? (
+            <label className="field">
+              <span>
+                Entrée dans la pharmacie <span className="oblig">facultatif</span>
+              </span>
+              <input id="fiche-entree" type="date" max={today} value={person.entreeLe ?? ''} onChange={(e) => maj({ entreeLe: e.target.value || undefined })} />
+              <span className="aide" id="fiche-anciennete">{person.entreeLe ? `Ancienneté : ${anciennete(person.entreeLe, today)}` : 'Sert à calculer l’ancienneté.'}</span>
+            </label>
+          ) : null}
           {person.salarie ? (
             <SiCouts>
               <label className="field">
@@ -354,53 +359,16 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             </SiCouts>
           ) : null}
         </section>
-        {person.salarie ? <p className="tiny muted" style={{ marginTop: -12 }}>Le taux horaire ne sert qu'à comparer le coût de deux scénarios. Il n'est jamais visible dans l'espace salarié.</p> : null}
+        {person.salarie ? <SiCouts><p className="tiny muted" style={{ margin: 0 }}>Le taux horaire ne sert qu'à comparer le coût de deux scénarios. Il n'est jamais visible dans l'espace salarié.</p></SiCouts> : null}
+        </Accordeon>
 
-        <section className="fiche-bloc">
-          <TitreFiche icone={Award} note={`${person.competences.length} sélectionnée${person.competences.length > 1 ? 's' : ''}`}>
-            Compétences et diplômes
-          </TitreFiche>
-          <p className="small soft">Touchez une compétence pour l’ajouter ou la retirer.</p>
-          <div className="comp-familles">
-            {COMPETENCE_FAMILLES.map((fam, i) => {
-              const Icone = FAMILLE_ICONE[i] ?? Award;
-              const acquis = fam.cles.filter((c) => person.competences.includes(c)).length;
-              return (
-                <div key={fam.titre} className="comp-famille" role="group" aria-label={fam.titre}>
-                  <div className="comp-tete">
-                    <span className="comp-pic" aria-hidden="true">
-                      <Icone size={16} />
-                    </span>
-                    <b>{fam.titre}</b>
-                    <span className="comp-nb num">
-                      {acquis}/{fam.cles.length}
-                    </span>
-                  </div>
-                  <div className="comp-liste">
-                    {fam.cles.map((c: CompetenceId) => {
-                      const on = person.competences.includes(c);
-                      const Pic = COMPETENCE_ICONE[c];
-                      return (
-                        <button key={c} type="button" className={`comp${on ? ' on' : ''}`} aria-pressed={on} onClick={() => maj({ competences: on ? person.competences.filter((x) => x !== c) : [...person.competences, c] })}>
-                          <Pic size={16} aria-hidden="true" />
-                          <span>{COMPETENCE_LABEL[c]}</span>
-                          {on ? <Check size={14} strokeWidth={3} className="comp-coche" aria-hidden="true" /> : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <Accordeon icone={Award} droite={`${person.competences.length} sélectionnée${person.competences.length > 1 ? 's' : ''}`} ouvert titre="Compétences et diplômes">
+          <ChoixCompetences person={person} onChange={(competences) => maj({ competences })} />
           <p className="tiny muted">Un rendez-vous n’est planifiable que si une personne formée est en poste et la salle libre.</p>
-        </section>
+        </Accordeon>
 
         {person.qualification === 'animateur' ? (
-          <section className="fiche-bloc" data-focus="marques">
-            <TitreFiche icone={Tags} note={`${(person.marques ?? []).length} marque${(person.marques ?? []).length > 1 ? 's' : ''}`}>
-              Marques présentées
-            </TitreFiche>
+          <Accordeon icone={Tags} droite={`${(person.marques ?? []).length} marque${(person.marques ?? []).length > 1 ? 's' : ''}`} focus="marques" titre="Marques présentées">
             <p className="small soft">Vous choisissez les marques que {person.prenom} anime, et pour quelles familles de produits. Il les retrouve dans son espace.</p>
             <div className="mq-liste">
               {(person.marques ?? []).map((m, i) => {
@@ -433,13 +401,10 @@ function Fiche({ person }: { person: Person }): JSX.Element {
               })}
             </div>
             <AjoutMarque person={person} maj={maj} />
-          </section>
+          </Accordeon>
         ) : null}
         {person.qualification === 'rayonniste' ? (
-          <section className="fiche-bloc" data-focus="rayons">
-            <TitreFiche icone={Tags} note={`${(person.rayons ?? []).length} rayon${(person.rayons ?? []).length > 1 ? 's' : ''}`}>
-              Rayons confiés
-            </TitreFiche>
+          <Accordeon icone={Tags} droite={`${(person.rayons ?? []).length} rayon${(person.rayons ?? []).length > 1 ? 's' : ''}`} focus="rayons" titre="Rayons confiés">
             <p className="small soft">Les familles de produits dont {person.prenom} tient les rayons. Il les retrouve dans son espace.</p>
             <div className="mq-types" role="group" aria-label="Rayons confiés">
               {TYPES_PRODUIT.map((t: TypeProduit) => {
@@ -452,12 +417,11 @@ function Fiche({ person }: { person: Person }): JSX.Element {
                 );
               })}
             </div>
-          </section>
+          </Accordeon>
         ) : null}
 
         {!person.externe ? (
-          <section className="fiche-bloc">
-            <TitreFiche icone={ShieldCheck}>Droits d’accès</TitreFiche>
+          <Accordeon icone={ShieldCheck} titre="Droits d’accès">
             {estResponsable(data, person) ? (
               <div className="notice ok">
                 <Crown size={17} aria-hidden="true" />
@@ -489,12 +453,11 @@ function Fiche({ person }: { person: Person }): JSX.Element {
                 {!jeSuisResponsable ? <p className="small soft">Seul {chef ? nomComplet(chef) : 'le titulaire principal'} peut accorder ou retirer cet accès.</p> : null}
               </>
             )}
-          </section>
+          </Accordeon>
         ) : null}
 
         {!person.externe ? (
-          <section className="fiche-bloc">
-            <TitreFiche icone={ChartLine}>Suivi sur 12 mois</TitreFiche>
+          <Accordeon icone={ChartLine} titre="Suivi sur 12 mois">
             {jeSuisTitulaire && forts.length ? (
               <div className="pf-fiche" data-focus="points-forts-fiche">
                 <div className="eyebrow">Points forts</div>
@@ -503,12 +466,11 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             ) : null}
             <Compteurs suivi={suiviDe(data, person.id, today)} />
             <p className="tiny muted">Retards et départs se notent depuis la vue d’une journée (dans « Construire », cliquez sur un jour). Des dates et des durées, jamais une raison.</p>
-          </section>
+          </Accordeon>
         ) : null}
 
         {!person.externe ? (
-          <section className="fiche-bloc">
-            <TitreFiche icone={KeyRound}>Compte de connexion</TitreFiche>
+          <Accordeon icone={KeyRound} titre="Compte de connexion">
             <div className="notice" style={{ alignItems: 'center' }}>
               <KeyRound size={17} aria-hidden="true" />
               <div className="grow">
@@ -541,12 +503,11 @@ function Fiche({ person }: { person: Person }): JSX.Element {
                 </button>
               ) : null}
             </div>
-          </section>
+          </Accordeon>
         ) : null}
 
         {!person.externe ? (
-          <section className="fiche-bloc">
-            <TitreFiche icone={HandHelping}>Volontariat</TitreFiche>
+          <Accordeon icone={HandHelping} titre="Volontariat">
             {person.salarie && person.heuresHebdo < 35 ? (
               <label className="check">
                 <input type="checkbox" checked={person.volontaireHeuresComp} onChange={(e) => maj({ volontaireHeuresComp: e.target.checked })} />
@@ -563,14 +524,11 @@ function Fiche({ person }: { person: Person }): JSX.Element {
               </label>
             ) : null}
             {!(person.salarie && person.heuresHebdo < 35) && !estPharmacien(person) ? <p className="soft small">Aucun volontariat applicable à ce contrat.</p> : null}
-          </section>
+          </Accordeon>
         ) : null}
 
         {!person.externe ? (
-          <section className="fiche-bloc">
-            <TitreFiche icone={HeartHandshake} droite={<Pill title="Plafond identique pour toute l'équipe">Prioritaires : {usage.actifs} / {usage.plafond}</Pill>}>
-              Besoins personnels
-            </TitreFiche>
+          <Accordeon icone={HeartHandshake} droite={<Pill title="Plafond identique pour toute l'équipe">Prioritaires : {usage.actifs} / {usage.plafond}</Pill>} titre="Besoins personnels">
             {besoins.length ? (
               besoins.map((b) => (
                 <div key={b.id} className="row wrap" style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 6 }}>
@@ -603,12 +561,11 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             <p className="tiny muted">
               Indisponibilité reconnue : contrainte impérative. Préférence prioritaire : servie avant les autres, plafonnée. Simple préférence : satisfaite si possible.
             </p>
-          </section>
+          </Accordeon>
         ) : null}
 
         {!person.externe ? (
-          <section className="fiche-bloc">
-            <TitreFiche icone={CalendarOff}>Absences à venir</TitreFiche>
+          <Accordeon icone={CalendarOff} titre="Absences à venir">
             {absences.length ? (
               absences.map((a) => (
                 <div key={a.id} className="row wrap" style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 6 }}>
@@ -631,7 +588,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             ) : (
               <p className="soft small">Aucune absence à venir.</p>
             )}
-          </section>
+          </Accordeon>
         ) : null}
       </div>
       <div className="card-body row wrap" style={{ borderTop: '1px solid var(--line)' }}>

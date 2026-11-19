@@ -63,28 +63,43 @@ L'application s'ouvre sur la page de connexion. Deux chemins partent de là :
 
 ## Découvrir sans rien saisir
 
-### Quatre visites guidées
+### Dix visites guidées, en trois familles
 
 Chaque visite **raconte une histoire**, chapitre après chapitre. Au début d'un chapitre, une annonce dit ce
-qu'on va y faire, dans la peau de qui, et où l'on en est dans le plan.
+qu'on va y faire, dans la peau de qui, et où l'on en est dans le plan. La fenêtre « Comment ça marche ? »
+les range en trois familles, puis propose d'entrer librement, en testeur.
 
-| Visite | Durée | Ce qu'elle raconte |
-| --- | --- | --- |
-| **Titulaire** | 30 min, 55 étapes | La vie d'un planning, de la création de la pharmacie au bilan du mois. |
-| **Pharmacien** | 7 min | L'espace d'un pharmacien : planning, demandes, gardes, compte. |
-| **Équipe** | 7 min | L'espace d'un préparateur : planning, demandes, collègues, compte. |
-| **Journée type** | 8 min, 13 étapes | Une journée du matin au soir, avec ceux qui la vivent. |
+**Les parcours**
 
-Les chapitres de la visite du titulaire suivent l'ordre où les choses se vivent :
+| Visite | Ce qu'elle raconte |
+| --- | --- |
+| **Complet** | Tout Solvéa, de la création de la pharmacie au bilan du mois, en passant par moments dans la peau de l'équipe. |
+| **Titulaire** | Gérer la pharmacie une fois installée : construire, publier, décider, suivre, faire le bilan, régler. |
+| **Pharmacien** | L'espace d'un pharmacien : planning, demandes, gardes, compétences, compte. |
+| **Préparateur** | L'espace d'un préparateur : planning, demandes, collègues, compétences, compte. |
 
-1. **Installer la pharmacie** : équipe, fiche d'une personne, marques d'un animateur, horaires, règles.
+**Les autres métiers** : une visite courte pour l'**animatrice**, l'**apprentie** et l'**étudiant**, chacun avec son accueil.
+
+**Une journée type, trois scénarios** (la pharmacie tourne déjà)
+
+| Scénario | Ce qu'il raconte |
+| --- | --- |
+| **Journée ordinaire** | Le matin, un remplacement entre collègues, chacun son espace, le soir on prépare la suite. |
+| **Journée sous tension** | Un arrêt le matin, l'appel à l'équipe, un retard annoncé depuis la route, un accident du travail à déclarer. |
+| **Veille de publication** | L'échéance du mois, les préférences, trois propositions, la publication, l'équipe qui reçoit son planning, le bilan. |
+
+Les chapitres de la visite complète suivent l'ordre où les choses se vivent :
+
+1. **Installer la pharmacie** : équipe, fiche d'une personne, marques d'un animateur, horaires, dimensionnement, règles.
 2. **Recueillir les souhaits** : les préférences du mois, vues par un préparateur.
 3. **Construire et publier** : la grille, les propositions, les contrôles, les gardes, la publication.
 4. **L'équipe reçoit son planning** : ce que voient un préparateur et un pharmacien.
 5. **Les demandes de l'équipe** : congé, remplacement, la décision du titulaire.
-6. **Les imprévus** : absence du matin, appel à l'équipe, retard, décision à deux titulaires.
+6. **Les imprévus** : absence du matin, appel à l'équipe, retard annoncé, accident du travail, décision à deux titulaires.
 7. **Le bilan du mois** : heures, équité, journal et paie, documents.
-8. **Au quotidien** : tableau de bord, raccourcis, aide, compte.
+8. **Au quotidien** : tableau de bord, horaires du titulaire, raccourcis, aide, compte.
+
+Une étape qui parle d'un champ rangé dans une rubrique repliée ouvre la rubrique toute seule.
 
 ### L'environnement de test
 
@@ -277,6 +292,31 @@ menu et le contenu de chaque thème.
 Dans la bannière, une icône au trait suit le **moment de la journée** : soleil levant le matin (dès 5 h),
 plein soleil à midi (dès 11 h), soleil plus doux l'après-midi (dès 14 h), soleil couchant le soir (dès 18 h),
 lune en fin de journée (dès 21 h). Le salut passe à « Bonsoir » à partir de 18 h. Aucun émoji dans l'interface.
+
+---
+
+## Tout le monde lit le même planning
+
+Deux gestes différents changent un planning, et Solvéa les traite différemment :
+
+| Geste | Effet sur le planning publié |
+| --- | --- |
+| **Une décision** : absence approuvée ou enregistrée, poste couvert, formation, remplacement validé, inventaire, garde, départ d'une personne | Le planning publié suit **aussitôt**, journée par journée. Chaque personne dont la journée change reçoit un avis. |
+| **Une retouche à la main** dans la grille : poser, déplacer, effacer, proposer, copier | Elle reste un **brouillon** jusqu'à « Publier les modifications ». Le tableau de bord le signale tant que ce n'est pas fait. |
+
+À la publication, le message dit quelle semaine vient d'être publiée et quand elle commence ; si la semaine
+en cours n'a pas de planning, il propose de la construire.
+
+## L'équipe : la fiche, les compétences, les statistiques
+
+- **La fiche d'une personne** prend la couleur de son rôle et se range en rubriques qui se replient. « Poste et
+  contrat » porte la fonction, les heures, le **type de contrat** et la **date d'entrée** ; l'ancienneté se calcule seule.
+- **Les compétences et diplômes** se cochent dans la fiche, par le titulaire, ou dans « Mon compte », par chacun
+  pour soi : les titulaires sont informés de chaque changement. Les entretiens pharmaceutiques et les tests suivis
+  d'une délivrance sont réservés aux pharmaciens ; un préparateur conseille et délivre sous le contrôle effectif
+  d'un pharmacien présent.
+- **Les statistiques** (menu « Bilan ») réunissent la composition de l'équipe, la couverture des compétences,
+  les points forts de chacun et quelques repères d'activité. Ni note, ni classement.
 
 ---
 

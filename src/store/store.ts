@@ -7,7 +7,8 @@ import { MOIS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, f
 import type { AbsenceType, Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, RendezVous, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, MOTIF_RETARD_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
 import type { AvisRetard, CadreFormation, DetailAccident, MotifRetard } from '../domain/types';
-import { LIEU_ACCIDENT_LABEL } from '../domain/types';
+import { COMPETENCE_LABEL, LIEU_ACCIDENT_LABEL, peutDetenir } from '../domain/types';
+import type { CompetenceId } from '../domain/types';
 import { echeanceDeclaration } from '../engine/accident';
 import { RETARD_MAX, arriveePrevue, dureeRetard, effetsRetard, superieurs } from '../engine/retard';
 import { decrireBesoin, decrireJournee, minutesSemaine, shiftsSemaine } from '../engine/core';
@@ -253,6 +254,8 @@ export interface Store {
   validerGarde: (id: string) => void;
 
   majPersonne: (p: Person) => void;
+  /** Chacun tient lui-même à jour ses compétences et diplômes : les titulaires en sont informés. */
+  majMesCompetences: (personId: string, competences: CompetenceId[]) => void;
   supprimerPersonne: (id: string) => void;
   majOfficine: (patch: Partial<Officine>) => void;
   majRegle: (id: string, patch: Partial<Pick<Regle, 'valeur' | 'active'>>) => void;
@@ -1344,6 +1347,22 @@ export const useStore = create<Store>((set, get) => {
         ...d,
         personnes: d.personnes.some((x) => x.id === p.id) ? d.personnes.map((x) => (x.id === p.id ? p : x)) : d.personnes.concat(p),
       })),
+    majMesCompetences: (personId, competences) =>
+      commit((d) => {
+        const p = d.personnes.find((x) => x.id === personId);
+        if (!p) return d;
+        // On ne garde que ce que le métier permet de détenir.
+        const voulues = [...new Set(competences)].filter((c) => peutDetenir(p, c));
+        const ajoutees = voulues.filter((c) => !p.competences.includes(c));
+        const retirees = p.competences.filter((c) => !voulues.includes(c));
+        if (!ajoutees.length && !retirees.length) return d;
+        const liste = (cles: CompetenceId[]): string => cles.map((c) => COMPETENCE_LABEL[c]).join(', ');
+        const suite = { ...d, personnes: d.personnes.map((x) => (x.id === personId ? { ...x, competences: voulues } : x)) };
+        return annoncer(suite, `${nom(d, personId)} a mis à jour ses compétences`, {
+          pour: [personId],
+          effets: [ajoutees.length ? `Ajouté : ${liste(ajoutees)}.` : '', retirees.length ? `Retiré : ${liste(retirees)}.` : '', 'Les rendez-vous et les missions tiennent compte de cette mise à jour.'],
+        });
+      }),
     supprimerPersonne: (id) =>
       commit((d) => ({
         ...d,

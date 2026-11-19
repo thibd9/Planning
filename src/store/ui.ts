@@ -14,6 +14,7 @@ export type Vue =
   | 'gardes'
   | 'equipe'
   | 'equite'
+  | 'stats'
   | 'regles'
   | 'journal'
   | 'officine'

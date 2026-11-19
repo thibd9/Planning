@@ -1,9 +1,10 @@
-import { ChevronDown, PillBottle, Ruler, ShieldCheck, Users } from 'lucide-react';
+import { ChevronDown, PillBottle, Scale, ShieldCheck, Users } from 'lucide-react';
 import { JOURS, fmtDecimal, fmtHeure } from '../../domain/time';
 import type { InfosOfficine } from '../../domain/types';
 import type { BilanMetier, VerdictEffectif } from '../../engine/dimensionnement';
 import { HYPOTHESES, dimensionnement } from '../../engine/dimensionnement';
 import { useStore } from '../../store/store';
+import { Accordeon } from './Accordeon';
 
 const VERDICT: Record<VerdictEffectif, { mot: string; ton: string; phrase: string }> = {
   manque: { mot: 'Il en manque', ton: 'danger', phrase: 'Les contrats ne couvrent pas le besoin : le planning tiendra mal dès la première absence.' },
@@ -12,8 +13,10 @@ const VERDICT: Record<VerdictEffectif, { mot: string; ton: string; phrase: strin
   large: { mot: 'Plus qu’il n’en faut', ton: 'info', phrase: 'Les contrats dépassent nettement le besoin : il y a de la marge pour des services ou des projets.' },
 };
 const etp = (n: number): string => `${fmtDecimal(n, 1)} temps plein`;
+/** Le verdict au fil d'une phrase : « assez », « il en manque ». */
+const verdictEnClair = (v: VerdictEffectif): string => VERDICT[v].mot.charAt(0).toLowerCase() + VERDICT[v].mot.slice(1);
 /** « lundi à vendredi », « samedi », « lundi, mercredi ». */
-const joursEnClair = (jours: number[]): string => {
+export const joursEnClair = (jours: number[]): string => {
   const j = [...jours].sort((a, b) => a - b);
   const suite = j.every((x, k) => k === 0 || x === j[k - 1] + 1);
   return j.length > 2 && suite ? `${JOURS[j[0]]} à ${JOURS[j[j.length - 1]]}` : j.map((x) => JOURS[x]).join(', ');
@@ -47,7 +50,7 @@ function Bilan({ id, titre, icone, bilan, precision }: { id: string; titre: stri
 }
 
 /**
- * L'équipe est-elle bien dimensionnée ? Réservé aux titulaires.
+ * L'équipe est-elle bien dimensionnée ? Réservé aux titulaires. Une rubrique en accordéon de la page « Réglages ».
  * Trois chiffres à saisir, un repère pour les pharmaciens, un pour le reste du comptoir, et tout le calcul à découvert.
  */
 export function Dimensionnement(): JSX.Element {
@@ -64,21 +67,26 @@ export function Dimensionnement(): JSX.Element {
   };
   const H = HYPOTHESES;
   const p = d.pharmaciens;
+  // Fermée, la rubrique dit l'essentiel : combien au comptoir, et si les contrats suivent.
+  const resume =
+    d.source === 'aucune'
+      ? 'À compléter : indiquez les clients servis par jour, ou la surface de vente'
+      : `${d.comptoir.ordinaire} au comptoir à l’heure ordinaire, ${d.comptoir.pointe} à la pointe · pharmaciens : ${verdictEnClair(p.verdict)} · préparateurs et comptoir : ${verdictEnClair(d.equipe.verdict)}`;
   return (
-    <section className="card pad col dim" aria-labelledby="dim-titre" data-focus="dimensionnement" id="dimensionnement" style={{ marginBottom: 20 }}>
-      <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
-        <span className="ico" aria-hidden="true">
-          <Ruler size={18} />
+    <Accordeon
+      id="dimensionnement"
+      focus="dimensionnement"
+      icone={Scale}
+      titre={
+        <span id="dim-titre" role="heading" aria-level={3}>
+          L’équipe est-elle bien dimensionnée ?
         </span>
-        <div className="grow">
-          <h2 className="h3" id="dim-titre">
-            L’équipe est-elle bien dimensionnée ?
-          </h2>
-          <p className="soft small" style={{ margin: '3px 0 0', maxWidth: '78ch' }}>
-            Un repère pour vous, titulaire. Il part des clients à servir, pas du mobilier : les caisses ne sont qu’un plafond. Ce n’est pas une norme, et toutes les hypothèses sont écrites plus bas.
-          </p>
-        </div>
-      </div>
+      }
+      resume={resume}
+    >
+      <p className="of-intro">
+        Un repère pour vous, titulaire. Il part des clients à servir, pas du mobilier : les caisses ne sont qu’un plafond. Ce n’est pas une norme, et toutes les hypothèses sont écrites plus bas.
+      </p>
 
       <div className="of-grille">
         <label className="field" htmlFor="dim-passages">
@@ -211,6 +219,6 @@ export function Dimensionnement(): JSX.Element {
           </li>
         </ol>
       </details>
-    </section>
+    </Accordeon>
   );
 }

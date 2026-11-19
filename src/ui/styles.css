@@ -4748,3 +4748,46 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 @media (max-width: 900px) {
   .choix-parcours.compactes { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* === La couleur d'un rôle, posée sur un bloc : la fiche d'un pharmacien est bleu-vert, ses boutons aussi ===
+   `.teinte.t-<thème>` fixe les deux couleurs pleines ; les couleurs dérivées sont recalculées ici, car celles de
+   la racine ont déjà été résolues avec la couleur de l'espace. */
+.teinte.t-ciel { --a-plein: #1257c0; --a-plein-2: #1a6ddb; }
+.teinte.t-bleu { --a-plein: #1b4f7f; --a-plein-2: #2a6aa3; }
+.teinte.t-sarcelle { --a-plein: #0a5a63; --a-plein-2: #127680; }
+.teinte.t-indigo { --a-plein: #3730a3; --a-plein-2: #4338ca; }
+.teinte.t-rose { --a-plein: #a61e5c; --a-plein-2: #bf2a6e; }
+.teinte.t-emeraude { --a-plein: #17694a; --a-plein-2: #1e7d59; }
+.teinte.t-ambre { --a-plein: #8a5a00; --a-plein-2: #9a6500; }
+.teinte.t-corail { --a-plein: #a6401f; --a-plein-2: #b84a26; }
+.teinte {
+  --a-deep: var(--a-plein);
+  --a-2: var(--a-plein-2);
+  --a-text: color-mix(in srgb, var(--a-plein) 90%, #000);
+  --a-hover: color-mix(in srgb, var(--a-plein) 72%, #000);
+  --a-soft: color-mix(in srgb, var(--a-plein-2) 13%, #fff);
+  --a-pastel: color-mix(in srgb, var(--a-plein-2) 26%, #fff);
+  --a-tint: color-mix(in srgb, var(--a-plein-2) 6%, #fff);
+  --a-wash: color-mix(in srgb, var(--a-plein) 10%, transparent);
+  --glow: 0 10px 22px -14px color-mix(in srgb, var(--a-plein) 55%, transparent);
+  --pastel-line: color-mix(in srgb, var(--a-plein-2) 30%, #fff);
+}
+:root[data-mode='sombre'] .teinte {
+  --a-deep: color-mix(in srgb, var(--a-plein-2) 46%, #fff);
+  --a-2: color-mix(in srgb, var(--a-plein-2) 58%, #fff);
+  --a-text: color-mix(in srgb, var(--a-plein-2) 40%, #fff);
+  --a-hover: color-mix(in srgb, var(--a-plein-2) 22%, #fff);
+  --a-soft: color-mix(in srgb, var(--a-plein-2) 26%, #172029);
+  --a-pastel: color-mix(in srgb, var(--a-plein-2) 40%, #172029);
+  --a-tint: color-mix(in srgb, var(--a-plein-2) 13%, #172029);
+  --pastel-line: color-mix(in srgb, var(--a-plein-2) 45%, #172029);
+}
+
+/* === La fiche d'une personne : des rubriques qui se replient, séparées par un filet === */
+.card-body.fiche { display: block; padding: 4px 24px 10px; }
+.fiche-contrat { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px 18px; align-items: start; }
+.fiche-contrat .field { min-width: 0; }
+.fiche-contrat .field input, .fiche-contrat .field select { width: 100%; }
+/* Une compétence que ce métier ne peut pas exercer : montrée, verrouillée, sans effet au clic. */
+.comp.reservee, .comp.reservee:hover { background: transparent; color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--line); transform: none; cursor: not-allowed; opacity: 1; }
+.comp.reservee .comp-verrou { color: var(--ink-3); }

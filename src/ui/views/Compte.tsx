@@ -1,9 +1,11 @@
-import { Check, CircleHelp, KeyRound, LayoutDashboard, LogOut, Moon, Palette, Type, UserRound } from 'lucide-react';
+import { Award, Check, CircleHelp, KeyRound, LayoutDashboard, LogOut, Moon, Palette, Type, UserRound } from 'lucide-react';
+import { ChoixCompetences } from '../components/Competences';
 import { ChoixDisposition } from '../components/Disposition';
 import { ChoixApparence } from '../components/Apparence';
 import { useState } from 'react';
 import { ESPACE_LABEL, empreinte, espaceDe, estResponsable, libelleRole, responsable } from '../../domain/acces';
-import { nomComplet, nomCourt } from '../../domain/types';
+import { anciennete } from '../../domain/time';
+import { CONTRAT_LABEL, contratDe, nomComplet, nomCourt } from '../../domain/types';
 import { useStore } from '../../store/store';
 import type { Theme } from '../../store/ui';
 import { prefsDe, themeDuProfil, useUi } from '../../store/ui';
@@ -28,6 +30,8 @@ const THEMES: { cle: Theme; nom: string; a: string; b: string }[] = [
 export function Compte({ personId }: { personId: string }): JSX.Element {
   const data = useStore((s) => s.data);
   const definirMotDePasse = useStore((s) => s.definirMotDePasse);
+  const majMesCompetences = useStore((s) => s.majMesCompetences);
+  const today = useStore((s) => s.today);
   const { preferences, setPreferences, deconnecter, dire, setTour, aller } = useUi();
   const person = data.personnes.find((p) => p.id === personId);
   const cle = person?.identifiant ?? personId;
@@ -77,13 +81,38 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
               {!estResponsable(data, person) && person.gestion ? <Pill tone="iris">Accès gestion accordé</Pill> : null}
             </div>
             <p className="small soft" style={{ marginTop: 8 }}>
-              {libelleRole(data, person)} · {person.salarie ? `${person.heuresHebdo} h par semaine` : 'non salarié'} · {data.officine.nom}
+              {libelleRole(data, person)} · {person.salarie ? `${person.heuresHebdo} h par semaine · ${CONTRAT_LABEL[contratDe(person)]}` : 'non salarié'}
+              {person.entreeLe ? ` · ${anciennete(person.entreeLe, today)} d’ancienneté` : ''} · {data.officine.nom}
               {!estResponsable(data, person) && espace !== 'responsable' && chef ? ` · Seul ${nomCourt(chef)} peut vous donner l’accès à la gestion.` : ''}
             </p>
           </div>
           <button type="button" className="btn" onClick={deconnecter}>
             <LogOut size={16} aria-hidden="true" /> Se déconnecter
           </button>
+        </section>
+
+        <section className="card" aria-labelledby="c-competences" id="mes-competences">
+          <div className="card-head">
+            <span className="ico" aria-hidden="true">
+              <Award size={18} />
+            </span>
+            <div className="grow">
+              <h2 id="c-competences" className="h3">Mes compétences et diplômes</h2>
+              <div className="small soft">Vous les tenez à jour vous-même. Vos titulaires sont informés de chaque changement.</div>
+            </div>
+            <span className="small soft num">
+              {person.competences.length} sélectionnée{person.competences.length > 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="card-body col" style={{ gap: 14 }}>
+            <ChoixCompetences
+              person={person}
+              onChange={(competences) => {
+                majMesCompetences(person.id, competences);
+                dire('Compétences mises à jour.', true);
+              }}
+            />
+          </div>
         </section>
 
         <section className="card" aria-labelledby="c-apparence">

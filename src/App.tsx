@@ -1,4 +1,4 @@
-import { AlarmClock, ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, CheckCheck, ChevronDown, ChevronRight, CircleHelp, ClipboardCheck, Crown, FolderOpen, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, LifeBuoy, Lightbulb, ListChecks, LogOut, Medal, Menu, MessageSquare, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, TrendingUp, UserRound, Users, X } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, ChartNoAxesColumn, CheckCheck, ChevronDown, ChevronRight, CircleHelp, ClipboardCheck, Crown, FolderOpen, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, LifeBuoy, Lightbulb, ListChecks, LogOut, Medal, Menu, MessageSquare, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, TrendingUp, UserRound, Users, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
@@ -24,6 +24,7 @@ import { Connexion } from './ui/views/Connexion';
 import { Construire } from './ui/views/Construire';
 import { Equipe } from './ui/views/Equipe';
 import { Equite } from './ui/views/Equite';
+import { Stats } from './ui/views/Stats';
 import { Gardes } from './ui/views/Gardes';
 import { Journal } from './ui/views/Journal';
 import { MesGardes } from './ui/views/MesGardes';
@@ -74,6 +75,7 @@ const GESTION: Lien[] = [
   { ...MESSAGES, groupe: 'Suivre' },
   { vue: 'heures', label: 'Heures', question: 'Compteurs à régulariser', icon: <Hourglass size={18} />, couleur: 'c-clair', groupe: 'Suivre' },
   { vue: 'equite', label: 'Équité', question: 'Qui a porté quoi', icon: <Scale size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
+  { vue: 'stats', label: 'Statistiques', question: 'L’équipe en chiffres', icon: <ChartNoAxesColumn size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
   { vue: 'journal', label: 'Journal et paie', question: 'Historique, export', icon: <ScrollText size={18} />, couleur: 'c-clair', groupe: 'Bilan' },
   { ...DOCUMENTS, label: 'Documents', groupe: 'Bilan' },
   AIDE,
@@ -643,6 +645,8 @@ export function App(): JSX.Element {
             <Heures />
           ) : vueActive === 'equite' ? (
             <Equite />
+          ) : vueActive === 'stats' ? (
+            <Stats />
           ) : vueActive === 'regles' ? (
             <Regles />
           ) : vueActive === 'aide' ? (

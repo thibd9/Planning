@@ -74,16 +74,17 @@ const personne = (
 
 /** Équipe fictive. Les taux horaires sont indicatifs et ne servent qu'à comparer des scénarios. */
 export const EQUIPE_DEMO: Person[] = [
-  personne('p_helene', 'Caroline', 'Tellier', 'titulaire', 42, null, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
+  personne('p_helene', 'Caroline', 'Tellier', 'titulaire', 42, null, { entreeLe: '2011-03-01', competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
   // Titulaire secondaire, associé à temps réduit : sans droit de gestion tant que la titulaire principale ne le lui donne pas.
-  personne('p_antoine', 'Pierre', 'Fiandino', 'titulaire', 24, null, { competences: ['vaccination'], volontaireGardes: true }),
-  personne('p_karim', 'Igor', 'Le Russe', 'adjoint', 35, 24, { competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
-  personne('p_lea', 'Léa', 'Fontaine', 'adjoint', 28, 23.5, { competences: ['vaccination', 'entretien'], volontaireHeuresComp: true, volontaireGardes: true }),
-  personne('p_camille', 'Nicolas', 'Le Syndicaliste', 'preparateur', 35, 15.8, { competences: ['orthopedie'] }),
-  personne('p_thomas', 'Thomas', 'Nguyen', 'preparateur', 35, 15.2, { competences: ['commandes'] }),
-  personne('p_ines', 'Inès', 'Da Silva', 'preparateur', 24, 15.2, { volontaireHeuresComp: true }),
-  personne('p_jules', 'Jules', 'Perrin', 'preparateur', 35, 14.6, { competences: ['commandes'] }),
+  personne('p_antoine', 'Pierre', 'Fiandino', 'titulaire', 24, null, { entreeLe: '2017-09-04', competences: ['vaccination'], volontaireGardes: true }),
+  personne('p_karim', 'Igor', 'Le Russe', 'adjoint', 35, 24, { entreeLe: '2019-04-08', competences: ['vaccination', 'trod', 'entretien'], volontaireGardes: true }),
+  personne('p_lea', 'Léa', 'Fontaine', 'adjoint', 28, 23.5, { entreeLe: '2021-09-06', competences: ['vaccination', 'entretien'], volontaireHeuresComp: true, volontaireGardes: true }),
+  personne('p_camille', 'Nicolas', 'Le Syndicaliste', 'preparateur', 35, 15.8, { entreeLe: '2014-01-13', competences: ['orthopedie'] }),
+  personne('p_thomas', 'Thomas', 'Nguyen', 'preparateur', 35, 15.2, { entreeLe: '2020-06-15', competences: ['commandes'] }),
+  personne('p_ines', 'Inès', 'Da Silva', 'preparateur', 24, 15.2, { entreeLe: '2022-02-07', volontaireHeuresComp: true }),
+  personne('p_jules', 'Jules', 'Perrin', 'preparateur', 35, 14.6, { entreeLe: '2023-10-02', competences: ['commandes'] }),
   personne('p_sarah', 'Sarah', 'Lemoine', 'animateur', 21, 13.2, {
+    entreeLe: '2024-04-22',
     competences: ['dermo', 'beaute', 'para'],
     // Marques d'exemple, inventées pour la démonstration.
     marques: [
@@ -92,8 +93,8 @@ export const EQUIPE_DEMO: Person[] = [
       { id: 'mq_3', marque: 'Verdéa', types: ['phyto', 'complements'] },
     ],
   }),
-  personne('p_manon', 'Manon', 'Girard', 'apprenti', 21, 9.4),
-  personne('p_yanis', 'Yanis', 'Morel', 'etudiant', 16, 13.9),
+  personne('p_manon', 'Manon', 'Girard', 'apprenti', 21, 9.4, { entreeLe: '2025-09-01' }),
+  personne('p_yanis', 'Yanis', 'Morel', 'etudiant', 16, 13.9, { entreeLe: '2026-07-06' }),
   personne('x_paul', 'Paul', 'Lemaire', 'adjoint', 0, 62, { externe: true, competences: ['vaccination', 'trod'] }),
   personne('x_nadia', 'Nadia', 'Brun', 'preparateur', 0, 42, { externe: true }),
 ];
