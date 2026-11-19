@@ -493,3 +493,24 @@ gardes), et ce que l'écart suggère pour les prochains plannings.
 
 Sur le tableau de bord, un trait continu dans la couleur du thème traverse la frise du jour, surmonté de
 l'étiquette « Maintenant » et de l'heure. Il n'apparaît que le jour même, pendant les heures d'ouverture.
+
+## L'équipe est-elle bien dimensionnée ?
+
+Dans « Réglages », une carte réservée aux titulaires dit si l'équipe est assez nombreuse. Le calcul part de
+l'activité, pas du mobilier : **six caisses ne demandent pas six personnes**.
+
+1. On indique le nombre de **clients servis par jour** (et, si on veut, le temps moyen par client et l'activité
+   annuelle hors taxes).
+2. Solvéa en déduit combien de personnes il faut **au comptoir en même temps**, à l'heure ordinaire et à l'heure
+   de pointe, avec un minimum et un **plafond utile** : les postes de comptoir, plus une personne hors comptoir.
+3. Il compare ensuite les **contrats** au besoin, en équivalents temps plein, pour les pharmaciens d'un côté,
+   pour le reste du comptoir de l'autre : « Il en manque », « C'est juste », « Assez », « Plus qu'il n'en faut ».
+4. Il signale les réglages d'effectif minimum qui s'écartent du repère, et rappelle la seule règle officielle :
+   un pharmacien adjoint en équivalent temps plein par tranche révolue de 1,3 million d'euros d'activité
+   (arrêté du 21 février 2022, à vérifier car les seuils peuvent être révisés).
+
+Les hypothèses sont affichées sur place (« D'où vient ce calcul ») et écrites dans
+`src/engine/dimensionnement.ts` : 5 minutes par client (4 avec un robot), 80 % du temps au comptoir passé à
+servir, une pointe à 1,6 fois la moyenne, 20 % de travail hors comptoir, 12 % d'absences. Sans nombre de
+clients, le calcul se rabat sur la surface de vente et le dit : c'est grossier. C'est un repère
+d'organisation, pas une norme. Solvi répond aussi à « ai-je assez de préparateurs ? », aux titulaires seulement.

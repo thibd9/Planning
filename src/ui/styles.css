@@ -4606,3 +4606,43 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .tbj-piste > :first-child { flex: 1 1 auto; min-width: 0; }
 /* La croix de la pharmacie reste entière quand la bannière s'élargit. */
 .tb-couverture.ill-pharmacie .tb-scene-image { transform: translate(-50%, -46%); }
+
+/* ---------- Dimensionnement de l'équipe (Réglages, titulaires) ---------- */
+.dim { gap: 18px; }
+.dim-attente { margin: 0; padding: 12px 14px; border-radius: 8px; background: var(--n-2); color: var(--ink-2); font-size: 14px; }
+.dim-comptoir { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.dim-comptoir > div { display: grid; gap: 1px; padding: 12px 16px; border-left: 1px solid var(--line); background: var(--surface-2); }
+.dim-comptoir > div:first-child { border-left: 0; }
+.dim-comptoir .l { font-size: 12px; color: var(--ink-3); }
+.dim-comptoir b { font-size: 26px; line-height: 1.1; font-weight: 750; letter-spacing: -0.02em; color: var(--ink); }
+.dim-comptoir .d { font-size: 12.5px; color: var(--ink-3); }
+.dim-bilans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.dim-bilan { --dv: var(--ok); display: grid; gap: 8px; align-content: start; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; }
+.dim-bilan.v-manque { --dv: var(--danger); }
+.dim-bilan.v-juste { --dv: var(--warn); }
+.dim-bilan.v-large { --dv: var(--info); }
+.dim-bilan-tete { display: flex; align-items: center; gap: 10px; }
+.dim-bilan-tete h3 { margin: 0; font-size: 16px; }
+.dim-chiffres { margin: 0; font-size: 14px; color: var(--ink-2); }
+.dim-chiffres b { font-size: 20px; font-weight: 750; color: var(--ink); }
+.dim-barre { position: relative; height: 10px; margin: 4px 0 2px; border-radius: 6px; background: var(--n-2); }
+.dim-barre i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--dv); }
+.dim-repere { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--ink); }
+.dim-bilan p { margin: 0; }
+.dim-regle { display: flex; gap: 10px; align-items: flex-start; margin: 0; padding: 12px 14px; border-radius: 8px; background: var(--n-2); font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.dim-regle svg { flex: none; margin-top: 3px; }
+.dim-regle.alerte { background: var(--danger-soft); color: var(--danger-ink-fort, var(--danger-ink)); }
+.dim-ecarts ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.dim-ecarts .cap1::first-letter { text-transform: uppercase; }
+.dim-ecarts .cap1 { display: inline-block; }
+.dim-calcul { font-size: 14px; color: var(--ink-2); }
+.dim-calcul summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 650; color: var(--a-text); list-style: none; }
+.dim-calcul summary::-webkit-details-marker { display: none; }
+.dim-calcul[open] .chev { transform: rotate(180deg); }
+.dim-calcul ol { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 6px; line-height: 1.55; max-width: 86ch; }
+@media (max-width: 760px) {
+  .dim-comptoir { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dim-comptoir > div:nth-child(3) { border-left: 0; }
+  .dim-comptoir > div:nth-child(n + 3) { border-top: 1px solid var(--line); }
+  .dim-bilans { grid-template-columns: minmax(0, 1fr); }
+}

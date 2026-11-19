@@ -1,3 +1,5 @@
+import { memeIdentifiant } from '../../domain/acces';
+import { Dimensionnement } from '../components/Dimensionnement';
 import { Check, DoorClosed, DoorOpen, Plus, RotateCcw, Settings2, Store, Trash2, UserRound, Users, Utensils, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { JOURS, MOIS, fmtDateCourt, fmtDuree, fmtHHMM, parseHHMM, fmtDateLong, joursFeries } from '../../domain/time';
@@ -43,6 +45,8 @@ export function Officine(): JSX.Element {
   // Les jours fériés des douze prochains mois.
   const feries = [Number(today.slice(0, 4)), Number(today.slice(0, 4)) + 1].flatMap((y) => [...joursFeries(y).entries()]).filter(([d]) => d >= today && d < `${Number(today.slice(0, 4)) + 1}${today.slice(4)}`).sort((a, b) => a[0].localeCompare(b[0]));
   const dire = useUi((s) => s.dire);
+  const session = useUi((s) => s.session);
+  const titulaire = donnees.personnes.some((p) => !p.externe && p.qualification === 'titulaire' && memeIdentifiant(p.identifiant, session ?? ''));
   const infos: InfosOfficine = officine.infos ?? {};
   // Une valeur vidée disparaît de la fiche, plutôt que d'y rester à zéro.
   const majInfos = (patch: Partial<InfosOfficine>): void => {
@@ -133,6 +137,9 @@ export function Officine(): JSX.Element {
           </ul>
         ) : null}
       </section>
+
+      {/* Le dimensionnement de l'équipe : un repère réservé aux titulaires. */}
+      {titulaire ? <Dimensionnement /> : null}
 
       <div className="split egal">
         <div className="col" style={{ gap: 18 }}>

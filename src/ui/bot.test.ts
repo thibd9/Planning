@@ -27,6 +27,15 @@ describe('assistant : répondre d’après le planning', () => {
   const titulaire = { data, today: TODAY, moi: 'p_helene', espace: 'responsable' as const, fiches: fichesPour('responsable', true) };
   const camille = { data, today: TODAY, moi: 'p_camille', espace: 'equipe' as const, fiches: fichesPour('equipe', true) };
 
+  it('dit au titulaire si l’équipe est assez nombreuse, et le refuse aux autres', () => {
+    const r = repondre('Ai-je assez de préparateurs ?', titulaire);
+    expect(r.texte).toMatch(/au comptoir à l’heure ordinaire/);
+    expect(r.lignes?.some((l) => /^Pharmaciens : /.test(l))).toBe(true);
+    expect(r.lignes?.some((l) => /^Préparateurs et comptoir : /.test(l))).toBe(true);
+    expect(r.lignes?.at(-1)).toMatch(/repère, pas une norme/);
+    expect(repondre('Est-ce qu’on est en sous-effectif ?', camille).texte).toMatch(/réservé aux titulaires/);
+  });
+
   it('liste les personnes en poste un jour donné, avec leurs horaires', () => {
     const r = repondre('Qui travaille demain ?', titulaire);
     const attendus = new Set(data.shifts.filter((s) => s.date === addDays(TODAY, 1)).map((s) => s.personId));

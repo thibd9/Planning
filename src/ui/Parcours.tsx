@@ -1979,6 +1979,7 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   'qui-prepare': { gestion: ['Qui prépare le planning'] },
   'postes-types': { gestion: ['Horaires et effectif'] },
   'officine-chiffres': { gestion: ['Horaires et effectif'] },
+  dimensionnement: { gestion: ['Horaires et effectif'] },
   'points-forts': { gestion: ['La fiche d’une personne'] },
 };
 

@@ -296,6 +296,12 @@ export interface InfosOfficine {
   confidentialite?: number;
   /** Robot ou automate de dispensation. */
   robot?: boolean;
+  /** Clients servis par jour d'ouverture, en moyenne : la mesure d'activité qui sert au dimensionnement de l'équipe. */
+  passagesJour?: number;
+  /** Temps moyen passé avec un client, en minutes. Sans valeur : 5 minutes, 4 avec un robot. */
+  minutesParClient?: number;
+  /** Activité annuelle hors taxes, en euros : sert au nombre minimal de pharmaciens adjoints. Reste sur cet appareil. */
+  activiteAnnuelle?: number;
 }
 
 /** Quand le planning d'un mois doit être transmis à l'équipe, et ce qui se passe si l'échéance est dépassée. */

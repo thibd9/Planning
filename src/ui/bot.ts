@@ -11,6 +11,7 @@ import { aRegulariser, soldeHeures } from '../engine/heures';
 import { autreDuRdv, rdvARepondre, rdvAVenir } from '../engine/rdv';
 import { arriveePrevue, dureeRetard, retardsDuJour } from '../engine/retard';
 import { SUPPORT } from '../domain/support';
+import { dimensionnement } from '../engine/dimensionnement';
 import { chiffresOfficine } from '../engine/officine';
 import { useStore } from '../store/store';
 import type { Vue } from '../store/ui';
@@ -79,6 +80,7 @@ export const FICHES: Fiche[] = [
   { id: 'pauses', question: 'Régler la pause déjeuner et les pauses courtes', reponse: 'Ouvrez un poste dans « Construire » : la pause déjeuner, non comptée en temps de travail, puis jusqu’à quatre pauses courtes de 10, 15 ou 20 minutes. « Une par demi-journée » les place pour vous. Elles figurent sur le planning de chacun et sur la feuille imprimée.', mots: 'pause pauses dejeuner repas cafe courte demi-journee coupure repos', pour: GESTION, ecrans: ['construire'], bouton: 'Ouvrir Construire', aller: (ui) => ui.aller('construire') },
   { id: 'qui-prepare', question: 'Construire seul ou avec l’équipe', reponse: 'Dans « Réglages », « Qui prépare le planning » : « Vous seul », et vous construisez d’après vos habitudes ; « Avec l’équipe », et chacun donne ses préférences du mois avant une date limite. Le choix se change à tout moment.', mots: 'seul equipe collaboratif classique preferences mode organisation qui prepare', pour: GESTION, ecrans: ['officine'], bouton: 'Ouvrir les réglages', aller: (ui) => ui.aller('officine') },
   { id: 'postes-types', question: 'Créer ou modifier un poste type', reponse: 'Dans « Réglages », « Postes types » : un nom, des horaires, une pause, une couleur. Un poste type se pose ensuite en un clic dans « Construire », et les propositions s’en servent.', mots: 'poste type modele horaires couleur matin apres-midi journee ouverture fermeture', pour: GESTION, ecrans: ['officine', 'construire'], bouton: 'Ouvrir les réglages', aller: (ui) => ui.aller('officine') },
+  { id: 'dimensionnement', question: 'Savoir si l’équipe est assez nombreuse', reponse: 'Dans « Réglages », « L’équipe est-elle bien dimensionnée ? », réservé aux titulaires. Indiquez le nombre de clients servis par jour : Solvéa en déduit combien de personnes il faut au comptoir à l’heure ordinaire et à la pointe, puis compare les contrats au besoin, pour les pharmaciens et pour le reste du comptoir. Les caisses ne sont qu’un plafond : six caisses ne demandent pas six personnes. C’est un repère, pas une norme ; le calcul est détaillé sur place.', mots: 'assez nombreux effectif dimensionnement dimensionner combien de preparateurs combien de pharmaciens recruter embaucher sous-effectif sureffectif caisses clients passages activite adjoints chiffre d affaires equivalent temps plein', pour: GESTION, ecrans: ['officine', 'equipe'], bouton: 'Ouvrir les réglages', aller: (ui) => { ui.aller('officine'); window.setTimeout(() => document.getElementById('dimensionnement')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 120); } },
   { id: 'officine-chiffres', question: 'Renseigner l’officine en chiffres', reponse: 'Dans « Réglages », « L’officine en chiffres » : surface totale, surface de vente, réserve, caisses, postes de comptoir, espaces de confidentialité, robot. Tout est facultatif. Solvéa signale ce qui ne colle pas, par exemple plus de personnes attendues que de postes de comptoir.', mots: 'surface metres carres vente reserve caisses comptoirs confidentialite robot automate locaux taille officine', pour: GESTION, ecrans: ['officine'], bouton: 'Ouvrir les réglages', aller: (ui) => ui.aller('officine') },
   { id: 'construire', question: 'Construire le planning d’une semaine', reponse: 'Dans « Construire », un « + » pose un poste à la main. « Proposer un planning » calcule trois propositions comparables : équité, souhaits, coût. Les règles impératives passent toujours d’abord.', mots: 'creer planning grille poste generer proposition automatique', pour: GESTION, ecrans: ['construire', 'tableau'], bouton: 'Ouvrir « Construire »', aller: (ui) => { ui.setPlanVue('semaine'); ui.aller('construire'); } },
   { id: 'publier', question: 'Publier un planning', reponse: 'Tant qu’il est en brouillon, vous seul le voyez. « Publier » relit les règles et les délais, puis l’envoie à l’équipe. Tout changement ultérieur est annoncé à la personne concernée.', mots: 'envoyer diffuser brouillon equipe voit', pour: GESTION, ecrans: ['construire'], bouton: 'Aller publier', aller: (ui) => { ui.setPlanVue('semaine'); ui.aller('construire'); } },
@@ -488,6 +490,26 @@ function calculer(question: string, c: Contexte, defaut: { jour?: ISODate } = {}
     const suivi = { relance: 'horaires de la pharmacie', jour: date };
     if (!plages.length) return { texte: `${quand(date, today)}, la pharmacie est fermée${ferie(date) ? ` (${ferie(date)})` : ''}.`, suivi };
     return { texte: `${quand(date, today)}, la pharmacie est ouverte de ${plages.map((i) => `${fmtHeure(i.start)} à ${fmtHeure(i.end)}`).join(' et de ')}.`, ...(gestion ? { bouton: { label: 'Ouvrir les réglages', aller: (ui: Ui) => ui.aller('officine') } } : {}), suivi };
+  }
+
+  // Dimensionnement : réservé aux titulaires.
+  if (a('assez de preparateurs', 'assez de pharmaciens', 'assez de monde', 'assez de personnel', 'assez nombreux', 'assez nombreuse', 'sous effectif', 'sous-effectif', 'sureffectif', 'dimensionnement', 'dimensionnee', 'dimensionne', 'faut il recruter', 'dois je recruter', 'dois je embaucher', 'faut il embaucher', 'combien de preparateurs', 'combien de pharmaciens', 'combien de personnes au comptoir', 'combien d adjoints')) {
+    if (data.personnes.find((p) => p.id === moi)?.qualification !== 'titulaire') return { texte: 'Le dimensionnement de l’équipe est un repère réservé aux titulaires.', rang: 'limite' };
+    const d = dimensionnement(data.officine, data.personnes);
+    const reglages = { bouton: { label: 'Voir le calcul', aller: (ui: Ui) => { ui.aller('officine'); window.setTimeout(() => document.getElementById('dimensionnement')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 120); } } };
+    if (d.source === 'aucune') return { texte: 'Je ne peux pas le dire sans mesure de l’activité. Indiquez le nombre de clients servis par jour dans « Réglages », et je vous répondrai.', ...reglages };
+    const mot = { manque: 'il en manque', juste: 'c’est juste', bon: 'c’est assez', large: 'c’est plus qu’il n’en faut' } as const;
+    const n = (x: number): string => String(Math.round(x * 10) / 10).replace('.', ',');
+    return {
+      texte: `D’après ${d.source === 'passages' ? 'les clients servis' : 'la surface de vente (estimation grossière)'}, il faut ${d.comptoir.ordinaire} personne${d.comptoir.ordinaire > 1 ? 's' : ''} au comptoir à l’heure ordinaire et ${d.comptoir.pointe} à la pointe.`,
+      lignes: [
+        `Pharmaciens : ${n(d.pharmaciens.dispo)} temps plein au contrat pour ${n(d.pharmaciens.besoin)} qu’il faut, ${mot[d.pharmaciens.verdict]}.`,
+        `Préparateurs et comptoir : ${n(d.equipe.dispo)} temps plein pour ${n(d.equipe.besoin)}, ${mot[d.equipe.verdict]}.`,
+        ...d.remarques.slice(0, 2),
+        'C’est un repère, pas une norme.',
+      ],
+      ...reglages,
+    };
   }
 
   if (a('surface', 'metres carres', 'metre carre', 'm2', 'superficie', 'taille de la pharmacie', 'taille de l officine', 'caisse', 'caisses', 'comptoirs', 'postes de comptoir', 'surface de vente', 'reserve', 'robot', 'automate', 'officine en chiffres', 'confidentialite')) {
