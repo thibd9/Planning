@@ -8,8 +8,12 @@ import type { Fiche } from '../bot';
 import { fichesPour, simple } from '../bot';
 import { LEXIQUE } from '../lexique';
 import { ChoixRythme, lancerTutoriel, tutorielDe } from '../Parcours';
+import { Onglets } from '../components/Onglets';
 import { BlocSupport, ContactsSupport } from '../components/Support';
 import { NomSolvi, Solvi } from '../Solvi';
+
+/** Un identifiant d'onglet à partir du titre d'un thème. */
+const cleDe = (titre: string): string => titre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 /** Les fiches rangées par thème, dans l'ordre du travail. */
 const THEMES: { titre: string; ids: string[] }[] = [
@@ -42,6 +46,36 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
     .filter((g) => g.fiches.length);
   // Une recherche qui ne trouve que dans l'autre onglet y mène toute seule.
   const vu = mots.length && onglet === 'taches' && !fichesVues.length && termes.length ? 'lexique' : mots.length && onglet === 'lexique' && !termes.length && fichesVues.length ? 'taches' : onglet;
+
+  /** Un thème et ses fiches. */
+  const theme = (g: { titre: string; fiches: Fiche[] }): JSX.Element => (
+    <section key={g.titre} className="ad-groupe">
+      <h2 className="ad-theme">{g.titre}</h2>
+      <ul className="ad-fiches">
+        {g.fiches.map((f) => {
+          const tuto = tutorielDe(f.id, espace);
+          const n = tuto ? tuto.a - tuto.de + 1 : 0;
+          return (
+            <li key={f.id} className="ad-fiche" data-fiche={f.id}>
+              <h3 id={`ad-q-${f.id}`}>{f.question}</h3>
+              <p>{f.reponse}</p>
+              <div className="ad-actions">
+                {tuto ? (
+                  <button type="button" className="btn sm primary" onClick={() => lancerTutoriel(tuto)} aria-describedby={`ad-q-${f.id}`}>
+                    <Play size={14} aria-hidden="true" /> Voir le tutoriel
+                    <span className="ad-duree">{n > 1 ? `${n} étapes` : '1 étape'}</span>
+                  </button>
+                ) : null}
+                <button type="button" className="btn sm" onClick={() => f.aller(ui, espace)} aria-describedby={`ad-q-${f.id}`}>
+                  {f.bouton} <ArrowRight size={14} aria-hidden="true" />
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
 
   return (
     <div className="page page-aide">
@@ -83,34 +117,12 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
 
       {vu === 'taches' ? (
         groupes.length ? (
-          groupes.map((g) => (
-            <section key={g.titre} className="ad-groupe">
-              <h2 className="ad-theme">{g.titre}</h2>
-              <ul className="ad-fiches">
-                {g.fiches.map((f) => {
-                  const tuto = tutorielDe(f.id, espace);
-                  const n = tuto ? tuto.a - tuto.de + 1 : 0;
-                  return (
-                    <li key={f.id} className="ad-fiche" data-fiche={f.id}>
-                      <h3 id={`ad-q-${f.id}`}>{f.question}</h3>
-                      <p>{f.reponse}</p>
-                      <div className="ad-actions">
-                        {tuto ? (
-                          <button type="button" className="btn sm primary" onClick={() => lancerTutoriel(tuto)} aria-describedby={`ad-q-${f.id}`}>
-                            <Play size={14} aria-hidden="true" /> Voir le tutoriel
-                            <span className="ad-duree">{n > 1 ? `${n} étapes` : '1 étape'}</span>
-                          </button>
-                        ) : null}
-                        <button type="button" className="btn sm" onClick={() => f.aller(ui, espace)} aria-describedby={`ad-q-${f.id}`}>
-                          {f.bouton} <ArrowRight size={14} aria-hidden="true" />
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ))
+          mots.length ? (
+            groupes.map((g) => theme(g))
+          ) : (
+            // Sans recherche, un onglet par thème : on ne lit qu'une famille de fiches à la fois.
+            <Onglets id="aide-themes" label="Thèmes de l’aide" onglets={groupes.map((g) => ({ cle: cleDe(g.titre), titre: g.titre, note: g.fiches.length, contenu: theme(g) }))} />
+          )
         ) : (
           <div className="card empty ad-vide" id="ad-vide">
             <Solvi size={72} humeur="intrigue" vivant />

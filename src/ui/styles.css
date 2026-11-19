@@ -5002,3 +5002,12 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 @media (prefers-reduced-motion: reduce) {
   .cp-carte.dc-diapo, .dc-diapo .cp-ico, .dc-diapo .dc-reperes li, .dc-diapo-texte > * { animation: none; }
 }
+
+/* Les marques d'un animateur : une famille de produits au nom long passe à la ligne dans sa pastille, sans sortir de la carte. */
+.esp-marques { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.mqc-type { white-space: normal; max-width: 100%; text-align: left; line-height: 1.3; align-items: flex-start; }
+.mqc-type svg { margin-top: 2px; }
+
+/* Le prochain planning, étapes en ligne : un libellé long passe à la ligne plutôt que de sortir de la carte. */
+.tb-suite .cycle-etapes b, .tb-suite .cycle-etapes .small { white-space: normal; }
+.tb-suite .cycle-etapes li { min-width: 0; }

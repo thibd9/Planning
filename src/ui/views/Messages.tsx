@@ -1,5 +1,6 @@
 import { BellDot, CalendarPlus, MessageSquare, Send, Users } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { estResponsable } from '../../domain/acces';
 import { fmtDateCourt, fmtHeure, fmtHorodatage } from '../../domain/time';
 import { nomComplet, nomCourt } from '../../domain/types';
 import { useStore } from '../../store/store';
@@ -29,12 +30,18 @@ export function Messages({ personId }: { personId: string }): JSX.Element {
   const messages = duFil(fil).sort((a, b) => a.at.localeCompare(b.at));
   const autre = data.personnes.find((p) => p.id === fil);
   const totalNonLus = ['equipe', ...collegues.map((p) => p.id)].reduce((t, f) => t + (f === fil ? 0 : nonLus(f)), 0);
-  /** Les conversations, celles qui ont du nouveau d'abord, puis la plus récente en tête. */
+  /**
+   * Les conversations, toujours dans le même ordre : toute l'équipe, le titulaire principal, les autres titulaires,
+   * les pharmaciens, les préparateurs, puis les autres postes. Un message non lu se signale par sa pastille, sans
+   * déplacer la conversation : on la retrouve toujours au même endroit.
+   */
+  const rang = (p: (typeof collegues)[number]): number => (estResponsable(data, p) ? 1 : p.qualification === 'titulaire' ? 2 : p.qualification === 'adjoint' && !p.externe ? 3 : p.qualification === 'preparateur' && !p.externe ? 4 : 5);
+  const RUBRIQUES = ['', 'Titulaires', 'Titulaires', 'Pharmaciens', 'Préparateurs', 'Autres postes'];
   const fils = useMemo(
     () =>
-      [{ id: 'equipe', person: undefined as (typeof collegues)[number] | undefined }, ...collegues.map((p) => ({ id: p.id, person: p }))]
+      [{ id: 'equipe', person: undefined as (typeof collegues)[number] | undefined, rang: 0 }, ...collegues.map((p) => ({ id: p.id, person: p, rang: rang(p) }))]
         .map((f) => ({ ...f, n: f.id === fil ? 0 : nonLus(f.id), der: dernier(f.id) }))
-        .sort((a, b) => Number(b.n > 0) - Number(a.n > 0) || (b.der?.at ?? '').localeCompare(a.der?.at ?? '')),
+        .sort((a, b) => a.rang - b.rang || (a.person?.prenom ?? '').localeCompare(b.person?.prenom ?? '', 'fr')),
     [data.messages, data.personnes, fil, personId],
   );
   const quand = (iso: string): string => {
@@ -77,8 +84,7 @@ export function Messages({ personId }: { personId: string }): JSX.Element {
         <div className="col msg-fils" style={{ gap: 8 }} role="group" aria-label="Conversations">
           {fils.map((f, i) => (
             <div key={f.id} style={{ display: 'contents' }}>
-              {i === 0 && f.n ? <div className="msg-rubrique nouveau">Non lus</div> : null}
-              {i > 0 && !f.n && fils[i - 1].n ? <div className="msg-rubrique">Conversations</div> : null}
+              {f.rang > 0 && RUBRIQUES[f.rang] !== RUBRIQUES[fils[i - 1]?.rang ?? 0] ? <div className="msg-rubrique">{RUBRIQUES[f.rang]}</div> : null}
               <button type="button" className={`g-item msg-fil${fil === f.id ? ' on' : ''}${f.n ? ' non-lu' : ''}`} aria-pressed={fil === f.id} onClick={() => setFil(f.id)}>
                 {f.person ? <Avatar person={f.person} /> : <span className="ico" aria-hidden="true"><Users size={18} /></span>}
                 <span className="grow" style={{ minWidth: 0 }}>
