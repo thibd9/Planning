@@ -1,3 +1,4 @@
+import { montrerDansPlanning } from '../viser';
 import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarCheck, CalendarRange, Check, ChevronDown, CircleCheck, Handshake, CircleHelp, Clock3, ListChecks, MoonStar, Paperclip, PartyPopper, Send, UserMinus, Users, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RAISONS_REFUS, texteRefus } from '../../domain/refus';
@@ -55,7 +56,7 @@ export function Resoudre(): JSX.Element {
   const d = useMemo(() => decisions(data, today), [data, today]);
   /** L'absence dont on choisit la solution, jour par jour. */
   const [reglage, setReglage] = useState<string | null>(null);
-  const { aller, setSemaine, ouvrirGarde } = useUi();
+  const { ouvrirGarde } = useUi();
   const corrigerRepos = useStore((s) => s.corrigerRepos);
   const { donnerAccord, ecarterAccord } = useStore();
   const dire = useUi((s) => s.dire);
@@ -304,7 +305,7 @@ export function Resoudre(): JSX.Element {
                         className="btn sm"
                         onClick={() => {
                           corrigerRepos(garde.id, c.shift.id);
-                          dire('Poste corrigé pour respecter le repos.', true);
+                          dire('Poste corrigé pour respecter le repos.', true, { label: 'Voir le poste', faire: () => montrerDansPlanning({ date: c.shift.date, personId: c.shift.personId }) });
                         }}
                       >
                         Corriger le poste
@@ -397,15 +398,18 @@ export function Resoudre(): JSX.Element {
                   </div>
                 </div>
                 {pub.type === 'a_publier' && pub.jours < 10 ? <Pill tone="warn">Moins de 7 jours ouvrés</Pill> : null}
+                {/* On arrive sur ce qu'il reste à faire : la grille si elle est vide, le bouton « Publier » sinon. */}
                 <button
                   type="button"
                   className="btn sm"
+                  data-publier={pub.monday}
                   onClick={() => {
-                    setSemaine(pub.monday);
-                    aller('construire');
+                    const vide = pub.type === 'a_publier' && !pub.nombre;
+                    montrerDansPlanning({ date: pub.monday, cible: vide ? 'grille' : 'publier' });
+                    dire(vide ? 'La grille est vide : posez les postes, ou demandez des propositions.' : 'Relisez la semaine, puis publiez : le bouton est mis en évidence.');
                   }}
                 >
-                  Ouvrir la semaine <ArrowRight size={14} />
+                  {pub.type === 'a_publier' && !pub.nombre ? 'Construire la semaine' : pub.type === 'modifications' ? 'Publier les modifications' : 'Relire et publier'} <ArrowRight size={14} />
                 </button>
               </div>
             ))}
@@ -433,7 +437,7 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const resoudre = useStore((s) => s.resoudreTrou);
-  const { dire, setSemaine, aller, session } = useUi();
+  const { dire, session } = useUi();
   const [choix, setChoix] = useState<Record<string, string>>({});
   // Le titulaire peut assumer lui-même le poste, sans le reporter sur un collègue.
   const moi = data.personnes.find((p) => memeIdentifiant(p.identifiant, session ?? ''));
@@ -475,10 +479,8 @@ function DialogueReglage({ trous, titre, onClose }: { trous: Trou[]; titre: stri
       if (o) resoudre(x.trou.id, o);
     }
     dire(`${regles} jour${regles > 1 ? 's' : ''} réglé${regles > 1 ? 's' : ''}${aLaMain.length ? `, ${aLaMain.length} à régler à la main` : ''}.`, true);
-    if (aLaMain.length) {
-      setSemaine(mondayOf(aLaMain[0].trou.shift.date));
-      aller('construire');
-    }
+    // Ce qui reste à régler à la main : on arrive sur la case concernée.
+    if (aLaMain.length) montrerDansPlanning({ date: aLaMain[0].trou.shift.date, personId: aLaMain[0].trou.shift.personId });
     onClose();
   };
   return (
@@ -694,7 +696,10 @@ function CarteTrou({ trou, ouvert }: { trou: Trou; ouvert: boolean }): JSX.Eleme
               style={{ marginTop: 'auto' }}
               onClick={() => {
                 resoudre(trou.id, o);
-                dire(publie && (o.changements.length || o.patch.liberer.length) ? 'Option retenue. Pensez à publier la modification pour prévenir l’équipe.' : 'Option retenue.', true);
+                dire(publie && (o.changements.length || o.patch.liberer.length) ? 'Option retenue. Pensez à publier la modification pour prévenir l’équipe.' : 'Option retenue.', true, {
+                  label: 'Voir dans le planning',
+                  faire: () => montrerDansPlanning({ date: trou.shift.date, personId: trou.shift.personId }),
+                });
               }}
             >
               Choisir
@@ -1204,7 +1209,10 @@ function DemandeRemplacement({ remplacement: r }: { remplacement: Remplacement }
                     className={`btn sm${sonTour ? ' primary' : ''}`}
                     onClick={() => {
                       validerRemplacement(r.id, c.personId);
-                      dire(`Remplacement validé : ${p ? nomCourt(p) : ''} reprend le poste${enPlus(c.personId)}. Les deux personnes sont prévenues.`, true);
+                      dire(`Remplacement validé : ${p ? nomCourt(p) : ''} reprend le poste${enPlus(c.personId)}. Les deux personnes sont prévenues.`, true, {
+                        label: 'Voir dans le planning',
+                        faire: () => montrerDansPlanning({ date: r.date, personId: c.personId }),
+                      });
                     }}
                   >
                     <Check size={14} aria-hidden="true" /> Valider avec {p?.prenom}

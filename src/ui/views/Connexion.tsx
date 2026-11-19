@@ -1,4 +1,5 @@
 import { ArrowLeft, ChevronRight, CircleAlert, LogIn, MonitorSmartphone, Play, RotateCcw, ShieldCheck, Store } from 'lucide-react';
+import { PiedSupport } from '../components/Support';
 import { useState } from 'react';
 import { empreinte, espaceDe, estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
@@ -208,6 +209,7 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
           <MonitorSmartphone size={14} aria-hidden="true" />
           <span>Sans serveur, cette connexion sépare les espaces sur cet appareil ; elle ne remplace pas de vrais comptes en ligne.</span>
         </p>
+        <PiedSupport />
       </div>
       </div>
       <ChoixParcours />

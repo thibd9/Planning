@@ -35,6 +35,7 @@ import { MesDemandes, MonSuivi } from './ui/views/MonEspace';
 import { PlanningEquipe } from './ui/views/PlanningEquipe';
 import { Heures } from './ui/views/Heures';
 import { Assistant } from './ui/Assistant';
+import { PiedSupport } from './ui/components/Support';
 import { aRegulariser } from './engine/heures';
 import { autreDuRdv, rdvARepondre } from './engine/rdv';
 import { URGENCE_LABEL } from './domain/types';
@@ -229,7 +230,8 @@ export function App(): JSX.Element {
 
   useEffect(() => {
     if (!toast) return;
-    const t = window.setTimeout(taire, 5200);
+    // Un message qui propose d'aller voir reste un peu plus longtemps.
+    const t = window.setTimeout(taire, toast.suite ? 9000 : 5200);
     return () => window.clearTimeout(t);
   }, [toast, taire]);
 
@@ -626,6 +628,7 @@ export function App(): JSX.Element {
           ) : (
             <Officine />
           )}
+          <PiedSupport />
         </main>
       </div>
 
@@ -655,6 +658,19 @@ export function App(): JSX.Element {
       {toast ? (
         <div className="toast" role="status">
           {toast.message}
+          {toast.suite ? (
+            <button
+              type="button"
+              className="toast-suite"
+              onClick={() => {
+                const { faire } = toast.suite!;
+                taire();
+                faire();
+              }}
+            >
+              {toast.suite.label}
+            </button>
+          ) : null}
           {toast.annulable ? (
             <button
               type="button"

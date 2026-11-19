@@ -1,3 +1,4 @@
+import { CIBLE, viser } from '../viser';
 import { AlarmClock, ArrowLeftRight, ArrowRight, BriefcaseMedical, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus, UsersRound, BellRing, Sparkles } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
@@ -80,9 +81,12 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
     const r = reponses(data, moisDe(addDays(cible, 3)));
     const recues = r.repondu.length;
     const attendues = recues + r.attendus.length;
+    // On arrive sur ce qu'il reste à faire : la grille vide, ou le bouton « Publier » quand tout est bon.
     const voir = (): void => {
       setSemaine(cible);
       aller('construire');
+      if (!postes) viser(CIBLE.grille);
+      else if (!bloquants) viser(CIBLE.publier);
     };
     const etapes: { nom: string; detail: string; etat: 'fait' | 'cours' | 'attente' }[] = [
       ...(collaboratif ? [{ nom: 'Préférences', detail: `${recues}/${attendues} reçues`, etat: recues >= attendues || postes ? ('fait' as const) : ('cours' as const) }] : []),

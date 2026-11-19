@@ -14,6 +14,7 @@ const SEMAINE = [0, 1, 2, 3, 4];
 export const OFFICINE_DEMO: Officine = {
   nom: 'Grande Pharmacie de la Pinède',
   surface: 180,
+  infos: { surfaceVente: 110, reserve: 45, caisses: 3, comptoirs: 4, confidentialite: 1 },
   responsableId: 'p_helene',
   horaires: [
     [{ start: H(8, 30), end: H(19, 30) }],

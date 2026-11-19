@@ -8,17 +8,19 @@ import type { Fiche } from '../bot';
 import { fichesPour, simple } from '../bot';
 import { LEXIQUE } from '../lexique';
 import { ChoixRythme, lancerTutoriel, tutorielDe } from '../Parcours';
+import { BlocSupport, ContactsSupport } from '../components/Support';
 import { NomSolvi, Solvi } from '../Solvi';
 
 /** Les fiches rangées par thème, dans l'ordre du travail. */
 const THEMES: { titre: string; ids: string[] }[] = [
   { titre: 'Mon planning', ids: ['accueil', 'prochain', 'equipe-planning', 'gardes-moi', 'suivi', 'imprimer'] },
   { titre: 'Mes demandes', ids: ['difference', 'souhaits', 'conge', 'remplacer', 'retard-prevenir', 'aider'] },
-  { titre: 'Préparer', ids: ['personne', 'marques', 'mdp-equipe', 'reglages', 'feries', 'regles', 'pharmacie'] },
-  { titre: 'Construire et publier', ids: ['construire', 'controles', 'mois', 'retard', 'publier', 'formation', 'gardes'] },
-  { titre: 'Absences et remplacements', ids: ['absence', 'demande-remplacement', 'demandes-equipe', 'accord', 'decisions'] },
+  { titre: 'Au quotidien', ids: ['tableau', 'creer', 'signaler', 'echeance'] },
+  { titre: 'Préparer', ids: ['personne', 'marques', 'mdp-equipe', 'reglages', 'qui-prepare', 'postes-types', 'officine-chiffres', 'feries', 'regles', 'pharmacie'] },
+  { titre: 'Construire et publier', ids: ['construire', 'propositions', 'pauses', 'controles', 'mois', 'retard', 'publier', 'formation', 'gardes'] },
+  { titre: 'Absences et remplacements', ids: ['absence', 'accident', 'demande-remplacement', 'demandes-equipe', 'accord', 'decisions'] },
   { titre: 'Suivre et faire le bilan', ids: ['heures', 'equite', 'points-forts', 'paie', 'historique', 'documents'] },
-  { titre: 'Messages et compte', ids: ['message', 'rendez-vous', 'compte'] },
+  { titre: 'Messages, compte et support', ids: ['message', 'rendez-vous', 'compte', 'support'] },
 ];
 
 
@@ -34,7 +36,7 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
   const fichesVues = fiches.filter((f) => trouve(`${f.question} ${f.reponse} ${f.mots}`));
   const termes = LEXIQUE.filter((t) => (espace === 'responsable' || !t.gestion) && trouve(`${t.mot} ${t.sens}`));
   // Le titulaire lit d'abord la gestion ; ses propres horaires viennent ensuite.
-  const themes = espace === 'responsable' ? [...THEMES.slice(2), ...THEMES.slice(0, 2)] : THEMES;
+  const themes = espace === 'responsable' ? [...THEMES.slice(2), ...THEMES.slice(0, 2)] : [...THEMES.slice(0, 2), ...THEMES.slice(2)];
   const groupes = themes.map((t) => ({ titre: t.titre, fiches: t.ids.map((id) => fichesVues.find((f) => f.id === id)).filter((f): f is Fiche => !!f) }))
     .concat([{ titre: 'Autres', fiches: fichesVues.filter((f) => !THEMES.some((t) => t.ids.includes(f.id))) }])
     .filter((g) => g.fiches.length);
@@ -110,9 +112,17 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
             </section>
           ))
         ) : (
-          <div className="card empty ad-vide">
-            <Solvi size={64} humeur="intrigue" vivant />
-            <span>Rien ne correspond à « {recherche} ». Essayez un autre mot, ou demandez à Solvi.</span>
+          <div className="card empty ad-vide" id="ad-vide">
+            <Solvi size={72} humeur="intrigue" vivant />
+            <span>
+              <b>Rien ne correspond à « {recherche} ».</b> Essayez un autre mot, demandez à Solvi, ou appelez le support.
+            </span>
+            <span className="ad-vide-actions">
+              <button type="button" className="btn sm" onClick={() => ui.ouvrirAssistant(true)}>
+                Demander à Solvi
+              </button>
+              <ContactsSupport petit />
+            </span>
           </div>
         )
       ) : termes.length ? (
@@ -125,7 +135,15 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
           ))}
         </dl>
       ) : (
-        <div className="card empty">Aucun terme ne correspond à « {recherche} ».</div>
+        <div className="card empty ad-vide" id="lex-vide">
+          <Solvi size={72} humeur="intrigue" vivant />
+          <span>
+            <b>Aucun terme ne correspond à « {recherche} ».</b> Le support vous l’expliquera.
+          </span>
+          <span className="ad-vide-actions">
+            <ContactsSupport petit />
+          </span>
+        </div>
       )}
 
       <div className="ad-pied">
@@ -152,6 +170,7 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
           <ArrowRight size={16} aria-hidden="true" />
         </button>
       </div>
+      <BlocSupport />
     </div>
   );
 }

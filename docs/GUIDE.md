@@ -423,3 +423,23 @@ src/
 2. **Pointage simple** (code ou QR code, ni photo ni biométrie) pour distinguer prévu, réalisé, validé.
 3. **Échanges de postes** entre collègues, validés automatiquement s'ils respectent règles et équité.
 4. **Autres conventions collectives** : le noyau est générique, seules les fiches de règles changent.
+
+## L'officine en chiffres
+
+Dans « Réglages », la carte « L'officine en chiffres » décrit les locaux : surface totale, surface de vente,
+réserve et préparatoire, caisses, postes de comptoir, espaces de confidentialité, robot. Tout est facultatif.
+Solvéa remarque ce qui ne colle pas (une surface de vente plus grande que la surface totale, plus de personnes
+attendues que de postes de comptoir) sans jamais bloquer. Solvi sait répondre à « combien de caisses ? ».
+
+## Aller droit à l'endroit à régler
+
+Depuis « Résoudre » ou le tableau de bord, chaque façon de régler mène à l'endroit exact : la case du planning,
+le bouton « Publier » ou la grille vide. L'endroit est entouré quelques secondes et le clavier y est placé.
+Après une option appliquée sur place, le message propose « Voir dans le planning ».
+
+## Le support
+
+Quand ni l'aide, ni le lexique, ni Solvi ne répondent, on contacte le support : ses coordonnées figurent en
+bas de chaque écran, sur la page de connexion, sur la page d'aide et dans les réponses de Solvi. Le support est
+celui de Solvéa : les titulaires n'ont rien à renseigner. Les coordonnées affichées aujourd'hui sont
+provisoires et fictives (`src/domain/support.ts`) ; elles sont à remplacer avant toute mise en service.

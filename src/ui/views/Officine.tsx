@@ -1,9 +1,10 @@
 import { Check, DoorClosed, DoorOpen, Plus, RotateCcw, Settings2, Store, Trash2, UserRound, Users, Utensils, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { JOURS, MOIS, fmtDateCourt, fmtDuree, fmtHHMM, parseHHMM, fmtDateLong, joursFeries } from '../../domain/time';
-import type { CouleurPoste, Interval, PosteType } from '../../domain/types';
+import type { CouleurPoste, InfosOfficine, Interval, PosteType } from '../../domain/types';
 import { COULEUR_POSTE_LABEL } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
+import { chiffresOfficine, remarquesOfficine } from '../../engine/officine';
 import { estCollaboratif, limiteSouhaits, moisDe, moisDecale } from '../../engine/souhaits';
 import { COULEURS_POSTE, DialoguePosteType, classePoste } from '../components/PosteTypeDialogue';
 import { useStore } from '../../store/store';
@@ -42,6 +43,14 @@ export function Officine(): JSX.Element {
   // Les jours fériés des douze prochains mois.
   const feries = [Number(today.slice(0, 4)), Number(today.slice(0, 4)) + 1].flatMap((y) => [...joursFeries(y).entries()]).filter(([d]) => d >= today && d < `${Number(today.slice(0, 4)) + 1}${today.slice(4)}`).sort((a, b) => a[0].localeCompare(b[0]));
   const dire = useUi((s) => s.dire);
+  const infos: InfosOfficine = officine.infos ?? {};
+  // Une valeur vidée disparaît de la fiche, plutôt que d'y rester à zéro.
+  const majInfos = (patch: Partial<InfosOfficine>): void => {
+    const suite = Object.fromEntries(Object.entries({ ...infos, ...patch }).filter(([, v]) => v !== undefined && v !== false && v !== 0));
+    majOfficine({ infos: Object.keys(suite).length ? (suite as InfosOfficine) : undefined });
+  };
+  const remarques = remarquesOfficine(officine);
+  const chiffres = chiffresOfficine(officine);
   const setPoste = (id: string, patch: Partial<PosteType>): void => {
     majOfficine({ postes: officine.postes.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
   };
@@ -55,7 +64,7 @@ export function Officine(): JSX.Element {
         <div className="grow">
           <div className="eyebrow">Officine</div>
           <h1>{officine.nom || 'Mon officine'}</h1>
-          {officine.surface ? <p className="page-fait num">{officine.surface} m²</p> : null}
+          {chiffres.length ? <p className="page-fait num">{chiffres.slice(0, 3).join(' · ')}</p> : null}
           <p>Horaires d'ouverture, effectif attendu et postes types. Ces réglages sont des choix d'organisation : ils se modifient librement.</p>
         </div>
       </div>
@@ -68,33 +77,62 @@ export function Officine(): JSX.Element {
           Nom de la pharmacie
           <input id="officine-nom" value={officine.nom} onChange={(e) => majOfficine({ nom: e.target.value })} placeholder="Pharmacie du Marché" />
         </label>
-        <label className="field surface" htmlFor="officine-surface">
-          <span>
-            Surface de l’officine <span className="oblig">facultatif</span>
-          </span>
-          <span className="champ-unite">
-            <input
-              id="officine-surface"
-              type="number"
-              inputMode="decimal"
-              min={1}
-              max={5000}
-              step={1}
-              className="num"
-              value={officine.surface ?? ''}
-              onChange={(e) => {
-                const v = Math.round(Number(e.target.value));
-                majOfficine({ surface: e.target.value.trim() && v > 0 ? Math.min(v, 5000) : undefined });
-              }}
-              placeholder="120"
-              aria-describedby="officine-surface-unite"
-            />
-            <span className="unite" id="officine-surface-unite">
-              m²
-            </span>
-          </span>
-        </label>
       </div>
+
+      {/* L'officine en chiffres : des repères facultatifs, que l'on complète quand on les connaît. */}
+      <section className="card pad col of-infos" aria-labelledby="of-infos" data-focus="infos-officine" style={{ marginBottom: 20 }}>
+        <div>
+          <h2 className="h3" id="of-infos">
+            L’officine en chiffres
+          </h2>
+          <p className="soft small" style={{ margin: '3px 0 0' }}>Facultatif. Ces repères décrivent vos locaux ; complétez ceux que vous connaissez.</p>
+        </div>
+        <div className="of-grille">
+          {(
+            [
+              { cle: 'surface', nom: 'Surface totale', unite: 'm²', max: 5000, valeur: officine.surface, ecrire: (v: number | undefined) => majOfficine({ surface: v }) },
+              { cle: 'surfaceVente', nom: 'Surface de vente', unite: 'm²', max: 5000, valeur: infos.surfaceVente, ecrire: (v: number | undefined) => majInfos({ surfaceVente: v }) },
+              { cle: 'reserve', nom: 'Réserve et préparatoire', unite: 'm²', max: 5000, valeur: infos.reserve, ecrire: (v: number | undefined) => majInfos({ reserve: v }) },
+              { cle: 'caisses', nom: 'Caisses', unite: '', max: 40, valeur: infos.caisses, ecrire: (v: number | undefined) => majInfos({ caisses: v }) },
+              { cle: 'comptoirs', nom: 'Postes de comptoir', unite: '', max: 40, valeur: infos.comptoirs, ecrire: (v: number | undefined) => majInfos({ comptoirs: v }) },
+              { cle: 'confidentialite', nom: 'Espaces de confidentialité', unite: '', max: 20, valeur: infos.confidentialite, ecrire: (v: number | undefined) => majInfos({ confidentialite: v }) },
+            ] as const
+          ).map((c) => (
+            <label key={c.cle} className="field" htmlFor={`officine-${c.cle}`}>
+              {c.nom}
+              <span className={c.unite ? 'champ-unite' : undefined}>
+                <input
+                  id={`officine-${c.cle}`}
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={c.max}
+                  step={1}
+                  className="num"
+                  value={c.valeur ?? ''}
+                  onChange={(e) => {
+                    const v = Math.round(Number(e.target.value));
+                    c.ecrire(e.target.value.trim() && v > 0 ? Math.min(v, c.max) : undefined);
+                  }}
+                  placeholder="-"
+                />
+                {c.unite ? <span className="unite">{c.unite}</span> : null}
+              </span>
+            </label>
+          ))}
+          <label className="check of-robot" htmlFor="officine-robot">
+            <input id="officine-robot" type="checkbox" checked={!!infos.robot} onChange={(e) => majInfos({ robot: e.target.checked || undefined })} />
+            <span>Robot ou automate de dispensation</span>
+          </label>
+        </div>
+        {remarques.length ? (
+          <ul className="of-remarques" id="of-remarques">
+            {remarques.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
 
       <div className="split egal">
         <div className="col" style={{ gap: 18 }}>
@@ -357,27 +395,6 @@ export function Officine(): JSX.Element {
             </div>
           </div>
 
-        </div>
-      </div>
-
-      <div className="card pad col" style={{ marginTop: 18 }} data-focus="support">
-        <div>
-          <h2 className="h3">Support</h2>
-          <p className="soft small" style={{ margin: '3px 0 0' }}>Quand Solvi ne sait pas répondre, il propose de joindre cette personne. Laissez vide : il renverra vers vous.</p>
-        </div>
-        <div className="champs">
-          <label className="field" htmlFor="support-nom">
-            Nom du contact
-            <input id="support-nom" value={officine.support?.nom ?? ''} onChange={(e) => majOfficine({ support: { ...officine.support, nom: e.target.value } })} placeholder="Support Solvéa" autoComplete="off" />
-          </label>
-          <label className="field" htmlFor="support-email">
-            Adresse électronique
-            <input id="support-email" type="email" value={officine.support?.email ?? ''} onChange={(e) => majOfficine({ support: { ...officine.support, email: e.target.value } })} placeholder="support@exemple.fr" autoComplete="off" />
-          </label>
-          <label className="field" htmlFor="support-telephone">
-            Téléphone
-            <input id="support-telephone" type="tel" value={officine.support?.telephone ?? ''} onChange={(e) => majOfficine({ support: { ...officine.support, telephone: e.target.value } })} placeholder="01 23 45 67 89" autoComplete="off" />
-          </label>
         </div>
       </div>
 

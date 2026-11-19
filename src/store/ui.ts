@@ -95,7 +95,8 @@ interface Ui {
   /** Préférences d'affichage, propres à chaque personne. */
   preferences: Record<string, PrefsChoisies>;
   /** Message bref en bas d'écran, avec annulation possible. */
-  toast: { message: string; annulable: boolean } | null;
+  /** `suite` : un bouton qui mène à l'endroit que le message concerne. */
+  toast: { message: string; annulable: boolean; suite?: { label: string; faire: () => void } } | null;
   focus: { personId?: string; date?: ISODate } | null;
   gardeId: string | null;
   personneId: string | null;
@@ -157,7 +158,7 @@ interface Ui {
   setPreferences: (personId: string, p: Partial<Preferences>) => void;
   /** Ces personnes retrouvent la couleur de leur profil : la visite guidée repart ainsi des couleurs par défaut. */
   oublierCouleurs: (identifiants: string[]) => void;
-  dire: (message: string, annulable?: boolean) => void;
+  dire: (message: string, annulable?: boolean, suite?: { label: string; faire: () => void }) => void;
   taire: () => void;
   setFocus: (f: Ui['focus']) => void;
   ouvrirGarde: (id: string | null) => void;
@@ -239,7 +240,7 @@ export const useUi = create<Ui>((set) => ({
       ecrire(CLE_PREFS, preferences);
       return { preferences };
     }),
-  dire: (message, annulable = false) => set({ toast: { message, annulable } }),
+  dire: (message, annulable = false, suite) => set({ toast: { message, annulable, ...(suite ? { suite } : {}) } }),
   taire: () => set({ toast: null }),
   setFocus: (focus) => set({ focus }),
   ouvrirGarde: (gardeId) => set({ gardeId, vue: 'gardes' }),

@@ -140,6 +140,17 @@ function Yeux({ humeur, fond }: { humeur: Humeur; fond: string }): JSX.Element {
           ))}
         </>
       );
+    case 'intrigue':
+      // Un sourcil haut, l'autre froncé, un œil plissé et la bouche de côté : Solvi se pose la question.
+      return (
+        <g transform="translate(1.4 -0.8)">
+          <Ouverts fond={fond} h={13.6} dy={2.8} droite={false} />
+          <Ouverts fond={fond} h={21} dy={-1} gauche={false} />
+          <path d="M76.6 88.8 L92 91.6" {...OEIL} strokeWidth={3.2} />
+          <path d="M107 81.6 Q115.6 75.6 124 80.4" {...OEIL} strokeWidth={3.2} />
+          <path d="M96.4 113.6 Q100.4 110.8 104.6 112.4" {...OEIL} strokeWidth={2.8} />
+        </g>
+      );
     default:
       return <Ouverts fond={fond} />;
   }
@@ -180,9 +191,11 @@ function Signe({ humeur }: { humeur: Humeur }): JSX.Element | null {
       );
     case 'intrigue':
       return (
-        <g className="solvi-signe hoche">
-          <path d="M146 40 a7 7 0 1 1 9.6 6.4 q-2.8 1.4 -2.8 4.6" {...trait} strokeWidth={4} />
-          <circle cx="152.8" cy="58.4" r="2.5" style={plein} />
+        <g className="solvi-signe doute">
+          <path d="M144.6 38.6 a8.4 8.4 0 1 1 11.6 7.7 q-3.4 1.7 -3.4 5.6" {...trait} strokeWidth={4.8} />
+          <circle cx="152.8" cy="60.6" r="3" style={plein} />
+          <path d="M165.4 30.6 a4.6 4.6 0 1 1 6.3 4.2 q-1.8 0.9 -1.8 3" {...trait} strokeWidth={2.8} opacity="0.55" />
+          <circle cx="169.9" cy="42.6" r="1.7" style={plein} opacity="0.55" />
         </g>
       );
     case 'reflechi':

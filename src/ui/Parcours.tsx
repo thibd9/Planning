@@ -1967,6 +1967,18 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   decisions: { gestion: ['La cloche'] },
   assistant: { gestion: ['Solvi, votre assistant'], equipe: ['Solvi, votre assistant'] },
   controles: { gestion: ['Les contrôles'] },
+  signaler: { gestion: ['Retards et suivi'], equipe: ['Prévenir d’un retard'] },
+  accident: { gestion: ['Une absence imprévue'], equipe: ['Demander un congé'] },
+  support: { gestion: ['L’aide'], equipe: ['Solvi, votre assistant'] },
+  tableau: { gestion: ['Le tableau de bord'] },
+  creer: { gestion: ['Le bouton « Créer »'] },
+  echeance: { gestion: ['Le tableau de bord'] },
+  propositions: { gestion: ['Trois propositions'] },
+  pauses: { gestion: ['Poser un poste'] },
+  'qui-prepare': { gestion: ['Qui prépare le planning'] },
+  'postes-types': { gestion: ['Horaires et effectif'] },
+  'officine-chiffres': { gestion: ['Horaires et effectif'] },
+  'points-forts': { gestion: ['La fiche d’une personne'] },
 };
 
 /** Le tutoriel d'une fiche d'aide pour ce rôle, s'il existe. */

@@ -283,10 +283,19 @@ export interface BesoinEffectif {
 export type ModelePlanning = 'collaboratif' | 'classique';
 
 /** Qui joindre quand Solvi ne sait pas répondre : renseigné par le titulaire. */
-export interface Support {
-  nom?: string;
-  email?: string;
-  telephone?: string;
+/** L'officine en chiffres : des repères sur les locaux, que le titulaire complète s'il les connaît. */
+export interface InfosOfficine {
+  /** Surface de vente, en mètres carrés. */
+  surfaceVente?: number;
+  /** Réserve et préparatoire, en mètres carrés. */
+  reserve?: number;
+  caisses?: number;
+  /** Postes de comptoir, où l'on délivre. */
+  comptoirs?: number;
+  /** Espaces de confidentialité (entretiens, vaccination). */
+  confidentialite?: number;
+  /** Robot ou automate de dispensation. */
+  robot?: boolean;
 }
 
 /** Quand le planning d'un mois doit être transmis à l'équipe, et ce qui se passe si l'échéance est dépassée. */
@@ -301,8 +310,10 @@ export interface ReglagePublication {
 
 export interface Officine {
   nom: string;
-  /** Surface de l'officine, en mètres carrés. Facultative. */
+  /** Surface totale de l'officine, en mètres carrés. Facultative. */
   surface?: number;
+  /** Les autres repères sur les locaux, tous facultatifs. */
+  infos?: InfosOfficine;
   /**
    * Afficher les coûts estimés. Désactivé par défaut : Solvéa ne connaît pas les salaires. Activé, il montre des
    * coûts calculés sur les seuls taux horaires que le titulaire a saisis dans les fiches.
@@ -312,7 +323,6 @@ export interface Officine {
   publication?: Partial<ReglagePublication>;
   /** Le répertoire des marques de la pharmacie : celles qu'on peut confier à un animateur. Il s'enrichit à l'usage. */
   marques?: string[];
-  support?: Support;
   modele?: ModelePlanning;
   /** Jour du mois précédent où la collecte des préférences se ferme (20 par défaut). */
   souhaitsLimite?: number;

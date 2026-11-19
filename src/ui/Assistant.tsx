@@ -1,4 +1,4 @@
-import { ArrowRight, GraduationCap, LifeBuoy, Mail, MessageSquare, Phone, SendHorizontal, X } from 'lucide-react';
+import { ArrowRight, GraduationCap, MessageSquare, SendHorizontal, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from '../domain/acces';
 import { estCollaboratif } from '../engine/souhaits';
@@ -6,6 +6,7 @@ import { useStore } from '../store/store';
 import { useUi } from '../store/ui';
 import type { Memoire, Reponse } from './bot';
 import { fichesPour, repondre } from './bot';
+import { ContactsSupport } from './components/Support';
 import type { Humeur } from './Solvi';
 import { NomSolvi, Solvi } from './Solvi';
 
@@ -81,9 +82,6 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
   // Solvi réfléchit pendant qu'il cherche, s'interroge quand il n'a pas compris, sourit quand il a répondu.
   const derniere = [...fil].reverse().find((b) => b.de !== 'moi');
   const humeurBot: Humeur = reflexion ? 'reflechi' : !derniere ? 'heureux' : (derniere.reponse?.humeur ?? 'content');
-  const support = data.officine.support;
-  const courriel = support?.email?.trim();
-  const telephone = support?.telephone?.trim();
   if (tour !== null || (parcours !== null && !assistant && !assistantEnVisite)) return null;
   return (
     <div className="assistant no-print">
@@ -145,17 +143,8 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
                   ) : null}
                   {b.reponse?.support ? (
                     <div className="aide-support">
-                      {courriel ? (
-                        <a className="btn sm" href={`mailto:${courriel}`}>
-                          <Mail size={14} aria-hidden="true" /> Écrire {support?.nom?.trim() ? `à ${support.nom.trim()}` : 'au support'}
-                        </a>
-                      ) : null}
-                      {telephone ? (
-                        <a className="btn sm" href={`tel:${telephone.replace(/[^+\d]/g, '')}`}>
-                          <Phone size={14} aria-hidden="true" /> {telephone}
-                        </a>
-                      ) : null}
-                      {!courriel && !telephone && espace !== 'responsable' ? (
+                      <ContactsSupport petit />
+                      {espace !== 'responsable' ? (
                         <button
                           type="button"
                           className="btn sm"
@@ -165,19 +154,6 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
                           }}
                         >
                           <MessageSquare size={14} aria-hidden="true" /> Écrire à mon titulaire
-                        </button>
-                      ) : null}
-                      {!courriel && !telephone && espace === 'responsable' ? (
-                        <button
-                          type="button"
-                          className="btn sm"
-                          onClick={() => {
-                            useUi.getState().aller('officine');
-                            ouvrirAssistant(false);
-                            window.setTimeout(() => document.querySelector('[data-focus="support"]')?.scrollIntoView({ block: 'center' }), 80);
-                          }}
-                        >
-                          <LifeBuoy size={14} aria-hidden="true" /> Indiquer un contact de support
                         </button>
                       ) : null}
                     </div>

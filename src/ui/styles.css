@@ -4231,3 +4231,45 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .connexion .card.pad { padding: 24px 20px 22px; }
 }
 @media (prefers-reduced-motion: reduce) { .cx-option .cx-fleche { transition: none; } }
+
+/* ---------- Solvi s'interroge : la tête penche, le point d'interrogation se balance ---------- */
+.solvi.h-intrigue svg { rotate: -7deg; transform-origin: 50% 70%; }
+.solvi.vivant.h-intrigue svg { animation: solvi-penche 3.4s ease-in-out infinite; }
+.solvi-signe.doute { transform-origin: 40% 100%; animation: solvi-signe 0.45s var(--fluide) both, solvi-doute 2.6s ease-in-out 0.45s infinite; }
+@keyframes solvi-penche { 0%, 100% { rotate: -5deg; } 45%, 60% { rotate: -11deg; } }
+@keyframes solvi-doute { 0%, 100% { transform: rotate(-6deg) translateY(0); } 50% { transform: rotate(10deg) translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) {
+  .solvi.vivant.h-intrigue svg, .solvi-signe.doute { animation: none !important; }
+}
+
+/* ---------- Le support : en pied de page, sur la page d'aide, dans les états vides ---------- */
+.pied-support { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 40px; padding: 14px 0 4px; border-top: 1px solid var(--line); font-size: 0.8125rem; color: var(--ink-3); }
+.pied-support a { color: var(--ink-2); font-weight: 600; text-decoration: none; }
+.pied-support a:hover { color: var(--a-plein); text-decoration: underline; }
+.pied-support svg { flex: none; color: var(--ink-3); }
+.connexion .pied-support { justify-content: center; margin-top: 22px; border-top: 0; padding: 0; }
+.sup-contacts { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.sup-bloc { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 16px 18px; margin-top: 14px; }
+.sup-bloc .sup-ico { flex: none; color: var(--a-plein); }
+.sup-bloc h2 { margin: 0; }
+.sup-bloc p { margin: 2px 0 0; }
+.ad-vide { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 28px 18px; }
+.ad-vide b { display: block; color: var(--ink); }
+.ad-vide-actions { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+
+/* ---------- L'officine en chiffres ---------- */
+.of-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 16px; align-items: end; }
+.of-grille .field { min-width: 0; }
+.of-grille input[type='number'] { width: 100%; }
+.of-robot { grid-column: 1 / -1; }
+.of-remarques { margin: 0; padding: 10px 12px 10px 30px; border-radius: var(--r-s); background: var(--warn-soft); color: var(--warn-ink, var(--ink)); font-size: 0.875rem; display: grid; gap: 4px; }
+
+/* ---------- Désigner un endroit : un contour net, deux ondes, puis plus rien ---------- */
+.vise { outline: 3px solid var(--a-plein) !important; outline-offset: 3px; border-radius: 6px; scroll-margin: 96px 24px 24px; animation: vise 1.2s ease-out 3; }
+.pg-c.vise, .pg-o.vise { outline-offset: -3px; }
+.plan-scroll.vise { outline-offset: -3px; }
+@keyframes vise { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--a-plein) 60%, transparent); } to { box-shadow: 0 0 0 16px transparent; } }
+@media (prefers-reduced-motion: reduce) { .vise { animation: none; } }
+.toast .toast-suite { font-weight: 700; }
+@media (max-width: 720px) { .of-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .of-grille { grid-template-columns: minmax(0, 1fr); } }
