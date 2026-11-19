@@ -4400,9 +4400,21 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .app-nom .coche { color: var(--a-deep); opacity: 0; }
 .app-carte.on .coche { opacity: 1; }
 .app-phrase { font-size: 12.5px; line-height: 1.35; color: var(--ink-3); }
-.menu-apparence { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; }
-.menu-apparence-nom { display: inline-flex; align-items: center; gap: 10px; font-weight: 550; color: var(--ink-2); }
-.seg.petit button { min-height: 30px; padding: 4px 9px; font-size: 12.5px; }
+/* L'apparence dans le menu du compte : trois vignettes de même largeur, chacune montre son thème d'un coup d'œil. */
+.menu-apparence { margin: 4px 0; padding: 4px 0 10px; border-block: 1px solid var(--line); }
+.menu .ap-choix { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 6px 6px 0; }
+.menu .ap-choix button { flex-direction: column; align-items: center; gap: 7px; padding: 8px 6px 7px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink-2); font-size: 12.5px; font-weight: 600; line-height: 1.2; text-align: center; transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease; }
+.menu .ap-choix button:hover { background: var(--n-2); border-color: var(--pastel-line); }
+.menu .ap-choix button.on { border-color: var(--a-deep); box-shadow: 0 0 0 1px var(--a-deep); background: var(--a-soft); color: var(--a-text); }
+.ap-vignette { display: grid; grid-template-columns: 30% 1fr; width: 100%; max-width: 60px; aspect-ratio: 16 / 10; border-radius: 4px; overflow: hidden; box-shadow: 0 0 0 1px rgba(var(--ink-rgb), 0.2); }
+.ap-vignette i { display: block; position: relative; }
+.ap-vignette i:first-child { background: #ffffff; box-shadow: inset -1px 0 0 #d9e2ec; }
+.ap-vignette i:last-child { background: #eef2f7; }
+.ap-vignette i:last-child::after { content: ''; position: absolute; inset: 24% 16% 24% 16%; border-radius: 2px; background: #ffffff; box-shadow: 0 0 0 1px #d9e2ec; }
+.ap-vignette.mixte i:first-child { background: #102f6b; box-shadow: none; }
+.ap-vignette.sombre i:first-child { background: #172029; box-shadow: inset -1px 0 0 #2a3643; }
+.ap-vignette.sombre i:last-child { background: #0e141a; }
+.ap-vignette.sombre i:last-child::after { background: #1d2832; box-shadow: 0 0 0 1px #2a3643; }
 
 @media (max-width: 1100px) {
   .tb-resume { flex-basis: 210px; padding-left: 20px; }
@@ -4687,3 +4699,23 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .tb-grille.tb-rang { grid-template-columns: minmax(0, 1fr); }
   .tb-rang .tb-decider { order: -1; }
 }
+
+/* Tableau de bord : la carte du comptoir quand rien n'est planifié. Une phrase qui explique, un bouton pour agir. */
+.tb-vide { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.tb-vide p { margin: 0; max-width: 68ch; line-height: 1.5; }
+
+/* Mon planning : une page comme les autres. Sous le titre, le prochain poste tient sur une ligne, en pleine largeur. */
+.mp-actions { align-self: center; gap: 8px; }
+.mp-prochain { margin-bottom: 22px; }
+.mp-prochain .prochain { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 28px; padding: 18px 22px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-1); }
+.mp-prochain .prochain > .eyebrow { flex: 0 0 100%; }
+.mp-prochain .pp-ligne { flex: none; }
+.mp-prochain .pp-d { flex: 1 1 260px; }
+.mp-prochain .pp-suite { flex: none; padding: 0 0 0 28px; border-top: 0; border-left: 1px solid var(--line); }
+@media (max-width: 760px) {
+  .mp-prochain .pp-suite { flex: 0 0 100%; padding: 10px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+}
+/* Semaine sans planning publié, vue par un titulaire : la phrase, puis le bouton qui mène à la grille. */
+.jh-attente { flex-wrap: wrap; }
+.jh-attente > span { flex: 1 1 260px; }
+.jh-attente .btn { flex: none; background: var(--surface); }

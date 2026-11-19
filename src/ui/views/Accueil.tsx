@@ -220,7 +220,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
 
   const groupes: { id: string; lignes: Ligne[]; singulier: string }[] = [
     { id: 'tit2', lignes: secondaires, singulier: 'titulaire' },
-    { id: 'adj', lignes: adjoints, singulier: 'pharmacien adjoint' },
+    { id: 'adj', lignes: adjoints, singulier: 'pharmacien' },
     { id: 'prep', lignes: preparateurs, singulier: 'préparateur' },
     { id: 'anim', lignes: animateurs, singulier: 'animateur' },
     { id: 'appr', lignes: apprentis, singulier: 'apprenti' },
@@ -615,7 +615,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
               <hr className="sep" />
               <Groupe id="tit2" titre="Autres titulaires" aide="Vos associés, s’il y en a. Ils ont les mêmes écrans que vous ; chacune de leurs décisions attend votre accord." icone={<Crown size={18} />} ton="mint" singulier="titulaire" lignes={secondaires} onChange={setSecondaires} ajouter={() => ligne('titulaire', '35')} libelleAjout="Ajouter un titulaire" erreurs={erreurs} />
               <hr className="sep" />
-              <Groupe id="adj" titre="Pharmaciens adjoints" aide="Avec les titulaires, ils assurent la présence d’un pharmacien, pauses comprises." icone={<PillIcon size={18} />} ton="mint" singulier="pharmacien adjoint" lignes={adjoints} onChange={setAdjoints} ajouter={() => ligne('adjoint')} libelleAjout="Ajouter un pharmacien" erreurs={erreurs} />
+              <Groupe id="adj" titre="Pharmaciens" aide="Avec les titulaires, ils assurent la présence d’un pharmacien, pauses comprises." icone={<PillIcon size={18} />} ton="mint" singulier="pharmacien" lignes={adjoints} onChange={setAdjoints} ajouter={() => ligne('adjoint')} libelleAjout="Ajouter un pharmacien" erreurs={erreurs} />
               <hr className="sep" />
               <Groupe id="prep" titre="Préparateurs" aide="Indiquez les heures du contrat : un temps partiel est comparé au prorata." icone={<Users size={18} />} ton="sky" singulier="préparateur" lignes={preparateurs} onChange={setPreparateurs} ajouter={() => ligne('preparateur')} libelleAjout="Ajouter un préparateur" erreurs={erreurs} />
               <hr className="sep" />
@@ -675,7 +675,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
                   <div className="notice warn">
                     <AlertTriangle size={17} aria-hidden="true" />
                     <span>
-                      Un seul pharmacien pour l’instant : chacune de ses pauses laissera l’ouverture sans pharmacien{coupure ? ', sauf pendant la coupure du midi' : ''}. Prévoyez un adjoint ou un remplaçant.
+                      Un seul pharmacien pour l’instant : chacune de ses pauses laissera l’ouverture sans pharmacien{coupure ? ', sauf pendant la coupure du midi' : ''}. Prévoyez un second pharmacien ou un remplaçant.
                     </span>
                   </div>
                 ) : (

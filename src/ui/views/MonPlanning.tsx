@@ -1,8 +1,8 @@
 import { decrirePauses } from '../../engine/pauses';
-import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Handshake, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
+import { ArrowRight, Ban, BellRing, CalendarClock, CalendarDays, Check, Coffee, HandHelping, Handshake, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
-import { JOURS, addDays, dayIndex, fmtDateCourt, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, weekDates, weekday, ferie } from '../../domain/time';
+import { JOURS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, weekDates, weekday, ferie } from '../../domain/time';
 import type { ISODate, Shift } from '../../domain/types';
 import { MISSION_LABEL, classeAbsence, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
 import { minutesTravail } from '../../engine/core';
@@ -70,11 +70,19 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
 
   return (
     <div className="me">
-      <div className="hero tb-hero">
-        <div className="tbh-texte">
-          <div className="eyebrow">{fmtDateLong(today)}</div>
-          <h1>Bonjour {person.prenom}</h1>
-          <div className="row wrap" style={{ marginTop: 14 }}>
+      {/* Une page comme les autres : l'accueil, avec le bonjour et la date, c'est le tableau de bord (ou « Mon espace »). */}
+      <div className="page-head">
+        <span className="page-ico" aria-hidden="true">
+          <CalendarDays size={26} />
+        </span>
+        <div className="grow">
+          <div className="eyebrow">Mon planning</div>
+          <h1>
+            Quand est-ce que <span className="hl">je travaille</span> ?
+          </h1>
+          <p>Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.</p>
+        </div>
+        <div className="row wrap mp-actions">
             <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
               <Plus size={16} aria-hidden="true" /> {gere ? 'Poser une absence' : 'Faire une demande'}
             </button>
@@ -96,8 +104,9 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                 <BellRing size={13} aria-hidden="true" /> {nonLus.length} changement{nonLus.length > 1 ? 's' : ''} à lire
               </Pill>
             ) : null}
-          </div>
         </div>
+      </div>
+      <div className="mp-prochain">
         <ProchainPoste postes={aVenir.filter((x) => !absences.some((a) => a.statut === 'approuvee' && a.from <= x.date && x.date <= a.to))} today={today} action={<PrevenirRetard personId={personId} />} />
       </div>
 
@@ -367,7 +376,20 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                   ) : (
                     <div className="jh-attente">
                       <CalendarClock size={26} aria-hidden="true" />
-                      <span>{gere ? 'Cette semaine n’est pas encore publiée : construisez-la, puis publiez-la.' : 'Votre responsable prépare encore cette semaine. Vous serez prévenu dès la publication.'}</span>
+                      <span>{gere ? `La semaine du ${fmtSemaine(monday)} n’a pas de planning publié : personne n’y voit encore ses horaires.` : 'Votre responsable prépare encore cette semaine. Vous serez prévenu dès la publication.'}</span>
+                      {gere ? (
+                        <button
+                          type="button"
+                          className="btn"
+                          data-construire={monday}
+                          onClick={() => {
+                            useUi.getState().setSemaine(monday);
+                            aller('construire');
+                          }}
+                        >
+                          Construire cette semaine <ArrowRight size={16} aria-hidden="true" />
+                        </button>
+                      ) : null}
                     </div>
                   )}
                 </div>

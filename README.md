@@ -87,7 +87,7 @@ trouve. Chacun choisit son apparence, claire, mixte ou sombre ; seul le titulair
 | --- | --- | --- |
 | Titulaire principal | Bleu ciel | Tableau de bord, décisions, son propre planning |
 | Autre titulaire | Bleu marine | Les mêmes écrans ; ses décisions attendent un accord |
-| Pharmacien adjoint | Bleu-vert | Gardes et missions |
+| Pharmacien | Bleu-vert | Gardes et missions |
 | Préparateur | Indigo | Compétences et postes |
 | Animateur | Framboise | Les marques qu'il présente |
 | Apprenti, étudiant | Vert, ambre | Alternance, études et horaires |

@@ -1,26 +1,6 @@
 import { AlertTriangle, ArrowRight, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, CircleX, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users,  BookOpenCheck, Eye, Sun, Sunrise, Sunset, CalendarClock, Stethoscope } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  JOURS,
-  JOURS_COURT,
-  addDays,
-  dayIndex,
-  fmtDecimal,
-  fmtDuree,
-  fmtEuros,
-  fmtHHMM,
-  fmtHeure,
-  fmtHorodatage,
-  fmtJourMois,
-  fmtSemaine,
-  isoWeek,
-  mondayOf,
-  parseHHMM,
-  totalDuree,
-  uid,
-  weekDates,
-  weekday,
-} from '../../domain/time';
+import { JOURS, JOURS_COURT, addDays, dayIndex, fmtDecimal, fmtDuree, fmtEuros, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, parseHHMM, totalDuree, uid, weekDates, weekday, fmtDateCourt } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
 import { ABSENCE_LABEL, ACTIVITE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt, classeAbsence, libelleGarde } from '../../domain/types';
 import {
@@ -51,6 +31,7 @@ import { memeIdentifiant } from '../../domain/acces';
 import { modificationsEnAttente, useStore } from '../../store/store';
 import { VueMois } from '../components/Mois';
 import { useUi } from '../../store/ui';
+import { CIBLE, viser } from '../viser';
 import type { Echelle } from '../kit';
 import { Tuile } from '../components/Tuile';
 import { ABSENCE_ICONE, ACTIVITE_COULEUR, ACTIVITE_COURT, ACTIVITE_ICONE, GARDE_ICONE } from '../icons';
@@ -68,7 +49,7 @@ export function echelleOfficine(data: AppData): Echelle {
 }
 
 const GROUPES: { titre: string; note?: string; test: (p: Person) => boolean; couleur: string; icone: JSX.Element }[] = [
-  { titre: 'Pharmaciens', note: 'titulaires et adjoints', test: (p) => estPharmacien(p) && !p.externe, couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
+  { titre: 'Pharmaciens', note: 'titulaires compris', test: (p) => estPharmacien(p) && !p.externe, couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
   { titre: 'Préparateurs', test: (p) => p.qualification === 'preparateur' && !p.externe, couleur: 'r-prepa', icone: <FlaskConical size={14} /> },
   { titre: 'Animateurs', test: (p) => p.qualification === 'animateur' && !p.externe, couleur: 'r-anim', icone: <Megaphone size={14} /> },
   { titre: 'Apprentis', test: (p) => p.qualification === 'apprenti' && !p.externe, couleur: 'r-apprenti', icone: <Sprout size={14} /> },
@@ -638,8 +619,8 @@ function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISO
     ? 'Aucun poste posé ce jour-là.'
     : trous.length
       ? aucun
-        ? `Aucun pharmacien n’a de poste ce jour-là :\n${plages(trous)}\nPosez le poste d’un titulaire ou d’un adjoint.`
-        : `La pharmacie est ouverte sans pharmacien sur :\n${plages(trous)}\nProlongez un poste, décalez une pause ou posez un autre pharmacien (titulaire ou adjoint).`
+        ? `Aucun pharmacien n’a de poste ce jour-là :\n${plages(trous)}\nPosez le poste d’un pharmacien.`
+        : `La pharmacie est ouverte sans pharmacien sur :\n${plages(trous)}\nProlongez un poste, décalez une pause ou posez un autre pharmacien.`
       : sous.length
         ? `Sous l’effectif attendu sur :\n${plages(sous)}\nAjoutez une personne au comptoir.`
         : 'Pharmacien présent sur toute l’ouverture, effectif atteint.';
@@ -1296,7 +1277,21 @@ function DialoguePublication({ semaine, onClose }: { semaine: ISODate; onClose: 
             disabled={!pret}
             onClick={() => {
               publier(semaine, ctrl.delais.filter((d) => accords.includes(d.id)).map((d) => d.message), assume ? bloquants.length : 0);
-              dire(ctrl.premiere ? 'Planning publié. L’équipe peut le consulter.' : 'Modifications publiées et notifiées.');
+              // On dit quelle semaine vient d'être publiée et quand elle commence : l'écran ouvre par défaut la semaine suivante,
+              // et l'on croit facilement avoir publié la semaine en cours.
+              const cetteSemaine = mondayOf(today);
+              const aVenir = semaine > cetteSemaine;
+              const enCoursVide = aVenir && !shiftsSemaine(data, cetteSemaine).length && data.semaines[cetteSemaine]?.statut !== 'publie';
+              if (!ctrl.premiere) dire('Modifications publiées et notifiées.');
+              else if (enCoursVide)
+                dire(`Semaine du ${fmtSemaine(semaine)} publiée : elle commence ${fmtDateCourt(semaine)}. La semaine en cours, elle, n’a pas encore de planning.`, false, {
+                  label: 'Construire cette semaine',
+                  faire: () => {
+                    useUi.getState().setSemaine(cetteSemaine);
+                    viser(CIBLE.grille);
+                  },
+                });
+              else dire(`Semaine du ${fmtSemaine(semaine)} publiée${aVenir ? ` : elle commence ${fmtDateCourt(semaine)}` : ''}. L’équipe peut la consulter.`);
               onClose();
             }}
           >

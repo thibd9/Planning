@@ -127,7 +127,7 @@ export const REGLES_INITIALES: Regle[] = [
     famille: 'pharmacie',
     titre: 'Pharmacien présent pendant toute l’ouverture',
     description:
-      'Les médicaments sont préparés par un pharmacien ou sous sa surveillance directe. Le contrôle porte sur chaque minute d’ouverture, pas sur un total d’heures. Titulaires et adjoints sont pharmaciens ; un titulaire en poste reste présent pendant sa pause, la pause d’un adjoint compte comme une absence.',
+      'Les médicaments sont préparés par un pharmacien ou sous sa surveillance directe. Le contrôle porte sur chaque minute d’ouverture, pas sur un total d’heures. Les titulaires comptent comme pharmaciens ; un titulaire en poste reste présent pendant sa pause, la pause d’un pharmacien salarié compte comme une absence.',
     nature: 'imperative',
     source: 'Code de la santé publique ; Ordre national des pharmaciens',
     dateEffet: '2026-01-01',
@@ -164,9 +164,9 @@ export const REGLES_INITIALES: Regle[] = [
   {
     id: 'pharmacie.adjoints',
     famille: 'pharmacie',
-    titre: 'Nombre de pharmaciens adjoints',
+    titre: 'Nombre de pharmaciens',
     description:
-      'Un équivalent temps plein d’adjoint par tranche révolue de 1,3 million d’euros de chiffre d’affaires annuel hors taxes.',
+      'Un équivalent temps plein de pharmacien, en plus du titulaire, par tranche révolue de 1,3 million d’euros de chiffre d’affaires annuel hors taxes.',
     nature: 'alerte',
     source: 'Code de la santé publique ; déclaration annuelle à l’ARS (source secondaire)',
     dateEffet: '2026-01-01',

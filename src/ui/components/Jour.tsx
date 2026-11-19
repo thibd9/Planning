@@ -74,7 +74,7 @@ export function DialogueJour({ date: initiale, moi, onClose }: { date: ISODate; 
           <p className="notice danger small" role="status">
             <AlertTriangle size={16} aria-hidden="true" />
             <span>
-              <b>Aucun pharmacien présent</b> de {trous.map((t) => `${fmtHeure(t.start)} à ${fmtHeure(t.end)}${t.raison ? ` (${t.raison})` : ''}`).join(', puis de ')}. Décalez une pause, allongez un poste ou posez un autre pharmacien, titulaire ou adjoint.
+              <b>Aucun pharmacien présent</b> de {trous.map((t) => `${fmtHeure(t.start)} à ${fmtHeure(t.end)}${t.raison ? ` (${t.raison})` : ''}`).join(', puis de ')}. Décalez une pause, allongez un poste ou posez un autre pharmacien.
             </span>
           </p>
         ) : (

@@ -430,7 +430,7 @@ export function validateEquipe(data: AppData): Issue[] {
       id: 'pharmacie.adjoints',
       regle: 'pharmacie.adjoints',
       gravite: 'alerte',
-      message: `Adjoints : ${quota.etpActuel.toLocaleString('fr-FR')} équivalent temps plein pour ${quota.etpRequis} attendu${
+      message: `Pharmaciens, hors titulaires : ${quota.etpActuel.toLocaleString('fr-FR')} équivalent temps plein pour ${quota.etpRequis} attendu${
         quota.etpRequis > 1 ? 's' : ''
       } au vu du chiffre d'affaires déclaré.`,
     });

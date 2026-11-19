@@ -24,7 +24,7 @@ const SOUHAIT_COURT: Record<string, string> = { matin: 'Matin', journee: 'Jour',
 
 /** Les lignes se rangent par poste, comme dans la grille de la semaine. */
 const GROUPES: { titre: string; note?: string; cles: Qualification[]; couleur: string; icone: JSX.Element }[] = [
-  { titre: 'Pharmaciens', note: 'titulaires et adjoints', cles: ['titulaire', 'adjoint'], couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
+  { titre: 'Pharmaciens', note: 'titulaires compris', cles: ['titulaire', 'adjoint'], couleur: 'r-adjoint', icone: <PillIcon size={14} /> },
   { titre: 'Préparateurs', cles: ['preparateur'], couleur: 'r-prepa', icone: <FlaskConical size={14} /> },
   { titre: 'Animateurs', cles: ['animateur'], couleur: 'r-anim', icone: <Megaphone size={14} /> },
   { titre: 'Apprentis', cles: ['apprenti'], couleur: 'r-apprenti', icone: <Sprout size={14} /> },

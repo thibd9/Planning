@@ -53,13 +53,13 @@ describe("dimensionnement de l'équipe", () => {
     expect(seul.pharmaciens.verdict).toBe('manque');
   });
 
-  it('rappelle la règle des adjoints selon l’activité annuelle', () => {
+  it('rappelle la règle du nombre de pharmaciens selon l’activité annuelle', () => {
     const sous = dimensionnement({ horaires, effectifs: [], infos: { activiteAnnuelle: 1_200_000 } }, equipe);
     expect(sous.pharmaciens.adjointsRequis).toBe(0);
     const deux = dimensionnement({ horaires, effectifs: [], infos: { activiteAnnuelle: 2_700_000 } }, equipe);
     expect(deux.pharmaciens.adjointsRequis).toBe(2);
     expect(deux.pharmaciens.adjointsCouverts).toBe(1);
-    expect(deux.remarques.some((r) => /au moins 2 pharmaciens adjoints/.test(r))).toBe(true);
+    expect(deux.remarques.some((r) => /au moins 2 pharmaciens en équivalent temps plein, en plus du titulaire/.test(r))).toBe(true);
     // Un titulaire associé à temps plein peut tenir lieu d'adjoint.
     const associes = dimensionnement({ horaires, effectifs: [], infos: { activiteAnnuelle: 2_700_000 } }, [...equipe, personne('t2', 'titulaire', 35)]);
     expect(associes.pharmaciens.adjointsCouverts).toBe(2);

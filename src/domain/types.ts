@@ -300,7 +300,7 @@ export interface InfosOfficine {
   passagesJour?: number;
   /** Temps moyen passé avec un client, en minutes. Sans valeur : 5 minutes, 4 avec un robot. */
   minutesParClient?: number;
-  /** Activité annuelle hors taxes, en euros : sert au nombre minimal de pharmaciens adjoints. Reste sur cet appareil. */
+  /** Activité annuelle hors taxes, en euros : sert au nombre minimal de pharmaciens. Reste sur cet appareil. */
   activiteAnnuelle?: number;
 }
 
@@ -670,7 +670,7 @@ export const estPharmacien = (p: Pick<Person, 'qualification'>): boolean =>
 
 export const QUALIFICATION_LABEL: Record<Qualification, string> = {
   titulaire: 'Pharmacien titulaire',
-  adjoint: 'Pharmacien adjoint',
+  adjoint: 'Pharmacien',
   preparateur: 'Préparateur',
   etudiant: 'Étudiant en pharmacie',
   apprenti: 'Apprenti',
@@ -680,7 +680,7 @@ export const QUALIFICATION_LABEL: Record<Qualification, string> = {
 
 export const QUALIFICATION_COURT: Record<Qualification, string> = {
   titulaire: 'Titulaire',
-  adjoint: 'Adjoint',
+  adjoint: 'Pharmacien',
   preparateur: 'Préparateur',
   etudiant: 'Étudiant',
   apprenti: 'Apprenti',

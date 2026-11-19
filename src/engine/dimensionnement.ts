@@ -144,7 +144,7 @@ export function dimensionnement(officine: Pick<Officine, 'horaires' | 'effectifs
   if (source === 'surface') remarques.push('Estimation d’après la seule surface de vente : elle est grossière. Indiquez le nombre de clients servis par jour pour un repère fiable.');
   if (source !== 'aucune' && i.caisses && pointe < i.caisses) remarques.push(`Vous avez ${i.caisses} caisses, mais ${pointe} personne${pointe > 1 ? 's' : ''} au comptoir suffi${pointe > 1 ? 'sent' : 't'} à l’heure de pointe : le nombre de caisses ne fixe pas l’effectif.`);
   if (source === 'passages' && plafond !== null && Math.ceil(charge * H.pointe - 0.15) > plafond) remarques.push(`À l’heure de pointe, l’activité demanderait plus de monde que vos ${postes} postes ne peuvent en accueillir : la file s’allonge faute de place, pas faute de personnel.`);
-  if (adjointsRequis !== null && adjointsCouverts + 1e-9 < adjointsRequis) remarques.push(`Règle officielle : votre activité demande au moins ${adjointsRequis} pharmacien${adjointsRequis > 1 ? 's' : ''} adjoint${adjointsRequis > 1 ? 's' : ''} en équivalent temps plein ; vous en comptez ${String(arrondi(adjointsCouverts)).replace('.', ',')}.`);
+  if (adjointsRequis !== null && adjointsCouverts + 1e-9 < adjointsRequis) remarques.push(`Règle officielle : votre activité demande au moins ${adjointsRequis} pharmacien${adjointsRequis > 1 ? 's' : ''} en équivalent temps plein, en plus du titulaire ; vous en comptez ${String(arrondi(adjointsCouverts)).replace('.', ',')}.`);
 
   return {
     source,

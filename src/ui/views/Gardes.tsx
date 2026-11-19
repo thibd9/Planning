@@ -721,7 +721,7 @@ function DialogueGarde({ onClose }: { onClose: () => void }): JSX.Element {
             </option>
           ))}
         </select>
-        <span className="aide" id="garde-personne-aide">Titulaires et pharmaciens adjoints. « Conseillé » : disponible et le moins chargé en gardes cette année.</span>
+        <span className="aide" id="garde-personne-aide">Titulaires et pharmaciens. « Conseillé » : disponible et le moins chargé en gardes cette année.</span>
       </label>
       {choisi && !choisi.disponible ? (
         <div className="notice warn small">

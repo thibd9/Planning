@@ -43,7 +43,7 @@ const COMMUNS = ['Mon planning', 'Mon contrat ou mes heures', 'Entretien annuel'
 
 export const PROFILS: Record<Qualification, Profil> = {
   titulaire: { espace: 'Espace titulaire', phrase: 'Les décisions du jour, le planning et l’équipe.', sujets: ['Point d’équipe', 'Entretien annuel', 'Organisation du planning', 'Autre sujet'] },
-  adjoint: { espace: 'Espace pharmacien adjoint', phrase: 'Vos horaires, vos gardes et les plages où vous êtes le pharmacien présent.', sujets: ['Gardes et astreintes', 'Missions (vaccination, entretiens)', ...COMMUNS] },
+  adjoint: { espace: 'Espace pharmacien', phrase: 'Vos horaires, vos gardes et les plages où vous êtes le pharmacien présent.', sujets: ['Gardes et astreintes', 'Missions (vaccination, entretiens)', ...COMMUNS] },
   preparateur: { espace: 'Espace préparateur', phrase: 'Vos horaires, vos compétences et vos demandes.', sujets: ['Formation ou compétence', ...COMMUNS] },
   etudiant: { espace: 'Espace étudiant', phrase: 'Vos horaires autour de vos cours, et vos examens à signaler.', sujets: ['Cours et examens', 'Stage ou thèse', ...COMMUNS] },
   apprenti: { espace: 'Espace apprenti', phrase: 'Vos horaires en officine, vos jours d’école et le suivi avec votre tuteur.', sujets: ['Point avec mon tuteur', 'Jours d’école', ...COMMUNS] },

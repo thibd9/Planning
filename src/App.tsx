@@ -1,4 +1,4 @@
-import { AlarmClock, ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, CheckCheck, ChevronDown, ChevronRight, CircleHelp, ClipboardCheck, Crown, FolderOpen, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, LifeBuoy, Lightbulb, ListChecks, LogOut, Medal, Menu, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, TrendingUp, UserRound, Users, X } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, CheckCheck, ChevronDown, ChevronRight, CircleHelp, ClipboardCheck, Crown, FolderOpen, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, LifeBuoy, Lightbulb, ListChecks, LogOut, Medal, Menu, MessageSquare, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, TrendingUp, UserRound, Users, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
@@ -569,16 +569,22 @@ export function App(): JSX.Element {
                   ) : null}
                   {/* L'apparence se change d'ici, en un geste : clair, mixte (menu foncé) ou sombre. */}
                   <div className="menu-apparence" role="group" aria-label="Apparence">
-                    <span className="menu-apparence-nom">
-                      {sombre ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />} Apparence
-                    </span>
-                    <span className="seg petit">
-                      {(['clair', 'mixte', 'sombre'] as const).map((m) => (
-                        <button key={m} type="button" id={`apparence-${m}`} className={(m === 'sombre' ? sombre : !sombre && (prefs.mode === 'mixte') === (m === 'mixte')) ? 'on' : ''} aria-pressed={m === 'sombre' ? sombre : !sombre && (prefs.mode === 'mixte') === (m === 'mixte')} onClick={() => setPreferences(session ?? '', { mode: m })}>
-                          {m === 'clair' ? 'Clair' : m === 'mixte' ? 'Mixte' : 'Sombre'}
-                        </button>
-                      ))}
-                    </span>
+                    <div className="titre-menu">Apparence</div>
+                    <div className="ap-choix">
+                      {(['clair', 'mixte', 'sombre'] as const).map((m) => {
+                        const actif = m === 'sombre' ? sombre : !sombre && (prefs.mode === 'mixte') === (m === 'mixte');
+                        return (
+                          <button key={m} type="button" id={`apparence-${m}`} className={actif ? 'on' : ''} aria-pressed={actif} onClick={() => setPreferences(session ?? '', { mode: m })}>
+                            {/* Une vignette de l'écran : le menu à gauche, le contenu à droite. Elle montre le thème, pas le thème courant. */}
+                            <span className={`ap-vignette ${m}`} aria-hidden="true">
+                              <i />
+                              <i />
+                            </span>
+                            {m === 'clair' ? 'Clair' : m === 'mixte' ? 'Mixte' : 'Sombre'}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <button type="button" onClick={() => { setMenu(false); aller('compte'); window.setTimeout(() => document.getElementById('c-apparence')?.scrollIntoView({ block: 'start' }), 60); }}>
                     <Settings size={17} aria-hidden="true" /> Paramètres

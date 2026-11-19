@@ -71,7 +71,7 @@ qu'on va y faire, dans la peau de qui, et où l'on en est dans le plan.
 | Visite | Durée | Ce qu'elle raconte |
 | --- | --- | --- |
 | **Titulaire** | 30 min, 55 étapes | La vie d'un planning, de la création de la pharmacie au bilan du mois. |
-| **Pharmacien** | 7 min | L'espace d'un pharmacien adjoint : planning, demandes, gardes, compte. |
+| **Pharmacien** | 7 min | L'espace d'un pharmacien : planning, demandes, gardes, compte. |
 | **Équipe** | 7 min | L'espace d'un préparateur : planning, demandes, collègues, compte. |
 | **Journée type** | 8 min, 13 étapes | Une journée du matin au soir, avec ceux qui la vivent. |
 
@@ -80,7 +80,7 @@ Les chapitres de la visite du titulaire suivent l'ordre où les choses se vivent
 1. **Installer la pharmacie** : équipe, fiche d'une personne, marques d'un animateur, horaires, règles.
 2. **Recueillir les souhaits** : les préférences du mois, vues par un préparateur.
 3. **Construire et publier** : la grille, les propositions, les contrôles, les gardes, la publication.
-4. **L'équipe reçoit son planning** : ce que voient un préparateur et un pharmacien adjoint.
+4. **L'équipe reçoit son planning** : ce que voient un préparateur et un pharmacien.
 5. **Les demandes de l'équipe** : congé, remplacement, la décision du titulaire.
 6. **Les imprévus** : absence du matin, appel à l'équipe, retard, décision à deux titulaires.
 7. **Le bilan du mois** : heures, équité, journal et paie, documents.
@@ -89,7 +89,7 @@ Les chapitres de la visite du titulaire suivent l'ordre où les choses se vivent
 ### L'environnement de test
 
 Dans la barre du haut, l'étiquette « Espace … » ouvre un petit menu : on y passe d'un regard à l'autre sans
-se reconnecter (titulaire principal, second titulaire, pharmacien adjoint, préparateur, animateur, apprenti,
+se reconnecter (titulaire principal, second titulaire, pharmacien, préparateur, animateur, apprenti,
 étudiant), on y lance les tutoriels, on y remet les données d'exemple à neuf. Aucune barre ne s'ajoute à la
 page. Les personnes, les marques et la pharmacie de l'exemple sont inventées.
 
@@ -242,7 +242,7 @@ réponse, son prochain poste, puis ce qui est propre à son métier.
 | --- | --- | --- |
 | Titulaire principal | Bleu ciel | Tableau de bord, toutes les décisions |
 | Autre titulaire | Bleu marine | Mêmes écrans ; ses décisions attendent un accord |
-| Pharmacien adjoint | Bleu-vert | Ses gardes, ses missions |
+| Pharmacien | Bleu-vert | Ses gardes, ses missions |
 | Préparateur | Indigo | Ses compétences, ses postes |
 | Animateur | Framboise | Les marques qu'il présente, en cartes : nom, initiales, familles de produits |
 | Apprenti | Vert | Son alternance |
@@ -265,6 +265,14 @@ maquettes. Les blocs et leur style sont les mêmes, seule leur place change :
 | **Priorité d'abord** | La priorité, l'échéance du mois et « Mon agenda » en tête. Dessous, les décisions et le prochain planning à gauche, l'équipe du jour à droite. Puis les décisions récentes. |
 
 Sur un écran étroit, tout passe sur une colonne et ce qui attend une décision reste avant l'équipe du jour.
+
+Quand la semaine en cours n'a aucun poste (pharmacie qui débute, premier planning posé pour la semaine
+suivante), le tableau de bord le dit en clair : le repère affiche « Pas de planning » et la carte du comptoir
+propose « Construire cette semaine ». Un planning à publier qui n'a encore aucun poste est annoncé comme
+« à construire ».
+
+Dans le menu du compte, l'apparence se choisit sur trois vignettes (clair, mixte, sombre) qui montrent le
+menu et le contenu de chaque thème.
 
 Dans la bannière, une icône au trait suit le **moment de la journée** : soleil levant le matin (dès 5 h),
 plein soleil à midi (dès 11 h), soleil plus doux l'après-midi (dès 14 h), soleil couchant le soir (dès 18 h),
@@ -479,7 +487,7 @@ Chaque profil a son dessin dans la bannière d'accueil, révélé au centre entr
 | --- | --- | --- |
 | Titulaire principal | La pharmacie de quartier (maquette « Bannière 01 ») | Bleu ciel |
 | Titulaire secondaire | Le bloc-notes et le graphique | Bleu marine |
-| Pharmacien adjoint | La croix et la boîte | Bleu-vert |
+| Pharmacien | La croix et la boîte | Bleu-vert |
 | Préparateur | Le bécher, le flacon et le mortier | Indigo |
 | Animateur | Le mégaphone et le calendrier | Framboise |
 | Apprenti | Les livres et le badge | Émeraude |
@@ -520,7 +528,7 @@ l'activité, pas du mobilier : **six caisses ne demandent pas six personnes**.
 3. Il compare ensuite les **contrats** au besoin, en équivalents temps plein, pour les pharmaciens d'un côté,
    pour le reste du comptoir de l'autre : « Il en manque », « C'est juste », « Assez », « Plus qu'il n'en faut ».
 4. Il signale les réglages d'effectif minimum qui s'écartent du repère, et rappelle la seule règle officielle :
-   un pharmacien adjoint en équivalent temps plein par tranche révolue de 1,3 million d'euros d'activité
+   un pharmacien en équivalent temps plein par tranche révolue de 1,3 million d'euros d'activité
    (arrêté du 21 février 2022, à vérifier car les seuils peuvent être révisés).
 
 Les hypothèses sont affichées sur place (« D'où vient ce calcul ») et écrites dans

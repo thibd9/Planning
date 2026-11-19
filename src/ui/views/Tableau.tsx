@@ -78,6 +78,13 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   };
   const enPoste = [...new Map(duJour.map((s) => [s.personId, s])).values()];
   const ouvertAuj = ouverture(data.officine, today).length > 0;
+  // Une pharmacie qui débute, ou une semaine jamais construite : aucun poste cette semaine. On le dit, plutôt qu'un « 0 en poste » muet.
+  const semaineVide = !shiftsSemaine(data, lundi).length;
+  const construireCetteSemaine = (): void => {
+    setSemaine(lundi);
+    aller('construire');
+    viser(CIBLE.grille);
+  };
 
   // Le cycle d'une semaine : préférences, brouillon, contrôles, publication. On montre la première semaine à traiter.
   const cycle = useMemo(() => {
@@ -150,7 +157,13 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
     if (demandes) return { ton: 'attention', icone: <Check size={22} />, titre: `${pluriel(demandes, 'demande', 'demandes')} de l’équipe à trancher`, detail: 'Congés et horaires : chacun attend une réponse.', bouton: 'Répondre', action: () => ouvrir('demandes') };
     const gardes = d.gardesAAffecter.length + d.gardesRepos.length + d.gardesAbsence.length + d.gardesAValider.length;
     if (gardes) return { ton: 'attention', icone: <MoonStar size={22} />, titre: `${pluriel(gardes, 'garde', 'gardes')} à régler`, detail: 'À confier, à valider, ou un repos à prévoir.', bouton: 'Voir les gardes', action: () => ouvrir('gardes') };
-    if (d.publications.length) return { ton: 'attention', icone: <CalendarRange size={22} />, titre: 'Un planning attend d’être publié', detail: `Semaine du ${fmtSemaine(d.publications[0].monday)} : l’équipe ne voit pas encore ses horaires.`, bouton: 'Publier', action: () => ouvrir('publications') };
+    if (d.publications.length) {
+      const x = d.publications[0];
+      const semaine = `Semaine du ${fmtSemaine(x.monday)}`;
+      if (x.type === 'modifications') return { ton: 'attention', icone: <CalendarRange size={22} />, titre: 'Des modifications attendent d’être publiées', detail: `${semaine} : ${pluriel(x.nombre, 'changement', 'changements')} que l’équipe ne voit pas encore.`, bouton: 'Publier', action: () => ouvrir('publications') };
+      if (!x.nombre) return { ton: 'attention', icone: <CalendarRange size={22} />, titre: 'Un planning reste à construire', detail: `${semaine} : aucun poste n’est encore posé, l’équipe n’a pas d’horaires.`, bouton: 'Construire', action: () => ouvrir('publications') };
+      return { ton: 'attention', icone: <CalendarRange size={22} />, titre: 'Un planning attend d’être publié', detail: `${semaine} : l’équipe ne voit pas encore ses horaires.`, bouton: 'Publier', action: () => ouvrir('publications') };
+    }
     if (cycle.etapes.some((e) => e.etat !== 'fait')) return { ton: 'calme', icone: <CalendarRange size={22} />, titre: `Préparer la semaine du ${fmtSemaine(cycle.semaine)}`, detail: 'Rien d’urgent : c’est le bon moment pour avancer le prochain planning.', bouton: cycle.bouton, action: cycle.action };
     return { ton: 'ok', icone: <Check size={22} />, titre: 'Tout est à jour', detail: 'Absences couvertes, demandes arbitrées, plannings publiés.' };
   })();
@@ -270,7 +283,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
               <h2 id="tb-agenda">
                 {monPoste ? (
                   <>
-                    {capitale(monPoste.date === today ? 'Aujourd’hui' : monPoste.date === addDays(today, 1) ? 'Demain' : fmtDateCourt(monPoste.date))} :{' '}
+                    {capitale(monPoste.date === today ? 'Aujourd’hui' : monPoste.date === addDays(today, 1) ? 'Demain' : fmtDateCourt(monPoste.date))}{'\u00a0'}:{' '}
                     <span className="num sans-coupure">
                       {fmtHeure(monPoste.start)} – {fmtHeure(monPoste.end)}
                     </span>
@@ -419,7 +432,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <div className="grow">
               <div className="eyebrow">Aujourd’hui au comptoir</div>
               <h2 id="tb-jour">
-                {enPoste.length ? `${enPoste.length} personne${enPoste.length > 1 ? 's' : ''} en poste` : 'Aucun poste planifié'}
+                {enPoste.length ? `${enPoste.length} personne${enPoste.length > 1 ? 's' : ''} en poste` : !ouvertAuj ? 'Officine fermée' : semaineVide ? 'Semaine sans planning' : 'Aucun poste aujourd’hui'}
                 {absents.length ? ` · ${absents.length} absent${absents.length > 1 ? 's' : ''}` : ''}
               </h2>
             </div>
@@ -477,7 +490,27 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
               ) : null}
             </div>
           ) : (
-            <p className="card-body soft">Construisez ou publiez la semaine pour voir ici l’équipe du jour.</p>
+            <div className="card-body tb-vide" id="tb-jour-vide">
+              {!ouvertAuj ? (
+                <p className="soft">L’officine est fermée aujourd’hui : personne n’est attendu au comptoir.</p>
+              ) : semaineVide ? (
+                <>
+                  <p className="soft">
+                    La semaine du {fmtSemaine(lundi)} n’a aucun poste : elle n’a pas été construite. C’est normal quand la pharmacie vient d’être créée ou que le premier planning commence la semaine suivante. Vous pouvez la construire maintenant, même entamée.
+                  </p>
+                  <button type="button" className="btn" id="tb-construire-semaine" onClick={construireCetteSemaine}>
+                    Construire cette semaine <ArrowRight size={16} aria-hidden="true" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="soft">Personne n’a de poste aujourd’hui, alors que l’officine est ouverte. Les autres jours de la semaine sont planifiés.</p>
+                  <button type="button" className="btn" onClick={construireCetteSemaine}>
+                    Ouvrir le planning de la semaine <ArrowRight size={16} aria-hidden="true" />
+                  </button>
+                </>
+              )}
+            </div>
           )}
         </section>
   );
@@ -498,7 +531,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
                   {d.total} décision{d.total > 1 ? 's' : ''}
                 </b>{' '}
                 <span className="tb-resume-ligne">vous {d.total > 1 ? 'attendent' : 'attend'}.</span>{' '}
-                {d.total > 1 ? <>Concentrez-vous sur la priorité, <span className="sans-coupure">le reste suit dans l’ordre.</span></> : 'Elle est en tête, juste dessous.'}
+                {d.total > 1 ? <>Concentrez-vous sur la priorité, <span className="sans-coupure">le reste suit dans l’ordre.</span></> : 'Elle est affichée en premier.'}
               </>
             ) : (
               <>
@@ -514,8 +547,8 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <span className="ico" aria-hidden="true"><UsersRound size={18} /></span>
             <span className="grow">
               <span className="l">L’équipe aujourd’hui</span>
-              <span className="v">{ouvertAuj ? <><span className="num">{enPoste.length}</span> en poste</> : 'Fermée'}</span>
-              <span className="d">{ouvertAuj ? (absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'aucun absent') : 'pas d’ouverture'}</span>
+              <span className="v">{!ouvertAuj ? 'Fermée' : semaineVide ? 'Pas de planning' : <><span className="num">{enPoste.length}</span> en poste</>}</span>
+              <span className="d">{!ouvertAuj ? 'pas d’ouverture' : semaineVide ? 'semaine à construire' : absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'aucun absent'}</span>
             </span>
           </button>
           <button type="button" className="tb-chiffre" onClick={() => { setSemaine(lundi); aller('construire'); }}>

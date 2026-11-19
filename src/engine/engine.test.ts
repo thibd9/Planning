@@ -332,7 +332,7 @@ describe('équité, paie et langage courant', () => {
   it('exporte une fiche navette lisible', () => {
     const csv = ficheNavetteCSV(data, '2026-11');
     expect(csv).toContain('heures PRÉVUES');
-    expect(csv).toContain('Igor Le Russe;Adjoint;35');
+    expect(csv).toContain('Igor Le Russe;Pharmacien;35');
     expect(csv).not.toContain('Marchetti');
   });
   it('lit une demande en langage courant sans jamais stocker de motif', () => {

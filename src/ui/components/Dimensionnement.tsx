@@ -100,7 +100,7 @@ export function Dimensionnement(): JSX.Element {
             <input id="dim-activite" type="number" inputMode="numeric" min={0} max={50000000} step={10000} className="num" value={infos.activiteAnnuelle ?? ''} onChange={(e) => ecrire('activiteAnnuelle', e.target.value, 50000000)} placeholder="-" aria-describedby="dim-activite-aide" />
             <span className="unite">€</span>
           </span>
-          <span className="aide" id="dim-activite-aide">Facultatif : pour le nombre minimal d’adjoints. Reste sur cet appareil.</span>
+          <span className="aide" id="dim-activite-aide">Facultatif : pour le nombre minimal de pharmaciens. Reste sur cet appareil.</span>
         </label>
       </div>
 
@@ -150,7 +150,7 @@ export function Dimensionnement(): JSX.Element {
         <p className={`dim-regle${p.adjointsCouverts + 1e-9 < p.adjointsRequis ? ' alerte' : ''}`} id="dim-adjoints">
           <PillBottle size={16} aria-hidden="true" />
           <span>
-            <b>Règle officielle.</b> Avec cette activité, il faut au moins <b className="num">{p.adjointsRequis}</b> pharmacien{p.adjointsRequis > 1 ? 's' : ''} adjoint{p.adjointsRequis > 1 ? 's' : ''} en équivalent temps plein (un par tranche révolue de {fmtDecimal(H.trancheAdjoint / 1_000_000, 1)} million d’euros, arrêté du 21 février 2022). Vous en comptez <b className="num">{fmtDecimal(p.adjointsCouverts, 1)}</b>
+            <b>Règle officielle.</b> Avec cette activité, il faut au moins <b className="num">{p.adjointsRequis}</b> pharmacien{p.adjointsRequis > 1 ? 's' : ''} en équivalent temps plein, en plus du titulaire (un par tranche révolue de {fmtDecimal(H.trancheAdjoint / 1_000_000, 1)} million d’euros, arrêté du 21 février 2022). Vous en comptez <b className="num">{fmtDecimal(p.adjointsCouverts, 1)}</b>
             , titulaires associés à temps plein compris. Vérifiez le texte en vigueur : les seuils peuvent être révisés.
           </span>
         </p>

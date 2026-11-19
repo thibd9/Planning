@@ -4,7 +4,7 @@ import { estPharmacien } from './types';
 /**
  * Trois espaces selon le rôle :
  *  - responsable : les titulaires, et les personnes à qui le titulaire principal a donné l'accès ;
- *  - pharmacien  : un pharmacien adjoint sans droit de gestion ;
+ *  - pharmacien  : un pharmacien sans droit de gestion ;
  *  - equipe      : préparateurs, apprentis, étudiants, rayonnistes.
  */
 export type Espace = 'responsable' | 'pharmacien' | 'equipe';
@@ -74,5 +74,5 @@ export const memeIdentifiant = (a: string | undefined, b: string | undefined): b
 export function libelleRole(data: Pick<AppData, 'officine' | 'personnes'>, p: Person): string {
   if (p.externe) return 'Remplaçant';
   if (p.qualification === 'titulaire') return estResponsable(data, p) ? 'Titulaire principal' : 'Titulaire secondaire';
-  return { adjoint: 'Pharmacien adjoint', preparateur: 'Préparateur', etudiant: 'Étudiant', apprenti: 'Apprenti', rayonniste: 'Rayonniste', animateur: 'Animateur' }[p.qualification];
+  return { adjoint: 'Pharmacien', preparateur: 'Préparateur', etudiant: 'Étudiant', apprenti: 'Apprenti', rayonniste: 'Rayonniste', animateur: 'Animateur' }[p.qualification];
 }

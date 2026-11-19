@@ -90,7 +90,7 @@ export function Equipe(): JSX.Element {
         </div>
         {quota ? (
           <div className="card pad" style={{ padding: '10px 16px' }}>
-            <div className="eyebrow">Pharmaciens adjoints</div>
+            <div className="eyebrow">Pharmaciens</div>
             <div className="row" style={{ marginTop: 2 }}>
               <b className="num" style={{ fontSize: 20 }}>
                 {quota.etpActuel.toLocaleString('fr-FR')} / {quota.etpRequis}
@@ -117,7 +117,7 @@ export function Equipe(): JSX.Element {
             </button>
           }
         >
-          Commencez par le titulaire et les pharmaciens adjoints, puis les préparateurs et les autres postes.
+          Commencez par le titulaire et les pharmaciens, puis les préparateurs et les autres postes.
         </Empty>
       ) : null}
       <div className="split" style={{ gridTemplateColumns: '340px minmax(0, 1fr)', display: data.personnes.length ? undefined : 'none' }}>
@@ -184,7 +184,7 @@ export function Equipe(): JSX.Element {
 /** Un groupe par poste : on ne mélange pas apprentis, étudiants et animateurs. */
 const POSTES: { titre: string; cles: Qualification[] }[] = [
   { titre: 'Titulaires', cles: ['titulaire'] },
-  { titre: 'Pharmaciens adjoints', cles: ['adjoint'] },
+  { titre: 'Pharmaciens', cles: ['adjoint'] },
   { titre: 'Préparateurs', cles: ['preparateur'] },
   { titre: 'Animateurs', cles: ['animateur'] },
   { titre: 'Apprentis', cles: ['apprenti'] },
@@ -462,7 +462,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
               <div className="notice ok">
                 <Crown size={17} aria-hidden="true" />
                 <span>
-                  <b>Titulaire principal.</b> A créé la pharmacie et décide en dernier ressort : il donne son accord aux décisions des autres titulaires, et lui seul ouvre la gestion à un adjoint.
+                  <b>Titulaire principal.</b> A créé la pharmacie et décide en dernier ressort : il donne son accord aux décisions des autres titulaires, et lui seul ouvre la gestion à un pharmacien.
                 </span>
               </div>
             ) : person.qualification === 'titulaire' ? (

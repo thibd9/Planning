@@ -20,7 +20,7 @@ import { NomSolvi, Solvi } from './Solvi';
 export const ROLES_TEST: { cle: string; id: string; identifiant: string; court: string; titre: string; nom: string; detail: string }[] = [
   { cle: 't1', id: 'p_helene', identifiant: 'caroline.tellier', court: 'Titulaire 1', titre: 'Titulaire principale', nom: 'Caroline Tellier', detail: 'Tous les droits : tableau de bord, plannings, équipe, gardes, réglages.' },
   { cle: 't2', id: 'p_antoine', identifiant: 'pierre.fiandino', court: 'Titulaire 2', titre: 'Titulaire secondaire', nom: 'Pierre Fiandino', detail: 'Mêmes écrans que la titulaire principale ; ses décisions attendent son accord.' },
-  { cle: 'ph', id: 'p_karim', identifiant: 'igor.lerusse', court: 'Pharmacien', titre: 'Pharmacien adjoint', nom: 'Igor Le Russe', detail: 'Son planning, le planning publié, ses gardes, ses messages.' },
+  { cle: 'ph', id: 'p_karim', identifiant: 'igor.lerusse', court: 'Pharmacien', titre: 'Pharmacien', nom: 'Igor Le Russe', detail: 'Son planning, le planning publié, ses gardes, ses messages.' },
   { cle: 'pr', id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', court: 'Préparateur', titre: 'Préparateur', nom: 'Nicolas Le Syndicaliste', detail: 'Ses horaires, ses demandes, les remplacements, ses messages.' },
   { cle: 'an', id: 'p_sarah', identifiant: 'sarah.lemoine', court: 'Animateur', titre: 'Animatrice', nom: 'Sarah Lemoine', detail: 'Son accueil : les marques qu’elle présente, ses jours d’animation, ses rendez-vous.' },
   { cle: 'ap', id: 'p_manon', identifiant: 'manon.girard', court: 'Apprenti', titre: 'Apprentie', nom: 'Manon Girard', detail: 'Son accueil : son alternance, ses jours d’école, le point avec son tuteur.' },
@@ -205,7 +205,7 @@ const tempo = (ms: number): number => Math.round(ms * RYTHMES[rythme].facteur);
 /** Le temps de lire ce que dit Solvi avant qu'il agisse, compté une fois sa bulle ouverte : plus elle est longue, plus il attend. */
 const tempsDeLire = (texte: string): number => tempo(Math.min(5000, Math.max(1400, 400 + texte.trim().length * 32)));
 /** La couleur du profil de chaque personnage de l'exemple : la pastille qui l'annonce en début de chapitre. */
-const TEINTE_DE: Record<string, string> = { 'Caroline · titulaire': '#1f6bb8', 'Nicolas · préparateur': '#3730a3', 'Léa · pharmacienne adjointe': '#0a5a63', 'Igor · pharmacien adjoint': '#0a5a63', 'Pierre · titulaire secondaire': '#1b4f7f' };
+const TEINTE_DE: Record<string, string> = { 'Caroline · titulaire': '#1f6bb8', 'Nicolas · préparateur': '#3730a3', 'Léa · pharmacienne': '#0a5a63', 'Igor · pharmacien': '#0a5a63', 'Pierre · titulaire secondaire': '#1b4f7f' };
 
 interface Etape {
   /** Chapitre de la visite ; le sommaire permet de sauter de l'un à l'autre. */
@@ -555,7 +555,7 @@ const ETABLI_BRUT: Etape[] = [
     jouer: () => versDemandes('nicolas.lesyndicaliste', 'souhaits'),
   },
   {
-    qui: 'Igor · pharmacien adjoint',
+    qui: 'Igor · pharmacien',
     cible: '.content .card',
     titre: 'Ses gardes',
     texte: () => 'Igor retrouve ses gardes, le repos qui suit et ses récupérations. Il n’a pas accès à la gestion.',
@@ -654,7 +654,7 @@ const ETABLI_BRUT: Etape[] = [
 const ETABLI: Etape[] = raconter(ETABLI_BRUT, [
   { chapitre: 'Le matin : l’équipe du jour', but: 'Caroline ouvre Solvéa : qui est là, quel poste reste à couvrir, qui est en pause ou en retard.', etapes: ['Le tableau de bord', 'L’appel à l’équipe', 'Pauses et retards'] },
   { chapitre: 'Un remplacement entre collègues', but: 'Nicolas ne peut pas tenir un poste. Il demande, un collègue se propose, Caroline valide.', etapes: ['Ses horaires', 'Un collègue se propose', 'Valider'] },
-  { chapitre: 'Chacun son espace', but: 'Le même Solvéa, vu par un préparateur, un pharmacien adjoint et l’autre titulaire.', etapes: ['Mes préférences', 'Ses gardes', 'Décider à deux', 'Donner son accord'] },
+  { chapitre: 'Chacun son espace', but: 'Le même Solvéa, vu par un préparateur, un pharmacien et l’autre titulaire.', etapes: ['Mes préférences', 'Ses gardes', 'Décider à deux', 'Donner son accord'] },
   { chapitre: 'Le soir : préparer la suite', but: 'Caroline construit la semaine à venir, regarde le mois et solde les heures.', etapes: ['Construire', 'Le mois', 'Le compteur d’heures'] },
 ]);
 
@@ -722,7 +722,7 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: "[data-focus='ajouter-personne']", sert: 'Ce bouton ouvre la fiche d’une nouvelle personne.' },
       { faire: 'taper', dans: '#personne-prenom', texte: 'Sarah', dit: 'Saisissez le prénom de votre collaborateur', sert: 'Il apparaît sur chaque ligne du planning. Ici, inventons une personne.' },
       { faire: 'taper', dans: '#personne-nom', texte: 'Lemoine', dit: 'Puis son nom', sert: 'Il sert aussi à créer son identifiant de connexion.' },
-      { faire: 'choisir', dans: '#personne-fonction', valeur: 'animateur', dit: 'Choisissez sa fonction dans la liste déroulante', sert: 'Titulaire, pharmacien adjoint, préparateur, animateur… La fonction fixe sa couleur et ce qu’il peut tenir seul.' },
+      { faire: 'choisir', dans: '#personne-fonction', valeur: 'animateur', dit: 'Choisissez sa fonction dans la liste déroulante', sert: 'Titulaire, pharmacien, préparateur, animateur… La fonction fixe sa couleur et ce qu’il peut tenir seul.' },
       { faire: 'taper', dans: '#personne-heures', texte: '21', dit: 'Indiquez les heures de son contrat, par semaine', sert: 'Elles servent au compteur d’heures et à l’équité.' },
       { faire: 'cliquer', sur: VALIDER, sert: 'La personne rejoint l’équipe ; son compte est prêt.' },
       { faire: 'action', jouer: arriveeEquipe },
@@ -1141,7 +1141,7 @@ const COMPLET_BRUT: Etape[] = [
   },
   {
     chapitre: EQUIPE,
-    qui: 'Léa · pharmacienne adjointe',
+    qui: 'Léa · pharmacienne',
     cible: '.content .card',
     titre: 'Mes gardes',
     texte: () => 'Léa retrouve ses gardes, le repos qui suit chacune, et ce qui part en paie.',
@@ -1615,7 +1615,7 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
   },
   {
     chapitre: 'L’équipe reçoit son planning',
-    but: 'Le planning est publié. Voici ce que voient Nicolas, préparateur, puis Léa, pharmacienne adjointe.',
+    but: 'Le planning est publié. Voici ce que voient Nicolas, préparateur, puis Léa, pharmacienne.',
     etapes: ['Mon planning', 'Le calendrier du mois', 'Le planning de l’équipe', 'Mon suivi', 'Mes gardes'],
   },
   {
@@ -1885,12 +1885,12 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
   return etapes;
 }
 
-const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'Léa · pharmacienne adjointe', prenom: 'Léa', pharmacien: true });
+const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'Léa · pharmacienne', prenom: 'Léa', pharmacien: true });
 const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', qui: 'Nicolas · préparateur', prenom: 'Nicolas' });
 
 export const SCENARIOS = {
   complet: { court: 'Titulaire', role: 'Titulaire', titre: 'Tout Solvéa, de zéro', fil: 'De la création de la pharmacie au bilan du mois. On suit Caroline, titulaire, et l’on passe par moments dans la peau de son équipe.', duree: `30 min · ${COMPLET.length} étapes`, etapes: COMPLET },
-  pharmacien: { court: 'Pharmacien', role: 'Pharmacien adjoint', titre: 'Mon espace de pharmacien', fil: 'Tout ce que voit Léa, pharmacienne adjointe : son planning, ses demandes, ses gardes, son compte.', duree: `7 min · ${PHARMACIEN.length} étapes`, etapes: PHARMACIEN },
+  pharmacien: { court: 'Pharmacien', role: 'Pharmacien', titre: 'Mon espace de pharmacien', fil: 'Tout ce que voit Léa, pharmacienne : son planning, ses demandes, ses gardes, son compte.', duree: `7 min · ${PHARMACIEN.length} étapes`, etapes: PHARMACIEN },
   equipe: { court: 'Équipe', role: 'Préparateur, animateur, apprenti…', titre: 'Mon espace dans l’équipe', fil: 'Tout ce que voit Nicolas, préparateur : son planning, ses demandes, ses collègues, son compte.', duree: `7 min · ${EQUIPIER.length} étapes`, etapes: EQUIPIER },
   etabli: { court: 'Journée type', role: 'Tous les rôles', titre: 'Une journée type', fil: 'Une journée à la pharmacie, du matin au soir, avec ceux qui la vivent.', duree: `8 min · ${ETABLI.length} étapes`, etapes: ETABLI },
 } as const;
