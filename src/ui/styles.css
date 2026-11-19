@@ -4551,3 +4551,5 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .couleur-profil { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); max-width: 620px; }
 .couleur-profil .pastille { flex: none; }
 .couleur-profil b { display: block; }
+/* Le dessin du pharmacien est plus haut que les autres (16/9) : on le cadre un peu plus haut pour garder la croix entière. */
+.tb-couverture.ill-pharmacien .tb-scene-image { object-position: 50% 45%; }

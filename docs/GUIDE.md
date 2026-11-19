@@ -465,7 +465,7 @@ Chaque profil a son dessin dans la bannière d'accueil, révélé au centre entr
 | --- | --- | --- |
 | Titulaire principal | La pharmacie de quartier (maquette « Bannière 01 ») | Bleu ciel |
 | Titulaire secondaire | Le bloc-notes et le graphique | Bleu marine |
-| Pharmacien adjoint | Le calendrier et la boîte | Bleu-vert |
+| Pharmacien adjoint | La croix et la boîte | Bleu-vert |
 | Préparateur | Le bécher, le flacon et le mortier | Indigo |
 | Animateur | Le mégaphone et le calendrier | Framboise |
 | Apprenti | Les livres et le badge | Émeraude |
