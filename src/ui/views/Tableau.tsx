@@ -1,3 +1,4 @@
+import { illustrationDuProfil } from '../components/Illustration';
 import { CIBLE, viser } from '../viser';
 import { AlarmClock, ArrowLeftRight, ArrowRight, BellRing, BriefcaseMedical, Building2, CalendarDays, CalendarRange, Check, Handshake, History, Hourglass, ListChecks, MoonStar, ShieldCheck, Sparkles, Store, UserMinus, UsersRound } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
@@ -197,7 +198,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   return (
     <div className="tb">
       <BanniereAccueil
-        illustree
+        illustration={illustrationDuProfil(data, moi)}
         personne={moi}
         date={fmtDateLong(today)}
         role={`${moi ? libelleRole(data, moi) : 'Titulaire'} · ${data.officine.nom || 'Ma pharmacie'}`}

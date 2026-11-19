@@ -79,8 +79,8 @@ créer, rien à saisir. On y passe d'un profil à l'autre en un clic.
 
 ## Un espace par profil
 
-Chaque profil a sa couleur de base et son accueil : on sait d'un coup d'œil où l'on se trouve.
-Chacun choisit aussi son apparence, claire, mixte ou sombre, sans rien changer pour les autres.
+Chaque profil a sa couleur, son accueil et le dessin de sa bannière : on sait d'un coup d'œil où l'on se
+trouve. Chacun choisit son apparence, claire, mixte ou sombre ; seul le titulaire principal peut changer de couleur.
 
 | Profil | Couleur | Son espace |
 | --- | --- | --- |

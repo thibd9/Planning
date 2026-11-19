@@ -1576,7 +1576,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[aria-labelledby='c-apparence']",
     titre: 'Votre compte',
-    texte: () => 'Trois apparences (claire, mixte, sombre), dix couleurs, taille du texte. La visite est terminée : tout reste à essayer.',
+    texte: () => 'Trois apparences (claire, mixte, sombre), taille du texte, et pour vous seule, titulaire principale, dix couleurs. La visite est terminée : tout reste à essayer.',
     jouer: () => {
       avecPlanning();
       helene('compte');
@@ -1868,7 +1868,7 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
       qui: p.qui,
       cible: '.choix.themes',
       titre: 'Mon compte',
-      texte: () => 'Trois apparences, dix couleurs, mot de passe : votre compte se règle ici. À vous de jouer.',
+      texte: () => 'Trois apparences, taille du texte, mot de passe : votre compte se règle ici. La couleur est celle de votre profil. À vous de jouer.',
       jouer: () => moi('compte'),
     },
   ];

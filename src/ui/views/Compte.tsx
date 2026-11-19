@@ -31,7 +31,9 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
   const person = data.personnes.find((p) => p.id === personId);
   const cle = person?.identifiant ?? personId;
   const couleurProfil = themeDuProfil(data, person);
-  const prefs = prefsDe(preferences, cle, couleurProfil);
+  // Seul le titulaire principal choisit la couleur de son espace ; les autres gardent celle de leur profil.
+  const couleurLibre = estResponsable(data, person);
+  const prefs = prefsDe(preferences, cle, couleurProfil, couleurLibre);
   const [actuel, setActuel] = useState('');
   const [nouveau, setNouveau] = useState('');
   const [erreurCode, setErreurCode] = useState('');
@@ -102,20 +104,30 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
               </legend>
               <ChoixApparence valeur={prefs.mode} onChange={(m) => setPreferences(cle, { mode: m })} nom="mode" auto />
             </fieldset>
-            <fieldset>
-              <legend className="field" style={{ marginBottom: 8 }}>Couleur du thème</legend>
-              <div className="choix themes">
-                {THEMES.map((t) => (
-                  <label key={t.cle} htmlFor={`theme-${t.cle}`}>
-                    <input id={`theme-${t.cle}`} type="radio" name="theme" checked={prefs.theme === t.cle} onChange={() => setPreferences(cle, { theme: t.cle })} />
-                    <span className="pastille" style={{ background: `linear-gradient(135deg, ${t.a}, ${t.b})` }} aria-hidden="true" />
-                    {t.nom}
-                    <Check size={16} className="coche" aria-hidden="true" />
-                  </label>
-                ))}
+            {couleurLibre ? (
+              <fieldset>
+                <legend className="field" style={{ marginBottom: 8 }}>Couleur du thème</legend>
+                <div className="choix themes">
+                  {THEMES.map((t) => (
+                    <label key={t.cle} htmlFor={`theme-${t.cle}`}>
+                      <input id={`theme-${t.cle}`} type="radio" name="theme" checked={prefs.theme === t.cle} onChange={() => setPreferences(cle, { theme: t.cle })} />
+                      <span className="pastille" style={{ background: `linear-gradient(135deg, ${t.a}, ${t.b})` }} aria-hidden="true" />
+                      {t.nom}
+                      <Check size={16} className="coche" aria-hidden="true" />
+                    </label>
+                  ))}
+                </div>
+                <p className="tiny muted" style={{ marginTop: 8 }}>Chaque profil a sa couleur : on reconnaît d’un coup d’œil l’espace où l’on se trouve. En tant que titulaire principal, vous seul pouvez changer la vôtre. Le logo et les boutons la suivent ; votre bannière garde son illustration en bleu, et passe à l’aplat avec une autre couleur.</p>
+              </fieldset>
+            ) : (
+              <div className="couleur-profil" id="couleur-profil">
+                <span className="pastille" style={{ background: `linear-gradient(135deg, ${THEMES.find((t) => t.cle === couleurProfil)?.a}, ${THEMES.find((t) => t.cle === couleurProfil)?.b})` }} aria-hidden="true" />
+                <span>
+                  <b>Couleur de votre espace : {THEMES.find((t) => t.cle === couleurProfil)?.nom}</b>
+                  <span className="small soft">C’est la couleur de votre profil : elle dit d’un coup d’œil dans quel espace on se trouve. Seul le titulaire principal choisit la sienne.</span>
+                </span>
               </div>
-              <p className="tiny muted" style={{ marginTop: 8 }}>Chaque profil a sa couleur de base : on reconnaît d’un coup d’œil l’espace où l’on se trouve. Vous pouvez en choisir une autre. Le logo, les boutons et les bannières la suivent, en clair comme en sombre.</p>
-            </fieldset>
+            )}
             <fieldset>
               <legend className="field" style={{ marginBottom: 8 }}>
                 <span className="row" style={{ gap: 6 }}>

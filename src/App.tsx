@@ -226,7 +226,7 @@ export function App(): JSX.Element {
   // Tant que ni le nom ni l'équipe ne sont saisis, l'application s'ouvre sur l'écran de création.
   const aCreer = !data.officine.nom.trim() && !data.personnes.length;
   // Sans choix de sa part, chacun voit Solvéa dans la couleur de son profil.
-  const prefs = prefsDe(preferences, session, themeDuProfil(data, moi));
+  const prefs = prefsDe(preferences, session, themeDuProfil(data, moi), !moi || estResponsable(data, moi));
   const sombre = prefs.mode === 'sombre' || (prefs.mode === 'auto' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {

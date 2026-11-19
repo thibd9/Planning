@@ -168,9 +168,11 @@ interface Ui {
 }
 
 // Ce qui n'a pas été réglé reçoit sa valeur par défaut ; pour la couleur, c'est celle du profil.
-export const prefsDe = (prefs: Record<string, PrefsChoisies>, personId: string | null, themeProfil: Theme = PREFS_DEFAUT.theme): Preferences => {
+// `couleurLibre` : seul le titulaire principal choisit sa couleur ; pour les autres, la couleur est celle du profil,
+// quoi qu'ils aient pu enregistrer auparavant.
+export const prefsDe = (prefs: Record<string, PrefsChoisies>, personId: string | null, themeProfil: Theme = PREFS_DEFAUT.theme, couleurLibre = true): Preferences => {
   const choisies = personId ? prefs[personId] : undefined;
-  return { theme: choisies?.theme ?? themeProfil, texte: choisies?.texte ?? PREFS_DEFAUT.texte, mode: choisies?.mode ?? PREFS_DEFAUT.mode };
+  return { theme: (couleurLibre ? choisies?.theme : undefined) ?? themeProfil, texte: choisies?.texte ?? PREFS_DEFAUT.texte, mode: choisies?.mode ?? PREFS_DEFAUT.mode };
 };
 
 export const useUi = create<Ui>((set) => ({

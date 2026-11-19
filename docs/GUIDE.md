@@ -457,14 +457,27 @@ option suit le réglage de l'appareil) ou d'un geste depuis son nom, en haut à 
 Le menu est compact : la rubrique ouverte est un aplat de couleur, l'aide est une carte en bas du menu. La
 bannière d'accueil est un seul bloc ; les cinq repères sont des cartes de même hauteur.
 
-### Illustrations
+### Une bannière par profil
 
-La bannière d'accueil des titulaires porte l'illustration de la pharmacie de quartier, révélée au centre entre
-deux fondus bleus, comme sur la maquette. Elle s'efface quand la bannière devient trop étroite pour ne jamais
-passer sous le texte. Elle suit la couleur du profil : bleu ciel pour le titulaire principal, bleu marine pour
-un titulaire secondaire. Avec une couleur de thème qui n'est pas un bleu, la bannière reprend l'aplat de cette
-couleur, sans illustration. Les autres profils gardent l'aplat de leur couleur.
+Chaque profil a son dessin dans la bannière d'accueil, révélé au centre entre deux fondus de sa couleur :
 
-D'autres emplacements sont prévus (agenda, comptoir, prochain planning, priorité). Tant qu'aucun dessin n'est
-fourni, rien ne s'affiche et la mise en page n'en dépend pas. Pour en ajouter un : déposer le fichier dans
-`src/assets/illustrations/` et l'inscrire dans `src/ui/components/Illustration.tsx`.
+| Profil | Dessin | Couleur |
+| --- | --- | --- |
+| Titulaire principal | La pharmacie de quartier (maquette « Bannière 01 ») | Bleu ciel |
+| Titulaire secondaire | Le bloc-notes et le graphique | Bleu marine |
+| Pharmacien adjoint | Le calendrier et la boîte | Bleu-vert |
+| Préparateur | Le bécher, le flacon et le mortier | Indigo |
+| Animateur | Le mégaphone et le calendrier | Framboise |
+| Apprenti | Les livres et le badge | Émeraude |
+| Étudiant | Les livres et l'ordinateur | Ambre |
+
+Le rayonniste n'a pas encore de dessin : sa bannière garde l'aplat de sa couleur. Le dessin s'efface quand la
+bannière devient trop étroite, pour ne jamais passer sous le texte. Les fichiers sont dans
+`src/assets/illustrations/` et s'inscrivent dans `src/ui/components/Illustration.tsx`.
+
+### La couleur de l'espace
+
+La couleur d'un espace est celle du profil : elle dit d'un coup d'œil où l'on se trouve. **Seul le titulaire
+principal peut changer la sienne** (dix couleurs, dans « Mon compte »). S'il quitte le bleu, sa bannière passe à
+l'aplat de la couleur choisie. Tous les autres profils gardent leur couleur ; l'apparence (claire, mixte,
+sombre) et la taille du texte restent au choix de chacun.

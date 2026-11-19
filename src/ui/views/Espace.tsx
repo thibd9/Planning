@@ -1,3 +1,4 @@
+import { illustrationDuProfil } from '../components/Illustration';
 import type { LucideIcon } from 'lucide-react';
 import { Apple, ArrowLeftRight, ArrowRight, Award, Baby, BellRing, Bone, BookOpen, CalendarClock, CalendarDays, CalendarPlus, Droplets, GraduationCap, Inbox, Leaf, MessageSquare, MoonStar, PawPrint, Pill, Scissors, Smile, Sparkles, Stethoscope, Sun, Tags } from 'lucide-react';
 import { useState } from 'react';
@@ -84,6 +85,7 @@ export function Espace({ personId }: { personId: string }): JSX.Element | null {
   return (
     <div className="page page-espace">
       <BanniereAccueil
+        illustration={illustrationDuProfil(data, p)}
         personne={p}
         date={fmtDateLong(today)}
         role={`${profil.espace} · ${data.officine.nom || 'Ma pharmacie'}`}

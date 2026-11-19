@@ -4467,17 +4467,18 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 /* ---------- Bannière des titulaires : la pharmacie de quartier (maquette « Bannière 01 ») ----------
    Les positions sont celles de la maquette, en pourcentage de la bannière : l'illustration au centre droit,
    un fondu bleu qui la révèle, une lumière en haut, un fondu de lisibilité sous le résumé des décisions. */
-/* Les couleurs de la maquette (bleu ciel du titulaire principal) ; le bleu marine du titulaire secondaire les remplace plus bas. */
+/* Les couleurs de la bannière découlent de la couleur du profil : un bord sombre, la teinte du thème là où se
+   lit le texte, le même ton pour le panneau de droite. */
 .tb-couverture.illustree {
+  --ban-gauche: color-mix(in srgb, var(--a-plein) 88%, #04101f); --ban-centre: color-mix(in srgb, var(--a-plein-2) 72%, #fff); --ban-droite: var(--a-plein);
+  --ban-f0: color-mix(in srgb, var(--a-plein) 92%, #04101f); --ban-f1: var(--a-plein); --ban-f2: color-mix(in srgb, var(--a-plein) 45%, var(--a-plein-2)); --ban-f3: var(--a-plein-2); --ban-f4: var(--a-plein-2);
+  --ban-panneau: var(--a-plein); --ban-mono-1: color-mix(in srgb, var(--a-plein-2) 62%, #fff); --ban-mono-2: var(--a-plein-2); --ban-ombre: rgba(0, 0, 0, 0.3);
+  min-height: 148px; padding: 20px 26px 20px 34px; gap: 22px; background: linear-gradient(90deg, var(--ban-gauche) 0%, var(--ban-centre) 48%, var(--ban-droite) 100%); box-shadow: 0 18px 34px -24px color-mix(in srgb, var(--ban-gauche) 90%, transparent); }
+/* Titulaire principal, bleu ciel : les couleurs exactes de la maquette « Bannière 01 ». */
+:root[data-theme='ciel'] .tb-couverture.ill-pharmacie {
   --ban-gauche: #265dae; --ban-centre: #5da3f6; --ban-droite: #2863ae;
   --ban-f0: rgb(43, 100, 184); --ban-f1: rgb(53, 123, 213); --ban-f2: rgb(66, 139, 226); --ban-f3: rgb(74, 146, 230); --ban-f4: rgb(54, 116, 189);
   --ban-panneau: rgb(41, 95, 170); --ban-mono-1: #7bb6ff; --ban-mono-2: #3a83de; --ban-ombre: rgba(16, 52, 110, 0.45);
-  min-height: 148px; padding: 20px 26px 20px 34px; gap: 22px; background: linear-gradient(90deg, var(--ban-gauche) 0%, var(--ban-centre) 48%, var(--ban-droite) 100%); box-shadow: 0 18px 34px -24px color-mix(in srgb, var(--ban-gauche) 90%, transparent); }
-/* Titulaire secondaire (bleu marine) : mêmes fondus, dans sa couleur. La pharmacie reste révélée au centre. */
-:root[data-theme='bleu'] .tb-couverture.illustree {
-  --ban-gauche: color-mix(in srgb, var(--a-plein) 88%, #04101f); --ban-centre: color-mix(in srgb, var(--a-plein-2) 72%, #8ec5f5); --ban-droite: var(--a-plein);
-  --ban-f0: color-mix(in srgb, var(--a-plein) 92%, #04101f); --ban-f1: var(--a-plein); --ban-f2: color-mix(in srgb, var(--a-plein) 45%, var(--a-plein-2)); --ban-f3: var(--a-plein-2); --ban-f4: var(--a-plein-2);
-  --ban-panneau: var(--a-plein); --ban-mono-1: color-mix(in srgb, var(--a-plein-2) 62%, #fff); --ban-mono-2: var(--a-plein-2); --ban-ombre: rgba(6, 26, 48, 0.5);
 }
 .tb-couverture.illustree .tb-decor { display: none; }
 .tb-scene { position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: inherit; pointer-events: none; }
@@ -4497,11 +4498,11 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .tb-couverture.illustree .tb-resume b { margin-bottom: 8px; font-size: 20px; font-weight: 600; }
 :root[data-mode='sombre'] .tb-couverture.illustree { background: linear-gradient(90deg, var(--ban-gauche) 0%, var(--ban-centre) 48%, var(--ban-droite) 100%); }
 :root[data-mode='sombre'] .tb-couverture.illustree .tb-scene { filter: brightness(0.86) saturate(0.95); }
-/* L'illustration est bleue : avec une autre couleur de thème, la bannière revient à l'aplat du profil. */
-:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree { background: linear-gradient(105deg, color-mix(in srgb, var(--a-plein) 82%, #030b24) 0%, var(--a-plein) 42%, color-mix(in srgb, var(--a-plein-2) 88%, var(--a-plein)) 100%); }
-:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree .tb-scene { display: none; }
-:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree .tb-decor { display: block; }
-:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree .tb-portrait .avatar { background: rgba(255, 255, 255, 0.16); }
+/* La pharmacie est bleue : si le titulaire principal choisit une autre couleur, sa bannière revient à l'aplat. */
+:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.ill-pharmacie { background: linear-gradient(105deg, color-mix(in srgb, var(--a-plein) 82%, #030b24) 0%, var(--a-plein) 42%, color-mix(in srgb, var(--a-plein-2) 88%, var(--a-plein)) 100%); }
+:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.ill-pharmacie .tb-scene { display: none; }
+:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.ill-pharmacie .tb-decor { display: block; }
+:root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.ill-pharmacie .tb-portrait .avatar { background: rgba(255, 255, 255, 0.16); }
 @media (max-width: 1100px) {
   .tb-couverture.illustree .tb-resume { flex-basis: 214px; }
   .tb-couverture.illustree .tb-nom h1 { font-size: 27px; }
@@ -4537,4 +4538,16 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .tb-chiffre:nth-child(n + 4) { grid-column: span 3; }
 }
 /* Bleu marine : un voile de la couleur du profil accorde le ciel de l'illustration au reste de la bannière. */
-:root[data-theme='bleu'] .tb-scene-harmonie { left: 30%; width: 52%; background: color-mix(in srgb, var(--a-plein) 20%, transparent); }
+:root[data-theme='bleu'] .ill-pharmacie .tb-scene-harmonie { left: 30%; width: 52%; background: color-mix(in srgb, var(--a-plein) 20%, transparent); }
+
+/* ---------- Bannières des autres profils : le dessin du métier, entre deux fondus de la couleur du profil ----------
+   Le dessin occupe toute la hauteur et s'arrête sous le panneau de droite ; le texte s'arrête avant lui. */
+.tb-couverture.illustree:not(.ill-pharmacie) .tb-scene-image { left: auto; right: 21.5%; width: max(38cqw, 444px); height: auto; min-height: 100%; transform: translateY(-50%); }
+.tb-couverture.illustree:not(.ill-pharmacie) .tb-scene-fondu { left: 0; width: 100%; background: linear-gradient(90deg, var(--ban-f0) 0%, var(--ban-f1) 24%, var(--ban-f3) 40.5%, color-mix(in srgb, var(--ban-f3) 58%, transparent) 44.5%, color-mix(in srgb, var(--ban-f3) 0%, transparent) 49.5%, color-mix(in srgb, var(--ban-panneau) 0%, transparent) 69.5%, color-mix(in srgb, var(--ban-panneau) 55%, transparent) 74%, var(--ban-panneau) 78.5%, var(--ban-panneau) 100%); }
+.tb-couverture.illustree:not(.ill-pharmacie) .tb-scene-lisible { display: none; }
+.tb-couverture.illustree:not(.ill-pharmacie) .tb-scene-harmonie { left: 40%; width: 39%; background: color-mix(in srgb, var(--a-plein) 7%, transparent); }
+.tb-couverture.illustree:not(.ill-pharmacie) .tb-nom { max-width: calc(40.5% - 120px); }
+/* Mon compte : la couleur du profil, quand elle ne se choisit pas. */
+.couleur-profil { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); max-width: 620px; }
+.couleur-profil .pastille { flex: none; }
+.couleur-profil b { display: block; }
