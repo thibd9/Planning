@@ -1,0 +1,16 @@
+/* Accordéon : une rubrique qui se replie. Un filet fin sépare les rubriques ; le résumé remplace le contenu quand c'est fermé. */
+.acc { border-top: 1px solid var(--line); }
+.acc:first-child { border-top: 0; }
+.acc-tete { display: flex; align-items: center; gap: 14px; padding: 18px 2px; cursor: pointer; list-style: none; border-radius: 6px; }
+.acc-tete::-webkit-details-marker { display: none; }
+.acc-tete:hover .acc-titre b { color: var(--a-text); }
+.acc-ico { flex: none; display: grid; place-items: center; color: var(--a-text); line-height: 0; }
+.acc-titre { flex: 1 1 auto; min-width: 0; display: grid; gap: 2px; }
+.acc-titre b { font-size: 16px; font-weight: 700; letter-spacing: -0.015em; color: var(--ink); }
+.acc-resume { font-size: 13.5px; line-height: 1.4; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc[open] > .acc-tete .acc-resume { display: none; }
+.acc-droite { flex: none; font-size: 13px; color: var(--ink-2); }
+.acc-chevron { flex: none; color: var(--ink-3); transition: transform 0.2s ease; }
+.acc[open] > .acc-tete .acc-chevron { transform: rotate(180deg); }
+.acc-corps { padding: 4px 2px 26px; display: grid; gap: 18px; }
+@media (prefers-reduced-motion: reduce) { .acc-chevron { transition: none; } }

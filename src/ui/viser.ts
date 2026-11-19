@@ -1,6 +1,7 @@
 import { mondayOf } from '../domain/time';
 import type { ISODate } from '../domain/types';
 import { useUi } from '../store/ui';
+import { deplier } from './components/Accordeon';
 
 /** Les endroits du planning que l'on peut désigner. */
 export const CIBLE = {
@@ -19,6 +20,8 @@ let enCours: { el: HTMLElement; fin: number } | null = null;
 export function viser(selecteur: string, essais = 25): void {
   const tenter = (reste: number): void => {
     const el = document.querySelector<HTMLElement>(selecteur);
+    // L'endroit peut être dans une rubrique repliée : on l'ouvre d'abord.
+    deplier(el);
     if (!el) {
       if (reste > 0) window.setTimeout(() => tenter(reste - 1), 80);
       return;

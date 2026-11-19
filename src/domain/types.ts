@@ -47,6 +47,18 @@ export type CompetenceId =
   | 'tierspayant'
   | 'merchandising';
 
+/** Le type de contrat d'une personne. Un titulaire n'est pas salarié : il exerce à son compte. */
+export type TypeContrat = 'cdi' | 'cdd' | 'apprentissage' | 'professionnalisation' | 'stage' | 'remplacement' | 'non_salarie';
+export const CONTRAT_LABEL: Record<TypeContrat, string> = {
+  cdi: 'CDI',
+  cdd: 'CDD',
+  apprentissage: 'Contrat d’apprentissage',
+  professionnalisation: 'Contrat de professionnalisation',
+  stage: 'Stage',
+  remplacement: 'Remplacement ponctuel',
+  non_salarie: 'Titulaire (non salarié)',
+};
+
 export interface Person {
   id: string;
   prenom: string;
@@ -59,6 +71,10 @@ export interface Person {
   /** Taux horaire brut indicatif, utilisé uniquement pour simuler un coût. */
   tauxHoraire: number | null;
   competences: CompetenceId[];
+  /** Le type de contrat ; absent, il se déduit de la fonction (voir `contratDe`). */
+  contrat?: TypeContrat;
+  /** Le jour d'entrée dans la pharmacie : l'ancienneté se calcule à partir de là. */
+  entreeLe?: ISODate;
   /** Volontariat déclaré ; ne supprime aucun contrôle de repos. */
   volontaireHeuresComp: boolean;
   volontaireGardes: boolean;
@@ -788,3 +804,23 @@ export const ABSENCE_LABEL: Record<AbsenceType, string> = {
 
 export const nomComplet = (p: Person): string => `${p.prenom} ${p.nom}`;
 export const nomCourt = (p: Person): string => `${p.prenom} ${p.nom.charAt(0)}.`;
+
+/** Le contrat d'une personne : celui qui est saisi, sinon celui que sa fonction laisse attendre. */
+export function contratDe(p: Pick<Person, 'contrat' | 'qualification' | 'externe' | 'salarie'>): TypeContrat {
+  if (p.contrat) return p.contrat;
+  if (!p.salarie || p.qualification === 'titulaire') return 'non_salarie';
+  if (p.externe) return 'remplacement';
+  if (p.qualification === 'apprenti') return 'apprentissage';
+  if (p.qualification === 'etudiant') return 'cdd';
+  return 'cdi';
+}
+
+/**
+ * Les compétences que seul un pharmacien peut exercer : entretiens pharmaceutiques et bilans, dépistage suivi d'une
+ * délivrance sous protocole. Un préparateur conseille et délivre, mais sous le contrôle effectif d'un pharmacien.
+ */
+export const COMPETENCE_RESERVEE: Partial<Record<CompetenceId, true>> = { entretien: true, trod: true };
+/** Cette personne peut-elle détenir cette compétence ? */
+export function peutDetenir(p: Pick<Person, 'qualification'>, c: CompetenceId): boolean {
+  return !COMPETENCE_RESERVEE[c] || p.qualification === 'titulaire' || p.qualification === 'adjoint';
+}

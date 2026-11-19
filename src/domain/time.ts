@@ -285,3 +285,17 @@ export function momentDuJour(heure: number): Moment {
   if (heure >= 18 && heure < 21) return 'soir';
   return 'nuit';
 }
+
+/** L'ancienneté entre deux dates, en clair : « 3 ans et 4 mois », « 7 mois », « moins d'un mois ». */
+export function anciennete(depuis: ISODate, today: ISODate): string {
+  if (depuis > today) return 'pas encore arrivé';
+  const [a1, m1, j1] = depuis.split('-').map(Number);
+  const [a2, m2, j2] = today.split('-').map(Number);
+  const mois = (a2 - a1) * 12 + (m2 - m1) - (j2 < j1 ? 1 : 0);
+  const ans = Math.floor(mois / 12);
+  const reste = mois % 12;
+  if (mois < 1) return 'moins d’un mois';
+  const a = ans ? `${ans} an${ans > 1 ? 's' : ''}` : '';
+  const m = reste ? `${reste} mois` : '';
+  return a && m ? `${a} et ${m}` : a || m;
+}

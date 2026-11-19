@@ -12,6 +12,7 @@ import { evaluerRemplacement, peutDemanderRemplacement, peutRemplacer } from '..
 import { useStore } from '../store/store';
 import type { Vue } from '../store/ui';
 import { useUi } from '../store/ui';
+import { deplier } from './components/Accordeon';
 import { Logo } from './kit';
 import type { GesteSolvi, Humeur } from './Solvi';
 import { NomSolvi, Solvi } from './Solvi';
@@ -223,7 +224,12 @@ interface Etape {
   gestes?: Geste[];
 }
 
-const element = (c: Cible): HTMLElement | null => (typeof c === 'string' ? document.querySelector<HTMLElement>(c) : (c() ?? null));
+/** L'élément désigné par une étape. S'il se trouve dans une rubrique repliée, on l'ouvre : la visite montre toujours ce dont elle parle. */
+const element = (c: Cible): HTMLElement | null => {
+  const e = typeof c === 'string' ? document.querySelector<HTMLElement>(c) : (c() ?? null);
+  deplier(e);
+  return e;
+};
 /** Le premier élément dont le texte contient ces mots : un bouton se désigne comme on le lit. */
 const parTexte = (selecteur: string, texte: string): (() => HTMLElement | undefined) => () => [...document.querySelectorAll<HTMLElement>(selecteur)].find((e) => e.textContent?.includes(texte));
 const nieme = (selecteur: string, n: number): (() => HTMLElement | undefined) => () => document.querySelectorAll<HTMLElement>(selecteur)[n];
