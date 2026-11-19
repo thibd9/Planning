@@ -4646,3 +4646,12 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .dim-comptoir > div:nth-child(n + 3) { border-top: 1px solid var(--line); }
   .dim-bilans { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Fenêtres : une ombre légère sous l'en-tête, pour le détacher du contenu qui défile dessous. */
+.dialog-head { z-index: 2; box-shadow: 0 1px 0 rgba(var(--ink-rgb), 0.06), 0 10px 18px -14px rgba(var(--ink-rgb), 0.45); }
+.dialog-body { position: relative; z-index: 1; }
+/* Solvi passe sur d'autres éléments (bouton d'aide, visites guidées) : un flou blanc le détache de ce qu'il survole. */
+.aide-fab .solvi-corps svg, .pt-solvi .solvi-corps svg, .tour-solvi .solvi-corps svg {
+  filter: drop-shadow(0 0 2px var(--solvi-flou, #fff)) drop-shadow(0 0 9px var(--solvi-flou, #fff)) drop-shadow(0 0 20px color-mix(in srgb, var(--solvi-flou, #fff) 75%, transparent)) drop-shadow(0 6px 8px color-mix(in srgb, var(--solvi-ombre) 30%, transparent));
+}
+:root[data-mode='sombre'] { --solvi-flou: color-mix(in srgb, #fff 26%, var(--bg)); }

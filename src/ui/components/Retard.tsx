@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { addDays, fmtDateCourt, fmtHeure, todayISO } from '../../domain/time';
 import { MOTIF_RETARD_LABEL, nomCourt } from '../../domain/types';
 import type { AvisRetard, MotifRetard, Shift } from '../../domain/types';
-import { RETARDS_RAPIDES, RETARD_MAX, arriveePrevue, avisPour, dureeRetard, effetsRetard, posteAPrevenir, superieurs } from '../../engine/retard';
+import { RETARDS_RAPIDES, RETARD_LONG, RETARD_MAX, arriveePrevue, avisPour, dureeRetard, effetsRetard, posteAPrevenir, superieurs } from '../../engine/retard';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { Dialog } from '../kit';
@@ -133,14 +133,22 @@ function DialogueRetard({ personId, poste, avis, onClose }: { personId: string; 
                 {!autre && minutes === m ? <Check size={14} strokeWidth={3} className="comp-coche" aria-hidden="true" /> : null}
               </button>
             ))}
-            <button type="button" className={`comp${autre ? ' on' : ''}`} aria-pressed={autre} onClick={() => setAutre(true)}>
-              <span>Autre durée</span>
+            <button
+              type="button"
+              className={`comp${autre ? ' on' : ''}`}
+              aria-pressed={autre}
+              onClick={() => {
+                setAutre(true);
+                if (minutes < RETARD_LONG) setMinutes(RETARD_LONG);
+              }}
+            >
+              <span>+ de 20 min</span>
             </button>
           </div>
           {autre ? (
             <label className="field ret-autre" htmlFor="ret-minutes">
               Durée en minutes
-              <input id="ret-minutes" type="number" inputMode="numeric" min={1} max={RETARD_MAX} step={5} className="num" value={minutes || ''} onChange={(e) => setMinutes(Number(e.target.value))} />
+              <input id="ret-minutes" type="number" inputMode="numeric" min={RETARD_LONG} max={RETARD_MAX} step={5} className="num" value={minutes || ''} onChange={(e) => setMinutes(Number(e.target.value))} />
             </label>
           ) : null}
           <p className="ret-arrivee" id="ret-arrivee" role="status">

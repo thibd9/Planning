@@ -3,7 +3,10 @@ import { estPharmacien } from '../domain/types';
 import type { AppData, AvisRetard, ISODate, Minutes, Shift } from '../domain/types';
 
 /** Les retards proposés d'un geste ; au-delà, on saisit la durée. */
-export const RETARDS_RAPIDES = [5, 10, 15, 20, 30, 45, 60];
+/** Les durées proposées d'un geste. Au-delà, « + de 20 min » ouvre la saisie de la durée exacte. */
+export const RETARDS_RAPIDES = [5, 10, 15];
+/** La durée proposée d'emblée quand on choisit « + de 20 min ». */
+export const RETARD_LONG = 20;
 export const RETARD_MAX = 240;
 
 /** « 15 min », « 1 h », « 1 h 30 » : une durée de retard, dite comme on la dit. */

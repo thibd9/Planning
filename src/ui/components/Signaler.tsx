@@ -5,7 +5,7 @@ import { addDays, fmtDateCourt, fmtHeure, parseHHMM, todayISO } from '../../doma
 import { LIEU_ACCIDENT_LABEL, nomCourt } from '../../domain/types';
 import type { AbsenceType, DetailAccident, ISODate, LieuAccident, Person } from '../../domain/types';
 import { echeanceDeclaration } from '../../engine/accident';
-import { RETARDS_RAPIDES, RETARD_MAX, dureeRetard, posteAPrevenir, superieurs } from '../../engine/retard';
+import { RETARDS_RAPIDES, RETARD_LONG, RETARD_MAX, dureeRetard, posteAPrevenir, superieurs } from '../../engine/retard';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
 import { Dialog } from '../kit';
@@ -59,14 +59,18 @@ export function DialogueSignaler({ moi, quoi: depart, onClose }: { moi: Person; 
   const fin = au >= du ? au : du;
   const postes = data.shifts.filter((s) => s.personId === personne.id && s.date >= du && s.date <= fin).length;
   const noms = chefs.map((p) => nomCourt(p)).join(', ');
-  const pret = quoi === 'retard' ? !!poste : quoi === 'absence';
+  // Sans poste publié, on peut tout de même prévenir : l'avis part aux titulaires, sans heure d'arrivée.
+  const pret = quoi === 'retard' ? !!poste || (pourMoi && chefs.length > 0) : quoi === 'absence';
   const accident: Omit<DetailAccident, 'connuLe' | 'declareLe'> | undefined =
     quoi === 'absence' && raison === 'accident'
       ? { jour: jourAccident <= today ? jourAccident : today, ou, ...(parseHHMM(heure) !== null ? { heure: parseHHMM(heure)! } : {}), ...(faits.trim() ? { circonstances: faits.trim() } : {}), ...(temoin.trim() ? { temoin: temoin.trim() } : {}) }
       : undefined;
   const avant = fmtDateCourt(echeanceDeclaration(today));
   const confirmer = (): void => {
-    if (quoi === 'retard' && poste) {
+    if (quoi === 'retard' && !poste) {
+      prevenirRetard({ personId: personne.id, date: today, minutes: duree, note });
+      dire(`Retard signalé.${noms ? ` ${noms} ${chefs.length > 1 ? 'sont prévenus' : 'est prévenu'}.` : ''}`);
+    } else if (quoi === 'retard' && poste) {
       prevenirRetard({ personId: personne.id, date: poste.date, start: poste.start, minutes: duree, note, ...(pourMoi ? {} : { par: moi.id }) });
       dire(pourMoi ? `Retard signalé : arrivée vers ${fmtHeure(poste.start + duree)}.${noms ? ` ${noms} ${chefs.length > 1 ? 'sont prévenus' : 'est prévenu'}.` : ''}` : `Retard de ${nomCourt(personne)} noté : arrivée vers ${fmtHeure(poste.start + duree)}.`);
     } else if (quoi === 'absence') {
@@ -145,48 +149,65 @@ export function DialogueSignaler({ moi, quoi: depart, onClose }: { moi: Person; 
         </fieldset>
 
         {quoi === 'retard' ? (
-          poste ? (
-            <fieldset className="ret-bloc">
-              <legend>
-                De combien ? <span className="oblig">poste {poste.date === today ? 'd’aujourd’hui' : 'de demain'}, {fmtHeure(poste.start)} – {fmtHeure(poste.end)}</span>
-              </legend>
-              <div className="ret-choix" id="sg-durees">
-                {RETARDS_RAPIDES.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    className={`comp${!autre && minutes === m ? ' on' : ''}`}
-                    aria-pressed={!autre && minutes === m}
-                    onClick={() => {
-                      setAutre(false);
-                      setMinutes(m);
-                    }}
-                  >
-                    <span>{dureeRetard(m)}</span>
-                  </button>
-                ))}
-                <button type="button" className={`comp${autre ? ' on' : ''}`} aria-pressed={autre} onClick={() => setAutre(true)}>
-                  <span>Autre durée</span>
-                </button>
-              </div>
-              {autre ? (
-                <label className="field ret-autre" htmlFor="sg-minutes">
-                  Durée en minutes
-                  <input id="sg-minutes" type="number" inputMode="numeric" min={1} max={RETARD_MAX} step={5} className="num" value={minutes || ''} onChange={(e) => setMinutes(Number(e.target.value))} />
-                </label>
+          <fieldset className="ret-bloc">
+            <legend>
+              De combien ?{' '}
+              {poste ? (
+                <span className="oblig">
+                  poste {poste.date === today ? 'd’aujourd’hui' : 'de demain'}, {fmtHeure(poste.start)} – {fmtHeure(poste.end)}
+                </span>
               ) : null}
+            </legend>
+            <div className="ret-choix" id="sg-durees">
+              {RETARDS_RAPIDES.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  className={`comp${!autre && minutes === m ? ' on' : ''}`}
+                  aria-pressed={!autre && minutes === m}
+                  onClick={() => {
+                    setAutre(false);
+                    setMinutes(m);
+                  }}
+                >
+                  <span>{dureeRetard(m)}</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                className={`comp${autre ? ' on' : ''}`}
+                aria-pressed={autre}
+                onClick={() => {
+                  setAutre(true);
+                  if (minutes < RETARD_LONG) setMinutes(RETARD_LONG);
+                }}
+              >
+                <span>+ de 20 min</span>
+              </button>
+            </div>
+            {autre ? (
+              <label className="field ret-autre" htmlFor="sg-minutes">
+                Durée en minutes
+                <input id="sg-minutes" type="number" inputMode="numeric" min={RETARD_LONG} max={RETARD_MAX} step={5} className="num" value={minutes || ''} onChange={(e) => setMinutes(Number(e.target.value))} />
+              </label>
+            ) : null}
+            {poste ? (
               <p className="ret-arrivee" role="status">
                 <AlarmClock size={17} aria-hidden="true" />
                 <span>
                   Arrivée prévue vers <b className="num">{fmtHeure(poste.start + duree)}</b>, au lieu de {fmtHeure(poste.start)}.
                 </span>
               </p>
-            </fieldset>
-          ) : (
-            <p className="ret-effet small" id="sg-sans-poste">
-              {pourMoi ? 'Vous n’avez' : `${personne.prenom} n’a`} pas de poste publié aujourd’hui ni demain : il n’y a pas de retard à signaler.
-            </p>
-          )
+            ) : (
+              <p className="ret-effet small" id="sg-sans-poste">
+                {pourMoi
+                  ? chefs.length
+                    ? 'Aucun poste publié à votre nom aujourd’hui ni demain : l’avis part quand même, sans heure d’arrivée.'
+                    : 'Aucun poste publié à votre nom aujourd’hui ni demain, et personne à prévenir.'
+                  : `${personne.prenom} n’a pas de poste publié aujourd’hui ni demain : il n’y a pas de retard à noter.`}
+              </p>
+            )}
+          </fieldset>
         ) : null}
 
         {quoi === 'absence' ? (

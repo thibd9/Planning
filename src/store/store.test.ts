@@ -147,3 +147,27 @@ describe('points forts', () => {
     expect(pointsForts(peu, 'p_camille', today).map((x) => x.cle)).not.toContain('ponctuel');
   });
 });
+
+describe('prévenir d’un retard', () => {
+  it('sans poste publié, l’avis part aux titulaires en message, sans rien changer au planning', () => {
+    const avant = s().data;
+    s().prevenirRetard({ personId: 'p_camille', date: s().today, minutes: 25, note: 'train supprimé' });
+    const apres = s().data;
+    // Aucun avis rattaché à un poste, aucun poste modifié.
+    expect((apres.retards ?? []).length).toBe((avant.retards ?? []).length);
+    expect(apres.shifts).toEqual(avant.shifts);
+    // Un message par titulaire, qui dit la durée et l'absence de poste.
+    const nouveaux = apres.messages.filter((m) => !avant.messages.some((x) => x.id === m.id));
+    expect(nouveaux.length).toBeGreaterThan(0);
+    expect(nouveaux.every((m) => m.de === 'p_camille' && /25 min/.test(m.texte) && /pas de poste publié/.test(m.texte) && /Train supprimé/.test(m.texte))).toBe(true);
+  });
+
+  it('avec un poste, l’avis donne l’heure d’arrivée', () => {
+    const poste = posteAVenir();
+    const avant = (s().data.retards ?? []).length;
+    s().prevenirRetard({ personId: 'p_camille', date: poste.date, start: poste.start, minutes: 10 });
+    const retards = s().data.retards ?? [];
+    expect(retards).toHaveLength(avant + 1);
+    expect(retards.at(-1)).toMatchObject({ personId: 'p_camille', date: poste.date, start: poste.start, minutes: 10 });
+  });
+});
