@@ -111,7 +111,7 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
           ))
         ) : (
           <div className="card empty ad-vide">
-            <Solvi size={64} humeur="intrigue" />
+            <Solvi size={64} humeur="intrigue" vivant />
             <span>Rien ne correspond à « {recherche} ». Essayez un autre mot, ou demandez à Solvi.</span>
           </div>
         )

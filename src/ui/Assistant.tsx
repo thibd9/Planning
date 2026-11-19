@@ -91,7 +91,7 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
         <section className="aide-panneau" role="dialog" aria-label="Solvi, votre assistant">
           <div className="aide-tete">
             <span className="aide-logo" aria-hidden="true">
-              <Solvi size={52} humeur={humeurBot} />
+              <Solvi size={52} humeur={humeurBot} vivant />
             </span>
             <div className="grow">
               <h2>

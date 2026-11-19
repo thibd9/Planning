@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight, Check, CirclePause, CirclePlay, Crown, FlaskConical, Gauge, ListTree, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Store, Undo2, UserRound, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
 import type { AppData, Justificatif, Remplacement } from '../domain/types';
@@ -13,7 +13,7 @@ import { useStore } from '../store/store';
 import type { Vue } from '../store/ui';
 import { useUi } from '../store/ui';
 import { Logo } from './kit';
-import type { Humeur } from './Solvi';
+import type { GesteSolvi, Humeur } from './Solvi';
 import { NomSolvi, Solvi } from './Solvi';
 
 /** Les quatre regards de l'environnement de test, avec des personnes déjà créées. */
@@ -755,7 +755,7 @@ const COMPLET_BRUT: Etape[] = [
     },
     gestes: [
       { faire: 'cliquer', sur: "[data-focus='marques'] .mq .mq-types button[aria-pressed='false']", dit: 'Touchez une famille de produits', sert: 'Sarah présente désormais cette marque pour cette famille aussi.' },
-      { faire: 'taper', dans: '#mq-nom', texte: 'Nouvelle gamme', dit: 'Une marque absente du répertoire ? Écrivez son nom', sert: 'Tel qu’on le dit au comptoir.' },
+      { faire: 'taper', dans: '#mq-nom', texte: 'NHCO', dit: 'Une marque absente du répertoire ? Écrivez son nom', sert: 'Tel qu’on le dit au comptoir.' },
       { faire: 'cliquer', sur: '#mq-ajouter', sert: 'La marque rejoint le répertoire de la pharmacie : elle se proposera aux autres animateurs.' },
       { faire: 'cliquer', sur: "[data-focus='marques'] .mq:last-child .mq-types button", dit: 'Choisissez sa première famille de produits', sert: 'Une marque sans famille n’apparaît pas encore sur l’accueil de Sarah.' },
     ],
@@ -2079,6 +2079,13 @@ export function Parcours(): JSX.Element | null {
   /** La fiche d'explication est-elle à l'écran ? Elle s'efface le temps d'une transition ou d'une démonstration. */
   const [ouvert, setOuvert] = useState(false);
   const [clic, setClic] = useState(false);
+  // Les gestes de Solvi : il s'écrase un peu en se posant, hoche la tête quand il prend la parole, sursaute à un clic.
+  const [gesteSolvi, setGesteSolvi] = useState<GesteSolvi | null>(null);
+  const gesteN = useRef(0);
+  const jouerGeste = useCallback((nom: GesteSolvi['nom']): void => {
+    setGesteSolvi({ nom, cle: ++gesteN.current });
+    window.setTimeout(() => setGesteSolvi((g) => (g && g.cle === gesteN.current ? null : g)), 1150);
+  }, []);
   const [lecture, setLecture] = useState(false);
   const [sommaire, setSommaire] = useState(false);
   /** L'utilisateur a quitté l'écran de l'étape pour explorer : le projecteur s'efface. */
@@ -2687,7 +2694,37 @@ export function Parcours(): JSX.Element | null {
     return () => window.removeEventListener('keydown', onKey);
   }, [parcours, N, setParcours, phase, reste, acte]);
 
+  // Il se pose : un petit écrasement. Il prend la parole : un hochement de tête. Il clique : un sursaut.
+  const poseLe = useRef(0);
+  const volAvant = useRef(false);
+  useEffect(() => {
+    if (volAvant.current && !vol) {
+      poseLe.current = Date.now();
+      jouerGeste('atterrit');
+    }
+    volAvant.current = vol;
+  }, [vol, jouerGeste]);
+  useEffect(() => {
+    if (!annonce || vol || Date.now() - poseLe.current < 900) return;
+    jouerGeste('hoche');
+  }, [annonce, vol, jouerGeste]);
+  useEffect(() => {
+    if (clic) jouerGeste('bond');
+  }, [clic, jouerGeste]);
+
   if (!etape || parcours === null || !data.demo) return null;
+  // Où Solvi regarde : dans le sens du vol quand il se déplace, vers le pointeur quand il montre un geste, sinon vers
+  // sa bulle, qu'il lit avec vous.
+  const regardSolvi = ((): { x: number; y: number } => {
+    if (vol) return { x: elan === 'vers-gauche' ? -1 : elan === 'vers-droite' ? 1 : 0, y: -0.2 };
+    if (point && pointeVue && !sortie && pose) {
+      const dx = point.x - (pose.x + 32);
+      const dy = point.y - (pose.y + 32);
+      const d = Math.hypot(dx, dy) || 1;
+      return { x: dx / d, y: dy / d };
+    }
+    return { x: 0.45, y: 0.1 };
+  })();
   const rang = chapitres.findIndex((c) => parcours >= c.debut && parcours < c.debut + c.n);
   const ferme = !ouvert || phase === 'demo';
   return (
@@ -2706,7 +2743,7 @@ export function Parcours(): JSX.Element | null {
           style={{ transform: `translate3d(${pose?.x ?? 12}px, ${pose?.y ?? 84}px, 0)`, transitionDuration: `${dureeVol}ms, 300ms` }}
         >
           <span className="solvi-guide-qui">
-            <Solvi size={64} humeur={humeur} />
+            <Solvi size={64} humeur={humeur} vivant={!vol && !pause} regard={regardSolvi} geste={gesteSolvi ?? undefined} />
           </span>
           <div className="solvi-bulle" role="status">
             <span className="solvi-bulle-tete">
@@ -2773,7 +2810,7 @@ export function Parcours(): JSX.Element | null {
         <div className="pt-acte-fond no-print">
           <section className="pt-acte" role="dialog" aria-labelledby="pt-acte-titre">
             <div className="pt-acte-tete">
-              <Solvi size={66} humeur="heureux" />
+              <Solvi size={66} humeur="heureux" vivant geste={{ nom: 'salue', cle: 1 }} />
               <div className="grow">
                 <div className="eyebrow">
                   {SCENARIOS[scenario].titre} · chapitre {rang + 1} sur {chapitres.length}
@@ -2823,7 +2860,7 @@ export function Parcours(): JSX.Element | null {
       <aside ref={panneau} className={`parcours-test no-print${ferme ? ' ferme' : ''}`} aria-label="Parcours guidé" aria-hidden={ferme} {...(ferme ? { inert: '' } : {})} style={place ? { left: place.left, top: place.top, right: 'auto', bottom: 'auto' } : undefined}>
         <div className="row" style={{ gap: 10 }}>
           <span className="pt-solvi" aria-hidden="true">
-            <Solvi size={54} humeur={phase === 'fini' ? (dernier ? 'joyeux' : 'heureux') : 'neutre'} />
+            <Solvi size={54} humeur={phase === 'fini' ? (dernier ? 'joyeux' : 'heureux') : 'neutre'} vivant={!ferme} />
           </span>
           <div className="grow">
             <div className="eyebrow">

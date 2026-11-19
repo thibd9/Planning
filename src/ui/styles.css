@@ -4149,3 +4149,85 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .menu-test .bt-roles button .small { white-space: nowrap; }
 /* Sur téléphone, l'étiquette de l'espace est un vrai bouton : 44 px de haut, comme les autres. */
 @media (max-width: 760px), (pointer: coarse) { .espace-badge.bouton { min-height: 44px; min-width: 44px; justify-content: center; } }
+
+/* ================================================================ Solvi, plus vivant
+   Trois couches qui ne se gênent pas : le flottement (permanent), les gestes (joués une fois, à l'intérieur), et le
+   regard (les yeux glissent vers ce qu'il montre). Il respire, il atterrit en s'écrasant un peu, il hoche la tête
+   quand il prend la parole, et de lui-même il jette un coup d'œil, penche la tête ou sautille. */
+.solvi-geste { display: block; width: 100%; height: 100%; transform-origin: 50% 85%; will-change: transform; }
+.solvi-regard { transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1); }
+.solvi.vivant .solvi-corps { animation: solvi-respire 4.2s ease-in-out infinite; }
+@keyframes solvi-respire {
+  0%, 100% { transform: translateY(2%) rotate(-1.5deg) scale(1, 1); }
+  25% { transform: translateY(-3%) rotate(0.4deg) scale(1.015, 0.99); }
+  50% { transform: translateY(-7%) rotate(1.5deg) scale(1, 1.02); }
+  75% { transform: translateY(-2%) rotate(-0.2deg) scale(1.012, 0.992); }
+}
+/* Les gestes demandés. */
+.solvi-geste.g-atterrit { animation: solvi-atterrit 0.62s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.solvi-geste.g-hoche { animation: solvi-hoche-tete 0.55s ease-in-out both; }
+.solvi-geste.g-bond { animation: solvi-saut 0.62s cubic-bezier(0.3, 0.9, 0.4, 1) both; }
+.solvi-geste.g-salue { animation: solvi-salue 1.1s ease-in-out both; }
+@keyframes solvi-atterrit { 0% { transform: translateY(-14%) scale(0.96, 1.06); } 38% { transform: translateY(5%) scale(1.12, 0.86); } 62% { transform: translateY(-4%) scale(0.97, 1.05); } 82% { transform: translateY(1%) scale(1.02, 0.98); } 100% { transform: none; } }
+@keyframes solvi-hoche-tete { 0%, 100% { transform: none; } 30% { transform: translateY(5%) rotate(5deg) scale(1.02, 0.97); } 60% { transform: translateY(-2%) rotate(-2deg); } }
+@keyframes solvi-saut { 0%, 100% { transform: none; } 18% { transform: translateY(4%) scale(1.08, 0.9); } 48% { transform: translateY(-22%) scale(0.95, 1.07); } 78% { transform: translateY(3%) scale(1.06, 0.93); } }
+@keyframes solvi-salue { 0%, 100% { transform: none; } 15% { transform: rotate(-12deg) translateX(-3%); } 35% { transform: rotate(11deg) translateX(3%); } 55% { transform: rotate(-9deg) translateX(-2%); } 75% { transform: rotate(7deg) translateX(1%); } }
+/* Les gestes spontanés. */
+.solvi-geste.t-penche-g { animation: solvi-penche-g 0.9s ease-in-out both; }
+.solvi-geste.t-penche-d { animation: solvi-penche-d 0.9s ease-in-out both; }
+.solvi-geste.t-saut { animation: solvi-saut 0.6s cubic-bezier(0.3, 0.9, 0.4, 1) both; }
+@keyframes solvi-penche-g { 0%, 100% { transform: none; } 40%, 65% { transform: rotate(-9deg) translateX(-2%); } }
+@keyframes solvi-penche-d { 0%, 100% { transform: none; } 40%, 65% { transform: rotate(9deg) translateX(2%); } }
+.solvi-yeux.double { animation: solvi-double 0.7s ease-in-out both; }
+@keyframes solvi-double { 0%, 22%, 44%, 66%, 100% { transform: scaleY(1); } 11%, 55% { transform: scaleY(0.08); } }
+/* La joie se voit dans tout le corps. */
+.solvi.vivant.h-joyeux .solvi-geste:not([class*='g-']):not([class*='t-']), .solvi.vivant.h-excite .solvi-geste:not([class*='g-']):not([class*='t-']) { animation: solvi-joie 1.3s ease-in-out 2 both; }
+@keyframes solvi-joie { 0%, 100% { transform: none; } 20% { transform: translateY(-14%) rotate(-7deg); } 45% { transform: translateY(2%) rotate(0deg) scale(1.06, 0.94); } 70% { transform: translateY(-10%) rotate(7deg); } }
+/* L'ombre suit le souffle. */
+.solvi.vivant .solvi-ombre { animation-duration: 4.2s; }
+.solvi-guide.pause .solvi-geste { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .solvi.vivant .solvi-corps, .solvi-geste, .solvi-yeux.double { animation: none !important; }
+  .solvi-regard { transition: none; }
+}
+
+/* ================================================================ Page de connexion, affinée
+   Même disposition (le logo, la carte, centrés), en plus soigné : un fond calme où le symbole de Solvéa apparaît en
+   très grand et très pâle, une carte nette, des choix de première visite qui disent où ils mènent. Rien ne bouge. */
+.connexion { background: linear-gradient(180deg, color-mix(in srgb, var(--a-soft) 70%, var(--bg)) 0%, var(--bg) 52%); }
+.cx-tache, .cx-tache.t1, .cx-tache.t2, .cx-tache.t3 { animation: none; background: none; border-radius: 0; width: auto; height: auto; left: auto; right: auto; top: auto; bottom: auto; filter: none; opacity: 1; line-height: 0; }
+.cx-tache.t1 { left: 50%; top: 46%; width: 980px; height: 720px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--surface) 92%, transparent), transparent); }
+.cx-tache.t2 { right: -150px; top: -170px; opacity: 0.1; transform: rotate(12deg); }
+.cx-tache.t3 { left: -120px; bottom: -130px; opacity: 0.08; transform: rotate(-18deg); }
+.connexion .connexion-in { width: min(432px, 100%); gap: 0; }
+.cx-marque { gap: 13px; }
+.cx-devise { margin: 10px 0 26px; text-align: center; font-size: 15px; color: var(--ink-2); letter-spacing: -0.005em; }
+.connexion .card.pad { gap: 16px !important; padding: 32px 32px 28px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.05), 0 28px 56px -32px color-mix(in srgb, var(--a-plein) 55%, transparent); }
+.connexion .card.pad h1 { font-size: 24px !important; letter-spacing: -0.025em; }
+.connexion .card.pad h1 + p { font-size: 14.5px; }
+.cx-valider { display: grid; gap: 10px; margin-top: 4px; }
+.cx-valider .btn.primary { min-height: 46px; justify-content: center; font-size: 15px; }
+.cx-lien { justify-self: center; padding: 6px 8px; border: 0; background: none; color: var(--a-text); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 6px; }
+.cx-lien:hover { text-decoration: underline; text-underline-offset: 3px; }
+.cx-lien:focus-visible { outline: 2px solid var(--a-deep); outline-offset: 2px; }
+.cx-suite { gap: 10px; padding-top: 18px; margin-top: 4px; }
+.cx-ou { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.cx-actions { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.cx-option { display: flex; align-items: center; gap: 13px; width: 100%; min-height: 58px; padding: 10px 12px 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
+.cx-option > svg:first-child { flex: none; color: var(--a-text); }
+.cx-option-texte { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.cx-option-texte b { font-size: 14.5px; font-weight: 650; }
+.cx-option-texte span { font-size: 13px; color: var(--ink-2); }
+.cx-option .cx-fleche { flex: none; color: var(--ink-3); transition: transform 0.15s ease; }
+.cx-option:hover { border-color: color-mix(in srgb, var(--a-plein) 45%, var(--line)); background: var(--a-tint); }
+.cx-option:hover .cx-fleche { transform: translateX(3px); color: var(--a-text); }
+.cx-option:focus-visible { outline: 2px solid var(--a-deep); outline-offset: 2px; }
+.connexion .connexion-in > .cx-note { display: flex; align-items: flex-start; justify-content: center; gap: 8px; margin: 18px auto 0; max-width: 46ch; text-align: left; line-height: 1.45; }
+.cx-note svg { flex: none; margin-top: 2px; }
+@media (max-width: 760px) {
+  .cx-tache.t2 { right: -260px; top: -260px; }
+  .cx-tache.t3 { display: block; left: -220px; bottom: -220px; }
+  .cx-devise { margin-bottom: 20px; font-size: 14.5px; }
+  .connexion .card.pad { padding: 24px 20px 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .cx-option .cx-fleche { transition: none; } }

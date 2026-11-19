@@ -1,4 +1,4 @@
-import { ArrowLeft, CircleAlert, LogIn, Play, RotateCcw, ShieldCheck, Store } from 'lucide-react';
+import { ArrowLeft, ChevronRight, CircleAlert, LogIn, MonitorSmartphone, Play, RotateCcw, ShieldCheck, Store } from 'lucide-react';
 import { useState } from 'react';
 import { empreinte, espaceDe, estResponsable, memeIdentifiant } from '../../domain/acces';
 import { useStore } from '../../store/store';
@@ -57,12 +57,15 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
 
   return (
     <main className="connexion" id="contenu">
-      {/* Fond : quelques formes abstraites en dégradé, immobiles. */}
+      {/* Fond : une lueur derrière la carte et le symbole de Solvéa, en très grand et très pâle, immobile. */}
       <div className="cx-fond" aria-hidden="true">
         <span className="cx-tache t1" />
-        <span className="cx-tache t2" />
-        <span className="cx-tache t3" />
-        <span className="cx-tache t4" />
+        <span className="cx-tache t2">
+          <Logo size={560} />
+        </span>
+        <span className="cx-tache t3">
+          <Logo size={380} />
+        </span>
       </div>
       <div className="cx-panneau">
       <div className="connexion-in">
@@ -70,6 +73,7 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
           <Logo size={54} />
           <LogoNom hauteur={32} />
         </div>
+        <p className="cx-devise">Le planning d’équipe de votre pharmacie</p>
         {ecran === 'connexion' ? (
           <form
             className="card pad col"
@@ -103,22 +107,34 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
                 <CircleAlert size={15} aria-hidden="true" /> {erreur}
               </p>
             ) : null}
-            <button type="submit" className="btn primary" disabled={!identifiant.trim() || !motDePasse} style={{ minHeight: 46 }}>
-              <LogIn size={17} aria-hidden="true" /> Se connecter
-            </button>
-            {!vide ? (
-              <button type="button" className="btn ghost sm" onClick={() => { setEcran('oubli'); setErreur(''); setInfo(''); }}>
-                Mot de passe oublié ?
+            <div className="cx-valider">
+              <button type="submit" className="btn primary" disabled={!identifiant.trim() || !motDePasse}>
+                <LogIn size={17} aria-hidden="true" /> Se connecter
               </button>
-            ) : null}
+              {!vide ? (
+                <button type="button" className="cx-lien" onClick={() => { setEcran('oubli'); setErreur(''); setInfo(''); }}>
+                  Mot de passe oublié ?
+                </button>
+              ) : null}
+            </div>
             <div className="cx-suite">
               <span className="cx-ou">Première visite ?</span>
               <div className="cx-actions">
-                <button type="button" className="btn" onClick={onCreer}>
-                  <Store size={16} aria-hidden="true" /> Créer ma pharmacie
+                <button type="button" className="cx-option" onClick={onCreer}>
+                  <Store size={19} aria-hidden="true" />
+                  <span className="cx-option-texte">
+                    <b>Créer ma pharmacie</b>
+                    <span>Trois étapes, puis vos identifiants.</span>
+                  </span>
+                  <ChevronRight size={17} aria-hidden="true" className="cx-fleche" />
                 </button>
-                <button type="button" className="btn" onClick={() => ouvrirTutoriels(true)}>
-                  <Play size={16} aria-hidden="true" /> Comment ça marche ?
+                <button type="button" className="cx-option" onClick={() => ouvrirTutoriels(true)}>
+                  <Play size={19} aria-hidden="true" />
+                  <span className="cx-option-texte">
+                    <b>Comment ça marche ?</b>
+                    <span>Une pharmacie d’exemple, sans rien saisir.</span>
+                  </span>
+                  <ChevronRight size={17} aria-hidden="true" className="cx-fleche" />
                 </button>
               </div>
             </div>
@@ -188,7 +204,10 @@ export function Connexion({ onCreer }: { onCreer: () => void }): JSX.Element {
             </button>
           </div>
         ) : null}
-        <p className="tiny muted">Sans serveur, cette connexion sépare les espaces sur cet appareil ; elle ne remplace pas de vrais comptes en ligne.</p>
+        <p className="tiny muted cx-note">
+          <MonitorSmartphone size={14} aria-hidden="true" />
+          <span>Sans serveur, cette connexion sépare les espaces sur cet appareil ; elle ne remplace pas de vrais comptes en ligne.</span>
+        </p>
       </div>
       </div>
       <ChoixParcours />

@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 const CORPS =
   'M13.12 -51.25 A27 27 0 1 1 51.25 -13.12 A19.6 19.6 0 0 0 51.25 13.12 A27 27 0 1 1 13.12 51.25 A19.6 19.6 0 0 0 -13.12 51.25 A27 27 0 1 1 -51.25 13.12 A19.6 19.6 0 0 0 -51.25 -13.12 A27 27 0 1 1 -13.12 -51.25 A19.6 19.6 0 0 0 13.12 -51.25 Z';
@@ -223,13 +223,73 @@ function Signe({ humeur }: { humeur: Humeur }): JSX.Element | null {
  * des yeux qui clignent ; elle flotte sur place et prend la couleur du thème.
  * Purement décorative : son nom est porté par le texte qui l'accompagne.
  */
-export function Solvi({ size = 56, calme = false, humeur = 'neutre' }: { size?: number; calme?: boolean; humeur?: Humeur }): JSX.Element {
+/** Un geste que l'on demande à Solvi : il le joue une fois. `cle` change à chaque demande. */
+export interface GesteSolvi {
+  nom: 'atterrit' | 'hoche' | 'bond' | 'salue';
+  cle: number;
+}
+/** Les petits gestes qu'il fait de lui-même quand il attend : un coup d'œil, la tête qui penche, un petit saut, un double clin. */
+const TICS = ['oeil-g', 'oeil-d', 'penche-g', 'penche-d', 'saut', 'double', 'oeil-h'] as const;
+type Tic = (typeof TICS)[number];
+
+export function Solvi({
+  size = 56,
+  calme = false,
+  humeur = 'neutre',
+  vivant = false,
+  regard,
+  geste,
+}: {
+  size?: number;
+  calme?: boolean;
+  humeur?: Humeur;
+  /** Solvi vit sa vie quand il attend : il regarde autour de lui, penche la tête, sautille. */
+  vivant?: boolean;
+  /** Où il regarde, de -1 à 1 sur chaque axe : ses yeux suivent ce qu'il montre. */
+  regard?: { x: number; y: number };
+  geste?: GesteSolvi;
+}): JSX.Element {
   const id = useId();
   const u = (nom: string): string => `url(#${id}${nom})`;
+  const [tic, setTic] = useState<{ nom: Tic; cle: number } | null>(null);
+  // De lui-même, à intervalles irréguliers, un petit geste : jamais deux fois le même de suite, jamais pendant un geste demandé.
+  useEffect(() => {
+    if (!vivant || calme) return;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    let minuterie = 0;
+    let fin = 0;
+    let dernier: Tic | null = null;
+    let n = 0;
+    const prochain = (): void => {
+      minuterie = window.setTimeout(
+        () => {
+          const possibles = TICS.filter((t) => t !== dernier);
+          dernier = possibles[Math.floor(Math.random() * possibles.length)];
+          setTic({ nom: dernier, cle: ++n });
+          fin = window.setTimeout(() => setTic(null), 900);
+          prochain();
+        },
+        2600 + Math.random() * 3200,
+      );
+    };
+    prochain();
+    return () => {
+      window.clearTimeout(minuterie);
+      window.clearTimeout(fin);
+      setTic(null);
+    };
+  }, [vivant, calme]);
+  // Les yeux : ce qu'on lui demande de regarder, sauf le temps d'un coup d'œil spontané.
+  const coup = tic?.nom === 'oeil-g' ? { x: -1, y: 0 } : tic?.nom === 'oeil-d' ? { x: 1, y: 0 } : tic?.nom === 'oeil-h' ? { x: 0, y: -1 } : null;
+  const vise = coup ?? regard ?? { x: 0, y: 0 };
+  const borne = (v: number): number => Math.max(-1, Math.min(1, v));
+  const mouvement = geste ? `g-${geste.nom}` : tic && !coup ? `t-${tic.nom}` : '';
   return (
-    <span className={`solvi${calme ? ' calme' : ''} h-${humeur}`} style={{ width: size, height: size }} aria-hidden="true">
+    <span className={`solvi${calme ? ' calme' : ''}${vivant ? ' vivant' : ''} h-${humeur}`} style={{ width: size, height: size }} aria-hidden="true">
       <span className="solvi-ombre" />
       <span className="solvi-corps">
+        {/* Le flottement porte le corps ; les gestes se jouent à l'intérieur, sans l'interrompre. */}
+        <span key={geste ? `g${geste.cle}` : tic && !coup ? `t${tic.cle}` : 'repos'} className={`solvi-geste ${mouvement}`}>
         <svg width={size} height={size} viewBox="34 32 132 132" focusable="false">
           <defs>
             <linearGradient id={`${id}c`} x1="-58" y1="14" x2="60" y2="-10" gradientUnits="userSpaceOnUse">
@@ -293,9 +353,11 @@ export function Solvi({ size = 56, calme = false, humeur = 'neutre' }: { size?: 
             <path d={VISAGE} fill="none" style={{ stroke: 'var(--solvi-1)' }} strokeOpacity="0.36" strokeWidth="5.5" filter={u('fl')} transform="translate(1 2.4)" />
           </g>
           {/* Les yeux changent avec l'humeur ; seuls les yeux ouverts clignent. */}
-          <g key={humeur} className={`solvi-yeux${humeur === 'neutre' || humeur === 'intrigue' ? ' cligne' : ''}`}>
-            <g transform="translate(-13 -12.6) scale(1.13)">
-              <Yeux humeur={humeur} fond={u('o')} />
+          <g className="solvi-regard" style={{ transform: `translate(${(borne(vise.x) * 3.4).toFixed(2)}px, ${(borne(vise.y) * 2.6).toFixed(2)}px)` }}>
+            <g key={`${humeur}${tic?.nom === 'double' ? tic.cle : ''}`} className={`solvi-yeux${humeur === 'neutre' || humeur === 'intrigue' ? ' cligne' : ''}${tic?.nom === 'double' ? ' double' : ''}`}>
+              <g transform="translate(-13 -12.6) scale(1.13)">
+                <Yeux humeur={humeur} fond={u('o')} />
+              </g>
             </g>
           </g>
           {/* Le signe se tient au-dessus de Solvi, à droite, hors de son corps. */}
@@ -303,6 +365,7 @@ export function Solvi({ size = 56, calme = false, humeur = 'neutre' }: { size?: 
             <Signe key={`s-${humeur}`} humeur={humeur} />
           </g>
         </svg>
+        </span>
       </span>
     </span>
   );

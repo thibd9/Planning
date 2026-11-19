@@ -263,6 +263,10 @@ détail vient dessous, en retrait.
 **Solvi** est la mascotte de l'aide. Il n'apparaît que dans l'aide (le bouton « Aide », l'assistant, la
 page d'aide) et dans les visites guidées. Une brume légère le détache de ce qui passe dessous.
 
+Solvi est vivant sans être agité : il respire, ses yeux suivent ce qu'il montre, il s'écrase un peu en se
+posant, hoche la tête quand il prend la parole, et de lui-même jette un coup d'œil ou penche la tête. Tout
+cela s'arrête si l'appareil demande moins de mouvement.
+
 Pendant une visite, **on lit, puis on regarde**, et une seule chose bouge à la fois :
 
 1. le projecteur se pose sur le bloc concerné ;
