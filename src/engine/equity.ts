@@ -1,4 +1,4 @@
-import { addDays, dayIndex, mondayOf, weekDates, weekday } from '../domain/time';
+import { addDays, dayIndex, fmtHeure, mondayOf, weekDates, weekday } from '../domain/time';
 import type { AppData, ISODate, Person } from '../domain/types';
 import { estPharmacien } from '../domain/types';
 import { estFermeture, estOuverture, minutesTravail } from './core';
@@ -24,6 +24,26 @@ export interface LigneEquite {
    */
   attendu: Record<CompteurCle, number | null>;
   semainesTravaillees: number;
+  /** Le détail de ce qui est compté : chaque date, avec l'horaire quand il y en a un. Par ordre de date. */
+  detail: Record<CompteurCle, FaitEquite[]>;
+  /** Comment la part attendue est calculée ; `null` si la personne n'est pas concernée ou si rien ne se partage. */
+  partage: Record<CompteurCle, PartageEquite | null>;
+}
+
+/** Un fait compté : un samedi travaillé, une fermeture, une garde… */
+export interface FaitEquite {
+  date: ISODate;
+  precision?: string;
+}
+
+/** Le partage d'un compteur : le total de l'équipe, la part de la personne (de 0 à 1) et sur quoi elle repose. */
+export interface PartageEquite {
+  total: number;
+  part: number;
+  /** `contrat` : au prorata des heures du contrat et des semaines travaillées ; `egal` : à parts égales. */
+  base: 'contrat' | 'egal';
+  /** Nombre de personnes entre lesquelles on partage. */
+  entre: number;
 }
 
 const CLES: CompteurCle[] = ['samedis', 'fermetures', 'gardes', 'depannages', 'changementsTardifs', 'souhaitsRefuses'];
@@ -63,6 +83,8 @@ export function equite(data: AppData, from: ISODate, to: ISODate): LigneEquite[]
       reel: { samedis: 0, fermetures: 0, gardes: 0, depannages: 0, changementsTardifs: 0, souhaitsRefuses: 0 },
       attendu: { samedis: 0, fermetures: 0, gardes: 0, depannages: 0, changementsTardifs: null, souhaitsRefuses: null },
       semainesTravaillees: 0,
+      detail: { samedis: [], fermetures: [], gardes: [], depannages: [], changementsTardifs: [], souhaitsRefuses: [] },
+      partage: { samedis: null, fermetures: null, gardes: null, depannages: null, changementsTardifs: null, souhaitsRefuses: null },
     });
     semaines.set(p.id, new Set());
   }
@@ -75,36 +97,51 @@ export function equite(data: AppData, from: ISODate, to: ISODate): LigneEquite[]
     if (!l) continue;
     semaines.get(s.personId)!.add(mondayOf(s.date));
     // Un poste repris au pied levé (absence couverte, remplacement) compte pour un dépannage.
-    if (s.origine === 'reparation') l.reel.depannages += 1;
+    const horaire = `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`;
+    if (s.origine === 'reparation') {
+      l.reel.depannages += 1;
+      l.detail.depannages.push({ date: s.date, precision: horaire });
+    }
     const wd = weekday(s.date);
     if (wd === 5) {
       const k = `${s.personId}|${s.date}`;
       if (!samedisVus.has(k)) {
         samedisVus.add(k);
         l.reel.samedis += 1;
+        l.detail.samedis.push({ date: s.date, precision: horaire });
       }
     } else if (wd < 5 && estFermeture(data.officine, s)) {
       l.reel.fermetures += 1;
+      l.detail.fermetures.push({ date: s.date, precision: `jusqu’à ${fmtHeure(s.end)}` });
     }
   }
   for (const g of data.gardes) {
     const di = dayIndex(g.date);
     if (di < lo || di > hi || !g.personId) continue;
     const l = lignes.get(g.personId);
-    if (l) l.reel.gardes += 1;
+    if (l) {
+      l.reel.gardes += 1;
+      l.detail.gardes.push({ date: g.date });
+    }
   }
   for (const n of data.notifications) {
     const di = dayIndex(n.date);
     if (di < lo || di > hi || !n.tardif) continue;
     const l = lignes.get(n.personId);
-    if (l) l.reel.changementsTardifs += 1;
+    if (l) {
+      l.reel.changementsTardifs += 1;
+      l.detail.changementsTardifs.push({ date: n.date });
+    }
   }
   for (const b of data.besoins) {
     if (b.decision !== 'refusee' || !b.decidedAt) continue;
     const di = dayIndex(b.decidedAt.slice(0, 10));
     if (di < lo || di > hi) continue;
     const l = lignes.get(b.personId);
-    if (l) l.reel.souhaitsRefuses += 1;
+    if (l) {
+      l.reel.souhaitsRefuses += 1;
+      l.detail.souhaitsRefuses.push({ date: b.decidedAt.slice(0, 10) });
+    }
   }
 
   for (const p of personnes) lignes.get(p.id)!.semainesTravaillees = semaines.get(p.id)!.size;
@@ -116,10 +153,12 @@ export function equite(data: AppData, from: ISODate, to: ISODate): LigneEquite[]
     const totalPoids = eligibles.reduce((t, p) => t + poids(p), 0);
     const total = eligibles.reduce((t, p) => t + lignes.get(p.id)!.reel[cle], 0);
     for (const p of personnes) {
-      lignes.get(p.id)!.attendu[cle] =
-        eligibles.includes(p) && totalPoids > 0 ? (total * poids(p)) / totalPoids : null;
+      const concerne = eligibles.includes(p) && totalPoids > 0;
+      lignes.get(p.id)!.attendu[cle] = concerne ? (total * poids(p)) / totalPoids : null;
+      lignes.get(p.id)!.partage[cle] = concerne ? { total, part: poids(p) / totalPoids, base: cle === 'gardes' ? 'egal' : 'contrat', entre: eligibles.length } : null;
     }
   }
+  for (const l of lignes.values()) for (const cle of CLES) l.detail[cle].sort((a, b) => a.date.localeCompare(b.date));
   return personnes.map((p) => lignes.get(p.id)!);
 }
 

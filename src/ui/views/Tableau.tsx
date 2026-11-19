@@ -501,9 +501,20 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
           </div>
           {parPersonne.length ? (
             <div className="tbj">
-              <div className="tbj-ligne tete" aria-hidden="true">
+              {/* L'heure qu'il est : une étiquette au-dessus des heures, puis un trait continu à travers toutes les lignes. */}
+              <div className={`tbj-ligne tete${aiguille !== null ? ' avec-maintenant' : ''}`} aria-hidden="true">
                 <span />
-                <Graduations echelle={echelle} />
+                <span className="tbj-piste">
+                  <Graduations echelle={echelle} />
+                  {aiguille !== null ? (
+                    <>
+                      <span className={`tbj-maintenant${aiguille < 12 ? ' debut' : aiguille > 88 ? ' fin' : ''}`} style={{ left: `${aiguille}%` }}>
+                        Maintenant · {fmtHeure(maintenant)}
+                      </span>
+                      <i className="tbj-aiguille" style={{ left: `${aiguille}%` }} />
+                    </>
+                  ) : null}
+                </span>
               </div>
               {parPersonne.map(({ p, postes }) =>
                 p ? (

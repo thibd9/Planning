@@ -481,3 +481,15 @@ La couleur d'un espace est celle du profil : elle dit d'un coup d'œil où l'on 
 principal peut changer la sienne** (dix couleurs, dans « Mon compte »). S'il quitte le bleu, sa bannière passe à
 l'aplat de la couleur choisie. Tous les autres profils gardent leur couleur ; l'apparence (claire, mixte,
 sombre) et la taille du texte restent au choix de chacun.
+
+## Équité : le détail de chaque ligne
+
+Dans « Équité », chaque ligne s'ouvre. On y lit **ce qui est compté** (chaque samedi travaillé avec son
+horaire, chaque fermeture, chaque garde...) et **d'où vient la part attendue** : le total de l'équipe sur la
+période, la part de la personne d'après son contrat et ses semaines travaillées (à parts égales pour les
+gardes), et ce que l'écart suggère pour les prochains plannings.
+
+## Aujourd'hui au comptoir : l'heure qu'il est
+
+Sur le tableau de bord, un trait continu dans la couleur du thème traverse la frise du jour, surmonté de
+l'étiquette « Maintenant » et de l'heure. Il n'apparaît que le jour même, pendant les heures d'ouverture.

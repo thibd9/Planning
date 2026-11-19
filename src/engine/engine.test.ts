@@ -310,6 +310,25 @@ describe('équité, paie et langage courant', () => {
     expect(ines?.attendu.samedis ?? 0).toBeLessThan(camille?.attendu.samedis ?? 0);
     expect(lignes.find((l) => l.personId === 'p_jules')?.reel.changementsTardifs).toBe(1);
   });
+
+  it('garde le détail de ce qui est compté et explique la part attendue', () => {
+    const lignes = equite(data, addDays(LUNDI, -56), addDays(LUNDI, -1));
+    for (const l of lignes) {
+      // Autant de dates que d'occurrences, toutes des samedis, dans l'ordre.
+      expect(l.detail.samedis).toHaveLength(l.reel.samedis);
+      expect(l.detail.samedis.every((f) => weekday(f.date) === 5 && !!f.precision)).toBe(true);
+      expect(l.detail.samedis.map((f) => f.date)).toEqual([...l.detail.samedis.map((f) => f.date)].sort());
+      expect(l.detail.gardes).toHaveLength(l.reel.gardes);
+      expect(l.detail.fermetures).toHaveLength(l.reel.fermetures);
+      // La part attendue se retrouve : total de l'équipe × part de la personne.
+      const partage = l.partage.samedis;
+      if (partage) expect(partage.total * partage.part).toBeCloseTo(l.attendu.samedis as number, 5);
+      else expect(l.attendu.samedis).toBeNull();
+    }
+    const parts = lignes.map((l) => l.partage.samedis?.part ?? 0).reduce((t, x) => t + x, 0);
+    expect(parts).toBeCloseTo(1, 5);
+    expect(lignes.find((l) => l.partage.gardes)?.partage.gardes?.base).toBe('egal');
+  });
   it('exporte une fiche navette lisible', () => {
     const csv = ficheNavetteCSV(data, '2026-11');
     expect(csv).toContain('heures PRÉVUES');

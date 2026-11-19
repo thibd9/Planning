@@ -1,4 +1,4 @@
-import { BatteryWarning, CircleCheck, Scale, TrendingDown, TrendingUp } from 'lucide-react';
+import { BatteryWarning, ChevronDown, CircleCheck, Scale, TrendingDown, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { addDays, fmtDateCourt, fmtDecimal, fmtSemaine, mondayOf } from '../../domain/time';
 import type { Person } from '../../domain/types';
@@ -7,6 +7,17 @@ import type { CompteurCle, LigneEquite } from '../../engine/equity';
 import { COMPTEUR_CLES, COMPTEUR_LABEL, ecartEquite, equite, fatigue } from '../../engine/equity';
 import { useStore } from '../../store/store';
 import { Avatar, Seg } from '../kit';
+
+/** Les mots de chaque compteur, pour le détail d'une ligne. */
+const NOMS: Record<CompteurCle, { un: string; plusieurs: string; aucun: string }> = {
+  samedis: { un: 'samedi travaillé', plusieurs: 'samedis travaillés', aucun: 'Aucun samedi travaillé' },
+  fermetures: { un: 'fermeture', plusieurs: 'fermetures', aucun: 'Aucune fermeture' },
+  gardes: { un: 'garde', plusieurs: 'gardes', aucun: 'Aucune garde' },
+  depannages: { un: 'dépannage', plusieurs: 'dépannages', aucun: 'Aucun dépannage' },
+  changementsTardifs: { un: 'changement tardif', plusieurs: 'changements tardifs', aucun: 'Aucun changement tardif' },
+  souhaitsRefuses: { un: 'demande refusée', plusieurs: 'demandes refusées', aucun: 'Aucune demande refusée' },
+};
+const capitale = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
 /** Barre d'écart centrée : à droite, la personne a fait plus que sa part attendue ; à gauche, moins. */
 export function Ecart({ ligne, cle, max }: { ligne: LigneEquite; cle: CompteurCle; max: number }): JSX.Element {
@@ -145,23 +156,73 @@ export function Equite(): JSX.Element {
             const e = ecart(l, cle) as number;
             const etat = Math.abs(e) < SEUIL ? 'e-egal' : e > 0 ? 'e-plus' : 'e-moins';
             const w = Math.min(50, (Math.abs(e) / max) * 50);
+            const faits = l.detail[cle];
+            const partage = l.partage[cle];
+            const mot = NOMS[cle];
             return (
-              <li key={p.id} className={`eq-ligne ${etat}`}>
-                <Avatar person={p} />
-                <span className="eq-qui">
-                  <b>{nomCourt(p)}</b>
-                  <span className="small soft">
-                    {QUALIFICATION_COURT[p.qualification]} · {p.heuresHebdo} h
-                  </span>
-                </span>
-                <span className="eq-fait num">
-                  <b>{l.reel[cle]}</b>
-                  <span className="small soft"> pour {fmtDecimal(l.attendu[cle] as number, 1)} attendu</span>
-                </span>
-                <span className="eq-barre" aria-hidden="true">
-                  <i style={e >= 0 ? { left: '50%', width: `${w}%` } : { right: '50%', width: `${w}%` }} />
-                </span>
-                <span className="eq-mot">{etat === 'e-egal' ? 'À l’équilibre' : `${fmtDecimal(Math.abs(e), 1)} de ${e > 0 ? 'plus' : 'moins'}`}</span>
+              <li key={p.id} className={`eq-item ${etat}`}>
+                {/* La ligne s'ouvre : les dates comptées, puis le calcul de la part attendue. */}
+                <details className="eq-detail" data-personne={p.id}>
+                  <summary className={`eq-ligne ${etat}`}>
+                    <Avatar person={p} />
+                    <span className="eq-qui">
+                      <b>{nomCourt(p)}</b>
+                      <span className="small soft">
+                        {QUALIFICATION_COURT[p.qualification]} · {p.heuresHebdo} h
+                      </span>
+                    </span>
+                    <span className="eq-fait num">
+                      <b>{l.reel[cle]}</b>
+                      <span className="small soft"> pour {fmtDecimal(l.attendu[cle] as number, 1)} attendu</span>
+                    </span>
+                    <span className="eq-barre" aria-hidden="true">
+                      <i style={e >= 0 ? { left: '50%', width: `${w}%` } : { right: '50%', width: `${w}%` }} />
+                    </span>
+                    <span className="eq-mot">{etat === 'e-egal' ? 'À l’équilibre' : `${fmtDecimal(Math.abs(e), 1)} de ${e > 0 ? 'plus' : 'moins'}`}</span>
+                    <span className="eq-chev" aria-hidden="true">
+                      <ChevronDown size={18} />
+                    </span>
+                    <span className="sr">, voir le détail</span>
+                  </summary>
+                  <div className="eq-corps">
+                    <div className="eq-bloc">
+                      <h3 className="eq-titre">Ce qui est compté</h3>
+                      {faits.length ? (
+                        <ul className="eq-faits">
+                          {faits.map((f, n) => (
+                            <li key={`${f.date}-${n}`}>
+                              <b>{capitale(fmtDateCourt(f.date))}</b>
+                              {f.precision ? <span className="small soft num">{f.precision}</span> : null}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="soft small">
+                          {mot.aucun} du {fmtDateCourt(from)} au {fmtDateCourt(to)}.
+                        </p>
+                      )}
+                    </div>
+                    {partage ? (
+                      <div className="eq-bloc">
+                        <h3 className="eq-titre">D’où vient la part attendue</h3>
+                        <p className="small">
+                          Sur la période, l’équipe compte <b className="num">{partage.total}</b> {partage.total > 1 ? mot.plusieurs : mot.un}, à partager entre {partage.entre} personnes.{' '}
+                          {partage.base === 'egal' ? (
+                            <>Les gardes se partagent à parts égales entre pharmaciens : </>
+                          ) : (
+                            <>
+                              La part de {p.prenom} suit son contrat ({p.heuresHebdo} h par semaine) et ses {Math.max(1, l.semainesTravaillees)} semaine{Math.max(1, l.semainesTravaillees) > 1 ? 's' : ''} travaillée{Math.max(1, l.semainesTravaillees) > 1 ? 's' : ''} :{' '}
+                            </>
+                          )}
+                          <b className="num">{fmtDecimal(partage.part * 100, 0)} %</b> du total, soit <b className="num">{fmtDecimal(l.attendu[cle] as number, 1)}</b>.
+                        </p>
+                        <p className="small soft">
+                          {etat === 'e-egal' ? 'L’écart est trop faible pour compter : la personne est à l’équilibre.' : e > 0 ? `${p.prenom} en a fait ${fmtDecimal(e, 1)} de plus que sa part : à ménager dans les prochains plannings.` : `${p.prenom} en a fait ${fmtDecimal(Math.abs(e), 1)} de moins que sa part : à solliciter en premier.`}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+                </details>
               </li>
             );
           })}
