@@ -22,7 +22,6 @@ import {
   weekday,
 } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
-import { imprimer } from '../../env';
 import { ABSENCE_LABEL, ACTIVITE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt, classeAbsence, libelleGarde } from '../../domain/types';
 import {
   besoinsDe,
@@ -42,6 +41,7 @@ import type { GenResult } from '../../engine/generate';
 import { VARIANTE_LABEL, genererVariantes } from '../../engine/generate';
 import { semaineHabituelle } from '../../engine/habitudes';
 import { estCollaboratif } from '../../engine/souhaits';
+import { DUREES_PAUSE, PAUSES_MAX, pausesProposees, pausesValides } from '../../engine/pauses';
 import { coutSemaine, decompteSemaine } from '../../engine/payroll';
 import { autreDuRdv, rdvFixes } from '../../engine/rdv';
 import { controlePublication } from '../../engine/publish';
@@ -183,7 +183,7 @@ export function Construire(): JSX.Element {
           <button type="button" className="btn ghost icon" onClick={redo} disabled={!future.length} aria-label="Rétablir" title="Rétablir (Ctrl + Maj + Z)">
             <Redo2 size={17} />
           </button>
-          <button type="button" className="btn ghost icon" onClick={() => imprimer(dire)} aria-label="Imprimer le planning" title="Imprimer">
+          <button type="button" className="btn ghost icon" onClick={() => useUi.getState().ouvrirImpression({ periode: planVue === 'mois' ? 'mois' : 'semaine', repere: semaine, moi: seulementMoi })} aria-label="Imprimer le planning" title="Aperçu avant impression">
             <Printer size={17} />
           </button>
         </div>
@@ -781,6 +781,8 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
   const [pauseDebut, setPauseDebut] = useState(fmtHHMM(shift?.pauseStart ?? postes[0]?.pauseStart ?? 750));
   const [pauseFin, setPauseFin] = useState(fmtHHMM(shift?.pauseEnd ?? postes[0]?.pauseEnd ?? 810));
   const [activite, setActivite] = useState<Activite>(shift?.activite ?? 'comptoir');
+  // Les pauses courtes : une heure de début et une durée chacune.
+  const [courtes, setCourtes] = useState<{ cle: string; debut: string; duree: number }[]>(() => (shift ? (shift.pauses ?? []) : (postes[0]?.pauses ?? [])).map((x) => ({ cle: uid('pc'), debut: fmtHHMM(x.start), duree: x.end - x.start })));
 
   const brouillon = useMemo<Shift | null>(() => {
     const s = parseHHMM(debut);
@@ -789,7 +791,13 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
     const ps = avecPause ? parseHHMM(pauseDebut) : null;
     const pe = avecPause ? parseHHMM(pauseFin) : null;
     const pauseOk = ps !== null && pe !== null && pe > ps && ps > s && pe < e;
-    const modifie = !shift || shift.start !== s || shift.end !== e || shift.pauseStart !== (pauseOk ? ps : undefined) || shift.activite !== activite;
+    const horaire = { start: s, end: e, ...(pauseOk ? { pauseStart: ps as number, pauseEnd: pe as number } : {}) };
+    const pauses = pausesValides(
+      horaire,
+      courtes.map((x) => ({ start: parseHHMM(x.debut) ?? -1, end: (parseHHMM(x.debut) ?? -1) + x.duree })),
+    );
+    const memesPauses = JSON.stringify(shift?.pauses ?? []) === JSON.stringify(pauses);
+    const modifie = !shift || shift.start !== s || shift.end !== e || shift.pauseStart !== (pauseOk ? ps : undefined) || shift.activite !== activite || !memesPauses;
     return {
       id: shift?.id ?? uid('s'),
       personId,
@@ -798,11 +806,12 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
       end: e,
       pauseStart: pauseOk ? (ps as number) : undefined,
       pauseEnd: pauseOk ? (pe as number) : undefined,
+      ...(pauses.length ? { pauses } : {}),
       activite,
       origine: modifie ? 'manuel' : (shift?.origine ?? 'manuel'),
       explication: modifie ? undefined : shift?.explication,
     };
-  }, [debut, fin, avecPause, pauseDebut, pauseFin, activite, shift, personId, date]);
+  }, [debut, fin, avecPause, pauseDebut, pauseFin, activite, shift, personId, date, courtes]);
 
   // Contrôle immédiat : ce que ce poste changerait, avant même d'enregistrer.
   const effets = useMemo(() => {
@@ -892,6 +901,7 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
                     setPauseDebut(fmtHHMM(p.pauseStart));
                     setPauseFin(fmtHHMM(p.pauseEnd));
                   }
+                  setCourtes((p.pauses ?? []).map((x) => ({ cle: uid('pc'), debut: fmtHHMM(x.start), duree: x.end - x.start })));
                 }}
               >
                 <span className="ti" aria-hidden="true">
@@ -946,7 +956,8 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
                   <span className={`chip-i ${ACTIVITE_COULEUR[a]}`} aria-hidden="true">
                     <I size={15} />
                   </span>
-                  <span className="grow">{a === 'formation' ? 'Planifier une formation' : 'Planifier un inventaire'}</span>
+                  <span className="grow">{ACTIVITE_COURT[a]}</span>
+                  <span className="sr">{a === 'formation' ? ' : planifier une formation' : ' : planifier un inventaire'}</span>
                   <ArrowRight size={15} aria-hidden="true" />
                 </button>
               );
@@ -965,7 +976,7 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
       </fieldset>
       <label className="check">
         <input type="checkbox" checked={avecPause} onChange={(e) => setAvecPause(e.target.checked)} />
-        Pause planifiée (non comptée en temps de travail)
+        Pause déjeuner (non comptée en temps de travail)
       </label>
       {avecPause ? (
         <div className="row">
@@ -979,6 +990,58 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           </label>
         </div>
       ) : null}
+      <fieldset className="pc" id="pauses-courtes">
+        <legend className="field">
+          Pauses courtes <span className="oblig">facultatif</span>
+        </legend>
+        <p className="small soft pc-aide">Dix à vingt minutes. Elles se lisent sur le planning et sur la feuille imprimée, sans changer le décompte des heures.</p>
+        {courtes.map((x, i) => {
+          const debutMin = parseHHMM(x.debut);
+          const gardee = !!brouillon?.pauses?.some((y) => y.start === debutMin);
+          return (
+            <div key={x.cle} className="pc-ligne">
+              <label className="field" htmlFor={`pc-debut-${x.cle}`}>
+                <span className={i === 0 ? undefined : 'sr'}>Début{i === 0 ? '' : `, pause ${i + 1}`}</span>
+                <input id={`pc-debut-${x.cle}`} type="time" step={300} value={x.debut} onChange={(e) => setCourtes((l) => l.map((y) => (y.cle === x.cle ? { ...y, debut: e.target.value } : y)))} />
+              </label>
+              <label className="field" htmlFor={`pc-duree-${x.cle}`}>
+                <span className={i === 0 ? undefined : 'sr'}>Durée{i === 0 ? '' : `, pause ${i + 1}`}</span>
+                <select id={`pc-duree-${x.cle}`} value={x.duree} onChange={(e) => setCourtes((l) => l.map((y) => (y.cle === x.cle ? { ...y, duree: Number(e.target.value) } : y)))}>
+                  {DUREES_PAUSE.map((d) => (
+                    <option key={d} value={d}>
+                      {d} min
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button type="button" className="btn ghost icon" aria-label={`Retirer la pause de ${x.debut}`} onClick={() => setCourtes((l) => l.filter((y) => y.cle !== x.cle))}>
+                <Trash2 size={16} />
+              </button>
+              {brouillon && !gardee ? <span className="erreur pc-hors">Hors du temps de travail, ou en double : elle ne sera pas gardée.</span> : null}
+            </div>
+          );
+        })}
+        <div className="row wrap" style={{ gap: 8 }}>
+          {courtes.length < PAUSES_MAX ? (
+            <button
+              type="button"
+              className="btn sm"
+              id="pc-ajouter"
+              onClick={() => {
+                const libre = brouillon ? pausesProposees(brouillon).find((x) => !courtes.some((y) => parseHHMM(y.debut) === x.start)) : undefined;
+                setCourtes((l) => l.concat({ cle: uid('pc'), debut: fmtHHMM(libre?.start ?? (parseHHMM(debut) ?? 510) + 120), duree: 15 }));
+              }}
+            >
+              <Plus size={15} aria-hidden="true" /> Ajouter une pause courte
+            </button>
+          ) : null}
+          {brouillon && pausesProposees(brouillon).length ? (
+            <button type="button" className="btn sm ghost" id="pc-proposer" onClick={() => setCourtes(pausesProposees(brouillon).map((x) => ({ cle: uid('pc'), debut: fmtHHMM(x.start), duree: x.end - x.start })))}>
+              Une par demi-journée
+            </button>
+          ) : null}
+        </div>
+      </fieldset>
       {brouillon ? (
         <div className="row small soft">
           <Track shifts={[brouillon]} echelle={echelleOfficine(data)} role={roleDe(person)} />

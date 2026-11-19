@@ -1,3 +1,4 @@
+import { phrasePauses } from '../../engine/pauses';
 import { Coffee, Sun, Sunset } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { addDays, fmtDateCourt, fmtDuree, fmtHeure, todayISO } from '../../domain/time';
@@ -45,7 +46,7 @@ export function ProchainPoste({ postes, today, action }: { postes: Shift[]; toda
       </div>
       <span className="pp-d">
         {fmtDuree(minutesTravail(p))} de travail
-        {p.pauseStart !== undefined && p.pauseEnd !== undefined ? ` · pause de ${fmtHeure(p.pauseStart)} à ${fmtHeure(p.pauseEnd)}` : ''}
+        {phrasePauses(p) ? ` · ${phrasePauses(p)}` : ''}
       </span>
       {suivant ? (
         <span className="pp-suite">

@@ -1,6 +1,6 @@
 import type { Espace } from '../domain/acces';
 import { libelleRole } from '../domain/acces';
-import { MOIS, addDays, dayIndex, ferie, fmtDateCourt, fmtDuree, fmtHeure, joursFeries, mondayOf } from '../domain/time';
+import { MOIS, addDays, dayIndex, ferie, fmtDateCourt, fmtDuree, fmtHeure, joursFeries, mondayOf, todayISO } from '../domain/time';
 import type { AppData, ISODate, Person, Shift } from '../domain/types';
 import { estPharmacien, libelleAbsence, libelleGarde, nomCourt } from '../domain/types';
 import { declarationsAFaire, delaiDeclaration } from '../engine/accident';
@@ -61,6 +61,7 @@ export const FICHES: Fiche[] = [
   { id: 'aider', question: 'Répondre à un appel ou aider un collègue', reponse: 'L’appel apparaît en tête de « Mon planning », avec votre rang dans le tour de rôle. « Je peux » ou « Je ne peux pas » : dire non ne change pas votre rang.', mots: 'volontaire depanner tour de role appel equipe je peux', pour: MOI_SEUL, ecrans: ['moi'], bouton: 'Voir les appels', aller: (ui) => ui.aller('moi') },
   { id: 'suivi', question: 'Voir mon compteur d’heures et mon suivi', reponse: '« Mon suivi » montre vos heures en plus ou en moins, ce qui a été noté sur douze mois et votre part des contraintes. Vous ne voyez que votre position.', mots: 'heures supplementaires compteur retards equite samedis', pour: MOI_SEUL, ecrans: ['suivi'], bouton: 'Ouvrir mon suivi', aller: (ui) => ui.aller('suivi') },
   { id: 'gardes-moi', question: 'Voir mes gardes', reponse: '« Mes gardes » liste vos gardes et astreintes, le repos qui suit et ce qui partira en paie.', mots: 'garde astreinte nuit dimanche repos', pour: ['pharmacien'], ecrans: ['mesgardes'], bouton: 'Ouvrir mes gardes', aller: (ui) => ui.aller('mesgardes') },
+  { id: 'imprimer', question: 'Imprimer le planning', reponse: 'Le bouton d’impression ouvre un aperçu : la feuille telle qu’elle sortira, à la semaine ou au mois, en couleur ou en noir et blanc, pour toute l’équipe ou pour vos seuls postes. Elle indique si le planning est publié ou encore en brouillon.', mots: 'imprimer impression apercu papier feuille pdf afficher noir blanc couleur mois semaine', pour: TOUS, bouton: 'Ouvrir l’aperçu', aller: (ui) => ui.ouvrirImpression({ periode: 'semaine', repere: useStore.getState().today }) },
   { id: 'message', question: 'Écrire à l’équipe ou à une personne', reponse: 'Un fil pour toute l’équipe et des conversations privées. Pour une absence, préférez une demande : elle est suivie.', mots: 'messages messagerie contacter prevenir', pour: TOUS, ecrans: ['messages'], bouton: 'Ouvrir les messages', aller: (ui) => ui.aller('messages') },
   { id: 'compte', question: 'Changer la couleur, le mode sombre ou mon mot de passe', reponse: 'Dans « Mon compte » : dix couleurs, mode clair ou sombre, taille du texte, mot de passe.', mots: 'theme apparence sombre nuit taille texte code', pour: TOUS, ecrans: ['compte'], bouton: 'Ouvrir mon compte', aller: (ui) => ui.aller('compte') },
 
@@ -204,7 +205,8 @@ const horaires = (l: Shift[]): string =>
     .map((s) => `${fmtHeure(s.start)} – ${fmtHeure(s.end)}`)
     .join(', ');
 const pluriel = (n: number, un: string, plusieurs: string): string => `${n} ${n > 1 ? plusieurs : un}`;
-const heureDe = (c: Contexte): number => c.heure ?? new Date().getHours() * 60 + new Date().getMinutes();
+// Sur une date d'essai (qui n'est pas la date réelle), la journée n'a pas commencé : la réponse ne dépend pas de l'horloge.
+const heureDe = (c: Contexte): number => c.heure ?? (c.today === todayISO() ? new Date().getHours() * 60 + new Date().getMinutes() : 0);
 const versSignaler = (quoi: 'retard' | 'absence' | 'choix') => (ui: Ui): void => ui.signaler(quoi);
 
 /** Les rubriques où Solvi sait emmener, par les mots qu'on emploie pour les nommer. */
@@ -583,7 +585,11 @@ function calculer(question: string, c: Contexte, defaut: { jour?: ISODate } = {}
   if (a('ma pause', 'pause dejeuner', 'je mange', 'pause cafe', 'j ai faim', 'ma coupure') && !a('regle', 'droit', 'legal')) {
     const poste = postesVisibles(c, date).find((s) => s.personId === moi && s.pauseStart !== undefined && s.pauseEnd !== undefined);
     const mien = postesVisibles(c, date).filter((s) => s.personId === moi);
-    if (poste) return { texte: `${quand(date, today)}, votre pause est de ${fmtHeure(poste.pauseStart!)} à ${fmtHeure(poste.pauseEnd!)}.`, humeur: 'heureux', suivi: { relance: 'ma pause', jour: date } };
+    const avecCourtes = postesVisibles(c, date).filter((s) => s.personId === moi && s.pauses?.length);
+    const courtes = avecCourtes.flatMap((s) => s.pauses ?? []).sort((x, y) => x.start - y.start);
+    const suiteCourtes = courtes.length ? ` Pause${courtes.length > 1 ? 's' : ''} courte${courtes.length > 1 ? 's' : ''} à ${courtes.map((x) => fmtHeure(x.start)).join(', ')}.` : '';
+    if (poste) return { texte: `${quand(date, today)}, votre pause déjeuner est de ${fmtHeure(poste.pauseStart!)} à ${fmtHeure(poste.pauseEnd!)}.${suiteCourtes}`, humeur: 'heureux', suivi: { relance: 'ma pause', jour: date } };
+    if (courtes.length && mien.length <= 1) return { texte: `${quand(date, today)}, pas de pause déjeuner sur votre poste.${suiteCourtes}`, humeur: 'heureux', suivi: { relance: 'ma pause', jour: date } };
     if (mien.length > 1) return { texte: `${quand(date, today)}, votre coupure est de ${fmtHeure(mien.sort((x, y) => x.start - y.start)[0].end)} à ${fmtHeure(mien[1].start)}.`, humeur: 'heureux', suivi: { relance: 'ma pause', jour: date } };
     return { texte: mien.length ? `${quand(date, today)}, aucune pause n’est notée sur votre poste (${horaires(mien)}).` : `${quand(date, today)}, vous n’avez pas de poste : la pause dure toute la journée.`, suivi: { relance: 'ma pause', jour: date } };
   }

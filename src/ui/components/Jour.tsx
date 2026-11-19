@@ -1,3 +1,4 @@
+import { phrasePauses } from '../../engine/pauses';
 import { AlertTriangle, ChevronLeft, ChevronRight, CircleCheck, Clock3, Coffee, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { peutGerer } from '../../domain/acces';
@@ -113,7 +114,7 @@ export function DialogueJour({ date: initiale, moi, onClose }: { date: ISODate; 
                       {fmtHeure(s.start)} – {fmtHeure(s.end)}
                     </b>
                     <span className="small soft">
-                      {fmtDuree(minutesTravail(s))} de travail{pause ? ` · pause de ${fmtHeure(s.pauseStart as number)} à ${fmtHeure(s.pauseEnd as number)}` : ' · sans pause'}
+                      {fmtDuree(minutesTravail(s))} de travail{phrasePauses(s) ? ` · ${phrasePauses(s)}` : ' · sans pause'}
                     </span>
                     {duJour.map((e) => (
                       <Pill key={e.id} tone="warn">

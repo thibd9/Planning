@@ -483,6 +483,7 @@ export function generer(source: AppData, monday: ISODate, opts: GenOptions): Gen
         start: o.poste.start,
         end: o.poste.end,
         pauseStart: o.poste.pauseStart,
+        ...(o.poste.pauses?.length ? { pauses: o.poste.pauses.map((x) => ({ ...x })) } : {}),
         pauseEnd: o.poste.pauseEnd,
         activite: 'comptoir',
         origine: 'genere',

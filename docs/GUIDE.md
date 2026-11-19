@@ -88,9 +88,10 @@ Les chapitres de la visite du titulaire suivent l'ordre où les choses se vivent
 
 ### L'environnement de test
 
-Une barre en haut de l'écran fait passer d'un regard à l'autre, sans se reconnecter : titulaire principal,
-second titulaire, pharmacien adjoint, préparateur, animateur, apprenti, étudiant. Les personnes, les
-marques et la pharmacie de l'exemple sont inventées.
+Dans la barre du haut, l'étiquette « Espace … » ouvre un petit menu : on y passe d'un regard à l'autre sans
+se reconnecter (titulaire principal, second titulaire, pharmacien adjoint, préparateur, animateur, apprenti,
+étudiant), on y lance les tutoriels, on y remet les données d'exemple à neuf. Aucune barre ne s'ajoute à la
+page. Les personnes, les marques et la pharmacie de l'exemple sont inventées.
 
 ---
 
@@ -114,6 +115,10 @@ marques et la pharmacie de l'exemple sont inventées.
 
 - **La semaine entière tient dans la largeur**, du lundi au dimanche, sans défilement, à toute taille
   d'écran. Quand la place manque, les tuiles se resserrent par paliers.
+- **Deux sortes de pauses** : la **pause déjeuner**, qui coupe le poste et n'est pas comptée dans le temps
+  de travail, et les **pauses courtes** (dix à vingt minutes), qui se lisent sur le planning sans changer
+  le décompte des heures. « Une par demi-journée » les propose d'un geste ; un poste type peut les porter.
+  Elles figurent dans la journée, dans « Mon planning » et sur la feuille imprimée (« déj. » et « p. »).
 - **Tâche d'un poste** : comptoir, réception, administratif. « Planifier une formation » et « Planifier un
   inventaire » ouvrent leur propre fenêtre (intitulé, lieu, participants).
 - **Postes types** : des cartes à la couleur du moment de la journée, avec pictogramme, horaires et durée.
@@ -143,6 +148,20 @@ plus fréquente sur les huit dernières semaines publiées. Deux garde-fous :
 
 - un planning **commencé à la main passe toujours avant** : il n'est jamais touché ;
 - **rien n'est publié sans le titulaire** : il relit, corrige, puis publie.
+
+### Imprimer
+
+Le bouton d'impression ouvre un **aperçu** : la feuille telle qu'elle sortira, en A4 paysage.
+
+| Réglage | Choix |
+| --- | --- |
+| **Période** | La semaine sur une page, ou le mois, semaine après semaine. |
+| **Encre** | Couleur (la teinte dit le moment de la journée) ou noir et blanc (heures en gras, absences en italique dans un cadre pointillé, jours fermés hachurés). |
+| **Personnes** | Toute l'équipe, ou mes seuls postes. |
+
+La feuille porte le nom de la pharmacie, la période, la date d'impression et l'état du planning : publié,
+ou « brouillon, non publié ». L'équipe n'imprime que ce qui est publié, et l'absence d'un collègue s'y lit
+« Absent », jamais par sa nature. Une grande équipe passe sur plusieurs pages sans perdre personne.
 
 ### 4. Décider
 
@@ -325,7 +344,7 @@ interne sur un petit écran.
 
 | Niveau | Ce qui est vérifié |
 | --- | --- |
-| **Tests unitaires** | 127 tests sur le moteur : règles, génération, présence du pharmacien, rattrapage, rendez-vous, retard, échéance du mois, accident du travail, et l'assistant (fautes de frappe, dates, personnes, fil de la conversation). |
+| **Tests unitaires** | 137 tests sur le moteur : règles, génération, présence du pharmacien, rattrapage, rendez-vous, retard, échéance du mois, accident du travail, et l'assistant (fautes de frappe, dates, personnes, fil de la conversation). |
 | **Parcours automatisés** | Chaque fonction est rejouée dans un navigateur, avec un audit d'accessibilité automatique (axe-core, WCAG 2.1 A et AA) sur chaque écran, en clair, en sombre et sur téléphone. |
 | **Visites guidées** | Les quatre visites sont déroulées en entier par un script. |
 | **Champs** | Un relevé de tous les champs de saisie, avec un appareil réglé à l'inverse de l'application. |

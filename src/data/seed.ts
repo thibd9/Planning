@@ -5,6 +5,7 @@ import type { AppData, Besoin, Garde, ISODate, Mission, Officine, Person, Shift 
 import { decrireJournee, shiftsSemaine } from '../engine/core';
 import { absenceDecouvre, tourDeRole } from '../engine/appel';
 import { generer } from '../engine/generate';
+import { pausesProposees } from '../engine/pauses';
 import { moisACollecter, proposerSouhaits } from '../engine/souhaits';
 
 const H = (h: number, m = 0): number => h * 60 + m;
@@ -45,6 +46,8 @@ export const OFFICINE_DEMO: Officine = {
   plafondPrioritaires: 2,
   caAnnuelHT: 2_900_000,
 };
+// Chaque poste type proposé au départ porte une pause courte par demi-journée : elle se lit sur le planning et sur le papier.
+OFFICINE_DEMO.postes = OFFICINE_DEMO.postes.map((p) => ({ ...p, pauses: pausesProposees(p) }));
 
 const personne = (
   id: string,
@@ -173,7 +176,7 @@ export function vierge(): AppData {
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
 /** À augmenter quand l'exemple change (noms, équipe) : les exemples enregistrés sur l'appareil sont alors régénérés. */
-export const DEMO_VERSION = 7;
+export const DEMO_VERSION = 8;
 
 export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);

@@ -12,7 +12,7 @@ import { NomSolvi, Solvi } from '../Solvi';
 
 /** Les fiches rangées par thème, dans l'ordre du travail. */
 const THEMES: { titre: string; ids: string[] }[] = [
-  { titre: 'Mon planning', ids: ['accueil', 'prochain', 'equipe-planning', 'gardes-moi', 'suivi'] },
+  { titre: 'Mon planning', ids: ['accueil', 'prochain', 'equipe-planning', 'gardes-moi', 'suivi', 'imprimer'] },
   { titre: 'Mes demandes', ids: ['difference', 'souhaits', 'conge', 'remplacer', 'retard-prevenir', 'aider'] },
   { titre: 'Préparer', ids: ['personne', 'marques', 'mdp-equipe', 'reglages', 'feries', 'regles', 'pharmacie'] },
   { titre: 'Construire et publier', ids: ['construire', 'controles', 'mois', 'retard', 'publier', 'formation', 'gardes'] },

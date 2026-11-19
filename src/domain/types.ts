@@ -82,14 +82,23 @@ export type Activite = 'comptoir' | 'back' | 'admin' | 'formation' | 'inventaire
 
 export type Origine = 'manuel' | 'genere' | 'reparation' | 'trame';
 
+/** Une pause courte dans un poste : dix à vingt minutes, lue sur le planning, sans effet sur le décompte des heures. */
+export interface PauseCourte {
+  start: Minutes;
+  end: Minutes;
+}
+
 export interface Shift {
   id: string;
   personId: string;
   date: ISODate;
   start: Minutes;
   end: Minutes;
+  /** La pause déjeuner : elle coupe le poste et n'est pas comptée dans le temps de travail. */
   pauseStart?: Minutes;
   pauseEnd?: Minutes;
+  /** Les pauses courtes du poste. */
+  pauses?: PauseCourte[];
   activite: Activite;
   origine: Origine;
   /** Phrase d'explication produite par le moteur (jamais saisie à la main). */
@@ -249,6 +258,8 @@ export interface PosteType {
   end: Minutes;
   pauseStart?: Minutes;
   pauseEnd?: Minutes;
+  /** Les pauses courtes posées avec ce poste. */
+  pauses?: PauseCourte[];
   /** Jours où ce poste est proposé : 0 = lundi … 6 = dimanche. */
   jours: number[];
   /** Couleur choisie pour ce poste dans les plannings ; absente : la couleur suit l'horaire (matin, journée, soir). */

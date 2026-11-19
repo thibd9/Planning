@@ -1,3 +1,4 @@
+import { decrirePauses } from '../../engine/pauses';
 import { Ban, BellRing, CalendarClock, Check, Coffee, HandHelping, Handshake, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
@@ -7,7 +8,6 @@ import { MISSION_LABEL, classeAbsence, libelleAbsence, nomCourt, nomGarde } from
 import { minutesTravail } from '../../engine/core';
 import { autreDuRdv, rdvDe } from '../../engine/rdv';
 import { peutRemplacer } from '../../engine/remplacement';
-import { imprimer } from '../../env';
 import { IconeGarde } from '../icons';
 import { RAISONS_DECLIN, texteDeclin } from '../../domain/refus';
 import { DialogueRefus } from '../components/Refus';
@@ -78,7 +78,7 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
             <button type="button" className="btn primary no-print" onClick={() => setDemande(true)}>
               <Plus size={16} aria-hidden="true" /> {gere ? 'Poser une absence' : 'Faire une demande'}
             </button>
-            <button type="button" className="btn no-print" onClick={() => imprimer(dire)}>
+            <button type="button" className="btn no-print" id="moi-imprimer" onClick={() => useUi.getState().ouvrirImpression({ periode: 'semaine', repere: today, moi: true })}>
               <Printer size={15} aria-hidden="true" /> Imprimer
             </button>
             <button
@@ -300,9 +300,10 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
                                           </b>
                                           <span className="jh-meta">
                                             <span>{fmtDuree(minutesTravail(x))} de travail</span>
-                                            {x.pauseStart !== undefined && x.pauseEnd !== undefined ? (
+                                            {decrirePauses(x).dejeuner ? <span>Pause déjeuner {decrirePauses(x).dejeuner}</span> : null}
+                                            {decrirePauses(x).courtes ? (
                                               <span>
-                                                Pause {fmtHeure(x.pauseStart)} – {fmtHeure(x.pauseEnd)}
+                                                Pause{(x.pauses?.length ?? 0) > 1 ? 's' : ''} courte{(x.pauses?.length ?? 0) > 1 ? 's' : ''} à {decrirePauses(x).courtes}
                                               </span>
                                             ) : null}
                                           </span>

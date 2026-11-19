@@ -1,3 +1,4 @@
+import { DUREES_PAUSE, pausesProposees } from '../../engine/pauses';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { fmtDuree, fmtHHMM, fmtHeure, parseHHMM, uid } from '../../domain/time';
@@ -34,6 +35,8 @@ export function DialoguePosteType({ onClose, onAjouter }: { onClose: () => void;
   const [end, setEnd] = useState(990);
   const [pause, setPause] = useState(60);
   const [pauseDebut, setPauseDebut] = useState(750);
+  // Une pause courte au milieu de chaque demi-journée assez longue ; 0 : aucune.
+  const [courte, setCourte] = useState(15);
   const [jours, setJours] = useState('semaine');
   const [couleur, setCouleur] = useState<CouleurPoste | ''>('orange');
   const choisir = (cle: string): void => {
@@ -54,6 +57,7 @@ export function DialoguePosteType({ onClose, onAjouter }: { onClose: () => void;
     start,
     end,
     ...(pause ? { pauseStart: pauseDebut, pauseEnd: pauseDebut + pause } : {}),
+    ...(courte && horairesOk ? { pauses: pausesProposees({ start, end, ...(pause ? { pauseStart: pauseDebut, pauseEnd: pauseDebut + pause } : {}) }, courte) } : {}),
     jours: JOURS_CHOIX.find((j) => j.cle === jours)?.jours ?? [0, 1, 2, 3, 4],
     ...(couleur ? { couleur } : {}),
   };
@@ -106,7 +110,7 @@ export function DialoguePosteType({ onClose, onAjouter }: { onClose: () => void;
           <input id="pt-fin" type="time" step={900} value={fmtHHMM(end)} onChange={(e) => setEnd(parseHHMM(e.target.value) ?? end)} />
         </label>
         <label className="field" htmlFor="pt-pause">
-          Pause
+          Pause déjeuner
           <select id="pt-pause" value={pause} onChange={(e) => setPause(Number(e.target.value))}>
             {PAUSES.map((m) => (
               <option key={m} value={m}>
@@ -121,6 +125,17 @@ export function DialoguePosteType({ onClose, onAjouter }: { onClose: () => void;
             <input id="pt-pause-debut" type="time" step={900} value={fmtHHMM(pauseDebut)} onChange={(e) => setPauseDebut(parseHHMM(e.target.value) ?? pauseDebut)} />
           </label>
         ) : null}
+        <label className="field" htmlFor="pt-courtes">
+          Pauses courtes
+          <select id="pt-courtes" value={courte} onChange={(e) => setCourte(Number(e.target.value))}>
+            <option value={0}>Aucune</option>
+            {DUREES_PAUSE.map((d) => (
+              <option key={d} value={d}>
+                {d} min par demi-journée
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       {!horairesOk ? (
         <p className="small" role="alert" style={{ color: 'var(--danger-ink)', margin: 0 }}>

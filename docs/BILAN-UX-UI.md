@@ -81,7 +81,7 @@ Gravité : **P0** bloque un usage réel, **P1** gêne fortement, **P2** agace, *
 | 11 | **Trop de place prise avant le contenu.** Sur un écran de 900 px de haut, la grille commence à 390 px. | Construire | Regrouper titre et commandes sur une ligne ; barre de test repliable. |
 | 12 | **Deux moteurs de visite guidée** (le tutoriel en 11 étapes et les visites avec Solvi). | Aide | N'en garder qu'un. |
 | 13 | **La visite « Titulaire » dure 30 minutes** (55 étapes). | Visites | La proposer par chapitres indépendants ; les tutoriels par tâche existent déjà. |
-| 14 | **Les visites guidées sont longues à revérifier** : les rejouer en entier prend près d'une heure de machine. Sur cette version, les quatre visites ont été déroulées en entier sans erreur (13, 16, 17 et 55 étapes). Dans la visite « Titulaire », douze gestes de démonstration facultatifs ne se jouaient pas : l'étape s'explique, mais Solvi ne montre pas le geste. Deux sont corrigés (les postes types), sans avoir été rejoués ; dix restent à reprendre (contrôles, compteur d'heures, tableau de bord). | Visites | Les rejouer à chaque livraison, de façon automatique. |
+| 14 | **Les visites guidées sont longues à revérifier** : les rejouer en entier prend près d'une heure de machine. Sur cette version, les quatre visites ont été déroulées en entier sans erreur (13, 16, 17 et 55 étapes). Dans la visite « Titulaire », douze gestes de démonstration facultatifs ne se jouaient pas : l'étape s'explique, mais Solvi ne montre pas le geste. Deux sont corrigés et rejoués (les postes types) ; dix restent à reprendre (contrôles, compteur d'heures, tableau de bord). | Visites | Les rejouer à chaque livraison, de façon automatique. |
 
 ### P2 : agacements
 
@@ -99,7 +99,7 @@ Gravité : **P0** bloque un usage réel, **P1** gêne fortement, **P2** agace, *
 ### P3 : finition
 
 - Les boutons « désactivés » sont seulement pâlis : dire pourquoi au survol.
-- L'impression existe mais n'a pas été contrôlée sur papier.
+- L'impression a maintenant un aperçu (semaine ou mois, couleur ou noir et blanc) ; elle reste à contrôler sur une vraie imprimante.
 - Aucun raccourci clavier pour les gestes fréquents (semaine suivante, annuler, publier).
 
 ---
@@ -217,7 +217,7 @@ sensibles : le cadre (RGPD, durée de conservation, accès) est à faire valider
 | Vrais utilisateurs | Aucun essai avec une équipe de pharmacie. |
 | Exactitude des règles de droit du travail | Les seuils sont réglables, mais leur justesse doit être validée par un professionnel. |
 | Délai de déclaration d'un accident du travail | Calculé d'après la règle des 48 heures hors dimanches et jours fériés : à faire confirmer. |
-| Impression | Feuille de style prévue, jamais contrôlée sur papier. |
+| Impression | L'aperçu et la mise en page sont vérifiés à l'écran ; aucune feuille n'est sortie d'une imprimante. |
 | Les gestes facultatifs de la visite « Titulaire » | Dix gestes ne trouvent pas leur cible à ce moment de l'histoire : à reprendre un par un. |
 | Gros volumes | Une équipe de 30 personnes, deux ans d'historique : temps de calcul et place dans le navigateur. |
 

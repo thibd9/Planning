@@ -202,7 +202,7 @@ export function Graduations({ echelle }: { echelle: Echelle }): JSX.Element {
  * Frise d'une journée : chaque poste est un bloc posé sur des repères horaires, avec son heure
  * de début et de fin écrites dedans ; la pause est hachurée. L'horaire complet est toujours écrit à côté.
  */
-export function Frise({ shifts, echelle, missions = [], nuit }: { shifts: Pick<Shift, 'start' | 'end' | 'pauseStart' | 'pauseEnd'>[]; echelle: Echelle; missions?: Pick<Mission, 'start' | 'end'>[]; nuit?: boolean }): JSX.Element {
+export function Frise({ shifts, echelle, missions = [], nuit }: { shifts: Pick<Shift, 'start' | 'end' | 'pauseStart' | 'pauseEnd' | 'pauses'>[]; echelle: Echelle; missions?: Pick<Mission, 'start' | 'end'>[]; nuit?: boolean }): JSX.Element {
   return (
     <span className="frise" aria-hidden="true">
       {graduations(echelle).map((h) => (
@@ -220,6 +220,10 @@ export function Frise({ shifts, echelle, missions = [], nuit }: { shifts: Pick<S
           {s.pauseStart !== undefined && s.pauseEnd !== undefined ? (
             <i className="pause" style={{ left: `${((s.pauseStart - s.start) / (s.end - s.start)) * 100}%`, width: `${((s.pauseEnd - s.pauseStart) / (s.end - s.start)) * 100}%` }} />
           ) : null}
+          {/* Les pauses courtes : un trait fin à leur heure. */}
+          {(s.pauses ?? []).map((x) => (
+            <i key={x.start} className="pause courte" style={{ left: `${((x.start - s.start) / (s.end - s.start)) * 100}%` }} />
+          ))}
         </span>
       ))}
       {missions.map((m, i) => (
@@ -235,7 +239,7 @@ export function Track({
   role,
   missions = [],
 }: {
-  shifts: Pick<Shift, 'start' | 'end' | 'pauseStart' | 'pauseEnd' | 'activite'>[];
+  shifts: Pick<Shift, 'start' | 'end' | 'pauseStart' | 'pauseEnd' | 'activite' | 'pauses'>[];
   echelle: Echelle;
   role: Role | 'nuit';
   missions?: Pick<Mission, 'start' | 'end'>[];
@@ -254,6 +258,7 @@ export function Track({
           <i key={`p${i}`} className="pause" style={{ left: `${pct(echelle, s.pauseStart)}%`, width: `${pct(echelle, s.pauseEnd) - pct(echelle, s.pauseStart)}%` }} />
         ) : null,
       )}
+      {shifts.flatMap((s, i) => (s.pauses ?? []).map((x) => <i key={`c${i}-${x.start}`} className="pause courte" style={{ left: `${pct(echelle, x.start)}%` }} />))}
       {missions.map((m, i) => (
         <i key={`m${i}`} className="rdvm" style={{ left: `${pct(echelle, m.start)}%`, width: `${pct(echelle, m.end) - pct(echelle, m.start)}%` }} />
       ))}

@@ -1,5 +1,6 @@
+import { phrasePauses } from '../../engine/pauses';
 import { Sparkles } from 'lucide-react';
-import { JOURS, fmtDuree, fmtHHMM, fmtHeure, weekday } from '../../domain/time';
+import { JOURS, fmtDuree, fmtHHMM, weekday } from '../../domain/time';
 import type { AppData, Person, Shift } from '../../domain/types';
 import { ACTIVITE_LABEL, nomCourt, couleurDuPoste } from '../../domain/types';
 import { decrireShift, minutesTravail } from '../../engine/core';
@@ -50,7 +51,7 @@ export function Tuile({
         {/* Le nom accessible reprend le texte visible, puis le complète. */}
         <span className="sr">
           , {nomCourt(person)}, {JOURS[weekday(s.date)]}
-          {s.pauseStart !== undefined && s.pauseEnd !== undefined ? `, pause de ${fmtHeure(s.pauseStart)} à ${fmtHeure(s.pauseEnd)}` : ''}
+          {phrasePauses(s) ? `, ${phrasePauses(s)}` : ''}
           {onClick ? '. Modifier le poste.' : '.'}
         </span>
       </span>

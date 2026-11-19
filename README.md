@@ -13,7 +13,7 @@ absorber un imprévu en dérangeant le moins de monde possible.
 
 ![React 18](https://img.shields.io/badge/React-18-1f6bb8?style=flat-square)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-1f6bb8?style=flat-square)
-![127 tests](https://img.shields.io/badge/tests-127-0b5a3f?style=flat-square)
+![137 tests](https://img.shields.io/badge/tests-137-0b5a3f?style=flat-square)
 ![Sans serveur](https://img.shields.io/badge/donn%C3%A9es-sur%20l'appareil-52606c?style=flat-square)
 
 [Démarrer](#démarrer) · [Ce que fait Solvéa](#ce-que-fait-solvéa) · [Guide détaillé](docs/GUIDE.md) · [Bilan UX et UI](docs/BILAN-UX-UI.md)
@@ -51,6 +51,7 @@ créer, rien à saisir. On y passe d'un profil à l'autre en un clic.
 | **Publier au mois** | Une échéance, un rappel, et un brouillon préparé d'après vos habitudes si le temps manque. Rien n'est publié sans vous. |
 | **Décider** | Congé, remplacement, horaires : chaque demande montre ce qu'elle implique avant qu'on tranche. Jamais un simple oui ou non. |
 | **Absorber l'imprévu** | Retard, absence, accident du travail : signalés en deux gestes, pour soi ou pour quelqu'un. Les postes à couvrir arrivent avec leurs options. |
+| **Imprimer** | Un aperçu avant impression : à la semaine ou au mois, en couleur ou en noir et blanc, pour l'équipe ou pour soi, avec la pause déjeuner et les pauses courtes. |
 | **Suivre** | Compteurs d'heures, équité des samedis et des fermetures, gardes, formations, fiche navette pour la paie. |
 | **Se parler** | Messages, rendez-vous fixés dans l'agenda de chacun, annonces de chaque décision. |
 
@@ -63,6 +64,12 @@ créer, rien à saisir. On y passe d'un profil à l'autre en un clic.
   <tr>
     <td align="center"><sub>La semaine, d'un seul regard</sub></td>
     <td align="center"><sub>Solvi répond d'après le planning</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/images/impression.png" alt="La feuille imprimée d'une semaine, en A4 paysage"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><sub>La feuille à afficher, telle qu'elle sort de l'imprimante</sub></td>
   </tr>
 </table>
 </div>
@@ -99,7 +106,7 @@ Quatre **visites guidées** et un tutoriel par tâche complètent l'aide.
 
 ## Sous le capot
 
-React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (127 tests), sans dépendance à un
+React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (137 tests), sans dépendance à un
 service extérieur.
 
 ```

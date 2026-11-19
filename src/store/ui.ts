@@ -130,6 +130,9 @@ interface Ui {
   /** Fenêtre « Signaler un retard ou une absence » demandée depuis ailleurs (Solvi, par exemple). */
   signalement: 'retard' | 'absence' | 'choix' | null;
   signaler: (quoi: Ui['signalement']) => void;
+  /** Aperçu avant impression : la période et le jour de départ ; null quand il est fermé. */
+  impression: { periode: 'semaine' | 'mois'; repere: ISODate; moi?: boolean } | null;
+  ouvrirImpression: (i: Ui['impression']) => void;
   /** Assistant d'aide ouvert. */
   assistant: boolean;
   ouvrirAssistant: (o: boolean) => void;
@@ -191,6 +194,8 @@ export const useUi = create<Ui>((set) => ({
   setDemandesOnglet: (demandesOnglet) => set({ demandesOnglet }),
   signalement: null,
   signaler: (signalement) => set({ signalement }),
+  impression: null,
+  ouvrirImpression: (impression) => set({ impression }),
   assistant: false,
   ouvrirAssistant: (assistant) => set({ assistant }),
   assistantEnVisite: false,

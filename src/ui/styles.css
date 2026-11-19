@@ -852,10 +852,6 @@ td.cap1, th.cap1 { display: table-cell; }
 @media (max-width: 560px) { .jour-ligne { grid-template-columns: 1fr; padding-inline: 16px; } .jl-actions { grid-column: 1; } }
 
 /* Environnement de test : bandeau discret mais toujours présent, et parcours pas à pas. */
-.bandeau-test { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; margin: 12px 32px 0; padding: 8px 10px 8px 16px; border-radius: 10px; background: var(--n-1); color: var(--ink); }
-.bandeau-test .bt-titre { display: inline-flex; align-items: center; gap: 7px; font-weight: 650; font-size: 13px; }
-.bandeau-test .seg { background: var(--surface); }
-.bandeau-test .btn:not(.primary) { background: var(--surface); }
 .parcours-test { position: fixed; right: 24px; bottom: 24px; z-index: 48; width: min(400px, calc(100vw - 32px)); background: var(--surface); border-radius: 10px; box-shadow: 0 30px 80px -24px rgba(var(--ink-rgb), 0.55), 0 0 0 1px var(--line); padding: 18px; display: flex; flex-direction: column; gap: 12px; animation: rise 0.2s ease; }
 .parcours-test .pt-n { width: 38px; height: 38px; border-radius: 6px; display: grid; place-items: center; font-weight: 700; background: var(--grad-vif); color: var(--on-vif); flex: none; }
 .parcours-test .pt-barre { height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
@@ -868,13 +864,6 @@ td.cap1, th.cap1 { display: table-cell; }
 .test-role b { font-size: 16px; letter-spacing: -0.02em; }
 .test-role .tr-go { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 650; font-size: 13px; color: var(--ink); }
 @media (max-width: 900px) {
-  .bandeau-test { margin: 10px 16px 0; }
-  .bandeau-test { padding: 6px 8px; gap: 6px; flex-wrap: nowrap; }
-  .bandeau-test .bt-titre { font-size: 0; gap: 0; padding-left: 4px; }
-  .bandeau-test .seg { overflow-x: auto; flex: 1; min-width: 0; }
-  .bandeau-test .seg button { white-space: nowrap; padding: 6px 10px; }
-  .bandeau-test .grow { display: none; }
-  .bandeau-test .btn { font-size: 0; gap: 0; padding: 0; width: 36px; min-height: 36px; flex: none; }
   .parcours-test { right: 12px; left: 12px; bottom: 86px; width: auto; }
 }
 
@@ -1114,8 +1103,8 @@ table.cal td.auj button.cal-n:hover .n { background: var(--a-hover); }
 *::-webkit-scrollbar-thumb { background: var(--n-4); border-radius: 8px; border: 3px solid transparent; background-clip: content-box; }
 *::-webkit-scrollbar-thumb:hover { background: var(--ctl); background-clip: content-box; border: 3px solid transparent; }
 *::-webkit-scrollbar-corner { background: transparent; }
-.side, .bandeau-test .seg { scrollbar-width: none; }
-.side::-webkit-scrollbar, .bandeau-test .seg::-webkit-scrollbar { display: none; }
+.side { scrollbar-width: none; }
+.side::-webkit-scrollbar { display: none; }
 
 /* Cartes repliables. */
 details.repli > summary { cursor: pointer; list-style: none; }
@@ -3647,11 +3636,7 @@ input[list]::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer;
   .side .side-foot { display: flex; margin-top: 14px; }
 
   /* Environnement de test : une liste pour changer de rôle, deux boutons ronds. */
-  .bandeau-test { flex-wrap: nowrap; gap: 8px; padding: 6px 8px 6px 12px; }
-  .bandeau-test .seg { display: none; }
   .bt-select { display: block; flex: 1; min-width: 0; min-height: 40px; padding-block: 6px; font-weight: 650; }
-  .bandeau-test .btn { flex: none; width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 0; gap: 0; justify-content: center; }
-  .bandeau-test .btn svg { width: 17px; height: 17px; }
 
   /* La bulle d'aide se tient au-dessus de la barre du bas. */
   .content { padding-bottom: 96px; }
@@ -3664,7 +3649,6 @@ input[list]::-webkit-calendar-picker-indicator { opacity: 0.55; cursor: pointer;
 @media (max-width: 640px) {
   .content { padding-inline: 14px; padding-top: 16px; }
   .topbar { padding-inline: 12px; }
-  .bandeau-test { margin-inline: 12px; }
   .page-head { gap: 12px; margin-bottom: 16px; align-items: center; }
   .page-ico { width: 42px; height: 42px; border-radius: 8px; }
   .page-ico svg { width: 21px; height: 21px; }
@@ -4002,3 +3986,166 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 @media (max-width: 400px) { .topbar .top-ico[data-tour='aide'] { display: none; } }
 /* Très petit téléphone (320 px) : les messages ont déjà leur onglet dans la barre du bas. */
 @media (max-width: 340px) { .topbar .top-ico[aria-label^='Messages'] { display: none; } }
+
+/* ================================================================ Aperçu avant impression
+   La fenêtre : les réglages sur une ligne, puis la feuille réduite sur un fond gris, comme sur une table. */
+.imp { display: grid; gap: 14px; min-width: 0; }
+.imp-outils { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.imp-nav { display: inline-flex; align-items: center; gap: 2px; }
+.imp-periode { min-width: 190px; text-align: center; font-weight: 650; font-size: 14px; }
+.imp-note { margin: 0; padding: 10px 14px; border-radius: 8px; background: var(--warn-soft); color: var(--warn-ink); font-size: 13.5px; }
+.imp-zone { display: grid; justify-items: center; gap: 16px; padding: 16px; border-radius: 8px; background: var(--n-1); max-height: max(300px, calc(100vh - 370px)); overflow: auto; }
+.imp-cadre { position: relative; flex: none; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 10px 28px -14px rgba(0, 0, 0, 0.45); overflow: hidden; }
+.imp-reduit { position: absolute; top: 0; left: 0; transform-origin: top left; }
+.imp-format { margin-right: auto; }
+.impression-doc { display: none; }
+@media (max-width: 760px) { .imp-periode { min-width: 0; flex: 1; } .imp-nav { flex: 1 1 100%; } .imp-zone { padding: 10px; } }
+
+/* ---------------------------------------------------------------- La feuille : A4 en paysage, à sa taille réelle
+   Du papier : fond blanc, encre noire, quel que soit le thème ou le mode de l'application. Les mesures sont en
+   millimètres et en points ; l'aperçu la réduit sans rien recalculer. */
+.feuille { box-sizing: border-box; width: 297mm; height: 210mm; padding: 10mm; display: flex; flex-direction: column; background: #fff; color: #111; font-family: inherit; font-size: 8.5pt; line-height: 1.25; overflow: hidden; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.feuille * { box-sizing: border-box; }
+.feuille .f-tete { flex: none; height: 19mm; display: flex; justify-content: space-between; align-items: flex-start; gap: 8mm; border-bottom: 0.5mm solid #111; margin-bottom: 0; padding-bottom: 2mm; }
+.feuille .f-officine { font-size: 8pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #444; }
+.feuille h1 { margin: 0.6mm 0 0.4mm; font-size: 15pt; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; color: #111; }
+.feuille .f-sous { font-size: 9pt; color: #333; }
+.feuille .f-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 1.2mm; font-size: 7.5pt; color: #444; white-space: nowrap; }
+.feuille .f-statut { padding: 0.8mm 2.4mm; border: 0.3mm solid #111; border-radius: 1mm; font-size: 8pt; font-weight: 700; color: #111; }
+.feuille .f-statut.brouillon, .feuille .f-statut.non_publie { border-style: dashed; }
+.feuille .f-corps { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 4mm; padding-top: 0; }
+.feuille .f-bloc { flex: none; }
+.feuille .f-bloc-titre { height: 6.5mm; display: flex; align-items: flex-end; gap: 3mm; padding-bottom: 1mm; font-size: 8pt; color: #333; }
+.feuille .f-bloc-titre b { font-size: 9pt; color: #111; }
+.feuille .f-etat-bloc { margin-left: auto; font-weight: 650; }
+.feuille .f-etat-bloc.brouillon, .feuille .f-etat-bloc.non_publie { font-style: italic; }
+.feuille table.f-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.feuille .f-col-nom { width: 42mm; }
+.feuille .f-col-total { width: 19mm; }
+.feuille.mois .f-col-nom { width: 34mm; }
+.feuille.mois .f-col-total { width: 14mm; }
+.feuille th, .feuille td { border: 0.2mm solid #9aa3ab; padding: 0 1.5mm; vertical-align: middle; text-align: center; font-weight: 400; color: #111; overflow: hidden; }
+.feuille thead th { height: 12mm; background: #eef1f4; border-color: #6b747c; }
+.feuille thead th b { display: block; font-size: 9.5pt; font-weight: 700; }
+.feuille thead th span { display: block; font-size: 7pt; color: #444; }
+.feuille thead th.f-h-nom { text-align: left; font-size: 8pt; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.feuille thead th.f-h-total { font-size: 8pt; font-weight: 700; }
+.feuille.mois thead th { height: 6.5mm; }
+.feuille.mois thead th b { display: inline; font-size: 7.5pt; }
+.feuille.mois thead th span { display: inline; margin-left: 1mm; font-size: 6pt; }
+.feuille tr.f-groupe th { height: 5.5mm; background: #fff; border-left: 0; border-right: 0; text-align: left; font-size: 7.5pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #333; padding-top: 1mm; }
+.feuille th.f-nom { text-align: left; white-space: nowrap; }
+.feuille th.f-nom b { display: block; font-size: 9pt; font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
+.feuille th.f-nom span { display: block; font-size: 7pt; color: #444; }
+.feuille.mois th.f-nom b { font-size: 7.5pt; }
+.feuille .f-c { font-size: 9pt; }
+.feuille .f-poste { display: block; }
+.feuille .f-poste + .f-poste { margin-top: 0.5mm; }
+.feuille .f-poste b { display: block; font-weight: 700; white-space: nowrap; }
+.feuille .f-c small { display: block; font-size: 6.6pt; color: #333; white-space: nowrap; }
+.feuille .f-c small.f-tache, .feuille .f-c small.f-garde { font-weight: 650; color: #111; }
+.feuille .f-c.repos { color: #6b747c; font-size: 7.5pt; }
+.feuille .f-c.abs i { font-style: italic; font-weight: 600; }
+.feuille .f-c.ferme, .feuille thead th.ferme { background: repeating-linear-gradient(135deg, #e3e7ea 0, #e3e7ea 0.5mm, #f5f6f7 0.5mm, #f5f6f7 1.6mm); color: #555; }
+.feuille .f-c.hors, .feuille thead th.hors { color: #5f6870; }
+.feuille .f-c.hors b, .feuille thead th.hors b { font-weight: 500; }
+.feuille .f-total { font-size: 8.5pt; }
+.feuille .f-total b { display: block; font-weight: 700; }
+.feuille .f-total span { display: block; font-size: 6.6pt; color: #444; }
+.feuille.mois .f-c { font-size: 7pt; padding: 0 0.6mm; }
+.feuille.mois .f-poste b { font-weight: 650; letter-spacing: -0.01em; }
+.feuille.mois .f-c small { font-size: 5.8pt; }
+.feuille.mois .f-total { font-size: 7pt; }
+/* En couleur : la teinte dit le moment de la journée, comme à l'écran. Le texte reste noir. */
+.feuille .f-c.poste.matin, .feuille .f-legende i.matin { background: #fff0c2; }
+.feuille .f-c.poste.milieu, .feuille .f-legende i.milieu { background: #ffe1c7; }
+.feuille .f-c.poste.journee, .feuille .f-legende i.journee { background: #d7e8fb; }
+.feuille .f-c.poste.soir, .feuille .f-legende i.soir { background: #e6defb; }
+.feuille .f-c.poste.garde { background: #dcd8f5; }
+.feuille .f-c.abs.conge, .feuille .f-legende i.conge { background: #d9f1e5; }
+.feuille .f-c.abs.arret, .feuille .f-legende i.arret { background: #fbdcdc; }
+.feuille .f-c.abs.formation, .feuille .f-legende i.formation { background: #d4f0f0; }
+.feuille .f-c.abs.absence { background: #e9edf1; }
+.feuille .f-legende i.ferme { background: repeating-linear-gradient(135deg, #e3e7ea 0, #e3e7ea 0.5mm, #f5f6f7 0.5mm, #f5f6f7 1.6mm); }
+/* En noir et blanc : plus aucune teinte. L'absence se lit à son italique et à son cadre pointillé. */
+.feuille.nb .f-c.poste, .feuille.nb .f-c.abs { background: #fff; }
+.feuille.nb .f-c.abs { outline: 0.3mm dashed #333; outline-offset: -1mm; }
+.feuille.nb thead th { background: #fff; border-bottom-width: 0.4mm; border-bottom-color: #111; }
+.feuille.nb .f-c.ferme, .feuille.nb thead th.ferme { background: repeating-linear-gradient(135deg, #cfd3d6 0, #cfd3d6 0.35mm, #fff 0.35mm, #fff 1.6mm); }
+.feuille .f-pied { flex: none; height: 13mm; display: flex; align-items: flex-end; justify-content: space-between; gap: 6mm; font-size: 7.5pt; color: #333; }
+.feuille .f-legende { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1.5mm 5mm; }
+.feuille .f-legende li { display: inline-flex; align-items: center; gap: 1.5mm; }
+.feuille .f-legende i { display: inline-block; width: 5mm; height: 3.2mm; border: 0.2mm solid #6b747c; }
+.feuille .f-legende-nb { margin: 0; max-width: 200mm; }
+.feuille .f-page { white-space: nowrap; color: #444; }
+
+/* À l'impression, quand l'aperçu est ouvert : seule la feuille sort, une page de papier par feuille. */
+@media print {
+  html.impression, html.impression body { height: auto !important; overflow: visible !important; background: #fff !important; }
+  html.impression body > *:not(.impression-doc) { display: none !important; }
+  html.impression .impression-doc { display: block !important; }
+  html.impression .impression-doc .feuille { break-after: page; page-break-after: always; }
+  html.impression .impression-doc .feuille:last-child { break-after: auto; page-break-after: auto; }
+}
+
+/* ---------------------------------------------------------------- Pauses courtes d'un poste : une ligne par pause */
+.pc { display: grid; gap: 10px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.pc-aide { margin: -4px 0 0; }
+.pc-ligne { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.pc-ligne .field { width: 130px; }
+.pc-ligne .pc-hors { flex: 1 1 100%; margin: 0; }
+/* Sur une frise, une pause courte est un trait fin, là où la pause déjeuner est une plage hachurée. */
+.frise .bloc i.pause.courte, .track i.pause.courte, i.pause.courte { width: 3px !important; min-width: 3px; background: rgba(17, 28, 39, 0.55); border-radius: 1px; opacity: 1; }
+
+/* ---------------------------------------------------------------- Environnement de test : un menu, plus de barre
+   L'étiquette « Espace … » de la barre du haut devient un bouton ; son menu réunit le changement de profil, les
+   tutoriels et la remise à neuf. La page gagne une rangée et rien ne s'interpose avant le contenu. */
+.bt-ancre { position: relative; display: inline-flex; min-width: 0; }
+.espace-badge.bouton { border: 0; cursor: pointer; font: inherit; font-size: 13.5px; font-weight: 700; transition: filter 0.15s ease, box-shadow 0.15s ease; }
+.espace-badge.bouton:hover { filter: brightness(0.96); }
+.espace-badge.bouton[aria-expanded='true'] { box-shadow: 0 0 0 3px var(--a-wash); }
+.espace-badge.bouton:focus-visible { outline: 2px solid var(--a-deep); outline-offset: 2px; }
+.espace-badge .bt-chevron { margin-left: -2px; opacity: 0.8; transition: transform 0.2s ease; }
+.espace-badge.bouton[aria-expanded='true'] .bt-chevron { transform: rotate(180deg); }
+.menu-test { position: absolute; top: calc(100% + 10px); left: 0; z-index: 70; width: min(340px, calc(100vw - 24px)); display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 24px 60px -24px rgba(var(--ink-rgb), 0.5); animation: rise 0.18s ease both; }
+.menu-test .bt-tete { display: flex; gap: 10px; align-items: flex-start; color: var(--ink); }
+.menu-test .bt-tete svg { flex: none; margin-top: 2px; color: var(--a-text); }
+.menu-test .bt-tete b { display: block; font-size: 14.5px; }
+.menu-test .bt-tete .small { display: block; margin-top: 2px; line-height: 1.4; }
+.menu-test .bt-roles { display: grid; gap: 2px; }
+.menu-test .bt-roles button { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; min-height: 40px; padding: 8px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.menu-test .bt-roles button b { font-size: 14px; font-weight: 650; }
+.menu-test .bt-roles button .small { color: var(--ink-3); }
+.menu-test .bt-roles button:hover { background: var(--n-2); }
+.menu-test .bt-roles button.on { background: var(--a-soft); color: var(--a-text); }
+.menu-test .bt-roles button.on .small { color: inherit; }
+.menu-test .bt-roles button:disabled { opacity: 0.45; cursor: default; }
+.menu-test .bt-roles button:focus-visible { outline: 2px solid var(--a-deep); outline-offset: -2px; }
+.menu-test .bt-actions { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.menu-test .bt-actions .btn { flex: 1; justify-content: center; }
+/* Sur téléphone, le menu prend la largeur de l'écran, aligné sur la barre du haut. */
+@media (max-width: 760px) { .menu-test { left: -10px; width: calc(100vw - 24px); } }
+@media (pointer: coarse) { .menu-test .bt-roles button { min-height: 44px; } }
+
+/* ---------------------------------------------------------------- Sous la barre du haut : plus de coupure nette
+   Le contenu s'estompe en arrivant sous la barre au lieu d'être tranché, et la barre prend une ombre dès que la
+   page défile dessous. */
+/* Le fondu n'est posé que lorsque la page a défilé : au repos, rien n'est masqué. */
+.main.defile .content { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 22px); mask-image: linear-gradient(to bottom, transparent 0, #000 22px); }
+.topbar-in { transition: box-shadow 0.25s ease; }
+.main.defile .topbar-in { box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.06), 0 16px 32px -18px rgba(var(--ink-rgb), 0.42); }
+@media print { .main.defile .content { -webkit-mask-image: none; mask-image: none; } }
+/* Feuille imprimée : les pauses sous les heures ; au mois, deux lignes serrées tiennent dans une rangée de 5 mm. */
+.feuille .f-legende li.f-abrev { color: #333; }
+.feuille.mois .f-poste b { font-size: 6.6pt; line-height: 1.08; }
+.feuille.mois .f-c small { font-size: 5.2pt; line-height: 1.08; }
+.feuille.semaine .f-c small { line-height: 1.2; }
+
+/* Retouches : le mot « facultatif » reste sur la ligne du titre ; une pause courte se lit comme un trait discret. */
+.pc > legend { display: flex; align-items: baseline; gap: 8px; padding: 0; margin-bottom: 2px; }
+.frise .bloc i.pause.courte, .track i.pause.courte, i.pause.courte { background: rgba(17, 28, 39, 0.38); top: 22%; bottom: 22%; height: auto; }
+.menu-test { white-space: normal; grid-template-columns: minmax(0, 1fr); text-align: left; font-weight: 400; }
+.menu-test .bt-tete > div { min-width: 0; }
+.menu-test .bt-roles button .small { white-space: nowrap; }
+/* Sur téléphone, l'étiquette de l'espace est un vrai bouton : 44 px de haut, comme les autres. */
+@media (max-width: 760px), (pointer: coarse) { .espace-badge.bouton { min-height: 44px; min-width: 44px; justify-content: center; } }

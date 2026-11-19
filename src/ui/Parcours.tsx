@@ -960,7 +960,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "button[aria-label='Imprimer le planning']",
     titre: 'Imprimer',
-    texte: () => 'Vous imprimez une feuille propre pour l’affichage. Chacun peut aussi imprimer son propre planning.',
+    texte: () => 'Ce bouton ouvre un aperçu avant impression : la semaine ou le mois, en couleur ou en noir et blanc, avec les pauses. Chacun peut aussi imprimer son propre planning.',
     jouer: () => {
       avecPlanning();
       semaineUne();
@@ -1944,6 +1944,7 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   compte: { gestion: ['Votre compte'], equipe: ['Mon compte'] },
   construire: { gestion: ['Une semaine à construire', 'La semaine est posée'] },
   publier: { gestion: ['Publier', 'Imprimer'] },
+  imprimer: { gestion: ['Imprimer'], equipe: ['Le planning de l’équipe'] },
   mois: { gestion: ['Le mois'] },
   absence: { gestion: ['Une absence imprévue', 'Personne ne se propose'] },
   'demande-remplacement': { gestion: ['La demande arrive', 'Valider le remplacement'] },
@@ -3019,47 +3020,76 @@ export function ChoixParcours(): JSX.Element | null {
   );
 }
 
-/** Bandeau de l'environnement de test : changer de regard en un clic, lancer ou relancer le parcours. */
-export function BandeauTest({ moi }: { moi: string }): JSX.Element {
+/**
+ * Le menu de l'environnement de test. Il s'ouvre depuis l'étiquette « Espace … » de la barre du haut : on y change de
+ * profil, on y lance les tutoriels, on y remet les données d'exemple à neuf. Aucune barre ne s'ajoute à la page.
+ */
+export function MenuTest({ moi, onClose }: { moi: string; onClose: () => void }): JSX.Element {
   const { ouvrirTutoriels, scenario } = useUi();
   const personnes = useStore((s) => s.data.personnes);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.querySelector<HTMLElement>('button[aria-pressed="true"]')?.focus();
+    const fermer = (e: MouseEvent | KeyboardEvent): void => {
+      if (e instanceof KeyboardEvent ? e.key === 'Escape' : !ref.current?.parentElement?.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener('mousedown', fermer);
+    document.addEventListener('keydown', fermer);
+    return () => {
+      document.removeEventListener('mousedown', fermer);
+      document.removeEventListener('keydown', fermer);
+    };
+  }, [onClose]);
   return (
-    <div className="bandeau-test no-print" role="region" aria-label="Environnement de test">
-      <span className="bt-titre" title="Environnement de test">
-        <FlaskConical size={16} aria-hidden="true" /> Environnement de test
-      </span>
-      <label className="sr" htmlFor="bt-role">
-        Voir l’application comme
-      </label>
-      <select
-        id="bt-role"
-        className="bt-select"
-        value={ROLES_TEST.find((r) => r.id === moi)?.cle ?? ''}
-        onChange={(e) => {
-          const r = ROLES_TEST.find((x) => x.cle === e.target.value);
-          if (r) voirComme(r.identifiant);
-        }}
-      >
-        {ROLES_TEST.filter((r) => personnes.some((p) => p.id === r.id)).map((r) => (
-          <option key={r.cle} value={r.cle}>
-            {r.court}
-          </option>
-        ))}
-      </select>
-      <div className="seg" role="group" aria-label="Voir l’application comme">
+    <div ref={ref} className="bandeau-test menu-test no-print" role="dialog" aria-label="Environnement de test">
+      <div className="bt-tete">
+        <FlaskConical size={18} aria-hidden="true" />
+        <div>
+          <b>Environnement de test</b>
+          <span className="small soft">Des données d’exemple. Changez de profil pour voir chaque espace.</span>
+        </div>
+      </div>
+      <div className="bt-roles" role="group" aria-label="Voir l’application comme">
         {ROLES_TEST.map((r) => (
-          <button key={r.cle} type="button" className={moi === r.id ? 'on' : ''} aria-pressed={moi === r.id} title={`${r.nom} · ${r.titre}`} disabled={!personnes.some((p) => p.id === r.id)} onClick={() => voirComme(r.identifiant)}>
-            {r.court}
+          <button
+            key={r.cle}
+            type="button"
+            className={moi === r.id ? 'on' : ''}
+            aria-pressed={moi === r.id}
+            disabled={!personnes.some((p) => p.id === r.id)}
+            onClick={() => {
+              onClose();
+              voirComme(r.identifiant);
+            }}
+          >
+            <b>{r.court}</b>
+            <span className="small">{r.titre}</span>
           </button>
         ))}
       </div>
-      <span className="grow" />
-      <button type="button" className="btn sm primary" onClick={() => ouvrirTutoriels(true)}>
-        <Play size={14} aria-hidden="true" /> Tutoriels
-      </button>
-      <button type="button" className="btn sm" onClick={() => lancerParcours(scenario)} title="Remet les données d’exemple à neuf et reprend le parcours à l’étape 1">
-        <RotateCcw size={14} aria-hidden="true" /> Réinitialiser
-      </button>
+      <div className="bt-actions">
+        <button
+          type="button"
+          className="btn sm primary"
+          onClick={() => {
+            onClose();
+            ouvrirTutoriels(true);
+          }}
+        >
+          <Play size={14} aria-hidden="true" /> Tutoriels
+        </button>
+        <button
+          type="button"
+          className="btn sm"
+          onClick={() => {
+            onClose();
+            lancerParcours(scenario);
+          }}
+          title="Remet les données d’exemple à neuf et reprend le parcours à l’étape 1"
+        >
+          <RotateCcw size={14} aria-hidden="true" /> Réinitialiser
+        </button>
+      </div>
     </div>
   );
 }

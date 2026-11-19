@@ -1,5 +1,5 @@
 import { AlarmClock, ArrowLeftRight, Bell, BookOpenCheck, Building2, CalendarClock, CalendarDays, CalendarRange, ChevronDown, CircleHelp, ClipboardCheck, Gauge, GraduationCap, Hourglass, House, Inbox, LayoutDashboard, ListChecks, LogOut, MessageSquare, Moon, MoonStar, Plus, Scale, ScrollText, Settings, Settings2, Store, Sun, UserRound, Users, FolderOpen, Crown, Medal, CheckCheck, LifeBuoy, TrendingUp, Menu, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Espace } from './domain/acces';
 import { espaceDe, estResponsable, estSecondaire, memeIdentifiant, responsable } from './domain/acces';
 import { fmtDateCourt, fmtHeure } from './domain/time';
@@ -10,12 +10,13 @@ import { DialogueDeconnexion } from './ui/components/Deconnexion';
 import { decisions } from './engine/decisions';
 import { useStore } from './store/store';
 import type { Vue } from './store/ui';
+import { ApercuImpression } from './ui/components/Impression';
 import { DialogueSignaler } from './ui/components/Signaler';
 import { prefsDe, themeDuProfil, useUi } from './store/ui';
 import { EtiquetteRole, couleurDe, iconeDe } from './ui/icons';
 import { Avatar, Logo, LogoNom } from './ui/kit';
 import { DialogueJour } from './ui/components/Jour';
-import { BandeauTest, ChoixParcours, Parcours } from './ui/Parcours';
+import { ChoixParcours, MenuTest, Parcours } from './ui/Parcours';
 import { Tour } from './ui/Tour';
 import { Accueil } from './ui/views/Accueil';
 import { Compte } from './ui/views/Compte';
@@ -132,6 +133,18 @@ export function App(): JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null);
   const outilsRef = useRef<HTMLDivElement>(null);
   const [panneau, setPanneau] = useState<'creer' | 'alertes' | null>(null);
+  const [menuTest, setMenuTest] = useState(false);
+  const fermerMenuTest = useCallback(() => setMenuTest(false), []);
+  // Le haut de la page se détache en douceur dès que le contenu défile dessous.
+  const [defile, setDefile] = useState(false);
+  useEffect(() => {
+    const el = document.getElementById('contenu');
+    if (!el) return;
+    const suivre = (): void => setDefile(el.scrollTop > 6);
+    suivre();
+    el.addEventListener('scroll', suivre, { passive: true });
+    return () => el.removeEventListener('scroll', suivre);
+  }, [vue, session]);
   /** Sur téléphone, toutes les rubriques s'ouvrent dans un volet ; la barre du bas garde les quatre plus utiles. */
   const [volet, setVolet] = useState(false);
   /** Signaler un retard ou une absence : à portée depuis tous les écrans. */
@@ -141,6 +154,7 @@ export function App(): JSX.Element {
     document.getElementById('contenu')?.scrollTo({ top: 0 });
   }, [vue]);
   const signalement = useUi((s) => s.signalement);
+  const impression = useUi((s) => s.impression);
   const moi = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''));
   const espace = espaceDe(data, moi);
   // Sans collecte des préférences (modèle classique), l'entrée disparaît du menu.
@@ -396,6 +410,7 @@ export function App(): JSX.Element {
         </button>
       </nav>
 
+      {impression && moi ? <ApercuImpression moi={moi} gestion={espace === 'responsable'} /> : null}
       {(signaler || signalement) && moi ? (
         <DialogueSignaler
           moi={moi}
@@ -406,14 +421,27 @@ export function App(): JSX.Element {
           }}
         />
       ) : null}
-      <div className="main">
+      <div className={`main${defile ? ' defile' : ''}`}>
         <header className="topbar no-print" aria-label="Barre d’outils">
           <div className="topbar-in">
             <span className="espace-qui grow">
-              <span className={`espace-badge ${couleurDe(moi)}`} title={secondaire ? `Vos décisions attendent l’accord de ${chef?.prenom ?? 'la titulaire principale'}` : undefined}>
-                <IconeRole size={16} aria-hidden="true" />
-                <span className="esp">{secondaire ? 'Espace titulaire secondaire' : estResponsable(data, moi) ? 'Espace titulaire' : espace === 'responsable' ? 'Espace gestion' : `Espace ${QUALIFICATION_COURT[moi.qualification].toLowerCase()}`}</span>
-              </span>
+              {data.demo ? (
+                // Dans l'environnement de test, l'étiquette de l'espace ouvre le menu : profil, tutoriels, remise à neuf.
+                <span className="bt-ancre">
+                  <button type="button" className={`espace-badge bouton ${couleurDe(moi)}`} id="bt-ouvrir" aria-haspopup="dialog" aria-expanded={menuTest} title="Environnement de test : changer de profil, tutoriels, réinitialiser" onClick={() => setMenuTest((x) => !x)}>
+                    <IconeRole size={16} aria-hidden="true" />
+                    <span className="esp">{secondaire ? 'Espace titulaire secondaire' : estResponsable(data, moi) ? 'Espace titulaire' : espace === 'responsable' ? 'Espace gestion' : `Espace ${QUALIFICATION_COURT[moi.qualification].toLowerCase()}`}</span>
+                    <span className="sr">, environnement de test : changer de profil</span>
+                    <ChevronDown size={15} aria-hidden="true" className="bt-chevron" />
+                  </button>
+                  {menuTest ? <MenuTest moi={moi.id} onClose={fermerMenuTest} /> : null}
+                </span>
+              ) : (
+                <span className={`espace-badge ${couleurDe(moi)}`} title={secondaire ? `Vos décisions attendent l’accord de ${chef?.prenom ?? 'la titulaire principale'}` : undefined}>
+                  <IconeRole size={16} aria-hidden="true" />
+                  <span className="esp">{secondaire ? 'Espace titulaire secondaire' : estResponsable(data, moi) ? 'Espace titulaire' : espace === 'responsable' ? 'Espace gestion' : `Espace ${QUALIFICATION_COURT[moi.qualification].toLowerCase()}`}</span>
+                </span>
+              )}
               <span className="small soft espace-officine">{data.officine.nom || 'Mon officine'}</span>
             </span>
             <span className="top-date cap1" aria-hidden="true">
@@ -556,7 +584,6 @@ export function App(): JSX.Element {
             </div>
           </div>
         </header>
-        {data.demo ? <BandeauTest moi={moi.id} /> : null}
         <main className="content" id="contenu" tabIndex={0}>
           {vueActive === 'espace' ? (
             <MonAccueil personId={moi.id} />
