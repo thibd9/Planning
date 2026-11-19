@@ -461,8 +461,9 @@ bannière d'accueil est un seul bloc ; les cinq repères sont des cartes de mêm
 
 La bannière d'accueil des titulaires porte l'illustration de la pharmacie de quartier, révélée au centre entre
 deux fondus bleus, comme sur la maquette. Elle s'efface quand la bannière devient trop étroite pour ne jamais
-passer sous le texte, et quand le titulaire choisit une couleur de thème qui n'est pas un bleu (la bannière
-reprend alors l'aplat de sa couleur). Les autres profils gardent l'aplat de leur couleur.
+passer sous le texte. Elle suit la couleur du profil : bleu ciel pour le titulaire principal, bleu marine pour
+un titulaire secondaire. Avec une couleur de thème qui n'est pas un bleu, la bannière reprend l'aplat de cette
+couleur, sans illustration. Les autres profils gardent l'aplat de leur couleur.
 
 D'autres emplacements sont prévus (agenda, comptoir, prochain planning, priorité). Tant qu'aucun dessin n'est
 fourni, rien ne s'affiche et la mise en page n'en dépend pas. Pour en ajouter un : déposer le fichier dans

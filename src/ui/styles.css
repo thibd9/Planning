@@ -4467,24 +4467,35 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 /* ---------- Bannière des titulaires : la pharmacie de quartier (maquette « Bannière 01 ») ----------
    Les positions sont celles de la maquette, en pourcentage de la bannière : l'illustration au centre droit,
    un fondu bleu qui la révèle, une lumière en haut, un fondu de lisibilité sous le résumé des décisions. */
-.tb-couverture.illustree { min-height: 148px; padding: 20px 26px 20px 34px; gap: 22px; background: linear-gradient(90deg, #265dae 0%, #5da3f6 48%, #2863ae 100%); box-shadow: 0 18px 34px -24px rgba(38, 93, 174, 0.9); }
+/* Les couleurs de la maquette (bleu ciel du titulaire principal) ; le bleu marine du titulaire secondaire les remplace plus bas. */
+.tb-couverture.illustree {
+  --ban-gauche: #265dae; --ban-centre: #5da3f6; --ban-droite: #2863ae;
+  --ban-f0: rgb(43, 100, 184); --ban-f1: rgb(53, 123, 213); --ban-f2: rgb(66, 139, 226); --ban-f3: rgb(74, 146, 230); --ban-f4: rgb(54, 116, 189);
+  --ban-panneau: rgb(41, 95, 170); --ban-mono-1: #7bb6ff; --ban-mono-2: #3a83de; --ban-ombre: rgba(16, 52, 110, 0.45);
+  min-height: 148px; padding: 20px 26px 20px 34px; gap: 22px; background: linear-gradient(90deg, var(--ban-gauche) 0%, var(--ban-centre) 48%, var(--ban-droite) 100%); box-shadow: 0 18px 34px -24px color-mix(in srgb, var(--ban-gauche) 90%, transparent); }
+/* Titulaire secondaire (bleu marine) : mêmes fondus, dans sa couleur. La pharmacie reste révélée au centre. */
+:root[data-theme='bleu'] .tb-couverture.illustree {
+  --ban-gauche: color-mix(in srgb, var(--a-plein) 88%, #04101f); --ban-centre: color-mix(in srgb, var(--a-plein-2) 72%, #8ec5f5); --ban-droite: var(--a-plein);
+  --ban-f0: color-mix(in srgb, var(--a-plein) 92%, #04101f); --ban-f1: var(--a-plein); --ban-f2: color-mix(in srgb, var(--a-plein) 45%, var(--a-plein-2)); --ban-f3: var(--a-plein-2); --ban-f4: var(--a-plein-2);
+  --ban-panneau: var(--a-plein); --ban-mono-1: color-mix(in srgb, var(--a-plein-2) 62%, #fff); --ban-mono-2: var(--a-plein-2); --ban-ombre: rgba(6, 26, 48, 0.5);
+}
 .tb-couverture.illustree .tb-decor { display: none; }
 .tb-scene { position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: inherit; pointer-events: none; }
 .tb-scene > * { position: absolute; top: 0; bottom: 0; }
 .tb-scene-image { top: 50%; bottom: auto; left: 54.83%; height: 134%; width: auto; max-width: none; aspect-ratio: 3 / 1; transform: translate(-50%, -50%); object-fit: cover; user-select: none; }
 .tb-scene-harmonie { left: 46%; width: 49.67%; background: rgba(40, 112, 202, 0.03); }
-.tb-scene-fondu { left: -18.95%; width: 118.95%; background: linear-gradient(90deg, rgb(43, 100, 184) 0%, rgb(53, 123, 213) 34%, rgb(66, 139, 226) 44%, rgb(74, 146, 230) 51.2%, rgba(74, 146, 230, 0.32) 56%, rgba(74, 146, 230, 0) 60.5%, rgba(54, 116, 189, 0) 72%, rgba(43, 100, 173, 0.04) 78%, rgba(41, 95, 170, 0.96) 84.5%, rgb(41, 95, 170) 100%); }
+.tb-scene-fondu { left: -18.95%; width: 118.95%; background: linear-gradient(90deg, var(--ban-f0) 0%, var(--ban-f1) 34%, var(--ban-f2) 44%, var(--ban-f3) 51.2%, color-mix(in srgb, var(--ban-f3) 32%, transparent) 56%, color-mix(in srgb, var(--ban-f3) 0%, transparent) 60.5%, color-mix(in srgb, var(--ban-f4) 0%, transparent) 72%, color-mix(in srgb, var(--ban-panneau) 4%, transparent) 78%, color-mix(in srgb, var(--ban-panneau) 96%, transparent) 84.5%, var(--ban-panneau) 100%); }
 .tb-scene-lumiere { left: 0; right: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0)); }
-.tb-scene-lisible { left: 67.09%; right: 0; background: linear-gradient(90deg, rgba(41, 95, 170, 0), #295faa 29%, #295faa); }
-.tb-couverture.illustree .tb-portrait .avatar, .tb-couverture.illustree .tb-portrait .avatar.lg { width: 62px; height: 62px; border-radius: 12px; font-size: 24px; font-weight: 600; color: #fff; background: linear-gradient(90deg, #7bb6ff, #3a83de); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 10px 22px -14px rgba(10, 40, 100, 0.7); }
+.tb-scene-lisible { left: 67.09%; right: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--ban-panneau) 0%, transparent), var(--ban-panneau) 29%, var(--ban-panneau)); }
+.tb-couverture.illustree .tb-portrait .avatar, .tb-couverture.illustree .tb-portrait .avatar.lg { width: 62px; height: 62px; border-radius: 12px; font-size: 24px; font-weight: 600; color: #fff; background: linear-gradient(90deg, var(--ban-mono-1), var(--ban-mono-2)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 10px 22px -14px rgba(10, 40, 100, 0.7); }
 /* Le texte s'arrête avant que la pharmacie n'apparaisse (44 % de la bannière, portrait compris). */
 .tb-couverture.illustree .tb-nom { max-width: calc(44% - 120px); }
-.tb-couverture.illustree .tb-nom .eyebrow { color: #e5f0ff; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-shadow: 0 1px 2px rgba(16, 52, 110, 0.4); }
+.tb-couverture.illustree .tb-nom .eyebrow { color: #e5f0ff; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-shadow: 0 1px 2px var(--ban-ombre); }
 .tb-couverture.illustree .tb-nom h1 { margin: 5px 0 6px; font-size: 32px; line-height: 1.16; font-weight: 700; }
-.tb-couverture.illustree .tb-role { color: #ecf4ff; font-size: 14px; text-shadow: 0 1px 2px rgba(16, 52, 110, 0.45); }
+.tb-couverture.illustree .tb-role { color: #ecf4ff; font-size: 14px; text-shadow: 0 1px 2px var(--ban-ombre); }
 .tb-couverture.illustree .tb-resume { flex: 0 0 max(20.94%, 232px); padding: 4px 0 4px max(2.2%, 20px); border-left: 1px solid rgba(255, 255, 255, 0.26); color: #f2f7ff; font-size: 13px; line-height: 1.45; }
 .tb-couverture.illustree .tb-resume b { margin-bottom: 8px; font-size: 20px; font-weight: 600; }
-:root[data-mode='sombre'] .tb-couverture.illustree { background: linear-gradient(90deg, #265dae 0%, #5da3f6 48%, #2863ae 100%); }
+:root[data-mode='sombre'] .tb-couverture.illustree { background: linear-gradient(90deg, var(--ban-gauche) 0%, var(--ban-centre) 48%, var(--ban-droite) 100%); }
 :root[data-mode='sombre'] .tb-couverture.illustree .tb-scene { filter: brightness(0.86) saturate(0.95); }
 /* L'illustration est bleue : avec une autre couleur de thème, la bannière revient à l'aplat du profil. */
 :root:not([data-theme='ciel']):not([data-theme='bleu']) .tb-couverture.illustree { background: linear-gradient(105deg, color-mix(in srgb, var(--a-plein) 82%, #030b24) 0%, var(--a-plein) 42%, color-mix(in srgb, var(--a-plein-2) 88%, var(--a-plein)) 100%); }
@@ -4504,7 +4515,7 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 }
 @container banniere (max-width: 900px) {
   .tb-scene-image, .tb-scene-fondu, .tb-scene-lisible, .tb-scene-harmonie { display: none; }
-  .tb-couverture.illustree { background: linear-gradient(105deg, #265dae 0%, #3f85dc 100%); }
+  .tb-couverture.illustree { background: linear-gradient(105deg, var(--ban-gauche) 0%, var(--ban-f2) 100%); }
   .tb-couverture.illustree .tb-nom { max-width: none; }
 }
 @media (max-width: 760px) {
@@ -4525,3 +4536,5 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .tb-chiffre { grid-column: span 2; }
   .tb-chiffre:nth-child(n + 4) { grid-column: span 3; }
 }
+/* Bleu marine : un voile de la couleur du profil accorde le ciel de l'illustration au reste de la bannière. */
+:root[data-theme='bleu'] .tb-scene-harmonie { left: 30%; width: 52%; background: color-mix(in srgb, var(--a-plein) 20%, transparent); }
