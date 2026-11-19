@@ -92,6 +92,10 @@ trouve. Chacun choisit son apparence, claire, mixte ou sombre ; seul le titulair
 | Apprenti, étudiant | Vert, ambre | Alternance, études et horaires |
 
 <div align="center">
+<img src="docs/images/bannieres.webp" alt="Les sept bannières d'accueil : une illustration et une couleur par profil" width="760">
+</div>
+
+<div align="center">
 <img src="docs/images/themes.png" alt="Le même tableau de bord dans les trois apparences : claire, mixte et sombre" width="880">
 </div>
 
