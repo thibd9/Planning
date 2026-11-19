@@ -20,9 +20,9 @@ import { Avatar, Empty, Pill } from '../kit';
 const ICONE_FORT: Record<PointFortCle, LucideIcon> = { ponctuel: AlarmClockCheck, entraide: HandHelping, volontaire: Hand, part: Scale };
 /** Ce que chaque point fort constate, d'après les faits des douze derniers mois. */
 const CRITERE_FORT: Record<PointFortCle, string> = {
-  ponctuel: 'Aucun retard ni départ anticipé noté en 12 mois',
+  ponctuel: 'Aucun retard ni départ anticipé noté en 12 mois, sur au moins 20 postes tenus',
   entraide: 'Au moins 2 postes repris au pied levé en 12 mois',
-  volontaire: 'Au moins 2 réponses à un appel à l’équipe en 12 mois',
+  volontaire: 'Au moins 2 propositions pour remplacer un collègue en 12 mois',
   part: 'Samedis et fermetures : au moins sa part sur 3 mois',
 };
 const COMPTEUR_COURT: Record<CompteurActivite, string> = { samedis: 'Samedis', fermetures: 'Fermetures', gardes: 'Gardes', depannages: 'Dépannages' };
@@ -30,6 +30,8 @@ const COMPTEUR_COURT: Record<CompteurActivite, string> = { samedis: 'Samedis', f
 const pluriel = (n: number, un: string, plusieurs: string): string => `${n} ${n > 1 ? plusieurs : un}`;
 const jourMoisAn = (d: ISODate): string => `${fmtJourMois(d)} ${d.slice(0, 4)}`;
 const ecartEnClair = (minutes: number): string => (minutes === 0 ? 'au contrat' : `${fmtDuree(Math.abs(minutes))} de ${minutes > 0 ? 'plus' : 'moins'}`);
+
+const fmtPourcent = (part: number): string => `${Math.round(part * 1000) / 10}%`;
 
 /** Une barre horizontale : la part de `valeur` dans `max`. Elle illustre ; la valeur est toujours écrite à côté. */
 function Barre({ valeur, max, alerte }: { valeur: number; max: number; alerte?: boolean }): JSX.Element {
@@ -40,8 +42,6 @@ function Barre({ valeur, max, alerte }: { valeur: number; max: number; alerte?: 
     </span>
   );
 }
-const fmtPourcent = (part: number): string => `${Math.round(part * 1000) / 10}%`;
-
 /** Une personne, cliquable : le clic ouvre sa fiche dans « Équipe ». */
 function Qui({ p, sous, onOuvrir }: { p: Person; sous?: string; onOuvrir: (id: string) => void }): JSX.Element {
   return (
@@ -270,7 +270,7 @@ export function Stats(): JSX.Element {
           </div>
           <div>
             <h3 className="st-h3">
-              Détenues par personne <span className="st-compte num">{k.absentes.length}</span>
+              Que personne ne détient <span className="st-compte num">{k.absentes.length}</span>
             </h3>
             {k.absentes.length ? (
               <ul className="st-absentes">

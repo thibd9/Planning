@@ -869,7 +869,7 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .split',
     titre: 'Horaires et effectif',
-    texte: () => 'Vous réglez les horaires d’ouverture, jour par jour. À côté, vous indiquez combien de personnes vous attendez au comptoir.',
+    texte: () => 'Les réglages se rangent en rubriques qui se replient. Vous réglez les horaires d’ouverture, jour par jour ; « Recopier » applique un jour aux autres. Plus bas, vous indiquez combien de personnes vous attendez au comptoir.',
     jouer: () => helene('officine'),
     gestes: [
       { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('[aria-label="Fermeture le samedi"]'), valeur: '18:00', dit: 'Réglez la fermeture du samedi à 18 h', sert: 'Chaque jour a ses heures d’ouverture et de fermeture.' },
@@ -1836,6 +1836,19 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [{ faire: 'cliquer', sur: '[data-declare]', dit: 'Cliquez sur « C’est fait »', sert: 'Le rappel est retiré : la déclaration est notée au dossier.', facultatif: true }],
   },
   {
+    chapitre: BILAN,
+    qui: HELENE,
+    cible: '#stats-cles',
+    cibleFin: '#stats-points-forts',
+    titre: 'Les statistiques de l’équipe',
+    texte: () => 'L’équipe en chiffres : sa composition, les compétences couvertes et celles qui reposent sur une seule personne, les points forts de chacun, les heures planifiées face aux contrats. Tout est calculé d’après ce qui est déjà saisi : ni note, ni classement.',
+    jouer: () => {
+      avecPlanning();
+      helene('stats');
+    },
+    gestes: [{ faire: 'cliquer', sur: '#stats-competences-2 > summary', dit: 'Ouvrez la famille « Conseil »', sert: 'Chaque compétence dit qui la détient. Une seule personne : elle se perd dès qu’elle est absente.', facultatif: true }],
+  },
+  {
     chapitre: QUOTIDIEN,
     qui: HELENE,
     cible: '.mp-prochain',
@@ -1881,7 +1894,7 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
     but: 'Un arrêt le matin même, un retard, une décision à prendre à deux titulaires : ce qui ne se prévoit pas.',
     etapes: ['Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Une journée', 'Retards et suivi', 'Un retard annoncé', 'Le retard, vu du comptoir', 'Un accident du travail', 'Décider à deux', 'Donner son accord', 'Les messages'],
   },
-  { chapitre: 'Le bilan du mois', but: 'En fin de mois : les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Le journal et la paie', 'Les documents', 'Absences et justificatifs'] },
+  { chapitre: 'Le bilan du mois', but: 'En fin de mois : les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Les statistiques de l’équipe', 'Le journal et la paie', 'Les documents', 'Absences et justificatifs'] },
   {
     chapitre: 'Au quotidien',
     but: 'Les raccourcis de tous les jours, et où trouver de l’aide.',
@@ -1900,7 +1913,7 @@ const TITULAIRE: Etape[] = raconter(
     { chapitre: 'Gardes, formation, inventaire', but: 'Ce qui s’ajoute au planning ordinaire, et qui prévient chacun tout seul.', etapes: ['Les gardes', 'Une formation', 'Un inventaire'] },
     { chapitre: 'Décider', but: 'Remplacements, congés, absences imprévues : chaque demande arrive au même endroit, avec de quoi trancher.', etapes: ['La demande arrive', 'Valider le remplacement', 'Une urgence médicale', 'Congés et horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande', 'Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Donner son accord'] },
     { chapitre: 'Suivre l’équipe', but: 'La journée en cours, les retards, un accident du travail, les messages.', etapes: ['Une journée', 'Retards et suivi', 'Le retard, vu du comptoir', 'Un accident du travail', 'Les messages'] },
-    { chapitre: 'Faire le bilan', but: 'Les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Le journal et la paie', 'Les documents'] },
+    { chapitre: 'Faire le bilan', but: 'Les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Les statistiques de l’équipe', 'Le journal et la paie', 'Les documents'] },
     { chapitre: 'Piloter au quotidien', but: 'Le tableau de bord, vos propres horaires, les raccourcis, et les réglages de la pharmacie.', etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'La cloche', 'Le bouton « Créer »', 'Horaires et effectif', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'Les règles', 'Votre compte'] },
   ],
   true,
@@ -2279,7 +2292,7 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   contrat: { gestion: ['La fiche d’une personne'] },
   repercussion: { gestion: ['Une absence imprévue', 'Personne ne se propose'] },
   'semaine-vide': { gestion: ['Une semaine à construire'] },
-  'points-forts': { gestion: ['La fiche d’une personne'] },
+  'points-forts': { gestion: ['Les statistiques de l’équipe'] },
 };
 
 /** Le tutoriel d'une fiche d'aide pour ce rôle, s'il existe. */

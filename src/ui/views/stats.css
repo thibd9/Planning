@@ -1,0 +1,184 @@
+/*
+ * Statistiques : l'équipe en chiffres.
+ * Des filets fins et de l'air entre les blocs ; aucune couleur hors des variables du thème, pour que le mode
+ * sombre suive. Les barres illustrent : la valeur est toujours écrite à côté.
+ * Chaque règle est rangée sous `.page-stats` : cette feuille est chargée avant la feuille générale, il lui faut
+ * donc un cran de précision de plus pour ajuster une carte ou un en-tête de carte.
+ */
+.page-stats { display: flex; flex-direction: column; }
+.page-stats .st-bloc { margin-top: 28px; }
+
+/* ------------------------------------------------------------------ Chiffres clés */
+/* Une seule carte, des cases séparées par un filet : la marge négative cache les filets du bord, quel que soit le nombre de colonnes. */
+.page-stats .st-cles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); overflow: hidden; }
+.page-stats .st-cle { display: grid; align-content: start; gap: 5px; min-width: 0; margin: -1px 0 0 -1px; padding: 22px 24px 24px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.page-stats .st-cle-nom { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.page-stats .st-cle-valeur { font-size: 30px; font-weight: 650; line-height: 1.12; letter-spacing: -0.035em; color: var(--ink); }
+.page-stats .st-cle-valeur small { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink-2); }
+.page-stats .st-cle-detail { font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+
+/* ------------------------------------------------------------------ Blocs */
+.page-stats .st-tete { align-items: flex-start; gap: 14px; padding: 20px 24px; }
+.page-stats .st-tete p { margin-top: 4px; max-width: 78ch; line-height: 1.45; }
+.page-stats .st-ico { flex: none; margin-top: 1px; line-height: 0; color: var(--a-text); }
+.page-stats .st-corps { display: grid; gap: 30px; padding: 26px 24px 28px; }
+.page-stats .st-corps > * { min-width: 0; }
+.page-stats .st-h3 { margin: 0 0 16px; font-size: 14px; font-weight: 650; letter-spacing: -0.005em; color: var(--ink); }
+.page-stats .st-compte { margin-left: 6px; font-weight: 600; color: var(--ink-2); }
+.page-stats .st-note { margin-top: 14px; line-height: 1.5; max-width: 80ch; }
+.page-stats .st-phrase { max-width: 78ch; margin-bottom: 20px; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.page-stats .st-phrase b { color: var(--ink); font-weight: 650; }
+
+/* Colonnes d'un bloc : un filet vertical entre elles, qui devient horizontal quand elles s'empilent. */
+.page-stats .st-colonnes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.page-stats .st-colonnes.deux { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.page-stats .st-colonnes > * { min-width: 0; padding: 0 32px; border-left: 1px solid var(--line); }
+.page-stats .st-colonnes > *:first-child { padding-left: 0; border-left: 0; }
+.page-stats .st-colonnes > *:last-child { padding-right: 0; }
+
+/* ------------------------------------------------------------------ Barres */
+.page-stats .st-barre { display: block; height: 8px; min-width: 0; border-radius: 4px; background: var(--n-1); overflow: hidden; }
+.page-stats .st-barre i { display: block; height: 100%; border-radius: 4px; background: var(--a-deep); }
+.page-stats .st-barre.alerte i { background: var(--warn); }
+
+/* Liste à barres : le nom à gauche, la valeur à droite, la barre dessous sur toute la largeur. */
+.page-stats .st-barres { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.page-stats .st-barres > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 7px 14px; }
+.page-stats .st-barres .st-barre { grid-column: 1 / -1; }
+.page-stats .st-b-nom { min-width: 0; font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
+.page-stats .st-b-val { font-size: 14px; color: var(--ink); white-space: nowrap; }
+.page-stats .st-b-val b { font-weight: 650; }
+
+/* Repères : un libellé, sa valeur, une précision. */
+.page-stats .st-reperes { margin: 0; display: grid; gap: 18px; }
+.page-stats .st-reperes > div { display: grid; gap: 3px; }
+.page-stats .st-reperes dt { font-size: 13px; color: var(--ink-2); }
+.page-stats .st-reperes dd { margin: 0; display: grid; gap: 2px; font-size: 17px; font-weight: 650; letter-spacing: -0.015em; color: var(--ink); }
+.page-stats .st-reperes dd .small { font-weight: 400; letter-spacing: 0; line-height: 1.45; }
+
+/* ------------------------------------------------------------------ Une personne, cliquable */
+.page-stats .st-qui { display: inline-flex; align-items: center; gap: 11px; max-width: 100%; min-height: 40px; margin: -4px -8px -4px -4px; padding: 4px 8px 4px 4px; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.page-stats .st-qui { justify-self: start; }
+.page-stats .st-qui:hover { background: var(--a-tint); }
+.page-stats .st-qui:hover b { color: var(--a-text); }
+.page-stats .st-qui-nom { display: grid; min-width: 0; line-height: 1.3; }
+.page-stats .st-qui-nom b { font-weight: 650; overflow-wrap: anywhere; }
+
+/* ------------------------------------------------------------------ Compétences */
+.page-stats .st-fragiles { list-style: none; margin: 0; padding: 0; }
+.page-stats .st-fragiles > li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; padding: 12px 0; border-top: 1px solid var(--line); }
+.page-stats .st-fragiles > li:first-child { padding-top: 0; border-top: 0; }
+.page-stats .st-fragiles > li:last-child { padding-bottom: 0; }
+.page-stats .st-f-nom { display: grid; gap: 2px; min-width: 0; flex: 1 1 12rem; }
+.page-stats .st-f-nom b { font-weight: 600; }
+.page-stats .st-absentes { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 28px; font-size: 14px; color: var(--ink); }
+.page-stats .st-absentes > li { break-inside: avoid; padding: 4px 0; }
+
+/* Les accordéons d'un bloc : un filet les sépare de ce qui précède. */
+.page-stats .st-accs { border-top: 1px solid var(--line); }
+.page-stats .st-accs .acc-corps { padding-bottom: 18px; }
+.page-stats .st-accs .acc:last-child[open] > .acc-corps { padding-bottom: 4px; }
+.page-stats .st-accs .acc:last-child:not([open]) > .acc-tete { padding-bottom: 2px; }
+
+/* Lignes larges : le nom, la barre, la valeur en clair. */
+.page-stats .st-rangs { list-style: none; margin: 0; padding: 0; }
+.page-stats .st-rangs > li { display: grid; grid-template-columns: minmax(0, 17rem) minmax(90px, 1fr) minmax(0, 21rem); align-items: center; gap: 8px 24px; padding: 13px 0; border-top: 1px solid var(--line); }
+.page-stats .st-rangs > li:first-child { padding-top: 0; border-top: 0; }
+.page-stats .st-r-nom { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+.page-stats .st-r-nom b { font-weight: 600; }
+.page-stats .st-r-val { min-width: 0; line-height: 1.45; color: var(--ink); }
+.page-stats .st-r-val.soft, .page-stats .st-r-val .soft { color: var(--ink-2); }
+.page-stats .st-r-val b { font-weight: 650; }
+
+/* ------------------------------------------------------------------ Points forts */
+.page-stats .st-natures { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 48px; }
+.page-stats .st-natures > li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 9px 12px; }
+.page-stats .st-natures .st-barre { grid-column: 1 / -1; }
+.page-stats .st-n-ico { margin-top: 2px; line-height: 0; color: var(--ok-ink); }
+.page-stats .st-n-nom { display: grid; gap: 2px; min-width: 0; }
+.page-stats .st-n-nom b { font-weight: 650; }
+.page-stats .st-n-nom .small { line-height: 1.4; }
+.page-stats .st-n-val { white-space: nowrap; font-size: 14px; }
+.page-stats .st-n-val b { font-size: 17px; font-weight: 650; letter-spacing: -0.015em; }
+
+.page-stats .st-personnes { list-style: none; margin: 0; padding: 0; }
+.page-stats .st-personnes > li { display: grid; grid-template-columns: minmax(0, 17rem) minmax(0, 1fr); align-items: start; gap: 10px 24px; padding: 15px 0; border-top: 1px solid var(--line); }
+.page-stats .st-personnes > li:first-child { padding-top: 0; border-top: 0; }
+.page-stats .st-points { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.page-stats .st-points > li { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 1px 10px; font-size: 14px; }
+.page-stats .st-points svg { margin-top: 3px; color: var(--ok-ink); }
+.page-stats .st-points b { font-weight: 650; }
+.page-stats .st-points .small { grid-column: 2; line-height: 1.4; }
+
+/* ------------------------------------------------------------------ Activité */
+.page-stats .st-totaux { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.page-stats .st-totaux > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 3px; min-width: 0; padding: 0 22px; border-left: 1px solid var(--line); }
+.page-stats .st-totaux > div:first-child { padding-left: 0; border-left: 0; }
+.page-stats .st-totaux dt { font-size: 13px; line-height: 1.35; color: var(--ink-2); }
+.page-stats .st-totaux dd { margin: 0; font-size: 24px; font-weight: 650; line-height: 1.15; letter-spacing: -0.03em; color: var(--ink); }
+.page-stats .st-faits { list-style: none; margin: 18px 0 22px; padding: 0; display: grid; gap: 5px; line-height: 1.5; }
+
+/* Le détail par personne : quatre décomptes par ligne ; les intitulés sont en tête de colonne. */
+.page-stats .st-cpt-tete, .page-stats .st-cpt-liste > li { display: grid; grid-template-columns: minmax(0, 1fr) repeat(4, 6rem); align-items: center; gap: 8px 12px; }
+.page-stats .st-cpt-tete { padding-bottom: 10px; border-bottom: 1px solid var(--line); font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.page-stats .st-cpt-tete > span, .page-stats .st-cpt-case { text-align: right; }
+.page-stats .st-cpt-liste { list-style: none; margin: 0; padding: 0; }
+.page-stats .st-cpt-liste > li { padding: 11px 0; border-top: 1px solid var(--line); }
+.page-stats .st-cpt-liste > li:first-child { border-top: 0; }
+.page-stats .st-cpt-case { font-size: 15px; }
+.page-stats .st-cpt-case b { font-weight: 650; }
+/* Sur grand écran, l'intitulé de chaque case reste lu par les lecteurs d'écran ; la tête de colonne le montre aux yeux. */
+.page-stats .st-cpt-lib { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ------------------------------------------------------------------ Écrans moyens */
+@media (max-width: 1180px) {
+  .page-stats .st-colonnes:not(.deux) { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 26px; }
+  .page-stats .st-colonnes:not(.deux) > *:nth-child(2) { padding-right: 0; }
+  .page-stats .st-colonnes:not(.deux) > *:nth-child(3) { grid-column: 1 / -1; padding: 26px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+  .page-stats .st-colonnes:not(.deux) > *:nth-child(3) .st-reperes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 28px; }
+}
+
+/* Avec le menu à gauche, la place manque avant 800 px : les lignes larges s'empilent, chaque case porte son intitulé. */
+@media (max-width: 1100px) {
+  .page-stats .st-rangs > li { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .page-stats .st-cpt-tete { display: none; }
+  .page-stats .st-cpt-liste > li { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 22px; padding: 14px 0; }
+  .page-stats .st-cpt-liste > li:first-child { padding-top: 0; }
+  .page-stats .st-cpt-liste .st-qui { grid-column: 1 / -1; }
+  .page-stats .st-cpt-case { display: flex; flex-direction: column; gap: 1px; text-align: left; }
+  .page-stats .st-cpt-lib { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; font-size: 12.5px; color: var(--ink-2); }
+}
+
+/* ------------------------------------------------------------------ Sous 800 px : une seule colonne */
+@media (max-width: 800px) {
+  .page-stats .st-bloc { margin-top: 22px; }
+  .page-stats .st-tete { padding: 18px 18px; }
+  .page-stats .st-corps { gap: 26px; padding: 22px 18px 24px; }
+  .page-stats .st-colonnes, .page-stats .st-colonnes.deux, .page-stats .st-colonnes:not(.deux) { grid-template-columns: minmax(0, 1fr); row-gap: 0; }
+  .page-stats .st-colonnes > *, .page-stats .st-colonnes:not(.deux) > *:nth-child(3) { grid-column: auto; padding: 24px 0 0; margin-top: 24px; border-left: 0; border-top: 1px solid var(--line); }
+  .page-stats .st-colonnes > *:first-child { padding-top: 0; margin-top: 0; border-top: 0; }
+  .page-stats .st-colonnes:not(.deux) > *:nth-child(3) .st-reperes { grid-template-columns: minmax(0, 1fr); }
+  .page-stats .st-natures { grid-template-columns: minmax(0, 1fr); }
+  .page-stats .st-personnes > li { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .page-stats .st-totaux { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 20px; }
+  .page-stats .st-totaux > div:nth-child(odd) { padding-left: 0; border-left: 0; }
+}
+
+/* ------------------------------------------------------------------ Téléphone */
+@media (max-width: 520px) {
+  .page-stats .st-cles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .page-stats .st-cle { padding: 16px 16px 18px; }
+  .page-stats .st-cle:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .page-stats .st-cle-valeur { font-size: 24px; }
+  .page-stats .st-cle-valeur small { font-size: 14px; }
+  .page-stats .st-tete { padding: 16px; }
+  .page-stats .st-corps { padding: 20px 16px 22px; }
+  .page-stats .st-absentes { columns: 1; }
+  .page-stats .st-natures > li { grid-template-columns: auto minmax(0, 1fr); }
+  .page-stats .st-n-val { grid-column: 2; }
+  .page-stats .st-cpt-liste > li { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
+}
+
+@media print {
+  .page-stats .st-bloc, .page-stats .st-cles { box-shadow: none; break-inside: avoid; }
+}

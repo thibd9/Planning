@@ -1,0 +1,89 @@
+/* Réglages de l'officine : des rubriques en accordéon, réunies en deux cartes.
+   On lit les résumés, on déplie la rubrique qui intéresse. Les règles sont préfixées par « .page-officine »
+   pour passer devant celles de styles.css sans y toucher. */
+
+/* ---------- Les deux cartes et leur intitulé ---------- */
+.page-officine .of-groupe { margin: 0 0 12px; padding: 0 2px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+.page-officine .of-carte { padding: 4px 26px; margin-bottom: 38px; }
+.page-officine .of-carte:last-of-type { margin-bottom: 0; }
+
+/* ---------- Les rubriques : de l'air autour du titre, le contenu aligné sous lui ---------- */
+.page-officine .acc-tete { padding-block: 20px; }
+.page-officine .acc-corps { padding-bottom: 30px; gap: 20px; }
+.page-officine .acc-corps > * { min-width: 0; }
+/* Le repère « .split » de la visite guidée réunit trois rubriques : il ne doit ni les mettre en colonnes, ni effacer le filet de la première. */
+.page-officine .split.of-duo { display: block; }
+.page-officine .of-duo > .acc:first-child { border-top: 1px solid var(--line); }
+@media (min-width: 760px) {
+  .page-officine .acc-corps { padding-left: 34px; }
+}
+@media (max-width: 640px) {
+  .page-officine .of-carte { padding-inline: 16px; }
+  /* Sur un petit écran, le résumé tient sur deux lignes plutôt que d'être coupé trop tôt. */
+  .page-officine .acc-resume { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
+}
+
+/* ---------- Dans une rubrique : phrase d'introduction, notes, champs ---------- */
+.page-officine .of-intro { margin: 0; max-width: 74ch; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.page-officine .of-note { margin: 0; max-width: 80ch; line-height: 1.5; }
+.page-officine .of-nom { max-width: 520px; }
+.page-officine .of-entete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.page-officine .of-entete > .of-intro { flex: 1 1 300px; }
+.page-officine .of-zero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
+.page-officine .of-zero > .of-intro { flex: 1 1 300px; }
+.page-officine .qp-effets-cols { grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+.page-officine .feries { grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+
+/* Cibles d'au moins 40 px à la souris, 44 px au doigt. */
+.page-officine .of-carte .btn.sm { min-height: 40px; }
+.page-officine .pt-nom, .page-officine .pt-couleur select, .page-officine .pub-regles input, .page-officine .qp-limite select { min-height: 40px; }
+.page-officine .dim-calcul summary { min-height: 40px; }
+@media (pointer: coarse) {
+  .page-officine .of-carte .btn.sm { min-height: 44px; }
+}
+
+/* ---------- Tableaux : ils défilent dans leur rubrique, jamais la page ---------- */
+/* La marge intérieure laisse la place au contour de focus des champs, que le défilement rognerait. */
+.page-officine .of-defile { overflow-x: auto; padding: 6px; margin: -6px; }
+.page-officine .of-defile table.t th:first-child, .page-officine .of-defile table.t td:first-child { padding-left: 0; }
+.page-officine .of-defile table.t th:last-child, .page-officine .of-defile table.t td:last-child { padding-right: 0; }
+.page-officine .of-plage { white-space: nowrap; }
+@media (max-width: 560px) {
+  .page-officine .of-effectifs th, .page-officine .of-effectifs td { padding-inline: 8px; }
+  /* Le mot « personnes » à côté du champ : l'en-tête de la colonne le dit déjà. */
+  .page-officine .of-effectifs .eff-min > span { display: none; }
+}
+
+/* ---------- Horaires d'ouverture : une ligne par jour ----------
+   Étroit : le jour et ses actions (icône seule) sur une ligne, les heures dessous.
+   Moyen : le jour, les heures et les actions sur une ligne. Large : chaque action porte son libellé. */
+.page-officine .horaires { container-type: inline-size; }
+.page-officine .jour-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 14px; align-items: center; padding: 14px 0; border-bottom: 0; border-top: 1px solid var(--line); }
+.page-officine .jour-ligne:first-child { border-top: 0; padding-top: 0; }
+.page-officine .jour-ligne:last-child { padding-bottom: 0; }
+.page-officine .jl-nom { grid-area: 1 / 1; font-weight: 650; }
+.page-officine .jl-actions { grid-area: 1 / 2; display: flex; flex-wrap: nowrap; justify-content: flex-end; gap: 8px; }
+.page-officine .jl-heures { grid-area: 2 / 1 / 3 / -1; min-width: 0; }
+
+.page-officine .of-carte .btn.jl-action { min-width: 40px; min-height: 40px; padding: 0 10px; gap: 6px; background: transparent; color: var(--ink-2); font-weight: 600; box-shadow: inset 0 0 0 1px var(--line); }
+.page-officine .btn.jl-action:hover, .page-officine .btn.jl-action.on { background: var(--a-tint); color: var(--a-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--a-deep) 40%, transparent); }
+.page-officine .btn.jl-action svg { flex: none; }
+.page-officine .jl-lib { display: none; }
+@media (pointer: coarse) {
+  .page-officine .of-carte .btn.jl-action { min-width: 44px; min-height: 44px; }
+}
+
+/* Les options « Recopier » se déplient sous la ligne du jour. */
+.page-officine .jl-recopie { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px; border-radius: 8px; background: var(--n-1); }
+.page-officine .jl-recopie .btn { white-space: normal; text-align: left; background: var(--surface); }
+.page-officine .jl-recopie .btn:hover { background: var(--a-soft); }
+.page-officine .jl-recopie .btn svg { flex: none; }
+
+@container (min-width: 640px) {
+  .page-officine .jour-ligne { grid-template-columns: 96px minmax(0, 1fr) auto; }
+  .page-officine .jl-nom, .page-officine .jl-heures, .page-officine .jl-actions { grid-area: auto; }
+  .page-officine .jl-recopie { grid-column: 2 / -1; }
+}
+@container (min-width: 820px) {
+  .page-officine .jl-lib { display: inline; }
+}

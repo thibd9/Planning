@@ -1,4 +1,4 @@
-import { AlertTriangle, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lock, Plus, RefreshCw, ShieldCheck, Sparkles, Tags, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, ChartNoAxesColumn, Award, BriefcaseBusiness, CalendarOff, ChartLine, Check, Crown, HandHelping, Medal, HeartHandshake, KeyRound, Lock, Plus, RefreshCw, ShieldCheck, Tags, Trash2, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { TYPES_PRODUIT, TYPE_PRODUIT_LABEL, cleMarque, repertoireMarques } from '../../domain/profils';
 import type { MarqueAnimee, TypeProduit } from '../../domain/profils';
@@ -61,22 +61,10 @@ export function Equipe(): JSX.Element {
   const internes = data.personnes.filter((p) => !p.externe);
   const externes = data.personnes.filter((p) => p.externe);
   const courant = data.personnes.find((p) => p.id === personneId) ?? internes[0];
-  // Les points forts de l'équipe ne sont montrés qu'aux titulaires ; eux-mêmes n'y figurent pas.
-  const today = useStore((s) => s.today);
+  // Les statistiques de l'équipe (dont les points forts) ont leur page ; seuls les titulaires y sont conduits.
+  const aller = useUi((s) => s.aller);
   const session = useUi((s) => s.session);
   const titulaire = data.personnes.find((p) => memeIdentifiant(p.identifiant, session ?? ''))?.qualification === 'titulaire';
-  const enAvant = useMemo(
-    () =>
-      titulaire
-        ? data.personnes
-            .filter((p) => !p.externe && p.qualification !== 'titulaire')
-            .map((p) => ({ p, points: pointsForts(data, p.id, today) }))
-            .filter((x) => x.points.length)
-            .sort((a, b) => a.p.prenom.localeCompare(b.p.prenom))
-        : [],
-    [data, today, titulaire],
-  );
-
   return (
     <div>
       <div className="page-head">
@@ -146,33 +134,13 @@ export function Equipe(): JSX.Element {
         </div>
         {courant ? <Fiche key={courant.id} person={courant} /> : null}
       </div>
-      {enAvant.length ? (
-        <section className="card pf-carte" data-focus="points-forts">
-          <div className="card-head">
-            <span className="pf-ico" aria-hidden="true">
-              <Sparkles size={18} />
-            </span>
-            <div className="grow">
-              <h2 className="h3">Les points forts de l’équipe</h2>
-              <p className="small soft" style={{ margin: 0 }}>Ce qui a été noté de positif pour chacun sur douze mois. Ce n’est ni une note, ni un classement.</p>
-            </div>
-          </div>
-          <ul className="pf-equipe">
-            {enAvant.map(({ p, points }) => (
-              <li key={p.id}>
-                <button type="button" className="pf-qui" onClick={() => ouvrirPersonne(p.id)} title="Ouvrir sa fiche">
-                  <Avatar person={p} />
-                  <span className="pf-nom">
-                    <b>{nomComplet(p)}</b>
-                    <span className="small soft">{libelleRole(data, p)}</span>
-                  </span>
-                </button>
-                <PointsForts points={points} court />
-              </li>
-            ))}
-          </ul>
-          <p className="tiny muted pf-note">Par ordre alphabétique. Les arrêts, les congés et les absences n’entrent jamais en compte.</p>
-        </section>
+      {titulaire ? (
+        <p className="eq-vers-stats" data-focus="points-forts">
+          Composition, compétences couvertes, points forts de chacun :{' '}
+          <button type="button" className="btn sm" onClick={() => aller('stats')}>
+            <ChartNoAxesColumn size={15} aria-hidden="true" /> Voir les statistiques de l’équipe
+          </button>
+        </p>
       ) : null}
       {ajout ? <DialoguePersonne onClose={() => setAjout(false)} /> : null}
       {formation ? <DialogueFormation onClose={() => setFormation(false)} /> : null}
