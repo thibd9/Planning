@@ -127,6 +127,9 @@ interface Ui {
   /** Onglet ouvert dans « Mes demandes » ; null = celui qui convient le mieux. */
   demandesOnglet: 'souhaits' | 'absences' | 'remplacements' | null;
   setDemandesOnglet: (o: 'souhaits' | 'absences' | 'remplacements' | null) => void;
+  /** Fenêtre « Signaler un retard ou une absence » demandée depuis ailleurs (Solvi, par exemple). */
+  signalement: 'retard' | 'absence' | 'choix' | null;
+  signaler: (quoi: Ui['signalement']) => void;
   /** Assistant d'aide ouvert. */
   assistant: boolean;
   ouvrirAssistant: (o: boolean) => void;
@@ -186,6 +189,8 @@ export const useUi = create<Ui>((set) => ({
   viserFil: (filVise) => set({ filVise }),
   demandesOnglet: null,
   setDemandesOnglet: (demandesOnglet) => set({ demandesOnglet }),
+  signalement: null,
+  signaler: (signalement) => set({ signalement }),
   assistant: false,
   ouvrirAssistant: (assistant) => set({ assistant }),
   assistantEnVisite: false,

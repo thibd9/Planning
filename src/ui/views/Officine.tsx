@@ -55,6 +55,7 @@ export function Officine(): JSX.Element {
         <div className="grow">
           <div className="eyebrow">Officine</div>
           <h1>{officine.nom || 'Mon officine'}</h1>
+          {officine.surface ? <p className="page-fait num">{officine.surface} m²</p> : null}
           <p>Horaires d'ouverture, effectif attendu et postes types. Ces réglages sont des choix d'organisation : ils se modifient librement.</p>
         </div>
       </div>
@@ -66,6 +67,32 @@ export function Officine(): JSX.Element {
         <label className="field grow" style={{ minWidth: 240 }}>
           Nom de la pharmacie
           <input id="officine-nom" value={officine.nom} onChange={(e) => majOfficine({ nom: e.target.value })} placeholder="Pharmacie du Marché" />
+        </label>
+        <label className="field surface" htmlFor="officine-surface">
+          <span>
+            Surface de l’officine <span className="oblig">facultatif</span>
+          </span>
+          <span className="champ-unite">
+            <input
+              id="officine-surface"
+              type="number"
+              inputMode="decimal"
+              min={1}
+              max={5000}
+              step={1}
+              className="num"
+              value={officine.surface ?? ''}
+              onChange={(e) => {
+                const v = Math.round(Number(e.target.value));
+                majOfficine({ surface: e.target.value.trim() && v > 0 ? Math.min(v, 5000) : undefined });
+              }}
+              placeholder="120"
+              aria-describedby="officine-surface-unite"
+            />
+            <span className="unite" id="officine-surface-unite">
+              m²
+            </span>
+          </span>
         </label>
       </div>
 

@@ -85,7 +85,7 @@ export function Documents({ personId, espace }: { personId: string; espace: Espa
         personId: a.personId,
         from: a.from,
         to: a.to,
-        nature: a.type === 'maladie' ? 'arret' : a.type,
+        nature: a.type === 'maladie' || a.type === 'accident' ? 'arret' : a.type,
         classe: classeAbsence(a.type),
         titre: libelleAbsence(a),
         detail: `${a.from === a.to ? `Le ${fmtDateCourt(a.from)}` : `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}`} · ${jours} jour${jours > 1 ? 's' : ''}`,

@@ -30,6 +30,7 @@ import {
   FlaskConical,
   GraduationCap,
   Handshake,
+  BriefcaseMedical,
   HeartPulse,
   Medal,
   Megaphone,
@@ -110,6 +111,7 @@ export const MOMENT_GARDE_ICONE: Record<MomentGarde, LucideIcon> = { nuit: Moon,
 export const ABSENCE_ICONE: Record<AbsenceType, LucideIcon> = {
   conge: TreePalm,
   maladie: HeartPulse,
+  accident: BriefcaseMedical,
   formation: Presentation,
   autre: CalendarOff,
 };

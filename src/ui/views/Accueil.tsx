@@ -90,7 +90,7 @@ function Groupe({
     }
   });
   return (
-    <fieldset className="bloc">
+    <fieldset className="bloc groupe">
       <legend>
         <span className={`ico ${ton}`} aria-hidden="true">
           {icone}
@@ -100,13 +100,13 @@ function Groupe({
           <span className="aide">{aide}</span>
         </span>
       </legend>
-      {lignes.length === 0 ? <p className="small soft">Aucune ligne pour l’instant.</p> : null}
+      {lignes.length === 0 ? <p className="small soft groupe-vide">Aucune ligne pour l’instant.</p> : null}
       {lignes.map((l, i) => {
         const qui = `${singulier} ${i + 1}`;
         const idL = `${id}-${l.cle}`;
         const err = erreurs.find((e) => e.champ.startsWith(idL));
         return (
-          <div key={l.cle} className="col" style={{ gap: 6 }}>
+          <div key={l.cle} className="col groupe-ligne" style={{ gap: 6 }}>
             <div className={`ligne${avecFonction ? ' fn' : ''}`}>
               <label className="field" htmlFor={`${idL}-prenom`}>
                 <span className={i === 0 ? undefined : 'sr'}>Prénom{i === 0 ? '' : `, ${qui}`}</span>
@@ -144,7 +144,7 @@ function Groupe({
           </div>
         );
       })}
-      <div>
+      <div className="groupe-pied">
         <button
           type="button"
           className="btn sm"
@@ -175,6 +175,7 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
   const { setTour, connecter } = useUi();
   const [etape, setEtape] = useState(0);
   const [nom, setNom] = useState('');
+  const [surface, setSurface] = useState('');
   const [semaine, setSemaine] = useState<Interval>({ start: 8 * 60 + 30, end: 19 * 60 + 30 });
   const [coupure, setCoupure] = useState(false);
   const [midi, setMidi] = useState<Interval>({ start: 12 * 60 + 30, end: 14 * 60 });
@@ -296,7 +297,8 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
       };
     });
     const horaires = [0, 1, 2, 3, 4].map(() => horaireSemaine.map((i) => ({ ...i }))).concat([samediOuvert ? [{ ...samedi }] : []], [[]]);
-    creerOfficine(nom.trim(), horaires, personnes, !!ajout || !!garder, !ajout);
+    const metres = Math.round(Number(surface));
+    creerOfficine(nom.trim(), horaires, personnes, !!ajout || !!garder, !ajout, metres > 0 ? Math.min(metres, 5000) : undefined);
     // Celui qui crée la pharmacie en est le titulaire principal : il est connecté d'emblée à son espace.
     connecter(personnes[0].identifiant as string, 'tableau');
     if (!ajout) setTour(0);
@@ -427,6 +429,18 @@ export function Accueil({ ajout, onAnnuler, garder }: { ajout?: Person; onAnnule
                       <CircleAlert size={15} aria-hidden="true" /> {errDe('officine-nom')?.message}
                     </span>
                   ) : null}
+                </label>
+                <label className="field surface" htmlFor="officine-surface">
+                  <span>
+                    Surface de l’officine <span className="oblig">(facultatif)</span>
+                  </span>
+                  <span className="champ-unite">
+                    <input id="officine-surface" type="number" inputMode="decimal" min={1} max={5000} step={1} className="num" value={surface} onChange={(e) => setSurface(e.target.value)} placeholder="120" aria-describedby="officine-surface-unite officine-surface-aide" />
+                    <span className="unite" id="officine-surface-unite">
+                      m²
+                    </span>
+                  </span>
+                  <span className="aide" id="officine-surface-aide">En mètres carrés. Vous pourrez la corriger dans « Réglages ».</span>
                 </label>
               </fieldset>
 

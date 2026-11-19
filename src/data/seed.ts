@@ -12,6 +12,7 @@ const SEMAINE = [0, 1, 2, 3, 4];
 
 export const OFFICINE_DEMO: Officine = {
   nom: 'Grande Pharmacie de la Pinède',
+  surface: 180,
   responsableId: 'p_helene',
   horaires: [
     [{ start: H(8, 30), end: H(19, 30) }],
@@ -172,7 +173,7 @@ export function vierge(): AppData {
  * avec un arrêt à traiter, la semaine suivante à construire.
  */
 /** À augmenter quand l'exemple change (noms, équipe) : les exemples enregistrés sur l'appareil sont alors régénérés. */
-export const DEMO_VERSION = 6;
+export const DEMO_VERSION = 7;
 
 export function seed(today: ISODate, avance = 0): AppData {
   const lundi = mondayOf(today);

@@ -847,7 +847,7 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'attendre', que: '.dialog' },
       // Un poste a été posé à la main à l'étape précédente : la fenêtre demande d'abord quoi en faire.
       { faire: 'cliquer', sur: parTexte('.dialog label.check', 'Conserver les postes déjà posés'), facultatif: true, dit: 'Cochez « Conserver les postes déjà posés »', sert: 'Le poste posé à la main est gardé ; le calcul complète autour.' },
-      { faire: 'cliquer', sur: parTexte('.dialog .btn', 'Calculer trois propositions'), facultatif: true, dit: 'Cliquez sur « Calculer trois propositions »', sert: 'Les règles impératives passent toujours avant le reste.' },
+      { faire: 'cliquer', sur: parTexte('.dialog .btn', 'Calculer les propositions'), facultatif: true, dit: 'Cliquez sur « Calculer les propositions »', sert: 'Les règles impératives passent toujours avant le reste.' },
       { faire: 'attendre', que: '.dialog .variant' },
       // Le temps de lire les trois propositions côte à côte.
       { faire: 'pause', ms: 3600, dit: 'Trois plannings à comparer : équité, préférences, contrats' },

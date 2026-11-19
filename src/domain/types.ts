@@ -111,7 +111,7 @@ export interface Mission {
   reportable: boolean;
 }
 
-export type AbsenceType = 'conge' | 'maladie' | 'formation' | 'autre';
+export type AbsenceType = 'conge' | 'maladie' | 'accident' | 'formation' | 'autre';
 export type AbsenceStatut = 'demandee' | 'approuvee' | 'refusee';
 
 /** La raison d'une demande d'absence ou d'horaires : une catégorie, visible des seuls titulaires. */
@@ -147,6 +147,27 @@ export interface Absence {
   /** La raison donnée par la personne : une catégorie, et une précision si elle le souhaite. Visible des seuls titulaires. */
   motif?: MotifDemande;
   precision?: string;
+  /** Accident du travail ou de trajet : les faits utiles à la déclaration, et la date où elle a été faite. */
+  accident?: DetailAccident;
+}
+
+/** Où l'accident s'est produit : à la pharmacie, pendant une mission à l'extérieur, ou sur le trajet. */
+export type LieuAccident = 'travail' | 'mission' | 'trajet';
+export const LIEU_ACCIDENT_LABEL: Record<LieuAccident, string> = { travail: 'À la pharmacie', mission: 'En mission à l’extérieur', trajet: 'Sur le trajet' };
+export interface DetailAccident {
+  /** Le jour de l'accident. */
+  jour: ISODate;
+  /** L'heure, en minutes depuis minuit, quand elle est connue. */
+  heure?: number;
+  ou: LieuAccident;
+  /** Ce qui s'est passé, en quelques mots : repris tel quel dans la déclaration. */
+  circonstances?: string;
+  /** Un témoin, ou la première personne prévenue. */
+  temoin?: string;
+  /** Le jour où l'employeur en a eu connaissance : le délai de déclaration part de là. */
+  connuLe: ISODate;
+  /** Le jour où le titulaire a noté la déclaration comme faite. */
+  declareLe?: ISODate;
 }
 
 /**
@@ -269,6 +290,8 @@ export interface ReglagePublication {
 
 export interface Officine {
   nom: string;
+  /** Surface de l'officine, en mètres carrés. Facultative. */
+  surface?: number;
   /**
    * Afficher les coûts estimés. Désactivé par défaut : Solvéa ne connaît pas les salaires. Activé, il montre des
    * coûts calculés sur les seuls taux horaires que le titulaire a saisis dans les fiches.
@@ -723,14 +746,15 @@ export const nomGarde = (g: Pick<Garde, 'start' | 'end' | 'type'>): string => `$
 export const libelleGarde = (g: Pick<Garde, 'start' | 'end' | 'type'>): string => `${nomGarde(g)} · ${GARDE_COURT[g.type]}`;
 
 /** Libellé d'une absence, avec l'intitulé quand c'est une formation. */
-export const libelleAbsence = (a: Pick<Absence, 'type' | 'libelle' | 'cadre' | 'lieu'>): string =>
-  a.type === 'formation' && a.libelle ? `${a.cadre ? CADRE_FORMATION_LABEL[a.cadre] : 'Formation'} · ${a.libelle}${a.lieu ? ` (${a.lieu})` : ''}` : ABSENCE_LABEL[a.type];
+export const libelleAbsence = (a: Pick<Absence, 'type' | 'libelle' | 'cadre' | 'lieu' | 'accident'>): string =>
+  a.type === 'formation' && a.libelle ? `${a.cadre ? CADRE_FORMATION_LABEL[a.cadre] : 'Formation'} · ${a.libelle}${a.lieu ? ` (${a.lieu})` : ''}` : a.type === 'accident' && a.accident?.ou === 'trajet' ? 'Accident de trajet' : ABSENCE_LABEL[a.type];
 /** Classe de couleur d'une absence dans les plannings. */
-export const classeAbsence = (type: AbsenceType): string => ({ conge: 'conge', maladie: 'arret', formation: 'formation', autre: 'absence' })[type];
+export const classeAbsence = (type: AbsenceType): string => ({ conge: 'conge', maladie: 'arret', accident: 'arret', formation: 'formation', autre: 'absence' })[type];
 
 export const ABSENCE_LABEL: Record<AbsenceType, string> = {
   conge: 'Congé',
   maladie: 'Arrêt',
+  accident: 'Accident du travail',
   formation: 'Formation',
   autre: 'Absence',
 };

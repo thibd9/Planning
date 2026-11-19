@@ -34,7 +34,7 @@ export function Compteurs({ suivi }: { suivi: Suivi }): JSX.Element {
     { label: 'Départs anticipés', valeur: String(suivi.departs) },
     { label: 'Absences non prévues', valeur: String(suivi.absencesImprevues), alerte: suivi.absencesImprevues >= 2 },
     { label: 'Congés', valeur: `${suivi.conges} j` },
-    { label: 'Arrêts', valeur: `${suivi.arrets} j` },
+    { label: 'Arrêts', valeur: `${suivi.arrets} j`, detail: suivi.accidents ? `dont ${suivi.accidents} accident${suivi.accidents > 1 ? 's' : ''} du travail` : undefined },
     { label: 'Formations', valeur: `${suivi.formations} j` },
     { label: 'Remplacements assurés', valeur: String(suivi.remplacementsAssures) },
   ];

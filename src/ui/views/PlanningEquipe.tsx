@@ -1,6 +1,6 @@
 import { CalendarRange, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
 import { useMemo } from 'react';
-import { JOURS, addDays, fmtHorodatage, fmtSemaine, isoWeek, weekDates, weekday } from '../../domain/time';
+import { JOURS, addDays, fmtHorodatage, fmtSemaine, isoWeek, weekDates, weekday, JOURS_COURT } from '../../domain/time';
 import { nomCourt } from '../../domain/types';
 import { imprimer } from '../../env';
 import { ouverture } from '../../engine/core';
@@ -78,7 +78,11 @@ export function PlanningEquipe({ personId }: { personId: string }): JSX.Element 
                   <th scope="col">Équipe</th>
                   {dates.map((d) => (
                     <th key={d} scope="col" aria-current={d === today ? 'date' : undefined}>
-                      {JOURS[weekday(d)]} {Number(d.slice(8))}
+                      <span className="d-long">{JOURS[weekday(d)]}</span>
+                      <span className="d-court" aria-hidden="true">
+                        {JOURS_COURT[weekday(d)]}
+                      </span>{' '}
+                      <span className="d-n num">{Number(d.slice(8))}</span>
                       {d === today ? <span className="sr"> (aujourd’hui)</span> : null}
                     </th>
                   ))}
@@ -106,15 +110,23 @@ export function PlanningEquipe({ personId }: { personId: string }): JSX.Element 
                       const absent = data.absences.some((a) => a.personId === p.id && a.statut === 'approuvee' && a.from <= d && d <= a.to);
                       return (
                         <td key={d}>
-                          {duJour.length ? (
-                            <span className="col" style={{ gap: 4 }}>
-                              {duJour.map((s) => (
-                                <Tuile key={s.id} data={data} s={s} person={p} echelle={echelle} />
-                              ))}
-                            </span>
-                          ) : (
-                            <span className="muted small">{absent ? 'Absent' : 'Repos'}</span>
-                          )}
+                          {/* La case mesure sa propre largeur : la tuile se resserre par paliers, comme dans « Construire ». */}
+                          <div className="lecture-case">
+                            {duJour.length ? (
+                              <span className="col" style={{ gap: 4 }}>
+                                {duJour.map((s) => (
+                                  <Tuile key={s.id} data={data} s={s} person={p} echelle={echelle} />
+                                ))}
+                              </span>
+                            ) : (
+                              <span className="muted small lecture-vide">
+                                <span className="lv-long">{absent ? 'Absent' : 'Repos'}</span>
+                                <span className="lv-court" aria-hidden="true">
+                                  {absent ? 'Abs.' : '·'}
+                                </span>
+                              </span>
+                            )}
+                          </div>
                         </td>
                       );
                     })}

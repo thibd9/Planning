@@ -9,6 +9,7 @@ import { diagnosticPrealable } from './diagnose';
 import { equite } from './equity';
 import { candidatsGarde, delaiGarde, parseCalendrierGardes, poidsGarde, repartirGardes, reposApresGarde, segmentsGarde, serieGardes, variablesGarde } from './gardes';
 import { generer, genererVariantes } from './generate';
+import { semaineHabituelle } from './habitudes';
 import { lireBesoin } from './nlp';
 import { ficheNavetteCSV } from './payroll';
 import { delaiRemplacement, evaluerRemplacement, peutDemanderRemplacement, peutRemplacer } from './remplacement';
@@ -155,6 +156,27 @@ describe('génération', () => {
     const samedi = variantes[0].shifts.filter((s) => weekday(s.date) === 5);
     expect(samedi.length).toBeGreaterThan(0);
     expect(samedi.every((s) => !!s.explication)).toBe(true);
+  });
+  it('sans préférences (le titulaire prépare seul), propose les habitudes à la place', () => {
+    const seul = { ...data, officine: { ...data.officine, modele: 'classique' as const } };
+    const variantes = genererVariantes(seul, SUIVANT, false);
+    // Aucune proposition « Préférences d'abord » : il n'y a pas de préférences à suivre.
+    expect(variantes.map((v) => v.variante)).not.toContain('souhaits');
+    expect(variantes.map((v) => v.variante)).toContain('equite');
+    expect(variantes.map((v) => v.variante)).toContain('cout');
+    const habituelle = semaineHabituelle(seul, SUIVANT);
+    const habitudes = variantes.find((v) => v.variante === 'habitudes');
+    if (habituelle.length) {
+      // Chaque poste habituel est repris tel quel dans la proposition.
+      expect(habitudes).toBeDefined();
+      expect(habituelle.every((h) => habitudes!.shifts.some((s) => s.personId === h.personId && s.date === h.date && s.start === h.start && s.end === h.end))).toBe(true);
+    } else {
+      // Sans assez de semaines publiées, il reste deux propositions.
+      expect(variantes).toHaveLength(2);
+    }
+    // Une pharmacie toute neuve, sans historique : deux propositions, jamais d'habitudes inventées.
+    const neuve = { ...seul, semaines: {} };
+    expect(genererVariantes(neuve, SUIVANT, false).map((v) => v.variante)).toEqual(['equite', 'cout']);
   });
   it('conserve les postes déjà posés quand on le demande', () => {
     const fixe = poste('p_jules', SUIVANT, 510, 780);
@@ -506,7 +528,7 @@ describe('délai de prévenance et suivi de présence', () => {
     const s = suiviDe(d, 'p_jules', TODAY);
     expect(s.retards).toBe(2);
     expect(s.formations).toBe(2);
-    expect(Object.keys(s).sort()).toEqual(['absencesImprevues', 'arrets', 'conges', 'departs', 'formations', 'minutesRetard', 'personId', 'remplacementsAssures', 'retards']);
+    expect(Object.keys(s).sort()).toEqual(['absencesImprevues', 'accidents', 'arrets', 'conges', 'departs', 'formations', 'minutesRetard', 'personId', 'remplacementsAssures', 'retards']);
   });
   it('publie deux semaines d’avance dans l’environnement de test, sans changer le jeu des tests', () => {
     const test = seed(TODAY, 2);

@@ -200,7 +200,7 @@ export function joursFeries(year: number): Map<ISODate, string> {
   if (cached) return cached;
   const p = paques(year);
   const map = new Map<ISODate, string>([
-    [`${year}-01-01`, "Jour de l'an"],
+    [`${year}-01-01`, 'Jour de l’an'],
     [addDays(p, 1), 'Lundi de Pâques'],
     [`${year}-05-01`, 'Fête du Travail'],
     [`${year}-05-08`, 'Victoire 1945'],

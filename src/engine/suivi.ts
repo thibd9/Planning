@@ -11,6 +11,8 @@ export interface Suivi {
   /** Jours d'absence approuvée, par nature, sur la période. */
   conges: number;
   arrets: number;
+  /** Nombre d'accidents du travail ou de trajet sur la période. */
+  accidents: number;
   formations: number;
   remplacementsAssures: number;
 }
@@ -22,7 +24,7 @@ export interface Suivi {
 export function suiviDe(data: Pick<AppData, 'ecarts' | 'absences' | 'remplacements'>, personId: string, today: ISODate, jours = 365): Suivi {
   const debut = addDays(today, -jours);
   const ecarts = (data.ecarts ?? []).filter((e) => e.personId === personId && e.date >= debut && e.date <= today);
-  const compter = (type: 'conge' | 'maladie' | 'formation'): number =>
+  const compter = (type: 'conge' | 'maladie' | 'accident' | 'formation'): number =>
     data.absences
       .filter((a) => a.personId === personId && a.statut === 'approuvee' && a.type === type && a.to >= debut && a.from <= today)
       .reduce((t, a) => t + (dayIndex(a.to < today ? a.to : today) - dayIndex(a.from > debut ? a.from : debut) + 1), 0);
@@ -34,7 +36,8 @@ export function suiviDe(data: Pick<AppData, 'ecarts' | 'absences' | 'remplacemen
     departs: ecarts.filter((e) => e.type === 'depart').length,
     absencesImprevues: ecarts.filter((e) => e.type === 'absence').length,
     conges: compter('conge'),
-    arrets: compter('maladie'),
+    arrets: compter('maladie') + compter('accident'),
+    accidents: data.absences.filter((a) => a.personId === personId && a.type === 'accident' && a.statut !== 'refusee' && a.to >= debut && a.from <= today).length,
     formations: compter('formation'),
     remplacementsAssures: data.remplacements.filter((r) => r.statut === 'acceptee' && r.remplacantId === personId && r.date >= debut).length,
   };

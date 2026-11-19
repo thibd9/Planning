@@ -122,7 +122,6 @@ export function Compte({ personId }: { personId: string }): JSX.Element {
                     <input id={`theme-${t.cle}`} type="radio" name="theme" checked={prefs.theme === t.cle} onChange={() => setPreferences(cle, { theme: t.cle })} />
                     <span className="pastille" style={{ background: `linear-gradient(135deg, ${t.a}, ${t.b})` }} aria-hidden="true" />
                     {t.nom}
-                    {t.cle === couleurProfil ? <span className="tiny soft theme-profil">votre profil</span> : null}
                     <Check size={16} className="coche" aria-hidden="true" />
                   </label>
                 ))}

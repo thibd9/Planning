@@ -64,7 +64,7 @@ export function indisponibilites(data: AppData, p: Person, date: ISODate): Indis
   if (absence) {
     out.push({
       plages: JOUR_ENTIER,
-      raison: `${ABSENCE_LABEL[absence.type].toLowerCase()} approuvé${absence.type === 'conge' || absence.type === 'maladie' ? '' : 'e'} jusqu'au ${fmtJourMois(absence.to)}`,
+      raison: `${ABSENCE_LABEL[absence.type].toLowerCase()} approuvé${absence.type === 'conge' || absence.type === 'maladie' || absence.type === 'accident' ? '' : 'e'} jusqu'au ${fmtJourMois(absence.to)}`,
       negociable: false,
     });
   }

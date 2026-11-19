@@ -102,7 +102,8 @@ const RAPIDES: Record<Espace, { vue: Vue; court: string }[]> = {
 };
 
 const NAV: Record<Espace, Lien[]> = {
-  responsable: GESTION,
+  // Un titulaire a lui aussi un planning : « Mon planning » suit le tableau de bord.
+  responsable: [GESTION[0], { ...MOI, groupe: GESTION[0].groupe, question: 'Mes horaires et mes rendez-vous' }, ...GESTION.slice(1)],
   pharmacien: [ACCUEIL, ...PERSO, MESGARDES, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
   equipe: [ACCUEIL, ...PERSO, PLANNING, { ...MESSAGES, groupe: 'L’équipe' }, AIDE],
 };
@@ -135,6 +136,11 @@ export function App(): JSX.Element {
   const [volet, setVolet] = useState(false);
   /** Signaler un retard ou une absence : à portée depuis tous les écrans. */
   const [signaler, setSignaler] = useState(false);
+  // Changer d'écran ramène en haut : on n'arrive pas au milieu d'une page parce que la précédente était déroulée.
+  useEffect(() => {
+    document.getElementById('contenu')?.scrollTo({ top: 0 });
+  }, [vue]);
+  const signalement = useUi((s) => s.signalement);
   const moi = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''));
   const espace = espaceDe(data, moi);
   // Sans collecte des préférences (modèle classique), l'entrée disparaît du menu.
@@ -390,7 +396,16 @@ export function App(): JSX.Element {
         </button>
       </nav>
 
-      {signaler && moi ? <DialogueSignaler moi={moi} onClose={() => setSignaler(false)} /> : null}
+      {(signaler || signalement) && moi ? (
+        <DialogueSignaler
+          moi={moi}
+          quoi={signalement === 'retard' || signalement === 'absence' ? signalement : undefined}
+          onClose={() => {
+            setSignaler(false);
+            useUi.getState().signaler(null);
+          }}
+        />
+      ) : null}
       <div className="main">
         <header className="topbar no-print" aria-label="Barre d’outils">
           <div className="topbar-in">

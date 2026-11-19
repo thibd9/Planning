@@ -1,4 +1,4 @@
-import { AlertTriangle, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users, X, BookOpenCheck, Eye, Sun, Sunrise, Sunset } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, CircleX, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users,  BookOpenCheck, Eye, Sun, Sunrise, Sunset, CalendarClock, Stethoscope } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   JOURS,
@@ -40,7 +40,10 @@ import { CAS_LABEL, diagnosticPrealable, diagnosticResultat } from '../../engine
 import { equite, fatigue, periodeAvant } from '../../engine/equity';
 import type { GenResult } from '../../engine/generate';
 import { VARIANTE_LABEL, genererVariantes } from '../../engine/generate';
+import { semaineHabituelle } from '../../engine/habitudes';
+import { estCollaboratif } from '../../engine/souhaits';
 import { coutSemaine, decompteSemaine } from '../../engine/payroll';
+import { autreDuRdv, rdvFixes } from '../../engine/rdv';
 import { controlePublication } from '../../engine/publish';
 import type { Issue } from '../../engine/validate';
 import { validateWeek } from '../../engine/validate';
@@ -343,7 +346,7 @@ export function Construire(): JSX.Element {
                     <div key={g.titre} role="rowgroup" style={{ display: 'contents' }}>
                       <div className="pg-group" role="row">
                         <span role="cell" style={{ display: 'contents' }}>
-                          <span className={`chip-i ${g.couleur}`} aria-hidden="true" style={{ width: 22, height: 22, borderRadius: 7 }}>
+                          <span className={`chip-i ${g.couleur}`} aria-hidden="true" style={{ width: 22, height: 22, borderRadius: 4 }}>
                             {g.icone}
                           </span>{' '}
                           {g.titre}
@@ -433,6 +436,26 @@ export function Construire(): JSX.Element {
                                         {fmtHHMM(g.start)}→{fmtHHMM(g.end)}
                                         <span className="ts">{g.type === 'astreinte' ? 'Astreinte' : 'Garde'}</span>
                                       </span>
+                                    </span>
+                                  ))}
+                                  {/* Tout ce qui occupe la personne ce jour-là se lit sur le planning : rendez-vous fixés, activités à rendez-vous. */}
+                                  {rdvFixes(data, p.id, date).map((r) => {
+                                    const autre = data.personnes.find((x) => x.id === autreDuRdv(r, p.id));
+                                    return (
+                                      <span key={r.id} className="pg-rdv" title={`Rendez-vous avec ${autre ? nomCourt(autre) : 'un collègue'} : ${r.sujet}, ${fmtHeure(r.start)} – ${fmtHeure(r.end)}`}>
+                                        <CalendarClock size={12} aria-hidden="true" />
+                                        <span className="pg-rdv-h num">{fmtHeure(r.start)}</span>
+                                        <span className="sr">
+                                          , rendez-vous avec {autre ? nomCourt(autre) : 'un collègue'} : {r.sujet}
+                                        </span>
+                                      </span>
+                                    );
+                                  })}
+                                  {missions.map((m) => (
+                                    <span key={m.id} className="pg-rdv mission" title={`${MISSION_LABEL[m.type]}, ${fmtHeure(m.start)} – ${fmtHeure(m.end)}`}>
+                                      <Stethoscope size={12} aria-hidden="true" />
+                                      <span className="pg-rdv-h num">{fmtHeure(m.start)}</span>
+                                      <span className="sr">, {MISSION_LABEL[m.type]}</span>
                                     </span>
                                   ))}
                                   {!duJour.length && !absence && !gardes.length && ouverts[i] && !passee ? (
@@ -622,7 +645,7 @@ function Objectif({ data, date, ouvert, vide, flag }: { data: AppData; date: ISO
         : 'Pharmacien présent sur toute l’ouverture, effectif atteint.';
   return (
     <div className={`pg-o${flag ? ' flag' : ''}`} role="cell" data-aide={aide} data-aide-ton={etat === 'bad' || etat === 'warn' ? etat : undefined} data-aide-pos={weekday(date) >= 5 ? 'fin' : undefined} tabIndex={etat === 'bad' || etat === 'warn' ? 0 : undefined}>
-      <span className={`mark ${etat}`}>{etat === 'ok' ? <Check size={15} /> : etat === 'bad' ? <X size={14} /> : etat === 'warn' ? <AlertTriangle size={13} /> : <Minus size={14} />}</span>
+      <span className={`mark ${etat}`}>{etat === 'ok' ? <CircleCheck size={22} /> : etat === 'bad' ? <CircleX size={22} /> : etat === 'warn' ? <AlertTriangle size={22} /> : <Minus size={14} />}</span>
       {/* Le constat est écrit, avec l'heure : pas besoin de survoler pour comprendre. */}
       <span className={`pg-o-mot ${etat}`}>
         <b>{titre}</b>
@@ -905,6 +928,28 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
         <div className="choix">
           {(Object.keys(ACTIVITE_LABEL) as Activite[]).map((a) => {
             const I = ACTIVITE_ICONE[a];
+            // Une formation ou un inventaire ne se pose pas comme une tâche : ils ont leur fenêtre (intitulé, lieu,
+            // participants). Le bouton y emmène ; un poste qui en vient déjà garde simplement sa tâche.
+            if ((a === 'formation' || a === 'inventaire') && shift?.activite !== a)
+              return (
+                <button
+                  key={a}
+                  type="button"
+                  className="choix-vers"
+                  id={`tache-vers-${a}`}
+                  title={a === 'formation' ? 'Ouvre la fenêtre « Planifier une formation »' : 'Ouvre la fenêtre « Planifier un inventaire »'}
+                  onClick={() => {
+                    onClose();
+                    useUi.getState().agir('equipe', a);
+                  }}
+                >
+                  <span className={`chip-i ${ACTIVITE_COULEUR[a]}`} aria-hidden="true">
+                    <I size={15} />
+                  </span>
+                  <span className="grow">{a === 'formation' ? 'Planifier une formation' : 'Planifier un inventaire'}</span>
+                  <ArrowRight size={15} aria-hidden="true" />
+                </button>
+              );
             return (
               <label key={a} htmlFor={`tache-${a}`} title={ACTIVITE_LABEL[a]}>
                 <input id={`tache-${a}`} type="radio" name="tache" checked={activite === a} onChange={() => setActivite(a)} />
@@ -1002,13 +1047,21 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
     const cible = cle === 'souhaits' ? Math.max(...v) : Math.min(...v);
     return v[i] === cible && new Set(v).size > 1;
   };
+  // Sans préférences (le titulaire prépare seul), on compare aux habitudes : la semaine telle qu'elle est publiée d'ordinaire.
+  const collaboratif = estCollaboratif(data.officine);
+  const habituelle = useMemo(() => (collaboratif ? [] : semaineHabituelle(data, semaine)), [collaboratif, data, semaine]);
+  const fidelite = (i: number): number => {
+    const postes = resultats?.[i]?.shifts ?? [];
+    if (!postes.length) return 0;
+    return Math.round((postes.filter((s) => habituelle.some((h) => h.personId === s.personId && h.date === s.date && h.start === s.start && h.end === s.end)).length / postes.length) * 100);
+  };
   const retenu = resultats?.[choix];
   const personnes = data.personnes.filter((p) => !p.externe);
 
   return (
     <Dialog
       size="wide"
-      title="Trois propositions pour la semaine"
+      title={`${resultats && resultats.length === 2 ? 'Deux' : 'Trois'} propositions pour la semaine`}
       subtitle={`Semaine ${isoWeek(semaine)} · ${fmtSemaine(semaine)}. Le calcul propose, vous décidez : rien n'est publié sans votre validation.`}
       onClose={onClose}
       footer={
@@ -1061,7 +1114,7 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
           </label>
           <div>
             <button type="button" className="btn magic" onClick={() => lancer(graine)} data-autofocus>
-              <Sparkles size={15} /> Calculer trois propositions
+              <Sparkles size={15} /> Calculer les propositions
             </button>
           </div>
         </div>
@@ -1101,8 +1154,17 @@ function DialogueGeneration({ semaine, onClose }: { semaine: ISODate; onClose: (
                     ))}
                   </span>
                   <span className="kpi">
-                    <span>Préférences suivies</span>
-                    <b className={meilleur('souhaits', i) ? 'best' : ''}>{k.souhaits === null ? '-' : `${Math.round(k.souhaits * 100)} %`}</b>
+                    {collaboratif ? (
+                      <>
+                        <span>Préférences suivies</span>
+                        <b className={meilleur('souhaits', i) ? 'best' : ''}>{k.souhaits === null ? '-' : `${Math.round(k.souhaits * 100)} %`}</b>
+                      </>
+                    ) : habituelle.length ? (
+                      <>
+                        <span title="Part des postes identiques à votre semaine habituelle, d’après vos dernières semaines publiées">Fidèle à vos habitudes</span>
+                        <b className={fidelite(i) === Math.max(...(resultats ?? []).map((_, n) => fidelite(n))) && new Set((resultats ?? []).map((_, n) => fidelite(n))).size > 1 ? 'best' : ''}>{fidelite(i)} %</b>
+                      </>
+                    ) : null}
                     <span title="Écart type entre samedis réels et attendus sur 8 semaines : plus il est bas, plus la répartition est équilibrée">Écart d'équité (samedis)</span>
                     <b className={meilleur('ecartSamedis', i) ? 'best' : ''}>{fmtDecimal(k.ecartSamedis, 2)}</b>
                     <span>Heures au-delà des contrats</span>

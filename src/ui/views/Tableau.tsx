@@ -1,11 +1,14 @@
-import { AlarmClock, ArrowLeftRight, ArrowRight, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus, UsersRound, BellRing, Sparkles } from 'lucide-react';
+import { AlarmClock, ArrowLeftRight, ArrowRight, BriefcaseMedical, Building2, CalendarRange, Check, Handshake, Hourglass, MoonStar, ShieldCheck, UserMinus, UsersRound, BellRing, Sparkles } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import { libelleRole, memeIdentifiant } from '../../domain/acces';
 import { MOIS, addDays, fmtDateCourt, fmtDateLong, fmtHeure, fmtSemaine, mondayOf, todayISO, totalDuree, weekDates } from '../../domain/time';
 import type { AppData } from '../../domain/types';
-import { nomCourt, MOTIF_RETARD_LABEL } from '../../domain/types';
+import { libelleAbsence, libelleGarde, nomCourt, MOTIF_RETARD_LABEL } from '../../domain/types';
+import { declarationsAFaire, delaiDeclaration } from '../../engine/accident';
 import { ouverture, shiftsSemaine, trousPharmacien } from '../../engine/core';
 import { arriveePrevue, retardsDuJour } from '../../engine/retard';
+import { rdvAVenir } from '../../engine/rdv';
+import { ProchainsRendezVous } from '../components/RendezVous';
 import { etatPublication, reglagePublication } from '../../engine/echeance';
 import { decisions } from '../../engine/decisions';
 import { aRegulariser, semaineLibre } from '../../engine/heures';
@@ -28,6 +31,8 @@ function couverture(data: AppData, monday: string): number | null {
   }
   return total ? Math.round(((total - sans) / total) * 100) : null;
 }
+
+const capitale = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
 /** Tableau de bord du responsable : l'état de l'officine en un écran. */
 export function Tableau({ personId }: { personId: string }): JSX.Element {
@@ -65,10 +70,6 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
   };
   const enPoste = [...new Map(duJour.map((s) => [s.personId, s])).values()];
   const ouvertAuj = ouverture(data.officine, today).length > 0;
-  const presenceAuj = (() => {
-    const total = totalDuree(ouverture(data.officine, today));
-    return total ? Math.round(((total - totalDuree(trousPharmacien(data, today))) / total) * 100) : 0;
-  })();
 
   // Le cycle d'une semaine : préférences, brouillon, contrôles, publication. On montre la première semaine à traiter.
   const cycle = useMemo(() => {
@@ -96,13 +97,37 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
     return { semaine: cible, etapes, bouton, action: voir };
   }, [data, today, aller, setSemaine]);
 
+  // Les accidents du travail signalés dont la déclaration reste à faire : un délai légal court, donc un rappel bien visible.
+  const aDeclarer = useMemo(() => declarationsAFaire(data, today), [data, today]);
+  const noterDeclaration = useStore((s) => s.noterDeclarationAccident);
   // Ce qui passe avant tout le reste : une seule chose, dite en clair, avec le bouton qui y mène.
   const priorite = ((): { ton: 'urgent' | 'attention' | 'calme' | 'ok'; icone: JSX.Element; titre: string; detail: string; bouton?: string; action?: () => void } => {
     const pluriel = (n: number, un: string, plusieurs: string): string => `${n} ${n > 1 ? plusieurs : un}`;
+    // Un délai légal qui tombe aujourd'hui, ou déjà dépassé, passe avant tout le reste.
+    if (aDeclarer.length && aDeclarer[0].jours <= 0) {
+      const x = aDeclarer[0];
+      const qui = data.personnes.find((y) => y.id === x.absence.personId);
+      return {
+        ton: x.jours <= 0 ? 'urgent' : 'attention',
+        icone: <BriefcaseMedical size={22} />,
+        titre: `${libelleAbsence(x.absence)} à déclarer`,
+        detail: `Celui de ${qui ? nomCourt(qui) : 'la personne'} : à la caisse d’assurance maladie au plus tard le ${fmtDateCourt(x.echeance)}, ${delaiDeclaration(x.jours)}. Notez « C’est fait » une fois la déclaration envoyée.`,
+      };
+    }
     if (d.trous.length) {
       const t = [...d.trous].sort((a, b) => a.shift.date.localeCompare(b.shift.date) || a.shift.start - b.shift.start)[0];
       const qui = data.personnes.find((x) => x.id === t.shift.personId);
       return { ton: 'urgent', icone: <UserMinus size={22} />, titre: `${pluriel(d.trous.length, 'poste', 'postes')} sans personne`, detail: `Le plus proche : celui ${qui ? `de ${nomCourt(qui)}` : 'd’un absent'}, ${fmtDateCourt(t.shift.date)} de ${fmtHeure(t.shift.start)} à ${fmtHeure(t.shift.end)}.`, bouton: 'Couvrir l’absence', action: () => ouvrir('absences') };
+    }
+    if (aDeclarer.length) {
+      const x = aDeclarer[0];
+      const qui = data.personnes.find((y) => y.id === x.absence.personId);
+      return {
+        ton: x.jours <= 0 ? 'urgent' : 'attention',
+        icone: <BriefcaseMedical size={22} />,
+        titre: `${libelleAbsence(x.absence)} à déclarer`,
+        detail: `Celui de ${qui ? nomCourt(qui) : 'la personne'} : à la caisse d’assurance maladie au plus tard le ${fmtDateCourt(x.echeance)}, ${delaiDeclaration(x.jours)}. Notez « C’est fait » une fois la déclaration envoyée.`,
+      };
     }
     if (d.remplacements.length) {
       const r = [...d.remplacements].sort((a, b) => a.date.localeCompare(b.date))[0];
@@ -118,6 +143,22 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
     if (cycle.etapes.some((e) => e.etat !== 'fait')) return { ton: 'calme', icone: <CalendarRange size={22} />, titre: `Préparer la semaine du ${fmtSemaine(cycle.semaine)}`, detail: 'Rien d’urgent : c’est le bon moment pour avancer le prochain planning.', bouton: cycle.bouton, action: cycle.action };
     return { ton: 'ok', icone: <Check size={22} />, titre: 'Tout est à jour', detail: 'Absences couvertes, demandes arbitrées, plannings publiés.' };
   })();
+  // Mon agenda : mon prochain poste (jamais un poste déjà terminé) et mes rendez-vous à venir.
+  const heureIci = today === todayISO() ? new Date().getHours() * 60 + new Date().getMinutes() : 0;
+  const monPoste = moi
+    ? data.shifts
+        .filter((x) => x.personId === moi.id && data.semaines[mondayOf(x.date)]?.statut === 'publie' && (x.date > today || (x.date === today && x.end > heureIci)))
+        .sort((x, y) => x.date.localeCompare(y.date) || x.start - y.start)[0]
+    : undefined;
+  const mesRdv = moi ? rdvAVenir(data, moi.id, today) : [];
+  // Les jours qui suivent : mes postes publiés, et ma prochaine garde, pour que l'agenda se lise d'un coup d'œil.
+  const mesSuivants = moi
+    ? data.shifts
+        .filter((x) => x.personId === moi.id && x.id !== monPoste?.id && data.semaines[mondayOf(x.date)]?.statut === 'publie' && (x.date > today || (x.date === today && x.end > heureIci)))
+        .sort((x, y) => x.date.localeCompare(y.date) || x.start - y.start)
+        .slice(0, 4)
+    : [];
+  const maGarde = moi ? data.gardes.filter((g) => g.personId === moi.id && g.date >= today).sort((x, y) => x.date.localeCompare(y.date))[0] : undefined;
   // Le planning se transmet au mois : à l'approche de l'échéance, puis une fois dépassée, un bandeau le rappelle.
   const pub = etatPublication(data, today);
   const relais = reglagePublication(data.officine).relais;
@@ -176,7 +217,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <span className="grow">
               <span className="l">L’équipe aujourd’hui</span>
               <span className="v">{ouvertAuj ? <><span className="num">{enPoste.length}</span> en poste</> : 'Fermée'}</span>
-              <span className="d">{ouvertAuj ? `${absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'Aucun absent'} · pharmacien ${presenceAuj} %` : 'Pas d’ouverture aujourd’hui'}</span>
+              <span className="d">{ouvertAuj ? (absents.length ? `${absents.length} absent${absents.length > 1 ? 's' : ''}` : 'aucun absent') : 'pas d’ouverture'}</span>
             </span>
           </button>
           <button type="button" className="tb-chiffre" onClick={() => { setSemaine(lundi); aller('construire'); }}>
@@ -192,7 +233,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <span className="grow">
               <span className="l">Semaine prochaine</span>
               <span className="v">{etatSuivante}</span>
-              <span className="d">du {fmtSemaine(suivante)}</span>
+              <span className="d">à partir du {fmtDateCourt(suivante).replace(/^\S+ /, '')}</span>
             </span>
           </button>
           <button type="button" className="tb-chiffre" onClick={() => aller('heures')}>
@@ -200,7 +241,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
             <span className="grow">
               <span className="l">Compteurs d’heures</span>
               <span className="v">{heures ? <><span className="num">{heures}</span> à régulariser</> : 'À jour'}</span>
-              <span className="d">{heures ? 'heures en plus ou en moins' : 'chacun est à son contrat'}</span>
+              <span className="d">{heures ? 'en plus ou en moins' : 'chacun à son contrat'}</span>
             </span>
           </button>
           <button type="button" className="tb-chiffre" onClick={() => aller('gardes')}>
@@ -214,73 +255,134 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
         </div>
       </BanniereAccueil>
 
-      <section className={`tb-priorite ${priorite.ton}`} aria-labelledby="tb-prio" data-focus="priorite">
-        <span className="tb-prio-ico" aria-hidden="true">
-          {priorite.icone}
-        </span>
-        <div className="grow">
-          <div className="eyebrow">{priorite.ton === 'ok' ? 'Aujourd’hui' : 'À faire en premier'}</div>
-          <h2 id="tb-prio">{priorite.titre}</h2>
-          <p>{priorite.detail}</p>
+      <div className="tb-duo">
+        {/* À gauche : ce qu'il faut faire, une chose par bloc, la plus pressée d'abord. Les deux blocs ont la même forme. */}
+        <div className="tb-avant">
+          <section className={`tb-priorite ${priorite.ton}`} aria-labelledby="tb-prio" data-focus="priorite">
+            <span className="tb-prio-ico" aria-hidden="true">
+              {priorite.icone}
+            </span>
+            <div className="tb-prio-texte">
+              <div className="eyebrow">{priorite.ton === 'ok' ? 'Aujourd’hui' : 'À faire en premier'}</div>
+              <h2 id="tb-prio">{priorite.titre}</h2>
+              <p>{priorite.detail}</p>
+            </div>
+            {priorite.action && priorite.bouton ? (
+              <button type="button" className="btn primary" onClick={priorite.action}>
+                {priorite.bouton} <ArrowRight size={16} aria-hidden="true" />
+              </button>
+            ) : null}
+          </section>
+
+          {pub.etat === 'rappel' || pub.etat === 'depasse' ? (
+            <section className={`tb-priorite note tb-echeance ${pub.etat}`} aria-labelledby="tb-echeance" data-focus="echeance">
+              <span className="tb-prio-ico" aria-hidden="true">
+                {pub.etat === 'depasse' && prepares ? <Sparkles size={20} /> : <BellRing size={20} />}
+              </span>
+              <div className="tb-prio-texte">
+                <div className="eyebrow">Planning de {nomMois}</div>
+                <h3 id="tb-echeance">
+                  {pub.etat === 'rappel'
+                    ? `À transmettre avant le ${fmtDateCourt(pub.echeance)}`
+                    : prepares && !pub.vides
+                      ? 'Préparé par Solvéa d’après vos habitudes'
+                      : `En retard depuis le ${fmtDateCourt(pub.echeance)}`}
+                </h3>
+                <p>
+                  {pub.etat === 'rappel'
+                    ? `${pub.jours === 0 ? 'C’est aujourd’hui.' : `Il reste ${pub.jours} jour${pub.jours > 1 ? 's' : ''}.`} ${pub.restantes} semaine${pub.restantes > 1 ? 's ne sont' : ' n’est'} pas encore publiée${pub.restantes > 1 ? 's' : ''}${pub.vides ? `, dont ${pub.vides} vide${pub.vides > 1 ? 's' : ''}` : ''}.`
+                    : pub.vides
+                      ? relais
+                        ? `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}. Solvéa peut ${pub.vides > 1 ? 'les' : 'la'} préparer en brouillon d’après vos habitudes ; rien n’est publié sans vous.`
+                        : `${pub.vides} semaine${pub.vides > 1 ? 's' : ''} vide${pub.vides > 1 ? 's' : ''}, ${pub.restantes} à publier.`
+                      : `${pub.restantes} semaine${pub.restantes > 1 ? 's' : ''} en brouillon${prepares ? `, dont ${prepares} préparée${prepares > 1 ? 's' : ''} par Solvéa` : ''} : relisez, corrigez, puis publiez le mois.`}
+                </p>
+              </div>
+              {pub.etat === 'depasse' && pub.vides && relais ? (
+                <button
+                  type="button"
+                  className="btn"
+                  id="echeance-preparer"
+                  onClick={() => {
+                    preparerMois(pub.mois);
+                    dire(`Solvéa a préparé ${nomMois} en brouillon d’après vos habitudes. Relisez, puis publiez le mois.`, true);
+                    versLeMois();
+                  }}
+                >
+                  <Sparkles size={16} aria-hidden="true" /> Préparer {nomMois}
+                </button>
+              ) : (
+                <button type="button" className="btn" id="echeance-ouvrir" onClick={versLeMois}>
+                  {pub.vides ? `Construire ${nomMois}` : 'Relire et publier'} <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              )}
+            </section>
+          ) : null}
         </div>
-        {priorite.action && priorite.bouton ? (
-          <button type="button" className="btn primary" onClick={priorite.action}>
-            {priorite.bouton} <ArrowRight size={16} aria-hidden="true" />
-          </button>
-        ) : null}
-      </section>
-
-
-      {pub.etat === 'rappel' || pub.etat === 'depasse' ? (
-        <section className={`tb-echeance ${pub.etat}`} aria-labelledby="tb-echeance" data-focus="echeance">
-          <span className="tb-echeance-ico" aria-hidden="true">
-            {pub.etat === 'depasse' && prepares ? <Sparkles size={20} /> : <BellRing size={20} />}
-          </span>
-          <div className="grow">
-            <h2 id="tb-echeance">
-              {pub.etat === 'rappel'
-                ? `Planning de ${nomMois} : à transmettre avant le ${fmtDateCourt(pub.echeance)}`
-                : prepares && !pub.vides
-                  ? `Solvéa a préparé ${nomMois} d’après vos habitudes`
-                  : `Le planning de ${nomMois} devait être transmis le ${fmtDateCourt(pub.echeance)}`}
-            </h2>
-            <p>
-              {pub.etat === 'rappel'
-                ? `${pub.jours === 0 ? 'C’est aujourd’hui.' : `Il reste ${pub.jours} jour${pub.jours > 1 ? 's' : ''}.`} ${pub.restantes} semaine${pub.restantes > 1 ? 's ne sont' : ' n’est'} pas encore publiée${pub.restantes > 1 ? 's' : ''}${pub.vides ? `, dont ${pub.vides} vide${pub.vides > 1 ? 's' : ''}` : ''}.`
-                : pub.vides
-                  ? relais
-                    ? `${pub.vides} semaine${pub.vides > 1 ? 's sont' : ' est'} encore vide${pub.vides > 1 ? 's' : ''}. Solvéa peut ${pub.vides > 1 ? 'les' : 'la'} préparer en brouillon d’après vos habitudes ; vos semaines déjà commencées ne sont pas touchées, et rien n’est publié sans vous.`
-                    : `${pub.vides} semaine${pub.vides > 1 ? 's sont' : ' est'} encore vide${pub.vides > 1 ? 's' : ''}, ${pub.restantes} à publier.`
-                  : `${pub.restantes} semaine${pub.restantes > 1 ? 's sont' : ' est'} en brouillon${prepares ? `, dont ${prepares} préparée${prepares > 1 ? 's' : ''} par Solvéa` : ''} : relisez, corrigez si besoin, puis publiez le mois.`}
-            </p>
+        {/* Mon agenda : un titulaire a lui aussi un planning et des rendez-vous. */}
+        <section className="card tb-agenda" aria-labelledby="tb-agenda" data-focus="mon-agenda">
+          <div className="card-head">
+            <div className="grow">
+              <div className="eyebrow">Mon agenda</div>
+              <h2 id="tb-agenda">
+                {monPoste ? (
+                  <>
+                    {capitale(monPoste.date === today ? 'Aujourd’hui' : monPoste.date === addDays(today, 1) ? 'Demain' : fmtDateCourt(monPoste.date))} :{' '}
+                    <span className="num sans-coupure">
+                      {fmtHeure(monPoste.start)} – {fmtHeure(monPoste.end)}
+                    </span>
+                  </>
+                ) : (
+                  'Pas de poste à venir'
+                )}
+              </h2>
+            </div>
+            <button type="button" className="btn sm" onClick={() => aller('moi')}>
+              Mon planning <ArrowRight size={15} aria-hidden="true" />
+            </button>
           </div>
-          {pub.etat === 'depasse' && pub.vides && relais ? (
-            <button
-              type="button"
-              className="btn sm"
-              id="echeance-preparer"
-              onClick={() => {
-                preparerMois(pub.mois);
-                dire(`Solvéa a préparé ${nomMois} en brouillon d’après vos habitudes. Relisez, puis publiez le mois.`, true);
-                versLeMois();
-              }}
-            >
-              <Sparkles size={16} aria-hidden="true" /> Laisser Solvéa préparer {nomMois}
-            </button>
-          ) : (
-            <button type="button" className="btn sm" id="echeance-ouvrir" onClick={versLeMois}>
-              {pub.vides ? `Construire ${nomMois}` : 'Relire et publier le mois'} <ArrowRight size={16} aria-hidden="true" />
-            </button>
-          )}
+          <div className="card-body tb-agenda-corps">
+            {mesSuivants.length || maGarde ? (
+              <div>
+                <h3 className="tb-agenda-titre">Ensuite</h3>
+                <ul className="tb-agenda-liste">
+                  {mesSuivants.map((x) => (
+                    <li key={x.id}>
+                      <span className="jour">{x.date === addDays(today, 1) ? 'Demain' : capitale(fmtDateCourt(x.date))}</span>
+                      <span className="num">
+                        {fmtHeure(x.start)} – {fmtHeure(x.end)}
+                      </span>
+                    </li>
+                  ))}
+                  {maGarde ? (
+                    <li className="garde">
+                      <span className="jour">
+                        <MoonStar size={14} aria-hidden="true" /> {capitale(fmtDateCourt(maGarde.date))}
+                      </span>
+                      <span>{libelleGarde(maGarde)}</span>
+                    </li>
+                  ) : null}
+                </ul>
+              </div>
+            ) : null}
+            <h3 className="tb-agenda-titre">Rendez-vous</h3>
+            {mesRdv.length ? (
+              <ProchainsRendezVous data={data} personId={moi?.id ?? ''} today={today} onOuvrir={(autre) => { useUi.getState().viserFil(autre); aller('messages'); }} />
+            ) : (
+              <p className="soft small" style={{ margin: 0 }}>Aucun rendez-vous à venir. Une demande acceptée se fixe ici et dans « Mon planning ».</p>
+            )}
+          </div>
         </section>
-      ) : null}
+      </div>
+
+
       <div className="tb-grille">
         <div className="tb-col">
           <section className="card tb-faire" aria-labelledby="tb-faire">
             <div className="card-head">
               <div className="grow">
                 <div className="eyebrow">À décider</div>
-                <h2 id="tb-faire">{d.total ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre` : 'Tout est à jour'}</h2>
+                <h2 id="tb-faire">{d.total ? `${d.total} décision${d.total > 1 ? 's' : ''} à prendre` : aDeclarer.length ? `${aDeclarer.length} déclaration${aDeclarer.length > 1 ? 's' : ''} à faire` : 'Tout est à jour'}</h2>
               </div>
               {d.total ? (
                 <button type="button" className="btn" onClick={() => aller('resoudre')}>
@@ -288,6 +390,39 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
                 </button>
               ) : null}
             </div>
+            {aDeclarer.length ? (
+              <ul className="tb-declarer" id="tb-declarer" aria-label="Accidents du travail à déclarer">
+                {aDeclarer.map((x) => {
+                  const qui = data.personnes.find((y) => y.id === x.absence.personId);
+                  return (
+                    <li key={x.absence.id} className={x.jours <= 0 ? 'presse' : undefined}>
+                      <span className="ico" aria-hidden="true">
+                        <BriefcaseMedical size={18} />
+                      </span>
+                      <span className="grow">
+                        <b>
+                          Déclarer l’{libelleAbsence(x.absence).toLowerCase()} de {qui ? nomCourt(qui) : 'la personne'}
+                        </b>
+                        <span className="small">
+                          À la caisse d’assurance maladie, au plus tard le {fmtDateCourt(x.echeance)} : {delaiDeclaration(x.jours)}.
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        className="btn sm"
+                        data-declare={x.absence.id}
+                        onClick={() => {
+                          noterDeclaration(x.absence.id);
+                          useUi.getState().dire('Déclaration notée comme faite : le rappel est retiré.');
+                        }}
+                      >
+                        <Check size={14} aria-hidden="true" /> C’est fait
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
             {sujets.length ? (
               <div className="tb-sujets">
                 {sujets.map((x, i) => (
@@ -299,7 +434,7 @@ export function Tableau({ personId }: { personId: string }): JSX.Element {
                   </button>
                 ))}
               </div>
-            ) : (
+            ) : aDeclarer.length ? null : (
               <p className="card-body soft tb-ajour">
                 <span className="tb-ajour-ico" aria-hidden="true">
                   <Check size={22} />

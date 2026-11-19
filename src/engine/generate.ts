@@ -22,13 +22,15 @@ import { diagnosticPrealable, diagnosticResultat } from './diagnose';
 import { ecartEquite, equite, fatigue, periodeAvant } from './equity';
 import { coutSemaine, decompteSemaine } from './payroll';
 import { cibleSemaine } from './heures';
+import { semaineHabituelle } from './habitudes';
 import { validateWeek } from './validate';
 
-export type Variante = 'equite' | 'souhaits' | 'cout';
+export type Variante = 'equite' | 'souhaits' | 'habitudes' | 'cout';
 
 export const VARIANTE_LABEL: Record<Variante, { titre: string; phrase: string }> = {
   equite: { titre: 'Équité d’abord', phrase: 'Répartit samedis et fermetures selon l’historique de chacun.' },
   souhaits: { titre: 'Préférences d’abord', phrase: 'Suit le plus de préférences possible.' },
+  habitudes: { titre: 'Habitudes d’abord', phrase: 'Reprend la semaine telle que vous la faites d’ordinaire, puis complète ce qui manque.' },
   cout: { titre: 'Contrats d’abord', phrase: 'Évite les heures au-delà des contrats.' },
 };
 
@@ -81,6 +83,8 @@ interface Poids {
 const POIDS: Record<Variante, Poids> = {
   equite: { sous: 3, sur: 4, prioritaire: 25, preference: 6, samedi: 22, fermeture: 6, etalement: 4, fatigue: 6, confort: 0.05, jour: 3 },
   souhaits: { sous: 3, sur: 4, prioritaire: 90, preference: 35, samedi: 12, fermeture: 2, etalement: 1.5, fatigue: 5, confort: 0.05, jour: 3 },
+  // Les habitudes sont posées d'avance ; ce qui reste à compléter suit les mêmes priorités que l'équité.
+  habitudes: { sous: 3, sur: 4, prioritaire: 25, preference: 6, samedi: 22, fermeture: 6, etalement: 4, fatigue: 6, confort: 0.05, jour: 3 },
   cout: { sous: 2, sur: 40, prioritaire: 25, preference: 6, samedi: 12, fermeture: 2, etalement: 1.5, fatigue: 5, confort: 0, jour: 3 },
 };
 
@@ -592,9 +596,21 @@ function expliquer(data: AppData, nouveaux: Shift[], hist: ReturnType<typeof equ
   }
 }
 
-/** Trois variantes comparables : équité, souhaits, coût. */
+/**
+ * Des propositions comparables. Quand l'équipe donne ses préférences : équité, préférences, contrats. Quand le
+ * titulaire prépare seul, il n'y a pas de préférences à suivre : la deuxième proposition repart de ses habitudes
+ * (la semaine telle qu'il la publie d'ordinaire), s'il a assez d'historique ; sinon il en reste deux.
+ */
 export function genererVariantes(data: AppData, monday: ISODate, conserver: boolean, graine = 7): GenResult[] {
-  return (['equite', 'souhaits', 'cout'] as Variante[]).map((variante, i) =>
-    generer(data, monday, { variante, conserver, graine: graine + i * 101 }),
-  );
+  const collaboratif = (data.officine.modele ?? 'collaboratif') === 'collaboratif';
+  const habituelle = collaboratif ? [] : semaineHabituelle(data, monday);
+  const variantes: Variante[] = collaboratif ? ['equite', 'souhaits', 'cout'] : habituelle.length ? ['equite', 'habitudes', 'cout'] : ['equite', 'cout'];
+  return variantes.map((variante, i) => {
+    if (variante !== 'habitudes') return generer(data, monday, { variante, conserver, graine: graine + i * 101 });
+    // Les postes habituels sont posés d'abord (sans doubler un poste déjà là quand on complète), puis le calcul comble le reste.
+    const fin = addDays(monday, 6);
+    const gardes = conserver ? data.shifts : data.shifts.filter((s) => s.date < monday || s.date > fin);
+    const repris = habituelle.filter((h) => !gardes.some((s) => s.personId === h.personId && s.date === h.date));
+    return generer({ ...data, shifts: gardes.concat(repris) }, monday, { variante, conserver: true, graine: graine + i * 101 });
+  });
 }

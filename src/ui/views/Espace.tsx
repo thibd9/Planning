@@ -1,7 +1,9 @@
-import { ArrowLeftRight, ArrowRight, Award, BellRing, BookOpen, CalendarClock, CalendarDays, CalendarPlus, GraduationCap, Inbox, MessageSquare, MoonStar, Tags } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Apple, ArrowLeftRight, ArrowRight, Award, Baby, BellRing, Bone, BookOpen, CalendarClock, CalendarDays, CalendarPlus, Droplets, GraduationCap, Inbox, Leaf, MessageSquare, MoonStar, PawPrint, Pill, Scissors, Smile, Sparkles, Stethoscope, Sun, Tags } from 'lucide-react';
 import { useState } from 'react';
 import { responsable } from '../../domain/acces';
-import { PROFILS, TYPE_PRODUIT_LABEL, marquesParType } from '../../domain/profils';
+import { PROFILS, TYPE_PRODUIT_LABEL } from '../../domain/profils';
+import type { TypeProduit } from '../../domain/profils';
 import { JOURS, dayIndex, fmtDateCourt, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, fmtJourMois, mondayOf, weekday } from '../../domain/time';
 import type { ISODate, Person, Shift } from '../../domain/types';
 import { COMPETENCE_LABEL, nomCourt, nomGarde } from '../../domain/types';
@@ -19,6 +21,9 @@ import { PrevenirRetard } from '../components/Retard';
 import { DialogueRendezVous, ProchainsRendezVous } from '../components/RendezVous';
 
 const jourLong = (date: ISODate): string => `${JOURS[weekday(date)]} ${fmtJourMois(date)}`;
+
+/** Un pictogramme par famille de produits : une marque se lit d'un coup d'œil. */
+const ICONE_PRODUIT: Record<TypeProduit, LucideIcon> = { dermocosmetique: Sparkles, solaire: Sun, capillaire: Scissors, hygiene: Droplets, bebe: Baby, bucco: Smile, complements: Pill, phyto: Leaf, nutrition: Apple, orthopedie: Bone, materiel: Stethoscope, veterinaire: PawPrint };
 
 /**
  * L'accueil de chaque profil : le prochain poste, ce qui est propre au métier (marques d'un animateur,
@@ -110,7 +115,7 @@ export function Espace({ personId }: { personId: string }): JSX.Element | null {
           <span className="tb-prio-ico" aria-hidden="true">
             {priorite.icone}
           </span>
-          <div className="grow">
+          <div className="tb-prio-texte">
             <div className="eyebrow">À faire en premier</div>
             <h2 id="esp-prio">{priorite.titre}</h2>
             <p>{priorite.detail}</p>
@@ -250,21 +255,39 @@ function Metier({ p, aVenir, onRdv, onDemande }: { p: Person; aVenir: Shift[]; o
     </div>
   );
   if (p.qualification === 'animateur') {
-    const groupes = marquesParType(p);
+    const marques = (p.marques ?? []).filter((m) => m.marque.trim());
     return (
       <>
         {tete(<Tags size={18} />, 'Mon métier', 'Les marques que je présente')}
         <div className="card-body esp-corps">
-          {groupes.length ? (
+          {marques.length ? (
             <ul className="esp-marques">
-              {groupes.map((g) => (
-                <li key={g.type}>
-                  <span className="esp-type">{TYPE_PRODUIT_LABEL[g.type]}</span>
-                  <span className="esp-puces">
-                    {g.marques.map((m) => (
-                      <span key={m} className="esp-marque">{m}</span>
-                    ))}
+              {marques.map((m, i) => (
+                <li key={m.id} className={`mqc t${i % 5}`}>
+                  <span className="mqc-logo" aria-hidden="true">
+                    {m.marque
+                      .trim()
+                      .split(/\s+/)
+                      .slice(0, 2)
+                      .map((x) => x.charAt(0).toUpperCase())
+                      .join('')}
                   </span>
+                  <div className="mqc-texte">
+                    <b>{m.marque}</b>
+                    <span className="small soft">{m.types.length ? `${m.types.length} famille${m.types.length > 1 ? 's' : ''} de produits` : 'Familles de produits à préciser'}</span>
+                    {m.types.length ? (
+                      <span className="mqc-types">
+                        {m.types.map((t) => {
+                          const Icone = ICONE_PRODUIT[t];
+                          return (
+                            <span key={t} className="mqc-type">
+                              <Icone size={13} aria-hidden="true" /> {TYPE_PRODUIT_LABEL[t]}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    ) : null}
+                  </div>
                 </li>
               ))}
             </ul>

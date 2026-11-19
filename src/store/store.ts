@@ -6,7 +6,9 @@ import { REGLES_INITIALES } from '../domain/rules';
 import { MOIS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
 import type { AbsenceType, Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, RendezVous, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, MOTIF_RETARD_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
-import type { AvisRetard, CadreFormation, MotifRetard } from '../domain/types';
+import type { AvisRetard, CadreFormation, DetailAccident, MotifRetard } from '../domain/types';
+import { LIEU_ACCIDENT_LABEL } from '../domain/types';
+import { echeanceDeclaration } from '../engine/accident';
 import { RETARD_MAX, arriveePrevue, dureeRetard, effetsRetard, superieurs } from '../engine/retard';
 import { decrireBesoin, decrireJournee, minutesSemaine, shiftsSemaine } from '../engine/core';
 import { appliquerCreneau, controlerCreneau } from '../engine/rattrapage';
@@ -155,7 +157,7 @@ export interface Store {
   ecarterAccord: (id: string, refus: boolean) => void;
   /** Crée l'officine depuis l'écran d'accueil : nom, horaires et première équipe. */
   /** `ajout` garde les pharmacies existantes ; `nouvelleCle` vaut pour un autre titulaire, qui reçoit sa propre clé de secours. */
-  creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[], ajout?: boolean, nouvelleCle?: boolean) => void;
+  creerOfficine: (nom: string, horaires: Officine['horaires'], personnes: Person[], ajout?: boolean, nouvelleCle?: boolean, surface?: number) => void;
   /** Un même identifiant peut avoir un compte dans plusieurs pharmacies : le mot de passe change partout. */
   definirMotDePasse: (identifiant: string, code: string) => void;
   changerOfficine: (id: string) => void;
@@ -219,7 +221,9 @@ export interface Store {
   /** « Je serai en retard » : la personne prévient elle-même. Ses titulaires reçoivent une notification et un message. */
   prevenirRetard: (r: { personId: string; date: ISODate; start: number; minutes: number; motif?: MotifRetard; note?: string; par?: string }) => void;
   /** « Je ne pourrai pas venir » : la personne signale elle-même une absence imprévue. Ses titulaires sont prévenus et décident. */
-  signalerAbsence: (a: { personId: string; from: ISODate; to: ISODate; type: AbsenceType; note?: string }) => void;
+  signalerAbsence: (a: { personId: string; from: ISODate; to: ISODate; type: AbsenceType; note?: string; accident?: Omit<DetailAccident, 'connuLe' | 'declareLe'> }) => void;
+  /** Le titulaire note que l'accident du travail a été déclaré à la caisse : le rappel s'arrête. */
+  noterDeclarationAccident: (absenceId: string) => void;
   /** « Je serai finalement à l'heure » : l'avis est retiré, les titulaires en sont prévenus. */
   annulerRetard: (id: string) => void;
   planifierFormation: (f: { intitule: string; personnes: string[]; from: ISODate; to: ISODate; cadre?: CadreFormation; lieu?: string }) => void;
@@ -371,7 +375,7 @@ export const useStore = create<Store>((set, get) => {
       set((s) => (s.past.length ? { data: s.past[s.past.length - 1], past: s.past.slice(0, -1), future: [s.data, ...s.future] } : s)),
     redo: () => set((s) => (s.future.length ? { data: s.future[0], future: s.future.slice(1), past: [...s.past, s.data] } : s)),
     reinitialiser: () => set({ officineId: uid('off'), data: vierge(), autres: {}, past: [], future: [] }),
-    creerOfficine: (nom, horaires, personnes, ajout, nouvelleCle) =>
+    creerOfficine: (nom, horaires, personnes, ajout, nouvelleCle, surface) =>
       set((etat) => {
         const base = vierge();
         const postes = base.officine.postes
@@ -382,6 +386,7 @@ export const useStore = create<Store>((set, get) => {
           officine: {
             ...base.officine,
             nom,
+            ...(surface ? { surface } : {}),
             responsableId: personnes.find((x) => x.qualification === 'titulaire')?.id,
             secours: (!nouvelleCle && etat.data.officine.secours) || `${Math.random().toString(36).slice(2, 6)}-${Math.random().toString(36).slice(2, 6)}`.toUpperCase(),
             horaires,
@@ -937,15 +942,26 @@ export const useStore = create<Store>((set, get) => {
 
     declarerAbsence: (a) =>
       commit((d, today) => {
-        const absence: Absence = { ...a, id: uid('a'), createdAt: now() };
+        // Un accident du travail noté par un titulaire : il en a connaissance aujourd'hui, le délai de déclaration part de là.
+        const accident: DetailAccident | undefined = a.type === 'accident' ? { jour: a.from, ou: 'travail', ...a.accident, connuLe: a.accident?.connuLe ?? today } : undefined;
+        const absence: Absence = { ...a, id: uid('a'), createdAt: now(), ...(accident ? { accident } : {}) };
         let next: AppData = { ...d, absences: d.absences.concat(absence) };
         if (absence.statut === 'approuvee') next = appliquerAbsence(next, absence, today);
         return journal(next, {
           type: 'absence',
-          titre: `${ABSENCE_LABEL[a.type]} de ${nom(d, a.personId)} ${a.statut === 'approuvee' ? 'enregistré' : 'demandé'}`,
-          detail: `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}.`,
+          titre: `${libelleAbsence(absence)} de ${nom(d, a.personId)} ${a.statut === 'approuvee' ? 'enregistré' : 'demandé'}`,
+          detail: `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}.${accident && !accident.declareLe ? ` À déclarer à la caisse d’assurance maladie au plus tard le ${fmtDateCourt(echeanceDeclaration(accident.connuLe))}.` : ''}`,
         });
       }),
+    noterDeclarationAccident: (absenceId) =>
+      commit((d, today) => {
+        const a = d.absences.find((x) => x.id === absenceId);
+        if (!a?.accident || a.accident.declareLe) return d;
+        return journal(
+          { ...d, absences: d.absences.map((x) => (x.id === absenceId ? { ...x, accident: { ...a.accident!, declareLe: today } } : x)) },
+          { type: 'absence', titre: `${libelleAbsence(a)} de ${nom(d, a.personId)} : déclaration notée comme faite`, detail: `Accident du ${fmtDateCourt(a.accident.jour)}, connu le ${fmtDateCourt(a.accident.connuLe)}.` },
+        );
+      }, false),
     signalerEcart: (e) =>
       commit((d) =>
         journal(
@@ -985,15 +1001,19 @@ export const useStore = create<Store>((set, get) => {
         if (!p || !chefs.length) return d;
         const at = now();
         const note = a.note?.trim() || undefined;
-        const absence: Absence = { id: uid('a'), personId: a.personId, from: a.from, to: a.to, type: a.type, statut: 'demandee', createdAt: at, imprevue: true, ...(note ? { precision: note } : {}) };
+        const accident: DetailAccident | undefined = a.type === 'accident' ? { jour: a.accident?.jour ?? a.from, ou: a.accident?.ou ?? 'travail', ...a.accident, connuLe: today } : undefined;
+        const absence: Absence = { id: uid('a'), personId: a.personId, from: a.from, to: a.to, type: a.type, statut: 'demandee', createdAt: at, imprevue: true, ...(note ? { precision: note } : {}), ...(accident ? { accident } : {}) };
         const jour = (x: ISODate): string => (x === today ? 'aujourd’hui' : x === addDays(today, 1) ? 'demain' : `le ${fmtDateCourt(x)}`);
         const periode = a.from === a.to ? jour(a.from) : `du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}`;
         const postes = d.shifts.filter((s) => s.personId === a.personId && s.date >= a.from && s.date <= a.to).length;
-        const texte = `Je ne pourrai pas venir ${periode} (${ABSENCE_LABEL[a.type].toLowerCase()}).${note ? ` ${note}` : ''}`;
+        const nature = libelleAbsence(absence).toLowerCase();
+        const faits = accident ? ` ${LIEU_ACCIDENT_LABEL[accident.ou]}, ${jour(accident.jour)}${accident.heure !== undefined ? ` vers ${fmtHeure(accident.heure)}` : ''}.${accident.circonstances ? ` ${accident.circonstances}` : ''}` : '';
+        const texte = accident ? `J’ai eu un ${nature}.${faits} Je ne pourrai pas venir ${periode}.${note ? ` ${note}` : ''}` : `Je ne pourrai pas venir ${periode} (${nature}).${note ? ` ${note}` : ''}`;
+        const declarer = accident ? [`Accident à déclarer à la caisse d’assurance maladie au plus tard le ${fmtDateCourt(echeanceDeclaration(today))} (48 heures, dimanches et jours fériés non comptés).`] : [];
         return journal(
           { ...d, absences: d.absences.concat(absence), messages: d.messages.concat(chefs.map((c) => ({ id: uid('msg'), de: a.personId, a: c, texte, at, luPar: [a.personId] }))) },
-          { type: 'absence', titre: `${nom(d, a.personId)} signale une absence ${periode}`, detail: `${ABSENCE_LABEL[a.type]}.${note ? ` ${note}` : ''}` },
-          { pour: chefs, effets: [postes ? `${postes} poste${postes > 1 ? 's sont concernés' : ' est concerné'} : à décider dans « Résoudre », puis à couvrir.` : 'Aucun poste planifié sur ces dates.'] },
+          { type: 'absence', titre: accident ? `${nom(d, a.personId)} signale un ${nature}` : `${nom(d, a.personId)} signale une absence ${periode}`, detail: `${libelleAbsence(absence)}.${faits}${note ? ` ${note}` : ''}` },
+          { pour: chefs, effets: [...declarer, postes ? `${postes} poste${postes > 1 ? 's sont concernés' : ' est concerné'} : à décider dans « Résoudre », puis à couvrir.` : 'Aucun poste planifié sur ces dates.'] },
         );
       }, false),
     annulerRetard: (id) =>
@@ -1079,7 +1099,7 @@ export const useStore = create<Store>((set, get) => {
           next,
           {
             type: 'absence',
-            titre: `${ABSENCE_LABEL[a.type]} de ${nom(d, a.personId)} ${approuver ? 'approuvé' : 'refusé'}`,
+            titre: a.type === 'accident' ? `${libelleAbsence(a)} de ${nom(d, a.personId)} ${approuver ? 'pris en compte' : 'écarté'}` : `${ABSENCE_LABEL[a.type]} de ${nom(d, a.personId)} ${approuver ? 'approuvé' : 'refusé'}`,
             detail: `Du ${fmtDateCourt(a.from)} au ${fmtDateCourt(a.to)}.${!approuver && motif ? ` ${motif}` : ''}`,
           },
           {

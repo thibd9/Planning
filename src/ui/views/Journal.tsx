@@ -21,7 +21,7 @@ const NATURES: Record<JournalType, { icone: LucideIcon; nom: string; pluriel: st
   generation: { icone: Sparkles, nom: 'Proposition', pluriel: 'Propositions', ton: 'accent' },
   regle: { icone: BookOpenCheck, nom: 'Règle', pluriel: 'Règles', ton: 'neutre' },
 };
-const TON_ABSENCE: Record<string, string> = { Congé: 'conge', Arrêt: 'arret', Formation: 'formation' };
+const TON_ABSENCE: Record<string, string> = { Congé: 'conge', Arrêt: 'arret', 'Accident du travail': 'arret', 'Accident de trajet': 'arret', Formation: 'formation' };
 
 function telecharger(nom: string, contenu: string, type: string): void {
   const url = URL.createObjectURL(new Blob([contenu], { type }));

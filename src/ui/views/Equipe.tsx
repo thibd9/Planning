@@ -573,7 +573,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             </TitreFiche>
             {besoins.length ? (
               besoins.map((b) => (
-                <div key={b.id} className="row wrap" style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 11 }}>
+                <div key={b.id} className="row wrap" style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 6 }}>
                   {b.statut === 'reconnue' ? <Lock size={15} /> : <HeartHandshake size={15} />}
                   <div className="grow">
                     <b>{decrireBesoin(b)}</b>
@@ -611,7 +611,7 @@ function Fiche({ person }: { person: Person }): JSX.Element {
             <TitreFiche icone={CalendarOff}>Absences à venir</TitreFiche>
             {absences.length ? (
               absences.map((a) => (
-                <div key={a.id} className="row wrap" style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 11 }}>
+                <div key={a.id} className="row wrap" style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 6 }}>
                   <CalendarOff size={15} />
                   <div className="grow">
                     <b>{libelleAbsence(a)}</b> · du {fmtDateCourt(a.from)} au {fmtDateCourt(a.to)}

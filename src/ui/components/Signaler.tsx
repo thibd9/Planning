@@ -1,9 +1,10 @@
-import { AlarmClock, BellRing, CalendarX, Check } from 'lucide-react';
+import { AlarmClock, BellRing, BriefcaseMedical, CalendarX, Check } from 'lucide-react';
 import { useState } from 'react';
 import { peutGerer } from '../../domain/acces';
-import { addDays, fmtDateCourt, fmtHeure, todayISO } from '../../domain/time';
-import { nomCourt } from '../../domain/types';
-import type { AbsenceType, ISODate, Person } from '../../domain/types';
+import { addDays, fmtDateCourt, fmtHeure, parseHHMM, todayISO } from '../../domain/time';
+import { LIEU_ACCIDENT_LABEL, nomCourt } from '../../domain/types';
+import type { AbsenceType, DetailAccident, ISODate, LieuAccident, Person } from '../../domain/types';
+import { echeanceDeclaration } from '../../engine/accident';
 import { RETARDS_RAPIDES, RETARD_MAX, dureeRetard, posteAPrevenir, superieurs } from '../../engine/retard';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
@@ -12,8 +13,10 @@ import { Dialog } from '../kit';
 type Quoi = 'retard' | 'absence';
 const RAISONS: { cle: AbsenceType; nom: string }[] = [
   { cle: 'maladie', nom: 'Maladie' },
+  { cle: 'accident', nom: 'Accident du travail' },
   { cle: 'autre', nom: 'Autre raison' },
 ];
+const LIEUX = Object.keys(LIEU_ACCIDENT_LABEL) as LieuAccident[];
 const heureQuIlEst = (today: string): number => {
   if (today !== todayISO()) return 0;
   const d = new Date();
@@ -39,6 +42,12 @@ export function DialogueSignaler({ moi, quoi: depart, onClose }: { moi: Person; 
   const [au, setAu] = useState<ISODate>(today);
   const [raison, setRaison] = useState<AbsenceType>('maladie');
   const [note, setNote] = useState('');
+  // Accident du travail : les faits utiles à la déclaration, notés tant qu'ils sont frais.
+  const [ou, setOu] = useState<LieuAccident>('travail');
+  const [jourAccident, setJourAccident] = useState<ISODate>(today);
+  const [heure, setHeure] = useState('');
+  const [faits, setFaits] = useState('');
+  const [temoin, setTemoin] = useState('');
   const personne = equipe.find((p) => p.id === qui) ?? moi;
   const pourMoi = personne.id === moi.id;
   const chefs = superieurs(data, personne.id)
@@ -51,6 +60,11 @@ export function DialogueSignaler({ moi, quoi: depart, onClose }: { moi: Person; 
   const postes = data.shifts.filter((s) => s.personId === personne.id && s.date >= du && s.date <= fin).length;
   const noms = chefs.map((p) => nomCourt(p)).join(', ');
   const pret = quoi === 'retard' ? !!poste : quoi === 'absence';
+  const accident: Omit<DetailAccident, 'connuLe' | 'declareLe'> | undefined =
+    quoi === 'absence' && raison === 'accident'
+      ? { jour: jourAccident <= today ? jourAccident : today, ou, ...(parseHHMM(heure) !== null ? { heure: parseHHMM(heure)! } : {}), ...(faits.trim() ? { circonstances: faits.trim() } : {}), ...(temoin.trim() ? { temoin: temoin.trim() } : {}) }
+      : undefined;
+  const avant = fmtDateCourt(echeanceDeclaration(today));
   const confirmer = (): void => {
     if (quoi === 'retard' && poste) {
       prevenirRetard({ personId: personne.id, date: poste.date, start: poste.start, minutes: duree, note, ...(pourMoi ? {} : { par: moi.id }) });
@@ -58,11 +72,16 @@ export function DialogueSignaler({ moi, quoi: depart, onClose }: { moi: Person; 
     } else if (quoi === 'absence') {
       if (gestion) {
         // Un titulaire enregistre l'absence : elle est acquise, et ses postes passent dans « Absences à couvrir ».
-        declarerAbsence({ personId: personne.id, from: du, to: fin, type: raison, statut: 'approuvee', ...(note.trim() ? { precision: note.trim() } : {}) });
-        dire(`Absence de ${pourMoi ? 'votre part' : nomCourt(personne)} enregistrée.${postes ? ` ${postes} poste${postes > 1 ? 's' : ''} à couvrir dans « Résoudre ».` : ''}`, true);
+        declarerAbsence({ personId: personne.id, from: du, to: fin, type: raison, statut: 'approuvee', ...(note.trim() ? { precision: note.trim() } : {}), ...(accident ? { accident: { ...accident, connuLe: today } } : {}) });
+        dire(
+          accident
+            ? `Accident enregistré. Déclaration à faire au plus tard le ${avant} : le rappel est sur votre tableau de bord.${postes ? ` ${postes} poste${postes > 1 ? 's' : ''} à couvrir dans « Résoudre ».` : ''}`
+            : `Absence de ${pourMoi ? 'votre part' : nomCourt(personne)} enregistrée.${postes ? ` ${postes} poste${postes > 1 ? 's' : ''} à couvrir dans « Résoudre ».` : ''}`,
+          true,
+        );
       } else {
-        signalerAbsence({ personId: personne.id, from: du, to: fin, type: raison, note });
-        dire(`Absence signalée.${noms ? ` ${noms} ${chefs.length > 1 ? 'sont prévenus' : 'est prévenu'}.` : ''}`);
+        signalerAbsence({ personId: personne.id, from: du, to: fin, type: raison, note, ...(accident ? { accident } : {}) });
+        dire(`${accident ? 'Accident signalé' : 'Absence signalée'}.${noms ? ` ${noms} ${chefs.length > 1 ? 'sont prévenus' : 'est prévenu'}.` : ''}`);
       }
     }
     onClose();
@@ -78,7 +97,7 @@ export function DialogueSignaler({ moi, quoi: depart, onClose }: { moi: Person; 
             Annuler
           </button>
           <button type="button" className="btn primary" id="sg-confirmer" disabled={!pret} onClick={confirmer}>
-            <BellRing size={16} aria-hidden="true" /> {!quoi ? 'Choisissez retard ou absence' : gestion ? (quoi === 'retard' ? 'Noter le retard' : 'Enregistrer l’absence') : 'Prévenir les titulaires'}
+            <BellRing size={16} aria-hidden="true" /> {!quoi ? 'Choisissez retard ou absence' : gestion ? (quoi === 'retard' ? 'Noter le retard' : accident ? 'Enregistrer l’accident' : 'Enregistrer l’absence') : 'Prévenir les titulaires'}
           </button>
         </>
       }
@@ -201,9 +220,61 @@ export function DialogueSignaler({ moi, quoi: depart, onClose }: { moi: Person; 
             </div>
             <p className={postes ? 'ret-effet small' : 'small soft'} id="sg-postes" style={{ margin: 0 }}>
               {postes
-                ? `${postes} poste${postes > 1 ? 's sont planifiés' : ' est planifié'} ${du === fin ? `le ${fmtDateCourt(du)}` : 'sur ces dates'} : ${gestion ? 'ils seront à couvrir dans « Résoudre », avec les options comparées.' : 'vos titulaires décideront comment les couvrir.'}`
+                ? `${postes} poste${postes > 1 ? 's sont planifiés' : ' est planifié'} ${du === fin ? `le ${fmtDateCourt(du)}` : 'sur ces dates'} : ${gestion ? `${postes > 1 ? 'ils seront' : 'il sera'} à couvrir dans « Résoudre », avec les options comparées.` : `vos titulaires décideront comment ${postes > 1 ? 'les' : 'le'} couvrir.`}`
                 : 'Aucun poste n’est planifié sur ces dates.'}
             </p>
+          </fieldset>
+        ) : null}
+
+        {accident ? (
+          <fieldset className="ret-bloc acc" id="sg-accident">
+            <legend>
+              L’accident <span className="oblig">ces faits servent à la déclaration</span>
+            </legend>
+            <div className="ret-choix" id="sg-ou" role="group" aria-label="Où est-ce arrivé ?">
+              {LIEUX.map((x) => (
+                <button key={x} type="button" className={`comp${ou === x ? ' on' : ''}`} aria-pressed={ou === x} onClick={() => setOu(x)}>
+                  <span>{LIEU_ACCIDENT_LABEL[x]}</span>
+                </button>
+              ))}
+            </div>
+            <div className="row wrap" style={{ alignItems: 'flex-end', gap: 12 }}>
+              <label className="field" htmlFor="sg-acc-jour">
+                Le jour de l’accident
+                <input id="sg-acc-jour" type="date" value={jourAccident} max={today} onChange={(e) => setJourAccident(e.target.value)} />
+              </label>
+              <label className="field" htmlFor="sg-acc-heure">
+                <span>
+                  Vers quelle heure <span className="oblig">si connue</span>
+                </span>
+                <input id="sg-acc-heure" type="time" value={heure} onChange={(e) => setHeure(e.target.value)} />
+              </label>
+            </div>
+            <label className="field" htmlFor="sg-acc-faits">
+              Ce qui s’est passé, en quelques mots
+              <textarea id="sg-acc-faits" rows={2} maxLength={280} value={faits} onChange={(e) => setFaits(e.target.value)} placeholder="Par exemple : chute dans la réserve en rangeant une livraison, douleur au poignet droit" />
+            </label>
+            <label className="field" htmlFor="sg-acc-temoin">
+              <span>
+                Un témoin, ou la première personne prévenue <span className="oblig">facultatif</span>
+              </span>
+              <input id="sg-acc-temoin" value={temoin} onChange={(e) => setTemoin(e.target.value)} maxLength={80} autoComplete="off" />
+            </label>
+            <div className="acc-suite" id="sg-acc-suite">
+              <span className="acc-suite-tete">
+                <BriefcaseMedical size={16} aria-hidden="true" /> La suite, dans l’ordre
+              </span>
+              <ol>
+                <li>{pourMoi ? 'Faites constater vos blessures par un médecin : il établit le certificat médical initial.' : `${personne.prenom} fait constater ses blessures par un médecin, qui établit le certificat médical initial.`}</li>
+                <li>
+                  {gestion
+                    ? `Vous déclarez l’accident à la caisse d’assurance maladie dans les 48 heures, dimanches et jours fériés non comptés : au plus tard le ${avant}.`
+                    : `Votre employeur déclare l’accident à la caisse d’assurance maladie dans les 48 heures, dimanches et jours fériés non comptés : au plus tard le ${avant}.`}
+                </li>
+                <li>{gestion ? `Vous remettez la feuille d’accident à ${pourMoi ? 'la personne concernée' : personne.prenom} : elle évite l’avance des frais de soins.` : 'Il vous remet la feuille d’accident : elle vous évite d’avancer les frais de soins.'}</li>
+              </ol>
+              <p className="small soft">Solvéa rappelle le délai et garde les faits : la déclaration elle-même se fait auprès de la caisse.</p>
+            </div>
           </fieldset>
         ) : null}
 

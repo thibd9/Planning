@@ -181,13 +181,17 @@ export function Tour(): JSX.Element | null {
   }
   left = Math.max(16, Math.min(left, W - largeur - 16));
   top = Math.max(16, Math.min(top, H - 310));
+  // La flèche vise le milieu de ce qui est montré, même quand la carte a dû se décaler pour tenir dans l'écran.
+  const borne = (v: number, min: number, max: number): number => Math.max(min, Math.min(v, max));
+  const flecheX = rect ? borne(rect.left + rect.width / 2 - left - 9, 26, largeur - 44) : 40;
+  const flecheY = rect ? borne(rect.top + rect.height / 2 - top - 9, 26, 190) : 34;
   const dernier = tour === ETAPES.length - 1;
 
   return (
     <>
       <div className="tour-veil" onClick={fermer} aria-hidden="true" />
       <div key={tour} className={`tour-hole${trou ? '' : ' none'}`} style={trou ?? undefined} />
-      <div key={`c${tour}`} className={`tour-card pos-${cote}`} role="dialog" aria-modal="true" aria-label={`Tutoriel, étape ${tour + 1} sur ${ETAPES.length}`} style={{ top, left, width: largeur }}>
+      <div key={`c${tour}`} className={`tour-card pos-${cote}`} role="dialog" aria-modal="true" aria-label={`Tutoriel, étape ${tour + 1} sur ${ETAPES.length}`} style={{ top, left, width: largeur, ['--fleche-x' as string]: `${flecheX}px`, ['--fleche-y' as string]: `${flecheY}px` }}>
         <div className="tour-tete">
           <span className="tour-n num" aria-hidden="true">
             {tour + 1}

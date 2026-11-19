@@ -4,7 +4,7 @@ import type { Espace } from '../domain/acces';
 import { estCollaboratif } from '../engine/souhaits';
 import { useStore } from '../store/store';
 import { useUi } from '../store/ui';
-import type { Reponse } from './bot';
+import type { Memoire, Reponse } from './bot';
 import { fichesPour, repondre } from './bot';
 import type { Humeur } from './Solvi';
 import { NomSolvi, Solvi } from './Solvi';
@@ -18,9 +18,9 @@ interface Bulle {
 
 /** Questions proposées d'emblée : celles dont la réponse se lit dans le planning, selon le rôle. */
 const AMORCES: Record<Espace, string[]> = {
-  responsable: ['Qui travaille demain ?', 'Qui est absent ?', 'Que dois-je décider ?', 'Les heures à régulariser ?'],
-  pharmacien: ['Mon prochain poste ?', 'Ma prochaine garde ?', 'Qui travaille demain ?', 'Me faire remplacer'],
-  equipe: ['Mon prochain poste ?', 'Qui travaille demain ?', 'Mon compteur d’heures ?', 'Me faire remplacer'],
+  responsable: ['Ma journée', 'Qui travaille demain ?', 'Qui est absent ?', 'Que dois-je décider ?', 'Les heures à régulariser ?'],
+  pharmacien: ['Ma journée', 'Mon prochain poste ?', 'Ma prochaine garde ?', 'Qui travaille demain ?', 'Me faire remplacer'],
+  equipe: ['Ma journée', 'Mon prochain poste ?', 'Qui travaille avec moi demain ?', 'Mon compteur d’heures ?', 'Me faire remplacer'],
 };
 
 /** Solvi, l'assistant de Solvéa : on lui pose une question, il répond d'après le planning ou d'après ses fiches, et il y emmène. */
@@ -35,10 +35,12 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
   const bouton = useRef<HTMLButtonElement>(null);
   const bas = useRef<HTMLDivElement>(null);
   const compteur = useRef(0);
+  // Ce que Solvi retient d'une question à l'autre : « et demain ? », « oui », « et Karim ? ».
+  const memoire = useRef<Memoire | undefined>(undefined);
 
   const fiches = useMemo(() => fichesPour(espace, estCollaboratif(data.officine)), [espace, data.officine]);
   // Les suggestions du début : l'écran en cours d'abord, puis les questions qui se lisent dans le planning.
-  const amorces = useMemo(() => [...new Set([...fiches.filter((f) => f.ecrans?.includes(vue)).slice(0, 2).map((f) => f.question), ...AMORCES[espace]])].slice(0, 5), [fiches, vue, espace]);
+  const amorces = useMemo(() => [...new Set([...fiches.filter((f) => f.ecrans?.includes(vue)).slice(0, 2).map((f) => f.question), ...AMORCES[espace]])].slice(0, 6), [fiches, vue, espace]);
 
   useEffect(() => {
     if (!assistant) return;
@@ -56,7 +58,10 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
     bas.current?.scrollIntoView({ block: 'end' });
   }, [fil, reflexion]);
   // Une autre personne se connecte : la conversation repart de zéro.
-  useEffect(() => setFil([]), [personId]);
+  useEffect(() => {
+    setFil([]);
+    memoire.current = undefined;
+  }, [personId]);
 
   const demander = (texte: string): void => {
     const q = texte.trim();
@@ -64,7 +69,8 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
     setQuestion('');
     setFil((f) => f.concat({ id: ++compteur.current, de: 'moi', texte: q }));
     setReflexion(true);
-    const reponse = repondre(q, { data, today, moi: personId, espace, fiches });
+    const reponse = repondre(q, { data, today, moi: personId, espace, fiches, memoire: memoire.current });
+    memoire.current = reponse.memoire;
     window.setTimeout(() => {
       setFil((f) => f.concat({ id: ++compteur.current, de: 'bot', texte: reponse.texte, reponse }));
       setReflexion(false);
@@ -207,7 +213,7 @@ export function Assistant({ espace, prenom, personId }: { espace: Espace; prenom
             <label className="sr" htmlFor="aide-question">
               Votre question
             </label>
-            <input ref={champ} id="aide-question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Qui travaille demain ?" autoComplete="off" />
+            <input ref={champ} id="aide-question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Votre question, avec vos mots" autoComplete="off" />
             <button type="submit" className="aide-envoyer" disabled={!question.trim()} aria-label="Envoyer la question">
               <SendHorizontal size={18} aria-hidden="true" />
             </button>

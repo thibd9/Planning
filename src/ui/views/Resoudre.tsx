@@ -20,7 +20,8 @@ import {
   weekday,
 } from '../../domain/time';
 import type { Absence, AppData, Besoin, BesoinStatut, ISODate, MotifDemande, Remplacement, Trou, Shift } from '../../domain/types';
-import { classeAbsence, libelleAbsence, nomCourt, nomGarde, libelleGarde, MOTIF_DEMANDE_LABEL, MOTIF_REMPLACEMENT_LABEL, estPharmacien } from '../../domain/types';
+import { classeAbsence, libelleAbsence, nomCourt, nomGarde, libelleGarde, LIEU_ACCIDENT_LABEL, MOTIF_DEMANDE_LABEL, MOTIF_REMPLACEMENT_LABEL, estPharmacien } from '../../domain/types';
+import { echeanceDeclaration } from '../../engine/accident';
 import { besoinApplicable, contreditBesoin, decrireBesoin, decrireShift, minutesSemaine, shiftsSemaine } from '../../engine/core';
 import { absencesSimultanees } from '../../engine/suivi';
 import { decisions } from '../../engine/decisions';
@@ -760,6 +761,7 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
     return x ? nomCourt(x) : 'un collègue';
   };
   const [decision, setDecision] = useState(false);
+  const acc = absence.type === 'accident' ? absence.accident : undefined;
   const jours = dayIndex(absence.to) - dayIndex(absence.from) + 1;
   // Les postes déjà planifiés sur la période : ceux qu'un accord rendrait à couvrir.
   const postes = data.shifts.filter((s) => s.personId === absence.personId && s.date >= absence.from && s.date <= absence.to).sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start);
@@ -845,9 +847,20 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
                 <dd>
                   {libelleAbsence(absence)}, {jours} jour{jours > 1 ? 's' : ''}
                 </dd>
-                <dt>Raison</dt>
+                {acc ? (
+                  <>
+                    <dt>Accident</dt>
+                    <dd>
+                      {LIEU_ACCIDENT_LABEL[acc.ou]}, le {fmtDateCourt(acc.jour)}
+                      {acc.heure !== undefined ? ` vers ${fmtHeure(acc.heure)}` : ''}
+                      {acc.circonstances ? ` : « ${acc.circonstances} »` : ''}
+                      {acc.temoin ? ` Témoin ou première personne prévenue : ${acc.temoin}.` : ''}
+                    </dd>
+                  </>
+                ) : null}
+                <dt>{acc ? 'Un mot' : 'Raison'}</dt>
                 <dd>
-                  {absence.motif ? MOTIF_DEMANDE_LABEL[absence.motif] : 'Non précisée'}
+                  {absence.motif ? MOTIF_DEMANDE_LABEL[absence.motif] : acc && !absence.precision ? 'Aucun' : 'Non précisée'}
                   {absence.precision ? ` : « ${absence.precision} »` : ''}
                 </dd>
                 <dt>Délai</dt>
@@ -858,6 +871,11 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
             }
             implications={
               <>
+                {acc && !acc.declareLe ? (
+                  <p className="dr-alerte" id="dc-accident">
+                    Un accident du travail se déclare à la caisse d’assurance maladie dans les 48 heures, dimanches et jours fériés non comptés : au plus tard le {fmtDateCourt(echeanceDeclaration(acc.connuLe))}. Le rappel reste sur votre tableau de bord tant que la déclaration n’est pas notée comme faite.
+                  </p>
+                ) : null}
                 <p className={postes.length ? 'dr-alerte' : 'dr-ok'}>
                   {postes.length
                     ? `${postes.length} poste${postes.length > 1 ? 's sont déjà planifiés' : ' est déjà planifié'} sur ces dates : ${postes
@@ -891,15 +909,21 @@ function DemandeAbsence({ absence }: { absence: Absence }): JSX.Element {
               </>
             }
             options={[
-              { cle: 'accepter', titre: 'Accepter la demande', phrase: postes.length ? `L’absence est enregistrée ; ${postes.length > 1 ? 'ses postes sont' : 'son poste est'} à couvrir dans « Résoudre ».` : 'L’absence est enregistrée et prise en compte dans les plannings.', icone: Check },
-              { cle: 'refuser', titre: 'Refuser', phrase: `${p?.prenom ?? 'La personne'} garde ses postes et reçoit votre raison.`, icone: X, refus: true },
+              {
+                cle: 'accepter',
+                titre: acc ? 'Prendre acte de l’accident' : 'Accepter la demande',
+                phrase: `${acc ? 'L’arrêt' : 'L’absence'} est ${acc ? 'enregistré' : 'enregistrée'}${postes.length ? ` ; ${postes.length > 1 ? 'ses postes sont' : 'son poste est'} à couvrir dans « Résoudre ».` : ' et pris en compte dans les plannings.'}${acc ? ' Il vous reste à déclarer l’accident.' : ''}`,
+                icone: Check,
+              },
+              // Un accident ne se refuse pas comme un congé : on écarte seulement un signalement fait par erreur.
+              { cle: 'refuser', titre: acc ? 'Écarter ce signalement' : 'Refuser', phrase: acc ? `À réserver à une erreur de saisie : ${p?.prenom ?? 'la personne'} garde ses postes et reçoit votre raison.` : `${p?.prenom ?? 'La personne'} garde ses postes et reçoit votre raison.`, icone: X, refus: true },
             ]}
-            raisons={RAISONS_REFUS.absence}
-            message={(cle, motif) => (cle === 'accepter' ? `Votre demande (${objet}) est acceptée.` : texteRefus(`(${objet})`, motif))}
-            bouton={(cle) => (cle === 'accepter' ? 'Accepter la demande' : `Refuser et prévenir ${p?.prenom ?? 'la personne'}`)}
+            raisons={acc ? ['Signalement fait par erreur', 'Déjà enregistré par ailleurs'] : RAISONS_REFUS.absence}
+            message={(cle, motif) => (cle === 'accepter' ? (acc ? `Votre ${libelleAbsence(absence).toLowerCase()} est pris en compte, du ${fmtDateCourt(absence.from)} au ${fmtDateCourt(absence.to)}. La pharmacie se charge de la déclaration à la caisse.` : `Votre demande (${objet}) est acceptée.`) : texteRefus(`(${objet})`, motif))}
+            bouton={(cle) => (cle === 'accepter' ? (acc ? 'Prendre acte' : 'Accepter la demande') : acc ? 'Écarter le signalement' : `Refuser et prévenir ${p?.prenom ?? 'la personne'}`)}
             onConfirmer={(cle, motif) => {
               decider(absence.id, cle === 'accepter', cle === 'accepter' ? undefined : motif);
-              dire(cle === 'accepter' ? `Demande acceptée.${postes.length ? ` ${postes.length} poste${postes.length > 1 ? 's' : ''} à couvrir dans « Résoudre ».` : ''}` : `Demande refusée. ${p?.prenom ?? 'La personne'} est prévenu.`, true);
+              dire(cle === 'accepter' ? `${acc ? 'Accident pris en compte' : 'Demande acceptée'}.${postes.length ? ` ${postes.length} poste${postes.length > 1 ? 's' : ''} à couvrir dans « Résoudre ».` : ''}` : `Demande refusée. ${p?.prenom ?? 'La personne'} est prévenu.`, true);
             }}
             onClose={() => setDecision(false)}
           />
