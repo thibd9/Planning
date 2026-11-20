@@ -5109,161 +5109,6 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .card-head:has(> .grow:first-child + .btn) > .btn { width: 100%; justify-content: center; }
 }
 
-/* === « Découvrir Solvéa », d'après la maquette : un cadre teinté, un panneau clair, une visite en carte ===
-   Les illustrations ne sont pas reprises : le panneau de gauche garde l'aplat du rôle et son pictogramme. */
-.decouvrir { width: min(920px, 100%); border-radius: 20px; padding: 0 8px 8px; background: var(--grad-vif); background-size: 100% 100%; }
-.decouvrir .dc-tete { background: none; animation: none; padding: 22px 16px 20px 22px; gap: 18px; align-items: center; }
-.decouvrir .dc-logo { width: 60px; height: 60px; border-radius: 16px; background: var(--surface); box-shadow: 0 12px 26px -16px rgba(var(--ink-rgb), 0.55), 0 1px 0 rgba(255, 255, 255, 0.6) inset; }
-.decouvrir .dc-tete h2 { font-size: 28px; letter-spacing: -0.035em; }
-.dc-marque { color: var(--a-deep); }
-.decouvrir .dc-tete p { margin-top: 4px; font-size: 14.5px; line-height: 1.45; max-width: none; color: color-mix(in srgb, currentColor 82%, transparent); }
-.decouvrir .dc-tete .dialog-fermer { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); color: var(--ink); box-shadow: 0 8px 18px -12px rgba(var(--ink-rgb), 0.6); align-self: flex-start; }
-.decouvrir .dc-corps { padding: 6px 26px 18px; gap: 16px; border-radius: 16px; background: color-mix(in srgb, var(--surface) 88%, var(--a-tint)); }
-
-/* Les familles : un pictogramme, un nom, un compteur en pastille, et un filet entre deux onglets. */
-.decouvrir .dc-onglets { gap: 0; flex-wrap: nowrap; border-bottom: 1px solid var(--line); }
-.decouvrir .dc-onglet { position: relative; gap: 10px; padding: 14px 22px 15px; font-size: 14.5px; font-weight: 650; color: var(--ink); border-bottom: 3px solid transparent; white-space: nowrap; }
-.decouvrir .dc-onglet:first-child { padding-left: 10px; }
-.decouvrir .dc-onglet + .dc-onglet::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 15px; width: 1px; background: var(--line); }
-.decouvrir .dc-onglet svg { flex: none; color: var(--ink-2); }
-.decouvrir .dc-onglet.on { color: var(--a-text); border-bottom-color: var(--a-deep); }
-.decouvrir .dc-onglet.on svg { color: var(--a-deep); }
-.decouvrir .dc-onglet-nb { min-width: 26px; padding: 2px 8px; border-radius: 999px; background: var(--a-soft); color: var(--a-text); font-size: 12px; font-weight: 700; text-align: center; }
-
-/* Les visites de la famille : un pictogramme au trait, à la couleur du rôle. */
-.decouvrir .dc-carrousel { gap: 14px; }
-.decouvrir .dc-points { gap: 10px; }
-.decouvrir .dc-point { min-height: 38px; gap: 9px; padding: 6px 16px 6px 12px; border-radius: 9px; font-size: 14px; font-weight: 650; color: var(--ink); background: var(--surface); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.06); }
-.decouvrir .dc-point-ico { width: auto; height: auto; border-radius: 0; background: none; color: color-mix(in srgb, var(--v1) 82%, var(--ink)); }
-.decouvrir .dc-point.on { color: color-mix(in srgb, var(--v1) 78%, var(--ink)); background: color-mix(in srgb, var(--v1) 10%, var(--surface)); border-color: color-mix(in srgb, var(--v1) 62%, var(--surface)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--v1) 62%, var(--surface)); }
-
-/* La visite : l'aplat du rôle à gauche avec ses trois repères en bas, l'histoire à droite. */
-.decouvrir .cp-carte.dc-diapo { grid-template-columns: minmax(200px, 0.38fr) minmax(0, 1fr); min-height: 318px; padding: 0; gap: 0; border-radius: 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 16px 36px -28px rgba(var(--ink-rgb), 0.55); }
-.decouvrir .dc-diapo .cp-visuel { display: grid; grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; justify-content: stretch; gap: 14px; height: auto; padding: 18px; }
-.decouvrir .dc-diapo .cp-ico { place-self: center; width: 92px; height: 92px; border-radius: 22px; background: rgba(255, 255, 255, 0.2); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34); position: relative; z-index: 1; }
-.decouvrir .dc-diapo .cp-ico svg { width: 44px; height: 44px; }
-.decouvrir .dc-diapo .cp-ico.logo { background: #fff; box-shadow: 0 16px 30px -18px rgba(8, 20, 48, 0.7); }
-.decouvrir .dc-diapo .cp-ico.logo svg { width: 56px; height: auto; }
-.decouvrir .dc-reperes { justify-self: start; justify-items: start; gap: 7px; }
-.decouvrir .dc-reperes li { gap: 9px; padding: 6px 14px 6px 11px; border-radius: 999px; background: rgba(9, 20, 46, 0.46); color: #fff; font-size: 13.5px; font-weight: 700; }
-.decouvrir .dc-diapo-texte { padding: 22px 24px 20px; gap: 10px; }
-.dc-etiquette { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.3; background: color-mix(in srgb, var(--v1) 11%, var(--surface)); color: color-mix(in srgb, var(--v1) 78%, var(--ink)); }
-.decouvrir .cp-carte.dc-diapo h3 { font-size: 25px; letter-spacing: -0.03em; margin: 2px 0 0; }
-.decouvrir .dc-fil { font-size: 14.5px; max-width: 60ch; }
-/* Les chapitres : chacun se lance d'un clic. */
-.decouvrir .dc-chapitres { gap: 7px 14px; margin-top: 4px; }
-.dc-chapitre { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 34px; padding: 4px 8px 4px 5px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; line-height: 1.25; text-align: left; cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
-.dc-chapitre:hover, .dc-chapitre:focus-visible { border-color: color-mix(in srgb, var(--v1) 55%, var(--line)); background: color-mix(in srgb, var(--v1) 6%, var(--surface)); }
-.dc-chapitre-nom { flex: 1; min-width: 0; text-wrap: balance; }
-.dc-chevron { flex: none; color: var(--ink-3); transition: transform 0.15s ease; }
-.dc-chapitre:hover .dc-chevron { transform: translateX(2px); color: color-mix(in srgb, var(--v1) 78%, var(--ink)); }
-.decouvrir .dc-num { width: 27px; height: 24px; border-radius: 7px; font-size: 12.5px; }
-.decouvrir .dc-diapo-pied { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); flex-wrap: nowrap; }
-.decouvrir .dc-avec { gap: 6px 10px; font-size: 13px; flex-wrap: nowrap; min-width: 0; }
-.decouvrir .dc-avec > svg { flex: none; }
-.dc-avec-mot { font-weight: 600; margin-right: -2px; }
-.decouvrir .dc-perso { gap: 6px; white-space: nowrap; }
-.decouvrir .dc-perso i { flex: none; width: 24px; height: 24px; display: grid; place-items: center; color: #fff; font-size: 11.5px; font-weight: 700; font-style: normal; line-height: 1; }
-.decouvrir .cp-carte.dc-diapo .dc-diapo-pied .btn { flex: none; min-height: 46px; padding: 10px 20px; border-radius: 10px; font-size: 15.5px; white-space: nowrap; }
-
-/* Le rythme : une barre centrée, trois choix avec leur pictogramme. */
-.rythme-option b { display: inline-flex; align-items: center; gap: 8px; }
-.decouvrir .rythme.compact { display: flex; align-items: center; gap: 14px; margin: 2px auto 0; padding: 8px 10px 8px 18px; border-radius: 12px; background: var(--a-soft); }
-.decouvrir .rythme.compact .rythme-titre { gap: 9px; font-size: 13.5px; font-weight: 600; color: var(--ink); white-space: nowrap; }
-.decouvrir .rythme.compact .rythme-choix { display: flex; gap: 8px; }
-.decouvrir .rythme.compact .rythme-option { display: inline-flex; align-items: center; min-height: 36px; padding: 6px 18px; border: 1.5px solid transparent; border-radius: 9px; font-size: 14px; box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.07); }
-.decouvrir .rythme.compact .rythme-option b { font-weight: 650; }
-.decouvrir .rythme.compact .rythme-option.on { border-color: var(--a-deep); color: var(--a-text); }
-
-/* L'entrée libre reprend le même panneau. */
-.decouvrir .dc-libre { padding-top: 8px; }
-
-@media (min-width: 901px) and (max-height: 820px) {
-  .decouvrir .dc-tete { padding: 16px 14px 14px 20px; }
-  .decouvrir .dc-logo { width: 52px; height: 52px; border-radius: 14px; }
-  .decouvrir .dc-tete h2 { font-size: 25px; }
-  .decouvrir .dc-tete p { font-size: 13.5px; }
-  .decouvrir .dc-corps { padding: 2px 24px 14px; gap: 12px; }
-  .decouvrir .dc-onglet { padding: 11px 20px 12px; }
-  .decouvrir .dc-onglet + .dc-onglet::before { top: 11px; bottom: 12px; }
-  .decouvrir .dc-carrousel { gap: 12px; }
-  .decouvrir .cp-carte.dc-diapo { min-height: 286px; }
-  .decouvrir .dc-diapo .cp-ico { width: 78px; height: 78px; border-radius: 19px; }
-  .decouvrir .dc-diapo-texte { padding: 16px 22px 16px; gap: 8px; }
-  .decouvrir .cp-carte.dc-diapo h3 { font-size: 23px; }
-  .decouvrir .dc-chapitres { gap: 6px 14px; }
-  .dc-chapitre { min-height: 32px; }
-  .decouvrir .dc-diapo-pied { padding-top: 12px; }
-}
-@media (min-width: 901px) and (max-height: 700px) {
-  .decouvrir .dc-tete p { display: none; }
-  .decouvrir .cp-carte.dc-diapo { min-height: 250px; }
-  .decouvrir .dc-fil { font-size: 13.5px; }
-  .dc-chapitre { min-height: 30px; font-size: 13px; }
-}
-@media (max-width: 720px) {
-  .decouvrir { padding: 0 4px 4px; border-radius: 16px; }
-  .decouvrir .dc-tete { padding: 14px 10px 12px 14px; gap: 12px; }
-  .decouvrir .dc-logo { width: 46px; height: 46px; border-radius: 12px; }
-  .decouvrir .dc-tete h2 { font-size: 22px; }
-  .decouvrir .dc-corps { padding: 2px 12px 14px; gap: 12px; border-radius: 13px; }
-  .decouvrir .dc-onglets { overflow-x: auto; scrollbar-width: none; }
-  .decouvrir .dc-onglet { padding: 11px 14px 12px; gap: 8px; }
-  .decouvrir .dc-onglet + .dc-onglet::before { top: 11px; bottom: 12px; }
-  .decouvrir .cp-carte.dc-diapo { grid-template-columns: minmax(0, 1fr); min-height: 0; }
-  .decouvrir .dc-diapo .cp-visuel { grid-template-rows: auto; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; padding: 14px; }
-  .decouvrir .dc-diapo .cp-ico { width: 60px; height: 60px; border-radius: 15px; }
-  .decouvrir .dc-diapo .cp-ico svg { width: 30px; height: 30px; }
-  .decouvrir .dc-diapo .cp-ico.logo svg { width: 38px; }
-  .decouvrir .dc-reperes { display: flex; flex-wrap: wrap; gap: 6px; }
-  .decouvrir .dc-reperes li { padding: 4px 11px 4px 9px; font-size: 12.5px; }
-  .decouvrir .dc-diapo-texte { padding: 16px 16px 16px; }
-  .decouvrir .cp-carte.dc-diapo h3 { font-size: 21px; }
-  .decouvrir .dc-chapitres { grid-template-columns: minmax(0, 1fr); }
-  .dc-chapitre { min-height: 40px; }
-  .decouvrir .dc-diapo-pied { flex-wrap: wrap; }
-  .decouvrir .dc-avec { flex-wrap: wrap; }
-  .decouvrir .cp-carte.dc-diapo .dc-diapo-pied .btn { width: 100%; justify-content: center; }
-  .decouvrir .rythme.compact { flex-wrap: wrap; justify-content: center; margin-inline: 0; padding: 10px; }
-  .decouvrir .rythme.compact .rythme-option { padding-inline: 14px; }
-}
-/* Écran très bas (portable 13 pouces avec barres du navigateur) : la fenêtre des visites tient sans défiler. */
-@media (min-width: 901px) and (max-height: 700px) {
-  .decouvrir .dc-tete { padding: 12px 14px 10px 18px; }
-  .decouvrir .dc-logo { width: 44px; height: 44px; border-radius: 12px; }
-  .decouvrir .dc-logo svg { width: 28px; height: auto; }
-  .decouvrir .dc-tete h2 { font-size: 23px; }
-  .decouvrir .dc-tete .dialog-fermer { width: 36px; height: 36px; align-self: center; }
-  .decouvrir .dc-corps { padding: 0 22px 10px; gap: 9px; }
-  .decouvrir .dc-onglet { padding: 9px 18px 10px; }
-  .decouvrir .dc-onglet + .dc-onglet::before { top: 9px; bottom: 10px; }
-  .decouvrir .dc-carrousel { gap: 9px; }
-  .decouvrir .dc-point { min-height: 34px; }
-  .decouvrir .cp-carte.dc-diapo { min-height: 0; }
-  .decouvrir .dc-diapo .cp-visuel { padding: 14px; gap: 10px; }
-  .decouvrir .dc-diapo .cp-ico { width: 64px; height: 64px; border-radius: 16px; }
-  .decouvrir .dc-diapo .cp-ico svg { width: 32px; height: 32px; }
-  .decouvrir .dc-diapo .cp-ico.logo svg { width: 40px; height: auto; }
-  .decouvrir .dc-reperes { gap: 5px; }
-  .decouvrir .dc-reperes li { padding: 4px 12px 4px 10px; font-size: 12.5px; }
-  .decouvrir .dc-diapo-texte { padding: 12px 20px 12px; gap: 6px; }
-  .decouvrir .cp-carte.dc-diapo h3 { font-size: 21px; }
-  .decouvrir .dc-chapitres { gap: 5px 12px; margin-top: 2px; }
-  .dc-chapitre { min-height: 28px; padding-block: 2px; }
-  .decouvrir .dc-num { height: 22px; }
-  .decouvrir .dc-diapo-pied { padding-top: 9px; }
-  .decouvrir .cp-carte.dc-diapo .dc-diapo-pied .btn { min-height: 40px; font-size: 14.5px; }
-  .decouvrir .rythme.compact { padding: 5px 8px 5px 14px; }
-  .decouvrir .rythme.compact .rythme-option { min-height: 32px; padding-block: 4px; }
-}
-/* En sombre, les couleurs de rôle foncées (titulaire, publication) s'éclaircissent pour rester lisibles. */
-:root[data-mode='sombre'] .decouvrir .dc-point-ico,
-:root[data-mode='sombre'] .decouvrir .dc-point.on,
-:root[data-mode='sombre'] .decouvrir .dc-etiquette,
-:root[data-mode='sombre'] .decouvrir .dc-num,
-:root[data-mode='sombre'] .dc-chapitre:hover .dc-chevron { color: color-mix(in srgb, var(--v1) 38%, var(--ink)); }
-:root[data-mode='sombre'] .decouvrir .dc-point.on { background: color-mix(in srgb, var(--v1) 26%, var(--surface)); border-color: color-mix(in srgb, var(--v1) 45%, var(--ink-3)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--v1) 45%, var(--ink-3)); }
-:root[data-mode='sombre'] .decouvrir .dc-etiquette, :root[data-mode='sombre'] .decouvrir .dc-num { background: color-mix(in srgb, var(--v1) 30%, var(--surface)); }
 .page-stats .ong { margin-top: 16px; }
 /* Sur un téléphone, le bouton principal d'un en-tête de carte passe sous le titre au lieu de l'écraser. */
 @media (max-width: 480px) {
@@ -5413,3 +5258,133 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 /* Visite guidée : le champ que Solvi explique est cerné, le temps de lire. */
 .pt-explique { outline: 2px solid var(--a-deep) !important; outline-offset: 3px; border-radius: 8px; transition: outline-color 0.2s ease; }
 @media print { .pt-explique { outline: 0 !important; } }
+
+/* === « Découvrir Solvéa » : une liste à gauche, la visite choisie à droite, le départ en pied ===
+   Hiérarchie : 1. choisir une visite (la liste, toujours visible) ; 2. comprendre ce qu'elle contient (titre, phrase,
+   repères, chapitres, personnages) ; 3. régler le rythme et lancer. Une seule couleur forte : celle du rôle, en accent. */
+.rythme-option b { display: inline-flex; align-items: center; gap: 8px; }
+.decouvrir.dc2 { --v1: var(--a-deep); width: min(1040px, 100%); height: min(720px, calc(100dvh - 40px)); max-height: none; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 30px 80px -30px rgba(var(--ink-rgb), 0.55); }
+.dc2 .v-titulaire { --v1: #1f5fbf; } .dc2 .v-titulaire2 { --v1: #1d3f73; } .dc2 .v-pharmacien { --v1: #0f8075; } .dc2 .v-equipe { --v1: #5b46c9; }
+.dc2 .v-animateur { --v1: #a8326b; } .dc2 .v-apprenti { --v1: #17694a; } .dc2 .v-etudiant { --v1: #8a5a00; } .dc2 .v-journee { --v1: #b05f00; }
+.dc2 .v-tension { --v1: #a8402c; } .dc2 .v-publication { --v1: #0a5a63; }
+/* L'en-tête : sobre, une ligne de titre, une ligne d'explication. */
+.dc2 .dc-tete { flex: none; display: flex; align-items: center; gap: 14px; padding: 18px 20px 16px 24px; background: var(--surface); color: var(--ink); border-bottom: 1px solid var(--line); animation: none; }
+.dc2 .dc-tete::after { display: none; }
+.dc2 .dc-logo { flex: none; width: 44px; height: 44px; border-radius: 11px; display: grid; place-items: center; background: var(--a-tint); box-shadow: none; }
+.dc2 .dc-tete h2 { margin: 0; font-size: 21px; letter-spacing: -0.025em; white-space: nowrap; color: var(--ink); }
+.dc2 .dc-tete p { margin: 2px 0 0; font-size: 14px; line-height: 1.4; color: var(--ink-2); max-width: none; }
+.dc2 .dc-tete .dialog-fermer { width: 36px; height: 36px; background: var(--n-1); color: var(--ink); box-shadow: none; align-self: center; }
+.dc2 .dc-tete .dialog-fermer:hover { background: var(--n-2); }
+/* Le corps : deux colonnes qui défilent chacune de leur côté. */
+.dc2 .dc-corps { flex: 1; min-height: 0; display: grid; grid-template-columns: 252px minmax(0, 1fr); gap: 0; padding: 0; border-radius: 0; background: none; outline: none; }
+/* La liste des visites. */
+.dc2 .dc-liste { min-height: 0; overflow-y: auto; padding: 14px 10px 18px; background: var(--surface-2); border-right: 1px solid var(--line); scrollbar-width: thin; }
+.dc2 .dc-famille + .dc-famille { margin-top: 14px; }
+.dc2 .dc-famille ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.dc2 .dc-famille-titre { margin: 0 0 4px; padding: 0 10px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.dc2 .dc-point { position: relative; width: 100%; min-height: 38px; display: flex; align-items: center; gap: 10px; padding: 7px 10px; border: 0; border-radius: 8px; background: none; box-shadow: none; color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; transform: none; }
+.dc2 .dc-point:hover { background: var(--n-1); transform: none; }
+.dc2 .dc-point-ico { flex: none; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 0; background: none; color: color-mix(in srgb, var(--v1) 85%, var(--ink)); line-height: 0; }
+.dc2 .dc-point-nom { flex: 1; min-width: 0; line-height: 1.25; }
+.dc2 .dc-point-duree { flex: none; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.dc2 .dc-point.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.08), inset 0 0 0 1px var(--line); }
+.dc2 .dc-point.on::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 3px 3px 0; background: var(--v1); }
+.dc2 .dc-point.on .dc-point-duree { color: var(--ink-2); }
+.dc2 .dc-point:focus-visible { outline: 2px solid var(--a-deep); outline-offset: 1px; }
+/* Le détail : il défile, le pied reste en place. */
+.dc2 .dc-detail { min-height: 0; display: flex; flex-direction: column; background: var(--surface); border: 0; border-radius: 0; box-shadow: none; padding: 0; animation: dc2-entre 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.dc2 .dc-detail.arriere { animation-name: dc2-entre-arriere; }
+@keyframes dc2-entre { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes dc2-entre-arriere { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.dc2 .dc-detail-defile { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 28px 20px; display: flex; flex-direction: column; gap: 14px; }
+.dc2 .dc-titre { display: flex; align-items: center; gap: 14px; }
+.dc2 .dc-ico { flex: none; width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--v1) 12%, var(--surface)); color: color-mix(in srgb, var(--v1) 88%, var(--ink)); }
+.dc2 .dc-ico.logo { background: var(--a-tint); }
+.dc2 .dc-titre-texte { min-width: 0; }
+.dc2 .dc-etiquette { display: block; padding: 0; margin: 0 0 2px; background: none; border-radius: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: color-mix(in srgb, var(--v1) 80%, var(--ink)); }
+.dc2 .dc-detail h3 { margin: 0; font-size: 23px; line-height: 1.2; letter-spacing: -0.025em; white-space: normal; color: var(--ink); }
+.dc2 .dc-fil { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 64ch; }
+/* Les repères : une ligne discrète, pas des pastilles. */
+.dc2 .dc-reperes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.dc2 .dc-reperes li { display: inline-flex; align-items: center; gap: 7px; padding: 0; background: none; border-radius: 0; color: var(--ink-2); font-size: 13.5px; font-weight: 600; white-space: nowrap; animation: none; }
+.dc2 .dc-reperes svg { color: var(--ink-3); }
+/* Les blocs « Chapitres » et « Vous suivez », séparés par un filet. */
+.dc2 .dc-bloc { padding-top: 14px; border-top: 1px solid var(--line); }
+.dc2 .dc-bloc-titre { margin: 0 0 8px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; font-weight: 700; color: var(--ink); }
+.dc2 .dc-bloc-titre span { font-size: 12.5px; font-weight: 500; color: var(--ink-3); }
+.dc2 .dc-chapitres { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 16px; }
+.dc2 .dc-chapitre { width: 100%; min-height: 36px; display: flex; align-items: center; gap: 10px; padding: 6px 8px; border: 0; border-radius: 7px; background: none; color: var(--ink); font: inherit; font-size: 14px; font-weight: 550; line-height: 1.3; text-align: left; cursor: pointer; }
+.dc2 .dc-chapitre:hover, .dc2 .dc-chapitre:focus-visible { background: color-mix(in srgb, var(--v1) 7%, var(--surface)); }
+.dc2 .dc-num { flex: none; width: 22px; height: auto; background: none; border-radius: 0; font-size: 13px; font-weight: 700; color: var(--ink-3); text-align: right; }
+.dc2 .dc-chapitre-nom { flex: 1; min-width: 0; text-wrap: pretty; }
+.dc2 .dc-chevron { flex: none; color: var(--ink-3); opacity: 0; transition: opacity 0.15s ease, transform 0.15s ease; }
+.dc2 .dc-chapitre:hover .dc-chevron, .dc2 .dc-chapitre:focus-visible .dc-chevron { opacity: 1; transform: translateX(2px); color: color-mix(in srgb, var(--v1) 80%, var(--ink)); }
+.dc2 .dc-avec-ligne { margin: 0; display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--ink-2); }
+.dc2 .dc-persos { display: inline-flex; flex: none; }
+.dc2 .dc-persos i { width: 28px; height: 28px; margin-left: -6px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 700; font-style: normal; box-shadow: 0 0 0 2px var(--surface); }
+.dc2 .dc-persos i:first-child { margin-left: 0; }
+/* Le pied : le rythme à gauche, le départ à droite. */
+.dc2 .dc-detail-pied { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; padding: 14px 28px; border-top: 1px solid var(--line); background: var(--surface); }
+.dc2 .dc-detail-pied .rythme.compact { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; background: none; border-radius: 0; }
+.dc2 .dc-detail-pied .rythme-titre { gap: 7px; font-size: 13px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.dc2 .dc-detail-pied .rythme-choix { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-2); }
+.dc2 .dc-detail-pied .rythme-option { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 12px; border: 0; border-radius: 7px; background: none; box-shadow: none; color: var(--ink-2); font-size: 13.5px; }
+.dc2 .dc-detail-pied .rythme-option b { gap: 6px; font-weight: 600; }
+.dc2 .dc-detail-pied .rythme-option svg { width: 15px; height: 15px; }
+.dc2 .dc-detail-pied .rythme-option.on { background: var(--surface); color: var(--a-text); box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.12), inset 0 0 0 1px var(--line); }
+.dc2 .dc-lancer { min-height: 44px; padding: 10px 22px; font-size: 15px; border-radius: 10px; }
+/* L'entrée libre. */
+.dc2 .dc-libre .dc-roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-top: 4px; }
+.dc2 .dc-role { min-height: 56px; border-radius: 10px; }
+/* Thème sombre : l'accent du rôle s'éclaircit pour rester lisible. */
+:root[data-mode='sombre'] .dc2 .dc-point-ico, :root[data-mode='sombre'] .dc2 .dc-etiquette, :root[data-mode='sombre'] .dc2 .dc-ico { color: color-mix(in srgb, var(--v1) 45%, var(--ink)); }
+:root[data-mode='sombre'] .dc2 .dc-ico { background: color-mix(in srgb, var(--v1) 24%, var(--surface)); }
+:root[data-mode='sombre'] .dc2 .dc-point.on::before { background: color-mix(in srgb, var(--v1) 55%, var(--ink)); }
+/* Portable bas : tout se resserre un peu, le pied reste visible. */
+@media (min-width: 721px) and (max-height: 760px) {
+  .dc2 .dc-tete { padding: 12px 18px 12px 20px; }
+  .dc2 .dc-logo { width: 38px; height: 38px; }
+  .dc2 .dc-tete h2 { font-size: 19px; }
+  .dc2 .dc-detail-defile { padding: 18px 24px 14px; gap: 11px; }
+  .dc2 .dc-detail h3 { font-size: 21px; }
+  .dc2 .dc-ico { width: 42px; height: 42px; }
+  .dc2 .dc-chapitre { min-height: 32px; padding-block: 4px; }
+  .dc2 .dc-detail-pied { padding: 10px 24px; }
+  .dc2 .dc-point { min-height: 34px; padding-block: 5px; }
+}
+/* Téléphone : la liste devient une rangée qu'on fait glisser, le détail prend toute la largeur. */
+@media (max-width: 720px) {
+  .decouvrir.dc2 { height: calc(100dvh - 24px); border-radius: 12px; }
+  .dc2 .dc-tete { padding: 12px 12px 12px 14px; gap: 10px; }
+  .dc2 .dc-tete p { display: none; }
+  .dc2 .dc-logo { width: 36px; height: 36px; }
+  .dc2 .dc-corps { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .dc2 .dc-liste { display: flex; gap: 6px; padding: 10px 12px; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid var(--line); scrollbar-width: none; }
+  .dc2 .dc-famille { display: contents; }
+  .dc2 .dc-famille + .dc-famille { margin: 0; }
+  .dc2 .dc-famille-titre { display: none; }
+  .dc2 .dc-famille ul { display: contents; }
+  .dc2 .dc-point { width: auto; flex: none; min-height: 36px; border: 1px solid var(--line); background: var(--surface); white-space: nowrap; }
+  .dc2 .dc-point-duree { display: none; }
+  .dc2 .dc-point.on::before { left: 8px; right: 8px; top: auto; bottom: -1px; width: auto; height: 3px; border-radius: 3px 3px 0 0; }
+  .dc2 .dc-detail-defile { padding: 16px 16px 12px; }
+  .dc2 .dc-detail h3 { font-size: 20px; }
+  .dc2 .dc-chapitres { grid-template-columns: minmax(0, 1fr); }
+  .dc2 .dc-chevron { opacity: 1; }
+  .dc2 .dc-detail-pied { padding: 10px 16px 12px; }
+  .dc2 .dc-detail-pied .rythme-titre { display: none; }
+  .dc2 .dc-lancer { flex: 1; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) { .dc2 .dc-detail { animation: none; } }
+/* L'entrée libre reste visible en bas de la liste, même quand celle-ci défile. */
+.dc2 .dc-liste { display: flex; flex-direction: column; padding-bottom: 0; }
+.dc2 .dc-famille:last-child { position: sticky; bottom: 0; margin-top: auto; padding: 10px 0 12px; background: var(--surface-2); border-top: 1px solid var(--line); }
+.dc2 .dc-famille:nth-last-child(2) { margin-bottom: 14px; }
+.dc2 .dc-avec { display: flex; align-items: center; gap: 14px; }
+.dc2 .dc-avec .dc-bloc-titre { margin: 0; }
+.dc2 .dc-num { font-variant-numeric: tabular-nums; letter-spacing: 0; }
+@media (max-width: 720px) {
+  .dc2 .dc-liste { flex-direction: row; padding-bottom: 10px; }
+  .dc2 .dc-famille:last-child { position: static; margin: 0; padding: 0; border: 0; background: none; }
+  .dc2 .dc-famille:nth-last-child(2) { margin: 0; }
+}

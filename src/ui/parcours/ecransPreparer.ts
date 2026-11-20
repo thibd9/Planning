@@ -542,8 +542,8 @@ export function ecransPreparer(o: OutilsVisite): Etape[] {
       chapitre: 'Équipe',
       qui: o.HELENE,
       cible: "[data-focus='marques']",
-      titre: 'Les marques d’une animatrice',
-      texte: () => 'Pour un animateur, la fiche ajoute les marques présentées, et pour quelles familles de produits. Sarah les retrouve sur son accueil.',
+      titre: 'Les marques d’un animateur ou d’une animatrice',
+      texte: () => 'Pour un animateur ou une animatrice, la fiche ajoute les marques présentées, et pour quelles familles de produits. Sarah les retrouve sur son accueil.',
       jouer: () => {
         equipe('p_sarah');
         ficheExemple('p_sarah');
@@ -552,7 +552,7 @@ export function ecransPreparer(o: OutilsVisite): Etape[] {
         { faire: 'expliquer', sur: "[data-focus='marques'] > summary", nom: 'Marques présentées', quoi: 'la rubrique des marques animées, avec leur nombre.' },
         { faire: 'expliquer', sur: champ('mq-mq_1'), nom: 'Marque', quoi: 'le nom d’une marque présentée, modifiable ici.', exemple: 'Lumaderm' },
         { faire: 'expliquer', sur: "[data-focus='marques'] .mq .mq-types", nom: 'Familles de produits', quoi: 'les familles de produits pour lesquelles cette marque est présentée.', sert: 'Touchez une famille pour l’ajouter ou la retirer. Une marque sans famille n’apparaît pas encore sur l’accueil de l’animateur.' },
-        { faire: 'expliquer', sur: '[aria-label="Retirer la marque Lumaderm"]', nom: 'Retirer la marque', quoi: 'retire cette marque de la fiche.', sert: 'Elle reste dans le répertoire de la pharmacie, proposée aux autres animateurs.' },
+        { faire: 'expliquer', sur: '[aria-label="Retirer la marque Lumaderm"]', nom: 'Retirer la marque', quoi: 'retire cette marque de la fiche.', sert: 'Elle reste dans le répertoire de la pharmacie, proposée aux autres animateurs et animatrices.' },
         { faire: 'expliquer', sur: champ('mq-nom'), nom: 'Une marque absente du répertoire', quoi: 'le nom d’une marque nouvelle, tel qu’on le dit au comptoir.', sert: 'Les marques déjà connues de la pharmacie se proposent au-dessus, d’un clic.' },
         { faire: 'taper', dans: '#mq-nom', texte: 'NHCO', dit: 'Écrivez le nom d’une marque', sert: 'Le bouton « Ajouter la marque » s’active.' },
         { faire: 'expliquer', sur: '#mq-ajouter', nom: 'Ajouter la marque', quoi: 'ajoute la marque à la fiche et au répertoire de la pharmacie.', sert: 'Il reste grisé tant que le nom est vide, ou si la marque est déjà présentée. Ici, on n’ajoute rien.' },
