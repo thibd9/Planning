@@ -321,7 +321,8 @@ libre sur l'horaire reprend le poste ; s'il y travaille déjà, la personne est 
 
 Les pages chargées se rangent en **onglets** (réglages : Pharmacie, Horaires, Comptoir, Planning, Paramètres ;
 statistiques : Composition, Compétences, Points forts, Activité) et la fenêtre « Comment ça marche ? » montre
-une visite à la fois, en carrousel.
+une visite à la fois, en carrousel : sa durée, ses étapes, ses chapitres et ceux que l'on y suit. Un clic sur
+un chapitre lance la visite à cet endroit.
 
 ## L'équipe : la fiche, les compétences, les statistiques
 
