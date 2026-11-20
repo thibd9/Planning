@@ -4303,6 +4303,7 @@ const CARTES: Record<Scenario, { nom: string; phrase: string; mots: string[]; te
   ecrans_suivre: { nom: 'Planifier et suivre', phrase: 'Chaque champ du quotidien.', mots: [], teinte: 'v-pharmacien', icone: <CalendarCheck size={22} /> },
   ecrans_equipe: { nom: 'L’espace de l’équipe', phrase: 'Chaque champ côté équipe.', mots: [], teinte: 'v-equipe', icone: <UsersRound size={22} /> },
 };
+type Famille = (typeof SCENARIOS)[Scenario]['groupe'] | 'libre';
 const GROUPES: { cle: (typeof SCENARIOS)[Scenario]['groupe']; titre: string; phrase: string; icone: typeof BookOpen; etiquette: (nom: string) => string }[] = [
   { cle: 'parcours', titre: 'Parcours', phrase: 'Le plus complet d’abord, puis un parcours par rôle.', icone: BookOpen, etiquette: (nom) => `Parcours ${nom.toLowerCase()}` },
   { cle: 'metiers', titre: 'Autres métiers', phrase: 'Chaque profil a son accueil : animateur ou animatrice, apprenti ou apprentie, étudiant ou étudiante.', icone: BriefcaseBusiness, etiquette: () => 'Autre métier' },
@@ -4310,11 +4311,7 @@ const GROUPES: { cle: (typeof SCENARIOS)[Scenario]['groupe']; titre: string; phr
   { cle: 'ecrans', titre: 'Écran par écran', phrase: 'Chaque écran et chaque champ : ce qu’on y met, et à quoi cela sert.', icone: MousePointerClick, etiquette: () => 'Écran par écran' },
 ];
 
-/**
- * Fenêtre « Découvrir Solvéa ». À gauche, toutes les visites, rangées par famille, et l'entrée libre : on voit
- * d'un coup d'œil ce qui existe. À droite, la visite choisie : ce qu'elle raconte, sa durée, ses chapitres (chacun
- * se lance directement) et ceux qu'on y suit. En pied, le rythme et « Lancer la visite », les deux réglages du départ.
- */
+/** Fenêtre « Découvrir Solvéa » : une visite guidée par rôle, ou une entrée libre. */
 export function ChoixParcours(): JSX.Element | null {
   const { tutoriels, ouvrirTutoriels } = useUi();
   const exemple = useMemo(() => (tutoriels ? ROLES_TEST : []), [tutoriels]);
@@ -4326,9 +4323,11 @@ export function ChoixParcours(): JSX.Element | null {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [tutoriels, ouvrirTutoriels]);
-  const [libre, setLibre] = useState(false);
+  // Une seule visite à l'écran : on passe de l'une à l'autre avec les flèches, ou l'on saute à une famille par les onglets.
+  const [onglet, setOnglet] = useState<Famille>('parcours');
   const [montree, setMontree] = useState<Scenario>('complet');
   const [sens, setSens] = useState<'avant' | 'arriere'>('avant');
+  const glisse = useRef<number | null>(null);
   if (!tutoriels) return null;
   const entrer = (identifiant: string): void => {
     store().chargerExemple(false);
@@ -4337,183 +4336,173 @@ export function ChoixParcours(): JSX.Element | null {
   };
   const toutes = Object.keys(SCENARIOS) as Scenario[];
   const montrer = (cle: Scenario): void => {
+    // Le sens du passage : la visite suivante arrive par la droite, la précédente par la gauche.
     setSens(toutes.indexOf(cle) >= toutes.indexOf(montree) ? 'avant' : 'arriere');
     setMontree(cle);
-    setLibre(false);
+    setOnglet(SCENARIOS[cle].groupe);
   };
   const voisine = (pas: number): void => montrer(toutes[(toutes.indexOf(montree) + pas + toutes.length) % toutes.length]);
+  const famille = toutes.filter((cle) => SCENARIOS[cle].groupe === SCENARIOS[montree].groupe);
   const carte = CARTES[montree];
   const visite = SCENARIOS[montree];
-  const groupe = GROUPES.find((g) => g.cle === visite.groupe);
   const chapitres = [...new Set(visite.etapes.map((e) => e.chapitre).filter((c): c is string => !!c))];
   // Ceux que l'on suit dans la visite, dans l'ordre où ils apparaissent (« Un collègue » n'est pas un personnage).
-  const personnages = [...new Set(visite.etapes.map((e) => e.qui))].filter((q) => q.includes(' · ')).slice(0, 6);
-  const prenoms = personnages.map((q) => q.split(' · ')[0]);
-  const avec = prenoms.length > 1 ? `${prenoms.slice(0, -1).join(', ')} et ${prenoms[prenoms.length - 1]}` : (prenoms[0] ?? '');
-  const [minutesVisite, etapesVisite] = visite.duree.split(' · ');
+  const personnages = [...new Set(visite.etapes.map((e) => e.qui))].filter((q) => q.includes(' · ')).slice(0, 5);
   return (
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && ouvrirTutoriels(false)}>
-      <div className="decouvrir dc2" role="dialog" aria-modal="true" aria-labelledby="decouvrir-titre">
-        <header className="dc-tete">
+      <div className="decouvrir" role="dialog" aria-modal="true" aria-labelledby="decouvrir-titre">
+        <div className="dc-tete">
           <span className="dc-logo" aria-hidden="true">
-            <Logo size={26} />
+            <Logo size={34} />
           </span>
           <div className="grow">
-            <h2 id="decouvrir-titre">Découvrir Solvéa</h2>
-            <p>Choisissez une visite guidée : chacune raconte une histoire, chapitre après chapitre. Ou entrez librement.</p>
+            <h2 id="decouvrir-titre">
+              Découvrir <span className="dc-marque">Solvéa</span>
+            </h2>
+            <p>
+              Choisissez une visite : chacune raconte une histoire, chapitre après chapitre.
+              <br />
+              Ou entrez librement pour explorer l’outil à votre rythme.
+            </p>
           </div>
           <button type="button" className="dialog-fermer" onClick={() => ouvrirTutoriels(false)} aria-label="Fermer" autoFocus>
             <X size={18} aria-hidden="true" />
           </button>
-        </header>
-        <div
-          className="dc-corps dc-carrousel"
-          tabIndex={-1}
-          onKeyDown={(e) => {
-            if (libre || (e.target as HTMLElement).closest('.rythme')) return;
-            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-              e.preventDefault();
-              voisine(1);
-            }
-            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-              e.preventDefault();
-              voisine(-1);
-            }
-          }}
-        >
-          {/* Toutes les visites, rangées par famille : le choix se fait ici, en une fois. */}
-          <nav className="dc-liste" aria-label="Visites guidées">
+        </div>
+        <div className="dc-corps">
+          {/* Les familles : trois de visites, puis l'entrée libre. */}
+          <div className="dc-onglets" role="tablist" aria-label="Familles de visites">
             {GROUPES.map((g) => (
-              <section key={g.cle} className="dc-famille" aria-labelledby={`dc-famille-${g.cle}`}>
-                <h3 className="dc-famille-titre" id={`dc-famille-${g.cle}`}>
-                  {g.titre}
-                </h3>
-                <ul>
-                  {toutes
-                    .filter((cle) => SCENARIOS[cle].groupe === g.cle)
-                    .map((cle) => (
-                      <li key={cle}>
-                        <button type="button" className={`dc-point ${CARTES[cle].teinte}${!libre && cle === montree ? ' on' : ''}`} data-nom={CARTES[cle].nom} aria-current={!libre && cle === montree ? 'true' : undefined} onClick={() => montrer(cle)}>
-                          <span className={`dc-point-ico${cle === 'complet' ? ' logo' : ''}`} aria-hidden="true">
-                            {cloneElement(CARTES[cle].icone, { size: 18 })}
-                          </span>
-                          <span className="dc-point-nom">{CARTES[cle].nom}</span>
-                          <span className="dc-point-duree num">{SCENARIOS[cle].duree.split(' · ')[0]}</span>
-                        </button>
-                      </li>
-                    ))}
-                </ul>
-              </section>
+              <button key={g.cle} type="button" role="tab" id={`dc-onglet-${g.cle}`} aria-selected={onglet === g.cle} aria-controls="dc-panneau" className={`dc-onglet${onglet === g.cle ? ' on' : ''}`} onClick={() => montrer(toutes.find((cle) => SCENARIOS[cle].groupe === g.cle) ?? 'complet')}>
+                <g.icone size={19} aria-hidden="true" />
+                {g.titre}
+                <span className="dc-onglet-nb num">{toutes.filter((cle) => SCENARIOS[cle].groupe === g.cle).length}</span>
+              </button>
             ))}
-            <section className="dc-famille" aria-labelledby="dc-famille-libre">
-              <h3 className="dc-famille-titre" id="dc-famille-libre">
-                Sans guide
-              </h3>
-              <ul>
-                <li>
-                  <button type="button" id="dc-onglet-libre" className={`dc-point dc-point-libre${libre ? ' on' : ''}`} aria-current={libre ? 'true' : undefined} onClick={() => setLibre(true)}>
-                    <span className="dc-point-ico" aria-hidden="true">
-                      <Compass size={18} />
+            <button type="button" role="tab" id="dc-onglet-libre" aria-selected={onglet === 'libre'} aria-controls="dc-panneau" className={`dc-onglet${onglet === 'libre' ? ' on' : ''}`} onClick={() => setOnglet('libre')}>
+              <Compass size={19} aria-hidden="true" />
+              Entrer librement
+            </button>
+          </div>
+          {onglet === 'libre' ? (
+            <div id="dc-panneau" role="tabpanel" aria-labelledby="dc-onglet-libre">
+          <div className="dc-libre">
+              <div className="dc-groupe-tete">
+                <h3 className="dc-sous">Ou entrer librement, en testeur</h3>
+                <span className="small soft">Sans guide : choisissez un profil et essayez tout. Les données d’exemple se remettent à neuf quand vous voulez.</span>
+              </div>
+              <div className="dc-roles">
+                {exemple.map((r) => (
+                  <button key={r.cle} type="button" className="dc-role" onClick={() => entrer(r.identifiant)} title={r.detail}>
+                    <span className="dc-av" aria-hidden="true">
+                      {r.nom.split(' ').map((x) => x.charAt(0)).join('')}
                     </span>
-                    <span className="dc-point-nom">Entrer librement</span>
+                    <span>
+                      <b>{r.nom.split(' ')[0]}</b>
+                      <span className="small soft">{r.titre}</span>
+                    </span>
                   </button>
-                </li>
-              </ul>
-            </section>
-          </nav>
-          {libre ? (
-            <div className="dc-detail dc-libre" id="dc-panneau">
-              <div className="dc-detail-defile">
-                <span className="dc-etiquette">Sans guide</span>
-                <h3>Entrer librement, en testeur</h3>
-                <p className="dc-fil">Choisissez un profil et essayez tout, sans guide. Les données d’exemple se remettent à neuf quand vous voulez, depuis l’étiquette « Espace » en haut de l’écran.</p>
-                <div className="dc-roles">
-                  {exemple.map((r) => (
-                    <button key={r.cle} type="button" className="dc-role" onClick={() => entrer(r.identifiant)} title={r.detail}>
-                      <span className="dc-av" aria-hidden="true">
-                        {r.nom.split(' ').map((x) => x.charAt(0)).join('')}
-                      </span>
-                      <span>
-                        <b>{r.nom.split(' ')[0]}</b>
-                        <span className="small soft">{r.titre}</span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
+            </div>
           ) : (
-            <article key={montree} className={`dc-detail dc-diapo ${carte.teinte} ${sens}`} data-scenario={montree} id="dc-panneau" aria-live="polite" aria-labelledby="dc-titre-visite">
-              <div className="dc-detail-defile">
-                <div className="dc-titre">
-                  <span className={`dc-ico${montree === 'complet' ? ' logo' : ''}`} aria-hidden="true">
-                    {cloneElement(carte.icone, { size: 24 })}
-                  </span>
-                  <div className="dc-titre-texte">
-                    <span className="dc-etiquette">
-                      {groupe?.titre} · {visite.role}
+            <div
+              id="dc-panneau"
+              role="tabpanel"
+              aria-labelledby={`dc-onglet-${onglet}`}
+              className="dc-carrousel"
+              aria-roledescription="carrousel"
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight') voisine(1);
+                if (e.key === 'ArrowLeft') voisine(-1);
+              }}
+            >
+              {/* Les visites de la famille, juste au-dessus de la visite montrée : un pictogramme et un nom. */}
+              <div className="dc-points" role="group" aria-label="Visites de cette famille">
+                {famille.map((cle) => (
+                  <button key={cle} type="button" className={`dc-point ${CARTES[cle].teinte}${cle === montree ? ' on' : ''}`} data-nom={CARTES[cle].nom} aria-current={cle === montree ? 'true' : undefined} onClick={() => montrer(cle)}>
+                    <span className="dc-point-ico" aria-hidden="true">
+                      {cloneElement(CARTES[cle].icone, { size: 19 })}
                     </span>
-                    <h3 id="dc-titre-visite">{visite.titre}</h3>
-                  </div>
-                </div>
-                <p className="dc-fil">{visite.fil}</p>
-                <ul className="dc-reperes" aria-label="En bref">
-                  <li>
-                    <Timer size={16} aria-hidden="true" /> {minutesVisite}
-                  </li>
-                  <li>
-                    <List size={16} aria-hidden="true" /> {etapesVisite}
-                  </li>
-                  <li>
-                    <BookOpen size={16} aria-hidden="true" /> {chapitres.length} chapitre{chapitres.length > 1 ? 's' : ''}
-                  </li>
-                </ul>
-                <section className="dc-bloc" aria-labelledby="dc-chapitres-titre">
-                  <h4 className="dc-bloc-titre" id="dc-chapitres-titre">
-                    Chapitres <span>Cliquez sur un chapitre pour commencer la visite à cet endroit.</span>
-                  </h4>
-                  <ol className="dc-chapitres">
-                    {chapitres.map((c, n) => (
-                      <li key={c}>
-                        <button type="button" className="dc-chapitre" data-chapitre={n + 1} onClick={() => lancerParcours(montree, Math.max(0, visite.etapes.findIndex((e) => e.chapitre === c)))}>
-                          <span className="dc-num" aria-hidden="true">
-                            {n + 1}
-                          </span>
-                          <span className="dc-chapitre-nom">
-                            <span className="sr">Commencer au chapitre {n + 1} : </span>
-                            {c}
-                          </span>
-                          <ChevronRight size={15} aria-hidden="true" className="dc-chevron" />
-                        </button>
+                    {CARTES[cle].nom}
+                  </button>
+                ))}
+              </div>
+              {/* Une visite à la fois. On passe à la suivante par son nom, les flèches du clavier, ou en glissant le doigt. */}
+              <div
+                className="dc-scene"
+                onTouchStart={(e) => {
+                  glisse.current = e.touches[0].clientX;
+                }}
+                onTouchEnd={(e) => {
+                  const dx = e.changedTouches[0].clientX - (glisse.current ?? e.changedTouches[0].clientX);
+                  glisse.current = null;
+                  if (Math.abs(dx) > 48) voisine(dx < 0 ? 1 : -1);
+                }}
+              >
+                <article key={montree} className={`cp-carte dc-diapo ${carte.teinte} ${sens}`} data-scenario={montree} aria-roledescription="diapositive" aria-label={`${carte.nom}, visite ${toutes.indexOf(montree) + 1} sur ${toutes.length}`} aria-live="polite">
+                  <div className="cp-visuel">
+                    <span className={`cp-ico${montree === 'complet' ? ' logo' : ''}`} aria-hidden="true">
+                      {carte.icone}
+                    </span>
+                    <ul className="dc-reperes" aria-label="En bref">
+                      <li>
+                        <Timer size={17} aria-hidden="true" /> {visite.duree.split(' · ')[0]}
                       </li>
-                    ))}
-                  </ol>
-                </section>
-                {personnages.length ? (
-                  <section className="dc-bloc dc-avec" aria-labelledby="dc-avec-titre">
-                    <h4 className="dc-bloc-titre" id="dc-avec-titre">
-                      Vous suivez
-                    </h4>
-                    <p className="dc-avec-ligne">
-                      <span className="dc-persos" aria-hidden="true">
+                      <li>
+                        <List size={17} aria-hidden="true" /> {visite.duree.split(' · ')[1]}
+                      </li>
+                      <li>
+                        <BookOpen size={17} aria-hidden="true" /> {chapitres.length} chapitre{chapitres.length > 1 ? 's' : ''}
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="dc-diapo-texte">
+                    <span className="dc-etiquette">
+                      {GROUPES.find((g) => g.cle === visite.groupe)?.etiquette(carte.nom)} · {famille.indexOf(montree) + 1} sur {famille.length}
+                    </span>
+                    <h3>{visite.titre}</h3>
+                    <p className="dc-fil">{visite.fil}</p>
+                    <ol className={`dc-chapitres${chapitres.length > 12 ? " nombreux tres" : chapitres.length > 8 ? " nombreux" : ""}`} aria-label="Chapitres">
+                      {chapitres.map((c, n) => (
+                        <li key={c}>
+                          {/* Un chapitre se lance directement : la visite s'ouvre sur son annonce. */}
+                          <button type="button" className="dc-chapitre" data-chapitre={n + 1} title={`Lancer la visite à ce chapitre`} onClick={() => lancerParcours(montree, Math.max(0, visite.etapes.findIndex((e) => e.chapitre === c)))}>
+                            <span className="dc-num" aria-hidden="true">
+                              {n + 1}
+                            </span>
+                            <span className="dc-chapitre-nom">
+                              <span className="sr">Chapitre {n + 1} : </span>
+                              {c}
+                            </span>
+                            <ChevronRight size={16} aria-hidden="true" className="dc-chevron" />
+                          </button>
+                        </li>
+                      ))}
+                    </ol>
+                    <div className="dc-diapo-pied">
+                      <span className="dc-avec">
+                        <UsersRound size={17} aria-hidden="true" />
+                        <span className="dc-avec-mot">Avec :</span>
                         {personnages.map((q) => (
-                          <i key={q} style={{ background: TEINTE_DE[q] ?? 'var(--n-4)' }}>
-                            {q.charAt(0)}
-                          </i>
+                          <span key={q} className="dc-perso">
+                            <i style={{ background: TEINTE_DE[q] ?? 'var(--n-4)' }} aria-hidden="true">
+                              {q.charAt(0)}
+                            </i>
+                            {q.split(' · ')[0]}
+                          </span>
                         ))}
                       </span>
-                      <span>{avec}</span>
-                    </p>
-                  </section>
-                ) : null}
+                      <button type="button" className="btn primary" onClick={() => lancerParcours(montree)}>
+                        <Play size={18} aria-hidden="true" /> Lancer la visite <span className="sr">{carte.nom}</span>
+                      </button>
+                    </div>
+                  </div>
+                </article>
               </div>
-              <footer className="dc-detail-pied">
-                <ChoixRythme compact />
-                <button type="button" className="btn primary dc-lancer" onClick={() => lancerParcours(montree)}>
-                  <Play size={17} aria-hidden="true" /> Lancer la visite <span className="sr">{carte.nom}</span>
-                </button>
-              </footer>
-            </article>
+              <ChoixRythme compact />
+            </div>
           )}
         </div>
       </div>

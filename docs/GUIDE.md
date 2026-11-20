@@ -67,9 +67,9 @@ L'application s'ouvre sur la page de connexion. Deux chemins partent de là :
 
 Chaque visite **raconte une histoire**, chapitre après chapitre. Au début d'un chapitre, une annonce dit ce
 qu'on va y faire, dans la peau de qui, et où l'on en est dans le plan. La fenêtre « Comment ça marche ? »
-les range dans une liste, par famille, avec leur durée ; « Entrer librement » (en testeur) est épinglé en bas.
-À droite, la visite choisie : ce qu'elle raconte, sa durée, ses chapitres (un clic sur un chapitre y fait
-commencer la visite) et les personnes suivies. En pied, le rythme (posé, normal, vif) et « Lancer la visite ».
+les range en quatre familles d'onglets, puis propose d'entrer librement, en testeur. Une visite à la fois :
+ce qu'elle raconte, sa durée, ses chapitres (un clic sur un chapitre y fait commencer la visite) et les
+personnes suivies ; dessous, le rythme (posé, normal, vif).
 
 **Les parcours**
 
