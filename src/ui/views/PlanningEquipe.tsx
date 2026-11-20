@@ -1,4 +1,4 @@
-import { CalendarRange, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
+import { CalendarRange, ChevronLeft, ChevronRight, Printer, UserRound, UsersRound } from 'lucide-react';
 import { useMemo } from 'react';
 import { JOURS, addDays, fmtHorodatage, fmtSemaine, isoWeek, weekDates, weekday, JOURS_COURT } from '../../domain/time';
 import { nomCourt } from '../../domain/types';
@@ -63,8 +63,8 @@ export function PlanningEquipe({ personId }: { personId: string }): JSX.Element 
               value={seulementMoi ? 'moi' : 'equipe'}
               onChange={(v) => setSeulementMoi(v === 'moi')}
               options={[
-                { value: 'equipe', label: 'Toute l’équipe' },
-                { value: 'moi', label: 'Mes postes' },
+                { value: 'equipe', label: <><UsersRound size={16} aria-hidden="true" />Toute l’équipe</> },
+                { value: 'moi', label: <><UserRound size={16} aria-hidden="true" />Mes postes</> },
               ]}
             />
           </div>

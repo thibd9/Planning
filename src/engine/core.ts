@@ -126,6 +126,11 @@ export function estAbsent(data: Pick<AppData, 'absences'>, personId: string, dat
   );
 }
 
+/** Un jour de repos posé par le titulaire pour cette personne (poste type « Repos »). */
+export function enRepos(data: Pick<AppData, 'repos'>, personId: string, date: ISODate): boolean {
+  return (data.repos ?? []).some((r) => r.personId === personId && r.date === date);
+}
+
 /** Le besoin s'applique-t-il à cette date (période, jour, parité de semaine) ? */
 export function besoinApplicable(b: Besoin, date: ISODate): boolean {
   if (b.decision !== 'acceptee') return false;

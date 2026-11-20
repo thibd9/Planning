@@ -5333,3 +5333,79 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .ong-barre .ong-onglet, .jr-filtre, .seg button { padding-inline: 12px; }
 /* Le compteur de l'onglet ouvert : fond clair et texte de la couleur du thème, pour un contraste franc. */
 .ong-barre .ong-onglet.on .ong-note, .jr-filtre.on .rg-nb { background: var(--surface); color: var(--a-text); }
+
+/* === En-tête de « Construire » : le titre et sa phrase, trois repères chiffrés, puis les bascules sur leur ligne === */
+.ph-sous { margin-top: 6px; font-size: 14.5px; }
+.ph-reperes { list-style: none; margin: 0; padding: 0; display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+.ph-reperes li { display: flex; align-items: center; gap: 10px; padding: 9px 14px 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.ph-reperes b { display: block; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: var(--ink); }
+.ph-reperes small { display: block; margin-top: 2px; font-size: 12px; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
+.ph-rep-ico { flex: none; width: 30px; height: 30px; display: grid; place-items: center; color: var(--a-deep); }
+.ph-reperes li.ring { gap: 10px; }
+.ph-reperes li.ring svg { flex: none; }
+.page-head > .ph-outils { flex-basis: 100%; align-items: center; margin-top: -4px; }
+.legend-titre { font-weight: 650; color: var(--ink); }
+.legend small { font-size: 11.5px; color: var(--ink-3); }
+@media (min-width: 901px) and (max-height: 820px) {
+  .ph-sous { margin-top: 3px; font-size: 14px; }
+  .ph-reperes li { padding: 6px 12px 6px 9px; }
+  .ph-reperes b { font-size: 16.5px; }
+}
+@media (max-width: 720px) {
+  .ph-reperes { width: 100%; gap: 6px; }
+  .ph-reperes li { flex: 1 1 0; min-width: 0; padding: 7px 8px; gap: 6px; }
+  .ph-rep-ico { display: none; }
+  .ph-reperes li.ring svg { width: 22px; height: 22px; }
+  .ph-reperes b { font-size: 15px; }
+  .ph-reperes small { white-space: normal; font-size: 11px; line-height: 1.2; }
+}
+@media print { .ph-reperes { display: none; } }
+/* Sur un écran de portable, les repères se resserrent pour laisser le titre sur une ligne. */
+@media (min-width: 721px) and (max-width: 1500px) {
+  .ph-rep-ico, .ph-long { display: none; }
+  .ph-reperes { gap: 8px; }
+  .ph-reperes li { padding: 6px 12px; }
+  .ph-reperes li.ring svg { width: 24px; height: 24px; }
+}
+
+/* === « Qui a demandé ce créneau ? » dans la fenêtre d'un poste : une question, un verdict en clair, les demandeurs ===
+   Le liseré de gauche dit l'état : vert quand le poste revient à qui l'a demandé, ambre quand il faut trancher. */
+.dp-pref { gap: 10px; padding: 14px 16px 14px 18px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); border-left: 3px solid var(--a-deep); }
+.dp-pref.accorde { border-left-color: var(--ok); }
+.dp-pref.plusieurs, .dp-pref.autre { border-left-color: #c98a12; }
+.dp-pref.contre { border-left-color: var(--danger, #c0392b); }
+.dp-pref.libre { border-left-color: var(--line-2, var(--ink-3)); }
+.dp-pref-tete { align-items: flex-start; justify-content: flex-start; gap: 10px; flex-wrap: nowrap; }
+.dp-pref-ico { flex: none; width: 30px; height: 30px; display: grid; place-items: center; color: var(--a-deep); }
+.dp-pref-q { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+.dp-pref-tete p { margin: 2px 0 0; }
+.dp-pref-texte { font-weight: 550; }
+.dp-pref .btn { background: var(--surface); }
+.dp-pref .btn.primary { background: var(--a-deep); color: var(--on-a); }
+.dp-pref .btn.ghost { background: none; }
+.dp-pref-qui { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; gap: 6px; }
+.dp-pref-qui li { display: flex; align-items: center; gap: 10px; padding: 6px 10px 6px 6px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); }
+.dp-pref-qui li.ici { border-color: color-mix(in srgb, var(--a-deep) 45%, var(--line)); }
+.dp-pref-qui .grow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; min-width: 0; }
+.dp-pref-qui .grow .small { flex-basis: 100%; }
+.dp-pref-tag { font-size: 11.5px; font-weight: 650; color: var(--a-text); }
+.dp-pref-chance { flex: none; min-width: 52px; text-align: right; font-size: 15px; font-weight: 700; color: var(--ink); }
+.dp-pref-aide { margin: 0; }
+.dp-pref-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.dp-pref-actions:empty { display: none; }
+.dp-pref-autres { margin: 0; padding-top: 8px; width: 100%; border-top: 1px dashed var(--line); color: var(--ink-2); line-height: 1.5; }
+.dp-pref-autres b { font-weight: 650; color: var(--ink); }
+
+/* Un jour de repos posé : une tuile grise, sobre, qui se lit « Repos » dans la grille et dans le mois. */
+.tile.repos-pose { min-height: 40px; background: repeating-linear-gradient(135deg, var(--n-1) 0 6px, var(--surface-2) 6px 12px); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; }
+.tile.repos-pose .ti { background: var(--surface); color: var(--ink-2); }
+.tile.repos-pose .tt { font-size: 12px; font-weight: 650; }
+.tile.repos-pose:hover { box-shadow: inset 0 0 0 1.5px var(--a-deep); }
+.mo-c.repos-pose { background: repeating-linear-gradient(135deg, var(--n-1) 0 5px, var(--surface-2) 5px 10px); color: var(--ink-2); font-size: 10px; font-weight: 650; box-shadow: inset 0 0 0 1px var(--line); }
+/* Le poste type « Repos », à la suite des autres. */
+.tile.ptc.ptc-repos { background: repeating-linear-gradient(135deg, var(--n-1) 0 6px, var(--surface-2) 6px 12px); box-shadow: inset 0 0 0 1px var(--line); }
+.tile.ptc.ptc-repos .ti { background: var(--surface); color: var(--ink-2); }
+.tile.ptc.ptc-repos.on { box-shadow: inset 0 0 0 2px var(--ink); }
+.dp-repos { margin-top: 2px; }
+.dp-pref-tag.recoit { color: var(--ok); }
+.dp-pref-qui li.ici { border-color: color-mix(in srgb, var(--ok) 55%, var(--line)); background: color-mix(in srgb, var(--ok) 5%, var(--surface)); }

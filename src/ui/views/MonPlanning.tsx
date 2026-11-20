@@ -1,5 +1,5 @@
 import { decrirePauses } from '../../engine/pauses';
-import { ArrowRight, Ban, BellRing, CalendarClock, CalendarDays, Check, Coffee, HandHelping, Handshake, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
+import { ArrowRight, Ban, BellRing, CalendarClock, CalendarDays, CalendarRange, Check, Coffee, HandHelping, Handshake, Plus, Printer, Stethoscope, Sun, Sunset, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { peutGerer } from '../../domain/acces';
 import { JOURS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, weekDates, weekday, ferie } from '../../domain/time';
@@ -236,8 +236,8 @@ export function MonPlanning({ personId }: { personId: string }): JSX.Element {
               value={affichage}
               onChange={setAffichage}
               options={[
-                { value: 'semaine', label: 'Semaine' },
-                { value: 'calendrier', label: 'Calendrier' },
+                { value: 'semaine', label: <><CalendarRange size={16} aria-hidden="true" />Semaine</> },
+                { value: 'calendrier', label: <><CalendarDays size={16} aria-hidden="true" />Calendrier</> },
               ]}
             />
           </div>

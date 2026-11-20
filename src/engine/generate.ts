@@ -8,6 +8,7 @@ import {
   effectifRequis,
   equipeInterne,
   estAbsent,
+  enRepos,
   estFermeture,
   estOuverture,
   minutesSemaine,
@@ -210,7 +211,7 @@ export function generer(source: AppData, monday: ISODate, opts: GenOptions): Gen
   const permis: number[][][] = personnes.map((p, pi) =>
     dates.map((date, d) => {
       if (fixeJour[pi][d]) return [0];
-      if (estAbsent(data, p.id, date)) return [0];
+      if (estAbsent(data, p.id, date) || enRepos(data, p.id, date)) return [0];
       const reconnus = besoinsDe(data, p.id, date).filter((b) => b.statut === 'reconnue');
       const ok = [0];
       options[d].forEach((o, oi) => {

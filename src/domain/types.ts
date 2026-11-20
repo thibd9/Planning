@@ -646,10 +646,18 @@ export interface Souhait {
 }
 export const SOUHAIT_LABEL: Record<SouhaitChoix, string> = { matin: 'Matin', journee: 'Journée', soir: 'Après-midi', repos: 'Repos' };
 
+/** Un jour de repos posé à la main par le titulaire : la personne ne travaille pas ce jour-là, et le calcul le respecte. */
+export interface ReposPose {
+  personId: string;
+  date: ISODate;
+}
+
 export interface AppData {
   officine: Officine;
   /** Préférences du mois, posés jour par jour dans le modèle collaboratif. */
   souhaits?: Souhait[];
+  /** Les jours de repos posés dans le planning (poste type « Repos »). */
+  repos?: ReposPose[];
   regularisations?: Regularisation[];
   /** Documents déposés par chacun dans son espace ; ils restent sur l'appareil. */
   documents?: DocumentGed[];

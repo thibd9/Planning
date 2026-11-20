@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { DEMO_VERSION, seed, vierge } from '../data/seed';
 import { estSecondaire } from '../domain/acces';
 import { REGLES_INITIALES } from '../domain/rules';
-import { MOIS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
+import { MOIS, addDays, dayIndex, fmtDateCourt, fmtDuree, fmtHHMM, fmtSemaine, fromDayIndex, mondayOf, todayISO, uid, weekDates, fmtHeure } from '../domain/time';
 import type { AbsenceType, Absence, AppData, Besoin, BesoinStatut, EcartType, Garde, ISODate, JournalEntry, Justificatif, Mission, Officine, Person, Regle, RegulType, Regularisation, RendezVous, Shift, Souhait, SouhaitChoix, Urgence, Remplacement, DocumentGed, MotifRemplacement, Annonce } from '../domain/types';
 import { ABSENCE_LABEL, ECART_LABEL, GARDE_LABEL, MOTIF_RETARD_LABEL, REGUL_LABEL, URGENCE_LABEL, nomCourt, libelleAbsence } from '../domain/types';
 import type { AvisRetard, CadreFormation, DetailAccident, MotifRetard } from '../domain/types';
@@ -211,6 +211,10 @@ export interface Store {
   moveShift: (id: string, personId: string, date: ISODate) => void;
   appliquerGeneration: (monday: ISODate, res: GenResult) => void;
   viderSemaine: (monday: ISODate) => void;
+  /** Remet à zéro le planning d'une période : postes et repos posés, des jours à venir seulement (le passé reste). */
+  remettreAZero: (from: ISODate, to: ISODate) => void;
+  /** Pose un jour de repos : le poste de ce jour-là est retiré. */
+  poserRepos: (personId: string, date: ISODate) => void;
   copierSemaine: (source: ISODate, cible: ISODate) => void;
   publier: (monday: ISODate, accords: string[], bloquantsAssumes: number) => void;
   /**
@@ -888,7 +892,26 @@ export const useStore = create<Store>((set, get) => {
       retouche((d) => ({
         ...d,
         shifts: d.shifts.some((s) => s.id === shift.id) ? d.shifts.map((s) => (s.id === shift.id ? shift : s)) : d.shifts.concat(shift),
+        // Un poste posé un jour de repos remplace ce repos.
+        ...(d.repos?.some((r) => r.personId === shift.personId && r.date === shift.date) ? { repos: d.repos.filter((r) => !(r.personId === shift.personId && r.date === shift.date)) } : {}),
       })),
+    poserRepos: (personId, date) =>
+      retouche((d) => ({
+        ...d,
+        shifts: d.shifts.filter((s) => !(s.personId === personId && s.date === date)),
+        repos: (d.repos ?? []).filter((r) => !(r.personId === personId && r.date === date)).concat({ personId, date }),
+      })),
+    remettreAZero: (from, to) =>
+      retouche((d, today) => {
+        const debut = from > today ? from : today;
+        if (debut > to) return d;
+        const dans = (date: ISODate): boolean => date >= debut && date <= to;
+        const retires = d.shifts.filter((s) => dans(s.date)).length;
+        const next = { ...d, shifts: d.shifts.filter((s) => !dans(s.date)), repos: (d.repos ?? []).filter((r) => !dans(r.date)) };
+        return retires
+          ? journal(next, { type: 'modification', titre: 'Planning remis à zéro', detail: `Du ${fmtDateCourt(debut)} au ${fmtDateCourt(to)} : ${retires} poste${retires > 1 ? 's' : ''} retiré${retires > 1 ? 's' : ''} du brouillon. Rien n'est publié sans validation.`, semaine: mondayOf(debut) })
+          : next;
+      }),
     deleteShift: (id) => retouche((d) => ({ ...d, shifts: d.shifts.filter((s) => s.id !== id) })),
     moveShift: (id, personId, date) =>
       retouche((d) => {

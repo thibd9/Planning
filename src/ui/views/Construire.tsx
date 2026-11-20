@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, Ban, BookOpenCheck, Boxes, CalendarCheck, CalendarClock, CalendarHeart, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, CircleX, Coffee, Copy, Dices, Eye, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Stethoscope, Sun, Sunrise, Sunset, Trash2, Undo2, UserRoundPlus, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Ban, BookOpenCheck, Boxes, CalendarCheck, CalendarClock, CalendarDays, CalendarHeart, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, CircleX, Clock3, Coffee, Coins, Copy, Dices, Eye, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Moon, Pencil, Pill as PillIcon, Plus, Printer, Redo2, RotateCcw, Scale, ShieldAlert, Sparkles, Sprout, Stethoscope, Sun, Sunrise, Sunset, Trash2, Undo2, UserRound, UserRoundPlus, Users, UsersRound } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { JOURS, JOURS_COURT, addDays, dayIndex, fmtDecimal, fmtDuree, fmtEuros, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, parseHHMM, totalDuree, uid, weekDates, weekday, fmtDateCourt } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
@@ -6,6 +6,7 @@ import { ABSENCE_LABEL, ACTIVITE_LABEL, MISSION_LABEL, SOUHAIT_LABEL, estPharmac
 import {
   besoinsDe,
   decrireBesoin,
+  enRepos,
   minutesSemaine,
   minutesTravail,
   ouverture,
@@ -66,7 +67,7 @@ const GROUPES: { titre: string; note?: string; test: (p: Person) => boolean; cou
 export function Construire(): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
-  const { undo, redo, past, future, moveShift, copierSemaine, viderSemaine } = useStore();
+  const { undo, redo, past, future, moveShift, copierSemaine, remettreAZero } = useStore();
   const { semaine, setSemaine, focus, setFocus, dire, voirJour, planVue, setPlanVue, seulementMoi, setSeulementMoi, session, prefsVisibles, setPrefsVisibles } = useUi();
   // Les préférences ne se recueillent que si le planning se prépare avec l'équipe.
   const collaboratifEquipe = estCollaboratif(data.officine);
@@ -128,6 +129,8 @@ export function Construire(): JSX.Element {
     return total ? Math.round(((total - sans) / total) * 100) : 0;
   }, [data, dates]);
   const joursAvant = dayIndex(semaine) - dayIndex(today);
+  const personnesPosees = new Set(postes.map((x) => x.personId)).size;
+  const minutesPosees = postes.reduce((n, x) => n + minutesTravail(x), 0);
   const sansEquipe = !data.personnes.some((p) => !p.externe);
   const aller = useUi((s) => s.aller);
   const visiblesIssues = (postes.length ? issues : []).filter(
@@ -145,15 +148,54 @@ export function Construire(): JSX.Element {
           <h1>
             Comment couvrir <span className="hl">{planVue === 'mois' ? 'le mois' : 'la semaine'}</span> ?
           </h1>
+          <p className="ph-sous">Posez les postes, vérifiez que l’équipe est au complet, puis publiez.</p>
         </div>
-        <div className="row wrap no-print" style={{ gap: 8 }}>
+        {/* La semaine en trois chiffres : qui est au planning, combien d'heures, et la part d'ouverture couverte par un pharmacien. */}
+        {planVue === 'semaine' && postes.length && !sansEquipe ? (
+          <ul className="ph-reperes" aria-label="La semaine en chiffres">
+            <li>
+              <span className="ph-rep-ico" aria-hidden="true">
+                <UsersRound size={18} />
+              </span>
+              <span>
+                <b className="num">{personnesPosees}</b>
+                <small>
+                  {personnesPosees > 1 ? 'personnes' : 'personne'}
+                  <span className="ph-long"> au planning</span>
+                </small>
+              </span>
+            </li>
+            <li>
+              <span className="ph-rep-ico" aria-hidden="true">
+                <Clock3 size={18} />
+              </span>
+              <span>
+                <b className="num">{fmtDuree(minutesPosees)}</b>
+                <small>
+                  planifiées<span className="ph-long"> cette semaine</span>
+                </small>
+              </span>
+            </li>
+            <li className="ring" data-aide="Part des minutes d’ouverture où un pharmacien est planifié">
+              <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="var(--track)" strokeWidth="3.5" />
+                <circle cx="12" cy="12" r="9" fill="none" stroke={couverture === 100 ? 'var(--ok)' : '#a86400'} strokeWidth="3.5" strokeLinecap="round" strokeDasharray={`${(couverture / 100) * 56.5} 56.5`} transform="rotate(-90 12 12)" />
+              </svg>
+              <span>
+                <b className="num">{couverture} %</b>
+                <small>pharmacien présent</small>
+              </span>
+            </li>
+          </ul>
+        ) : null}
+        <div className="row wrap no-print ph-outils" style={{ gap: 8 }}>
           <Seg<'equipe' | 'moi'>
             label="Personnes affichées"
             value={seulementMoi ? 'moi' : 'equipe'}
             onChange={(v) => setSeulementMoi(v === 'moi')}
             options={[
-              { value: 'equipe', label: 'Toute l’équipe' },
-              { value: 'moi', label: 'Mes postes' },
+              { value: 'equipe', label: <><UsersRound size={16} aria-hidden="true" />Toute l’équipe</> },
+              { value: 'moi', label: <><UserRound size={16} aria-hidden="true" />Mes postes</> },
             ]}
           />
           <Seg<'semaine' | 'mois'>
@@ -161,8 +203,8 @@ export function Construire(): JSX.Element {
             value={planVue}
             onChange={setPlanVue}
             options={[
-              { value: 'semaine', label: 'Semaine' },
-              { value: 'mois', label: 'Mois' },
+              { value: 'semaine', label: <><CalendarRange size={16} aria-hidden="true" />Semaine</> },
+              { value: 'mois', label: <><CalendarDays size={16} aria-hidden="true" />Mois</> },
             ]}
           />
           <button type="button" className="btn ghost icon" onClick={undo} disabled={!past.length} aria-label="Annuler la dernière manipulation" title="Annuler (Ctrl + Z)">
@@ -226,36 +268,15 @@ export function Construire(): JSX.Element {
                   <Pencil size={12} /> Brouillon
                 </Pill>
               )}
-              {postes.length ? (
-                <span className="ring" data-aide="Part des minutes d’ouverture où un pharmacien est planifié">
-                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" fill="none" stroke="var(--track)" strokeWidth="3.5" />
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="9"
-                      fill="none"
-                      stroke={couverture === 100 ? 'var(--ok)' : '#a86400'}
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      strokeDasharray={`${(couverture / 100) * 56.5} 56.5`}
-                    />
-                  </svg>
-                  <span className="num">{couverture} %</span>
-                  <small>
-                    pharmacien présent{joursAvant > 0 && statut?.statut !== 'publie' ? ` · J − ${joursAvant}` : ''}
-                  </small>
-                </span>
-              ) : null}
               <div className="right row wrap no-print" style={{ gap: 8 }}>
                 <Seg<Lecture>
                   label="Lecture du planning"
                   value={lecture}
                   onChange={setLecture}
                   options={[
-                    { value: 'heures', label: 'Heures' },
-                    ...(couts ? [{ value: 'cout' as const, label: 'Coût' }] : []),
-                    { value: 'equite', label: 'Équité' },
+                    { value: 'heures', label: <><Clock3 size={16} aria-hidden="true" />Heures</> },
+                    ...(couts ? [{ value: 'cout' as const, label: <><Coins size={16} aria-hidden="true" />Coût</> }] : []),
+                    { value: 'equite', label: <><Scale size={16} aria-hidden="true" />Équité</> },
                   ]}
                 />
                 {!passee ? (
@@ -271,6 +292,20 @@ export function Construire(): JSX.Element {
                     >
                       <Copy size={15} /> Recopier
                     </button>
+                    {postes.length || (data.repos ?? []).some((r) => r.date >= semaine && r.date <= addDays(semaine, 6)) ? (
+                      <button
+                        type="button"
+                        className="btn"
+                        id="plan-zero"
+                        title={semaine <= today ? 'Retire les postes et les repos des jours à venir de la semaine. Les jours passés restent.' : 'Retire tous les postes et les repos de la semaine'}
+                        onClick={() => {
+                          remettreAZero(semaine, addDays(semaine, 6));
+                          dire(statut?.statut === 'publie' ? 'Semaine remise à zéro dans le brouillon. L’équipe garde le planning publié tant que vous ne publiez pas.' : 'Semaine remise à zéro.', true);
+                        }}
+                      >
+                        <RotateCcw size={15} /> Remettre à zéro
+                      </button>
+                    ) : null}
                     <button type="button" className="btn magic" data-tour="proposer" onClick={() => setGeneration(true)}>
                       <Sparkles size={15} /> Proposer un planning
                     </button>
@@ -377,6 +412,7 @@ export function Construire(): JSX.Element {
                               const absence = data.absences.find((a) => a.personId === p.id && a.statut === 'approuvee' && a.from <= date && date <= a.to);
                               const reconnus = besoinsDe(data, p.id, date).filter((b) => b.statut === 'reconnue');
                               const gardes = data.gardes.filter((g) => g.personId === p.id && g.date === date);
+                              const reposPose = !duJour.length && enRepos(data, p.id, date);
                               const missions = data.missions.filter((m) => m.personId === p.id && m.date === date);
                               const signale = !!focus && focus.personId === p.id && (!focus.date || focus.date === date);
                               // La préférence donnée pour ce jour, lisible dans la case : suivie, ou différente du poste posé.
@@ -466,7 +502,16 @@ export function Construire(): JSX.Element {
                                       <span className="sr">{duJour.length ? (suivi ? ', préférence suivie' : ', préférence non suivie') : ', préférence demandée'}</span>
                                     </span>
                                   ) : null}
-                                  {!duJour.length && !absence && !gardes.length && ouverts[i] && !passee ? (
+                                  {reposPose ? (
+                                    <button type="button" className="tile repos-pose" onClick={() => setEdition({ personId: p.id, date })} title="Jour de repos posé. Cliquez pour le changer en poste.">
+                                      <span className="ti" aria-hidden="true">
+                                        <Moon size={15} />
+                                      </span>
+                                      <span className="tt">Repos</span>
+                                      <span className="sr">, {nomCourt(p)} {JOURS[weekday(date)]}, modifier</span>
+                                    </button>
+                                  ) : null}
+                                  {!duJour.length && !reposPose && !absence && !gardes.length && ouverts[i] && !passee ? (
                                     <button type="button" className="add" onClick={() => setEdition({ personId: p.id, date })} aria-label={`Ajouter un poste à ${nomCourt(p)} ${JOURS[weekday(date)]}`}>
                                       <Plus size={15} />
                                     </button>
@@ -492,10 +537,11 @@ export function Construire(): JSX.Element {
                   </li>
                 );
               })}
-              <li><i className="matin" /> Matin</li>
-              <li><i className="milieu" /> Journée</li>
-              <li><i className="journee" /> Journée longue</li>
-              <li><i className="soir" /> Soir</li>
+              <li className="legend-titre">Couleurs des postes :</li>
+              <li title="Le poste finit à 14 h 30 au plus tard"><i className="matin" /> Matin <small>fin avant 14 h 30</small></li>
+              <li title="Le poste finit avant 18 h"><i className="milieu" /> Journée <small>fin avant 18 h</small></li>
+              <li title="Le poste finit à 18 h ou après"><i className="journee" /> Journée longue <small>jusqu’au soir</small></li>
+              <li title="Le poste commence à 11 h 30 ou après"><i className="soir" /> Soir <small>début à 11 h 30 ou après</small></li>
               <li><i className="garde" /> Garde</li>
               <li><i className="conge" /> Congé</li>
               <li><i className="arret" /> Arrêt</li>
@@ -548,18 +594,6 @@ export function Construire(): JSX.Element {
                 <Pill tone="warn" title="Alertes d'organisation">
                   {nb.alerte} alerte{nb.alerte > 1 ? 's' : ''}
                 </Pill>
-              ) : null}
-              {postes.length && !passee ? (
-                <button
-                  type="button"
-                  className="btn ghost sm danger"
-                  onClick={() => {
-                    viderSemaine(semaine);
-                    dire('Semaine vidée.', true);
-                  }}
-                >
-                  <Trash2 size={14} /> Vider la semaine
-                </button>
               ) : null}
             </div>
             <div className="card-body">
@@ -778,7 +812,7 @@ export function CarteBlocage({ b, data, ouvert }: { b: Blocage; data: AppData; o
 
 function DialoguePoste({ personId, date, shift, onClose }: { personId: string; date: ISODate; shift?: Shift; onClose: () => void }): JSX.Element {
   const data = useStore((s) => s.data);
-  const { saveShift, deleteShift } = useStore();
+  const { saveShift, deleteShift, poserRepos } = useStore();
   const dire = useUi((s) => s.dire);
   const today = useStore((s) => s.today);
   // La personne du poste : celle de la case, ou celle à qui l'on accorde sa préférence.
@@ -794,6 +828,8 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
   const [pauseDebut, setPauseDebut] = useState(fmtHHMM(shift?.pauseStart ?? postes[0]?.pauseStart ?? 750));
   const [pauseFin, setPauseFin] = useState(fmtHHMM(shift?.pauseEnd ?? postes[0]?.pauseEnd ?? 810));
   const [activite, setActivite] = useState<Activite>(shift?.activite ?? 'comptoir');
+  // Le poste type « Repos » : ce jour-là, la personne ne travaille pas. Ouvert sur un repos déjà posé, il est choisi d'emblée.
+  const [repos, setRepos] = useState(!shift && enRepos(data, personId, date));
   // Les pauses courtes : une heure de début et une durée chacune.
   const [courtes, setCourtes] = useState<{ cle: string; debut: string; duree: number }[]>(() => (shift ? (shift.pauses ?? []) : (postes[0]?.pauses ?? [])).map((x) => ({ cle: uid('pc'), debut: fmtHHMM(x.start), duree: x.end - x.start })));
 
@@ -838,6 +874,12 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
   // Ceux qui demandent ce créneau et n'ont pas encore de poste ce jour-là (la personne de la fenêtre comprise).
   const candidats = forme ? demandes[forme].filter((id) => id === qui || !data.shifts.some((x) => x.personId === id && x.date === date && x.id !== shift?.id)) : [];
   const sonSouhait = souhaitDe(data, qui, date);
+  // Où en est-on : personne n'a demandé, la personne de la case est seule à demander, quelqu'un d'autre l'est,
+  // plusieurs demandent, ou la personne de la case a demandé un repos.
+  const verdict = sonSouhait === 'repos' ? 'contre' : !candidats.length ? 'libre' : candidats.length > 1 ? 'plusieurs' : candidats[0] === qui ? 'accorde' : 'autre';
+  // Les chances de chacun avant le tirage : elles ne dépendent pas du hasard, seulement des préférences déjà suivies.
+  const chances = candidats.length > 1 ? (tirerAuSort(data, candidats, today, 0)?.chances ?? null) : null;
+  const autresFormes = (['matin', 'journee', 'soir', 'repos'] as const).filter((f) => f !== forme && demandes[f].length).map((f) => [f, demandes[f]] as const);
   const accorder = (id: string, pourquoi: string): void => {
     setQui(id);
     setRaison(pourquoi);
@@ -878,7 +920,11 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
               <Trash2 size={15} /> Supprimer
             </button>
           ) : null}
-          {brouillon ? (
+          {repos ? (
+            <span className="dp-total" id="dp-total" style={shift ? undefined : { marginRight: 'auto' }}>
+              Jour de repos
+            </span>
+          ) : brouillon ? (
             <span className="dp-total num" id="dp-total" style={shift ? undefined : { marginRight: 'auto' }}>
               {fmtDuree(minutesTravail(brouillon))} de travail
             </span>
@@ -889,8 +935,14 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           <button
             type="button"
             className="btn primary"
-            disabled={!brouillon}
+            disabled={!brouillon && !repos}
             onClick={() => {
+              if (repos) {
+                poserRepos(qui, date);
+                dire(`${JOURS[wd].charAt(0).toUpperCase() + JOURS[wd].slice(1)} : jour de repos pour ${person.prenom}.`, true);
+                onClose();
+                return;
+              }
               if (!brouillon) return;
               saveShift(brouillon);
               dire(shift ? 'Poste modifié.' : raison ? `Poste ajouté pour ${person.prenom} : sa préférence est accordée.` : 'Poste ajouté.', true);
@@ -911,18 +963,18 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           </div>
         </div>
       ) : null}
-      {postes.length ? (
+      {(
         <div className="ptc-bloc">
           <div className="ptc-tete">
             <span className="eyebrow">Poste type</span>
-            <span className="small soft">Un clic remplit les horaires et les pauses.</span>
+            <span className="small soft">Un clic remplit les horaires et les pauses. « Repos » laisse la journée libre.</span>
           </div>
           <div className="ptc-liste" role="group" aria-label="Postes types">
             {postes.map((p) => {
               const teinte = p.couleur ? `k-${p.couleur}` : momentDe(p);
               const moment = momentDe(p);
               const Picto = moment === 'matin' ? Sunrise : moment === 'soir' ? Sunset : Sun;
-              const choisi = debut === fmtHHMM(p.start) && fin === fmtHHMM(p.end);
+              const choisi = !repos && debut === fmtHHMM(p.start) && fin === fmtHHMM(p.end);
               return (
               <button
                 key={p.id}
@@ -930,6 +982,7 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
                 className={`tile ptc ${teinte}${choisi ? ' on' : ''}`}
                 aria-pressed={choisi}
                 onClick={() => {
+                  setRepos(false);
                   setDebut(fmtHHMM(p.start));
                   setFin(fmtHHMM(p.end));
                   setAvecPause(p.pauseStart !== undefined);
@@ -956,9 +1009,32 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
               </button>
               );
             })}
+            <button type="button" className={`tile ptc ptc-repos${repos ? ' on' : ''}`} id="ptc-repos" aria-pressed={repos} onClick={() => { setRepos(true); setQui(personId); setRaison(undefined); setTirage(null); }}>
+              <span className="ti" aria-hidden="true">
+                <Moon size={17} />
+              </span>
+              <span className="ptc-texte">
+                <b>Repos</b>
+                <span className="num ptc-duree">{shift ? 'retire ce poste' : 'ne travaille pas ce jour'}</span>
+              </span>
+              {repos ? <Check size={16} strokeWidth={3} className="ptc-coche" aria-hidden="true" /> : null}
+            </button>
           </div>
         </div>
-      ) : null}
+      )}
+      {repos ? (
+        <div className={`notice ${sonSouhait === 'repos' ? 'ok' : 'info'} dp-repos`} id="dp-repos">
+          <Moon size={16} aria-hidden="true" />
+          <div>
+            <b>{person.prenom} ne travaille pas ce jour-là.</b>
+            <div>
+              {shift ? 'Le poste prévu sera retiré. ' : ''}
+              {sonSouhait === 'repos' ? 'C’est aussi sa préférence : elle est respectée.' : 'Le repos se voit dans la grille, et les propositions de planning le respectent.'}
+            </div>
+          </div>
+        </div>
+      ) : (
+      <>
       {/* Les horaires et la pause déjeuner sur une seule ligne : c'est ce que l'on règle le plus souvent. */}
       <div className="dp-horaires">
         <label className="field">
@@ -988,55 +1064,105 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           </>
         ) : null}
       </div>
-      {/* Les préférences du jour : qui demande ce créneau, et le moyen de trancher sans quitter la fenêtre. */}
-      {collaboratif && forme ? (
-        <section className="dp-pref" id="dp-preferences" aria-label="Préférences de l’équipe pour ce jour">
+      {/* Les préférences du jour : qui a demandé ce créneau, ce que cela implique, et le moyen de trancher sans quitter la fenêtre. */}
+      {collaboratif && forme && brouillon ? (
+        <section className={`dp-pref ${verdict}`} id="dp-preferences" aria-label="Préférences de l’équipe pour ce jour">
           <div className="dp-pref-tete">
-            <span className="eyebrow">Préférences du jour</span>
-            <span className="dp-pref-formes">
-              {(['matin', 'journee', 'soir', 'repos'] as const).map((f) => (
-                <span key={f} className={`dp-pref-forme${f === forme ? ' ici' : ''}${demandes[f].length ? '' : ' vide'}`} title={demandes[f].length ? enListe(demandes[f]) : 'Personne'}>
-                  {SOUHAIT_LABEL[f]} <b className="num">{demandes[f].length}</b>
-                </span>
-              ))}
+            <span className="dp-pref-ico" aria-hidden="true">
+              <CalendarHeart size={18} />
             </span>
+            <div className="grow">
+              <h3 className="dp-pref-q">Qui a demandé ce créneau ?</h3>
+              <p className="small soft">
+                Ce poste ({fmtHeure(brouillon.start)} – {fmtHeure(brouillon.end)}) correspond à la préférence « {SOUHAIT_LABEL[forme]} ».
+              </p>
+            </div>
           </div>
           <p className="dp-pref-texte" id="dp-pref-texte">
-            {sonSouhait === 'repos'
-              ? `${person.prenom} a demandé à ne pas travailler ce jour-là.`
-              : sonSouhait === forme
-                ? `${person.prenom} a demandé ce créneau${candidats.length > 1 ? `, comme ${enListe(candidats.filter((x) => x !== qui))}` : ' : sa préférence est respectée'}.`
-                : candidats.length
-                  ? `${candidats.length > 1 ? `${candidats.length} personnes demandent` : `${enListe(candidats)} demande`} ce créneau (${SOUHAIT_LABEL[forme].toLowerCase()})${candidats.length > 1 ? ` : ${enListe(candidats)}` : ''}.${sonSouhait ? ` ${person.prenom} a demandé : ${SOUHAIT_LABEL[sonSouhait].toLowerCase()}.` : ''}`
-                  : `Personne n’a demandé ce créneau (${SOUHAIT_LABEL[forme].toLowerCase()}).${sonSouhait ? ` ${person.prenom} a demandé : ${SOUHAIT_LABEL[sonSouhait].toLowerCase()}.` : ''}`}
+            {verdict === 'contre'
+              ? `${person.prenom} a demandé un repos ce jour-là : ce poste irait contre sa préférence.${candidats.length ? ` ${candidats.length > 1 ? `${enListe(candidats)} ont demandé ce créneau.` : `${enListe(candidats)} a demandé ce créneau.`}` : ''}`
+              : verdict === 'libre'
+                ? `Personne n’a demandé ce créneau. Le poste est libre : vous le donnez à qui vous voulez.${sonSouhait ? ` ${person.prenom} a demandé : ${SOUHAIT_LABEL[sonSouhait].toLowerCase()}.` : ''}`
+                : verdict === 'accorde'
+                  ? `${person.prenom} est la seule personne à avoir demandé ce créneau : le poste lui revient.`
+                  : verdict === 'autre'
+                    ? `${enListe(candidats)} est la seule personne à avoir demandé ce créneau. ${person.prenom} ne l’a pas demandé${sonSouhait ? ` (préférence : ${SOUHAIT_LABEL[sonSouhait].toLowerCase()})` : ''}.`
+                    : `${candidats.length} personnes ont demandé ce créneau : ${enListe(candidats)}.`}
           </p>
-          {candidats.length === 1 && candidats[0] !== qui ? (
-            <button type="button" className="btn sm" id="dp-accorder" onClick={() => accorder(candidats[0], 'Préférence accordée : seule personne à avoir demandé ce créneau.')}>
-              <Check size={15} aria-hidden="true" /> Accorder ce poste à {prenomDe(candidats[0])}
-            </button>
+          {/* Plusieurs demandes : qui sont-elles, et quelles sont leurs chances si l'on tire au sort. */}
+          {candidats.length > 1 && chances ? (
+            <>
+              <ul className="dp-pref-qui" aria-label="Personnes qui ont demandé ce créneau">
+                {chances.map((c) => {
+                  const q = data.personnes.find((x) => x.id === c.personId);
+                  return (
+                    <li key={c.personId} className={c.personId === qui ? 'ici' : undefined}>
+                      <Avatar person={q} />
+                      <span className="grow">
+                        <b>{q?.prenom}</b>
+                        {c.personId === personId ? <span className="dp-pref-tag">dans cette case</span> : null}
+                        {c.personId === qui && qui !== personId ? <span className="dp-pref-tag recoit">reçoit le poste</span> : null}
+                        <span className="small soft">{c.total ? `${c.suivies} préférence${c.suivies > 1 ? 's' : ''} suivie${c.suivies > 1 ? 's' : ''} sur ${c.total} ces 8 semaines` : 'Aucune préférence passée à rattraper'}</span>
+                      </span>
+                      <span className="dp-pref-chance num" title="Chances au tirage au sort">
+                        {c.pourcent} %
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              {qui === personId ? (
+                <p className="small soft dp-pref-aide">
+                  Un seul poste à donner ? Tirez au sort : celui dont les préférences ont été le moins suivies a le plus de chances. Sinon, enregistrez : le poste reste à {person.prenom}.
+                </p>
+              ) : null}
+            </>
           ) : null}
-          {candidats.length > 1 ? (
-            <button
-              type="button"
-              className="btn sm"
-              id="dp-tirer"
-              onClick={() => {
-                const t = tirerAuSort(data, candidats, today, Math.random());
-                if (!t) return;
-                setTirage(t);
-                accorder(t.gagnant, `Préférence départagée par tirage au sort entre ${enListe(candidats)}.`);
-              }}
-            >
-              <Dices size={15} aria-hidden="true" /> {tirage ? 'Retirer au sort' : `Tirer au sort entre ${enListe(candidats)}`}
-            </button>
-          ) : null}
+          <div className="dp-pref-actions">
+            {candidats.length === 1 && candidats[0] !== qui ? (
+              <button type="button" className="btn sm primary" id="dp-accorder" onClick={() => accorder(candidats[0], 'Préférence accordée : seule personne à avoir demandé ce créneau.')}>
+                <Check size={15} aria-hidden="true" /> Accorder ce poste à {prenomDe(candidats[0])}
+              </button>
+            ) : null}
+            {candidats.length > 1 ? (
+              <button
+                type="button"
+                className="btn sm primary"
+                id="dp-tirer"
+                onClick={() => {
+                  const t = tirerAuSort(data, candidats, today, Math.random());
+                  if (!t) return;
+                  setTirage(t);
+                  accorder(t.gagnant, `Préférence départagée par tirage au sort entre ${enListe(candidats)}.`);
+                }}
+              >
+                <Dices size={15} aria-hidden="true" /> {tirage ? 'Retirer au sort' : `Tirer au sort entre ${enListe(candidats)}`}
+              </button>
+            ) : null}
+            {qui !== personId ? (
+              <button type="button" className="btn sm ghost" id="dp-revenir" onClick={() => { setQui(personId); setRaison(undefined); setTirage(null); }}>
+                <Undo2 size={15} aria-hidden="true" /> Rendre le poste à {prenomDe(personId)}
+              </button>
+            ) : null}
+          </div>
           {tirage ? (
             <p className="dp-pref-resultat" id="dp-tirage" role="status">
-              <b>Le sort a désigné {prenomDe(tirage.gagnant)}.</b> Chances : {tirage.chances.map((c) => `${prenomDe(c.personId)} ${c.pourcent} %`).join(', ')}. Celui dont les préférences ont été le moins suivies ces dernières semaines en a le plus.
+              <b>Le sort a désigné {prenomDe(tirage.gagnant)}.</b> {tirage.gagnant === personId ? `Le poste reste à ${prenomDe(personId)}` : `Le poste passe de ${prenomDe(personId)} à ${prenomDe(tirage.gagnant)}`} : enregistrez pour le poser.
             </p>
           ) : raison ? (
             <p className="dp-pref-resultat" role="status">
-              <b>Le poste est pour {person.prenom}.</b> Enregistrez pour le poser.
+              <b>Le poste passe à {person.prenom}.</b> Enregistrez pour le poser.
+            </p>
+          ) : null}
+          {autresFormes.length ? (
+            <p className="dp-pref-autres small">
+              <span className="soft">Les autres préférences de ce jour : </span>
+              {autresFormes.map(([f, ids], n) => (
+                <span key={f}>
+                  {n ? ' · ' : ''}
+                  <b>{SOUHAIT_LABEL[f]}</b> {enListe(ids)}
+                </span>
+              ))}
             </p>
           ) : null}
         </section>
@@ -1156,6 +1282,8 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           <CircleCheck size={16} /> Aucun nouveau point à signaler avec ce poste.
         </div>
       ) : null}
+      </>
+      )}
       {data.missions.filter((m) => m.personId === personId && m.date === date).map((m) => (
         <div key={m.id} className="small soft">
           Rendez-vous ce jour-là : {MISSION_LABEL[m.type]}, {fmtHeure(m.start)} – {fmtHeure(m.end)}

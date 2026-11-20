@@ -1,10 +1,10 @@
-import { Boxes, CalendarCheck, CalendarHeart, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, History, Hourglass, Lock, Megaphone, Pill as PillIcon, Plus, Sprout } from 'lucide-react';
+import { Boxes, CalendarCheck, CalendarHeart, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, History, Hourglass, Lock, Megaphone, Pill as PillIcon, Plus, RotateCcw, Sprout } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { JOURS, JOURS_COURT, MOIS, addDays, fmtDateCourt, fmtHeure, fmtSemaine, isoWeek, mondayOf, weekday, ferie } from '../../domain/time';
 import type { ISODate, Person, Qualification, Shift } from '../../domain/types';
 import { ABSENCE_LABEL, SOUHAIT_LABEL, classeAbsence, couleurDuPoste, libelleGarde, nomCourt, nomGarde } from '../../domain/types';
 import { IconeGarde } from '../icons';
-import { ouverture, shiftsSemaine } from '../../engine/core';
+import { enRepos, ouverture, shiftsSemaine } from '../../engine/core';
 import { validateWeek } from '../../engine/validate';
 import { semainesDuMois } from '../../engine/payroll';
 import type { Correction } from '../../engine/souhaits';
@@ -38,6 +38,7 @@ export function VueMois({ moiId, onPoste }: { moiId?: string; onPoste?: (personI
   const today = useStore((s) => s.today);
   const appliquer = useStore((s) => s.appliquerCorrection);
   const publier = useStore((s) => s.publier);
+  const remettreAZero = useStore((s) => s.remettreAZero);
   const envoyerMessage = useStore((s) => s.envoyerMessage);
   const [reponsesOuvertes, setReponsesOuvertes] = useState(false);
   const { semaine, setSemaine, setPlanVue, voirJour, dire, seulementMoi } = useUi();
@@ -231,7 +232,12 @@ export function VueMois({ moiId, onPoste }: { moiId?: string; onPoste?: (personI
           }
           return (
             <td key={d} className={cls}>
-              {onPoste && d >= today && !p.externe ? (
+              {enRepos(data, p.id, d) ? (
+                <button type="button" className="mo-c repos-pose" onClick={() => (onPoste && d >= today ? onPoste(p.id, d) : undefined)} disabled={!onPoste || d < today} title="Jour de repos posé">
+                  Repos
+                  <span className="sr">, {nomCourt(p)}</span>
+                </button>
+              ) : onPoste && d >= today && !p.externe ? (
                 <button type="button" className={`mo-c ${choix ? 'souhait' : 'libre'} mo-poser`} onClick={() => onPoste(p.id, d)} title={choix ? `Préférence : ${SOUHAIT_LABEL[choix]}. Cliquez pour poser un poste.` : 'Poser un poste'}>
                   {choix ? SOUHAIT_COURT[choix] : <Plus size={13} aria-hidden="true" />}
                   <span className="sr">
@@ -294,6 +300,21 @@ export function VueMois({ moiId, onPoste }: { moiId?: string; onPoste?: (personI
           <BoutonAuto onClick={corriger} disabled={calcul || !brouillons.length} occupe={calcul} focus="corriger" title={brouillons.length ? 'Recalcule les semaines en brouillon en suivant les préférences. Calcul fait sur cet appareil.' : 'Toutes les semaines du mois sont publiées'}>
             {calcul ? 'Calcul en cours…' : 'Corriger automatiquement'}
           </BoutonAuto>
+          {/* Tout le mois, d'un clic : les postes et les repos des jours à venir quittent le brouillon. Ctrl + Z ou « Annuler » les rend. */}
+          {data.shifts.some((x) => x.date >= today && x.date >= dates[0] && x.date <= dates[dates.length - 1]) ? (
+            <button
+              type="button"
+              className="btn"
+              id="mois-zero"
+              title="Retire les postes et les repos des jours à venir du mois. Les jours passés restent."
+              onClick={() => {
+                remettreAZero(dates[0], dates[dates.length - 1]);
+                dire(`${titreMois(mois)} remis à zéro dans le brouillon. Les semaines publiées restent visibles par l’équipe tant que vous ne publiez pas.`, true);
+              }}
+            >
+              <RotateCcw size={16} aria-hidden="true" /> Remettre le mois à zéro
+            </button>
+          ) : null}
           <button type="button" className="btn primary mo-publier" id="mois-publier" disabled={!aPublier.length} onClick={publierLeMois} title={aPublier.length ? 'Publie toutes les semaines du mois qui sont prêtes' : 'Aucune semaine en brouillon à publier'}>
             <CalendarCheck size={16} aria-hidden="true" /> Publier le mois
           </button>
