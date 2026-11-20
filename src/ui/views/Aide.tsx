@@ -1,4 +1,5 @@
-import { ArrowRight, BookA, GraduationCap, LifeBuoy, ListChecks, Play, Search, X } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { ArrowRight, BookA, CalendarCog, CalendarDays, ChartNoAxesColumn, GraduationCap, Layers, LifeBuoy, ListChecks, MessageSquareMore, Play, Rocket, Search, Star, UsersRound, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { Espace } from '../../domain/acces';
 import { estCollaboratif } from '../../engine/souhaits';
@@ -16,15 +17,15 @@ import { NomSolvi, Solvi } from '../Solvi';
 const cleDe = (titre: string): string => titre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 /** Les fiches rangées par thème, dans l'ordre du travail. */
-const THEMES: { titre: string; ids: string[] }[] = [
-  { titre: 'Mon planning', ids: ['accueil', 'prochain', 'equipe-planning', 'gardes-moi', 'suivi', 'imprimer'] },
-  { titre: 'Mes demandes', ids: ['difference', 'souhaits', 'conge', 'remplacer', 'retard-prevenir', 'aider'] },
-  { titre: 'Au quotidien', ids: ['tableau', 'semaine-vide', 'creer', 'signaler', 'echeance', 'repercussion'] },
-  { titre: 'Préparer', ids: ['personne', 'contrat', 'marques', 'mdp-equipe', 'reglages', 'qui-prepare', 'postes-types', 'officine-chiffres', 'dimensionnement', 'feries', 'regles', 'pharmacie'] },
-  { titre: 'Construire et publier', ids: ['construire', 'propositions', 'pauses', 'controles', 'preferences-equipe', 'mois', 'retard', 'publier', 'formation', 'gardes'] },
-  { titre: 'Absences et remplacements', ids: ['absence', 'accident', 'demande-remplacement', 'dernier-recours', 'demandes-equipe', 'accord', 'decisions'] },
-  { titre: 'Suivre et faire le bilan', ids: ['heures', 'equite', 'points-forts', 'paie', 'historique', 'documents'] },
-  { titre: 'Messages, compte et support', ids: ['message', 'rendez-vous', 'compte', 'mes-competences', 'support'] },
+const THEMES: { titre: string; icone: LucideIcon; ids: string[] }[] = [
+  { titre: 'Mon planning', icone: CalendarDays, ids: ['accueil', 'prochain', 'equipe-planning', 'gardes-moi', 'suivi', 'imprimer'] },
+  { titre: 'Mes demandes', icone: Star, ids: ['difference', 'souhaits', 'conge', 'remplacer', 'retard-prevenir', 'aider'] },
+  { titre: 'Au quotidien', icone: Layers, ids: ['tableau', 'semaine-vide', 'creer', 'signaler', 'echeance', 'repercussion'] },
+  { titre: 'Préparer', icone: CalendarCog, ids: ['personne', 'contrat', 'marques', 'mdp-equipe', 'reglages', 'qui-prepare', 'postes-types', 'officine-chiffres', 'dimensionnement', 'feries', 'regles', 'pharmacie'] },
+  { titre: 'Construire et publier', icone: Rocket, ids: ['construire', 'propositions', 'pauses', 'controles', 'preferences-equipe', 'mois', 'retard', 'publier', 'formation', 'gardes'] },
+  { titre: 'Absences et remplacements', icone: UsersRound, ids: ['absence', 'accident', 'demande-remplacement', 'dernier-recours', 'demandes-equipe', 'accord', 'decisions'] },
+  { titre: 'Suivre et faire le bilan', icone: ChartNoAxesColumn, ids: ['heures', 'equite', 'points-forts', 'paie', 'historique', 'documents'] },
+  { titre: 'Messages et support', icone: MessageSquareMore, ids: ['message', 'rendez-vous', 'compte', 'mes-competences', 'support'] },
 ];
 
 
@@ -41,8 +42,8 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
   const termes = LEXIQUE.filter((t) => (espace === 'responsable' || !t.gestion) && trouve(`${t.mot} ${t.sens}`));
   // Le titulaire lit d'abord la gestion ; ses propres horaires viennent ensuite.
   const themes = espace === 'responsable' ? [...THEMES.slice(2), ...THEMES.slice(0, 2)] : [...THEMES.slice(0, 2), ...THEMES.slice(2)];
-  const groupes = themes.map((t) => ({ titre: t.titre, fiches: t.ids.map((id) => fichesVues.find((f) => f.id === id)).filter((f): f is Fiche => !!f) }))
-    .concat([{ titre: 'Autres', fiches: fichesVues.filter((f) => !THEMES.some((t) => t.ids.includes(f.id))) }])
+  const groupes = themes.map((t) => ({ titre: t.titre, icone: t.icone, fiches: t.ids.map((id) => fichesVues.find((f) => f.id === id)).filter((f): f is Fiche => !!f) }))
+    .concat([{ titre: 'Autres', icone: ListChecks, fiches: fichesVues.filter((f) => !THEMES.some((t) => t.ids.includes(f.id))) }])
     .filter((g) => g.fiches.length);
   // Une recherche qui ne trouve que dans l'autre onglet y mène toute seule.
   const vu = mots.length && onglet === 'taches' && !fichesVues.length && termes.length ? 'lexique' : mots.length && onglet === 'lexique' && !termes.length && fichesVues.length ? 'taches' : onglet;
@@ -121,7 +122,7 @@ export function Aide({ espace }: { espace: Espace }): JSX.Element {
             groupes.map((g) => theme(g))
           ) : (
             // Sans recherche, un onglet par thème : on ne lit qu'une famille de fiches à la fois.
-            <Onglets id="aide-themes" label="Thèmes de l’aide" onglets={groupes.map((g) => ({ cle: cleDe(g.titre), titre: g.titre, note: g.fiches.length, contenu: theme(g) }))} />
+            <Onglets id="aide-themes" label="Thèmes de l’aide" onglets={groupes.map((g) => ({ cle: cleDe(g.titre), titre: g.titre, icone: g.icone, note: g.fiches.length, contenu: theme(g) }))} />
           )
         ) : (
           <div className="card empty ad-vide" id="ad-vide">

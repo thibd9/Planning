@@ -120,14 +120,18 @@ export function Resoudre(): JSX.Element {
       ) : null}
 
       {d.total ? (
-        <div className="onglets" role="tablist" aria-label="Familles de décisions">
+        <div className="onglets ong-barre" role="tablist" aria-label="Familles de décisions">
           {onglets.map((o) => (
-            <button key={o.cle} type="button" role="tab" id={`onglet-${o.cle}`} aria-selected={onglet === o.cle} aria-controls="panneau-decisions" className={`onglet${onglet === o.cle ? ' on' : ''}`} onClick={() => setChoix(o.cle)}>
-              <span aria-hidden="true">{o.icone}</span>
-              {o.label}
-              <span className={`compte${o.nombre ? '' : ' zero'}`}>
-                {o.nombre}
-                <span className="sr"> à traiter</span>
+            <button key={o.cle} type="button" role="tab" id={`onglet-${o.cle}`} aria-selected={onglet === o.cle} aria-controls="panneau-decisions" className={`onglet ong-onglet${onglet === o.cle ? ' on' : ''}`} onClick={() => setChoix(o.cle)}>
+              <span aria-hidden="true" className="ong-ico">
+                {o.icone}
+              </span>
+              <span className="ong-lib">
+                <span className="ong-titre">{o.label}</span>
+                <span className={`compte ong-note${o.nombre ? '' : ' zero'}`}>
+                  {o.nombre}
+                  <span className="sr"> à traiter</span>
+                </span>
               </span>
             </button>
           ))}

@@ -16,6 +16,7 @@ export interface Onglet {
  * Des onglets : quand une page porte trop de rubriques pour une seule colonne, on en montre une à la fois.
  * Tous les panneaux restent dans la page (les autres sont masqués) : une visite guidée ou un lien peut donc
  * désigner un champ d'un autre onglet, qui s'ouvre alors tout seul (voir `deplier`).
+ * Chaque onglet porte son pictogramme au-dessus de son nom ; l'onglet ouvert est une tuile pleine, avec une pointe.
  * Au clavier : flèches gauche et droite, Début, Fin.
  */
 export function Onglets({ id, label, onglets, defaut }: { id: string; label: string; onglets: Onglet[]; defaut?: string }): JSX.Element {
@@ -43,9 +44,11 @@ export function Onglets({ id, label, onglets, defaut }: { id: string; label: str
       >
         {onglets.map(({ cle, titre, icone: Icone, note }) => (
           <button key={cle} type="button" role="tab" id={`${id}-onglet-${cle}`} className={`ong-onglet${cle === courant ? ' on' : ''}`} aria-selected={cle === courant} aria-controls={`${id}-panneau-${cle}`} tabIndex={cle === courant ? 0 : -1} data-onglet={cle} onClick={() => setActif(cle)}>
-            {Icone ? <Icone size={17} aria-hidden="true" /> : null}
-            <span>{titre}</span>
-            {note !== undefined && note !== null ? <span className="ong-note">{note}</span> : null}
+            {Icone ? <Icone size={23} strokeWidth={1.9} aria-hidden="true" className="ong-ico" /> : null}
+            <span className="ong-lib">
+              <span className="ong-titre">{titre}</span>
+              {note !== undefined && note !== null ? <span className="ong-note">{note}</span> : null}
+            </span>
           </button>
         ))}
       </div>

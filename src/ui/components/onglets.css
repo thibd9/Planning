@@ -1,14 +1,5 @@
-/* Onglets : une rubrique à la fois. La barre défile de côté sur petit écran plutôt que de passer à la ligne. */
+/* Onglets : une rubrique à la fois. Le dessin (barre en carte, tuile pleine pour l'onglet ouvert) est dans styles.css,
+   avec les onglets de « Résoudre » qui le partagent. */
 .ong { min-width: 0; }
-.ong-barre { display: flex; gap: 2px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
-.ong-barre::-webkit-scrollbar { display: none; }
-.ong-onglet { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 16px 11px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; color: var(--ink-2); font: inherit; font-size: 14.5px; font-weight: 600; white-space: nowrap; cursor: pointer; }
-.ong-onglet:hover { color: var(--ink); }
-.ong-onglet svg { color: var(--ink-3); flex: none; }
-.ong-onglet.on { color: var(--a-text); border-bottom-color: var(--a-deep); }
-.ong-onglet.on svg { color: inherit; }
-.ong-onglet:focus-visible { outline-offset: -3px; box-shadow: none; }
-.ong-note { font-size: 12px; font-weight: 650; color: var(--ink-3); }
-.ong-onglet.on .ong-note { color: inherit; }
 .ong-panneau { padding-top: 6px; }
 .ong-panneau[hidden] { display: none; }
