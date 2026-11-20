@@ -189,8 +189,10 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
       const miens = st.data.shifts.filter((x) => x.personId === MOI);
       const libre = (x: Shift): boolean => !miens.some((m) => m.date === x.date && m.start < x.end && x.start < m.end);
       const preparateur = (id: string): boolean => st.data.personnes.find((p) => p.id === id)?.qualification === 'preparateur';
+      // Un autre jour que celui d'un appel à l'équipe : les deux demandes ne se confondent pas.
+      const appels = new Set(st.data.remplacements.filter((r) => r.statut === 'ouverte' && r.trouId).map((r) => r.date));
       const poste = st.data.shifts
-        .filter((x) => x.personId !== MOI && preparateur(x.personId) && peutDemanderRemplacement(st.data, x.date, st.today) && st.data.semaines[mondayOf(x.date)]?.statut === 'publie' && libre(x))
+        .filter((x) => x.personId !== MOI && preparateur(x.personId) && !appels.has(x.date) && peutDemanderRemplacement(st.data, x.date, st.today) && st.data.semaines[mondayOf(x.date)]?.statut === 'publie' && libre(x))
         .sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start)[0];
       if (poste) st.demanderRemplacement(poste, 'prevu', undefined, MOI, { motif: 'famille' });
     }
@@ -922,8 +924,9 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
         { faire: 'expliquer', sur: dansGarde('g-avenir', '.card-head .pill'), nom: 'L’état', quoi: 'à venir ; une fois passée, à valider par le responsable ; puis validée pour la paie.' },
         { faire: 'expliquer', sur: dansGarde('g-avenir', '.notice'), nom: 'Le délai de prévenance', quoi: 'combien de jours avant la garde elle vous a été communiquée.', sert: 'Un délai plus court que celui des règles est signalé.' },
         { faire: 'expliquer', sur: dansGarde('g-avenir', '.card-body > p.small'), nom: 'Le repos', quoi: 'ce que la garde change à votre repos quotidien.', sert: 'Un poste trop proche de la garde est signalé, avec l’heure de reprise possible.', facultatif: true },
-        { faire: 'expliquer', sur: o.parLibelle('Mois', '.page-mesgardes'), nom: 'Mois', quoi: 'le mois du récapitulatif.', sert: 'Le tableau liste, garde par garde, les éléments qui partent en paie.' },
         { faire: 'expliquer', sur: autour('#recap-mois', '.card-head'), nom: 'Récapitulatif mensuel', quoi: 'le mois choisi et son nombre de gardes.', sert: 'Le bouton « Imprimer », à côté, l’imprime.' },
+        { faire: 'expliquer', sur: o.parLibelle('Mois', '.page-mesgardes'), nom: 'Mois', quoi: 'le mois du récapitulatif.', sert: 'Changez-le pour revoir un mois passé.' },
+        { faire: 'expliquer', sur: '.page-mesgardes table.t', nom: 'Les éléments de paie', quoi: 'garde par garde : heures d’astreinte ou de garde, interventions, indemnités, repos compensateur, avec leur quantité.', sert: 'Le responsable les relit et les valide pour le comptable.', facultatif: true },
       ],
     },
     {
