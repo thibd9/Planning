@@ -853,6 +853,10 @@ const semaineUne = (): void => {
   useUi.getState().setSemaine(semaineDans(1));
 };
 
+/** Une semaine pleine du mois dont on recueille les préférences : c'est là qu'elles se lisent dans la grille. */
+const semaineASouhaits = (): string => mondayOf(`${moisACollecter(store().data.officine, store().today)}-08`);
+const TROIS_DEMANDEURS = ['p_thomas', 'p_ines', 'p_jules'];
+
 const COMPLET_BRUT: Etape[] = [
   // ---- 1. Préparer
   {
@@ -1019,6 +1023,33 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: '.content .plan',
     cibleFin: '.content .plan',
+    titre: 'Qui a demandé ce créneau ?',
+    texte: () => 'Les préférences de l’équipe se lisent dans chaque case. À la création d’un poste, Solvéa dit qui a demandé ce créneau : une seule personne, vous le lui accordez ; plusieurs, un tirage au sort équitable les départage.',
+    jouer: () => {
+      avecSouhaits();
+      const jour = addDays(semaineASouhaits(), 1);
+      poser((d) => ({ ...d, souhaits: (d.souhaits ?? []).filter((x) => !(x.date === jour && TROIS_DEMANDEURS.includes(x.personId))).concat(TROIS_DEMANDEURS.map((personId) => ({ personId, date: jour, choix: 'matin' as const }))) }));
+      helene('construire');
+      useUi.getState().setPlanVue('semaine');
+      useUi.getState().setPrefsVisibles(true);
+      useUi.getState().setSemaine(semaineASouhaits());
+    },
+    gestes: [
+      { faire: 'pause', ms: 2800, dit: 'Dans chaque case, la préférence de la personne', sert: 'Matin, journée, après-midi ou repos : ce que chacun a demandé pour le mois.' },
+      { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.plan-grid .add')].find((e) => /Thomas/.test(e.getAttribute('aria-label') ?? '') && /mardi/.test(e.getAttribute('aria-label') ?? '')), dit: 'Ouvrez un poste pour Thomas, mardi', sert: 'Thomas, Inès et Jules ont tous les trois demandé ce matin-là.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'cliquer', sur: parTexte('.dialog .ptc', 'Matin'), dit: 'Choisissez le poste type « Matin »', sert: 'Solvéa compte aussitôt qui a demandé ce créneau.' },
+      { faire: 'attendre', que: '#dp-tirer' },
+      { faire: 'cliquer', sur: '#dp-tirer', dit: 'Cliquez sur « Tirer au sort »', sert: 'Celui dont les préférences ont été le moins suivies ces dernières semaines a le plus de chances.' },
+      { faire: 'pause', ms: 3200, dit: 'Le sort a désigné un nom', sert: 'Le poste passe à cette personne, et les chances de chacun sont affichées.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Le poste est posé dans le brouillon.' },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.content .plan',
+    cibleFin: '.content .plan',
     titre: 'Trois propositions',
     texte: () => 'Solvéa calcule trois plannings complets : l’un privilégie l’équité, l’autre les préférences, le dernier le respect des contrats. Les règles passent toujours avant. Vous comparez, puis vous choisissez.',
     jouer: () => {
@@ -1084,14 +1115,19 @@ const COMPLET_BRUT: Etape[] = [
     qui: HELENE,
     cible: "[data-focus='mois']",
     titre: 'Le mois',
-    texte: () => 'La vue « Mois » montre quatre semaines d’un coup d’œil : les horaires, l’équipe au complet ou non, les heures de chacun et les préférences reçues.',
+    texte: () => 'La vue « Mois » montre quatre semaines d’un coup d’œil : les horaires, l’équipe au complet ou non, les heures de chacun et les préférences. Un clic sur une case y pose un poste, sans repasser par la semaine.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
-      semaineUne();
+      helene('construire');
+      useUi.getState().setPrefsVisibles(true);
+      useUi.getState().setSemaine(semaineASouhaits());
       useUi.getState().setPlanVue('mois');
     },
-    gestes: [{ faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('.mo-pref input'), dit: 'Cochez « Afficher les préférences »', sert: 'Les préférences de chacun s’affichent dans les cases du mois.' }],
+    gestes: [
+      { faire: 'pause', ms: 2600, dit: 'Chaque case porte la préférence de la personne', sert: 'Un clic sur une case ouvre le poste, ici même.' },
+      { faire: 'cliquer', sur: '#mois-reponses', dit: 'Ouvrez « préférences reçues »', sert: 'Qui a répondu, et qui relancer d’un clic avant la date limite.' },
+    ],
   },
   {
     chapitre: PLANIFIER,
@@ -1887,7 +1923,7 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
   {
     chapitre: 'Construire et publier',
     but: 'Caroline construit la semaine, la contrôle, y pose gardes et formations, puis l’envoie à l’équipe.',
-    etapes: ['Une semaine à construire', 'Poser un poste', 'Trois propositions', 'La semaine est posée', 'Les contrôles', 'Les gardes', 'Une formation', 'Un inventaire', 'Le mois', 'Publier', 'Imprimer'],
+    etapes: ['Une semaine à construire', 'Poser un poste', 'Qui a demandé ce créneau ?', 'Trois propositions', 'La semaine est posée', 'Les contrôles', 'Les gardes', 'Une formation', 'Un inventaire', 'Le mois', 'Publier', 'Imprimer'],
   },
   {
     chapitre: 'L’équipe reçoit son planning',
@@ -1919,7 +1955,7 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
 const TITULAIRE: Etape[] = raconter(
   COMPLET_BRUT,
   [
-    { chapitre: 'Construire la semaine', but: 'La grille, un poste posé à la main, trois propositions comparées, les contrôles, puis la publication.', etapes: ['Une semaine à construire', 'Poser un poste', 'Trois propositions', 'La semaine est posée', 'Les contrôles', 'Le mois', 'Publier', 'Imprimer'] },
+    { chapitre: 'Construire la semaine', but: 'La grille, un poste posé à la main, les préférences départagées, trois propositions comparées, les contrôles, puis la publication.', etapes: ['Une semaine à construire', 'Poser un poste', 'Qui a demandé ce créneau ?', 'Trois propositions', 'La semaine est posée', 'Les contrôles', 'Le mois', 'Publier', 'Imprimer'] },
     { chapitre: 'Gardes, formation, inventaire', but: 'Ce qui s’ajoute au planning ordinaire, et qui prévient chacun tout seul.', etapes: ['Les gardes', 'Une formation', 'Un inventaire'] },
     { chapitre: 'Décider', but: 'Remplacements, congés, absences imprévues : chaque demande arrive au même endroit, avec de quoi trancher.', etapes: ['La demande arrive', 'Valider le remplacement', 'Une urgence médicale', 'Congés et horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande', 'Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Donner son accord'] },
     { chapitre: 'Suivre l’équipe', but: 'La journée en cours, les retards, un accident du travail, les messages.', etapes: ['Une journée', 'Retards et suivi', 'Le retard, vu du comptoir', 'Un accident du travail', 'Les messages'] },

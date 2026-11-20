@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { peutGerer } from '../../domain/acces';
 import { addDays, fmtDateLong, fmtDuree, fmtHHMM, fmtHeure, mondayOf, parseHHMM } from '../../domain/time';
 import type { EcartType, ISODate, Shift } from '../../domain/types';
-import { ECART_LABEL, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
+import { ECART_LABEL, SOUHAIT_LABEL, libelleAbsence, nomCourt, nomGarde } from '../../domain/types';
+import { souhaitDe, souhaitRespecte } from '../../engine/souhaits';
 import { minutesTravail, ouverture, trousPharmacienExpliques } from '../../engine/core';
 import { useStore } from '../../store/store';
 import { useUi } from '../../store/ui';
@@ -20,6 +21,7 @@ export function DialogueJour({ date: initiale, moi, onClose }: { date: ISODate; 
   const data = useStore((s) => s.data);
   const { saveShift, signalerEcart, retirerEcart } = useStore();
   const dire = useUi((s) => s.dire);
+  const prefsVisibles = useUi((s) => s.prefsVisibles);
   const [date, setDate] = useState(initiale);
   const [ecartPour, setEcartPour] = useState<string | null>(null);
   const [ecartType, setEcartType] = useState<EcartType>('retard');
@@ -106,6 +108,11 @@ export function DialogueJour({ date: initiale, moi, onClose }: { date: ISODate; 
                     <div style={{ marginTop: 3 }}>
                       <EtiquetteRole person={p} />
                     </div>
+                    {gere && prefsVisibles && souhaitDe(data, p.id, date) ? (
+                      <span className={`je-pref${souhaitRespecte({ personId: p.id, date, choix: souhaitDe(data, p.id, date)! }, [s]) ? ' ok' : ' ecart'}`}>
+                        A demandé : {SOUHAIT_LABEL[souhaitDe(data, p.id, date)!].toLowerCase()}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
                 <div className="je-corps">

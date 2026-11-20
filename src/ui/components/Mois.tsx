@@ -1,7 +1,7 @@
-import { Boxes, CalendarCheck, CalendarHeart, Check, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, History, Hourglass, Lock, Megaphone, Pill as PillIcon, Plus, Sprout } from 'lucide-react';
+import { Boxes, CalendarCheck, CalendarHeart, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, FlaskConical, GraduationCap, History, Hourglass, Lock, Megaphone, Pill as PillIcon, Plus, Sprout } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { JOURS, JOURS_COURT, MOIS, addDays, fmtDateCourt, fmtHeure, fmtSemaine, isoWeek, mondayOf, weekday, ferie } from '../../domain/time';
-import type { ISODate, Person, Qualification } from '../../domain/types';
+import type { ISODate, Person, Qualification, Shift } from '../../domain/types';
 import { ABSENCE_LABEL, SOUHAIT_LABEL, classeAbsence, couleurDuPoste, libelleGarde, nomCourt, nomGarde } from '../../domain/types';
 import { IconeGarde } from '../icons';
 import { ouverture, shiftsSemaine } from '../../engine/core';
@@ -33,16 +33,19 @@ const GROUPES: { titre: string; note?: string; cles: Qualification[]; couleur: s
 ];
 
 /** Le mois, lisible comme la semaine : une ligne par personne, une case par jour, l'horaire écrit dedans. */
-export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
+export function VueMois({ moiId, onPoste }: { moiId?: string; onPoste?: (personId: string, date: ISODate, shift?: Shift) => void }): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const appliquer = useStore((s) => s.appliquerCorrection);
   const publier = useStore((s) => s.publier);
+  const envoyerMessage = useStore((s) => s.envoyerMessage);
+  const [reponsesOuvertes, setReponsesOuvertes] = useState(false);
   const { semaine, setSemaine, setPlanVue, voirJour, dire, seulementMoi } = useUi();
   const [mois, setMois] = useState(() => moisDe(addDays(semaine, 3)));
   const [calcul, setCalcul] = useState(false);
   const [bilan, setBilan] = useState<Correction | null>(null);
-  const [preferences, setPreferences] = useState(false);
+  const preferences = useUi((x) => x.prefsVisibles);
+  const setPreferences = useUi((x) => x.setPrefsVisibles);
   /** Les semaines déjà passées sont rangées : elles ne reviennent que sur demande, en grisé. */
   const [anciennes, setAnciennes] = useState(false);
 
@@ -202,12 +205,12 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
             const suivi = choix ? souhaitRespecte({ personId: p.id, date: d, choix }, postes) : true;
             return (
               <td key={d} className={cls}>
-                <button type="button" className={`mo-c ${m}${suivi ? '' : ' ecart'}`} onClick={() => ouvrirSemaine(d)} title={`${fmtHeure(debut)} – ${fmtHeure(fin)}${choix && !suivi ? ` · préférait : ${SOUHAIT_LABEL[choix].toLowerCase()}` : ''}`}>
+                <button type="button" className={`mo-c ${m}${suivi ? '' : ' ecart'}`} onClick={() => (onPoste && postes.length === 1 && d >= today ? onPoste(p.id, d, postes[0]) : ouvrirSemaine(d))} title={`${fmtHeure(debut)} – ${fmtHeure(fin)}${choix && !suivi ? ` · préférait : ${SOUHAIT_LABEL[choix].toLowerCase()}` : ''}`}>
                   <span>{court(debut)}</span>
                   <span>{court(fin)}</span>
                   <span className="sr">
                     , {nomCourt(p)}, {jour}
-                    {choix && !suivi ? `, préférence non suivie (${SOUHAIT_LABEL[choix]})` : ''}. Ouvrir la semaine
+                    {choix && !suivi ? `, préférence non suivie (${SOUHAIT_LABEL[choix]})` : ''}. {onPoste && postes.length === 1 && d >= today ? 'Modifier le poste' : 'Ouvrir la semaine'}
                   </span>
                 </button>
                 {marque}
@@ -227,7 +230,14 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
           }
           return (
             <td key={d} className={cls}>
-              {choix ? (
+              {onPoste && d >= today && !p.externe ? (
+                <button type="button" className={`mo-c ${choix ? 'souhait' : 'libre'} mo-poser`} onClick={() => onPoste(p.id, d)} title={choix ? `Préférence : ${SOUHAIT_LABEL[choix]}. Cliquez pour poser un poste.` : 'Poser un poste'}>
+                  {choix ? SOUHAIT_COURT[choix] : <Plus size={13} aria-hidden="true" />}
+                  <span className="sr">
+                    {choix ? `, préférence de ${nomCourt(p)}, ${jour}` : `Poser un poste à ${nomCourt(p)}, ${jour}`}
+                  </span>
+                </button>
+              ) : choix ? (
                 <span className="mo-c souhait" title={`Préférence : ${SOUHAIT_LABEL[choix]}`}>
                   {SOUHAIT_COURT[choix]}
                 </span>
@@ -258,7 +268,7 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
         </div>
         {collaboratif ? (
           <>
-            <span className="mo-reponses" title={equipe.attendus.length ? `Sans réponse : ${equipe.attendus.map((id) => nomCourt(data.personnes.find((p) => p.id === id)!)).join(', ')}` : 'Toute l’équipe a répondu'}>
+            <button type="button" className={`mo-reponses mo-rep-bouton${reponsesOuvertes ? ' on' : ''}`} id="mois-reponses" aria-expanded={reponsesOuvertes} aria-controls="mois-reponses-liste" onClick={() => setReponsesOuvertes(!reponsesOuvertes)}>
               <CalendarHeart size={16} aria-hidden="true" />
               <span>
                 <b className="num">
@@ -266,7 +276,8 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
                 </b>{' '}
                 préférences reçues
               </span>
-            </span>
+              <ChevronDown size={15} aria-hidden="true" className="mo-rep-chevron" />
+            </button>
             {restants >= 0 ? (
               <Pill tone={restants <= 3 ? 'warn' : 'ok'}>
                 <Hourglass size={13} aria-hidden="true" /> {restants === 0 ? 'Dernier jour' : `${restants} j restants`}
@@ -288,6 +299,44 @@ export function VueMois({ moiId }: { moiId?: string }): JSX.Element {
         </div>
       </div>
 
+      {collaboratif && reponsesOuvertes ? (
+        <section className="mo-rep" id="mois-reponses-liste" aria-label="Préférences reçues">
+          <div className="mo-rep-col">
+            <h3>Ont répondu · {equipe.repondu.length}</h3>
+            <p className="small soft">{equipe.repondu.length ? equipe.repondu.map((id) => nomCourt(data.personnes.find((x) => x.id === id)!)).join(', ') : 'Personne pour l’instant.'}</p>
+          </div>
+          <div className="mo-rep-col">
+            <h3>Sans réponse · {equipe.attendus.length}</h3>
+            {equipe.attendus.length ? (
+              <ul className="mo-rep-attendus">
+                {equipe.attendus.map((id) => {
+                  const q = data.personnes.find((x) => x.id === id)!;
+                  return (
+                    <li key={id}>
+                      <span>{nomCourt(q)}</span>
+                      {moiId && restants >= 0 ? (
+                        <button
+                          type="button"
+                          className="btn sm"
+                          data-relancer={id}
+                          onClick={() => {
+                            envoyerMessage(moiId, id, `Bonjour ${q.prenom}, pensez à donner vos préférences pour ${titreMois(mois).toLowerCase()} : ${restants === 0 ? 'c’est le dernier jour' : `il reste ${restants} jour${restants > 1 ? 's' : ''}`}. Merci !`);
+                            dire(`Rappel envoyé à ${q.prenom}.`);
+                          }}
+                        >
+                          Relancer
+                        </button>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="small soft">Toute l’équipe a répondu.</p>
+            )}
+          </div>
+        </section>
+      ) : null}
       <div className="mo-legende">
         <span><i className="mo-pastille matin" /> {MOMENT_LABEL.matin}</span>
         <span><i className="mo-pastille milieu" /> {MOMENT_LABEL.milieu}</span>

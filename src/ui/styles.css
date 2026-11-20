@@ -5011,3 +5011,75 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 /* Le prochain planning, étapes en ligne : un libellé long passe à la ligne plutôt que de sortir de la carte. */
 .tb-suite .cycle-etapes b, .tb-suite .cycle-etapes .small { white-space: normal; }
 .tb-suite .cycle-etapes li { min-width: 0; }
+
+/* === « Nouveau poste », allégée : postes types en pastilles, horaires et pause sur une ligne, pauses courtes repliées === */
+.dialog .ptc-liste { display: flex; flex-wrap: wrap; gap: 8px; }
+.dialog .tile.ptc { flex: 0 1 auto; display: inline-flex; align-items: center; gap: 9px; min-height: 0; padding: 8px 12px; border-radius: 8px; }
+.dialog .tile.ptc .ti { width: auto; height: auto; padding: 0; background: none; box-shadow: none; }
+.dialog .tile.ptc .ptc-texte { display: inline-flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.dialog .tile.ptc .ptc-texte b { font-size: 14px; }
+.dialog .tile.ptc .ptc-texte .num { font-size: 12.5px; }
+.dialog .tile.ptc .ptc-duree { display: none; }
+.dialog .tile.ptc .ptc-coche { position: static; margin-left: 2px; }
+.dp-horaires { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
+.dp-horaires .field { min-width: 0; }
+.dp-horaires input[type='time'] { width: 118px; }
+.dp-horaires .dp-pause { align-self: flex-end; min-height: 44px; padding-inline: 6px 2px; white-space: nowrap; }
+.dp-apercu { margin-top: -4px; }
+.dp-total { font-size: 14px; font-weight: 650; color: var(--ink-2); white-space: nowrap; }
+.dialog #pauses-courtes.acc { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.dialog #pauses-courtes .acc-tete { padding: 12px 2px; }
+.dialog #pauses-courtes .acc-corps { padding-bottom: 14px; }
+/* Les préférences du jour, dans la fenêtre d'un poste. */
+.dp-pref { display: grid; gap: 10px; padding: 14px 16px; border-radius: 8px; background: var(--a-tint); border: 1px solid var(--pastel-line); justify-items: start; }
+.dp-pref-tete { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; width: 100%; }
+.dp-pref-formes { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.dp-pref-forme { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 6px; background: var(--surface); font-size: 12.5px; font-weight: 600; color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
+.dp-pref-forme.vide { color: var(--ink-3); }
+.dp-pref-forme.ici { color: var(--a-text); box-shadow: inset 0 0 0 1.5px var(--a-deep); }
+.dp-pref-texte, .dp-pref-resultat { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ink); }
+.dp-pref-resultat { color: var(--ink-2); }
+.dp-pref-resultat b { color: var(--ink); }
+.dp-pref .btn { background: var(--surface); }
+
+/* L'en-tête d'une fenêtre ne se tasse jamais quand le contenu est long : c'est le corps qui défile. */
+.dialog-head { flex: none; }
+/* « Nouveau poste » : les tâches sur une seule ligne, en pastilles compactes. */
+.dp-tache .choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.dp-tache .choix > label, .dp-tache .choix > .choix-vers { flex: 0 1 auto; min-height: 40px; padding: 6px 12px 6px 8px; font-size: 13.5px; }
+.dp-tache .choix .chip-i { width: 26px; height: 26px; }
+
+.dialog:has(.dp-horaires) .dialog-body { padding: 18px 28px 20px; gap: 14px; }
+.dialog:has(.dp-horaires) .ptc-bloc { display: grid; gap: 8px; }
+
+/* === Les préférences de l'équipe, lisibles dans chaque vue du planning === */
+.plan-pref { min-height: 28px; padding: 0; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.pg-h.first:has(.plan-pref) { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.pg-pref { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; padding: 2px 7px; border-radius: 6px; font-size: 11.5px; font-weight: 650; line-height: 1.5; white-space: nowrap; color: var(--ink-2); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.pg-pref.repos { font-style: normal; color: var(--ink-3); }
+.pg-pref.ok { color: var(--ok-ink); background: var(--ok-soft); box-shadow: none; }
+.pg-pref.ecart { color: var(--warn-ink); background: var(--warn-soft); box-shadow: none; }
+.je-pref { display: inline-block; margin-top: 4px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.je-pref.ok { color: var(--ok-ink); }
+.je-pref.ecart { color: var(--warn-ink); }
+
+/* Dans une case vide, la préférence se lit au-dessus du « + », sans le recouvrir. */
+.pg-c > .pg-pref:not(.ok):not(.ecart) { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 1; pointer-events: none; }
+.pg-c:has(> .pg-pref:not(.ok):not(.ecart)) .add { place-items: end center; padding-bottom: 8px; }
+.pg-c > .pg-pref.ok, .pg-c > .pg-pref.ecart { align-self: center; }
+
+/* === Vue « Mois » : on agit où l'on lit. Une case libre pose un poste, les réponses se déplient en liste. === */
+.mo-c.mo-poser { cursor: pointer; }
+.mo-c.libre { background: transparent; color: transparent; box-shadow: none; }
+.mo-c.libre:hover, .mo-c.libre:focus-visible { color: var(--a-text); background: var(--a-soft); }
+.mo-c.souhait.mo-poser:hover, .mo-c.souhait.mo-poser:focus-visible { box-shadow: inset 0 0 0 1.5px var(--a-deep); color: var(--a-text); background: var(--a-tint); }
+.mo-rep-bouton { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 6px 10px; min-height: 36px; font: inherit; font-size: 13.5px; cursor: pointer; }
+.mo-rep-bouton:hover, .mo-rep-bouton.on { border-color: var(--pastel-line); background: var(--a-tint); }
+.mo-rep-chevron { color: var(--ink-3); transition: transform 0.2s ease; }
+.mo-rep-bouton.on .mo-rep-chevron { transform: rotate(180deg); }
+.mo-rep { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; padding: 16px 22px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.mo-rep h3 { margin: 0 0 6px; font-size: 13.5px; font-weight: 700; }
+.mo-rep p { margin: 0; }
+.mo-rep-attendus { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-width: 340px; }
+.mo-rep-attendus li { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; font-weight: 550; }
+@media (max-width: 720px) { .mo-rep { grid-template-columns: minmax(0, 1fr); } }

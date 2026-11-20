@@ -235,3 +235,53 @@ export function corrigerMois(data: AppData, mois: string): Correction {
   const equipe = equipeInterne(d).length || 1;
   return { data: d, corrigees, publiees, ecartsParPersonne: (total - suivis) / equipe, souhaitsSuivis: suivis, souhaitsTotal: total, bloquants: nb };
 }
+
+/** Les préférences données pour un jour, par forme : qui a demandé le matin, la journée, l'après-midi, le repos. */
+export function demandesDuJour(data: Pick<AppData, 'souhaits' | 'personnes'>, date: ISODate): Record<SouhaitChoix, string[]> {
+  const out: Record<SouhaitChoix, string[]> = { matin: [], journee: [], soir: [], repos: [] };
+  const internes = new Set(data.personnes.filter((p) => !p.externe).map((p) => p.id));
+  for (const s of data.souhaits ?? []) if (s.date === date && internes.has(s.personId)) out[s.choix].push(s.personId);
+  return out;
+}
+
+/**
+ * La part des préférences d'une personne qui ont été suivies sur les semaines publiées récentes.
+ * Sans préférence donnée sur la période, la part vaut 1 : rien ne lui est dû.
+ */
+export function partSuivie(data: Pick<AppData, 'souhaits' | 'shifts' | 'semaines'>, personId: string, today: ISODate, semaines = 8): { suivies: number; total: number; part: number } {
+  const depuis = addDays(today, -7 * semaines);
+  const donnees = (data.souhaits ?? []).filter((s) => s.personId === personId && s.date >= depuis && s.date < today && data.semaines[mondayOf(s.date)]?.statut === 'publie');
+  const suivies = donnees.filter((s) => souhaitRespecte(s, data.shifts.filter((x) => x.personId === personId && x.date === s.date))).length;
+  return { suivies, total: donnees.length, part: donnees.length ? suivies / donnees.length : 1 };
+}
+
+export interface Tirage {
+  gagnant: string;
+  /** Les chances de chacun, en pourcentage arrondi : celui dont les préférences ont été le moins suivies en a le plus. */
+  chances: { personId: string; pourcent: number; suivies: number; total: number }[];
+}
+
+/**
+ * Plusieurs personnes demandent le même créneau : un tirage au sort les départage. Il n'est pas aveugle : chacun pèse
+ * d'autant plus lourd que ses préférences ont été peu suivies ces dernières semaines (de 1 à 3 parts).
+ * `alea` est un nombre entre 0 et 1 : le hasard est fourni par l'appelant, ce qui rend le tirage vérifiable.
+ */
+export function tirerAuSort(data: Pick<AppData, 'souhaits' | 'shifts' | 'semaines'>, candidats: string[], today: ISODate, alea: number): Tirage | null {
+  const uniques = [...new Set(candidats)];
+  if (!uniques.length) return null;
+  const parts = uniques.map((personId) => {
+    const p = partSuivie(data, personId, today);
+    return { personId, poids: 1 + 2 * (1 - p.part), suivies: p.suivies, total: p.total };
+  });
+  const somme = parts.reduce((t, x) => t + x.poids, 0);
+  let seuil = Math.min(0.999999, Math.max(0, alea)) * somme;
+  let gagnant = parts[parts.length - 1].personId;
+  for (const x of parts) {
+    if (seuil < x.poids) {
+      gagnant = x.personId;
+      break;
+    }
+    seuil -= x.poids;
+  }
+  return { gagnant, chances: parts.map((x) => ({ personId: x.personId, pourcent: Math.round((x.poids / somme) * 100), suivies: x.suivies, total: x.total })) };
+}

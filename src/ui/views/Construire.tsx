@@ -1,8 +1,8 @@
-import { AlertTriangle, ArrowRight, Ban, Boxes, CalendarCheck, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, CircleX, Copy, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Trash2, Undo2, UserRoundPlus, Users,  BookOpenCheck, Eye, Sun, Sunrise, Sunset, CalendarClock, Stethoscope } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Ban, BookOpenCheck, Boxes, CalendarCheck, CalendarClock, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, CircleX, Coffee, Copy, Dices, Eye, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Stethoscope, Sun, Sunrise, Sunset, Trash2, Undo2, UserRoundPlus, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { JOURS, JOURS_COURT, addDays, dayIndex, fmtDecimal, fmtDuree, fmtEuros, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, parseHHMM, totalDuree, uid, weekDates, weekday, fmtDateCourt } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
-import { ABSENCE_LABEL, ACTIVITE_LABEL, MISSION_LABEL, estPharmacien, nomComplet, nomCourt, classeAbsence, libelleGarde } from '../../domain/types';
+import { ABSENCE_LABEL, ACTIVITE_LABEL, MISSION_LABEL, SOUHAIT_LABEL, estPharmacien, nomComplet, nomCourt, classeAbsence, libelleGarde } from '../../domain/types';
 import {
   besoinsDe,
   decrireBesoin,
@@ -20,7 +20,9 @@ import { equite, fatigue, periodeAvant } from '../../engine/equity';
 import type { GenResult } from '../../engine/generate';
 import { VARIANTE_LABEL, genererVariantes } from '../../engine/generate';
 import { semaineHabituelle } from '../../engine/habitudes';
-import { estCollaboratif } from '../../engine/souhaits';
+import { demandesDuJour, estCollaboratif, formePoste, souhaitDe, souhaitRespecte, tirerAuSort } from '../../engine/souhaits';
+import type { Tirage } from '../../engine/souhaits';
+import { Accordeon } from '../components/Accordeon';
 import { DUREES_PAUSE, PAUSES_MAX, pausesProposees, pausesValides } from '../../engine/pauses';
 import { coutSemaine, decompteSemaine } from '../../engine/payroll';
 import { autreDuRdv, rdvFixes } from '../../engine/rdv';
@@ -62,7 +64,9 @@ export function Construire(): JSX.Element {
   const data = useStore((s) => s.data);
   const today = useStore((s) => s.today);
   const { undo, redo, past, future, moveShift, copierSemaine, viderSemaine } = useStore();
-  const { semaine, setSemaine, focus, setFocus, dire, voirJour, planVue, setPlanVue, seulementMoi, setSeulementMoi, session } = useUi();
+  const { semaine, setSemaine, focus, setFocus, dire, voirJour, planVue, setPlanVue, seulementMoi, setSeulementMoi, session, prefsVisibles, setPrefsVisibles } = useUi();
+  // Les préférences ne se recueillent que si le planning se prépare avec l'équipe.
+  const collaboratifEquipe = estCollaboratif(data.officine);
   const moiId = data.personnes.find((p) => !p.externe && memeIdentifiant(p.identifiant, session ?? ''))?.id;
   const [lectureChoisie, setLecture] = useState<Lecture>('heures');
   // Les coûts ne se lisent que si le titulaire les a activés dans les réglages.
@@ -184,7 +188,7 @@ export function Construire(): JSX.Element {
         </Empty>
       ) : (
         planVue === 'mois' ? (
-          <VueMois moiId={moiId} />
+          <VueMois moiId={moiId} onPoste={(personId, date, shift) => setEdition({ personId, date, shift })} />
         ) : (
         <>
           <div className="plan">
@@ -279,6 +283,12 @@ export function Construire(): JSX.Element {
               <div className="plan-grid" style={{ gridTemplateColumns: colonnes }} role="table" aria-label={`Planning de la semaine du ${fmtSemaine(semaine)}`}>
                 <div role="row" style={{ display: 'contents' }}>
                   <div className="pg-h first" role="columnheader">
+                    {collaboratifEquipe ? (
+                      <label className="check plan-pref" title="Afficher dans chaque case ce que la personne a demandé">
+                        <input id="plan-preferences" type="checkbox" checked={prefsVisibles} onChange={(e) => setPrefsVisibles(e.target.checked)} />
+                        <span>Préférences</span>
+                      </label>
+                    ) : null}
                     <span className="eyebrow">Équipe</span>
                   </div>
                   {dates.map((date, i) => (
@@ -365,6 +375,9 @@ export function Construire(): JSX.Element {
                               const gardes = data.gardes.filter((g) => g.personId === p.id && g.date === date);
                               const missions = data.missions.filter((m) => m.personId === p.id && m.date === date);
                               const signale = !!focus && focus.personId === p.id && (!focus.date || focus.date === date);
+                              // La préférence donnée pour ce jour, lisible dans la case : suivie, ou différente du poste posé.
+                              const souhait = prefsVisibles && collaboratifEquipe && !absence ? souhaitDe(data, p.id, date) : undefined;
+                              const suivi = souhait ? souhaitRespecte({ personId: p.id, date, choix: souhait }, duJour) : true;
                               return (
                                 <div
                                   key={date}
@@ -439,6 +452,13 @@ export function Construire(): JSX.Element {
                                       <span className="sr">, {MISSION_LABEL[m.type]}</span>
                                     </span>
                                   ))}
+                                  {souhait ? (
+                                    <span className={`pg-pref ${souhait}${duJour.length ? (suivi ? ' ok' : ' ecart') : ''}`} title={`${p.prenom} a demandé : ${SOUHAIT_LABEL[souhait].toLowerCase()}${duJour.length ? (suivi ? ' (préférence suivie)' : ' (le poste posé est différent)') : ''}`}>
+                                      {duJour.length && suivi ? <Check size={11} strokeWidth={3} aria-hidden="true" /> : null}
+                                      {SOUHAIT_LABEL[souhait]}
+                                      <span className="sr">{duJour.length ? (suivi ? ', préférence suivie' : ', préférence non suivie') : ', préférence demandée'}</span>
+                                    </span>
+                                  ) : null}
                                   {!duJour.length && !absence && !gardes.length && ouverts[i] && !passee ? (
                                     <button type="button" className="add" onClick={() => setEdition({ personId: p.id, date })} aria-label={`Ajouter un poste à ${nomCourt(p)} ${JOURS[weekday(date)]}`}>
                                       <Plus size={15} />
@@ -753,7 +773,12 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
   const data = useStore((s) => s.data);
   const { saveShift, deleteShift } = useStore();
   const dire = useUi((s) => s.dire);
-  const person = data.personnes.find((p) => p.id === personId) as Person;
+  const today = useStore((s) => s.today);
+  // La personne du poste : celle de la case, ou celle à qui l'on accorde sa préférence.
+  const [qui, setQui] = useState(personId);
+  const [raison, setRaison] = useState<string | undefined>(undefined);
+  const [tirage, setTirage] = useState<Tirage | null>(null);
+  const person = data.personnes.find((p) => p.id === qui) as Person;
   const wd = weekday(date);
   const postes = data.officine.postes.filter((p) => p.jours.includes(wd));
   const [debut, setDebut] = useState(fmtHHMM(shift?.start ?? postes[0]?.start ?? 510));
@@ -781,7 +806,7 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
     const modifie = !shift || shift.start !== s || shift.end !== e || shift.pauseStart !== (pauseOk ? ps : undefined) || shift.activite !== activite || !memesPauses;
     return {
       id: shift?.id ?? uid('s'),
-      personId,
+      personId: qui,
       date,
       start: s,
       end: e,
@@ -789,10 +814,27 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
       pauseEnd: pauseOk ? (pe as number) : undefined,
       ...(pauses.length ? { pauses } : {}),
       activite,
-      origine: modifie ? 'manuel' : (shift?.origine ?? 'manuel'),
-      explication: modifie ? undefined : shift?.explication,
+      origine: modifie || raison ? 'manuel' : (shift?.origine ?? 'manuel'),
+      explication: raison ?? (modifie ? undefined : shift?.explication),
     };
-  }, [debut, fin, avecPause, pauseDebut, pauseFin, activite, shift, personId, date, courtes]);
+  }, [debut, fin, avecPause, pauseDebut, pauseFin, activite, shift, qui, raison, date, courtes]);
+
+  // Les préférences données pour ce jour : qui demande cette forme de poste, qui demande à ne pas travailler.
+  const collaboratif = estCollaboratif(data.officine);
+  const forme = brouillon ? formePoste(brouillon) : null;
+  const demandes = useMemo(() => demandesDuJour(data, date), [data, date]);
+  const prenomDe = (id: string): string => data.personnes.find((p) => p.id === id)?.prenom ?? '';
+  const enListe = (ids: string[]): string => {
+    const l = ids.map(prenomDe);
+    return l.length <= 1 ? (l[0] ?? '') : `${l.slice(0, -1).join(', ')} et ${l[l.length - 1]}`;
+  };
+  // Ceux qui demandent ce créneau et n'ont pas encore de poste ce jour-là (la personne de la fenêtre comprise).
+  const candidats = forme ? demandes[forme].filter((id) => id === qui || !data.shifts.some((x) => x.personId === id && x.date === date && x.id !== shift?.id)) : [];
+  const sonSouhait = souhaitDe(data, qui, date);
+  const accorder = (id: string, pourquoi: string): void => {
+    setQui(id);
+    setRaison(pourquoi);
+  };
 
   // Contrôle immédiat : ce que ce poste changerait, avant même d'enregistrer.
   const effets = useMemo(() => {
@@ -800,11 +842,12 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
     const monday = mondayOf(date);
     const avant = new Set(validateWeek(data, monday).map((i) => i.id));
     const apres = validateWeek({ ...data, shifts: data.shifts.filter((s) => s.id !== brouillon.id).concat(brouillon) }, monday);
-    return apres.filter((i) => !avant.has(i.id) && i.gravite !== 'info' && (i.personId === personId || i.date === date));
-  }, [brouillon, data, date, personId]);
+    return apres.filter((i) => !avant.has(i.id) && i.gravite !== 'info' && (i.personId === qui || i.date === date));
+  }, [brouillon, data, date, qui]);
 
   return (
     <Dialog
+      size="mid"
       title={shift ? 'Modifier le poste' : 'Nouveau poste'}
       subtitle={
         <>
@@ -828,6 +871,11 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
               <Trash2 size={15} /> Supprimer
             </button>
           ) : null}
+          {brouillon ? (
+            <span className="dp-total num" id="dp-total" style={shift ? undefined : { marginRight: 'auto' }}>
+              {fmtDuree(minutesTravail(brouillon))} de travail
+            </span>
+          ) : null}
           <button type="button" className="btn" onClick={onClose}>
             Annuler
           </button>
@@ -838,7 +886,7 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
             onClick={() => {
               if (!brouillon) return;
               saveShift(brouillon);
-              dire(shift ? 'Poste modifié.' : 'Poste ajouté.', true);
+              dire(shift ? 'Poste modifié.' : raison ? `Poste ajouté pour ${person.prenom} : sa préférence est accordée.` : 'Poste ajouté.', true);
               onClose();
             }}
           >
@@ -859,8 +907,8 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
       {postes.length ? (
         <div className="ptc-bloc">
           <div className="ptc-tete">
-            <span className="eyebrow">Partir d’un poste type</span>
-            <span className="small soft">Un clic remplit les horaires et la pause.</span>
+            <span className="eyebrow">Poste type</span>
+            <span className="small soft">Un clic remplit les horaires et les pauses.</span>
           </div>
           <div className="ptc-liste" role="group" aria-label="Postes types">
             {postes.map((p) => {
@@ -904,7 +952,8 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           </div>
         </div>
       ) : null}
-      <div className="row wrap" style={{ alignItems: 'flex-end' }}>
+      {/* Les horaires et la pause déjeuner sur une seule ligne : c'est ce que l'on règle le plus souvent. */}
+      <div className="dp-horaires">
         <label className="field">
           Début
           <input type="time" step={900} value={debut} onChange={(e) => setDebut(e.target.value)} data-autofocus />
@@ -913,8 +962,79 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           Fin
           <input type="time" step={900} value={fin} onChange={(e) => setFin(e.target.value)} />
         </label>
+        <label className="check dp-pause">
+          <input type="checkbox" checked={avecPause} onChange={(e) => setAvecPause(e.target.checked)} />
+          <span>
+            Pause déjeuner<span className="sr"> (non comptée en temps de travail)</span>
+          </span>
+        </label>
+        {avecPause ? (
+          <>
+            <label className="field">
+              Début de pause
+              <input type="time" step={900} value={pauseDebut} onChange={(e) => setPauseDebut(e.target.value)} />
+            </label>
+            <label className="field">
+              Fin de pause
+              <input type="time" step={900} value={pauseFin} onChange={(e) => setPauseFin(e.target.value)} />
+            </label>
+          </>
+        ) : null}
       </div>
-      <fieldset>
+      {/* Les préférences du jour : qui demande ce créneau, et le moyen de trancher sans quitter la fenêtre. */}
+      {collaboratif && forme ? (
+        <section className="dp-pref" id="dp-preferences" aria-label="Préférences de l’équipe pour ce jour">
+          <div className="dp-pref-tete">
+            <span className="eyebrow">Préférences du jour</span>
+            <span className="dp-pref-formes">
+              {(['matin', 'journee', 'soir', 'repos'] as const).map((f) => (
+                <span key={f} className={`dp-pref-forme${f === forme ? ' ici' : ''}${demandes[f].length ? '' : ' vide'}`} title={demandes[f].length ? enListe(demandes[f]) : 'Personne'}>
+                  {SOUHAIT_LABEL[f]} <b className="num">{demandes[f].length}</b>
+                </span>
+              ))}
+            </span>
+          </div>
+          <p className="dp-pref-texte" id="dp-pref-texte">
+            {sonSouhait === 'repos'
+              ? `${person.prenom} a demandé à ne pas travailler ce jour-là.`
+              : sonSouhait === forme
+                ? `${person.prenom} a demandé ce créneau${candidats.length > 1 ? `, comme ${enListe(candidats.filter((x) => x !== qui))}` : ' : sa préférence est respectée'}.`
+                : candidats.length
+                  ? `${candidats.length > 1 ? `${candidats.length} personnes demandent` : `${enListe(candidats)} demande`} ce créneau (${SOUHAIT_LABEL[forme].toLowerCase()})${candidats.length > 1 ? ` : ${enListe(candidats)}` : ''}.${sonSouhait ? ` ${person.prenom} a demandé : ${SOUHAIT_LABEL[sonSouhait].toLowerCase()}.` : ''}`
+                  : `Personne n’a demandé ce créneau (${SOUHAIT_LABEL[forme].toLowerCase()}).${sonSouhait ? ` ${person.prenom} a demandé : ${SOUHAIT_LABEL[sonSouhait].toLowerCase()}.` : ''}`}
+          </p>
+          {candidats.length === 1 && candidats[0] !== qui ? (
+            <button type="button" className="btn sm" id="dp-accorder" onClick={() => accorder(candidats[0], 'Préférence accordée : seule personne à avoir demandé ce créneau.')}>
+              <Check size={15} aria-hidden="true" /> Accorder ce poste à {prenomDe(candidats[0])}
+            </button>
+          ) : null}
+          {candidats.length > 1 ? (
+            <button
+              type="button"
+              className="btn sm"
+              id="dp-tirer"
+              onClick={() => {
+                const t = tirerAuSort(data, candidats, today, Math.random());
+                if (!t) return;
+                setTirage(t);
+                accorder(t.gagnant, `Préférence départagée par tirage au sort entre ${enListe(candidats)}.`);
+              }}
+            >
+              <Dices size={15} aria-hidden="true" /> {tirage ? 'Retirer au sort' : `Tirer au sort entre ${enListe(candidats)}`}
+            </button>
+          ) : null}
+          {tirage ? (
+            <p className="dp-pref-resultat" id="dp-tirage" role="status">
+              <b>Le sort a désigné {prenomDe(tirage.gagnant)}.</b> Chances : {tirage.chances.map((c) => `${prenomDe(c.personId)} ${c.pourcent} %`).join(', ')}. Celui dont les préférences ont été le moins suivies ces dernières semaines en a le plus.
+            </p>
+          ) : raison ? (
+            <p className="dp-pref-resultat" role="status">
+              <b>Le poste est pour {person.prenom}.</b> Enregistrez pour le poser.
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+      <fieldset className="dp-tache">
         <legend className="field" style={{ marginBottom: 8 }}>Tâche</legend>
         <div className="choix">
           {(Object.keys(ACTIVITE_LABEL) as Activite[]).map((a) => {
@@ -955,26 +1075,8 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
           })}
         </div>
       </fieldset>
-      <label className="check">
-        <input type="checkbox" checked={avecPause} onChange={(e) => setAvecPause(e.target.checked)} />
-        Pause déjeuner (non comptée en temps de travail)
-      </label>
-      {avecPause ? (
-        <div className="row">
-          <label className="field">
-            Début de pause
-            <input type="time" step={900} value={pauseDebut} onChange={(e) => setPauseDebut(e.target.value)} />
-          </label>
-          <label className="field">
-            Fin de pause
-            <input type="time" step={900} value={pauseFin} onChange={(e) => setPauseFin(e.target.value)} />
-          </label>
-        </div>
-      ) : null}
-      <fieldset className="pc" id="pauses-courtes">
-        <legend className="field">
-          Pauses courtes <span className="oblig">facultatif</span>
-        </legend>
+      <Accordeon id="pauses-courtes" icone={Coffee} titre="Pauses courtes" resume={courtes.length ? `${courtes.length} : ${courtes.map((x) => x.debut.replace(':', ' h ').replace(' h 00', ' h')).join(', ')}` : 'Aucune. Dix à vingt minutes, sans effet sur le décompte des heures.'} ouvert={false}>
+        <div className="pc">
         <p className="small soft pc-aide">Dix à vingt minutes. Elles se lisent sur le planning et sur la feuille imprimée, sans changer le décompte des heures.</p>
         {courtes.map((x, i) => {
           const debutMin = parseHHMM(x.debut);
@@ -1022,11 +1124,11 @@ function DialoguePoste({ personId, date, shift, onClose }: { personId: string; d
             </button>
           ) : null}
         </div>
-      </fieldset>
+        </div>
+      </Accordeon>
       {brouillon ? (
-        <div className="row small soft">
+        <div className="dp-apercu" aria-hidden="true">
           <Track shifts={[brouillon]} echelle={echelleOfficine(data)} role={roleDe(person)} />
-          <span className="num" style={{ whiteSpace: 'nowrap' }}>{fmtDuree(minutesTravail(brouillon))} de travail</span>
         </div>
       ) : (
         <div className="notice warn">

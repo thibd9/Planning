@@ -150,6 +150,9 @@ interface Ui {
   setPlanVue: (v: 'semaine' | 'mois') => void;
   seulementMoi: boolean;
   setSeulementMoi: (b: boolean) => void;
+  /** Les préférences de l'équipe sont affichées sur le planning : en semaine, au mois et dans la journée. */
+  prefsVisibles: boolean;
+  setPrefsVisibles: (b: boolean) => void;
   setSujet: (s: string | null) => void;
   agir: (vue: Vue, intention: Ui['intention']) => void;
   setIntention: (i: Ui['intention']) => void;
@@ -213,6 +216,8 @@ export const useUi = create<Ui>((set) => ({
   setPlanVue: (planVue) => set({ planVue }),
   seulementMoi: false,
   setSeulementMoi: (seulementMoi) => set({ seulementMoi }),
+  prefsVisibles: true,
+  setPrefsVisibles: (prefsVisibles) => set({ prefsVisibles }),
   setSujet: (sujet) => set({ sujet }),
   agir: (vue, intention) => set({ vue, intention, focus: null }),
   setIntention: (intention) => set({ intention }),
