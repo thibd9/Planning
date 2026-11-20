@@ -1,6 +1,6 @@
 import type { Etape, Geste, OutilsVisite } from '../Parcours';
 import { addDays, dayIndex, mondayOf, todayISO } from '../../domain/time';
-import type { DocumentGed, Garde, Notification, Shift } from '../../domain/types';
+import type { Annonce, DocumentGed, Garde, Notification, Shift } from '../../domain/types';
 import { tourDeRole } from '../../engine/appel';
 import { decrireShift } from '../../engine/core';
 import { proposerRdv } from '../../engine/rdv';
@@ -144,6 +144,19 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
     const moment = proposerRdv(data, CAROLINE, MOI, 30, today)[0];
     if (moment) s().demanderRendezVous({ de: CAROLINE, avec: MOI, sujet: 'Entretien annuel', ...moment, note: 'Faisons le point sur votre année.' });
   };
+  /** Une décision récente qui concerne Nicolas, encore à lire : l'accueil la montre dans « Décisions qui me concernent ». */
+  const decisionALire = (): void => {
+    const annonce: Annonce = {
+      id: 'ann_eq',
+      at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+      titre: 'Demande d’horaires de Nicolas acceptée : finir avant 17 h le mercredi, une semaine sur deux',
+      effets: ['Préférence prioritaire : le planning la sert avant les simples préférences, sans la garantir.'],
+      pour: [MOI, CAROLINE],
+      auteur: CAROLINE,
+      luPar: [CAROLINE],
+    };
+    o.poser((d) => ({ ...d, annonces: [annonce, ...(d.annonces ?? []).filter((x) => x.id !== annonce.id)] }));
+  };
   /** Une absence déjà accordée dans l'équipe : la frise des absences a une ligne à montrer. */
   const absenceDansLEquipe = (): void => {
     const { data, today } = s();
@@ -260,6 +273,7 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
       jouer: () => {
         o.avecPlanning();
         rdvPropose();
+        decisionALire();
         nicolas('espace');
       },
       gestes: [
@@ -270,7 +284,8 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
         { faire: 'expliquer', sur: o.parTexte('.esp-raccourcis button', 'Voir mon planning'), nom: 'Voir mon planning', quoi: 'le lien vers vos semaines publiées.', sert: 'Le même écran que « Mon planning », dans le menu.' },
         { faire: 'expliquer', sur: o.parTexte('.esp-raccourcis button', 'Demander une absence'), nom: 'Demander une absence ou un horaire', quoi: 'le lien vers « Mes demandes ».', sert: 'Pour un congé, une formation ou un horaire à tenir : votre titulaire y répond.' },
         { faire: 'expliquer', sur: o.parTexte('.esp-raccourcis button', 'Écrire à'), nom: 'Écrire à votre titulaire', quoi: 'la conversation privée avec votre titulaire principal.', sert: 'Pour une question rapide. Une absence ou un horaire passent plutôt par une demande : elle est suivie.' },
-        { faire: 'expliquer', sur: autour('#esp-annonces', 'section'), nom: 'Décisions qui me concernent', quoi: 'les dernières décisions de vos titulaires qui vous touchent, avec ce qu’elles changent à votre planning.', sert: 'Le bouton « Vu » les marque comme lues ; elles restent sous la cloche, en haut de l’écran.', facultatif: true },
+        { faire: 'expliquer', sur: autour('#esp-annonces', 'section'), nom: 'Décisions qui me concernent', quoi: 'les dernières décisions de vos titulaires qui vous touchent, avec ce qu’elles changent à votre planning.', sert: 'Qui a décidé, et quand, est écrit dessous.', facultatif: true },
+        { faire: 'cliquer', sur: '.page-espace .annonce-vu', dit: 'Cliquez sur « Vu »', sert: 'La décision est marquée comme lue : elle ne compte plus sous la cloche.', facultatif: true },
       ],
     },
     {
