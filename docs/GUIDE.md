@@ -138,6 +138,14 @@ page. Les personnes, les marques et la pharmacie de l'exemple sont inventées.
   inventaire » ouvrent leur propre fenêtre (intitulé, lieu, participants).
 - **Postes types** : des cartes à la couleur du moment de la journée, avec pictogramme, horaires et durée.
   Un clic remplit le poste.
+- **Les préférences, là où l'on travaille** : ce que chacun a demandé pour le mois se lit dans chaque case
+  de la semaine, du mois et de la journée. La case « Préférences » les masque d'un clic.
+- **Qui a demandé ce créneau ?** : la fenêtre « Nouveau poste » le dit. Une seule personne l'a demandé :
+  « Accorder ce poste » le lui attribue. Plusieurs : « Tirer au sort » les départage. Le tirage est
+  pondéré : celui dont les préférences ont été le moins suivies ces dernières semaines a le plus de
+  chances, et les chances de chacun sont affichées.
+- **Le mois, pour agir** : un clic sur une case pose ou modifie le poste sans repasser par la semaine.
+  « Préférences reçues » liste qui a répondu et permet de relancer les autres avant la date limite.
 - **Trois propositions comparables** : équité d'abord, préférences d'abord, contrats d'abord. Les règles
   passent toujours avant. Quand le titulaire prépare seul, il n'y a pas de préférences : la deuxième
   proposition devient **« Habitudes d'abord »** (la semaine telle qu'il la publie d'ordinaire, complétée

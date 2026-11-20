@@ -13,7 +13,7 @@ absorber un imprévu en dérangeant le moins de monde possible.
 
 ![React 18](https://img.shields.io/badge/React-18-1f6bb8?style=flat-square)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-1f6bb8?style=flat-square)
-![173 tests](https://img.shields.io/badge/tests-173-0b5a3f?style=flat-square)
+![177 tests](https://img.shields.io/badge/tests-177-0b5a3f?style=flat-square)
 ![Sans serveur](https://img.shields.io/badge/donn%C3%A9es-sur%20l'appareil-52606c?style=flat-square)
 
 [Démarrer](#démarrer) · [Ce que fait Solvéa](#ce-que-fait-solvéa) · [Guide détaillé](docs/GUIDE.md) · [Bilan UX et UI](docs/BILAN-UX-UI.md)
@@ -48,6 +48,7 @@ créer, rien à saisir. On y passe d'un profil à l'autre en un clic.
 | | |
 | --- | --- |
 | **Construire** | La semaine entière tient dans la largeur, du lundi au dimanche. Trois propositions comparables, calculées dans le respect des règles. |
+| **Tenir compte des préférences** | Ce que chacun a demandé se lit dans chaque case, à la semaine, au mois et à la journée. En créant un poste, on voit qui a demandé le créneau : une seule personne, on le lui accorde ; plusieurs, un tirage au sort équitable les départage. |
 | **Publier au mois** | Une échéance, un rappel, et un brouillon préparé d'après vos habitudes si le temps manque. Rien n'est publié sans vous. |
 | **Décider** | Congé, remplacement, horaires : chaque demande montre ce qu'elle implique avant qu'on tranche. Jamais un simple oui ou non. |
 | **Absorber l'imprévu** | Retard, absence, accident du travail : signalés en deux gestes, pour soi ou pour quelqu'un. Les postes à couvrir arrivent avec leurs options. |
@@ -122,7 +123,7 @@ Dix **visites guidées** complètent l'aide, avec un tutoriel par tâche : un pa
 
 ## Sous le capot
 
-React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (173 tests), sans dépendance à un
+React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (177 tests), sans dépendance à un
 service extérieur.
 
 ```
