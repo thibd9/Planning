@@ -1997,7 +1997,7 @@ function appelPour(personId: string): void {
 }
 
 /** La visite d'un membre de l'équipe : son planning, ses demandes, ses collègues, son espace. Rien de la gestion. */
-function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: string; pharmacien?: boolean }): Etape[] {
+function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: string; pharmacien?: boolean; sansAppel?: boolean }): Etape[] {
   const moi = (vue: Vue): void => voirComme(p.identifiant, vue);
   const etapes: Etape[] = [
     {
@@ -2133,17 +2133,22 @@ function visiteDe(p: { id: string; identifiant: string; qui: string; prenom: str
         { faire: 'cliquer', sur: parTexte('.choix.urgence label', 'Urgence médicale'), sert: 'L’urgence médicale passe en tête, avec un justificatif possible.' },
       ],
     },
-    {
-      chapitre: AVEC_EQUIPE,
-      qui: p.qui,
-      cible: "[data-focus='aider']",
-      titre: 'Un appel à l’équipe',
-      texte: () => 'Quand un poste est à couvrir, tous ceux qui peuvent le tenir sont prévenus ensemble. Vous voyez votre rang ; dire non ne le change pas.',
-      jouer: () => {
-        appelPour(p.id);
-        moi('moi');
-      },
-    },
+    // Un étudiant pris par ses cours quatre jours sur six, et déjà en poste les deux autres, n'est jamais appelé : l'étape n'aurait rien à montrer.
+    ...(p.sansAppel
+      ? []
+      : [
+          {
+            chapitre: AVEC_EQUIPE,
+            qui: p.qui,
+            cible: "[data-focus='aider']",
+            titre: 'Un appel à l’équipe',
+            texte: () => 'Quand un poste est à couvrir, tous ceux qui peuvent le tenir sont prévenus ensemble. Vous voyez votre rang ; dire non ne le change pas.',
+            jouer: () => {
+              appelPour(p.id);
+              moi('moi');
+            },
+          },
+        ]),
     ...(p.pharmacien
       ? [
           {
@@ -2227,7 +2232,7 @@ const PHARMACIEN = visiteDe({ id: 'p_lea', identifiant: 'lea.fontaine', qui: 'L�
 const EQUIPIER = visiteDe({ id: 'p_camille', identifiant: 'nicolas.lesyndicaliste', qui: 'Nicolas · préparateur', prenom: 'Nicolas' });
 const ANIMATRICE = visiteDe({ id: 'p_sarah', identifiant: 'sarah.lemoine', qui: 'Sarah · animatrice', prenom: 'Sarah' });
 const APPRENTIE = visiteDe({ id: 'p_manon', identifiant: 'manon.girard', qui: 'Manon · apprentie', prenom: 'Manon' });
-const ETUDIANT = visiteDe({ id: 'p_yanis', identifiant: 'yanis.morel', qui: 'Yanis · étudiant', prenom: 'Yanis' });
+const ETUDIANT = visiteDe({ id: 'p_yanis', identifiant: 'yanis.morel', qui: 'Yanis · étudiant', prenom: 'Yanis', sansAppel: true });
 
 /** La durée annoncée : une demi-minute par étape, au rythme normal. */
 const minutes = (etapes: Etape[]): string => `${Math.max(3, Math.round(etapes.length * 0.5))} min · ${etapes.length} étapes`;
@@ -2330,6 +2335,7 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   echeance: { gestion: ['Le tableau de bord'] },
   propositions: { gestion: ['Trois propositions'] },
   pauses: { gestion: ['Poser un poste'] },
+  'preferences-equipe': { gestion: ['Qui a demandé ce créneau ?'] },
   'qui-prepare': { gestion: ['Qui prépare le planning'] },
   'postes-types': { gestion: ['Horaires et effectif'] },
   'officine-chiffres': { gestion: ['Horaires et effectif'] },
@@ -2904,9 +2910,15 @@ export function Parcours(): JSX.Element | null {
       return;
     }
     let amene = false;
+    let deplie = false;
     let dernierRecadrage = 0;
     const mesurer = (): void => {
       const base = cible ? document.querySelector<HTMLElement>(cible) : null;
+      // Ce que l'étape montre peut se trouver dans un accordéon replié ou sous un autre onglet : on l'ouvre une fois, puis on laisse la main.
+      if (base && !deplie) {
+        deplie = true;
+        deplier(base);
+      }
       const geste = visee.current ? element(visee.current) : null;
       // Une fenêtre ouverte passe devant tout le reste : c'est elle qu'on éclaire, pas le bloc resté derrière.
       const devant = document.querySelector<HTMLElement>('.overlay .dialog, .overlay .decouvrir, .assistant .aide-panneau');
