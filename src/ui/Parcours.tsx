@@ -2,13 +2,18 @@ import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, CalendarCheck, Cale
 import { cloneElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
-import type { AppData, Justificatif, Remplacement } from '../domain/types';
+import type { AppData, Justificatif, Person, Remplacement } from '../domain/types';
 import { seed } from '../data/seed';
+import { HEBERGE } from '../env';
 import { tourDeRole } from '../engine/appel';
 import { sousEffectifs, trousPharmacien } from '../engine/core';
+import { etatPublication } from '../engine/echeance';
 import { generer } from '../engine/generate';
+import { soldeHeures } from '../engine/heures';
+import { proposerRdv } from '../engine/rdv';
 import { moisACollecter, proposerSouhaits } from '../engine/souhaits';
 import { evaluerRemplacement, peutDemanderRemplacement, peutRemplacer } from '../engine/remplacement';
+import { validateWeek } from '../engine/validate';
 import { useStore } from '../store/store';
 import type { Vue } from '../store/ui';
 import { useUi } from '../store/ui';
@@ -398,6 +403,8 @@ function souhaitsPour(id: string): void {
   s.poserSouhaits(proposerSouhaits(s.data, p, mois, s.today).map((x, i) => (i % 7 === 3 ? { ...x, choix: 'matin' as const } : i % 9 === 5 ? { ...x, choix: 'soir' as const } : i % 11 === 8 ? { ...x, choix: 'repos' as const } : x)));
 }
 function avecSouhaits(camille = true): void {
+  // Un poste allongé pour montrer les contrôles retrouve ses horaires, même si la démonstration a été passée.
+  sansEcart();
   avecEquipe();
   ['p_lea', 'p_thomas', 'p_manon', 'p_ines', 'p_jules', 'p_antoine', 'p_sarah', ...(camille ? ['p_camille'] : [])].forEach(souhaitsPour);
 }
@@ -908,6 +915,169 @@ const semaineUne = (): void => {
 const semaineASouhaits = (): string => mondayOf(`${moisACollecter(store().data.officine, store().today)}-08`);
 const TROIS_DEMANDEURS = ['p_thomas', 'p_ines', 'p_jules'];
 
+// ---- Mises en place des étapes qui montrent le reste des fonctions
+
+/** Un réglage de l'exemple est remis en place une fois la démonstration jouée : la suite de la visite n'en dépend pas. */
+const officineExemple = (cles: (keyof AppData['officine'])[]): void => {
+  const ref = reference().officine;
+  poser((d) => ({ ...d, officine: { ...d.officine, ...Object.fromEntries(cles.map((c) => [c, ref[c]])) } }));
+};
+/** De même pour la fiche d'une personne de l'exemple. */
+const personneExemple = (id: string, cles: (keyof Person)[]): void => {
+  const ref = reference().personnes.find((p) => p.id === id);
+  if (ref) poser((d) => ({ ...d, personnes: d.personnes.map((p) => (p.id === id ? { ...p, ...Object.fromEntries(cles.map((c) => [c, ref[c]])) } : p)) }));
+};
+const postesDeLaSemaine = (d: AppData, lundi: string, personId?: string): AppData['shifts'] => d.shifts.filter((x) => x.date >= lundi && x.date <= addDays(lundi, 6) && (!personId || x.personId === personId));
+
+/** La première semaine encore vide, à remplir d'après la précédente. Si celle-ci est presque vide elle aussi, elle reçoit une proposition. */
+function semaineARecopier(): string {
+  const n = [2, 3, 4, 5, 6, 7, 8, 9].find((k) => !postesDeLaSemaine(store().data, semaineDans(k)).length) ?? 9;
+  proposerSemaine(semaineDans(n - 1));
+  return semaineDans(n);
+}
+
+/** Le poste que la démonstration déplace : celui d'un préparateur, vers un jour ouvert où il n'a rien. */
+let deplace = false;
+function deplacerUnPoste(): void {
+  const s = store();
+  const lundi = semaineDans(1);
+  deplace = false;
+  for (const id of ['p_ines', 'p_jules', 'p_thomas', 'p_camille', 'p_manon']) {
+    const postes = postesDeLaSemaine(s.data, lundi, id).sort((a, b) => a.date.localeCompare(b.date));
+    const libre = [0, 1, 2, 3, 4].map((i) => addDays(lundi, i)).find((j) => !postes.some((x) => x.date === j) && !s.data.absences.some((a) => a.personId === id && a.from <= j && j <= a.to));
+    const poste = postes.find((x) => x.date < addDays(lundi, 5));
+    if (!poste || !libre) continue;
+    s.moveShift(poste.id, id, libre);
+    deplace = true;
+    return;
+  }
+}
+/** Un poste de Thomas allongé sans pause, le temps de montrer un contrôle : la proposition, elle, n'en laisse souvent aucun. */
+let posteAllonge: AppData['shifts'][number] | null = null;
+function avecUnEcart(): void {
+  const s = store();
+  const lundi = semaineDans(1);
+  if (posteAllonge || validateWeek(s.data, lundi).some((i) => i.gravite !== 'info')) return;
+  const poste = postesDeLaSemaine(s.data, lundi, 'p_thomas').sort((a, b) => a.date.localeCompare(b.date))[0];
+  if (!poste) return;
+  posteAllonge = poste;
+  s.saveShift({ ...poste, start: 8 * 60 + 30, end: 19 * 60 + 30, pauseStart: undefined, pauseEnd: undefined, pauses: undefined });
+}
+function sansEcart(): void {
+  if (posteAllonge) store().saveShift(posteAllonge);
+  posteAllonge = null;
+}
+/** La case vide où la démonstration pose un repos : Jules, jeudi, ou à défaut une autre case du jeudi. */
+const caseDuRepos = (): HTMLElement | undefined => {
+  const cases = [...document.querySelectorAll<HTMLElement>('.plan-grid .add')].filter((e) => /jeudi/.test(e.getAttribute('aria-label') ?? ''));
+  return cases.find((e) => /Jules/.test(e.getAttribute('aria-label') ?? '')) ?? cases.find((e) => /Thomas|Inès|Manon/.test(e.getAttribute('aria-label') ?? '')) ?? cases[0];
+};
+/** « Annuler » et « Rétablir » ne sont montrés que si le poste a bien été déplacé : sinon ils déferaient autre chose. */
+const boutonHistorique = (nom: string): (() => HTMLElement | null) => () => (deplace ? document.querySelector<HTMLElement>(`[aria-label="${nom}"]`) : null);
+
+/** Le planning publié de Nicolas change : il en est prévenu, et doit dire qu'il l'a vu. */
+function avecChangement(): void {
+  avecPlanning();
+  const s = store();
+  if (s.data.notifications.some((n) => n.personId === 'p_camille' && !n.luLe)) return;
+  const lundi = semaineDans(2);
+  const poste = postesDeLaSemaine(s.data, lundi, 'p_camille').sort((a, b) => a.date.localeCompare(b.date))[0];
+  if (!poste || s.data.semaines[lundi]?.statut !== 'publie') return;
+  s.saveShift({ ...poste, end: poste.end - 30 });
+  store().publier(lundi, [], 0);
+}
+
+/** Inès ne peut pas venir pour raison médicale : sa demande attend la réponse, et un titulaire peut assurer le poste. */
+const urgenceDInes = (d: AppData): Remplacement | undefined => d.remplacements.find((r) => r.demandeur === 'p_ines' && r.urgence === 'medical' && r.statut === 'ouverte' && r.accord === 'attente');
+function avecUrgenceDInes(): void {
+  avecPlanning();
+  const s = store();
+  if (urgenceDInes(s.data)) return;
+  const poste = s.data.shifts
+    .filter((x) => x.personId === 'p_ines' && x.date >= semaineDans(1) && s.data.semaines[mondayOf(x.date)]?.statut === 'publie' && !s.data.remplacements.some((r) => r.shiftId === x.id))
+    .sort((x, y) => x.date.localeCompare(y.date) || x.start - y.start)[0];
+  if (poste) s.demanderRemplacement(poste, 'medical', JUSTIFICATIF_EXEMPLE, undefined, { motif: 'sante' });
+}
+
+/** Nicolas a demandé à finir plus tôt certains jours : la demande attend que la titulaire lui donne son poids. */
+function avecDemandeDHoraires(): void {
+  avecPlanning();
+  const s = store();
+  if (s.data.besoins.some((b) => b.decision === 'en_attente')) return;
+  s.ajouterBesoin({ personId: 'p_camille', motif: 'famille', precision: 'Sortie d’école à 16 h 30', forme: 'finir_avant', jours: [0, 1, 3, 4], frequence: 1, heure: 16 * 60 + 30, from: s.today, statut: 'preference', horsPlafond: false, decision: 'en_attente' });
+}
+
+/** Nicolas a demandé un rendez-vous à Caroline, à un moment où ils sont tous les deux en poste. */
+function avecRendezVous(): void {
+  avecPlanning();
+  const s = store();
+  if ((s.data.rendezVous ?? []).some((r) => r.de === 'p_camille' && r.statut === 'propose' && r.attend === 'p_helene' && r.date >= s.today)) return;
+  const moment = proposerRdv(s.data, 'p_camille', 'p_helene', 30, s.today)[0];
+  if (moment) s.demanderRendezVous({ de: 'p_camille', avec: 'p_helene', sujet: 'Point sur mes horaires', ...moment, note: '' });
+}
+
+/** Thomas a fait des heures au-delà de son contrat cette semaine : son compteur passe en positif. */
+function avecHeuresEnPlus(): void {
+  avecPlanning();
+  const s = store();
+  const lundi = semaineDans(0);
+  const thomas = s.data.personnes.find((p) => p.id === 'p_thomas');
+  if (!thomas) return;
+  const solde = soldeHeures(s.data, thomas, s.today).solde;
+  if (solde >= 60) return;
+  const plus = Math.max(90, Math.ceil((120 - solde) / 30) * 30);
+  const poste = postesDeLaSemaine(s.data, lundi, 'p_thomas').sort((a, b) => a.end - b.end)[0];
+  if (!poste || poste.end + plus > 20 * 60) return;
+  // La semaine est déjà publiée : la version publiée suit, comme si ces heures avaient été tenues.
+  poser((d) => {
+    const semaine = d.semaines[lundi];
+    if (!semaine) return d;
+    const allonge = <T extends { id: string; end: number }>(x: T): T => (x.id === poste.id ? { ...x, end: x.end + plus } : x);
+    return { ...d, shifts: d.shifts.map(allonge), semaines: { ...d.semaines, [lundi]: { ...semaine, snapshot: semaine.snapshot?.map(allonge) } } };
+  });
+}
+
+/** Une garde de nuit tenue la semaine dernière par Léa : il reste à déclarer ses dérangements et à la valider pour la paie. */
+function avecGardePassee(): string | null {
+  avecGardes();
+  const passee = (): string | undefined => store().data.gardes.find((g) => g.personId && g.date < store().today && !g.valideLe && g.type === 'volets_fermes')?.id;
+  if (!passee()) store().ajouterGardes([{ date: addDays(store().today, -6), start: 19 * 60 + 30, end: 8 * 60 + 30, type: 'volets_fermes', personId: 'p_lea', interventions: [] }], false);
+  return passee() ?? null;
+}
+
+/** L'échéance de publication du mois suivant est passée : le rappel est en tête du tableau de bord. */
+function avecEcheanceDepassee(): void {
+  avecPlanning();
+  poser((d) => ({ ...d, officine: { ...d.officine, publication: { delai: 45, rappel: 7, relais: true } } }));
+}
+/** Le mois suivant est préparé en brouillon, comme le fait Solvéa une fois l'échéance passée. */
+function avecMoisPrepare(): void {
+  avecEcheanceDepassee();
+  const s = store();
+  const etat = etatPublication(s.data, s.today);
+  if (etat.vides) s.preparerMois(etat.mois);
+  helene('construire');
+  useUi.getState().setSemaine(mondayOf(`${etat.mois}-08`));
+  useUi.getState().setPlanVue('mois');
+}
+/** Une case libre du mois, de préférence dans la ligne d'un titulaire et en fin de mois : là où le planning est encore un brouillon. */
+const caseLibreDuMois = (): HTMLElement | undefined => {
+  const cases = [...document.querySelectorAll<HTMLElement>("[data-focus='mois'] button[title*='oser un poste']")];
+  return cases.filter((e) => /Caroline/.test(e.textContent ?? '')).pop() ?? cases.filter((e) => /Pierre/.test(e.textContent ?? '')).pop() ?? cases.pop();
+};
+
+/** Un message de Nicolas attend Caroline : c'est ce que Solvéa rappelle avant une déconnexion. */
+function avecMessageNonLu(): void {
+  const s = store();
+  if (!s.data.messages.some((m) => m.a === 'p_helene' && m.de !== 'p_helene' && !m.luPar.includes('p_helene'))) s.envoyerMessage('p_camille', 'p_helene', 'Bonjour Caroline, pourrait-on voir ensemble mes horaires de janvier ?');
+}
+
+/** Une date à trois mois d'ici, écrite comme dans un calendrier de garde reçu : jour/mois/année. */
+const dateDeGardeRecue = (): string => {
+  const [a, m, j] = addDays(store().today, 86).split('-');
+  return `${j}/${m}/${a}`;
+};
+
 const COMPLET_BRUT: Etape[] = [
   // ---- 1. Préparer
   {
@@ -1075,7 +1245,7 @@ const COMPLET_BRUT: Etape[] = [
     cible: '.content .plan',
     cibleFin: '.content .plan',
     titre: 'Qui a demandé ce créneau ?',
-    texte: () => 'Les préférences de l’équipe se lisent dans chaque case. À la création d’un poste, Solvéa dit qui a demandé ce créneau : une seule personne, vous le lui accordez ; plusieurs, un tirage au sort équitable les départage.',
+    texte: () => 'Les préférences de l’équipe se lisent dans chaque case. En créant un poste, Solvéa répond à la question « Qui a demandé ce créneau ? » : personne, et le poste est libre ; une seule personne, et vous le lui accordez d’un clic ; plusieurs, et un tirage au sort équitable les départage.',
     jouer: () => {
       avecSouhaits();
       const jour = addDays(semaineASouhaits(), 1);
@@ -1087,13 +1257,19 @@ const COMPLET_BRUT: Etape[] = [
     },
     gestes: [
       { faire: 'pause', ms: 2800, dit: 'Dans chaque case, la préférence de la personne', sert: 'Matin, journée, après-midi ou repos : ce que chacun a demandé pour le mois.' },
+      { faire: 'cliquer', sur: '#plan-preferences', dit: 'Décochez la case « Préférences »', sert: 'Les préférences se masquent, pour lire la grille seule.', facultatif: true },
+      { faire: 'cliquer', sur: '#plan-preferences', dit: 'Recochez-la', sert: 'Elles reviennent dans chaque case.', facultatif: true },
       { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.plan-grid .add')].find((e) => /Thomas/.test(e.getAttribute('aria-label') ?? '') && /mardi/.test(e.getAttribute('aria-label') ?? '')), dit: 'Ouvrez un poste pour Thomas, mardi', sert: 'Thomas, Inès et Jules ont tous les trois demandé ce matin-là.' },
       { faire: 'attendre', que: '.dialog' },
       { faire: 'cliquer', sur: parTexte('.dialog .ptc', 'Matin'), dit: 'Choisissez le poste type « Matin »', sert: 'Solvéa compte aussitôt qui a demandé ce créneau.' },
-      { faire: 'attendre', que: '#dp-tirer' },
-      { faire: 'cliquer', sur: '#dp-tirer', dit: 'Cliquez sur « Tirer au sort »', sert: 'Celui dont les préférences ont été le moins suivies ces dernières semaines a le plus de chances.' },
-      { faire: 'pause', ms: 3200, dit: 'Le sort a désigné un nom', sert: 'Le poste passe à cette personne, et les chances de chacun sont affichées.' },
-      { faire: 'cliquer', sur: VALIDER, sert: 'Le poste est posé dans le brouillon.' },
+      { faire: 'attendre', que: '#dp-pref-texte' },
+      { faire: 'pause', ms: 3000, dit: '« Qui a demandé ce créneau ? »', sert: 'La réponse est écrite en clair : trois personnes ont demandé ce matin-là, Thomas compris.' },
+      { faire: 'attendre', que: '.dp-pref-qui .dp-pref-chance' },
+      { faire: 'pause', ms: 3400, dit: 'Chacun a ses chances, affichées avant le tirage', sert: 'Elles tiennent compte des préférences déjà suivies ces huit dernières semaines : celui qui a été le moins servi a le plus de chances.' },
+      { faire: 'cliquer', sur: '#dp-tirer', dit: 'Cliquez sur « Tirer au sort »', sert: 'Le sort désigne un nom, selon ces chances.' },
+      { faire: 'attendre', que: '#dp-tirage' },
+      { faire: 'pause', ms: 3200, dit: 'Le sort a désigné un nom', sert: 'Le poste va à la personne désignée. Si ce n’est pas Thomas, « Rendre le poste à Thomas » revient en arrière.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Le poste est posé dans le brouillon, pour la personne désignée.' },
     ],
   },
   {
@@ -1128,9 +1304,10 @@ const COMPLET_BRUT: Etape[] = [
   {
     chapitre: PLANIFIER,
     qui: HELENE,
-    cible: '.content .plan',
+    cible: '.ph-reperes',
+    cibleFin: '.content .plan',
     titre: 'La semaine est posée',
-    texte: () => 'La semaine est remplie. La couleur dit le moment de la journée : jaune le matin, bleu la journée, violet l’après-midi. Chaque tuile se déplace ou se corrige.',
+    texte: () => 'La semaine est remplie. En haut, trois repères : les personnes au planning, les heures planifiées, la part de l’ouverture avec un pharmacien. La couleur d’une tuile dit le moment de la journée ; la légende est sous la grille. Chaque tuile se déplace ou se corrige.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
@@ -1155,10 +1332,14 @@ const COMPLET_BRUT: Etape[] = [
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
+      avecUnEcart();
       semaineUne();
     },
     gestes: [
-      { faire: 'cliquer', sur: '.content .issue', dit: 'Cliquez sur un contrôle', sert: 'La grille montre aussitôt la personne et le jour concernés.', facultatif: true },
+      { faire: 'cliquer', sur: '.content .issue', dit: 'Cliquez sur un contrôle', sert: 'La grille montre aussitôt la personne et le jour concernés.' },
+      { faire: 'pause', ms: 2400 },
+      // Le poste allongé pour l'exemple retrouve ses horaires : la publication de la suite n'a rien de bloquant.
+      { faire: 'action', jouer: sansEcart },
     ],
   },
   {
@@ -1178,6 +1359,7 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'pause', ms: 2600, dit: 'Chaque case porte la préférence de la personne', sert: 'Un clic sur une case ouvre le poste, ici même.' },
       { faire: 'cliquer', sur: '#mois-reponses', dit: 'Ouvrez « préférences reçues »', sert: 'Qui a répondu, et qui relancer d’un clic avant la date limite.' },
+      { faire: 'cliquer', sur: '[data-relancer]', dit: 'Cliquez sur « Relancer »', sert: 'Un message part à la personne, avec le nombre de jours qu’il lui reste.', facultatif: true },
     ],
   },
   {
@@ -1235,6 +1417,14 @@ const COMPLET_BRUT: Etape[] = [
       avecPlanning();
       semaineUne();
     },
+    gestes: [
+      { faire: 'cliquer', sur: "button[aria-label='Imprimer le planning']", dit: 'Cliquez sur l’imprimante', sert: 'L’aperçu montre la feuille telle qu’elle sortira, en A4 paysage.' },
+      { faire: 'attendre', que: '.dialog .imp' },
+      { faire: 'cliquer', sur: parTexte('.dialog .imp-outils .seg button', 'Mois'), sert: 'La feuille se fait à la semaine ou au mois.' },
+      { faire: 'cliquer', sur: parTexte('.dialog .imp-outils .seg button', 'Noir et blanc'), sert: 'En couleur, ou en noir et blanc pour économiser l’encre.' },
+      { faire: 'cliquer', sur: parTexte('.dialog .imp-outils .seg button', 'Mes postes'), sert: 'Pour toute l’équipe, ou pour vos seuls postes.' },
+      { faire: 'cliquer', sur: parTexte('.dialog .dialog-foot .btn', 'Fermer'), dit: 'Fermez l’aperçu', sert: '« Imprimer », juste à côté, envoie la feuille à l’imprimante.' },
+    ],
   },
   {
     chapitre: PLANIFIER,
@@ -1847,6 +2037,14 @@ const COMPLET_BRUT: Etape[] = [
       avecPlanning();
       helene('compte');
     },
+    gestes: [
+      { faire: 'taper', dans: '#code-actuel', texte: 'demo', dit: 'Saisissez votre mot de passe actuel', sert: 'Dans la pharmacie d’exemple, c’est « demo ».' },
+      { faire: 'taper', dans: '#code-nouveau', texte: 'pinede-2026', dit: 'Puis le nouveau', sert: 'Au moins six caractères. Seule une empreinte est conservée, sur cet appareil.' },
+      { faire: 'cliquer', sur: parTexte("[aria-labelledby='c-code'] button", 'Changer le mot de passe'), sert: 'Le nouveau mot de passe est enregistré. Dessous, la clé de secours : notez-la, elle seule permet de le redéfinir en cas d’oubli.' },
+      { faire: 'pause', ms: 2200 },
+      // Le compte d'exemple retrouve son mot de passe : on peut s'y reconnecter après la visite.
+      { faire: 'action', jouer: () => personneExemple('p_helene', ['code', 'provisoire']) },
+    ],
   },
   {
     chapitre: QUOTIDIEN,
@@ -1933,7 +2131,7 @@ const COMPLET_BRUT: Etape[] = [
     chapitre: BILAN,
     qui: HELENE,
     cible: '#stats-cles',
-    cibleFin: '#stats-points-forts',
+    cibleFin: '#stats-activite',
     titre: 'Les statistiques de l’équipe',
     texte: () => 'L’équipe en chiffres, en quatre onglets : sa composition, les compétences couvertes et celles qui reposent sur une seule personne, les points forts de chacun, les heures planifiées face aux contrats. Tout est calculé d’après ce qui est déjà saisi : ni note, ni classement.',
     jouer: () => {
@@ -1943,6 +2141,7 @@ const COMPLET_BRUT: Etape[] = [
     gestes: [
       { faire: 'cliquer', sur: '#stats-onglet-competences', dit: 'Ouvrez l’onglet « Compétences »', sert: 'Les compétences couvertes, celles qui reposent sur une seule personne, celles que personne ne détient.', facultatif: true },
       { faire: 'cliquer', sur: '#stats-onglet-points-forts', dit: 'Puis l’onglet « Points forts »', sert: 'Ce qui a été noté de positif pour chacun sur douze mois, par ordre alphabétique.', facultatif: true },
+      { faire: 'cliquer', sur: '#stats-onglet-activite', dit: 'Enfin l’onglet « Activité »', sert: 'Les heures planifiées face aux contrats, puis les samedis, fermetures, gardes et dépannages sur douze mois.', facultatif: true },
     ],
   },
   {
@@ -1956,6 +2155,651 @@ const COMPLET_BRUT: Etape[] = [
       helene('moi');
     },
   },
+  // ---- Le reste des fonctions : chaque étape qui suit est rangée dans son chapitre par le récit, plus bas.
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: "[data-focus='infos-officine']",
+    titre: 'L’officine en chiffres',
+    texte: () => 'Dans l’onglet « Pharmacie » des réglages, quelques repères sur vos locaux : surfaces, caisses, postes de comptoir, espaces de confidentialité, robot. Tout est facultatif. Solvéa signale ce qui ne colle pas.',
+    jouer: () => helene('officine'),
+    gestes: [
+      { faire: 'taper', dans: '#officine-caisses', texte: '6', dit: 'Indiquez le nombre de caisses', sert: 'Six caisses pour quatre postes de comptoir : Solvéa le remarque aussitôt, sans rien bloquer.' },
+      { faire: 'cliquer', sur: 'label[for="officine-robot"]', dit: 'Cochez « Robot ou automate de dispensation »', sert: 'Avec un robot, le temps passé avec chaque client est compté plus court.' },
+      { faire: 'pause', ms: 2200 },
+      { faire: 'action', jouer: () => officineExemple(['infos']) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '.content .split > :last-child',
+    titre: 'Contrat et ancienneté',
+    texte: () => 'La rubrique « Poste et contrat » porte la fonction, les heures par semaine, le type de contrat et la date d’entrée. L’ancienneté se calcule toute seule.',
+    jouer: () => {
+      avecEquipe();
+      helene('equipe');
+      useUi.getState().ouvrirPersonne('p_ines');
+    },
+    gestes: [
+      { faire: 'choisir', dans: '#fiche-contrat', valeur: 'cdd', dit: 'Choisissez le type de contrat', sert: 'CDI, CDD, apprentissage, professionnalisation, stage : les statistiques de l’équipe en tiennent compte.' },
+      { faire: 'choisir', dans: '#fiche-entree', valeur: '2021-02-08', dit: 'Indiquez la date d’entrée dans la pharmacie', sert: 'L’ancienneté s’écrit juste dessous, et dans le résumé de la rubrique.' },
+      { faire: 'pause', ms: 2200 },
+      { faire: 'action', jouer: () => personneExemple('p_ines', ['contrat', 'entreeLe']) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '.content .split > :last-child',
+    titre: 'Droits d’accès et mot de passe',
+    texte: () => 'Deux rubriques de la fiche règlent qui entre, et où. « Droits d’accès » ouvre la gestion à un pharmacien : vous seule, titulaire principale, pouvez l’accorder. « Compte de connexion » donne son identifiant et un mot de passe provisoire.',
+    jouer: () => {
+      avecEquipe();
+      helene('equipe');
+      useUi.getState().ouvrirPersonne('p_karim');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: 'label[for="gestion-p_karim"]', dit: 'Cochez « Peut modifier les plannings, l’équipe, les gardes et les réglages »', sert: 'Igor, pharmacien, se connecte alors à l’espace de gestion.' },
+      { faire: 'cliquer', sur: 'label[for="gestion-p_karim"]', dit: 'Décochez la case', sert: 'Sans cet accès, Igor n’a que son espace de pharmacien.' },
+      { faire: 'cliquer', sur: parTexte('.content .split > :last-child button', 'Nouveau mot de passe provisoire'), sert: 'Le mot de passe s’affiche : vous le transmettez à Igor, qui le remplacera dans « Mon compte ».' },
+      { faire: 'pause', ms: 2200 },
+      // Le compte d'exemple retrouve son mot de passe : on peut s'y reconnecter après la visite.
+      { faire: 'action', jouer: () => personneExemple('p_karim', ['code', 'provisoire', 'gestion']) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '.content .split > :last-child',
+    titre: 'Volontariat et besoins personnels',
+    texte: () => 'Deux autres rubriques de la fiche. « Volontariat » dit si la personne accepte des heures complémentaires ou des gardes. « Besoins personnels » réunit ses contraintes d’horaires, chacune avec son poids.',
+    jouer: () => {
+      avecEquipe();
+      helene('equipe');
+      useUi.getState().ouvrirPersonne('p_lea');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content .split > :last-child label.check', 'heures complémentaires'), dit: 'Cochez « Volontaire pour des heures complémentaires »', sert: 'Léa travaille à temps partiel. Quand un collègue manque, Solvéa peut lui proposer des heures en plus, avec son accord.' },
+      { faire: 'cliquer', sur: parTexte('.content .split > :last-child label.check', 'Volontaire pour les gardes'), dit: 'Cochez « Volontaire pour les gardes »', sert: 'À charge égale, un pharmacien volontaire passe d’abord dans la répartition des gardes. Le repos qui suit reste contrôlé.' },
+      { faire: 'attendre', que: parTexte('.content .split > :last-child details', 'Besoins personnels') },
+      { faire: 'pause', ms: 3200, dit: 'Ses besoins personnels, avec leur poids', sert: 'Léa n’est pas disponible un samedi sur deux : une demande prioritaire. Le plafond de demandes prioritaires est le même pour toute l’équipe.' },
+      { faire: 'cliquer', sur: parTexte('.content .split > :last-child button', 'Besoin ou absence'), sert: 'Vous notez vous-même une contrainte ou une absence pour Léa, par exemple après un entretien.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'pause', ms: 2200 },
+      { faire: 'cliquer', sur: parTexte('.dialog .dialog-foot .btn', 'Annuler'), dit: 'Fermez la fenêtre', sert: 'Rien n’est noté tant que vous n’avez pas cliqué sur « Enregistrer ».' },
+      // La fiche d'exemple retrouve son volontariat : la répartition des gardes de la suite n'en dépend pas.
+      { faire: 'action', jouer: () => personneExemple('p_lea', ['volontaireHeuresComp', 'volontaireGardes']) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '#acc-horaires',
+    titre: 'Recopier un horaire',
+    texte: () => 'Inutile de saisir six fois les mêmes heures. « Recopier » applique les horaires d’un jour aux autres jours ouverts, ou reprend ceux de la veille.',
+    jouer: () => helene('officine'),
+    gestes: [
+      { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('[aria-label="Fermeture le lundi"]'), valeur: '19:00', dit: 'Avancez la fermeture du lundi à 19 h', sert: 'On règle un jour, une seule fois.' },
+      { faire: 'cliquer', sur: '#jl-recopier-0', dit: 'Cliquez sur « Recopier », sur la ligne du lundi', sert: 'Deux possibilités s’ouvrent dessous.' },
+      { faire: 'cliquer', sur: parTexte('#jl-recopie-0 button', 'Appliquer ces horaires'), dit: 'Cliquez sur « Appliquer ces horaires aux autres jours ouverts »', sert: 'Toute la semaine ferme maintenant à 19 h. Un jour fermé le reste.' },
+      { faire: 'pause', ms: 2200 },
+      // Les horaires de l'exemple sont remis en place pour la suite de la visite.
+      { faire: 'action', jouer: () => officineExemple(['horaires']) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '#acc-feries',
+    titre: 'Les jours fériés',
+    texte: () => 'Sous les horaires, la liste des jours fériés des douze prochains mois. Une case dit si la pharmacie ferme ces jours-là. Ils sont marqués dans la grille, le mois et le calendrier de chacun.',
+    jouer: () => helene('officine'),
+    gestes: [
+      { faire: 'cliquer', sur: '#acc-feries label.check', dit: 'Décochez « Officine fermée les jours fériés »', sert: 'La pharmacie reste alors ouverte ces jours-là : ils sont signalés dans les plannings.' },
+      { faire: 'cliquer', sur: '#acc-feries label.check', dit: 'Recochez la case', sert: 'Fermée : aucun poste n’y est proposé, hors gardes.' },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '#acc-postes',
+    cibleFin: '#acc-postes',
+    titre: 'Les postes types',
+    texte: () => 'Vos horaires habituels, chacun avec son nom, sa pause et sa couleur. Un poste type se pose ensuite d’un clic dans « Construire », et les propositions de planning s’en servent.',
+    jouer: () => helene('officine'),
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('#acc-postes button', 'Ajouter un poste type'), sert: 'Une fenêtre s’ouvre, avec l’aperçu de la tuile.' },
+      { faire: 'attendre', que: '.dialog #pt-modele' },
+      { faire: 'choisir', dans: '#pt-modele', valeur: 'apres', dit: 'Partez d’un modèle', sert: 'Horaires, pause et couleur se remplissent d’un coup ; tout reste réglable.' },
+      { faire: 'taper', dans: '#pt-nom', texte: 'Renfort du soir', dit: 'Donnez un nom au poste', sert: 'C’est le nom que vous lirez dans la fenêtre d’un poste.' },
+      { faire: 'cliquer', sur: '.dialog .pt-nuancier .pt-nuance:not(.on)', dit: 'Choisissez sa couleur d’un clic', sert: 'La tuile prendra cette couleur dans la grille.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Le poste type rejoint la liste : il se modifie et se retire ici.' },
+      { faire: 'pause', ms: 2400 },
+      // Le poste d'exemple est retiré : les propositions de la suite s'appuient sur les postes types d'origine.
+      { faire: 'action', jouer: () => poser((d) => ({ ...d, officine: { ...d.officine, postes: d.officine.postes.filter((x) => x.label !== 'Renfort du soir') } })) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: "[data-focus='publication']",
+    titre: 'L’échéance de publication',
+    texte: () => 'Le planning se transmet au mois. Vous fixez combien de jours avant le 1er il doit être publié, et quand Solvéa vous le rappelle. Passé l’échéance, il peut préparer les semaines vides en brouillon : rien n’est publié sans vous.',
+    jouer: () => helene('officine'),
+    gestes: [
+      { faire: 'taper', dans: '#pub-delai', texte: '21', dit: 'Fixez le délai : 21 jours avant le 1er du mois', sert: 'Dessous, Solvéa écrit la date du rappel et la date limite du mois prochain.' },
+      { faire: 'pause', ms: 2600, dit: 'La case du dessous laisse Solvéa préparer le mois', sert: 'D’après vos habitudes : la journée la plus fréquente de chacun sur vos dernières semaines publiées.' },
+      { faire: 'action', jouer: () => officineExemple(['publication']) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '#acc-parametres',
+    titre: 'Paramètres et coûts',
+    texte: () => 'Le dernier onglet réunit la valeur du point conventionnel, le nombre de demandes prioritaires par personne, le chiffre d’affaires et l’affichage des coûts estimés. « Repartir de zéro », tout en bas, efface la pharmacie de cet appareil.',
+    jouer: () => helene('officine'),
+    gestes: [
+      { faire: 'cliquer', sur: '#acc-parametres label.couts-option', dit: 'Cochez « Afficher les coûts estimés »', sert: 'Un champ « Taux horaire brut », facultatif, apparaît dans chaque fiche, et la grille gagne une lecture « Coût ».' },
+      { faire: 'pause', ms: 2400, dit: 'Sans cette option, aucun montant n’est affiché', sert: 'Solvéa ne connaît pas vos salaires. Ce n’est jamais un calcul de paie.' },
+      { faire: 'action', jouer: () => officineExemple(['couts']) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
+    cible: '.content .card',
+    titre: 'Régler un seuil',
+    texte: () => 'Les règles que vous fixez vous-même ont un seuil : plafond d’heures par semaine, samedis libres par mois, délai des remplacements. Chaque changement est noté au journal.',
+    jouer: () => {
+      avecEquipe();
+      helene('regles');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content .jr-filtre', 'Réglables'), sert: 'On ne garde que les règles dont vous fixez le seuil.' },
+      { faire: 'cliquer', sur: parTexte('.content summary', 'Samedis libres par mois'), dit: 'Ouvrez « Samedis libres par mois »', sert: 'Un choix de votre officine, pour protéger l’équipe.' },
+      { faire: 'taper', dans: () => document.querySelector<HTMLElement>('[aria-label="Seuil de la règle Samedis libres par mois"]'), texte: '2', dit: 'Passez le seuil à 2 samedis', sert: 'Le bouton « Enregistrer » apparaît dès que la valeur change.' },
+      { faire: 'cliquer', sur: parTexte('.content .rg-reglages button', 'Enregistrer'), sert: 'Les contrôles appliquent le nouveau seuil. « Me prévenir » coupe ou rétablit l’alerte.' },
+      { faire: 'pause', ms: 2200 },
+      // Le seuil de l'exemple est remis en place : les contrôles de la suite ne changent pas.
+      { faire: 'action', jouer: () => poser((d) => ({ ...d, regles: d.regles.map((r) => (r.id === 'equipe.samedisLibres' ? { ...r, valeur: reference().regles.find((x) => x.id === r.id)?.valeur ?? r.valeur } : r)) })) },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.content .plan',
+    cibleFin: '.content .plan',
+    titre: 'Les pauses courtes',
+    texte: () => 'En plus de la pause déjeuner, un poste porte jusqu’à quatre pauses courtes de dix, quinze ou vingt minutes. Elles se lisent sur le planning et sur la feuille imprimée, sans changer le décompte des heures.',
+    jouer: () => {
+      avecSouhaits();
+      proposerSemaine(semaineDans(1));
+      semaineUne();
+    },
+    gestes: [
+      { faire: 'cliquer', sur: '.plan-grid .tile', dit: 'Cliquez sur une tuile', sert: 'Le poste s’ouvre.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'cliquer', sur: '#pc-proposer', dit: 'Dans « Pauses courtes », cliquez sur « Une par demi-journée »', sert: 'Solvéa place une pause au milieu de chaque demi-journée.', facultatif: true },
+      { faire: 'choisir', dans: () => document.querySelector<HTMLElement>('.dialog select[id^="pc-duree-"]'), valeur: '20', dit: 'Réglez la durée de la première : 20 minutes', sert: 'Chaque pause a son heure et sa durée. « Ajouter une pause courte » en ajoute une autre.', facultatif: true },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Le poste est enregistré avec ses pauses.' },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.content .plan',
+    cibleFin: '.content .plan',
+    titre: 'Déplacer un poste',
+    texte: () => 'Une tuile se déplace à la souris : vous la glissez vers un autre jour ou vers une autre personne. Chaque manipulation de la grille s’annule, puis se rétablit.',
+    jouer: () => {
+      avecSouhaits();
+      proposerSemaine(semaineDans(1));
+      semaineUne();
+    },
+    gestes: [
+      { faire: 'pause', ms: 2800, dit: 'Glissez une tuile vers une autre case', sert: 'Regardez la ligne d’Inès : son premier poste change de jour.' },
+      { faire: 'action', jouer: deplacerUnPoste },
+      { faire: 'pause', ms: 2400, dit: 'Le poste a changé de jour', sert: 'Les heures de la semaine et les contrôles se recalculent aussitôt.' },
+      { faire: 'cliquer', sur: boutonHistorique('Annuler la dernière manipulation'), dit: 'Cliquez sur « Annuler »', sert: 'Le poste revient à sa place. Au clavier : Ctrl + Z.', facultatif: true },
+      { faire: 'cliquer', sur: boutonHistorique('Rétablir'), dit: 'Puis sur « Rétablir »', sert: 'Et il repart. Rien n’est perdu tant que vous restez sur la grille.', facultatif: true },
+      { faire: 'pause', ms: 1600 },
+      // Le poste retrouve sa place : la suite de la visite repart de la proposition d'origine.
+      { faire: 'action', jouer: () => (deplace ? store().undo() : undefined) },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.plan-bar',
+    cibleFin: '.content .plan',
+    titre: 'Recopier la semaine précédente',
+    texte: () => 'Quand les semaines se ressemblent, « Recopier » reprend les postes de la semaine précédente dans le brouillon. Vous n’avez plus qu’à retoucher.',
+    jouer: () => {
+      avecSouhaits();
+      proposerSemaine(semaineDans(1));
+      const semaine = semaineARecopier();
+      helene('construire');
+      useUi.getState().setSemaine(semaine);
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.plan-bar button', 'Recopier'), sert: 'Les postes de la semaine précédente sont repris, jour pour jour. Rien n’est publié.' },
+      { faire: 'pause', ms: 2800, dit: 'La semaine est remplie d’un coup', sert: 'C’est un brouillon : chaque tuile reste modifiable.' },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Annuler la dernière manipulation"]'), dit: 'Cliquez sur « Annuler »', sert: 'La semaine redevient vide : la recopie n’était qu’un essai.' },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.content .plan',
+    cibleFin: '.content .plan',
+    titre: 'Un jour de repos',
+    texte: () => 'Le dernier poste type de la fenêtre s’appelle « Repos » : la personne ne travaille pas ce jour-là. Le repos se voit dans la grille et dans le mois, et les propositions de planning le respectent.',
+    jouer: () => {
+      avecSouhaits();
+      semaineUne();
+    },
+    gestes: [
+      { faire: 'cliquer', sur: caseDuRepos, dit: 'Ouvrez un poste pour Jules, jeudi', sert: 'La fenêtre « Nouveau poste » s’ouvre, avec ses postes types.' },
+      { faire: 'attendre', que: '.dialog #ptc-repos' },
+      { faire: 'cliquer', sur: '#ptc-repos', dit: 'Choisissez le dernier poste type, « Repos »', sert: 'Les horaires et la pause disparaissent : il n’y a rien à régler.' },
+      { faire: 'attendre', que: '#dp-repos' },
+      { faire: 'pause', ms: 2800, dit: 'Ce jour-là, pas de poste', sert: 'Si ce repos figurait dans ses préférences du mois, l’encadré le dirait : la préférence est respectée.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Le jour de repos est posé dans le brouillon.' },
+      { faire: 'attendre', que: '.plan-grid .tile.repos-pose' },
+      { faire: 'pause', ms: 3000, dit: 'Le repos se lit dans la case', sert: 'Les propositions de planning ne donneront aucun poste à Jules ce jour-là. Un poste posé à la main remplacerait le repos.' },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.plan-bar',
+    cibleFin: '.content .plan',
+    titre: 'Remettre à zéro',
+    texte: () => 'Pour repartir d’une page blanche, « Remettre à zéro » retire d’un clic les postes et les repos des jours à venir. Les jours passés restent, et la version publiée ne bouge pas tant que vous ne republiez pas. Dans la vue « Mois », « Remettre le mois à zéro » fait de même pour tout le mois.',
+    jouer: () => {
+      avecSouhaits();
+      proposerSemaine(semaineDans(1));
+      semaineUne();
+    },
+    gestes: [
+      { faire: 'cliquer', sur: '#plan-zero', sert: 'La semaine se vide. Un message le confirme, avec son bouton « Annuler ».' },
+      { faire: 'pause', ms: 2800, dit: 'La grille est vide', sert: 'Seul le brouillon a changé : rien n’est envoyé à l’équipe.' },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Annuler la dernière manipulation"]'), dit: 'Cliquez sur « Annuler »', sert: 'Les postes et le repos reviennent, à l’identique. Au clavier : Ctrl + Z.' },
+      { faire: 'pause', ms: 1600 },
+      { faire: 'cliquer', sur: parTexte('.ph-outils .seg button', 'Mois'), dit: 'Passez sur la vue « Mois »', sert: 'Le même geste existe pour le mois entier.' },
+      { faire: 'attendre', que: '#mois-zero' },
+      { faire: 'cliquer', sur: '#mois-zero', sert: 'Tous les postes à venir du mois quittent le brouillon. Les semaines publiées restent visibles par l’équipe.' },
+      { faire: 'pause', ms: 2400, dit: 'Le mois est vide', sert: 'Rien n’est publié sans vous.' },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Annuler la dernière manipulation"]'), dit: 'Cliquez sur « Annuler »', sert: 'Le mois revient tel qu’il était.' },
+      // Si une remise à zéro n'a pas été annulée, la semaine retrouve ses postes : la suite de la visite en dépend.
+      { faire: 'action', jouer: () => (postesDeLaSemaine(store().data, semaineDans(1)).length ? undefined : store().undo()) },
+      { faire: 'cliquer', sur: parTexte('.ph-outils .seg button', 'Semaine'), dit: 'Revenez à la semaine', sert: 'Tout est en place.' },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.content .card',
+    cibleFin: '.content .card',
+    titre: 'Une série de gardes',
+    texte: () => 'Un tour de garde qui revient à intervalle fixe se saisit en une fois : la première date, l’intervalle, le nombre de gardes.',
+    jouer: () => {
+      avecPlanning();
+      helene('gardes');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content button', 'Ajouter une garde'), sert: 'La même fenêtre que pour une garde seule.' },
+      { faire: 'cliquer', sur: 'label[for="garde-repeter"]', dit: 'Cochez « Créer une série régulière »', sert: 'Deux champs apparaissent : l’intervalle et le nombre de gardes.' },
+      { faire: 'taper', dans: '#garde-nombre', texte: '4', dit: 'Indiquez le nombre de gardes', sert: 'Toutes les quatre semaines, ici. La date de la dernière garde s’écrit à côté.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Les quatre gardes sont au calendrier. Il reste à les confier.' },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.content .card',
+    cibleFin: '.content .card',
+    titre: 'Répartir les gardes',
+    texte: () => 'Des gardes restent à confier ? « Répartir » propose un partage équitable entre pharmaciens. Vous relisez, puis vous appliquez.',
+    jouer: () => {
+      avecGardes();
+      helene('gardes');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content button', 'Répartir'), sert: 'Solvéa compare les pharmaciens pour chaque garde à confier.' },
+      { faire: 'attendre', que: '.dialog table', facultatif: true },
+      { faire: 'pause', ms: 3200, dit: 'Chaque garde va au pharmacien disponible le moins chargé cette année', sert: 'La colonne « Pourquoi » l’explique. Un dimanche ou un jour férié pèse plus lourd qu’une nuit.' },
+      { faire: 'cliquer', sur: VALIDER, dit: 'Cliquez sur « Appliquer la répartition »', sert: 'Chaque garde est confiée. Vous pourrez encore modifier chaque affectation.' },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.content .card',
+    cibleFin: '.content .card',
+    titre: 'Importer un calendrier de gardes',
+    texte: () => 'Le calendrier de garde est fixé hors de la pharmacie. Plutôt que de le ressaisir, collez les lignes reçues du syndicat ou de l’agence régionale de santé : une garde par ligne.',
+    jouer: () => {
+      avecGardes();
+      helene('gardes');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content button', 'Importer un calendrier'), sert: 'Une fenêtre attend les lignes du calendrier.' },
+      { faire: 'taper', dans: '.dialog textarea', texte: `${dateDeGardeRecue()};19:30;08:30;volets fermés`, dit: 'Collez les lignes reçues', sert: 'Sur chaque ligne : la date, le début, la fin, le type de garde.' },
+      { faire: 'pause', ms: 2200, dit: 'Solvéa relit chaque ligne', sert: 'Les gardes reconnues sont comptées ; une ligne illisible est signalée.' },
+      { faire: 'cliquer', sur: VALIDER, dit: 'Cliquez sur « Ajouter 1 garde »', sert: 'La garde rejoint le calendrier sur douze mois. Il reste à la confier.' },
+    ],
+  },
+  {
+    chapitre: PLANIFIER,
+    qui: HELENE,
+    cible: '.plan-bar',
+    cibleFin: '.plan-bar',
+    titre: 'Modifier un planning publié',
+    texte: () => 'Un planning publié se corrige encore. Tant que vous n’avez pas republié, l’équipe voit l’ancienne version ; ensuite, seule la personne concernée est prévenue.',
+    jouer: () => {
+      avecPlanning();
+      helene('construire');
+      useUi.getState().setSemaine(semaineDans(2));
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.plan-grid .tile', 'Nicolas'), dit: 'Ouvrez un poste de Nicolas', sert: 'Cette semaine est publiée : toute l’équipe la voit déjà.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'cliquer', sur: '.dialog .ptc:not(.on)', dit: 'Choisissez un autre poste type', sert: 'Ses horaires changent.' },
+      { faire: 'cliquer', sur: VALIDER, sert: 'La correction reste un brouillon : l’étiquette de la semaine le dit.' },
+      { faire: 'pause', ms: 2800, dit: '« Publié · 1 modification en attente »', sert: 'L’équipe voit encore la version publiée.' },
+      { faire: 'cliquer', sur: "[data-focus='publier']", dit: 'Cliquez sur « Publier les modifications »', sert: 'Solvéa relit les règles et le délai de prévenance.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'cliquer', sur: parTexte('.dialog label.check', 'Je publie quand même'), facultatif: true, sert: 'Un point bloquant se publie seulement si vous l’assumez.' },
+      { faire: 'cliquer', sur: parTexte('.dialog button', 'Tout cocher'), facultatif: true, sert: 'Les accords à recueillir sont notés d’un seul geste.' },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('.dialog label.check.ligne input:not(:checked)'), facultatif: true, dit: 'Cochez l’accord recueilli', sert: 'Moins de sept jours avant : l’accord de la personne est noté.' },
+      { faire: 'cliquer', sur: VALIDER, dit: 'Cliquez sur « Publier et notifier »', sert: 'Nicolas est prévenu, avec l’avant et l’après. Il devra dire qu’il l’a vu.' },
+    ],
+  },
+  {
+    chapitre: EQUIPE,
+    qui: CAMILLE,
+    cible: "[data-focus='changements']",
+    cibleFin: "[data-focus='changements']",
+    titre: 'Ce qui a changé',
+    texte: () => 'Quand un planning publié est modifié, la personne concernée le lit en tête de « Mon planning » : la date, l’avant, l’après. Elle confirme l’avoir vu.',
+    jouer: () => {
+      avecChangement();
+      voirComme('nicolas.lesyndicaliste', 'moi');
+    },
+    gestes: [{ faire: 'cliquer', sur: parTexte("[data-focus='changements'] button", 'ai vu ce changement'), dit: 'Cliquez sur « J’ai vu ce changement »', sert: 'L’accusé de lecture est daté. La titulaire le retrouve dans le journal.' }],
+  },
+  {
+    chapitre: EQUIPE,
+    qui: 'Sarah · animatrice',
+    cible: "[data-focus='mon-metier']",
+    titre: 'L’accueil de chacun',
+    texte: () => 'Chaque membre de l’équipe ouvre Solvéa sur son accueil : ce qui attend une réponse, le prochain poste, puis ce qui est propre à son métier. Sarah, animatrice, y retrouve les marques qu’elle présente.',
+    jouer: () => {
+      avecPlanning();
+      voirComme('sarah.lemoine', 'espace');
+    },
+    gestes: [{ faire: 'cliquer', sur: parTexte('.esp-raccourcis .tb-sujet', 'Voir mon planning'), sert: 'Les raccourcis mènent droit au planning, aux demandes et aux messages.' }],
+  },
+  {
+    chapitre: EQUIPE,
+    qui: CAMILLE,
+    cible: '#mes-competences',
+    titre: 'Mes compétences',
+    texte: () => 'Dans « Mon compte », chacun tient à jour ses compétences et diplômes. Ses titulaires sont informés de chaque changement.',
+    jouer: () => {
+      avecPlanning();
+      voirComme('nicolas.lesyndicaliste', 'compte');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: '#mes-competences .comp:not(.on):not(.reservee)', dit: 'Touchez une compétence nouvellement acquise', sert: 'Elle est ajoutée au profil de Nicolas, et ses titulaires reçoivent l’annonce.' },
+      { faire: 'cliquer', sur: '#mes-competences .comp-regle', dit: 'Les compétences à cadenas sont réservées aux pharmaciens', sert: 'Entretiens pharmaceutiques, tests suivis d’une délivrance : un préparateur ne peut pas les cocher.', facultatif: true },
+    ],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: HELENE,
+    cible: '.demande-r.u-medical',
+    cibleFin: '.onglets, .content .empty, .content .card',
+    titre: 'En dernier recours',
+    texte: () => 'Personne ne peut reprendre le poste ? En dernier recours, c’est aux titulaires de l’assurer. Pour une urgence médicale, ce choix est toujours proposé.',
+    jouer: () => {
+      avecUrgenceDInes();
+      useUi.getState().setSujet('remplacements');
+      helene('resoudre');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.demande-r.u-medical')].find((e) => /Inès/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button[data-decider]'), dit: 'Cliquez sur « Décider », sur la demande d’Inès', sert: 'Inès ne peut pas venir, pour raison médicale.' },
+      { faire: 'attendre', que: '.dialog .dr' },
+      { faire: 'cliquer', sur: 'label[for="dr-titulaire"]', dit: 'Choisissez « Accepter : un titulaire assure le poste »', sert: 'Le poste d’Inès est assuré sans attendre un volontaire.' },
+      { faire: 'pause', ms: 2800, dit: 'Dessous : quel titulaire assure le poste', sert: 'Celui qui est libre sur cet horaire est proposé d’abord : il renforce vraiment le comptoir.' },
+      { faire: 'cliquer', sur: '#dr-confirmer', sert: 'Le poste passe au titulaire, et chacun est prévenu.' },
+    ],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: HELENE,
+    cible: '.panneau',
+    titre: 'Une demande d’horaires',
+    texte: () => 'Nicolas demande à finir plus tôt certains jours. Vous ne répondez pas seulement oui ou non : vous donnez son poids à la demande.',
+    jouer: () => {
+      avecDemandeDHoraires();
+      useUi.getState().setSujet('demandes');
+      helene('resoudre');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.panneau .decision')].find((e) => /à arbitrer/.test(e.textContent ?? ''))?.querySelector<HTMLElement>('button[data-decider]'), dit: 'Cliquez sur « Décider », sur la demande d’horaires', sert: 'La fenêtre montre les postes déjà planifiés qui ne respecteraient pas la demande.' },
+      { faire: 'attendre', que: '.dialog #dc-implications' },
+      { faire: 'pause', ms: 3200, dit: 'Trois poids possibles', sert: 'Simple préférence, préférence prioritaire (plafonnée, la même limite pour tous), ou indisponibilité reconnue, qui devient une règle pour le calcul.' },
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>(document.querySelector('#dc-prioritaire:not(:disabled)') ? 'label[for="dc-prioritaire"]' : 'label[for="dc-preference"]'), dit: 'Choisissez le poids de la demande', sert: 'Prioritaire : elle passe avant les simples préférences, et compte dans le plafond de Nicolas.' },
+      { faire: 'cliquer', sur: '#dc-confirmer', sert: 'Nicolas reçoit la réponse. Les propositions de planning en tiendront compte.' },
+    ],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: CAMILLE,
+    cible: "[data-focus='mes-rdv']",
+    titre: 'Demander un rendez-vous',
+    texte: () => 'Un point avec la titulaire, un entretien : Nicolas le demande depuis son accueil. La demande part dans la messagerie, puis se fixe dans les deux agendas.',
+    jouer: () => {
+      avecPlanning();
+      voirComme('nicolas.lesyndicaliste', 'espace');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: '#esp-rdv-demander', dit: 'Cliquez sur « Demander un rendez-vous »', sert: 'La fenêtre propose les sujets de son métier et la personne à voir.' },
+      { faire: 'attendre', que: '.dialog #rdv-avis' },
+      { faire: 'cliquer', sur: '.rdv-idees .comp', dit: 'Choisissez un moment proposé', sert: 'Solvéa propose des moments où les deux sont en poste.', facultatif: true },
+      { faire: 'cliquer', sur: '#rdv-envoyer', dit: 'Cliquez sur « Envoyer la demande »', sert: 'La demande part dans la conversation avec Caroline.' },
+    ],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: HELENE,
+    cible: '.fil',
+    cibleFin: '.fil',
+    titre: 'Répondre à un rendez-vous',
+    texte: () => 'La demande de Nicolas arrive dans sa conversation privée. Caroline accepte, propose un autre horaire ou décline.',
+    jouer: () => {
+      avecRendezVous();
+      useUi.getState().viserFil('p_camille');
+      helene('messages');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.msg-fils .msg-fil', 'Nicolas'), dit: 'Ouvrez la conversation avec Nicolas', sert: 'Chaque personne a sa conversation privée, à côté du fil de toute l’équipe.' },
+      { faire: 'cliquer', sur: parTexte('.fil .rdv-carte button', 'Accepter'), sert: 'Le rendez-vous est fixé : il figure dans les deux agendas et sur la grille.', facultatif: true },
+    ],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: HELENE,
+    cible: '#top-signaler',
+    cibleFin: '#tb-declarer, .tb-jour',
+    titre: 'Une absence signalée par téléphone',
+    texte: () => '« Retard ou absence » est en haut de chaque écran, pour tout le monde. Un titulaire s’en sert aussi pour noter ce qu’un collègue lui annonce par téléphone.',
+    jouer: () => {
+      avecPlanning();
+      helene('tableau');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: '#top-signaler', sert: 'Jules vient d’appeler : il s’est blessé en rangeant une commande.' },
+      { faire: 'attendre', que: '.dialog #sg-qui' },
+      { faire: 'choisir', dans: '#sg-qui', valeur: 'p_jules', dit: 'Choisissez la personne concernée', sert: 'Pour vous, ou pour quelqu’un de l’équipe.' },
+      { faire: 'cliquer', sur: 'label[for="sg-absence"]', dit: 'Choisissez « Une absence »', sert: 'Un retard se note au même endroit, avec sa durée.' },
+      { faire: 'cliquer', sur: parTexte('#sg-raisons .comp', 'Accident du travail'), dit: 'Choisissez la raison « Accident du travail »', sert: 'Le jour, le lieu et les faits serviront à la déclaration.' },
+      { faire: 'taper', dans: '#sg-acc-faits', texte: 'Chute dans la réserve, en rangeant une commande.', dit: 'Notez ce qui s’est passé', sert: 'Tant que les faits sont frais.' },
+      { faire: 'cliquer', sur: '#sg-confirmer', sert: 'L’absence est enregistrée, ses postes vont dans « Résoudre », et le délai de déclaration commence.' },
+    ],
+  },
+  {
+    chapitre: SUIVRE,
+    qui: HELENE,
+    cible: "[data-focus='compteurs-heures']",
+    titre: 'Des heures en plus',
+    texte: () => 'Thomas a dépassé son contrat cette semaine. Des heures en plus se récupèrent ou se paient : « Faire récupérer » ouvre son planning, « Payer » solde le compteur.',
+    jouer: () => {
+      avecHeuresEnPlus();
+      helene('heures');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: "[data-regul='recuperation']", dit: 'Cliquez sur « Faire récupérer »', sert: 'Le planning de Thomas s’ouvre : vous choisissez quand lui rendre ses heures.' },
+      { faire: 'attendre', que: '.dialog .rat-pl' },
+      { faire: 'cliquer', sur: '.dialog .rat-choix .rat-carte', dit: 'Gardez le créneau conseillé', sert: 'Solvéa propose des créneaux sans règle enfreinte, là où le comptoir peut s’en passer.', facultatif: true },
+      { faire: 'cliquer', sur: '#rat-valider', dit: 'Cliquez sur « Planifier et prévenir »', sert: 'Le poste est raccourci, et le message part à Thomas.' },
+    ],
+  },
+  {
+    chapitre: BILAN,
+    qui: HELENE,
+    cible: '.content .g-detail',
+    cibleFin: '.content .g-detail',
+    titre: 'Une garde, jusqu’à la paie',
+    texte: () => 'La fiche d’une garde la suit de bout en bout : à qui elle est confiée, les dérangements de la nuit, le repos à protéger, puis les variables pour le comptable.',
+    jouer: () => {
+      const id = avecGardePassee();
+      helene('gardes');
+      useUi.getState().ouvrirGarde(id);
+    },
+    gestes: [
+      { faire: 'pause', ms: 3000, dit: 'Cinq étapes, de « Prévue » à « Validée pour la paie »', sert: 'Cette garde de nuit a été tenue par Léa la semaine dernière.' },
+      { faire: 'cliquer', sur: parTexte('.g-detail button', 'Déclarer'), dit: 'Déclarez un dérangement de la nuit', sert: 'L’heure et la durée, trajet compris : elles comptent comme du travail effectif.' },
+      { faire: 'cliquer', sur: parTexte('.g-detail button', 'Valider pour le comptable'), sert: 'Les variables de la garde rejoignent la fiche navette du mois.', facultatif: true },
+    ],
+  },
+  {
+    chapitre: BILAN,
+    qui: HELENE,
+    cible: '.content .nv-barre, .content .page-head',
+    cibleFin: '.content .nv-carte, .content .card',
+    titre: 'Exporter pour le comptable',
+    texte: () => 'La fiche navette réunit, salarié par salarié, les heures prévues du mois, les heures en plus et les absences. Un bouton en fait un fichier pour le cabinet comptable ; le journal s’exporte de la même façon, comme dossier de preuve.',
+    jouer: () => {
+      avecPlanning();
+      helene('journal');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content .seg button', 'Fiche navette'), sert: 'Les heures prévues du mois, à rapprocher des heures réellement faites.' },
+      { faire: 'pause', ms: 2800, dit: '« Exporter pour le comptable » en fait un fichier', sert: 'Un tableau à ouvrir dans un tableur, une ligne par salarié.' },
+      // Dans l'application installée, ce bouton télécharge un fichier : la visite ne le fait que là où le contenu s'affiche à l'écran.
+      { faire: 'cliquer', sur: () => (HEBERGE ? parTexte('.content .nv-barre button', 'Exporter pour le comptable')() : null), sert: 'Ici, le contenu du fichier s’affiche : il se copie d’un clic.', facultatif: true },
+      { faire: 'attendre', que: '#export-contenu', facultatif: true },
+      { faire: 'cliquer', sur: () => (document.querySelector('#export-contenu') ? parTexte('.dialog .dialog-foot .btn', 'Fermer')() : null), dit: 'Fermez la fenêtre', sert: 'La fiche navette reste à l’écran, mois par mois.', facultatif: true },
+    ],
+  },
+  {
+    chapitre: BILAN,
+    qui: HELENE,
+    cible: "[data-focus='echeance'], [data-focus='cycle']",
+    cibleFin: "[data-focus='mois']",
+    titre: 'L’échéance du mois',
+    texte: () => 'Le planning du mois suivant doit partir avant une date que vous avez fixée. À l’approche, le tableau de bord le rappelle. Passé ce jour, Solvéa propose de préparer les semaines vides.',
+    jouer: () => {
+      avecEcheanceDepassee();
+      helene('tableau');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: '#echeance-preparer, #echeance-ouvrir', sert: 'Solvéa remplit les semaines vides en brouillon, d’après vos habitudes : rien n’est publié.', facultatif: true },
+      { faire: 'attendre', que: "[data-focus='mois']", facultatif: true },
+      { faire: 'pause', ms: 3200, dit: 'Le mois est prêt, en brouillon', sert: 'Une semaine commencée à la main n’est jamais touchée. À vous de relire, corriger, puis publier.' },
+      // Le délai de publication de l'exemple est remis en place : la suite de la visite ne dépend pas de l'échéance dépassée.
+      { faire: 'action', jouer: () => officineExemple(['publication']) },
+    ],
+  },
+  {
+    chapitre: BILAN,
+    qui: HELENE,
+    cible: "[data-focus='mois']",
+    cibleFin: "[data-focus='mois']",
+    titre: 'Poser un poste depuis le mois',
+    texte: () => 'Dans la vue « Mois », chaque case se touche : une case vide pose un poste, une case remplie l’ouvre. Vous corrigez le mois sans repasser par chaque semaine.',
+    jouer: avecMoisPrepare,
+    gestes: [
+      { faire: 'cliquer', sur: caseLibreDuMois, dit: 'Cliquez sur une case vide', sert: 'Le poste s’ouvre ici même, pour cette personne et ce jour-là.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'cliquer', sur: '.dialog .ptc', dit: 'Choisissez un poste type', sert: 'Horaires et pauses se remplissent d’un coup.', facultatif: true },
+      { faire: 'cliquer', sur: VALIDER, sert: 'Le poste apparaît dans le mois, avec sa couleur.' },
+      // Le délai de publication de l'exemple est remis en place : la suite de la visite ne dépend pas de l'échéance dépassée.
+      { faire: 'action', jouer: () => officineExemple(['publication']) },
+    ],
+  },
+  {
+    chapitre: BILAN,
+    qui: HELENE,
+    cible: "[data-focus='mois']",
+    cibleFin: "[data-focus='mois']",
+    titre: 'Corriger et publier le mois',
+    texte: () => 'Trois boutons, au-dessus du mois. « Corriger automatiquement » recalcule les semaines en brouillon. « Remettre le mois à zéro » retire les postes à venir, d’un clic qui s’annule. « Publier le mois » envoie d’un coup toutes les semaines prêtes.',
+    jouer: avecMoisPrepare,
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content button', 'Corriger automatiquement'), sert: 'Solvéa recalcule les semaines en brouillon en suivant les règles et les préférences. Rien n’est publié.', facultatif: true },
+      { faire: 'attendre', que: parTexte('.content button', 'Corriger automatiquement'), facultatif: true },
+      { faire: 'pause', ms: 2800, dit: 'Le mois est recalculé, toujours en brouillon', sert: 'Vous relisez ; chaque case reste modifiable.' },
+      { faire: 'cliquer', sur: '#mois-publier', sert: 'Les semaines prêtes sont publiées et l’équipe est prévenue. Une semaine avec un point bloquant reste en brouillon : Solvéa dit laquelle.', facultatif: true },
+      // Le délai de publication de l'exemple est remis en place : la suite de la visite ne dépend pas de l'échéance dépassée.
+      { faire: 'action', jouer: () => officineExemple(['publication']) },
+    ],
+  },
+  {
+    chapitre: QUOTIDIEN,
+    qui: HELENE,
+    cible: '.content',
+    cibleFin: '#aide-support',
+    titre: 'L’aide par thème et le support',
+    texte: () => 'Sans recherche, l’aide se range par thème, un onglet chacun. Au-dessus, vous choisissez le rythme des tutoriels. Et quand rien ne répond à votre question, le support est en bas de page.',
+    jouer: () => {
+      avecPlanning();
+      helene('aide');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: () => document.querySelector<HTMLElement>('[aria-label="Effacer la recherche"]'), dit: 'Effacez la recherche', sert: 'Les thèmes reviennent.', facultatif: true },
+      { faire: 'cliquer', sur: '#aide-themes-onglet-construire-et-publier', dit: 'Ouvrez le thème « Construire et publier »', sert: 'On ne lit qu’une famille de fiches à la fois.' },
+      { faire: 'cliquer', sur: '#aide-themes-onglet-absences-et-remplacements', dit: 'Puis « Absences et remplacements »', sert: 'Sur chaque fiche : la réponse en deux lignes, « Voir le tutoriel », et le bouton qui mène à l’écran.' },
+      { faire: 'cliquer', sur: '#sup-titre', dit: 'En bas de page : « Contacter le support »', sert: 'Ni l’aide, ni le lexique, ni moi ne répondons à votre question ? Une personne vous répond, par téléphone ou par courriel.' },
+    ],
+  },
+  {
+    chapitre: QUOTIDIEN,
+    qui: HELENE,
+    cible: '.topbar-in',
+    cibleFin: '.topbar-in',
+    titre: 'Le menu de votre nom',
+    texte: () => 'En haut à droite, votre nom ouvre un menu : votre compte, vos horaires, l’apparence, vos pharmacies, la déconnexion.',
+    jouer: () => {
+      avecPlanning();
+      avecMessageNonLu();
+      helene('tableau');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: '.compte-btn', dit: 'Cliquez sur votre nom', sert: 'Le menu réunit ce qui vous est propre.' },
+      { faire: 'cliquer', sur: '#apparence-mixte', dit: 'Dans « Apparence », choisissez « Mixte »', sert: 'L’apparence se change d’ici, en un geste : le menu fonce, le contenu reste clair.' },
+      { faire: 'cliquer', sur: '#apparence-clair', dit: 'Revenez à « Clair »', sert: 'Le choix ne vaut que pour vous.' },
+      { faire: 'cliquer', sur: parTexte('.topbar-in .menu button', 'Se déconnecter'), sert: 'Avant de partir, Solvéa rappelle ce qui reste en cours.' },
+      { faire: 'attendre', que: '.dialog .dx-liste' },
+      { faire: 'pause', ms: 3200, dit: 'Rien ne sera perdu', sert: 'Chaque sujet en cours a son bouton « Traiter ». Tout est déjà enregistré sur cet appareil.' },
+      { faire: 'cliquer', sur: parTexte('.dialog .dialog-foot .btn', 'Rester et finir'), sert: 'On reste connecté. Sans rien en cours, la déconnexion est immédiate.' },
+    ],
+  },
 ];
 
 /**
@@ -1968,34 +2812,34 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
   {
     chapitre: 'Installer la pharmacie',
     but: 'Caroline crée sa pharmacie : son équipe, ses horaires, ses règles. C’est tout ce qu’il faut à Solvéa pour proposer un planning.',
-    etapes: ['Créer la pharmacie', 'Ajouter l’équipe', 'La fiche d’une personne', 'Les marques d’une animatrice', 'Horaires et effectif', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'Les règles'],
+    etapes: ['Créer la pharmacie', 'Ajouter l’équipe', 'La fiche d’une personne', 'Contrat et ancienneté', 'Droits d’accès et mot de passe', 'Volontariat et besoins personnels', 'Les marques d’une animatrice', 'Horaires et effectif', 'Recopier un horaire', 'Les jours fériés', 'Les postes types', 'L’officine en chiffres', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'L’échéance de publication', 'Paramètres et coûts', 'Les règles', 'Régler un seuil'],
   },
   { chapitre: 'Recueillir les souhaits', but: 'Avant de construire, chacun dit ce qui l’arrange. On passe un instant dans la peau de Nicolas, préparateur.', etapes: ['Les préférences du mois'] },
   {
     chapitre: 'Construire et publier',
     but: 'Caroline construit la semaine, la contrôle, y pose gardes et formations, puis l’envoie à l’équipe.',
-    etapes: ['Une semaine à construire', 'Poser un poste', 'Qui a demandé ce créneau ?', 'Trois propositions', 'La semaine est posée', 'Les contrôles', 'Les gardes', 'Une formation', 'Un inventaire', 'Le mois', 'Publier', 'Imprimer'],
+    etapes: ['Une semaine à construire', 'Poser un poste', 'Qui a demandé ce créneau ?', 'Un jour de repos', 'Trois propositions', 'La semaine est posée', 'Les pauses courtes', 'Déplacer un poste', 'Remettre à zéro', 'Recopier la semaine précédente', 'Les contrôles', 'Les gardes', 'Une série de gardes', 'Répartir les gardes', 'Importer un calendrier de gardes', 'Une formation', 'Un inventaire', 'Le mois', 'Publier', 'Modifier un planning publié', 'Imprimer'],
   },
   {
     chapitre: 'L’équipe reçoit son planning',
     but: 'Le planning est publié. Voici ce que voient Nicolas, préparateur, puis Léa, pharmacienne.',
-    etapes: ['Mon planning', 'Le calendrier du mois', 'Le planning de l’équipe', 'Mon suivi', 'Mes gardes'],
+    etapes: ['Mon planning', 'Ce qui a changé', 'Le calendrier du mois', 'Le planning de l’équipe', 'Mon suivi', 'Mes compétences', 'L’accueil de chacun', 'Mes gardes'],
   },
   {
     chapitre: 'Les demandes de l’équipe',
     but: 'Un congé, un remplacement : la demande part de Nicolas, un collègue se propose, Caroline décide.',
-    etapes: ['Mes demandes', 'Demander, avec sa raison', 'Se faire remplacer', 'La demande arrive', 'Un collègue se propose', 'Valider le remplacement', 'Une urgence médicale', 'Congés et horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande'],
+    etapes: ['Mes demandes', 'Demander, avec sa raison', 'Se faire remplacer', 'La demande arrive', 'Un collègue se propose', 'Valider le remplacement', 'Une urgence médicale', 'En dernier recours', 'Congés et horaires', 'Une demande d’horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande', 'Demander un rendez-vous', 'Répondre à un rendez-vous'],
   },
   {
     chapitre: 'Les imprévus',
     but: 'Un arrêt le matin même, un retard, une décision à prendre à deux titulaires : ce qui ne se prévoit pas.',
-    etapes: ['Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Une journée', 'Retards et suivi', 'Un retard annoncé', 'Le retard, vu du comptoir', 'Un accident du travail', 'Décider à deux', 'Donner son accord', 'Les messages'],
+    etapes: ['Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Une journée', 'Retards et suivi', 'Un retard annoncé', 'Le retard, vu du comptoir', 'Une absence signalée par téléphone', 'Un accident du travail', 'Décider à deux', 'Donner son accord', 'Les messages'],
   },
-  { chapitre: 'Le bilan du mois', but: 'En fin de mois : les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Les statistiques de l’équipe', 'Le journal et la paie', 'Les documents', 'Absences et justificatifs'] },
+  { chapitre: 'Le bilan du mois', but: 'En fin de mois : les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents, puis le mois suivant à préparer.', etapes: ['Le compteur d’heures', 'Des heures en plus', 'L’équité', 'Les statistiques de l’équipe', 'Le journal et la paie', 'Exporter pour le comptable', 'Une garde, jusqu’à la paie', 'Les documents', 'Absences et justificatifs', 'L’échéance du mois', 'Poser un poste depuis le mois', 'Corriger et publier le mois'] },
   {
     chapitre: 'Au quotidien',
     but: 'Les raccourcis de tous les jours, et où trouver de l’aide.',
-    etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'Le bouton « Créer »', 'La cloche', 'Plusieurs pharmacies', 'Solvi, votre assistant', 'L’aide', 'Mot de passe et clé de secours', 'Votre compte'],
+    etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'Le bouton « Créer »', 'La cloche', 'Le menu de votre nom', 'Plusieurs pharmacies', 'Solvi, votre assistant', 'L’aide', 'L’aide par thème et le support', 'Mot de passe et clé de secours', 'Votre compte'],
   },
 ]);
 
@@ -2006,12 +2850,12 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
 const TITULAIRE: Etape[] = raconter(
   COMPLET_BRUT,
   [
-    { chapitre: 'Construire la semaine', but: 'La grille, un poste posé à la main, les préférences départagées, trois propositions comparées, les contrôles, puis la publication.', etapes: ['Une semaine à construire', 'Poser un poste', 'Qui a demandé ce créneau ?', 'Trois propositions', 'La semaine est posée', 'Les contrôles', 'Le mois', 'Publier', 'Imprimer'] },
-    { chapitre: 'Gardes, formation, inventaire', but: 'Ce qui s’ajoute au planning ordinaire, et qui prévient chacun tout seul.', etapes: ['Les gardes', 'Une formation', 'Un inventaire'] },
-    { chapitre: 'Décider', but: 'Remplacements, congés, absences imprévues : chaque demande arrive au même endroit, avec de quoi trancher.', etapes: ['La demande arrive', 'Valider le remplacement', 'Une urgence médicale', 'Congés et horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande', 'Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Donner son accord'] },
-    { chapitre: 'Suivre l’équipe', but: 'La journée en cours, les retards, un accident du travail, les messages.', etapes: ['Une journée', 'Retards et suivi', 'Le retard, vu du comptoir', 'Un accident du travail', 'Les messages'] },
-    { chapitre: 'Faire le bilan', but: 'Les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents.', etapes: ['Le compteur d’heures', 'L’équité', 'Les statistiques de l’équipe', 'Le journal et la paie', 'Les documents'] },
-    { chapitre: 'Piloter au quotidien', but: 'Le tableau de bord, vos propres horaires, les raccourcis, et les réglages de la pharmacie.', etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'La cloche', 'Le bouton « Créer »', 'Horaires et effectif', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'Les règles', 'Votre compte'] },
+    { chapitre: 'Construire la semaine', but: 'La grille, un poste posé à la main, les préférences départagées, un jour de repos, trois propositions comparées, les retouches, les contrôles, puis la publication.', etapes: ['Une semaine à construire', 'Poser un poste', 'Qui a demandé ce créneau ?', 'Un jour de repos', 'Trois propositions', 'La semaine est posée', 'Les pauses courtes', 'Déplacer un poste', 'Remettre à zéro', 'Recopier la semaine précédente', 'Les contrôles', 'Le mois', 'Publier', 'Modifier un planning publié', 'Imprimer'] },
+    { chapitre: 'Gardes, formation, inventaire', but: 'Ce qui s’ajoute au planning ordinaire, et qui prévient chacun tout seul.', etapes: ['Les gardes', 'Une série de gardes', 'Répartir les gardes', 'Importer un calendrier de gardes', 'Une formation', 'Un inventaire'] },
+    { chapitre: 'Décider', but: 'Remplacements, congés, absences imprévues : chaque demande arrive au même endroit, avec de quoi trancher.', etapes: ['La demande arrive', 'Valider le remplacement', 'Une urgence médicale', 'En dernier recours', 'Congés et horaires', 'Une demande d’horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande', 'Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Donner son accord'] },
+    { chapitre: 'Suivre l’équipe', but: 'La journée en cours, les retards, une absence notée pour un collègue, un accident du travail, les messages et les rendez-vous.', etapes: ['Une journée', 'Retards et suivi', 'Le retard, vu du comptoir', 'Une absence signalée par téléphone', 'Un accident du travail', 'Les messages', 'Répondre à un rendez-vous'] },
+    { chapitre: 'Faire le bilan', but: 'Les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents, puis le mois suivant à préparer.', etapes: ['Le compteur d’heures', 'Des heures en plus', 'L’équité', 'Les statistiques de l’équipe', 'Le journal et la paie', 'Exporter pour le comptable', 'Une garde, jusqu’à la paie', 'Les documents', 'L’échéance du mois', 'Poser un poste depuis le mois', 'Corriger et publier le mois'] },
+    { chapitre: 'Piloter au quotidien', but: 'Le tableau de bord, vos propres horaires, les raccourcis, les fiches de l’équipe et les réglages de la pharmacie.', etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'La cloche', 'Le bouton « Créer »', 'Le menu de votre nom', 'Contrat et ancienneté', 'Droits d’accès et mot de passe', 'Volontariat et besoins personnels', 'Horaires et effectif', 'Recopier un horaire', 'Les jours fériés', 'Les postes types', 'L’officine en chiffres', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'L’échéance de publication', 'Paramètres et coûts', 'Les règles', 'Régler un seuil', 'Votre compte'] },
   ],
   true,
 );
@@ -2355,8 +3199,8 @@ export interface Tutoriel {
 }
 /** Pour chaque fiche d'aide : la visite et les titres de la première et de la dernière étape qui la montrent. */
 const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string, string?]; pharmacien?: [string, string?] }> = {
-  accueil: { equipe: ['Mon accueil'] },
-  'rendez-vous': { equipe: ['Demander un rendez-vous'] },
+  accueil: { gestion: ['L’accueil de chacun'], equipe: ['Mon accueil'] },
+  'rendez-vous': { gestion: ['Demander un rendez-vous', 'Répondre à un rendez-vous'], equipe: ['Demander un rendez-vous'] },
   'retard-prevenir': { equipe: ['Prévenir d’un retard'] },
   prochain: { equipe: ['Mon prochain poste', 'Ma semaine'] },
   'equipe-planning': { equipe: ['Le planning de l’équipe'] },
@@ -2370,49 +3214,49 @@ const TUTORIELS: Record<string, { gestion?: [string, string?]; equipe?: [string,
   documents: { gestion: ['Les documents'] },
   message: { gestion: ['Les messages'], equipe: ['Les messages'] },
   compte: { gestion: ['Votre compte'], equipe: ['Mon compte'] },
-  construire: { gestion: ['Une semaine à construire', 'La semaine est posée'] },
-  publier: { gestion: ['Publier', 'Imprimer'] },
+  construire: { gestion: ['Une semaine à construire', 'Remettre à zéro'] },
+  publier: { gestion: ['Publier', 'Modifier un planning publié'] },
   imprimer: { gestion: ['Imprimer'], equipe: ['Le planning de l’équipe'] },
   mois: { gestion: ['Le mois'] },
   absence: { gestion: ['Une absence imprévue', 'Personne ne se propose'] },
   'demande-remplacement': { gestion: ['La demande arrive', 'Valider le remplacement'] },
   'demandes-equipe': { gestion: ['Congés et horaires', 'Refuser une demande'] },
-  gardes: { gestion: ['Les gardes'] },
+  gardes: { gestion: ['Les gardes', 'Importer un calendrier de gardes'] },
   formation: { gestion: ['Une formation', 'Un inventaire'] },
   personne: { gestion: ['Ajouter l’équipe', 'La fiche d’une personne'] },
   marques: { gestion: ['Les marques d’une animatrice'] },
-  'mdp-equipe': { gestion: ['Mot de passe et clé de secours'] },
-  heures: { gestion: ['Le compteur d’heures'] },
+  'mdp-equipe': { gestion: ['Droits d’accès et mot de passe'] },
+  heures: { gestion: ['Le compteur d’heures', 'Des heures en plus'] },
   retard: { gestion: ['Une journée', 'Retards et suivi'] },
   reglages: { gestion: ['Horaires et effectif', 'Qui prépare le planning'] },
-  regles: { gestion: ['Les règles'] },
-  paie: { gestion: ['Le journal et la paie'] },
+  regles: { gestion: ['Les règles', 'Régler un seuil'] },
+  paie: { gestion: ['Le journal et la paie', 'Exporter pour le comptable'] },
   equite: { gestion: ['L’équité'] },
   accord: { gestion: ['Donner son accord'] },
   pharmacie: { gestion: ['Plusieurs pharmacies'] },
   historique: { gestion: ['Absences et justificatifs'] },
-  feries: { gestion: ['Horaires et effectif'] },
+  feries: { gestion: ['Les jours fériés'] },
   decisions: { gestion: ['La cloche'] },
   assistant: { gestion: ['Solvi, votre assistant'], equipe: ['Solvi, votre assistant'] },
   controles: { gestion: ['Les contrôles'] },
-  signaler: { gestion: ['Un retard annoncé', 'Le retard, vu du comptoir'], equipe: ['Prévenir d’un retard'] },
+  signaler: { gestion: ['Un retard annoncé', 'Une absence signalée par téléphone'], equipe: ['Prévenir d’un retard'] },
   accident: { gestion: ['Un accident du travail'], equipe: ['Demander un congé'] },
-  support: { gestion: ['L’aide'], equipe: ['Solvi, votre assistant'] },
+  support: { gestion: ['L’aide', 'L’aide par thème et le support'], equipe: ['Solvi, votre assistant'] },
   tableau: { gestion: ['Le tableau de bord'] },
   creer: { gestion: ['Le bouton « Créer »'] },
-  echeance: { gestion: ['Le tableau de bord'] },
+  echeance: { gestion: ['L’échéance du mois', 'Corriger et publier le mois'] },
   propositions: { gestion: ['Trois propositions'] },
-  pauses: { gestion: ['Poser un poste'] },
+  pauses: { gestion: ['Les pauses courtes'] },
   'preferences-equipe': { gestion: ['Qui a demandé ce créneau ?'] },
   'qui-prepare': { gestion: ['Qui prépare le planning'] },
-  'postes-types': { gestion: ['Horaires et effectif'] },
-  'officine-chiffres': { gestion: ['Horaires et effectif'] },
+  'postes-types': { gestion: ['Les postes types'] },
+  'officine-chiffres': { gestion: ['L’officine en chiffres'] },
   dimensionnement: { gestion: ['L’équipe est-elle assez nombreuse ?'] },
-  'mes-competences': { gestion: ['Votre compte'], equipe: ['Mes compétences'] },
-  contrat: { gestion: ['La fiche d’une personne'] },
+  'mes-competences': { gestion: ['Mes compétences'], equipe: ['Mes compétences'] },
+  contrat: { gestion: ['Contrat et ancienneté'] },
   repercussion: { gestion: ['Une absence imprévue', 'Personne ne se propose'] },
   'semaine-vide': { gestion: ['Une semaine à construire'] },
-  'dernier-recours': { gestion: ['Une urgence médicale'] },
+  'dernier-recours': { gestion: ['En dernier recours'] },
   'points-forts': { gestion: ['Les statistiques de l’équipe'] },
 };
 
