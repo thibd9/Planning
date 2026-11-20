@@ -111,7 +111,7 @@ interface Ui {
   /** Étape du parcours de test en cours ; null quand il est fermé. */
   parcours: number | null;
   /** Parcours guidé en cours : la visite complète, ou la journée d'une pharmacie déjà en place. */
-  scenario: 'complet' | 'titulaire' | 'pharmacien' | 'equipe' | 'animateur' | 'apprenti' | 'etudiant' | 'etabli' | 'tension' | 'publication';
+  scenario: 'complet' | 'titulaire' | 'pharmacien' | 'equipe' | 'animateur' | 'apprenti' | 'etudiant' | 'etabli' | 'tension' | 'publication' | 'ecrans_preparer' | 'ecrans_suivre' | 'ecrans_equipe';
   /** Tutoriel d'une seule tâche : la visite ne joue que ces étapes, de la première à la dernière incluse. */
   tache: { de: number; a: number } | null;
   /** Fenêtre de choix des tutoriels. */

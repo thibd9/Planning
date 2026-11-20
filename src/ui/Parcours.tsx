@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, CalendarCheck, CalendarDays, ChartNoAxesColumnIncreasing, Check, ChevronRight, CirclePause, CirclePlay, Compass, Crown, FlaskConical, Gauge, GraduationCap, Info, Leaf, List, ListTree, Megaphone, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sprout, Store, Timer, Undo2, UserRound, UsersRound, X, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, CalendarCheck, CalendarDays, ChartNoAxesColumnIncreasing, Check, ChevronRight, CirclePause, CirclePlay, Compass, Crown, FlaskConical, Gauge, GraduationCap, Info, Leaf, List, ListTree, Megaphone, MousePointer2, MousePointerClick, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sprout, Store, Timer, Undo2, UserRound, UsersRound, X, Zap } from 'lucide-react';
 import { cloneElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -16,6 +16,9 @@ import { deplier } from './components/Accordeon';
 import { Logo } from './kit';
 import type { GesteSolvi, Humeur } from './Solvi';
 import { NomSolvi, Solvi } from './Solvi';
+import { ecransEquipe } from './parcours/ecransEquipe';
+import { ecransPreparer } from './parcours/ecransPreparer';
+import { ecransSuivre } from './parcours/ecransSuivre';
 
 /** Les quatre regards de l'environnement de test, avec des personnes déjà créées. */
 export const ROLES_TEST: { cle: string; id: string; identifiant: string; court: string; titre: string; nom: string; detail: string }[] = [
@@ -63,13 +66,13 @@ function posteARemplacer(d: AppData, today: string): string | null {
 }
 
 /** Ce que vise un geste : un sélecteur, ou une fonction qui trouve l'élément (par son texte, son rang…). */
-type Cible = string | (() => HTMLElement | null | undefined);
+export type Cible = string | (() => HTMLElement | null | undefined);
 /** Un geste que la visite fait elle-même, à l'écran : elle clique, tape, choisit, comme le ferait l'utilisateur. */
 /**
  * `dit` : ce que Solvi demande de faire, quand le nom de l'élément ne suffit pas.
  * `sert` : à quoi sert le geste, en une phrase. `facultatif` : l'élément peut ne pas être là.
  */
-type Geste =
+export type Geste =
   | { faire: 'cliquer'; sur: Cible; dit?: string; sert?: string; facultatif?: boolean }
   | { faire: 'taper'; dans: Cible; texte: string; dit?: string; sert?: string; facultatif?: boolean }
   | { faire: 'choisir'; dans: Cible; valeur: string; dit?: string; sert?: string; facultatif?: boolean }
@@ -244,7 +247,7 @@ const tempsDeLire = (texte: string): number => tempo(Math.min(5000, Math.max(140
 /** La couleur du profil de chaque personnage de l'exemple : la pastille qui l'annonce en début de chapitre. */
 const TEINTE_DE: Record<string, string> = { 'Caroline · titulaire': '#1f6bb8', 'Nicolas · préparateur': '#3730a3', 'Léa · pharmacienne': '#0a5a63', 'Igor · pharmacien': '#0a5a63', 'Pierre · titulaire secondaire': '#1b4f7f', 'Sarah · animatrice': '#a8326b', 'Manon · apprentie': '#17694a', 'Yanis · étudiant': '#8a5a00' };
 
-interface Etape {
+export interface Etape {
   /** Chapitre de la visite ; le sommaire permet de sauter de l'un à l'autre. */
   chapitre?: string;
   /** Élément mis en lumière pendant l'étape (sélecteur CSS). */
@@ -270,6 +273,17 @@ const element = (c: Cible): HTMLElement | null => {
 const parTexte = (selecteur: string, texte: string): (() => HTMLElement | undefined) => () => [...document.querySelectorAll<HTMLElement>(selecteur)].find((e) => e.textContent?.includes(texte));
 const nieme = (selecteur: string, n: number): (() => HTMLElement | undefined) => () => document.querySelectorAll<HTMLElement>(selecteur)[n];
 const VALIDER = '.dialog-foot .btn.primary';
+/**
+ * Le champ (ou la case à cocher) dont le libellé contient ce texte : on désigne un champ comme on le lit à l'écran.
+ * Renvoie le libellé entier, qui contient le champ ; `dans` restreint la recherche à un bloc (une fenêtre, une carte).
+ */
+const parLibelle =
+  (texte: string, dans = 'body'): (() => HTMLElement | undefined) =>
+  () => {
+    const n = (t: string): string => t.replace(/\s+/g, ' ').trim().toLowerCase();
+    const zone = [...document.querySelectorAll<HTMLElement>(dans)].pop() ?? document.body;
+    return [...zone.querySelectorAll<HTMLElement>('label, legend')].find((l) => l.offsetParent !== null && n(l.textContent ?? '').includes(n(texte)));
+  };
 
 /** Écrit dans un champ comme le ferait le clavier : le formulaire reçoit chaque lettre. */
 function ecrire(el: HTMLElement, valeur: string): void {
@@ -2278,6 +2292,17 @@ const minutes = (etapes: Etape[]): string => `${Math.max(3, Math.round(etapes.le
  * Le catalogue des visites. `depart` : « zero » part d'une pharmacie qui vient d'être créée, « etabli » d'une pharmacie
  * qui tourne déjà. `groupe` range les cartes dans « Découvrir Solvéa » : les parcours, les autres métiers, les journées types.
  */
+/** Ce dont les visites « Écran par écran » ont besoin pour poser leurs écrans. Elles sont écrites dans src/ui/parcours/. */
+/** Donne à chaque chapitre sa phrase d'annonce (« ce qu'on y fait »), sans remplacer celle d'un chapitre du même nom. */
+const buts = (b: Record<string, string>): void => {
+  for (const [k, v] of Object.entries(b)) if (!(k in BUTS)) BUTS[k] = v;
+};
+const OUTILS = { parTexte, nieme, parLibelle, VALIDER, poser, store, helene, voirComme, avecEquipe, avecSouhaits, avecPlanning, avecDemande, semaineDans, semaineUne, semaineASouhaits, proposerSemaine, publierSemaine, HELENE, buts };
+export type OutilsVisite = typeof OUTILS;
+const ECRANS_PREPARER = ecransPreparer(OUTILS);
+const ECRANS_SUIVRE = ecransSuivre(OUTILS);
+const ECRANS_EQUIPE = ecransEquipe(OUTILS);
+
 export const SCENARIOS = {
   complet: { groupe: 'parcours', depart: 'zero', court: 'Complet', role: 'Tous les rôles', titre: 'Tout Solvéa, de zéro', fil: 'De la création de la pharmacie au bilan du mois. On suit Caroline, titulaire, et l’on passe par moments dans la peau de son équipe.', duree: minutes(COMPLET), etapes: COMPLET },
   titulaire: { groupe: 'parcours', depart: 'zero', court: 'Titulaire', role: 'Titulaire', titre: 'Gérer la pharmacie', fil: 'Construire, publier, décider, suivre, faire le bilan : tout ce que fait Caroline, titulaire, une fois la pharmacie installée.', duree: minutes(TITULAIRE), etapes: TITULAIRE },
@@ -2289,6 +2314,9 @@ export const SCENARIOS = {
   etabli: { groupe: 'journees', depart: 'etabli', court: 'Journée ordinaire', role: 'Tous les rôles', titre: 'Une journée ordinaire', fil: 'Une journée à la pharmacie, du matin au soir, avec ceux qui la vivent.', duree: minutes(ETABLI), etapes: ETABLI },
   tension: { groupe: 'journees', depart: 'etabli', court: 'Journée sous tension', role: 'Tous les rôles', titre: 'Une journée sous tension', fil: 'Un arrêt le matin, un retard, un accident du travail : tout se règle, et tout le monde est prévenu.', duree: minutes(TENSION), etapes: TENSION },
   publication: { groupe: 'journees', depart: 'etabli', court: 'Veille de publication', role: 'Tous les rôles', titre: 'Une veille de publication', fil: 'L’échéance du mois approche : on construit, on publie, l’équipe reçoit son planning, on fait le bilan.', duree: minutes(PUBLICATION), etapes: PUBLICATION },
+  ecrans_preparer: { groupe: 'ecrans', depart: 'etabli', court: 'Installer et préparer', role: 'Titulaire', titre: 'Installer et préparer', fil: 'Chaque écran de mise en place, champ par champ : la pharmacie, ses horaires, l’équipe, les postes types, les règles, votre compte. Ce qu’on y met, et à quoi cela sert.', duree: minutes(ECRANS_PREPARER), etapes: ECRANS_PREPARER },
+  ecrans_suivre: { groupe: 'ecrans', depart: 'etabli', court: 'Planifier et suivre', role: 'Titulaire', titre: 'Planifier et suivre', fil: 'Chaque écran du quotidien, champ par champ : construire, les gardes, les décisions, les heures, l’équité, les statistiques, le journal, les documents, les messages.', duree: minutes(ECRANS_SUIVRE), etapes: ECRANS_SUIVRE },
+  ecrans_equipe: { groupe: 'ecrans', depart: 'etabli', court: 'L’espace de l’équipe', role: 'Équipe', titre: 'L’espace de l’équipe', fil: 'Chaque écran d’un membre de l’équipe, champ par champ : son planning, ses préférences, ses demandes, son suivi, ses documents, ses messages, son compte.', duree: minutes(ECRANS_EQUIPE), etapes: ECRANS_EQUIPE },
 } as const;
 export type Scenario = keyof typeof SCENARIOS;
 
@@ -3425,12 +3453,16 @@ const CARTES: Record<Scenario, { nom: string; phrase: string; mots: string[]; te
   etabli: { nom: 'Journée ordinaire', phrase: 'Du matin au soir, tous les rôles.', mots: [], teinte: 'v-journee', icone: <Store size={22} /> },
   tension: { nom: 'Journée sous tension', phrase: 'Un arrêt, un retard, un accident.', mots: [], teinte: 'v-tension', icone: <Siren size={22} /> },
   publication: { nom: 'Veille de publication', phrase: 'Construire, publier, faire le bilan.', mots: [], teinte: 'v-publication', icone: <CalendarCheck size={22} /> },
+  ecrans_preparer: { nom: 'Installer et préparer', phrase: 'Chaque champ de la mise en place.', mots: [], teinte: 'v-titulaire2', icone: <Store size={22} /> },
+  ecrans_suivre: { nom: 'Planifier et suivre', phrase: 'Chaque champ du quotidien.', mots: [], teinte: 'v-pharmacien', icone: <CalendarCheck size={22} /> },
+  ecrans_equipe: { nom: 'L’espace de l’équipe', phrase: 'Chaque champ côté équipe.', mots: [], teinte: 'v-equipe', icone: <UsersRound size={22} /> },
 };
 type Famille = (typeof SCENARIOS)[Scenario]['groupe'] | 'libre';
 const GROUPES: { cle: (typeof SCENARIOS)[Scenario]['groupe']; titre: string; phrase: string; icone: typeof BookOpen; etiquette: (nom: string) => string }[] = [
   { cle: 'parcours', titre: 'Parcours', phrase: 'Le plus complet d’abord, puis un parcours par rôle.', icone: BookOpen, etiquette: (nom) => `Parcours ${nom.toLowerCase()}` },
   { cle: 'metiers', titre: 'Autres métiers', phrase: 'Chaque profil a son accueil : animatrice, apprentie, étudiant.', icone: BriefcaseBusiness, etiquette: () => 'Autre métier' },
   { cle: 'journees', titre: 'Journées types', phrase: 'Trois scénarios pour une journée : la pharmacie tourne déjà, on la suit du matin au soir.', icone: CalendarDays, etiquette: () => 'Journée type' },
+  { cle: 'ecrans', titre: 'Écran par écran', phrase: 'Chaque écran et chaque champ : ce qu’on y met, et à quoi cela sert.', icone: MousePointerClick, etiquette: () => 'Écran par écran' },
 ];
 
 /** Fenêtre « Découvrir Solvéa » : une visite guidée par rôle, ou une entrée libre. */
