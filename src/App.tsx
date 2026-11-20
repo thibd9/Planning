@@ -266,6 +266,8 @@ export function App(): JSX.Element {
   useEffect(() => {
     if (!menu && !panneau) return;
     const fermer = (e: MouseEvent | KeyboardEvent): void => {
+      // Pendant une visite guidée, « Continuer » ou « Pause » dans la bulle de Solvi ne referme pas le menu que la visite vient d'ouvrir.
+      if (!(e instanceof KeyboardEvent) && (e.target as Element | null)?.closest?.('.solvi-guide, .parcours-test')) return;
       const dehors = (r: HTMLDivElement | null): boolean => !r?.contains(e.target as Node);
       if (e instanceof KeyboardEvent ? e.key === 'Escape' : dehors(menuRef.current) && dehors(outilsRef.current)) {
         setMenu(false);
