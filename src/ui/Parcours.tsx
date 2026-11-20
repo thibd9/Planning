@@ -118,7 +118,7 @@ function decouper(gestes: Geste[]): Geste[][] {
 /** Le nom lisible d'un élément : son texte, sans les mentions réservées aux lecteurs d'écran ni les précisions. */
 function nomDe(el: HTMLElement): string {
   const copie = el.cloneNode(true) as HTMLElement;
-  copie.querySelectorAll('.sr, small, svg, .small, .soft, .aide, .compte, .nav-badge, .q, select, input, textarea, ol, ul, .modele-nom, .voie-etat, .voie-reponse, .pill').forEach((x) => x.remove());
+  copie.querySelectorAll('.sr, small, svg, .small, .soft, .aide, .compte, .rg-nb, .ong-note, .nav-badge, .q, select, input, textarea, ol, ul, .modele-nom, .voie-etat, .voie-reponse, .pill').forEach((x) => x.remove());
   let texte = (copie.textContent ?? '').replace(/\s+/g, ' ').trim() || el.getAttribute('aria-label') || el.getAttribute('title') || '';
   // Un bloc qui contient un titre et une phrase : on garde le titre.
   const titre = copie.querySelector('b, strong, h2, h3')?.textContent?.trim();
