@@ -1809,11 +1809,11 @@ export function ecransSuivre(o: OutilsVisite): Etape[] {
         o.helene('documents');
       },
       gestes: [
-        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Plannings publiés'), quoi: 'les semaines publiées, rangées par mois.' },
-        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Mes absences'), quoi: 'vos propres absences et arrêts, avec leur état.' },
-        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Mes fichiers'), quoi: 'les fichiers que vous déposez.' },
-        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Reçus de l’équipe'), quoi: 'les documents que l’équipe a rendus visibles des titulaires.' },
-        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Absences de l’équipe'), quoi: 'l’historique de l’équipe : arrêts, congés, formations, remplacements, absences non prévues.' },
+        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Plannings publiés'), nom: 'Plannings publiés', quoi: 'les semaines publiées, rangées par mois.' },
+        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Mes absences'), nom: 'Mes absences', quoi: 'vos propres absences et arrêts, avec leur état.' },
+        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Mes fichiers'), nom: 'Mes fichiers', quoi: 'les fichiers que vous déposez.' },
+        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Reçus de l’équipe'), nom: 'Reçus de l’équipe', quoi: 'les documents que l’équipe a rendus visibles des titulaires.' },
+        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Absences de l’équipe'), nom: 'Absences de l’équipe', quoi: 'l’historique de l’équipe : arrêts, congés, formations, remplacements, absences non prévues.' },
         { faire: 'expliquer', sur: '.content .doc-liste .doc', nom: 'Une semaine publiée', quoi: 'ses dates, le nombre de postes publiés, et « terminée » une fois passée.' },
         { faire: 'expliquer', sur: '.content .doc-liste .doc .btn', nom: 'Voir', quoi: 'ouvre cette semaine dans « Construire ».' },
       ],
@@ -1896,8 +1896,8 @@ export function ecransSuivre(o: OutilsVisite): Etape[] {
       gestes: [
         { faire: 'expliquer', sur: '#aide-recherche', nom: 'Chercher dans l’aide', quoi: 'un mot ou deux.', sert: 'La recherche filtre les fiches et le lexique en même temps.', exemple: 'garde' },
         { faire: 'expliquer', sur: '.content .rythme', nom: 'Rythme de la visite', quoi: 'posé, normal ou vif : le temps laissé pour lire pendant les tutoriels.', sert: 'Il se choisit avant d’en lancer un, et se garde d’une fois sur l’autre.' },
-        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Comment faire'), quoi: 'les fiches de tâches, rangées par thème.' },
-        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Lexique'), quoi: 'le vocabulaire de Solvéa, défini en une phrase.' },
+        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Comment faire'), nom: 'Comment faire', quoi: 'les fiches de tâches, rangées par thème.' },
+        { faire: 'expliquer', sur: o.parTexte('.content .jr-filtres .jr-filtre', 'Lexique'), nom: 'Lexique', quoi: 'le vocabulaire de Solvéa, défini en une phrase.' },
         { faire: 'expliquer', sur: '#aide-themes .ong-barre', nom: 'Les thèmes', quoi: 'un onglet par famille de tâches : au quotidien, préparer, construire et publier, absences, bilan, messages.' },
         { faire: 'expliquer', sur: '.content .ad-fiche', nom: 'Une fiche', quoi: 'la question, la réponse en deux lignes, puis les boutons.' },
         { faire: 'expliquer', sur: o.parTexte('.content .ad-fiche .btn', 'Voir le tutoriel'), quoi: 'rejoue cette tâche sur la pharmacie d’exemple, puis vous ramène ici.', sert: 'Le nombre d’étapes est indiqué.' },
