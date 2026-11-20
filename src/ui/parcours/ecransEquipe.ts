@@ -20,11 +20,11 @@ const CAROLINE = 'p_helene';
 
 const ACCUEIL = 'Mon accueil';
 const PLANNING = 'Mon planning et celui de l’équipe';
-const DEMANDES = 'Mes demandes';
+const DEMANDES = 'Mes demandes et remplacements';
 const AIDER = 'Aider un collègue';
 const SUIVI = 'Mon suivi et mes gardes';
 const DOCUMENTS = 'Mes documents';
-const MESSAGES = 'Messages et rendez-vous';
+const MESSAGES = 'Mes messages et rendez-vous';
 const COMPTE = 'Mon compte et mes compétences';
 
 /** Un PDF minuscule : le document d'exemple de Nicolas s'ouvre vraiment. */
@@ -74,6 +74,7 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
   o.buts({
     [ACCUEIL]: 'Ce que Nicolas voit en arrivant : son prochain poste, ce qui attend sa réponse, son métier, ses rendez-vous, et la barre du haut.',
     [PLANNING]: 'Son prochain poste, un retard à annoncer, ses semaines, le calendrier du mois, l’impression et le planning de toute l’équipe.',
+    [DEMANDES]: 'Dire ses préférences, demander une absence ou un horaire, suivre sa demande, se faire remplacer.',
     [AIDER]: 'Un poste à couvrir ou un collègue qui cherche un remplaçant : se proposer, ou dire non sans se justifier.',
     [SUIVI]: 'Le compteur d’heures, ce qui a été noté, la part des contraintes ; puis les gardes d’une pharmacienne.',
     [DOCUMENTS]: 'Les plannings publiés, les absences, et les fichiers que l’on dépose soi-même.',
@@ -292,7 +293,7 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
       chapitre: ACCUEIL,
       qui: SARAH,
       cible: "[data-focus='mon-metier']",
-      titre: 'L’accueil d’une animatrice',
+      titre: 'L’accueil de Sarah, animatrice',
       texte: () => 'Sarah, animatrice, voit d’abord les marques qu’elle présente et ses prochains jours d’animation.',
       jouer: () => {
         o.avecPlanning();
@@ -309,7 +310,7 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
       chapitre: ACCUEIL,
       qui: MANON,
       cible: "[data-focus='mon-metier']",
-      titre: 'L’accueil d’une apprentie',
+      titre: 'L’accueil de Manon, apprentie',
       texte: () => 'Manon, apprentie, retrouve son alternance : ses jours d’école, ses jours à la pharmacie et le point avec son tuteur.',
       jouer: () => {
         o.avecPlanning();
@@ -326,7 +327,7 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
       chapitre: ACCUEIL,
       qui: YANIS,
       cible: "[data-focus='mon-metier']",
-      titre: 'L’accueil d’un étudiant',
+      titre: 'L’accueil de Yanis, étudiant',
       texte: () => 'Yanis, étudiant, organise ses horaires autour de ses cours et de ses examens.',
       jouer: () => {
         o.avecPlanning();

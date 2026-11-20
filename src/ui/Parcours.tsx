@@ -3697,7 +3697,7 @@ export function Parcours(): JSX.Element | null {
       const facultatif = 'facultatif' in g && !!g.facultatif;
       const viser = (): void => {
         const el = element(cible);
-        if (!el || (el as HTMLButtonElement).disabled) {
+        if (!el || (g.faire !== 'expliquer' && (el as HTMLButtonElement).disabled)) {
           // Pendant une attente, Solvi garde sa bulle ouverte ; si elle dure (un calcul), il réfléchit.
           if (essais === 2) montrerBulle();
           if (g.faire === 'attendre' && essais === 4) setHumeur('reflechi');
