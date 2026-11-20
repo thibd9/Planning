@@ -5101,3 +5101,10 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .pg-pref-long { display: none; }
   .pg-pref-court { display: inline; }
 }
+
+/* Sur un téléphone, un titre de carte suivi d'un bouton : le bouton passe dessous, le titre garde toute la largeur. */
+@media (max-width: 480px) {
+  .card-head:has(> .grow:first-child + .btn) { flex-wrap: wrap; }
+  .card-head:has(> .grow:first-child + .btn) > .grow { flex-basis: 100%; }
+  .card-head:has(> .grow:first-child + .btn) > .btn { width: 100%; justify-content: center; }
+}
