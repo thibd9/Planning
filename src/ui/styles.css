@@ -4258,7 +4258,7 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .ad-vide-actions { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 
 /* ---------- L'officine en chiffres ---------- */
-.of-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 16px; align-items: end; }
+.of-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 16px; align-items: start; }
 .of-grille .field { min-width: 0; }
 .of-grille input[type='number'] { width: 100%; }
 .of-robot { grid-column: 1 / -1; }
