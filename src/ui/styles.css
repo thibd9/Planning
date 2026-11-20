@@ -5083,3 +5083,21 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .mo-rep-attendus { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-width: 340px; }
 .mo-rep-attendus li { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; font-weight: 550; }
 @media (max-width: 720px) { .mo-rep { grid-template-columns: minmax(0, 1fr); } }
+
+/* Sur un écran étroit, la colonne des noms est mince : la case « Préférences » garde sa coche et un pictogramme, le mot reste lu par les lecteurs d'écran. */
+.plan-pref-ico { display: none; color: var(--ink-2); }
+@media (max-width: 720px) {
+  .plan-pref { gap: 5px; }
+  .plan-pref-ico { display: block; flex: none; }
+  .plan-pref-mot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  /* Deux boutons seulement (vue Mois) : chacun prend toute la largeur, sinon le plus long déborde de sa demi-colonne. */
+  .plan-bar .right > :first-child:nth-last-child(2) { grid-column: 1 / -1; }
+}
+
+.pg-pref { max-width: 100%; overflow: hidden; }
+.pg-pref-court { display: none; }
+@media (max-width: 720px) {
+  .pg-pref { padding: 1px 4px; font-size: 10px; gap: 2px; align-self: center; }
+  .pg-pref-long { display: none; }
+  .pg-pref-court { display: inline; }
+}

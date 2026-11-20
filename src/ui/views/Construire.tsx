@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, Ban, BookOpenCheck, Boxes, CalendarCheck, CalendarClock, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, CircleX, Coffee, Copy, Dices, Eye, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Stethoscope, Sun, Sunrise, Sunset, Trash2, Undo2, UserRoundPlus, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Ban, BookOpenCheck, Boxes, CalendarCheck, CalendarClock, CalendarHeart, CalendarRange, Check, ChevronLeft, ChevronRight, CircleCheck, CircleX, Coffee, Copy, Dices, Eye, FlaskConical, GraduationCap, Info, Lock, Megaphone, MessageCircleQuestion, Minus, Pencil, Pill as PillIcon, Plus, Printer, Redo2, ShieldAlert, Sparkles, Sprout, Stethoscope, Sun, Sunrise, Sunset, Trash2, Undo2, UserRoundPlus, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { JOURS, JOURS_COURT, addDays, dayIndex, fmtDecimal, fmtDuree, fmtEuros, fmtHHMM, fmtHeure, fmtHorodatage, fmtJourMois, fmtSemaine, isoWeek, mondayOf, parseHHMM, totalDuree, uid, weekDates, weekday, fmtDateCourt } from '../../domain/time';
 import type { Activite, AppData, ISODate, Person, Shift } from '../../domain/types';
@@ -40,6 +40,9 @@ import { ABSENCE_ICONE, ACTIVITE_COULEUR, ACTIVITE_COURT, ACTIVITE_ICONE, GARDE_
 import { AvantApres, Avatar, Dialog, Empty, Pill, Seg, SiCouts, Track, momentDe, roleDe, Ferie } from '../kit';
 
 type Lecture = 'heures' | 'cout' | 'equite';
+
+/** Sur un téléphone, une colonne fait une quarantaine de pixels : la préférence s'y écrit en abrégé. */
+const SOUHAIT_COURT: Record<keyof typeof SOUHAIT_LABEL, string> = { matin: 'Matin', journee: 'Jour', soir: 'Ap.-m.', repos: 'Repos' };
 
 export function echelleOfficine(data: AppData): Echelle {
   const plages = data.officine.horaires.flat();
@@ -286,7 +289,8 @@ export function Construire(): JSX.Element {
                     {collaboratifEquipe ? (
                       <label className="check plan-pref" title="Afficher dans chaque case ce que la personne a demandé">
                         <input id="plan-preferences" type="checkbox" checked={prefsVisibles} onChange={(e) => setPrefsVisibles(e.target.checked)} />
-                        <span>Préférences</span>
+                        <CalendarHeart size={16} aria-hidden="true" className="plan-pref-ico" />
+                        <span className="plan-pref-mot">Préférences</span>
                       </label>
                     ) : null}
                     <span className="eyebrow">Équipe</span>
@@ -455,7 +459,10 @@ export function Construire(): JSX.Element {
                                   {souhait ? (
                                     <span className={`pg-pref ${souhait}${duJour.length ? (suivi ? ' ok' : ' ecart') : ''}`} title={`${p.prenom} a demandé : ${SOUHAIT_LABEL[souhait].toLowerCase()}${duJour.length ? (suivi ? ' (préférence suivie)' : ' (le poste posé est différent)') : ''}`}>
                                       {duJour.length && suivi ? <Check size={11} strokeWidth={3} aria-hidden="true" /> : null}
-                                      {SOUHAIT_LABEL[souhait]}
+                                      <span className="pg-pref-long">{SOUHAIT_LABEL[souhait]}</span>
+                                      <span className="pg-pref-court" aria-hidden="true">
+                                        {SOUHAIT_COURT[souhait]}
+                                      </span>
                                       <span className="sr">{duJour.length ? (suivi ? ', préférence suivie' : ', préférence non suivie') : ', préférence demandée'}</span>
                                     </span>
                                   ) : null}
