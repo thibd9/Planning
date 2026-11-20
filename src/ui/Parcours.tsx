@@ -75,9 +75,16 @@ type Geste =
   | { faire: 'choisir'; dans: Cible; valeur: string; dit?: string; sert?: string; facultatif?: boolean }
   | { faire: 'attendre'; que: Cible; facultatif?: boolean }
   | { faire: 'pause'; ms: number; dit?: string; sert?: string }
-  | { faire: 'action'; jouer: () => void; dit?: string };
-type GesteVisible = Extract<Geste, { faire: 'cliquer' | 'taper' | 'choisir' }>;
-const visible = (g: Geste): g is GesteVisible => g.faire === 'cliquer' || g.faire === 'taper' || g.faire === 'choisir';
+  | { faire: 'action'; jouer: () => void; dit?: string }
+  /**
+   * Montrer un champ ou un élément sans y toucher : Solvi s'y pose et dit ce qu'on y met (`quoi`), à quoi il sert
+   * (`sert`) et, si utile, un exemple. Le nom affiché est celui du champ (son libellé), sauf si `nom` le précise.
+   */
+  | { faire: 'expliquer'; sur: Cible; quoi: string; sert?: string; exemple?: string; nom?: string; facultatif?: boolean };
+type GesteVisible = Extract<Geste, { faire: 'cliquer' | 'taper' | 'choisir' | 'expliquer' }>;
+const visible = (g: Geste): g is GesteVisible => g.faire === 'cliquer' || g.faire === 'taper' || g.faire === 'choisir' || g.faire === 'expliquer';
+/** Ce que vise un geste visible. */
+const cibleDe = (g: GesteVisible): Cible => (g.faire === 'cliquer' || g.faire === 'expliquer' ? g.sur : g.dans);
 
 /**
  * Une démonstration se regarde geste par geste : chaque « temps » contient un seul geste visible
@@ -120,8 +127,12 @@ function decrire(temps: Geste[] | undefined): string {
   if (!temps) return '';
   const g = temps.find(visible);
   if (!g) return temps.find((x): x is Extract<Geste, { faire: 'action' }> => x.faire === 'action')?.dit ?? 'Voir la suite';
+  const el = element(cibleDe(g));
+  if (g.faire === 'expliquer') {
+    const nom = g.nom ?? (el ? champDe(el) || nomDe(el) : '');
+    return nom ? `« ${nom} » : ${g.quoi}` : g.quoi;
+  }
   if (g.dit) return g.dit;
-  const el = element(g.faire === 'cliquer' ? g.sur : g.dans);
   if (g.faire === 'cliquer') {
     const nom = el ? nomDe(el) : '';
     return nom ? `Cliquez sur « ${nom} »` : 'Cliquez ici';
@@ -133,6 +144,7 @@ function decrire(temps: Geste[] | undefined): string {
 }
 /** Ce que Solvi saisit ou choisit lui-même pendant la démonstration : un exemple, annoncé comme tel. */
 function exempleDe(g: GesteVisible): string {
+  if (g.faire === 'expliquer') return g.exemple ? `Par exemple : ${g.exemple}.` : '';
   if (g.faire === 'cliquer') return '';
   const el = element(g.dans);
   if (g.faire === 'taper') return `Pour l’exemple, j’écris « ${g.texte} ».`;
@@ -305,6 +317,7 @@ const annulerMinuteries = (): void => {
   minuteries.forEach((m) => window.clearTimeout(m.id));
   minuteries = [];
   suspendu = false;
+  if (typeof document !== 'undefined') document.querySelectorAll('.pt-explique').forEach((x) => x.classList.remove('pt-explique'));
 };
 /** Pause : chaque attente en cours s'arrête là où elle en est. Reprise : elle repart pour ce qu'il lui restait. */
 const suspendre = (): void => {
@@ -2805,7 +2818,7 @@ export function Parcours(): JSX.Element | null {
         montrerBulle();
         return suite(tempo(700));
       }
-      const cible = g.faire === 'cliquer' ? g.sur : g.faire === 'attendre' ? g.que : g.dans;
+      const cible = g.faire === 'attendre' ? g.que : cibleDe(g);
       let essais = 0;
       const facultatif = 'facultatif' in g && !!g.facultatif;
       const viser = (): void => {
@@ -2823,11 +2836,15 @@ export function Parcours(): JSX.Element | null {
           return plusTard(viser, 150);
         }
         if (g.faire === 'attendre') return suite(300);
-        // 1. L'écran défile et le projecteur se pose sur le bloc où le geste a lieu.
+        // 1. L'écran défile et le projecteur se pose sur le bloc où le geste a lieu. Un champ expliqué est en plus cerné.
         el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
+        if (g.faire === 'expliquer') {
+          document.querySelectorAll('.pt-explique').forEach((x) => x.classList.remove('pt-explique'));
+          el.classList.add('pt-explique');
+        }
         visee.current = cible;
         plusTard(() => mesure.current(), 60);
-        const dit = g.dit ?? decrire([g]);
+        const dit = g.faire === 'expliquer' ? decrire([g]) : (g.dit ?? decrire([g]));
         const aQuoi = g.sert ?? '';
         const enExemple = exempleDe(g);
         setHumeur('neutre');
@@ -2835,6 +2852,11 @@ export function Parcours(): JSX.Element | null {
         plusTard(() => {
           const suiteDuGeste = (): void =>
             patienter(tempsDeLire(`${dit} ${aQuoi} ${enExemple}`), () => {
+              // Expliquer un champ : on l'a lu, rien à faire de plus.
+              if (g.faire === 'expliquer') {
+                plusTard(() => element(cible)?.classList.remove('pt-explique'), tempo(250));
+                return suite(tempo(250));
+              }
               if (!element(cible)) return derouler(gestes, i + 1);
               partir(cible);
               plusTard(() => {

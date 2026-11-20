@@ -5409,3 +5409,7 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .dp-repos { margin-top: 2px; }
 .dp-pref-tag.recoit { color: var(--ok); }
 .dp-pref-qui li.ici { border-color: color-mix(in srgb, var(--ok) 55%, var(--line)); background: color-mix(in srgb, var(--ok) 5%, var(--surface)); }
+
+/* Visite guidée : le champ que Solvi explique est cerné, le temps de lire. */
+.pt-explique { outline: 2px solid var(--a-deep) !important; outline-offset: 3px; border-radius: 8px; transition: outline-color 0.2s ease; }
+@media print { .pt-explique { outline: 0 !important; } }
