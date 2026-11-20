@@ -5349,3 +5349,9 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
 .parcours-test .rythme.compact .rythme-titre svg { display: none; }
 .parcours-test .rythme.compact .rythme-option { padding: 5px 7px; }
 .parcours-test .rythme.compact { gap: 6px 8px; }
+
+/* Fiche de la visite : le titre de l'étape et, à sa droite, le « i » qui rouvre le mot sur les démonstrations. */
+.pt-titre { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+.pt-titre h2 { flex: 1; min-width: 0; margin: 0; }
+.pt-info { flex: none; width: 28px; height: 28px; margin-top: -2px; border: 0; border-radius: 50%; display: grid; place-items: center; background: none; color: var(--ink-3); cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+.pt-info:hover, .pt-info.on { background: var(--a-soft); color: var(--a-text); }

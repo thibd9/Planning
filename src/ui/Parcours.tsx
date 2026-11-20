@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, CalendarCheck, CalendarDays, ChartNoAxesColumnIncreasing, Check, ChevronRight, CirclePause, CirclePlay, Compass, Crown, FlaskConical, Gauge, GraduationCap, Leaf, List, ListTree, Megaphone, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sprout, Store, Timer, Undo2, UserRound, UsersRound, X, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, CalendarCheck, CalendarDays, ChartNoAxesColumnIncreasing, Check, ChevronRight, CirclePause, CirclePlay, Compass, Crown, FlaskConical, Gauge, GraduationCap, Info, Leaf, List, ListTree, Megaphone, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sprout, Store, Timer, Undo2, UserRound, UsersRound, X, Zap } from 'lucide-react';
 import { cloneElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -167,6 +167,27 @@ export function choisirRythme(r: Rythme): void {
     window.localStorage.setItem(CLE_RYTHME, r);
   } catch {
     /* le rythme reste celui de la séance */
+  }
+}
+/** Le mot d'explication sur les démonstrations : lu une fois, on ne le remontre que sur demande. */
+const CLE_ANNONCE = 'releve.visite.annonce';
+let annonceDejaLue: boolean | null = null;
+const annonceLue = (): boolean => {
+  if (annonceDejaLue === null) {
+    try {
+      annonceDejaLue = window.localStorage.getItem(CLE_ANNONCE) === 'lue';
+    } catch {
+      annonceDejaLue = false;
+    }
+  }
+  return annonceDejaLue;
+};
+function marquerAnnonceLue(): void {
+  annonceDejaLue = true;
+  try {
+    window.localStorage.setItem(CLE_ANNONCE, 'lue');
+  } catch {
+    /* le mot reste lu pour la séance */
   }
 }
 const RYTHME_PHRASE: Record<Rythme, string> = { pose: 'Le temps de tout lire et de tout voir.', normal: 'Le temps de lire, sans attendre.', vif: 'Pour qui connaît déjà.' };
@@ -3103,7 +3124,18 @@ export function Parcours(): JSX.Element | null {
     if (clic) jouerGeste('bond');
   }, [clic, jouerGeste]);
 
+  // Le mot d'explication sur les démonstrations se lit une fois ; ensuite, il s'ouvre par le petit « i » à côté du titre.
+  const [info, setInfo] = useState(false);
+  const premiereAnnonce = useRef<string | null>(null);
+  const cleEtape = `${scenario}:${parcours}`;
+  useEffect(() => setInfo(false), [cleEtape]);
+  useEffect(() => {
+    if (!reste || parcours === null || annonceLue() || premiereAnnonce.current) return;
+    premiereAnnonce.current = cleEtape;
+    marquerAnnonceLue();
+  }, [reste, parcours, cleEtape]);
   if (!etape || parcours === null || !data.demo) return null;
+  const annonceVisible = reste && (info || premiereAnnonce.current === cleEtape || (!annonceLue() && !premiereAnnonce.current));
   // Où Solvi regarde : dans le sens du vol quand il se déplace, vers le pointeur quand il montre un geste, sinon vers
   // sa bulle, qu'il lit avec vous.
   const regardSolvi = ((): { x: number; y: number } => {
@@ -3293,7 +3325,15 @@ export function Parcours(): JSX.Element | null {
                 <span className="sr">, ouvrir le sommaire</span>
               </button>
             ) : null}
-            <h2 className="h3" style={{ marginBottom: 4 }}>{etape.titre}</h2>
+            <div className="pt-titre">
+              <h2 className="h3">{etape.titre}</h2>
+              {reste && !libre ? (
+                <button type="button" className={`pt-info${annonceVisible ? ' on' : ''}`} id="pt-info" aria-expanded={annonceVisible} aria-controls="pt-annonce" title="Comment se passe une démonstration" onClick={() => { if (premiereAnnonce.current === cleEtape) premiereAnnonce.current = 'lu'; setInfo(!annonceVisible); }}>
+                  <Info size={16} aria-hidden="true" />
+                  <span className="sr">Comment se passe une démonstration</span>
+                </button>
+              ) : null}
+            </div>
             <p className="small">{etape.texte(data)}</p>
             {libre ? (
               <div className="pt-libre">
@@ -3302,8 +3342,8 @@ export function Parcours(): JSX.Element | null {
                   <Undo2 size={14} aria-hidden="true" /> Revenir à l’étape
                 </button>
               </div>
-            ) : reste ? (
-              <div className="pt-annonce">
+            ) : annonceVisible ? (
+              <div className="pt-annonce" id="pt-annonce">
                 <span className="pt-annonce-ico" aria-hidden="true">
                   <MousePointer2 size={16} />
                 </span>
