@@ -513,6 +513,8 @@ export function ecransSuivre(o: OutilsVisite): Etape[] {
         { faire: 'expliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.dialog .notice.ok')].find((e) => e.textContent?.includes('Pourquoi ce poste')), nom: 'Pourquoi ce poste ?', quoi: 'la raison donnée par le calcul quand il a posé ce poste.', sert: 'Elle disparaît dès que vous modifiez le poste.', facultatif: true },
         { faire: 'expliquer', sur: o.parLibelle('Tâche', '.dialog'), quoi: 'ce que fait la personne pendant ce poste : comptoir, réception ou administratif.', sert: 'Le comptoir compte dans l’effectif attendu ; la tâche se lit sur la tuile.' },
         { faire: 'expliquer', sur: '#tache-vers-formation', quoi: 'ouvre la fenêtre « Planifier une formation » : intitulé, lieu, dates, participants.', sert: '« Inventaire » ouvre de même la fenêtre de l’inventaire.' },
+        { faire: 'cliquer', sur: '#ptc-repos', dit: 'Choisissez le poste type « Repos »', sert: 'Les horaires laissent place à un jour de repos.' },
+        { faire: 'expliquer', sur: '#dp-repos', nom: 'Jour de repos', quoi: 'la personne ne travaille pas ce jour-là ; le poste prévu sera retiré.', sert: 'Si c’est aussi sa préférence, la fenêtre le dit.' },
         { faire: 'action', jouer: fermer },
       ],
     },
@@ -583,17 +585,35 @@ export function ecransSuivre(o: OutilsVisite): Etape[] {
       qui: o.HELENE,
       cible: '.content .plan',
       cibleFin: '.content .plan',
-      titre: 'Les indicateurs des propositions',
-      texte: () => 'Sur une semaine vide, le calcul part tout de suite. Chaque proposition se compare sur les mêmes indicateurs ; le meilleur est mis en valeur.',
+      titre: 'Une semaine vide',
+      texte: () => 'Sur une semaine vide, une carte propose de commencer, et le calcul des propositions part tout de suite.',
       jouer: () => {
         o.avecPlanning();
         ouvrirSemaine(addDays(semaineBrouillonLundi(), 7));
       },
       gestes: [
+        { faire: 'expliquer', sur: () => [...document.querySelectorAll<HTMLElement>('.content .card.pad')].find((e) => e.textContent?.includes('Cette semaine est vide')), nom: 'Cette semaine est vide', quoi: 'le rappel qu’aucun poste n’est posé, et les trois façons de commencer : des propositions, la semaine précédente recopiée, ou un « + ».' },
         { faire: 'cliquer', sur: "[data-tour='proposer']", sert: 'La semaine est vide : le calcul démarre aussitôt.' },
         { faire: 'attendre', que: '.dialog .variant' },
         { faire: 'expliquer', sur: '.dialog .variant .variant-etat', nom: 'L’état', quoi: '« Règles respectées », ou le nombre de points bloquants de la proposition.' },
         { faire: 'expliquer', sur: '.dialog .variant .mini', nom: 'La miniature', quoi: 'la semaine de chacun, du lundi au samedi, une ligne par personne.' },
+        { faire: 'action', jouer: fermer },
+      ],
+    },
+    {
+      chapitre: 'Construire',
+      qui: o.HELENE,
+      cible: '.content .plan',
+      cibleFin: '.content .plan',
+      titre: 'Les indicateurs des propositions',
+      texte: () => 'Chaque proposition se compare sur les mêmes indicateurs ; le meilleur est mis en valeur.',
+      jouer: () => {
+        o.avecPlanning();
+        ouvrirSemaine(addDays(semaineBrouillonLundi(), 7));
+      },
+      gestes: [
+        { faire: 'cliquer', sur: "[data-tour='proposer']", dit: 'Cliquez sur « Proposer un planning »' },
+        { faire: 'attendre', que: '.dialog .variant' },
         { faire: 'expliquer', sur: o.parTexte('.dialog .variant .kpi span', 'Préférences suivies'), quoi: 'la part des préférences de l’équipe que la proposition respecte.', sert: 'Quand vous préparez seul, l’indicateur devient « Fidèle à vos habitudes ».' },
         { faire: 'expliquer', sur: o.parTexte('.dialog .variant .kpi span', 'Écart d'), quoi: 'l’écart entre les samedis travaillés et la part attendue de chacun, sur huit semaines.', sert: 'Plus il est bas, plus la répartition est équilibrée.' },
         { faire: 'expliquer', sur: o.parTexte('.dialog .variant .kpi span', 'au-delà des contrats'), quoi: 'les heures planifiées au-delà des contrats, toutes personnes confondues.' },
@@ -1076,7 +1096,7 @@ export function ecransSuivre(o: OutilsVisite): Etape[] {
         { faire: 'cliquer', sur: '#top-signaler', sert: 'La fenêtre « Signaler un retard ou une absence » s’ouvre.' },
         { faire: 'attendre', que: '.dialog #sg-qui' },
         { faire: 'expliquer', sur: o.parLibelle('Pour qui ?', '.dialog'), quoi: 'vous-même, ou la personne de l’équipe qui vous a prévenu.', sert: 'Un titulaire signale pour un autre ; un membre de l’équipe ne signale que pour lui.' },
-        { faire: 'choisir', dans: '#sg-qui', valeur: 'p_camille', dit: 'Choisissez Nicolas', sert: 'Il a appelé : il sera en retard.' },
+        { faire: 'choisir', dans: '#sg-qui', valeur: 'p_camille', dit: 'Choisissez Nicolas', sert: 'Nicolas a téléphoné : un retard est annoncé.' },
         { faire: 'expliquer', sur: o.parLibelle('Que se passe-t-il ?', '.dialog'), quoi: 'un retard, ou une absence.' },
         { faire: 'cliquer', sur: 'label[for="sg-retard"]', dit: 'Choisissez « Un retard »' },
         { faire: 'expliquer', sur: o.parLibelle('De combien ?', '.dialog'), quoi: '5, 10 ou 15 minutes, ou plus de 20 ; à côté, le poste concerné, aujourd’hui ou demain.' },
@@ -1247,7 +1267,7 @@ export function ecransSuivre(o: OutilsVisite): Etape[] {
       cible: '.panneau',
       cibleFin: '.panneau',
       titre: 'Une demande de remplacement',
-      texte: () => 'Nicolas demande à être remplacé. La carte résume la demande ; « Décider » ouvre tout ce qu’il faut pour trancher.',
+      texte: () => 'Nicolas demande un remplacement. La carte résume la demande ; « Décider » ouvre tout ce qu’il faut pour trancher.',
       jouer: () => {
         toutADecider();
         ouvrirResoudre('remplacements');
