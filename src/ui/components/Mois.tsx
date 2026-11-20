@@ -108,8 +108,9 @@ export function VueMois({ moiId, onPoste }: { moiId?: string; onPoste?: (personI
   // Un mois entièrement passé s'affiche en entier : il n'y aurait rien d'autre à montrer.
   const toutPasse = passees.length === semaines.length;
   const affichees = semaines.filter((s) => anciennes || toutPasse || !s.passee);
-  /** Une semaine sans aucun poste tient en une colonne étroite, sauf si on regarde les préférences. */
-  const repliee = (s: (typeof semaines)[number]): boolean => s.etat === 'vide' && !(collaboratif && preferences);
+  /** Une semaine sans aucun poste tient en une colonne étroite, sauf si elle a des préférences à montrer. */
+  const avecSouhaits = (s: (typeof semaines)[number]): boolean => (data.souhaits ?? []).some((x) => x.date >= s.lundi && x.date <= addDays(s.lundi, 6));
+  const repliee = (s: (typeof semaines)[number]): boolean => s.etat === 'vide' && !(collaboratif && preferences && avecSouhaits(s));
   const colonnes = affichees.flatMap((s) => (repliee(s) ? [{ cle: `r${s.lundi}`, sem: s, date: null as ISODate | null }] : s.jours.map((d) => ({ cle: d, sem: s, date: d as ISODate | null }))));
   const nbJours = colonnes.filter((c) => c.date).length;
   const debuts = new Set(affichees.map((s) => s.jours[0]));
