@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BookOpen, CalendarCheck, Check, CirclePause, CirclePlay, Clock3, Crown, FlaskConical, Gauge, GraduationCap, ListChecks, ListTree, Megaphone, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sparkles, Sprout, Store, Undo2, UserRound, UsersRound, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, BriefcaseBusiness, CalendarCheck, CalendarDays, ChartNoAxesColumnIncreasing, Check, ChevronRight, CirclePause, CirclePlay, Compass, Crown, FlaskConical, Gauge, GraduationCap, Leaf, List, ListTree, Megaphone, MousePointer2, Pause, Pill as PillIcon, Play, RotateCcw, Siren, Sprout, Store, Timer, Undo2, UserRound, UsersRound, X, Zap } from 'lucide-react';
 import { cloneElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { libelleRole, peutGerer } from '../domain/acces';
 import { addDays, mondayOf } from '../domain/time';
@@ -177,7 +177,7 @@ export function ChoixRythme({ compact }: { compact?: boolean }): JSX.Element {
   return (
     <div className={`rythme${compact ? ' compact' : ''}`} role="radiogroup" aria-label="Rythme de la visite">
       <span className="rythme-titre">
-        <Gauge size={15} aria-hidden="true" /> Rythme de la visite
+        <Timer size={17} aria-hidden="true" /> Rythme de la visite
       </span>
       <div className="rythme-choix">
         {(Object.keys(RYTHMES) as Rythme[]).map((cle) => (
@@ -192,7 +192,10 @@ export function ChoixRythme({ compact }: { compact?: boolean }): JSX.Element {
               setR(cle);
             }}
           >
-            <b className="cap1">{RYTHMES[cle].nom}</b>
+            <b>
+              {cle === 'pose' ? <Leaf size={16} aria-hidden="true" /> : cle === 'vif' ? <Zap size={16} aria-hidden="true" /> : <ChartNoAxesColumnIncreasing size={16} aria-hidden="true" />}
+              {RYTHMES[cle].nom.charAt(0).toUpperCase() + RYTHMES[cle].nom.slice(1)}
+            </b>
             {compact ? null : <span>{RYTHME_PHRASE[cle]}</span>}
           </button>
         ))}
@@ -2264,16 +2267,19 @@ function couleursDeProfil(): void {
 }
 
 /** Lance un parcours guidé sur un environnement d'exemple remis à neuf. */
-export function lancerParcours(scenario: Scenario = 'etabli'): void {
+export function lancerParcours(scenario: Scenario = 'etabli', depart = 0): void {
   annulerMinuteries();
   store().chargerExemple(true, SCENARIOS[scenario].depart);
   couleursDeProfil();
   useUi.getState().montrerAssistant(false);
   // Le parcours est remis à l'étape 1 : l'écran de la première étape est posé par le composant.
   voirComme('caroline.tellier');
-  useUi.getState().setParcours(0, scenario, null);
-  // Relancé depuis l'étape 1, le parcours ne change pas d'étape : son écran est reposé ici.
-  SCENARIOS[scenario].etapes[0].jouer();
+  // Depuis la fenêtre des visites, on peut aussi commencer par un chapitre : chaque étape prépare elle-même son écran.
+  const etape = SCENARIOS[scenario].etapes[depart] ? depart : 0;
+  const deja = useUi.getState().parcours === etape;
+  useUi.getState().setParcours(etape, scenario, null);
+  // Relancé depuis la même étape, le parcours ne change pas d'étape : son écran est reposé ici.
+  if (etape === 0 || deja) SCENARIOS[scenario].etapes[etape].jouer();
 }
 
 /** Où revenir une fois le tutoriel d'une tâche terminé : la pharmacie et le compte d'où il a été lancé. */
@@ -3347,7 +3353,7 @@ export function Parcours(): JSX.Element | null {
 
 /** Une carte par visite : un mot pour le rôle, une phrase, trois repères. */
 const CARTES: Record<Scenario, { nom: string; phrase: string; mots: string[]; teinte: string; icone: JSX.Element }> = {
-  complet: { nom: 'Complet', phrase: 'Tout Solvéa, de la création au bilan.', mots: ['Installer', 'Construire', 'Décider'], teinte: 'v-titulaire', icone: <Sparkles size={30} /> },
+  complet: { nom: 'Complet', phrase: 'Tout Solvéa, de la création au bilan.', mots: ['Installer', 'Construire', 'Décider'], teinte: 'v-titulaire', icone: <Logo size={30} /> },
   titulaire: { nom: 'Titulaire', phrase: 'Gérer la pharmacie au quotidien.', mots: ['Construire', 'Décider', 'Bilan'], teinte: 'v-titulaire2', icone: <Crown size={30} /> },
   pharmacien: { nom: 'Pharmacien', phrase: 'Votre planning et vos gardes.', mots: ['Planning', 'Demandes', 'Gardes'], teinte: 'v-pharmacien', icone: <PillIcon size={30} /> },
   equipe: { nom: 'Préparateur', phrase: 'Votre espace, pas à pas.', mots: ['Planning', 'Demandes', 'Suivi'], teinte: 'v-equipe', icone: <FlaskConical size={30} /> },
@@ -3359,10 +3365,10 @@ const CARTES: Record<Scenario, { nom: string; phrase: string; mots: string[]; te
   publication: { nom: 'Veille de publication', phrase: 'Construire, publier, faire le bilan.', mots: [], teinte: 'v-publication', icone: <CalendarCheck size={22} /> },
 };
 type Famille = (typeof SCENARIOS)[Scenario]['groupe'] | 'libre';
-const GROUPES: { cle: (typeof SCENARIOS)[Scenario]['groupe']; titre: string; phrase: string }[] = [
-  { cle: 'parcours', titre: 'Parcours', phrase: 'Le plus complet d’abord, puis un parcours par rôle.' },
-  { cle: 'metiers', titre: 'Autres métiers', phrase: 'Chaque profil a son accueil : animatrice, apprentie, étudiant.' },
-  { cle: 'journees', titre: 'Journées types', phrase: 'Trois scénarios pour une journée : la pharmacie tourne déjà, on la suit du matin au soir.' },
+const GROUPES: { cle: (typeof SCENARIOS)[Scenario]['groupe']; titre: string; phrase: string; icone: typeof BookOpen; etiquette: (nom: string) => string }[] = [
+  { cle: 'parcours', titre: 'Parcours', phrase: 'Le plus complet d’abord, puis un parcours par rôle.', icone: BookOpen, etiquette: (nom) => `Parcours ${nom.toLowerCase()}` },
+  { cle: 'metiers', titre: 'Autres métiers', phrase: 'Chaque profil a son accueil : animatrice, apprentie, étudiant.', icone: BriefcaseBusiness, etiquette: () => 'Autre métier' },
+  { cle: 'journees', titre: 'Journées types', phrase: 'Trois scénarios pour une journée : la pharmacie tourne déjà, on la suit du matin au soir.', icone: CalendarDays, etiquette: () => 'Journée type' },
 ];
 
 /** Fenêtre « Découvrir Solvéa » : une visite guidée par rôle, ou une entrée libre. */
@@ -3410,8 +3416,14 @@ export function ChoixParcours(): JSX.Element | null {
             <Logo size={34} />
           </span>
           <div className="grow">
-            <h2 id="decouvrir-titre">Découvrir Solvéa</h2>
-            <p>Choisissez une visite : chacune raconte une histoire, chapitre après chapitre. Ou entrez librement.</p>
+            <h2 id="decouvrir-titre">
+              Découvrir <span className="dc-marque">Solvéa</span>
+            </h2>
+            <p>
+              Choisissez une visite : chacune raconte une histoire, chapitre après chapitre.
+              <br />
+              Ou entrez librement pour explorer l’outil à votre rythme.
+            </p>
           </div>
           <button type="button" className="dialog-fermer" onClick={() => ouvrirTutoriels(false)} aria-label="Fermer" autoFocus>
             <X size={18} aria-hidden="true" />
@@ -3422,11 +3434,13 @@ export function ChoixParcours(): JSX.Element | null {
           <div className="dc-onglets" role="tablist" aria-label="Familles de visites">
             {GROUPES.map((g) => (
               <button key={g.cle} type="button" role="tab" id={`dc-onglet-${g.cle}`} aria-selected={onglet === g.cle} aria-controls="dc-panneau" className={`dc-onglet${onglet === g.cle ? ' on' : ''}`} onClick={() => montrer(toutes.find((cle) => SCENARIOS[cle].groupe === g.cle) ?? 'complet')}>
+                <g.icone size={19} aria-hidden="true" />
                 {g.titre}
                 <span className="dc-onglet-nb num">{toutes.filter((cle) => SCENARIOS[cle].groupe === g.cle).length}</span>
               </button>
             ))}
             <button type="button" role="tab" id="dc-onglet-libre" aria-selected={onglet === 'libre'} aria-controls="dc-panneau" className={`dc-onglet${onglet === 'libre' ? ' on' : ''}`} onClick={() => setOnglet('libre')}>
+              <Compass size={19} aria-hidden="true" />
               Entrer librement
             </button>
           </div>
@@ -3469,7 +3483,7 @@ export function ChoixParcours(): JSX.Element | null {
                 {famille.map((cle) => (
                   <button key={cle} type="button" className={`dc-point ${CARTES[cle].teinte}${cle === montree ? ' on' : ''}`} data-nom={CARTES[cle].nom} aria-current={cle === montree ? 'true' : undefined} onClick={() => montrer(cle)}>
                     <span className="dc-point-ico" aria-hidden="true">
-                      {cloneElement(CARTES[cle].icone, { size: 16 })}
+                      {cloneElement(CARTES[cle].icone, { size: 19 })}
                     </span>
                     {CARTES[cle].nom}
                   </button>
@@ -3489,50 +3503,59 @@ export function ChoixParcours(): JSX.Element | null {
               >
                 <article key={montree} className={`cp-carte dc-diapo ${carte.teinte} ${sens}`} data-scenario={montree} aria-roledescription="diapositive" aria-label={`${carte.nom}, visite ${toutes.indexOf(montree) + 1} sur ${toutes.length}`} aria-live="polite">
                   <div className="cp-visuel">
-                    <span className="cp-ico" aria-hidden="true">
+                    <span className={`cp-ico${montree === 'complet' ? ' logo' : ''}`} aria-hidden="true">
                       {carte.icone}
                     </span>
                     <ul className="dc-reperes" aria-label="En bref">
                       <li>
-                        <Clock3 size={14} aria-hidden="true" /> {visite.duree.split(' · ')[0]}
+                        <Timer size={17} aria-hidden="true" /> {visite.duree.split(' · ')[0]}
                       </li>
                       <li>
-                        <ListChecks size={14} aria-hidden="true" /> {visite.duree.split(' · ')[1]}
+                        <List size={17} aria-hidden="true" /> {visite.duree.split(' · ')[1]}
                       </li>
                       <li>
-                        <BookOpen size={14} aria-hidden="true" /> {chapitres.length} chapitre{chapitres.length > 1 ? 's' : ''}
+                        <BookOpen size={17} aria-hidden="true" /> {chapitres.length} chapitre{chapitres.length > 1 ? 's' : ''}
                       </li>
                     </ul>
                   </div>
                   <div className="dc-diapo-texte">
-                    <span className="eyebrow">
-                      {visite.role} · {famille.indexOf(montree) + 1} sur {famille.length}
+                    <span className="dc-etiquette">
+                      {GROUPES.find((g) => g.cle === visite.groupe)?.etiquette(carte.nom)} · {famille.indexOf(montree) + 1} sur {famille.length}
                     </span>
                     <h3>{visite.titre}</h3>
                     <p className="dc-fil">{visite.fil}</p>
                     <ol className="dc-chapitres" aria-label="Chapitres">
                       {chapitres.map((c, n) => (
                         <li key={c}>
-                          <span className="dc-num" aria-hidden="true">
-                            {n + 1}
-                          </span>
-                          {c}
+                          {/* Un chapitre se lance directement : la visite s'ouvre sur son annonce. */}
+                          <button type="button" className="dc-chapitre" data-chapitre={n + 1} title={`Lancer la visite à ce chapitre`} onClick={() => lancerParcours(montree, Math.max(0, visite.etapes.findIndex((e) => e.chapitre === c)))}>
+                            <span className="dc-num" aria-hidden="true">
+                              {n + 1}
+                            </span>
+                            <span className="dc-chapitre-nom">
+                              <span className="sr">Chapitre {n + 1} : </span>
+                              {c}
+                            </span>
+                            <ChevronRight size={16} aria-hidden="true" className="dc-chevron" />
+                          </button>
                         </li>
                       ))}
                     </ol>
                     <div className="dc-diapo-pied">
                       <span className="dc-avec">
-                        <UsersRound size={15} aria-hidden="true" />
-                        <span className="sr">Avec </span>
+                        <UsersRound size={17} aria-hidden="true" />
+                        <span className="dc-avec-mot">Avec :</span>
                         {personnages.map((q) => (
                           <span key={q} className="dc-perso">
-                            <i style={{ background: TEINTE_DE[q] ?? 'var(--n-4)' }} aria-hidden="true" />
+                            <i style={{ background: TEINTE_DE[q] ?? 'var(--n-4)' }} aria-hidden="true">
+                              {q.charAt(0)}
+                            </i>
                             {q.split(' · ')[0]}
                           </span>
                         ))}
                       </span>
                       <button type="button" className="btn primary" onClick={() => lancerParcours(montree)}>
-                        <Play size={16} aria-hidden="true" /> Lancer <span className="sr">la visite {carte.nom}</span>
+                        <Play size={18} aria-hidden="true" /> Lancer la visite <span className="sr">{carte.nom}</span>
                       </button>
                     </div>
                   </div>

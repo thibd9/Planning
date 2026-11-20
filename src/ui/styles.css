@@ -5108,3 +5108,159 @@ table.lecture th[scope='col']:first-child { padding-left: 16px; }
   .card-head:has(> .grow:first-child + .btn) > .grow { flex-basis: 100%; }
   .card-head:has(> .grow:first-child + .btn) > .btn { width: 100%; justify-content: center; }
 }
+
+/* === « Découvrir Solvéa », d'après la maquette : un cadre teinté, un panneau clair, une visite en carte ===
+   Les illustrations ne sont pas reprises : le panneau de gauche garde l'aplat du rôle et son pictogramme. */
+.decouvrir { width: min(920px, 100%); border-radius: 20px; padding: 0 8px 8px; background: var(--grad-vif); background-size: 100% 100%; }
+.decouvrir .dc-tete { background: none; animation: none; padding: 22px 16px 20px 22px; gap: 18px; align-items: center; }
+.decouvrir .dc-logo { width: 60px; height: 60px; border-radius: 16px; background: var(--surface); box-shadow: 0 12px 26px -16px rgba(var(--ink-rgb), 0.55), 0 1px 0 rgba(255, 255, 255, 0.6) inset; }
+.decouvrir .dc-tete h2 { font-size: 28px; letter-spacing: -0.035em; }
+.dc-marque { color: var(--a-deep); }
+.decouvrir .dc-tete p { margin-top: 4px; font-size: 14.5px; line-height: 1.45; max-width: none; color: color-mix(in srgb, currentColor 82%, transparent); }
+.decouvrir .dc-tete .dialog-fermer { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); color: var(--ink); box-shadow: 0 8px 18px -12px rgba(var(--ink-rgb), 0.6); align-self: flex-start; }
+.decouvrir .dc-corps { padding: 6px 26px 18px; gap: 16px; border-radius: 16px; background: color-mix(in srgb, var(--surface) 88%, var(--a-tint)); }
+
+/* Les familles : un pictogramme, un nom, un compteur en pastille, et un filet entre deux onglets. */
+.decouvrir .dc-onglets { gap: 0; flex-wrap: nowrap; border-bottom: 1px solid var(--line); }
+.decouvrir .dc-onglet { position: relative; gap: 10px; padding: 14px 22px 15px; font-size: 14.5px; font-weight: 650; color: var(--ink); border-bottom: 3px solid transparent; white-space: nowrap; }
+.decouvrir .dc-onglet:first-child { padding-left: 10px; }
+.decouvrir .dc-onglet + .dc-onglet::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 15px; width: 1px; background: var(--line); }
+.decouvrir .dc-onglet svg { flex: none; color: var(--ink-2); }
+.decouvrir .dc-onglet.on { color: var(--a-text); border-bottom-color: var(--a-deep); }
+.decouvrir .dc-onglet.on svg { color: var(--a-deep); }
+.decouvrir .dc-onglet-nb { min-width: 26px; padding: 2px 8px; border-radius: 999px; background: var(--a-soft); color: var(--a-text); font-size: 12px; font-weight: 700; text-align: center; }
+
+/* Les visites de la famille : un pictogramme au trait, à la couleur du rôle. */
+.decouvrir .dc-carrousel { gap: 14px; }
+.decouvrir .dc-points { gap: 10px; }
+.decouvrir .dc-point { min-height: 38px; gap: 9px; padding: 6px 16px 6px 12px; border-radius: 9px; font-size: 14px; font-weight: 650; color: var(--ink); background: var(--surface); border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.06); }
+.decouvrir .dc-point-ico { width: auto; height: auto; border-radius: 0; background: none; color: color-mix(in srgb, var(--v1) 82%, var(--ink)); }
+.decouvrir .dc-point.on { color: color-mix(in srgb, var(--v1) 78%, var(--ink)); background: color-mix(in srgb, var(--v1) 10%, var(--surface)); border-color: color-mix(in srgb, var(--v1) 62%, var(--surface)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--v1) 62%, var(--surface)); }
+
+/* La visite : l'aplat du rôle à gauche avec ses trois repères en bas, l'histoire à droite. */
+.decouvrir .cp-carte.dc-diapo { grid-template-columns: minmax(200px, 0.38fr) minmax(0, 1fr); min-height: 318px; padding: 0; gap: 0; border-radius: 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 16px 36px -28px rgba(var(--ink-rgb), 0.55); }
+.decouvrir .dc-diapo .cp-visuel { display: grid; grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; justify-content: stretch; gap: 14px; height: auto; padding: 18px; }
+.decouvrir .dc-diapo .cp-ico { place-self: center; width: 92px; height: 92px; border-radius: 22px; background: rgba(255, 255, 255, 0.2); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34); position: relative; z-index: 1; }
+.decouvrir .dc-diapo .cp-ico svg { width: 44px; height: 44px; }
+.decouvrir .dc-diapo .cp-ico.logo { background: #fff; box-shadow: 0 16px 30px -18px rgba(8, 20, 48, 0.7); }
+.decouvrir .dc-diapo .cp-ico.logo svg { width: 56px; height: auto; }
+.decouvrir .dc-reperes { justify-self: start; justify-items: start; gap: 7px; }
+.decouvrir .dc-reperes li { gap: 9px; padding: 6px 14px 6px 11px; border-radius: 999px; background: rgba(9, 20, 46, 0.46); color: #fff; font-size: 13.5px; font-weight: 700; }
+.decouvrir .dc-diapo-texte { padding: 22px 24px 20px; gap: 10px; }
+.dc-etiquette { align-self: flex-start; padding: 5px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.3; background: color-mix(in srgb, var(--v1) 11%, var(--surface)); color: color-mix(in srgb, var(--v1) 78%, var(--ink)); }
+.decouvrir .cp-carte.dc-diapo h3 { font-size: 25px; letter-spacing: -0.03em; margin: 2px 0 0; }
+.decouvrir .dc-fil { font-size: 14.5px; max-width: 60ch; }
+/* Les chapitres : chacun se lance d'un clic. */
+.decouvrir .dc-chapitres { gap: 7px 14px; margin-top: 4px; }
+.dc-chapitre { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 34px; padding: 4px 8px 4px 5px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; line-height: 1.25; text-align: left; cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease; }
+.dc-chapitre:hover, .dc-chapitre:focus-visible { border-color: color-mix(in srgb, var(--v1) 55%, var(--line)); background: color-mix(in srgb, var(--v1) 6%, var(--surface)); }
+.dc-chapitre-nom { flex: 1; min-width: 0; text-wrap: balance; }
+.dc-chevron { flex: none; color: var(--ink-3); transition: transform 0.15s ease; }
+.dc-chapitre:hover .dc-chevron { transform: translateX(2px); color: color-mix(in srgb, var(--v1) 78%, var(--ink)); }
+.decouvrir .dc-num { width: 27px; height: 24px; border-radius: 7px; font-size: 12.5px; }
+.decouvrir .dc-diapo-pied { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); flex-wrap: nowrap; }
+.decouvrir .dc-avec { gap: 6px 10px; font-size: 13px; flex-wrap: nowrap; min-width: 0; }
+.decouvrir .dc-avec > svg { flex: none; }
+.dc-avec-mot { font-weight: 600; margin-right: -2px; }
+.decouvrir .dc-perso { gap: 6px; white-space: nowrap; }
+.decouvrir .dc-perso i { flex: none; width: 24px; height: 24px; display: grid; place-items: center; color: #fff; font-size: 11.5px; font-weight: 700; font-style: normal; line-height: 1; }
+.decouvrir .cp-carte.dc-diapo .dc-diapo-pied .btn { flex: none; min-height: 46px; padding: 10px 20px; border-radius: 10px; font-size: 15.5px; white-space: nowrap; }
+
+/* Le rythme : une barre centrée, trois choix avec leur pictogramme. */
+.rythme-option b { display: inline-flex; align-items: center; gap: 8px; }
+.decouvrir .rythme.compact { display: flex; align-items: center; gap: 14px; margin: 2px auto 0; padding: 8px 10px 8px 18px; border-radius: 12px; background: var(--a-soft); }
+.decouvrir .rythme.compact .rythme-titre { gap: 9px; font-size: 13.5px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.decouvrir .rythme.compact .rythme-choix { display: flex; gap: 8px; }
+.decouvrir .rythme.compact .rythme-option { display: inline-flex; align-items: center; min-height: 36px; padding: 6px 18px; border: 1.5px solid transparent; border-radius: 9px; font-size: 14px; box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.07); }
+.decouvrir .rythme.compact .rythme-option b { font-weight: 650; }
+.decouvrir .rythme.compact .rythme-option.on { border-color: var(--a-deep); color: var(--a-text); }
+
+/* L'entrée libre reprend le même panneau. */
+.decouvrir .dc-libre { padding-top: 8px; }
+
+@media (min-width: 901px) and (max-height: 820px) {
+  .decouvrir .dc-tete { padding: 16px 14px 14px 20px; }
+  .decouvrir .dc-logo { width: 52px; height: 52px; border-radius: 14px; }
+  .decouvrir .dc-tete h2 { font-size: 25px; }
+  .decouvrir .dc-tete p { font-size: 13.5px; }
+  .decouvrir .dc-corps { padding: 2px 24px 14px; gap: 12px; }
+  .decouvrir .dc-onglet { padding: 11px 20px 12px; }
+  .decouvrir .dc-onglet + .dc-onglet::before { top: 11px; bottom: 12px; }
+  .decouvrir .dc-carrousel { gap: 12px; }
+  .decouvrir .cp-carte.dc-diapo { min-height: 286px; }
+  .decouvrir .dc-diapo .cp-ico { width: 78px; height: 78px; border-radius: 19px; }
+  .decouvrir .dc-diapo-texte { padding: 16px 22px 16px; gap: 8px; }
+  .decouvrir .cp-carte.dc-diapo h3 { font-size: 23px; }
+  .decouvrir .dc-chapitres { gap: 6px 14px; }
+  .dc-chapitre { min-height: 32px; }
+  .decouvrir .dc-diapo-pied { padding-top: 12px; }
+}
+@media (min-width: 901px) and (max-height: 700px) {
+  .decouvrir .dc-tete p { display: none; }
+  .decouvrir .cp-carte.dc-diapo { min-height: 250px; }
+  .decouvrir .dc-fil { font-size: 13.5px; }
+  .dc-chapitre { min-height: 30px; font-size: 13px; }
+}
+@media (max-width: 720px) {
+  .decouvrir { padding: 0 4px 4px; border-radius: 16px; }
+  .decouvrir .dc-tete { padding: 14px 10px 12px 14px; gap: 12px; }
+  .decouvrir .dc-logo { width: 46px; height: 46px; border-radius: 12px; }
+  .decouvrir .dc-tete h2 { font-size: 22px; }
+  .decouvrir .dc-corps { padding: 2px 12px 14px; gap: 12px; border-radius: 13px; }
+  .decouvrir .dc-onglets { overflow-x: auto; scrollbar-width: none; }
+  .decouvrir .dc-onglet { padding: 11px 14px 12px; gap: 8px; }
+  .decouvrir .dc-onglet + .dc-onglet::before { top: 11px; bottom: 12px; }
+  .decouvrir .cp-carte.dc-diapo { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .decouvrir .dc-diapo .cp-visuel { grid-template-rows: auto; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; padding: 14px; }
+  .decouvrir .dc-diapo .cp-ico { width: 60px; height: 60px; border-radius: 15px; }
+  .decouvrir .dc-diapo .cp-ico svg { width: 30px; height: 30px; }
+  .decouvrir .dc-diapo .cp-ico.logo svg { width: 38px; }
+  .decouvrir .dc-reperes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .decouvrir .dc-reperes li { padding: 4px 11px 4px 9px; font-size: 12.5px; }
+  .decouvrir .dc-diapo-texte { padding: 16px 16px 16px; }
+  .decouvrir .cp-carte.dc-diapo h3 { font-size: 21px; }
+  .decouvrir .dc-chapitres { grid-template-columns: minmax(0, 1fr); }
+  .dc-chapitre { min-height: 40px; }
+  .decouvrir .dc-diapo-pied { flex-wrap: wrap; }
+  .decouvrir .dc-avec { flex-wrap: wrap; }
+  .decouvrir .cp-carte.dc-diapo .dc-diapo-pied .btn { width: 100%; justify-content: center; }
+  .decouvrir .rythme.compact { flex-wrap: wrap; justify-content: center; margin-inline: 0; padding: 10px; }
+  .decouvrir .rythme.compact .rythme-option { padding-inline: 14px; }
+}
+/* Écran très bas (portable 13 pouces avec barres du navigateur) : la fenêtre des visites tient sans défiler. */
+@media (min-width: 901px) and (max-height: 700px) {
+  .decouvrir .dc-tete { padding: 12px 14px 10px 18px; }
+  .decouvrir .dc-logo { width: 44px; height: 44px; border-radius: 12px; }
+  .decouvrir .dc-logo svg { width: 28px; height: auto; }
+  .decouvrir .dc-tete h2 { font-size: 23px; }
+  .decouvrir .dc-tete .dialog-fermer { width: 36px; height: 36px; align-self: center; }
+  .decouvrir .dc-corps { padding: 0 22px 10px; gap: 9px; }
+  .decouvrir .dc-onglet { padding: 9px 18px 10px; }
+  .decouvrir .dc-onglet + .dc-onglet::before { top: 9px; bottom: 10px; }
+  .decouvrir .dc-carrousel { gap: 9px; }
+  .decouvrir .dc-point { min-height: 34px; }
+  .decouvrir .cp-carte.dc-diapo { min-height: 0; }
+  .decouvrir .dc-diapo .cp-visuel { padding: 14px; gap: 10px; }
+  .decouvrir .dc-diapo .cp-ico { width: 64px; height: 64px; border-radius: 16px; }
+  .decouvrir .dc-diapo .cp-ico svg { width: 32px; height: 32px; }
+  .decouvrir .dc-diapo .cp-ico.logo svg { width: 40px; height: auto; }
+  .decouvrir .dc-reperes { gap: 5px; }
+  .decouvrir .dc-reperes li { padding: 4px 12px 4px 10px; font-size: 12.5px; }
+  .decouvrir .dc-diapo-texte { padding: 12px 20px 12px; gap: 6px; }
+  .decouvrir .cp-carte.dc-diapo h3 { font-size: 21px; }
+  .decouvrir .dc-chapitres { gap: 5px 12px; margin-top: 2px; }
+  .dc-chapitre { min-height: 28px; padding-block: 2px; }
+  .decouvrir .dc-num { height: 22px; }
+  .decouvrir .dc-diapo-pied { padding-top: 9px; }
+  .decouvrir .cp-carte.dc-diapo .dc-diapo-pied .btn { min-height: 40px; font-size: 14.5px; }
+  .decouvrir .rythme.compact { padding: 5px 8px 5px 14px; }
+  .decouvrir .rythme.compact .rythme-option { min-height: 32px; padding-block: 4px; }
+}
+/* En sombre, les couleurs de rôle foncées (titulaire, publication) s'éclaircissent pour rester lisibles. */
+:root[data-mode='sombre'] .decouvrir .dc-point-ico,
+:root[data-mode='sombre'] .decouvrir .dc-point.on,
+:root[data-mode='sombre'] .decouvrir .dc-etiquette,
+:root[data-mode='sombre'] .decouvrir .dc-num,
+:root[data-mode='sombre'] .dc-chapitre:hover .dc-chevron { color: color-mix(in srgb, var(--v1) 38%, var(--ink)); }
+:root[data-mode='sombre'] .decouvrir .dc-point.on { background: color-mix(in srgb, var(--v1) 26%, var(--surface)); border-color: color-mix(in srgb, var(--v1) 45%, var(--ink-3)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--v1) 45%, var(--ink-3)); }
+:root[data-mode='sombre'] .decouvrir .dc-etiquette, :root[data-mode='sombre'] .decouvrir .dc-num { background: color-mix(in srgb, var(--v1) 30%, var(--surface)); }
