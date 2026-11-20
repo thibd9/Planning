@@ -13,6 +13,7 @@ import { soldeHeures } from '../engine/heures';
 import { proposerRdv } from '../engine/rdv';
 import { moisACollecter, proposerSouhaits } from '../engine/souhaits';
 import { evaluerRemplacement, peutDemanderRemplacement, peutRemplacer } from '../engine/remplacement';
+import { validateWeek } from '../engine/validate';
 import { useStore } from '../store/store';
 import type { Vue } from '../store/ui';
 import { useUi } from '../store/ui';
@@ -375,6 +376,8 @@ function souhaitsPour(id: string): void {
   s.poserSouhaits(proposerSouhaits(s.data, p, mois, s.today).map((x, i) => (i % 7 === 3 ? { ...x, choix: 'matin' as const } : i % 9 === 5 ? { ...x, choix: 'soir' as const } : i % 11 === 8 ? { ...x, choix: 'repos' as const } : x)));
 }
 function avecSouhaits(camille = true): void {
+  // Un poste allongé pour montrer les contrôles retrouve ses horaires, même si la démonstration a été passée.
+  sansEcart();
   avecEquipe();
   ['p_lea', 'p_thomas', 'p_manon', 'p_ines', 'p_jules', 'p_antoine', 'p_sarah', ...(camille ? ['p_camille'] : [])].forEach(souhaitsPour);
 }
@@ -922,6 +925,21 @@ function deplacerUnPoste(): void {
     return;
   }
 }
+/** Un poste de Thomas allongé sans pause, le temps de montrer un contrôle : la proposition, elle, n'en laisse souvent aucun. */
+let posteAllonge: AppData['shifts'][number] | null = null;
+function avecUnEcart(): void {
+  const s = store();
+  const lundi = semaineDans(1);
+  if (posteAllonge || validateWeek(s.data, lundi).some((i) => i.gravite !== 'info')) return;
+  const poste = postesDeLaSemaine(s.data, lundi, 'p_thomas').sort((a, b) => a.date.localeCompare(b.date))[0];
+  if (!poste) return;
+  posteAllonge = poste;
+  s.saveShift({ ...poste, start: 8 * 60 + 30, end: 19 * 60 + 30, pauseStart: undefined, pauseEnd: undefined, pauses: undefined });
+}
+function sansEcart(): void {
+  if (posteAllonge) store().saveShift(posteAllonge);
+  posteAllonge = null;
+}
 /** La case vide où la démonstration pose un repos : Jules, jeudi, ou à défaut une autre case du jeudi. */
 const caseDuRepos = (): HTMLElement | undefined => {
   const cases = [...document.querySelectorAll<HTMLElement>('.plan-grid .add')].filter((e) => /jeudi/.test(e.getAttribute('aria-label') ?? ''));
@@ -1220,10 +1238,10 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'attendre', que: '#dp-pref-texte' },
       { faire: 'pause', ms: 3000, dit: '« Qui a demandé ce créneau ? »', sert: 'La réponse est écrite en clair : trois personnes ont demandé ce matin-là, Thomas compris.' },
       { faire: 'attendre', que: '.dp-pref-qui .dp-pref-chance' },
-      { faire: 'pause', ms: 3400, dit: 'Chacun a ses chances, affichées avant le tirage', sert: 'Celui dont les préférences ont été le moins suivies ces huit dernières semaines a le plus de chances.' },
+      { faire: 'pause', ms: 3400, dit: 'Chacun a ses chances, affichées avant le tirage', sert: 'Elles tiennent compte des préférences déjà suivies ces huit dernières semaines : celui qui a été le moins servi a le plus de chances.' },
       { faire: 'cliquer', sur: '#dp-tirer', dit: 'Cliquez sur « Tirer au sort »', sert: 'Le sort désigne un nom, selon ces chances.' },
       { faire: 'attendre', que: '#dp-tirage' },
-      { faire: 'pause', ms: 3200, dit: 'Le sort a désigné un nom', sert: 'Si ce n’est pas Thomas, le poste lui est retiré : « Rendre le poste à Thomas » revient en arrière.' },
+      { faire: 'pause', ms: 3200, dit: 'Le sort a désigné un nom', sert: 'Le poste va à la personne désignée. Si ce n’est pas Thomas, « Rendre le poste à Thomas » revient en arrière.' },
       { faire: 'cliquer', sur: VALIDER, sert: 'Le poste est posé dans le brouillon, pour la personne désignée.' },
     ],
   },
@@ -1286,10 +1304,14 @@ const COMPLET_BRUT: Etape[] = [
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
+      avecUnEcart();
       semaineUne();
     },
     gestes: [
-      { faire: 'cliquer', sur: '.content .issue', dit: 'Cliquez sur un contrôle', sert: 'La grille montre aussitôt la personne et le jour concernés.', facultatif: true },
+      { faire: 'cliquer', sur: '.content .issue', dit: 'Cliquez sur un contrôle', sert: 'La grille montre aussitôt la personne et le jour concernés.' },
+      { faire: 'pause', ms: 2400 },
+      // Le poste allongé pour l'exemple retrouve ses horaires : la publication de la suite n'a rien de bloquant.
+      { faire: 'action', jouer: sansEcart },
     ],
   },
   {
@@ -2161,6 +2183,30 @@ const COMPLET_BRUT: Etape[] = [
   {
     chapitre: PREPARER,
     qui: HELENE,
+    cible: '.content .split > :last-child',
+    titre: 'Volontariat et besoins personnels',
+    texte: () => 'Deux autres rubriques de la fiche. « Volontariat » dit si la personne accepte des heures complémentaires ou des gardes. « Besoins personnels » réunit ses contraintes d’horaires, chacune avec son poids.',
+    jouer: () => {
+      avecEquipe();
+      helene('equipe');
+      useUi.getState().ouvrirPersonne('p_lea');
+    },
+    gestes: [
+      { faire: 'cliquer', sur: parTexte('.content .split > :last-child label.check', 'heures complémentaires'), dit: 'Cochez « Volontaire pour des heures complémentaires »', sert: 'Léa travaille à temps partiel. Quand un collègue manque, Solvéa peut lui proposer des heures en plus, avec son accord.' },
+      { faire: 'cliquer', sur: parTexte('.content .split > :last-child label.check', 'Volontaire pour les gardes'), dit: 'Cochez « Volontaire pour les gardes »', sert: 'À charge égale, un pharmacien volontaire passe d’abord dans la répartition des gardes. Le repos qui suit reste contrôlé.' },
+      { faire: 'attendre', que: parTexte('.content .split > :last-child details', 'Besoins personnels') },
+      { faire: 'pause', ms: 3200, dit: 'Ses besoins personnels, avec leur poids', sert: 'Léa n’est pas disponible un samedi sur deux : une demande prioritaire. Le plafond de demandes prioritaires est le même pour toute l’équipe.' },
+      { faire: 'cliquer', sur: parTexte('.content .split > :last-child button', 'Besoin ou absence'), sert: 'Vous notez vous-même une contrainte ou une absence pour Léa, par exemple après un entretien.' },
+      { faire: 'attendre', que: '.dialog' },
+      { faire: 'pause', ms: 2200 },
+      { faire: 'cliquer', sur: parTexte('.dialog .dialog-foot .btn', 'Annuler'), dit: 'Fermez la fenêtre', sert: 'Rien n’est noté tant que vous n’avez pas cliqué sur « Enregistrer ».' },
+      // La fiche d'exemple retrouve son volontariat : la répartition des gardes de la suite n'en dépend pas.
+      { faire: 'action', jouer: () => personneExemple('p_lea', ['volontaireHeuresComp', 'volontaireGardes']) },
+    ],
+  },
+  {
+    chapitre: PREPARER,
+    qui: HELENE,
     cible: '#acc-horaires',
     titre: 'Recopier un horaire',
     texte: () => 'Inutile de saisir six fois les mêmes heures. « Recopier » applique les horaires d’un jour aux autres jours ouverts, ou reprend ceux de la veille.',
@@ -2331,10 +2377,10 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'attendre', que: '.dialog #ptc-repos' },
       { faire: 'cliquer', sur: '#ptc-repos', dit: 'Choisissez le dernier poste type, « Repos »', sert: 'Les horaires et la pause disparaissent : il n’y a rien à régler.' },
       { faire: 'attendre', que: '#dp-repos' },
-      { faire: 'pause', ms: 2800, dit: 'Ce jour-là, pas de poste', sert: 'Si la personne avait demandé ce repos dans ses préférences, l’encadré le dirait : elle est respectée.' },
+      { faire: 'pause', ms: 2800, dit: 'Ce jour-là, pas de poste', sert: 'Si ce repos figurait dans ses préférences du mois, l’encadré le dirait : la préférence est respectée.' },
       { faire: 'cliquer', sur: VALIDER, sert: 'Le jour de repos est posé dans le brouillon.' },
       { faire: 'attendre', que: '.plan-grid .tile.repos-pose' },
-      { faire: 'pause', ms: 3000, dit: 'Le repos se lit dans la case', sert: 'Les propositions ne placeront personne ici. Un poste posé ce jour-là remplacerait le repos.' },
+      { faire: 'pause', ms: 3000, dit: 'Le repos se lit dans la case', sert: 'Les propositions de planning ne donneront aucun poste à Jules ce jour-là. Un poste posé à la main remplacerait le repos.' },
     ],
   },
   {
@@ -2648,6 +2694,8 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'cliquer', sur: '#echeance-preparer, #echeance-ouvrir', sert: 'Solvéa remplit les semaines vides en brouillon, d’après vos habitudes : rien n’est publié.', facultatif: true },
       { faire: 'attendre', que: "[data-focus='mois']", facultatif: true },
       { faire: 'pause', ms: 3200, dit: 'Le mois est prêt, en brouillon', sert: 'Une semaine commencée à la main n’est jamais touchée. À vous de relire, corriger, puis publier.' },
+      // Le délai de publication de l'exemple est remis en place : la suite de la visite ne dépend pas de l'échéance dépassée.
+      { faire: 'action', jouer: () => officineExemple(['publication']) },
     ],
   },
   {
@@ -2663,6 +2711,8 @@ const COMPLET_BRUT: Etape[] = [
       { faire: 'attendre', que: '.dialog' },
       { faire: 'cliquer', sur: '.dialog .ptc', dit: 'Choisissez un poste type', sert: 'Horaires et pauses se remplissent d’un coup.', facultatif: true },
       { faire: 'cliquer', sur: VALIDER, sert: 'Le poste apparaît dans le mois, avec sa couleur.' },
+      // Le délai de publication de l'exemple est remis en place : la suite de la visite ne dépend pas de l'échéance dépassée.
+      { faire: 'action', jouer: () => officineExemple(['publication']) },
     ],
   },
   {
@@ -2671,13 +2721,15 @@ const COMPLET_BRUT: Etape[] = [
     cible: "[data-focus='mois']",
     cibleFin: "[data-focus='mois']",
     titre: 'Corriger et publier le mois',
-    texte: () => 'Deux boutons, au-dessus du mois. « Corriger automatiquement » recalcule les semaines en brouillon. « Publier le mois » envoie d’un coup toutes les semaines prêtes.',
+    texte: () => 'Trois boutons, au-dessus du mois. « Corriger automatiquement » recalcule les semaines en brouillon. « Remettre le mois à zéro » retire les postes à venir, d’un clic qui s’annule. « Publier le mois » envoie d’un coup toutes les semaines prêtes.',
     jouer: avecMoisPrepare,
     gestes: [
       { faire: 'cliquer', sur: parTexte('.content button', 'Corriger automatiquement'), sert: 'Solvéa recalcule les semaines en brouillon en suivant les règles et les préférences. Rien n’est publié.', facultatif: true },
       { faire: 'attendre', que: parTexte('.content button', 'Corriger automatiquement'), facultatif: true },
       { faire: 'pause', ms: 2800, dit: 'Le mois est recalculé, toujours en brouillon', sert: 'Vous relisez ; chaque case reste modifiable.' },
       { faire: 'cliquer', sur: '#mois-publier', sert: 'Les semaines prêtes sont publiées et l’équipe est prévenue. Une semaine avec un point bloquant reste en brouillon : Solvéa dit laquelle.', facultatif: true },
+      // Le délai de publication de l'exemple est remis en place : la suite de la visite ne dépend pas de l'échéance dépassée.
+      { faire: 'action', jouer: () => officineExemple(['publication']) },
     ],
   },
   {
@@ -2732,7 +2784,7 @@ const COMPLET: Etape[] = raconter(COMPLET_BRUT, [
   {
     chapitre: 'Installer la pharmacie',
     but: 'Caroline crée sa pharmacie : son équipe, ses horaires, ses règles. C’est tout ce qu’il faut à Solvéa pour proposer un planning.',
-    etapes: ['Créer la pharmacie', 'Ajouter l’équipe', 'La fiche d’une personne', 'Contrat et ancienneté', 'Droits d’accès et mot de passe', 'Les marques d’une animatrice', 'Horaires et effectif', 'Recopier un horaire', 'Les jours fériés', 'Les postes types', 'L’officine en chiffres', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'L’échéance de publication', 'Paramètres et coûts', 'Les règles', 'Régler un seuil'],
+    etapes: ['Créer la pharmacie', 'Ajouter l’équipe', 'La fiche d’une personne', 'Contrat et ancienneté', 'Droits d’accès et mot de passe', 'Volontariat et besoins personnels', 'Les marques d’une animatrice', 'Horaires et effectif', 'Recopier un horaire', 'Les jours fériés', 'Les postes types', 'L’officine en chiffres', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'L’échéance de publication', 'Paramètres et coûts', 'Les règles', 'Régler un seuil'],
   },
   { chapitre: 'Recueillir les souhaits', but: 'Avant de construire, chacun dit ce qui l’arrange. On passe un instant dans la peau de Nicolas, préparateur.', etapes: ['Les préférences du mois'] },
   {
@@ -2775,7 +2827,7 @@ const TITULAIRE: Etape[] = raconter(
     { chapitre: 'Décider', but: 'Remplacements, congés, absences imprévues : chaque demande arrive au même endroit, avec de quoi trancher.', etapes: ['La demande arrive', 'Valider le remplacement', 'Une urgence médicale', 'En dernier recours', 'Congés et horaires', 'Une demande d’horaires', 'Deux demandes sur les mêmes dates', 'Refuser une demande', 'Une absence imprévue', 'L’appel à l’équipe', 'Personne ne se propose', 'Donner son accord'] },
     { chapitre: 'Suivre l’équipe', but: 'La journée en cours, les retards, une absence notée pour un collègue, un accident du travail, les messages et les rendez-vous.', etapes: ['Une journée', 'Retards et suivi', 'Le retard, vu du comptoir', 'Une absence signalée par téléphone', 'Un accident du travail', 'Les messages', 'Répondre à un rendez-vous'] },
     { chapitre: 'Faire le bilan', but: 'Les heures de chacun, l’équité entre collègues, ce qui part en paie, les documents, puis le mois suivant à préparer.', etapes: ['Le compteur d’heures', 'Des heures en plus', 'L’équité', 'Les statistiques de l’équipe', 'Le journal et la paie', 'Exporter pour le comptable', 'Une garde, jusqu’à la paie', 'Les documents', 'L’échéance du mois', 'Poser un poste depuis le mois', 'Corriger et publier le mois'] },
-    { chapitre: 'Piloter au quotidien', but: 'Le tableau de bord, vos propres horaires, les raccourcis, les fiches de l’équipe et les réglages de la pharmacie.', etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'La cloche', 'Le bouton « Créer »', 'Le menu de votre nom', 'Contrat et ancienneté', 'Droits d’accès et mot de passe', 'Horaires et effectif', 'Recopier un horaire', 'Les jours fériés', 'Les postes types', 'L’officine en chiffres', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'L’échéance de publication', 'Paramètres et coûts', 'Les règles', 'Régler un seuil', 'Votre compte'] },
+    { chapitre: 'Piloter au quotidien', but: 'Le tableau de bord, vos propres horaires, les raccourcis, les fiches de l’équipe et les réglages de la pharmacie.', etapes: ['Le tableau de bord', 'Mes horaires de titulaire', 'La cloche', 'Le bouton « Créer »', 'Le menu de votre nom', 'Contrat et ancienneté', 'Droits d’accès et mot de passe', 'Volontariat et besoins personnels', 'Horaires et effectif', 'Recopier un horaire', 'Les jours fériés', 'Les postes types', 'L’officine en chiffres', 'L’équipe est-elle assez nombreuse ?', 'Qui prépare le planning', 'L’échéance de publication', 'Paramètres et coûts', 'Les règles', 'Régler un seuil', 'Votre compte'] },
   ],
   true,
 );
