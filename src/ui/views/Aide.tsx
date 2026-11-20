@@ -22,7 +22,7 @@ const THEMES: { titre: string; icone: LucideIcon; ids: string[] }[] = [
   { titre: 'Mes demandes', icone: Star, ids: ['difference', 'souhaits', 'conge', 'remplacer', 'retard-prevenir', 'aider'] },
   { titre: 'Au quotidien', icone: Layers, ids: ['tableau', 'semaine-vide', 'creer', 'signaler', 'echeance', 'repercussion'] },
   { titre: 'Préparer', icone: CalendarCog, ids: ['personne', 'contrat', 'marques', 'mdp-equipe', 'reglages', 'qui-prepare', 'postes-types', 'officine-chiffres', 'dimensionnement', 'feries', 'regles', 'pharmacie'] },
-  { titre: 'Construire et publier', icone: Rocket, ids: ['construire', 'propositions', 'pauses', 'controles', 'preferences-equipe', 'mois', 'retard', 'publier', 'formation', 'gardes'] },
+  { titre: 'Construire et publier', icone: Rocket, ids: ['construire', 'repos', 'remise-a-zero', 'propositions', 'pauses', 'controles', 'preferences-equipe', 'mois', 'retard', 'publier', 'formation', 'gardes'] },
   { titre: 'Absences et remplacements', icone: UsersRound, ids: ['absence', 'accident', 'demande-remplacement', 'dernier-recours', 'demandes-equipe', 'accord', 'decisions'] },
   { titre: 'Suivre et faire le bilan', icone: ChartNoAxesColumn, ids: ['heures', 'equite', 'points-forts', 'paie', 'historique', 'documents'] },
   { titre: 'Messages et support', icone: MessageSquareMore, ids: ['message', 'rendez-vous', 'compte', 'mes-competences', 'support'] },

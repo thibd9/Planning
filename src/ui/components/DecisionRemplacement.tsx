@@ -78,7 +78,7 @@ export function DecisionRemplacement({ remplacement: r, onClose }: { remplacemen
       : choix === 'confier' && confie
         ? `Votre demande de remplacement du ${quand} est acceptée : ${nomCourt(confie)} reprend votre poste.`
         : choix === 'titulaire' && assure
-          ? `Votre demande de remplacement du ${quand} est acceptée : ${nomCourt(assure)} assure votre poste. Vous êtes libéré.`
+          ? `Votre demande de remplacement du ${quand} est acceptée : ${nomCourt(assure)} assure votre poste, qui ne figure plus à votre planning.`
           : choix === 'equipe'
             ? `Votre demande de remplacement du ${quand} est acceptée. L’équipe disponible est prévenue ; tant qu’un remplaçant n’est pas validé, le poste reste le vôtre.`
             : '';
@@ -95,7 +95,7 @@ export function DecisionRemplacement({ remplacement: r, onClose }: { remplacemen
     } else if (choix === 'titulaire' && assure) {
       deciderDemande(r.id, true);
       assurerParTitulaire(r.id, assure.id);
-      dire(`${nomCourt(assure)} assure le poste de ${prenom} : ${prenom} est libéré, tout le monde est prévenu.`, true);
+      dire(`${nomCourt(assure)} assure le poste de ${prenom} : le poste ne figure plus au planning de ${prenom}, tout le monde est prévenu.`, true);
     } else if (choix === 'confier' && confie) {
       deciderDemande(r.id, true);
       validerRemplacement(r.id, confie.id);
@@ -120,7 +120,7 @@ export function DecisionRemplacement({ remplacement: r, onClose }: { remplacemen
           {
             cle: 'titulaire' as const,
             titre: recours.length > 1 ? 'Accepter : un titulaire assure le poste' : 'Accepter : le titulaire assure le poste',
-            phrase: peuvent.length ? `En dernier recours : ${prenom} est libéré, un titulaire tient le poste.` : `Aucun collègue ne peut le reprendre : c’est aux titulaires de l’assurer. ${prenom} est libéré.`,
+            phrase: peuvent.length ? `En dernier recours : un titulaire tient le poste de ${prenom}.` : `Aucun collègue ne peut le reprendre : c’est aux titulaires de l’assurer. ${prenom} est libéré.`,
             Icone: ShieldCheck,
           },
         ]
