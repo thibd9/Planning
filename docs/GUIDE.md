@@ -63,11 +63,13 @@ L'application s'ouvre sur la page de connexion. Deux chemins partent de là :
 
 ## Découvrir sans rien saisir
 
-### Dix visites guidées, en trois familles
+### Treize visites guidées, en quatre familles
 
 Chaque visite **raconte une histoire**, chapitre après chapitre. Au début d'un chapitre, une annonce dit ce
 qu'on va y faire, dans la peau de qui, et où l'on en est dans le plan. La fenêtre « Comment ça marche ? »
-les range en trois familles, puis propose d'entrer librement, en testeur.
+les range dans une liste, par famille, avec leur durée ; « Entrer librement » (en testeur) est épinglé en bas.
+À droite, la visite choisie : ce qu'elle raconte, sa durée, ses chapitres (un clic sur un chapitre y fait
+commencer la visite) et les personnes suivies. En pied, le rythme (posé, normal, vif) et « Lancer la visite ».
 
 **Les parcours**
 
@@ -78,7 +80,7 @@ les range en trois familles, puis propose d'entrer librement, en testeur.
 | **Pharmacien** | L'espace d'un pharmacien : planning, demandes, gardes, compétences, compte. |
 | **Préparateur** | L'espace d'un préparateur : planning, demandes, collègues, compétences, compte. |
 
-**Les autres métiers** : une visite courte pour l'**animatrice**, l'**apprentie** et l'**étudiant**, chacun avec son accueil.
+**Les autres métiers** : une visite courte pour l'**animateur ou animatrice**, l'**apprenti ou apprentie** et l'**étudiant ou étudiante**, chacun avec son accueil.
 
 **Une journée type, trois scénarios** (la pharmacie tourne déjà)
 
@@ -87,6 +89,15 @@ les range en trois familles, puis propose d'entrer librement, en testeur.
 | **Journée ordinaire** | Le matin, un remplacement entre collègues, chacun son espace, le soir on prépare la suite. |
 | **Journée sous tension** | Un arrêt le matin, l'appel à l'équipe, un retard annoncé depuis la route, un accident du travail à déclarer. |
 | **Veille de publication** | L'échéance du mois, les préférences, trois propositions, la publication, l'équipe qui reçoit son planning, le bilan. |
+
+**Écran par écran** : chaque écran et chaque champ. Solvi se pose à côté du champ, le cerne et dit ce qu'on y
+met, à quoi il sert, avec un exemple. Un chapitre par écran : on vient y chercher un écran précis.
+
+| Visite | Ce qu'elle couvre |
+| --- | --- |
+| **Installer et préparer** | Réglages (pharmacie, horaires, comptoir, planning, paramètres), postes types, fiche d'équipe et ajout d'une personne, règles, votre compte, plusieurs pharmacies. |
+| **Planifier et suivre** | Tableau de bord, construire et la fenêtre d'un poste, la journée, le mois, l'impression, les gardes, formation et inventaire, retard ou absence, résoudre, messages, heures, équité, statistiques, journal et paie, documents, aide. |
+| **L'espace de l'équipe** | Accueil, mon planning et celui de l'équipe, préférences, demandes, remplacement, aider un collègue, suivi et gardes, documents, messages, compte. |
 
 Les chapitres de la visite complète suivent l'ordre où les choses se vivent :
 

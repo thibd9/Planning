@@ -13,7 +13,7 @@ absorber un imprévu en dérangeant le moins de monde possible.
 
 ![React 18](https://img.shields.io/badge/React-18-1f6bb8?style=flat-square)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-1f6bb8?style=flat-square)
-![177 tests](https://img.shields.io/badge/tests-177-0b5a3f?style=flat-square)
+![183 tests](https://img.shields.io/badge/tests-183-0b5a3f?style=flat-square)
 ![Sans serveur](https://img.shields.io/badge/donn%C3%A9es-sur%20l'appareil-52606c?style=flat-square)
 
 [Démarrer](#démarrer) · [Ce que fait Solvéa](#ce-que-fait-solvéa) · [Guide détaillé](docs/GUIDE.md) · [Bilan UX et UI](docs/BILAN-UX-UI.md)
@@ -117,13 +117,13 @@ attend une décision. Il agit aussi : « je suis en retard » ouvre la bonne fen
 Il garde ses limites : ce n'est pas une intelligence artificielle qui improvise. Il répond d'après des
 règles, sur l'appareil, et rien de ce qu'on lui écrit ne quitte le navigateur.
 
-Dix **visites guidées** complètent l'aide, avec un tutoriel par tâche : un parcours complet, un par rôle (titulaire, pharmacien, préparateur, animatrice, apprentie, étudiant) et trois journées types (ordinaire, sous tension, veille de publication). On peut aussi entrer librement, en testeur, dans la peau de chaque profil.
+Treize **visites guidées** complètent l'aide, avec un tutoriel par tâche : un parcours complet, un par rôle (titulaire, pharmacien, préparateur, animateur ou animatrice, apprenti ou apprentie, étudiant ou étudiante), trois journées types (ordinaire, sous tension, veille de publication) et trois visites « Écran par écran » qui expliquent chaque champ : ce qu'on y met et à quoi il sert. On peut aussi entrer librement, en testeur, dans la peau de chaque profil.
 
 <br clear="right">
 
 ## Sous le capot
 
-React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (177 tests), sans dépendance à un
+React 18, TypeScript strict, Vite, zustand. Un moteur de règles testé (183 tests), sans dépendance à un
 service extérieur.
 
 ```
