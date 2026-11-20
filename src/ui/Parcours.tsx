@@ -1277,9 +1277,10 @@ const COMPLET_BRUT: Etape[] = [
   {
     chapitre: PLANIFIER,
     qui: HELENE,
-    cible: '.content .plan',
+    cible: '.ph-reperes',
+    cibleFin: '.content .plan',
     titre: 'La semaine est posée',
-    texte: () => 'La semaine est remplie. La couleur dit le moment de la journée : jaune le matin, bleu la journée, violet l’après-midi. Chaque tuile se déplace ou se corrige.',
+    texte: () => 'La semaine est remplie. En haut, trois repères : les personnes au planning, les heures planifiées, la part de l’ouverture avec un pharmacien. La couleur d’une tuile dit le moment de la journée ; la légende est sous la grille. Chaque tuile se déplace ou se corrige.',
     jouer: () => {
       avecSouhaits();
       proposerSemaine(semaineDans(1));
