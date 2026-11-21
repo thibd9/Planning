@@ -1,0 +1,243 @@
+{
+ "d-stats-o1": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Statistiques »",
+   "11.5px « 8 / 22 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "129×34 Composition",
+   "192×34 Compétences8 / 22",
+   "151×34 Points forts7",
+   "98×34 Activité",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 6,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-stats-o2": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Statistiques »",
+   "11.5px « 8 / 22 »",
+   "11.5px « NL »",
+   "11.5px « SL »"
+  ],
+  "nPetits": 6,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "129×34 Composition",
+   "192×34 Compétences8 / 22",
+   "151×34 Points forts7",
+   "98×34 Activité",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 6,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-stats-o3": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Statistiques »",
+   "11.5px « 8 / 22 »",
+   "11.5px « IL »",
+   "11.5px « ID »",
+   "11.5px « LF »",
+   "11.5px « NL »",
+   "11.5px « SL »",
+   "11.5px « YM »"
+  ],
+  "nPetits": 8,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "129×34 Composition",
+   "192×34 Compétences8 / 22",
+   "151×34 Points forts7",
+   "98×34 Activité",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 6,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-stats-o4": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Statistiques »",
+   "11.5px « 8 / 22 »",
+   "11.5px « IL »",
+   "11.5px « ID »",
+   "11.5px « JP »",
+   "11.5px « LF »",
+   "11.5px « MG »",
+   "11.5px « NL »",
+   "11.5px « SL »",
+   "11.5px « TN »",
+   "11.5px « YM »",
+   "11.5px « CT »",
+   "11.5px « PF »"
+  ],
+  "nPetits": 22,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "129×34 Composition",
+   "192×34 Compétences8 / 22",
+   "151×34 Points forts7",
+   "98×34 Activité",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 6,
+  "deborde": [],
+  "defilH": []
+ },
+ "t-stats-o1": {
+  "ok": true,
+  "n": 4,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Statistiques »",
+   "11.5px « 8 / 22 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "129×34 Composition",
+   "192×34 Compétences8 / 22",
+   "151×34 Points forts7",
+   "98×34 Activité",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 6,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+230px)"
+  ]
+ },
+ "t-stats-o2": {
+  "ok": true,
+  "n": 5,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Statistiques »",
+   "11.5px « 8 / 22 »",
+   "11.5px « NL »",
+   "11.5px « SL »"
+  ],
+  "nPetits": 6,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [
+   "« 3 sur 12 détenues par au moins une personne »",
+   "« 1 sur 3 détenues par au moins une personne »"
+  ],
+  "cibles": [
+   "129×34 Composition",
+   "192×34 Compétences8 / 22",
+   "151×34 Points forts7",
+   "98×34 Activité",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 6,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+230px)"
+  ]
+ },
+ "t-stats-o3": {
+  "ok": true,
+  "n": 5,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Statistiques »",
+   "11.5px « 8 / 22 »",
+   "11.5px « IL »",
+   "11.5px « ID »",
+   "11.5px « LF »",
+   "11.5px « NL »",
+   "11.5px « SL »",
+   "11.5px « YM »"
+  ],
+  "nPetits": 8,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "129×34 Composition",
+   "192×34 Compétences8 / 22",
+   "151×34 Points forts7",
+   "98×34 Activité",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 6,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+230px)"
+  ]
+ },
+ "t-stats-o4": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Statistiques »",
+   "11.5px « 8 / 22 »",
+   "11.5px « IL »",
+   "11.5px « ID »",
+   "11.5px « JP »",
+   "11.5px « LF »",
+   "11.5px « MG »",
+   "11.5px « NL »",
+   "11.5px « SL »",
+   "11.5px « TN »",
+   "11.5px « YM »",
+   "11.5px « CT »",
+   "11.5px « PF »"
+  ],
+  "nPetits": 22,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "129×34 Composition",
+   "192×34 Compétences8 / 22",
+   "151×34 Points forts7",
+   "98×34 Activité",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 6,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+230px)"
+  ]
+ }
+}

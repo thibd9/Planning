@@ -1,0 +1,182 @@
+TOPBAR: Espace pharmacien , environnement de test : changer de profil Grande Pharmacie de la Pinède ven. 20 novembre Faire une demande Retard ou absence , signaler 1 notifications, ouvrir la liste 1 IL Igor L. , ouvrir le menu du compte
+SIDE: MON ESPACE | Accueil | Mon planning | Mes demandes | Mon suivi | Mes documents | Mes gardes | L’ÉQUIPE | Planning de l’équipe | Messages | 1 | messages non lus | Besoin d’aide ? | Aide, tutoriels et lexique | Enregistré sur cet appareil à 10 h
+TITLE: Accueil · Solvéa
+
+=== espace ===
+IL
+VENDREDI 20 NOVEMBRE 2026
+Bonjour Igor 
+
+Espace pharmacien · Grande Pharmacie de la Pinède
+
+Votre semaine :
+12 h
+planifiées pour 14 h au contrat.
+
+Vos horaires, vos gardes et les plages où vous êtes le pharmacien présent.
+
+PROCHAIN POSTE
+Demain · matin
+9 h – 14 h
+5 h de travail · pause courte à 11 h 30 (15 min)
+Ensuite : Lun. 23 novembre, 8 h 30 – 16 h 30
+Prévenir d’un retard
+MON MÉTIER
+Mes gardes et mes missions
+MES PROCHAINES GARDES
+Jeudi 31 décembre
+Garde de nuit · 19:30 → 08:30
+MES COMPÉTENCES
+Vaccination
+Tests angine et cystite
+Entretiens pharmaceutiques
+MES PROCHAINS POSTES
+Samedi 21 novembre
+9 h – 14 h
+Lundi 23 novembre
+8 h 30 – 16 h 30
+Mardi 24 novembre
+8 h 30 – 16 h 30
+Mercredi 25 novembre
+11 h 30 – 19 h 30
+MON AGENDA
+Mes rendez-vous
+Demander un rendez-vous
+
+Aucun rendez-vous à venir. Une demande acceptée se fixe ici et dans « Mon planning ».
+
+Mes raccourcis
+Voir mon planning
+Demander une absence ou un horaire
+Écrire à Caroline T.
+CE QUI A CHANGÉ
+Décisions qui me concernent
+Arrêt d’Igor L. enregistré
+3 postes d’Igor L. retirés du planning, du mer. 18 novembre au ven. 20 novembre.
+3 postes à couvrir : les titulaires s’en chargent dans « Résoudre ».
+Décision · il y a 2 h
+Vu
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== moi === (title Mon planning · Solvéa)
+MON PLANNING
+Quand est-ce que je travaille ?
+
+Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.
+
+Faire une demande
+Imprimer
+Planning de l’équipe
+PROCHAIN POSTE
+Demain · matin
+9 h – 14 h
+5 h de travail · pause courte à 11 h 30 (15 min)
+Ensuite : Lun. 23 novembre, 8 h 30 – 16 h 30
+Prévenir d’un retard
+Mes semaines
+Semaine
+Calendrier
+Cette semaine · 16 – 22 novembre 2026
+Semaine 47 · publié le 4 novembre 2026 à 17 h 30
+12 h prévues
+2 jours
+16
+Lundi
+novembre
+, voir la journée
+Repos
+17
+Mardi
+novembre
+, voir la journée
+Journée
+8 h 30 – 16 h 30
+7 h de travail
+Pause déjeuner 12 h 30 – 13 h 30
+Pauses courtes à 10 h 30, 15 h (15 min)
+18
+Mercredi
+novembre
+, voir la journée
+Arrêt
+19
+Jeudi
+novembre
+, voir la journée
+Arrêt
+20
+Vendredi
+Aujourd’hui
+, voir la journée
+Arrêt
+21
+Samedi
+novembre
+, voir la journée
+Matin
+9 h – 14 h
+5 h de travail
+Pause courte à 11 h 30 (15 min)
+Semaine prochaine · 23 – 29 novembre 2026
+Semaine 48 · publié le 11 novembre 2026 à 17 h 30
+33 h prévues
+5 jours
+23
+Lundi
+novembre
+, voir la journée
+Journée
+8 h 30 – 16 h 30
+7 h de travail
+Pause déjeuner 12 h 30 – 13 h 30
+Pauses courtes à 10 h 30, 15 h (15 min)
+24
+Mardi
+novembre
+, voir la journée
+Journée
+8 h 30 – 16 h 30
+7 h de travail
+Pause déjeuner 12 h 30 – 13 h 30
+Pauses courtes à 10 h 30, 15 h (15 min)
+25
+Mercredi
+novembre
+, voir la journée
+Soir
+11 h 30 – 19 h 30
+7 h de travail
+Pause déjeuner 14 h – 15 h
+Pause courte à 17 h 15 (15 min)
+26
+Jeudi
+novembre
+, voir la journée
+Soir
+11 h 30 – 19 h 30
+7 h de travail
+Pause déjeuner 14 h – 15 h
+Pause courte à 17 h 15 (15 min)
+Vaccination · 16 h
+27
+Vendredi
+novembre
+, voir la journée
+Repos
+28
+Samedi
+novembre
+, voir la journée
+Matin
+9 h – 14 h
+5 h de travail
+Pause courte à 11 h 30 (15 min)
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+ERREURS: []

@@ -1,0 +1,78 @@
+{
+ "b1-r6-espace-b": {
+  "n": 2,
+  "hauteur": 1166,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11px « vendredi 20 novembre 2026 » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)",
+   "11.5px « Mon métier » (div.eyebrow)",
+   "11.5px « Mon agenda » (div.eyebrow)"
+  ],
+  "cibles": [
+   "213×34 « Demander un rendez-vous » (btn primary sm)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "11": 1,
+   "13": 8,
+   "14": 3,
+   "15": 4,
+   "16": 3,
+   "20": 1,
+   "24": 1,
+   "32": 2,
+   "11.5": 3,
+   "13.5": 2,
+   "14.5": 12
+  },
+  "entete": {
+   "h1": "Bonjour Yanis "
+  }
+ },
+ "b1-r6-demandes-b": {
+  "n": 2,
+  "hauteur": 1275,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « Comment faire » (div.eyebrow)",
+   "11.5px « L’équipe » (div.eyebrow)"
+  ],
+  "cibles": [
+   "113×34 « M’assister » (btn magic sm)",
+   "86×38 « Matin » (sh-choix matin)",
+   "103×38 « Journée » (sh-choix journee on)",
+   "120×38 « Après-midi » (sh-choix soir)",
+   "90×38 « Repos » (sh-choix repos)",
+   "97×38 « Effacer » (sh-choix effacer)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 11,
+   "13": 15,
+   "15": 23,
+   "16": 2,
+   "17": 3,
+   "19": 1,
+   "34": 2,
+   "11.5": 3,
+   "13.5": 9,
+   "12.5": 27,
+   "14.5": 2
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes demandes",
+   "sous": "Choisissez ce que vous voulez faire."
+  }
+ }
+}

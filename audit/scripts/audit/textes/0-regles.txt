@@ -1,0 +1,122 @@
+RÈGLES
+Ce que Solvéa vérifie pour vous
+
+Rangées par question. Ouvrez une règle pour lire le détail ou régler son seuil.
+
+Obligatoire
+: le planning ne peut pas l’enfreindre.
+Alerte
+: Solvéa vous prévient, vous décidez.
+Toutes
+24
+Obligatoires
+12
+Réglables
+20
+À faire valider
+11
+Combien d’heures au maximum ?
+
+Par jour, par semaine, et les pauses.
+
+Durée quotidienne maximale
+, obligatoire
+10 h
+À faire valider
+Amplitude de la journée
+, obligatoire
+12 h
+À faire valider
+Durée hebdomadaire maximale
+, obligatoire
+46 h
+À faire valider
+Pause
+, obligatoire
+20 min
+Durée minimale du temps partiel
+, alerte active
+16 h
+À faire valider
+Heures supplémentaires
+, alerte active
+43 h
+À faire valider
+Combien de temps à l’avance prévenir ?
+
+Avant de changer un planning ou de demander un remplacement.
+
+Demande de remplacement : délai minimal
+, alerte active
+7 jours
+À faire valider
+Modification des horaires d’un temps partiel
+, obligatoire
+7 jours ouvrés
+Les choix de votre officine
+
+Vos propres seuils, pour protéger l’équipe.
+
+Effectif minimal au comptoir
+, alerte active
+Plafond d’heures par semaine choisi par l’officine
+, alerte active
+42 h
+Samedis libres par mois
+, alerte active
+1 samedi
+Aucun poste pendant une absence approuvée
+, obligatoire
+Indisponibilité reconnue respectée
+, obligatoire
+Quel repos garantir ?
+
+Entre deux journées, et chaque semaine.
+
+Repos quotidien
+, obligatoire
+11 h
+Repos hebdomadaire
+, obligatoire
+36 h
+À faire valider
+Qui doit être présent ?
+
+Un pharmacien, les bonnes compétences.
+
+Pharmacien présent pendant toute l’ouverture
+, obligatoire
+À faire valider
+Seul pharmacien occupé en rendez-vous
+, alerte active
+Activité confiée à une personne habilitée
+, obligatoire
+À faire valider
+Nombre de pharmaciens
+, alerte active
+1300000 €
+À faire valider
+Et pour les gardes ?
+
+Délais, repos après la garde, ce qui part en paie.
+
+Programmation des gardes communiquée 15 jours avant
+, obligatoire
+15 jours
+Volets fermés, jour ouvrable : heures d’équivalence
+, alerte active
+25 %
+Garde un dimanche ou un jour férié
+, alerte active
+1.5 points/h
+Astreinte à domicile
+, alerte active
+10 %
+Majorations de nuit (volets ouverts)
+, alerte active
+À faire valider
+Une aide, pas une garantie. 11 règles sur 24 sont à faire valider par un avocat en droit social ou un expert-comptable : elles portent la mention « à faire valider ».
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example

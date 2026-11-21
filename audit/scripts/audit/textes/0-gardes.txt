@@ -1,0 +1,170 @@
+GARDES
+De la garde à la paie
+
+Le calendrier de garde est fixé hors de l'officine. Importez vos obligations, puis suivez chaque garde : affectation, interventions, repos à protéger, variables pour le comptable.
+
+Importer un calendrier
+Répartir 2 gardes
+Ajouter une garde
+RÉPARTITION 2026
+Gardes et astreintes par pharmacien
+CT
+Caroline T.
+0 garde · titulaire
+PF
+Pierre F.
+0 garde · titulaire
+IL
+Igor L.
+2 gardes
+LF
+Léa F.
+1 garde
+Calendrier sur douze mois
+Chaque pastille est une garde : pleine si elle est affectée, cerclée si elle reste à affecter.
+Novembre 2026
+29
+novembre, Garde de jour · volets ouverts, confiée à Léa F.
+Décembre 2026
+12
+décembre, Astreinte de nuit · à domicile, à affecter
+25
+décembre, Garde de jour · volets ouverts, à affecter
+31
+décembre, Garde de nuit · volets fermés, confiée à Igor L.
+Janvier 2027
+Aucune garde
+Février 2027
+Aucune garde
+Mars 2027
+Aucune garde
+Avril 2027
+Aucune garde
+Mai 2027
+Aucune garde
+Juin 2027
+Aucune garde
+Juillet 2027
+Aucune garde
+Août 2027
+Aucune garde
+Septembre 2027
+Aucune garde
+Octobre 2027
+Aucune garde
+24
+oct.
+Garde de nuit
+Repos réglé
+Samedi · 20 h → 8 h
+Volets Fermés
+IL
+Igor L.
+29
+nov.
+Garde de jour
+Affectée
+Dimanche · 9 h → 19 h
+Volets Ouverts
+LF
+Léa F.
+12
+déc.
+Astreinte de nuit
+Prévue
+Samedi · 19 h → 9 h
+À Domicile
+À affecter
+25
+déc.
+Garde de jour
+Prévue
+Vendredi · 9 h → 19 h
+Volets Ouverts
+À affecter
+31
+déc.
+Garde de nuit
+Affectée
+Jeudi · 19 h 30 → 8 h 30
+Volets Fermés
+IL
+Igor L.
+Garde de jour · volets ouverts
+dimanche 29 novembre 2026, de 9 h à 19 h · 10 h
+Prévue
+(fait)
+Affectée
+(étape en cours)
+Réalisée
+(à venir)
+Repos réglé
+(à venir)
+Validée pour la paie
+(à venir)
+dimanche · 10 h
+1
+1.
+Qui assure la garde ?
+
+Comparés sur leur disponibilité, leurs gardes de l’année, le repos à protéger et le coût.
+
+CT
+Caroline T.
+Titulaire principal
+Recommandé
+0 garde en 2026
+Volontaire
+Hors paie
+PF
+Pierre F.
+Titulaire secondaire
+0 garde en 2026
+Volontaire
+Hors paie
+LF
+Léa F.
+Pharmacien
+Affectée
+0 garde en 2026
+Volontaire
+délai de prévenance non tenu : accord à recueillir
+IL
+Igor L.
+Pharmacien
+2 gardes en 2026
+Volontaire
+délai de prévenance non tenu : accord à recueillir
+Programmation communiquée 27 jours avant la garde. Communiquée le 2 novembre 2026 à 10 h.
+2
+2.
+Déroulement
+
+Volets ouverts : l'officine est librement accessible, toute la durée est du travail effectif. Aucune intervention à déclarer.
+
+3
+3.
+Conséquences sur le repos
+Reprise possible à partir de lun. 30 novembre à 6 h (11 h de repos). Aucun poste planifié n’empiète sur ce repos.
+Repos compensateur de 10 h à positionner (garde un dimanche ou un jour férié).
+4
+4.
+Variables pour le comptable
+VARIABLE	MOIS	QUANTITÉ	MONTANT ESTIMÉ
+Indemnité de sujétion dimanche ou jour férié (1,5 point par heure)
+Accord du 23 mars 2000, article 4 (Légifrance) ; montants : circulaire FSPF 2026-16, non lue
+	novembre	15 points	à valoriser en paie
+Garde à volets ouverts : travail effectif
+Convention collective IDCC 1996 (source secondaire)
+	novembre	10 h	à valoriser en paie
+Repos compensateur à positionner
+Accord du 23 mars 2000, article 4 (Légifrance) ; montants : circulaire FSPF 2026-16, non lue
+	novembre	10 h	à valoriser en paie
+· Volets ouverts : majorations de nuit à appliquer par le comptable (taux à confirmer).
+· Valeur du point non saisie : l’indemnité de sujétion est exprimée en points.
+Quantités calculées d'après l'accord du 23 mars 2000 ; à faire relire par votre cabinet comptable.
+Valider pour le comptable
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example

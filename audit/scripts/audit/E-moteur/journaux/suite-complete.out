@@ -1,0 +1,414 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/complements.test.ts > Compléments > poste type illégal à côté de postes légaux
+KO  [X5b] generer (postes types) | Postes types de l’exemple + un poste 8 h 30 - 19 h 30 sans pause (11 h), trois graines | attendu: le poste de 11 h sans pause n’est jamais donné à un salarié | obtenu: 13 poste(s) de 11 h sans pause donné(s) à des salariés ; 26 bloquant(s) au total | Le calcul ne vérifie ni la durée quotidienne ni la pause : il fait confiance aux postes types ; l’écran de création de poste type ne les borne pas (PosteTypeDialogue : seulement fin > début).
+
+ ✓ tests/complements.test.ts > Compléments > poste type illégal à côté de postes légaux 5148ms
+stdout | tests/complements.test.ts > Compléments > préparation automatique du mois (relais à l’échéance)
+KO  [RL1] echeance.preparerMois | Relais à l’échéance (décembre 2026, d’après les habitudes) avec un repos posé pour Nicolas le 8 déc. et une indisponibilité reconnue de Thomas le mercredi | attendu: semaines préparées sans enfreindre repos posés ni indisponibilités reconnues | obtenu: 4 semaine(s) préparée(s) (4 d’après les habitudes) ; postes sur un repos posé : 1 ; postes contre une indisponibilité reconnue : 4 ; bloquants : 4 | semaineHabituelle() recopie les journées les plus fréquentes sans relire ni les besoins reconnus, ni les repos posés, ni les règles.
+
+ ✓ tests/complements.test.ts > Compléments > préparation automatique du mois (relais à l’échéance) 2448ms
+stdout | tests/complements.test.ts > Compléments > heures du mois : vue Mois et jours fériés
+KO  [HM-nov] souhaits.planifieMois | Nicolas, novembre 2026 (mercredi 11 férié), vue Mois | attendu: contrat sur 20 jours ouvrés hors férié = 140.0 h | obtenu: contrat compté 147.0 h pour 143.5 h planifiées | Le jour férié compte dans l’objectif du mois.
+OK  [SH-detail] heures.soldeHeures | Écart semaine par semaine (planifié - contrat), semaines publiées de l’exemple | attendu: écarts proches de 0 hors semaine fériée | obtenu: Nicolas : 09-21 -2.0 09-28 0.0 10-05 0.0 10-12 -2.0 10-19 0.0 10-26 -0.5 11-02 -2.0 11-09 -1.0 11-16 -0.5 | Yanis : 09-21 0.0 09-28 -1.5 10-05 0.0 10-12 0.0 10-19 0.0 10-26 0.0 11-02 0.0 11-09 -7.0 11-16 0.0 | Igor : 09-21 -2.0 09-28 -2.0 10-05 -0.5 10-12 0.0 10-19 0.0 10-26 0.5 11-02 0.0 11-09 -2.0 11-16 -2.0
+
+ ✓ tests/complements.test.ts > Compléments > heures du mois : vue Mois et jours fériés 2281ms
+stdout | tests/complements.test.ts > Compléments > gardes et durée hebdomadaire
+KO  [GH1] duree.hebdo | Adjoint : 5 × 8 h 30 = 42 h 30 de postes, plus une garde à volets ouverts le dimanche 9 h - 19 h (10 h de travail effectif) = 52 h 30 | attendu: durée hebdomadaire dépassée (bloquant) | obtenu: alerte equipe.heuresMax
+
+stdout | tests/complements.test.ts > Compléments > temps de calcul sur une grande équipe
+OK  [PERF] generer (temps) | Équipe de 29 personnes, une variante, 40 000 itérations | attendu: quelques secondes au plus | obtenu: 808 ms ; 0 bloquant(s)
+
+ ✓ tests/complements.test.ts > Compléments > gardes et durée hebdomadaire 2ms
+ ✓ tests/complements.test.ts > Compléments > temps de calcul sur une grande équipe 2769ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > une retouche reste un brouillon
+OK  [PU1] store.saveShift | Inès, 2026-11-24 (semaine publiée) : poste raccourci de 30 min dans la grille | attendu: version publiée inchangée ; 1 écart en attente de « Publier » | obtenu: publié 8.5-19.5 → 8.5-19.5 ; écarts p_ines 2026-11-24
+OK  [PU1-moveShift] store.moveShift | moveShift sur la semaine publiée du 2026-11-23 | attendu: version publiée inchangée | obtenu: inchangée
+OK  [PU1-deleteShift] store.deleteShift | deleteShift sur la semaine publiée du 2026-11-23 | attendu: version publiée inchangée | obtenu: inchangée
+OK  [PU1-poserRepos] store.poserRepos | poserRepos sur la semaine publiée du 2026-11-23 | attendu: version publiée inchangée | obtenu: inchangée
+OK  [PU1-viderSemaine] store.viderSemaine | viderSemaine sur la semaine publiée du 2026-11-23 | attendu: version publiée inchangée | obtenu: inchangée
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > une retouche reste un brouillon 12720ms
+stdout | tests/dates.test.ts > 5. Dates > semaines ISO et fin d’année
+OK  [ISO1] time.isoWeek | 2026-01-01, 2026-12-31, 2027-01-01, 2027-01-03, 2027-01-04, 2024-12-30, 2020-12-31, 2021-01-03, 2028-01-02, 2026-11-20 | attendu: [1,53,53,53,1,1,53,53,52,47] | obtenu: [1,53,53,53,1,1,53,53,52,47]
+OK  [ISO2] time.mondayOf | lundi du vendredi 1er janv. 2027 et du dimanche 3 janv. 2027 | attendu: ["2026-12-28","2026-12-28"] | obtenu: ["2026-12-28","2026-12-28"]
+OK  [ISO3] time.fmtSemaine | semaine du 28 déc. 2026 (à cheval sur deux années) | attendu: "28 décembre – 3 janvier 2027" | obtenu: "28 décembre – 3 janvier 2027" | Seule l’année de fin est écrite.
+
+stdout | tests/dates.test.ts > 5. Dates > 29 février et longueur des mois
+OK  [B1] time.addDays | 28 févr. 2028 + 1 ; 28 févr. 2027 + 1 ; 29 févr. 2028 + 365 | attendu: ["2028-02-29","2027-03-01","2029-02-28"] | obtenu: ["2028-02-29","2027-03-01","2029-02-28"]
+OK  [B2] time.weekday | mardi 29 février 2028 | attendu: 1 | obtenu: 1
+OK  [B3] souhaits.datesDuMois | février 2028, février 2027, février 2100 (non bissextile) | attendu: [29,28,28] | obtenu: [29,28,28]
+OK  [B4] souhaits.limiteSouhaits | Préférences de mars 2028 avec une limite au 29 (le réglage va de 1 à 28) ; au 31 pour mars 2027 | attendu: ["2028-02-29","2027-02-28"] | obtenu: ["2028-02-29","2027-02-28"]
+OK  [B5] time.fmtDateLong | mardi 29 février 2028 | attendu: "mardi 29 février 2028" | obtenu: "mardi 29 février 2028"
+
+stdout | tests/dates.test.ts > 5. Dates > jours fériés et fêtes mobiles
+OK  [JF-2025] time.joursFeries | fêtes mobiles 2025 | attendu: {"Lundi de Pâques":"2025-04-21","Ascension":"2025-05-29","Lundi de Pentecôte":"2025-06-09"} | obtenu: {"Lundi de Pâques":"2025-04-21","Ascension":"2025-05-29","Lundi de Pentecôte":"2025-06-09"}
+OK  [JF-2026] time.joursFeries | fêtes mobiles 2026 | attendu: {"Lundi de Pâques":"2026-04-06","Ascension":"2026-05-14","Lundi de Pentecôte":"2026-05-25"} | obtenu: {"Lundi de Pâques":"2026-04-06","Ascension":"2026-05-14","Lundi de Pentecôte":"2026-05-25"}
+OK  [JF-2027] time.joursFeries | fêtes mobiles 2027 | attendu: {"Lundi de Pâques":"2027-03-29","Ascension":"2027-05-06","Lundi de Pentecôte":"2027-05-17"} | obtenu: {"Lundi de Pâques":"2027-03-29","Ascension":"2027-05-06","Lundi de Pentecôte":"2027-05-17"}
+OK  [JF-2028] time.joursFeries | fêtes mobiles 2028 | attendu: {"Lundi de Pâques":"2028-04-17","Ascension":"2028-05-25","Lundi de Pentecôte":"2028-06-05"} | obtenu: {"Lundi de Pâques":"2028-04-17","Ascension":"2028-05-25","Lundi de Pentecôte":"2028-06-05"}
+OK  [JF-2038] time.joursFeries | fêtes mobiles 2038 | attendu: {"Lundi de Pâques":"2038-04-26","Ascension":"2038-06-03","Lundi de Pentecôte":"2038-06-14"} | obtenu: {"Lundi de Pâques":"2038-04-26","Ascension":"2038-06-03","Lundi de Pentecôte":"2038-06-14"}
+OK  [JF-n] time.joursFeries | nombre de jours fériés légaux (Code du travail, L3133-1 : 11) | attendu: 11 | obtenu: 11
+KO  [JF-am] time.ferie | Alsace-Moselle : Vendredi saint 26 mars 2027, 26 décembre 2026 | attendu: "à vérifier (non gérés : « France métropolitaine »)" | obtenu: ["non férié","non férié"] | Pas de réglage de région : une officine d’Alsace-Moselle ou d’outre-mer n’a pas ses jours fériés.
+OK  [JF-ov] time.joursOuvrablesEntre | jours ouvrables du jeu. 24 déc. 2026 (exclu) au lun. 28 déc. (inclus) : 26 sam. et 28 lun. (25 férié, 27 dimanche) | attendu: 2 | obtenu: 2
+OK  [JF-oe] time.joursOuvresEntre | jours ouvrés du jeu. 30 avr. 2026 au ven. 8 mai 2026 : 4, 5, 6, 7 mai (1er et 8 fériés) | attendu: 4 | obtenu: 4
+
+stdout | tests/dates.test.ts > 5. Dates > changement d’heure
+OK  [DST1] time.decalageParis | 29 mars 2026 à 1 h 59, 3 h ; 25 oct. 2026 à 1 h 59, 2 h 30 (heure ambiguë), 3 h | attendu: [60,120,120,120,60] | obtenu: [60,120,120,120,60]
+OK  [DST2] time.dureeReelle | nuits du 28 au 29 mars 2026 et du 24 au 25 oct. 2026, 20 h - 8 h ; nuit ordinaire | attendu: [660,780,720] | obtenu: [660,780,720]
+OK  [DST3] gardes.segmentsGarde | garde de 24 h du dimanche 25 oct. 2026 à 9 h au lundi 9 h (heure d’hiver) | attendu: [900,540] | obtenu: [900,540] | Le 25 octobre de 9 h à minuit : 15 h ; heure d’hiver déjà en place, aucun décalage.
+OK  [DST4] gardes.segmentsGarde | garde de 24 h du samedi 24 oct. 2026 à 9 h au dimanche 9 h | attendu: [900,600] | obtenu: [900,600]
+
+stdout | tests/publication.test.ts > 4. Publication et répercussions > une décision met à jour la version publiée sans republier, et seulement elle
+OK  [PU2] publish.repercuter | Brouillon en cours pour Inès (2026-11-24), puis arrêt de Thomas le 2026-11-25 enregistré | attendu: Thomas retiré de la version publiée, sans republier ; la retouche d’Inès reste un brouillon | obtenu: Thomas publié : repos ; Inès publiée : 8.5-19.5 (brouillon 8.5-19) ; publishedAt inchangé ; écarts restants p_ines 2026-11-24
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > une décision met à jour la version publiée sans republier, et seulement elle 1938ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > une décision sur la même journée qu’un brouillon publie aussi le brouillon
+KO  [PU3] publish.repercuter | Inès, 2026-11-24 : prise de poste retardée d’1 h en brouillon (non publiée), puis inventaire 20 h - 21 h planifié ce jour-là | attendu: version publiée = 8.5-19.5 + inventaire 20-21 ; la retouche reste un brouillon | obtenu: version publiée = 20-21 inventaire + 9.5-19.5 ; avis reçu par Inès : Planning habituel → Inventaire, 20:00 → 21:00 | repercuter() recopie toute la journée actuelle de la personne touchée, brouillon compris ; l’avis ne mentionne que l’inventaire.
+
+stdout | tests/dates.test.ts > 5. Dates > échéance de publication et date limite des préférences
+KO  [ECH1] echeance.etatPublication / souhaits.limiteSouhaits | Réglages par défaut : publication 14 jours avant le 1er, préférences jusqu’au 20 du mois précédent | attendu: la collecte des préférences se ferme avant l’échéance de publication | obtenu: 2026-12 : préférences jusqu’au 2026-11-20, publication au plus tard le 2026-11-17 (rappel dès le 2026-11-10) ; 2027-01 : préférences jusqu’au 2026-12-20, publication au plus tard le 2026-12-18 (rappel dès le 2026-12-11) ; 2027-02 : préférences jusqu’au 2027-01-20, publication au plus tard le 2027-01-18 (rappel dès le 2027-01-11) ; 2027-03 : préférences jusqu’au 2027-02-20, publication au plus tard le 2027-02-15 (rappel dès le 2027-02-08) ; 2027-08 : préférences jusqu’au 2027-07-20, publication au plus tard le 2027-07-18 (rappel dès le 2027-07-11) | 5 mois sur 5 : la collecte se ferme APRÈS la date limite de publication. Aucun contrôle croisé entre les deux réglages (Officine.tsx).
+KO  [ECH2] echeance.etatPublication | Le 2026-11-18 (exemple établi) | attendu: état cohérent avec la collecte encore ouverte jusqu’au 20 | obtenu: mois 2026-12, échéance 2026-11-17, état « depasse », 4 semaine(s) à publier, 4 vide(s) ; collecte des préférences de 2026-12 ouverte jusqu’au 2026-11-20
+OK  [ECH3] echeance.semainesDuMois / payroll.semainesDuMois | les deux fonctions homonymes, décembre 2026 et février 2027 | attendu: [["2026-11-30","2026-12-07","2026-12-14","2026-12-21","2026-12-28"],["2027-02-01","2027-02-08","2027-02-15","2027-02-22"]] | obtenu: [["2026-11-30","2026-12-07","2026-12-14","2026-12-21","2026-12-28"],["2027-02-01","2027-02-08","2027-02-15","2027-02-22"]] | Deux implémentations de la même fonction (répétition), mêmes résultats.
+OK  [ECH4] echeance.etatPublication | Le 10 déc. 2026 : publication de janvier 2027 | attendu: mois 2027-01, échéance 18 déc., semaines du 28 déc. au 25 janv. | obtenu: 2027-01, 2026-12-18, 2026-12-28 2027-01-04 2027-01-11 2027-01-18 2027-01-25
+
+stdout | tests/dates.test.ts > 5. Dates > officine en chiffres
+OK  [OF1] officine.chiffresOfficine | surface 180, vente 110, réserve 45, 3 caisses, 4 comptoirs, 1 espace, robot | attendu: ["180 m² au total","110 m² de surface de vente","45 m² de réserve et de préparatoire","3 caisses","4 postes de comptoir","1 espace de confidentialité","un robot de dispensation"] | obtenu: ["180 m² au total","110 m² de surface de vente","45 m² de réserve et de préparatoire","3 caisses","4 postes de comptoir","1 espace de confidentialité","un robot de dispensation"]
+OK  [OF2] officine.remarquesOfficine | vente 200 > total 180 ; 5 caisses pour 4 comptoirs ; effectif 3 pour 2 comptoirs | attendu: 3 | obtenu: 3
+KO  [OF3] officine.remarquesOfficine | surface 0 et valeurs négatives (−10 m² de vente) | attendu: "au moins une remarque" | obtenu: "aucune remarque" | Aucune remarque sur des valeurs négatives : la saisie de l’écran est la seule barrière.
+
+ ✓ tests/dates.test.ts > 5. Dates > semaines ISO et fin d’année 3ms
+ ✓ tests/dates.test.ts > 5. Dates > 29 février et longueur des mois 4ms
+ ✓ tests/dates.test.ts > 5. Dates > jours fériés et fêtes mobiles 2ms
+ ✓ tests/dates.test.ts > 5. Dates > changement d’heure 1ms
+ ✓ tests/dates.test.ts > 5. Dates > échéance de publication et date limite des préférences 4313ms
+ ✓ tests/dates.test.ts > 5. Dates > officine en chiffres 1ms
+stdout | tests/generation.test.ts > 2. Propositions de planning sur l’exemple > dix semaines, trois variantes
+KO  [G-2026-11-16-equite] generer | Semaine du 2026-11-16, variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 1 bloquant(s) [pharmacie.competence: Vaccination, jeudi de 16 h à 17 h : Igor L. n'est pas en poste sur tout le créneau.] ; >46 h : 0 ; au-delà du contrat : Jules 35.50 h / 35 h ; préférences suivies : 100 % de 3 ; écart samedis 1.78 ; alertes {"equipe.samedisLibres":4} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-11-16 9.50 h ; 530 ms
+KO  [G-2026-11-16-souhaits] generer | Semaine du 2026-11-16, variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 1 bloquant(s) [pharmacie.competence: Vaccination, jeudi de 16 h à 17 h : Igor L. n'est pas en poste sur tout le créneau.] ; >46 h : 0 ; au-delà du contrat : Manon 21.50 h / 21 h ; préférences suivies : 100 % de 3 ; écart samedis 1.77 ; alertes {"equipe.samedisLibres":2} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-11-19 9.50 h ; 530 ms
+KO  [G-2026-11-16-cout] generer | Semaine du 2026-11-16, variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 1 bloquant(s) [pharmacie.competence: Vaccination, jeudi de 16 h à 17 h : Igor L. n'est pas en poste sur tout le créneau.] ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 100 % de 3 ; écart samedis 1.85 ; alertes {"equipe.samedisLibres":3} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-11-16 9.50 h ; 530 ms
+OK  [G-2026-11-23-equite] generer | Semaine du 2026-11-23, variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Thomas 35.50 h / 35 h, Jules 35.50 h / 35 h ; préférences suivies : 50 % de 2 ; écart samedis 1.74 ; alertes {"equipe.effectif":1,"equipe.samedisLibres":3,"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Igor 2026-11-26 9.50 h ; 530 ms
+OK  [G-2026-11-23-souhaits] generer | Semaine du 2026-11-23, variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Jules 35.50 h / 35 h ; préférences suivies : 100 % de 2 ; écart samedis 1.75 ; alertes {"pharmacie.rdv":1,"equipe.effectif":1,"equipe.samedisLibres":5} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-11-23 9.50 h ; 530 ms
+OK  [G-2026-11-23-cout] generer | Semaine du 2026-11-23, variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 100 % de 2 ; écart samedis 1.7 ; alertes {"pharmacie.rdv":1,"equipe.effectif":1,"equipe.samedisLibres":4} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-11-23 9.50 h ; 530 ms
+OK  [G-2026-11-30-equite] generer | Semaine du 2026-11-30, variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Jules 35.50 h / 35 h, Manon 21.50 h / 21 h ; préférences suivies : 71 % de 24 ; écart samedis 1.76 ; alertes {"souhait":7} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Pierre 2026-12-04 9.50 h ; 507 ms
+OK  [G-2026-11-30-souhaits] generer | Semaine du 2026-11-30, variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 96 % de 24 ; écart samedis 1.79 ; alertes {"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-11-30 9.50 h ; 507 ms
+OK  [G-2026-11-30-cout] generer | Semaine du 2026-11-30, variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 79 % de 24 ; écart samedis 1.79 ; alertes {"souhait":5} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-11-30 9.50 h ; 507 ms
+OK  [G-2026-12-07-equite] generer | Semaine du 2026-12-07, variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Nicolas 35.50 h / 35 h, Jules 35.50 h / 35 h ; préférences suivies : 68 % de 28 ; écart samedis 1.9 ; alertes {"souhait":9} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-07 9.50 h ; 490 ms
+OK  [G-2026-12-07-souhaits] generer | Semaine du 2026-12-07, variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Nicolas 35.50 h / 35 h, Jules 35.50 h / 35 h ; préférences suivies : 96 % de 28 ; écart samedis 1.92 ; alertes {"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-09 9.50 h ; 490 ms
+OK  [G-2026-12-07-cout] generer | Semaine du 2026-12-07, variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 71 % de 28 ; écart samedis 1.88 ; alertes {"souhait":8} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Igor 2026-12-08 9.50 h ; 490 ms
+OK  [G-2026-12-14-equite] generer | Semaine du 2026-12-14, variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Nicolas 35.50 h / 35 h ; préférences suivies : 81 % de 26 ; écart samedis 1.81 ; alertes {"souhait":5} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Nicolas 2026-12-15 9.50 h ; 450 ms
+OK  [G-2026-12-14-souhaits] generer | Semaine du 2026-12-14, variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Nicolas 35.50 h / 35 h, Sarah 21.50 h / 21 h ; préférences suivies : 96 % de 26 ; écart samedis 1.81 ; alertes {"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-16 9.50 h ; 450 ms
+OK  [G-2026-12-14-cout] generer | Semaine du 2026-12-14, variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 65 % de 26 ; écart samedis 1.95 ; alertes {"souhait":9} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-14 9.50 h ; 450 ms
+OK  [G-2026-12-21-equite] generer | Semaine du 2026-12-21 (férié : 2026-12-25 Noël), variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 62 % de 26 ; écart samedis 1.53 ; alertes {"souhait":10} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-21 9.50 h ; 489 ms
+OK  [G-2026-12-21-souhaits] generer | Semaine du 2026-12-21 (férié : 2026-12-25 Noël), variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Nicolas 35.50 h / 35 h ; préférences suivies : 88 % de 26 ; écart samedis 1.52 ; alertes {"souhait":3} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-23 9.50 h ; 489 ms
+OK  [G-2026-12-21-cout] generer | Semaine du 2026-12-21 (férié : 2026-12-25 Noël), variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 62 % de 26 ; écart samedis 1.55 ; alertes {"souhait":10} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-21 9.50 h ; 489 ms
+OK  [G-2026-12-28-equite] generer | Semaine du 2026-12-28 (férié : 2027-01-01 Jour de l’an), variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 69 % de 16 ; écart samedis 1.49 ; alertes {"souhait":5} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-28 9.50 h ; 426 ms
+OK  [G-2026-12-28-souhaits] generer | Semaine du 2026-12-28 (férié : 2027-01-01 Jour de l’an), variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Igor 35.50 h / 35 h, Nicolas 35.50 h / 35 h ; préférences suivies : 94 % de 16 ; écart samedis 1.33 ; alertes {"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-30 9.50 h ; 426 ms
+OK  [G-2026-12-28-cout] generer | Semaine du 2026-12-28 (férié : 2027-01-01 Jour de l’an), variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 81 % de 16 ; écart samedis 1.33 ; alertes {"souhait":3} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2026-12-29 9.50 h ; 426 ms
+OK  [G-2027-01-04-equite] generer | Semaine du 2027-01-04, variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Igor 35.50 h / 35 h ; préférences suivies : 50 % de 2 ; écart samedis 1.19 ; alertes {"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Igor 2027-01-07 9.50 h ; 424 ms
+OK  [G-2027-01-04-souhaits] generer | Semaine du 2027-01-04, variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 100 % de 2 ; écart samedis 1.08 ; alertes {} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-01-04 9.50 h ; 424 ms
+OK  [G-2027-01-04-cout] generer | Semaine du 2027-01-04, variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 50 % de 2 ; écart samedis 1.12 ; alertes {"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-01-05 9.50 h ; 424 ms
+OK  [G-2027-03-29-equite] generer | Semaine du 2027-03-29 (férié : 2027-03-29 Lundi de Pâques), variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Nicolas 35.50 h / 35 h ; préférences suivies : 100 % de 1 ; écart samedis 0.34 ; alertes {} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-03-30 9.50 h ; 441 ms
+OK  [G-2027-03-29-souhaits] generer | Semaine du 2027-03-29 (férié : 2027-03-29 Lundi de Pâques), variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Igor 35.50 h / 35 h, Nicolas 35.50 h / 35 h, Jules 35.50 h / 35 h ; préférences suivies : 100 % de 1 ; écart samedis 0.27 ; alertes {} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-03-31 9.50 h ; 441 ms
+OK  [G-2027-03-29-cout] generer | Semaine du 2027-03-29 (férié : 2027-03-29 Lundi de Pâques), variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 100 % de 1 ; écart samedis 0.49 ; alertes {} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-03-30 9.50 h ; 441 ms
+OK  [G-2027-05-03-equite] generer | Semaine du 2027-05-03 (férié : 2027-05-06 Ascension, 2027-05-08 Victoire 1945), variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 67 % de 3 ; écart samedis 0 ; alertes {"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-05-03 9.50 h ; 363 ms
+OK  [G-2027-05-03-souhaits] generer | Semaine du 2027-05-03 (férié : 2027-05-06 Ascension, 2027-05-08 Victoire 1945), variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 100 % de 3 ; écart samedis 0 ; alertes {} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-05-03 9.50 h ; 363 ms
+OK  [G-2027-05-03-cout] generer | Semaine du 2027-05-03 (férié : 2027-05-06 Ascension, 2027-05-08 Victoire 1945), variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 100 % de 3 ; écart samedis 0 ; alertes {} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-05-03 9.50 h ; 363 ms
+OK  [G-2027-05-17-equite] generer | Semaine du 2027-05-17 (férié : 2027-05-17 Lundi de Pentecôte), variante Équité d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Manon 21.50 h / 21 h ; préférences suivies : 100 % de 3 ; écart samedis 0.41 ; alertes {} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-05-18 9.50 h ; 421 ms
+OK  [G-2027-05-17-souhaits] generer | Semaine du 2027-05-17 (férié : 2027-05-17 Lundi de Pentecôte), variante Préférences d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : Igor 35.50 h / 35 h, Thomas 35.50 h / 35 h ; préférences suivies : 100 % de 3 ; écart samedis 0.41 ; alertes {} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-05-19 9.50 h ; 421 ms
+OK  [G-2027-05-17-cout] generer | Semaine du 2027-05-17 (férié : 2027-05-17 Lundi de Pentecôte), variante Contrats d’abord | attendu: 0 bloquant ; personne au-delà de 46 h ; absences, repos posés et indisponibilités reconnues respectés | obtenu: 0 bloquant(s) ; >46 h : 0 ; au-delà du contrat : personne ; préférences suivies : 67 % de 3 ; écart samedis 0.44 ; alertes {"souhait":1} ; violations absence/repos/indispo 0/0/0 ; jour le plus long Caroline 2027-05-18 9.50 h ; 421 ms
+
+ ✓ tests/generation.test.ts > 2. Propositions de planning sur l’exemple > dix semaines, trois variantes 18610ms
+stdout | tests/generation.test.ts > 2. Propositions de planning sur l’exemple > les variantes tiennent-elles leur promesse ?
+OK  [GV1] variante souhaits | Semaines où l’équipe a donné des préférences | attendu: « Préférences d’abord » suit au moins autant de préférences que les deux autres | obtenu: 11 semaine(s) sur 11
+OK  [GV2] variante cout | Toutes les semaines | attendu: « Contrats d’abord » laisse au plus autant de personnes au-delà de leur contrat | obtenu: 11 semaine(s) sur 11
+KO  [GV3] variante equite | Toutes les semaines | attendu: « Équité d’abord » a le plus petit écart des samedis | obtenu: 4 semaine(s) sur 11
+
+stdout | tests/generation.test.ts > 2. Propositions de planning sur l’exemple > jours fériés et absences : objectif d’heures
+KO  [JF-2026-12-21] objectif hebdomadaire (cibleSemaine) | Semaine du 2026-12-21 avec jour(s) férié(s) chômé(s), temps pleins | attendu: Les heures perdues un jour férié chômé ne se récupèrent pas (Code du travail, L3133-2) : objectif réduit d’un jour, ou alerte | obtenu: 3 temps plein(s) sur 4 planifiés ≥ 34 h dans la semaine écourtée : Igor 33 h (normale 33 h), Nicolas 34.5 h (normale 35.5 h), Thomas 34.5 h (normale 34.5 h), Jules 34.5 h (normale 35.5 h) | cibleSemaine() = heuresHebdo + régularisations, sans déduire les jours fériés ; contratSemaine() (compteur d’heures) ne les déduit pas non plus.
+KO  [JF-2026-12-28] objectif hebdomadaire (cibleSemaine) | Semaine du 2026-12-28 avec jour(s) férié(s) chômé(s), temps pleins | attendu: Les heures perdues un jour férié chômé ne se récupèrent pas (Code du travail, L3133-2) : objectif réduit d’un jour, ou alerte | obtenu: 4 temps plein(s) sur 4 planifiés ≥ 34 h dans la semaine écourtée : Igor 34.5 h (normale 33 h), Nicolas 34.5 h (normale 35.5 h), Thomas 34.5 h (normale 34.5 h), Jules 34.5 h (normale 35.5 h) | cibleSemaine() = heuresHebdo + régularisations, sans déduire les jours fériés ; contratSemaine() (compteur d’heures) ne les déduit pas non plus.
+OK  [JF-2027-05-03] objectif hebdomadaire (cibleSemaine) | Semaine du 2027-05-03 avec jour(s) férié(s) chômé(s), temps pleins | attendu: Les heures perdues un jour férié chômé ne se récupèrent pas (Code du travail, L3133-2) : objectif réduit d’un jour, ou alerte | obtenu: 0 temps plein(s) sur 4 planifiés ≥ 34 h dans la semaine écourtée : Igor 33 h (normale 33 h), Nicolas 33 h (normale 35.5 h), Thomas 33 h (normale 34.5 h), Jules 33 h (normale 35.5 h) | cibleSemaine() = heuresHebdo + régularisations, sans déduire les jours fériés ; contratSemaine() (compteur d’heures) ne les déduit pas non plus.
+KO  [ABS-ines-equite] objectif hebdomadaire (cibleSemaine) | Inès, 24 h, congé approuvé lundi-mardi (variante equite) | attendu: contrat de la semaine, absences déduites : 14.4 h (contratSemaine) ; objectif donné au calcul : 24 h (cibleSemaine) | obtenu: 23 h planifiées sur jeudi-samedi | Le calcul vise le contrat entier malgré le congé : la personne « rattrape » ses jours de congé sur le reste de la semaine.
+KO  [ABS-ines-souhaits] objectif hebdomadaire (cibleSemaine) | Inès, 24 h, congé approuvé lundi-mardi (variante souhaits) | attendu: contrat de la semaine, absences déduites : 14.4 h (contratSemaine) ; objectif donné au calcul : 24 h (cibleSemaine) | obtenu: 24 h planifiées sur jeudi-samedi | Le calcul vise le contrat entier malgré le congé : la personne « rattrape » ses jours de congé sur le reste de la semaine.
+KO  [ABS-ines-cout] objectif hebdomadaire (cibleSemaine) | Inès, 24 h, congé approuvé lundi-mardi (variante cout) | attendu: contrat de la semaine, absences déduites : 14.4 h (contratSemaine) ; objectif donné au calcul : 24 h (cibleSemaine) | obtenu: 23 h planifiées sur jeudi-samedi | Le calcul vise le contrat entier malgré le congé : la personne « rattrape » ses jours de congé sur le reste de la semaine.
+KO  [ABS-igor-equite] objectif hebdomadaire (cibleSemaine) | Igor, 35 h, arrêt mercredi-vendredi, recalcul de la semaine en cours (variante equite) | attendu: au plus 14 h (contrat, arrêt déduit) | obtenu: 28 h planifiées lundi, mardi, samedi
+KO  [ABS-igor-souhaits] objectif hebdomadaire (cibleSemaine) | Igor, 35 h, arrêt mercredi-vendredi, recalcul de la semaine en cours (variante souhaits) | attendu: au plus 14 h (contrat, arrêt déduit) | obtenu: 28 h planifiées lundi, mardi, samedi
+KO  [ABS-igor-cout] objectif hebdomadaire (cibleSemaine) | Igor, 35 h, arrêt mercredi-vendredi, recalcul de la semaine en cours (variante cout) | attendu: au plus 14 h (contrat, arrêt déduit) | obtenu: 28 h planifiées lundi, mardi, samedi
+
+stdout | tests/generation.test.ts > 2. Propositions de planning sur l’exemple > samedis libres et jeunes
+KO  [SL1] equipe.samedisLibres | Toutes les propositions générées (33) | attendu: aucune alerte « travaille tous les samedis du mois » créée par le calcul | obtenu: 6 proposition(s) avec cette alerte : 2026-11-16/equite=4, 2026-11-16/souhaits=2, 2026-11-16/cout=3, 2026-11-23/equite=3, 2026-11-23/souhaits=5, 2026-11-23/cout=4 | Le calcul pèse les samedis pour l’équité mais ne lit pas le seuil « samedis libres par mois ».
+OK  [JT2] (jeunes travailleurs) | Heures de Manon (apprentie, 21 h) dans les 33 propositions | attendu: à vérifier selon son âge (35 h/sem. et 8 h/j si mineure) | obtenu: de 19 h à 21.5 h
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > une décision sur la même journée qu’un brouillon publie aussi le brouillon 2029ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > régler un poste à couvrir publie les brouillons des personnes déplacées
+OK  [PU4] publish.repercuter | Poste à couvrir du 2026-11-19 réglé par « Réaffecter Pierre F. » ; p_antoine avait en brouillon, le même jour, une demi-heure d’administratif 20 h - 20 h 30 sans rapport | attendu: la décision est publiée ; la demi-heure d’administratif reste un brouillon | obtenu: écarts en attente avant 1, après 0 ; journée publiée de p_antoine : 8.5-19.5
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > régler un poste à couvrir publie les brouillons des personnes déplacées 2411ms
+stdout | tests/premiermai.test.ts > 1er mai travaillé
+KO  [MAI1] (1er mai) | Officine réglée « ouverte les jours fériés », semaine du lundi 1er mai 2028 | attendu: à vérifier : le 1er mai est le seul jour férié chômé de droit (Code du travail) ; un poste ce jour-là appelle au moins une alerte et une majoration en paie | obtenu: 10 postes le 1er mai ; constats ce jour : aucun ; fiche navette : Igor: 0 variable(s), Léa: 0 variable(s), Nicolas: 0 variable(s), Thomas: 0 variable(s), Inès: 0 variable(s), Jules: 0 variable(s), Sarah: 0 variable(s), Manon: 0 variable(s)
+
+ ✓ tests/premiermai.test.ts > 1er mai travaillé 3157ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > une décision sur une semaine non publiée ne publie rien
+OK  [PU5] publish.repercuter | Semaine du 2026-12-14 en brouillon (copiée), arrêt de Thomas le 2026-12-15 | attendu: la semaine reste un brouillon, sans version publiée | obtenu: statut aucun ; snapshot absent
+
+stdout | tests/generation.test.ts > 2 bis. Cas extrêmes > un seul pharmacien (la titulaire)
+OK  [X1-equite] generer (cas extrême) | Équipe sans autre pharmacien que la titulaire principale (non salariée), semaine du 7 déc. | attendu: présence pharmacien tenue par la titulaire seule ; aucun salarié au-delà de 46 h | obtenu: 0 bloquant(s) [] ; >46 h : personne ; heures {"Caroline":56.5,"Nicolas":33,"Thomas":35,"Inès":23,"Jules":35,"Sarah":21,"Manon":21,"Yanis":16} ; blocages  ; 437 ms
+OK  [X1-souhaits] generer (cas extrême) | Équipe sans autre pharmacien que la titulaire principale (non salariée), semaine du 7 déc. | attendu: présence pharmacien tenue par la titulaire seule ; aucun salarié au-delà de 46 h | obtenu: 0 bloquant(s) [] ; >46 h : personne ; heures {"Caroline":56.5,"Nicolas":35,"Thomas":35.5,"Inès":23,"Jules":35.5,"Sarah":20.5,"Manon":21,"Yanis":16} ; blocages  ; 437 ms
+OK  [X1-cout] generer (cas extrême) | Équipe sans autre pharmacien que la titulaire principale (non salariée), semaine du 7 déc. | attendu: présence pharmacien tenue par la titulaire seule ; aucun salarié au-delà de 46 h | obtenu: 0 bloquant(s) [] ; >46 h : personne ; heures {"Caroline":56.5,"Nicolas":35,"Thomas":33,"Inès":23.5,"Jules":35,"Sarah":20.5,"Manon":21,"Yanis":16} ; blocages  ; 437 ms
+
+ ✓ tests/generation.test.ts > 2. Propositions de planning sur l’exemple > les variantes tiennent-elles leur promesse ? 2ms
+ ✓ tests/generation.test.ts > 2. Propositions de planning sur l’exemple > jours fériés et absences : objectif d’heures 1ms
+ ✓ tests/generation.test.ts > 2. Propositions de planning sur l’exemple > samedis libres et jeunes 1ms
+ ✓ tests/generation.test.ts > 2 bis. Cas extrêmes > un seul pharmacien (la titulaire) 3370ms
+stdout | tests/redo.test.ts > redo
+OK  [PU7b] store.redo | Après « Annuler » qui a dépublié : « Rétablir » ; puis une retouche et « Annuler » | attendu: Rétablir ramène la publication ; Annuler d’une retouche ne touche qu’à la retouche | obtenu: après Annuler aucun, après Rétablir publie, après retouche + Annuler publie
+
+ ✓ tests/redo.test.ts > redo 2280ms
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > une décision sur une semaine non publiée ne publie rien 1951ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > avis de changement tardif
+OK  [PU6] notifications.tardif | Inventaire posé pour Jules dans 3 jours (2026-11-23) | attendu: avis marqué « tardif » (moins de 7 jours) | obtenu: Inventaire, 08:00 → 08:30 tardif=true
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > avis de changement tardif 1987ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > « Annuler » après « Publier »
+KO  [PU7] store.undo | Copier une semaine (2026-12-07), la publier, puis « Annuler » | attendu: à décider : soit la publication reste (elle n’est pas annulable), soit l’annulation le dit ; jamais une dépublication silencieuse | obtenu: après publication : publie ; après Annuler : statut aucun, postes de la semaine 0, journal 6 → 5 entrées | publier() est un commit « non annulable » : il n’entre pas dans l’historique, si bien que « Annuler » revient à l’état d’avant la copie, publication comprise.
+
+stdout | tests/generation.test.ts > 2 bis. Cas extrêmes > un seul pharmacien salarié
+KO  [X2-equite] generer (cas extrême) | Seul pharmacien : Igor, adjoint salarié 35 h ; 57 h d’ouverture | attendu: Impossibilité annoncée ; jamais plus de 46 h ni de repos insuffisant pour combler | obtenu: 9 bloquant(s) ["duree.hebdo","pharmacie.presence"] ; >46 h : Igor 46.50 h ; heures {"Igor":46.5,"Nicolas":35,"Thomas":35,"Inès":24,"Jules":35,"Sarah":21,"Manon":21,"Yanis":16} ; blocages impossible: Pas assez d’heures de pharmacien sur la semaine | decouvert: lundi 7 décembre, 12 h 30 – 14 h : créneau encore découvert | decouvert: mardi 8 décembre, 8 h 30 – 11 h 30 : créneau encore découvert | decouvert: mardi 8 décembre, 14 h – 15 h : créneau encore découvert ; 488 ms
+KO  [X2-souhaits] generer (cas extrême) | Seul pharmacien : Igor, adjoint salarié 35 h ; 57 h d’ouverture | attendu: Impossibilité annoncée ; jamais plus de 46 h ni de repos insuffisant pour combler | obtenu: 11 bloquant(s) ["duree.hebdo","pharmacie.presence"] ; >46 h : Igor 46.50 h ; heures {"Igor":46.5,"Nicolas":35,"Thomas":35,"Inès":23,"Jules":35,"Sarah":21,"Manon":21,"Yanis":14.5} ; blocages impossible: Pas assez d’heures de pharmacien sur la semaine | decouvert: lundi 7 décembre, 12 h 30 – 14 h : créneau encore découvert | decouvert: mardi 8 décembre, 8 h 30 – 11 h 30 : créneau encore découvert | decouvert: mardi 8 décembre, 14 h – 15 h : créneau encore découvert ; 488 ms
+OK  [X2-cout] generer (cas extrême) | Seul pharmacien : Igor, adjoint salarié 35 h ; 57 h d’ouverture | attendu: Impossibilité annoncée ; jamais plus de 46 h ni de repos insuffisant pour combler | obtenu: 7 bloquant(s) ["pharmacie.presence"] ; >46 h : personne ; heures {"Igor":46,"Nicolas":33,"Thomas":33,"Inès":23,"Jules":35,"Sarah":19,"Manon":21,"Yanis":16} ; blocages impossible: Pas assez d’heures de pharmacien sur la semaine | decouvert: lundi 7 décembre, 12 h 30 – 14 h : créneau encore découvert | decouvert: mardi 8 décembre, 8 h 30 – 14 h : créneau encore découvert | decouvert: mercredi 9 décembre, 12 h 30 – 14 h : créneau encore découvert ; 488 ms
+
+ ✓ tests/generation.test.ts > 2 bis. Cas extrêmes > un seul pharmacien salarié 3603ms
+stdout | tests/x4.test.ts > x4
+bloquant Dimanche, de 13 h à 14 h, aucun pharmacien n'est présent (entre deux postes). Posez un pharmacien sur cette plage.
+alerte Dimanche, de 13 h à 14 h : 0 personne au comptoir pour 2 attendues.
+p_helene 9-13, p_antoine 14-19, p_camille 14-19, p_ines 9-13, p_yanis 9-13
+donnees_manquantes Aucun poste type le dimanche de 13 h à 14 h L’officine est ouverte le dimanche 13 décembre de 13 h à 14 h, mais aucun poste type ne couvre cette plage.
+
+ ✓ tests/x4.test.ts > x4 2947ms
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > « Annuler » après « Publier » 2023ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > seuils des règles impératives
+KO  [RG1] store.majRegle | Repos quotidien ramené à 2 h, durée hebdomadaire à 70 h, durée quotidienne à -1 h (règles « obligatoires ») | attendu: refusé, ou borné au minimum légal (la page Règles dit « le planning ne peut pas l’enfreindre ») | obtenu: enregistré : duree.quotidienne=-1, duree.hebdo=70, repos.quotidien=2 ; bloquants « durée quotidienne » sur la semaine : 36 (avant : 0 bloquants en tout)
+KO  [RG2] store.majRegle | Désactiver « Pharmacien présent » par l’action du magasin (l’écran masque la case), puis retirer tous les pharmaciens de la semaine | attendu: la règle impérative reste active | obtenu: active=false ; 0 constat(s) de présence | Pas de garde-fou dans majRegle ; seule l’interface empêche de décocher.
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > seuils des règles impératives 2006ms
+stdout | tests/pu4.test.ts > pu4
+2026-11-18 8.5 16.5 accepter:Aucun remplacement nécessaire retirer= ajouter=
+2026-11-19 8.5 19.5 echange:Réaffecter Pierre F. retirer=p_antoine 8.5-13 ajouter=p_antoine 8.5-19.5 || heures_comp:Proposer des heures complémentaires à Inès D. retirer=p_ines 8.5-16.5 ajouter=p_ines 8.5-19.5 || remplacant:Faire appel à Paul L., remplaçant habituel retirer= ajouter=x_paul 8.5-19.5 || accepter:Assumer la charge, sans réaffecter retirer= ajouter=
+2026-11-20 11.5 19.5 echange:Réaffecter Pierre F. retirer=p_antoine 8.5-16.5 ajouter=p_antoine 11.5-19.5 || heures_comp:Proposer des heures complémentaires à Léa F. retirer= ajouter=p_lea 11.5-19.5 || remplacant:Faire appel à Paul L., remplaçant habituel retirer= ajouter=x_paul 11.5-19.5
+option Réaffecter Pierre F. retirer [ 's_mwpmrk6c_b63b', 'brouillon_admin' ]
+apres [ 's_mwpmrksk_g454 8.5-19.5 comptoir' ]
+snapshot [ 's_mwpmrksk_g454 8.5-19.5 comptoir' ]
+
+ ✓ tests/pu4.test.ts > pu4 3016ms
+stdout | tests/generation.test.ts > 2 bis. Cas extrêmes > équipe trop petite
+OK  [X3-equite] generer (cas extrême) | Titulaire + une préparatrice 24 h pour 2 à 3 personnes attendues | attendu: Sous-effectif signalé, aucune règle impérative enfreinte pour la salariée | obtenu: 0 bloquant(s) [] ; >46 h : personne ; heures {"Caroline":56.5,"Inès":45} ; blocages  ; 600 ms
+OK  [X3-souhaits] generer (cas extrême) | Titulaire + une préparatrice 24 h pour 2 à 3 personnes attendues | attendu: Sous-effectif signalé, aucune règle impérative enfreinte pour la salariée | obtenu: 0 bloquant(s) [] ; >46 h : personne ; heures {"Caroline":56.5,"Inès":45} ; blocages  ; 600 ms
+OK  [X3-cout] generer (cas extrême) | Titulaire + une préparatrice 24 h pour 2 à 3 personnes attendues | attendu: Sous-effectif signalé, aucune règle impérative enfreinte pour la salariée | obtenu: 0 bloquant(s) [] ; >46 h : personne ; heures {"Caroline":56.5,"Inès":45} ; blocages  ; 600 ms
+
+ ✓ tests/generation.test.ts > 2 bis. Cas extrêmes > équipe trop petite 3898ms
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > durée quotidienne (10 h)
+OK  [Q1] duree.quotidienne | Préparateur 8 h - 19 h, pause 13 h - 13 h 59 : 10 h 01 de travail | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 10 h 01 de travail lundi, pour 10 h au plus.
+OK  [Q2] duree.quotidienne | Préparateur 8 h - 19 h, pause 13 h - 14 h : 10 h 00 pile | attendu: non signalé | obtenu: aucun constat
+OK  [Q3] duree.quotidienne | Titulaire 12 h de travail (non salarié) | attendu: non signalé | obtenu: aucun constat
+OK  [Q4] duree.quotidienne | Deux postes le même jour : 6 h + 4 h 30 = 10 h 30 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 10 h 30 de travail lundi, pour 10 h au plus.
+KO  [Q5] duree.quotidienne | Adjoint : poste 8 h 30 - 19 h 30 (9 h 30 de travail) puis garde à volets ouverts 20 h - 23 h le même jour (3 h de travail effectif) = 12 h 30 | attendu: signalé, bloquant | obtenu: aucun constat | La garde à volets ouverts est du travail effectif (le moteur la paie comme telle, code GARDE_VO) mais n’entre pas dans la durée quotidienne.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > amplitude (12 h)
+OK  [A1] duree.amplitude | Deux postes 7 h - 11 h et 15 h - 19 h 01 : amplitude 12 h 01 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : amplitude de 12 h 01 lundi, pour 12 h au plus.
+OK  [A2] duree.amplitude | Deux postes 7 h - 11 h et 15 h - 19 h : amplitude 12 h pile | attendu: non signalé | obtenu: aucun constat
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > durée hebdomadaire (46 h) et plafond de l’officine (42 h)
+OK  [H1] duree.hebdo | 5 jours de 9 h 15 = 46 h 15 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 46 h 15 planifiées cette semaine, pour 46 h au plus.
+OK  [H2] duree.hebdo | 5 jours de 9 h 12 = 46 h 00 pile | attendu: non signalé | obtenu: aucun constat
+OK  [H3] equipe.heuresMax | 46 h 00 : au-dessus du plafond de 42 h, sous le maximum | attendu: signalé, alerte | obtenu: alerte: P1 T. : 46 h cette semaine, au-dessus du plafond de l’officine (42 h).
+OK  [H4] equipe.heuresMax | 46 h 15 : au-delà du maximum, le plafond ne double pas le constat | attendu: non signalé | obtenu: aucun constat
+OK  [H5] equipe.heuresMax | 5 jours de 8 h 24 = 42 h 00 pile | attendu: non signalé | obtenu: aucun constat
+OK  [H6] equipe.heuresMax | 5 jours de 8 h 27 = 42 h 15 | attendu: signalé, alerte | obtenu: alerte: P1 T. : 42 h 15 cette semaine, au-dessus du plafond de l’officine (42 h).
+KO  [H7] (aucune) heures complémentaires | Temps partiel 24 h planifié 4 × 7 h 30 = 30 h (6 h complémentaires, au-delà du dixième du contrat) | attendu: au moins une alerte (limite du dixième, ou du tiers par accord, Code du travail) | obtenu: aucun constat | Aucune règle ne borne les heures complémentaires d’un temps partiel.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > pause (20 min dès 6 h)
+OK  [P1] duree.pause | 8 h - 14 h 15 sans coupure : 6 h 15 continues | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 6 h 15 de travail continu lundi sans pause de 20 minutes.
+KO  [P2] duree.pause | 8 h - 14 h sans coupure : 6 h 00 pile | attendu: signalé, bloquant | obtenu: aucun constat | L3121-16 (cité par la fiche) : « dès que le temps de travail quotidien ATTEINT six heures ». Le moteur ne signale qu’au-delà de 6 h (test `> 360`) et la fiche dit « au-delà de 6 heures ».
+OK  [P3] duree.pause | 8 h - 12 h puis 12 h 19 - 15 h : coupure de 19 min, 6 h 41 de travail | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 7 h de travail continu lundi sans pause de 20 minutes.
+OK  [P4] duree.pause | 8 h - 12 h puis 12 h 20 - 15 h : coupure de 20 min | attendu: non signalé | obtenu: aucun constat
+KO  [P5] duree.pause | 8 h - 15 h avec une pause courte de 20 min (10 h 50 - 11 h 10) saisie dans « pauses » | attendu: non signalé | obtenu: bloquant: P1 T. : 7 h de travail continu lundi sans pause de 20 minutes. | La pause courte de 20 min consécutives, payée, satisfait L3121-16 ; le moteur l’ignore et signale « sans pause de 20 minutes ».
+OK  [P6] duree.pause | Pause portée à 30 min : 8 h - 12 h puis 12 h 25 - 15 h (coupure de 25 min) | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 7 h de travail continu lundi sans pause de 30 minutes.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > repos quotidien (11 h)
+OK  [RQ1] repos.quotidien | Lundi 8 h 30 - 19 h 30, mardi dès 6 h 30 : 11 h pile | attendu: non signalé | obtenu: aucun constat
+OK  [RQ2] repos.quotidien | Lundi 8 h 30 - 19 h 30, mardi dès 6 h 15 : 10 h 45 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 10 h 45 de repos entre lundi 19 h 30 et mardi 6 h 15, pour 11 h requises.
+OK  [RQ3] repos.quotidien | Dimanche de la semaine précédente 14 h - 22 h, lundi 8 h 30 : 10 h 30 (à cheval sur deux semaines) | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 10 h 30 de repos entre dimanche 22 h et lundi 8 h 30, pour 11 h requises.
+OK  [RQ4] repos.quotidien | Adjoint de garde à volets fermés lundi 20 h - mardi 8 h, poste mardi 9 h - 13 h | attendu: signalé, bloquant | obtenu: bloquant: A1 T. : 1 h de repos entre mardi 8 h et mardi 9 h, pour 11 h requises.
+OK  [RQ5] repos.quotidien | Astreinte lundi 20 h - mardi 8 h sans intervention, poste mardi 8 h 30 | attendu: non signalé | obtenu: aucun constat
+OK  [RQ6] repos.quotidien | Même astreinte avec une intervention de 2 h à 3 h, poste mardi 8 h 30 (5 h 30 de repos) | attendu: signalé, bloquant | obtenu: bloquant: A1 T. : 5 h 30 de repos entre mardi 3 h et mardi 8 h 30, pour 11 h requises.
+KO  [RQ7] repos.quotidien | Samedi 27 mars 2027 fin 21 h, dimanche 28 mars début 8 h : 11 h à l’horloge, 10 h réellement écoulées (passage à l’heure d’été) | attendu: signalé, bloquant | obtenu: aucun constat | Le repos est mesuré en heure locale « naïve » (absMin), sans le décalage d’heure que le moteur sait pourtant calculer pour les gardes (dureeReelle).
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > repos hebdomadaire (36 h)
+OK  [RH1] repos.hebdo | Semaine précédente travaillée jusqu’au dimanche 17 h ; lundi au samedi 9 h - 17 h, puis lundi suivant dès 5 h : samedi 17 h → lundi 5 h = 36 h pile | attendu: non signalé | obtenu: aucun constat
+OK  [RH2] repos.hebdo | Idem, lundi suivant dès 4 h 45 : 35 h 45 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : le plus long repos de la semaine dure 35 h 45, pour 36 h requises.
+KO  [RH3] repos.hebdo | Sept jours sur sept (lundi au dimanche 9 h - 16 h), la semaine précédente vide, le lundi suivant travaillé 9 h | attendu: signalé, bloquant | obtenu: aucun constat | Le plus long repos de la semaine est de 17 h ; le moteur compte comme repos le temps « depuis toujours » avant le premier poste quand la semaine précédente est vide.
+KO  [RH4] repos.hebdo | Semaine précédente du lundi au vendredi, puis sept jours sur sept : le seul repos de 36 h est le week-end de la semaine précédente | attendu: signalé, bloquant | obtenu: aucun constat | Le repos du week-end précédent (vendredi 16 h → lundi 9 h, 65 h) est crédité à la semaine suivante. Le Code du travail (L3132-1) interdit aussi plus de six jours de travail par semaine : aucun contrôle.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > présence d’un pharmacien
+OK  [PH1] pharmacie.presence | Adjoint 8 h 30 - 19 h 29 (ouverture jusqu’à 19 h 30) : 1 min sans pharmacien | attendu: signalé, bloquant | obtenu: bloquant: Lundi, de 19 h 29 à 19 h 30, aucun pharmacien n'est présent : la pharmacie reste ouverte après le départ d’A1. Prolongez son poste ou posez un autre pharmacien sur cette plage. / bloquant: Mardi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié. / bloquant: Mercredi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié. / bloquant: Jeudi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié. / bloquant: Vendredi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié. / bloquant: Samedi, de 9 h à 19 h, aucun pharmacien n'est planifié.
+OK  [PH2] pharmacie.presence | Adjoint 8 h 30 - 19 h 30 pile, lundi | attendu: non signalé pour lundi | obtenu: aucun constat
+OK  [PH3] pharmacie.presence | Seul pharmacien = adjoint, pause 12 h 30 - 13 h 30 | attendu: bloquant 12 h 30 - 13 h 30 | obtenu: bloquant: Lundi, de 12 h 30 à 13 h 30, aucun pharmacien n'est présent pendant la pause d’A1. Décalez cette pause ou posez un autre pharmacien sur cette plage.
+OK  [PH4] pharmacie.presence | Seul pharmacien = titulaire, pause 12 h 30 - 13 h 30 | attendu: non signalé (règle annoncée : le titulaire reste présent pendant sa pause) | obtenu: aucun constat
+OK  [PH5] pharmacie.presence | Seul pharmacien en « formation (hors officine) » toute la journée | attendu: bloquant toute la journée | obtenu: bloquant: Lundi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié.
+OK  [PH6] pharmacie.presence | Vendredi 1er janvier 2027 (férié, officine fermée les jours fériés) | attendu: aucun contrôle ce jour-là | obtenu: aucun constat
+
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > durée quotidienne (10 h) 19ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > amplitude (12 h) 2ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > durée hebdomadaire (46 h) et plafond de l’officine (42 h) 23ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > pause (20 min dès 6 h) 12ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > repos quotidien (11 h) 21ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > repos hebdomadaire (36 h) 15ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > présence d’un pharmacien 9ms
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > seul pharmacien en rendez-vous, compétences et salle
+OK  [RDV1] pharmacie.rdv | Seul pharmacien (adjoint) en entretien 10 h - 10 h 30 | attendu: signalé, alerte | obtenu: alerte: Lundi, entre 10 h et 10 h 30, votre seul pharmacien est en rendez-vous. Vérifiez la couverture du comptoir.
+OK  [RDV2] pharmacie.rdv | Entretien 10 h - 10 h 30 avec la titulaire en poste à côté | attendu: non signalé | obtenu: aucun constat
+OK  [C1] pharmacie.competence | Vaccination confiée au préparateur sans la compétence | attendu: signalé, bloquant | obtenu: bloquant: Vaccination, lundi de 10 h à 10 h 30 : P1 T. n'a pas la formation requise.
+OK  [C2] pharmacie.competence | Entretien 10 h - 10 h 30, adjoint en poste 8 h 30 - 10 h 29 seulement | attendu: signalé, bloquant | obtenu: bloquant: Entretien pharmaceutique, lundi de 10 h à 10 h 30 : A1 T. n'est pas en poste sur tout le créneau.
+OK  [C3] pharmacie.competence | Entretien 10 h - 10 h 30, adjoint en poste 8 h 30 - 10 h 30 (fin pile) | attendu: non signalé | obtenu: aucun constat
+OK  [C4] pharmacie.competence | Créneau de vaccination sans personne affectée | attendu: signalé, alerte | obtenu: alerte: Vaccination, lundi de 10 h à 10 h 30 : personne n'est affecté à ce créneau.
+OK  [C5] pharmacie.competence | Deux activités en salle de confidentialité 10 h - 10 h 30 et 10 h 15 - 10 h 45 | attendu: signalé, bloquant | obtenu: bloquant: La salle de confidentialité est réservée deux fois lundi de 10 h 15 à 10 h 45.
+KO  [C6] pharmacie.competence | Entretien pharmaceutique confié à un préparateur dont la fiche porte la compétence « entretien » (réservée aux pharmaciens) | attendu: signalé, bloquant | obtenu: aucun constat | peutDetenir() réserve « entretien » et « trod » aux pharmaciens, mais validateWeek ne contrôle que la liste des compétences de la fiche.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > effectif minimal au comptoir
+OK  [E1] equipe.effectif | Trois personnes au comptoir toute la journée (seuils 2, 3 de 10 h à 12 h 30 et de 16 h 30 à 19 h) | attendu: non signalé | obtenu: aucun constat
+OK  [E2] equipe.effectif | Deux personnes seulement | attendu: alerte 10 h - 12 h 30 et 16 h 30 - 19 h | obtenu: alerte: Lundi, de 10 h à 12 h 30 : 2 personnes au comptoir pour 3 attendues. / alerte: Lundi, de 16 h 30 à 19 h : 2 personnes au comptoir pour 3 attendues.
+KO  [E3] equipe.effectif | Trois personnes, l’une en pause 10 h 15 - 10 h 45 (2 au comptoir pour 3 attendues pendant 30 min) | attendu: alerte de 10 h 15 à 10 h 45 | obtenu: alerte: Lundi, de 10 h 30 à 11 h : 2 personnes au comptoir pour 3 attendues. | Le contrôle échantillonne toutes les 30 min à partir de l’ouverture (8 h 30, 9 h, 9 h 30…).
+KO  [E4] equipe.effectif | Trois personnes, l’une en pause 10 h 05 - 10 h 25 (20 min sous le seuil) | attendu: alerte de 10 h 05 à 10 h 25 | obtenu: aucun constat
+OK  [E5] equipe.effectif | Trois personnes dont une en réception (activité « back ») | attendu: alerte (2 au comptoir) | obtenu: alerte: Lundi, de 10 h à 12 h 30 : 2 personnes au comptoir pour 3 attendues. / alerte: Lundi, de 16 h 30 à 19 h : 2 personnes au comptoir pour 3 attendues.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > absences approuvées, indisponibilités reconnues, préférences
+OK  [AB1] equipe.absence | Poste mardi pendant un congé approuvé lundi-mardi | attendu: signalé, bloquant | obtenu: bloquant: P1 T. est en absence approuvée mardi mais reste planifié(e).
+OK  [AB2] equipe.absence | Poste mardi pendant un congé seulement demandé | attendu: non signalé | obtenu: aucun constat
+OK  [AB3] equipe.absence | Poste mercredi, lendemain du congé approuvé | attendu: non signalé | obtenu: aucun constat
+OK  [I1] equipe.indisponibilite | Indisponibilité reconnue le lundi (journée), poste lundi | attendu: signalé, bloquant | obtenu: bloquant: Lundi, le poste de P1 T. contredit une indisponibilité reconnue.
+OK  [I2] equipe.indisponibilite | Indisponible lundi 14 h - 18 h, poste 9 h - 14 h (fin pile au début de la plage) | attendu: non signalé | obtenu: aucun constat
+OK  [I3] equipe.indisponibilite | Indisponible lundi 14 h - 18 h, poste 9 h - 14 h 15 | attendu: signalé, bloquant | obtenu: bloquant: Lundi, le poste de P1 T. contredit une indisponibilité reconnue.
+OK  [I4] equipe.indisponibilite | « Finir avant 17 h » reconnu, poste jusqu’à 17 h pile | attendu: non signalé | obtenu: aucun constat
+OK  [I5] equipe.indisponibilite | « Finir avant 17 h » reconnu, poste jusqu’à 17 h 15 | attendu: signalé, bloquant | obtenu: bloquant: Lundi, le poste de P1 T. contredit une indisponibilité reconnue.
+OK  [I6] equipe.indisponibilite | Indisponibilité reconnue mais encore en attente de décision | attendu: non signalé | obtenu: aucun constat
+OK  [I7] souhait | Préférence prioritaire « indisponible lundi », poste lundi | attendu: signalé, info | obtenu: info: Lundi, une préférence prioritaire de P1 T. n'est pas satisfaite.
+OK  [I8] equipe.indisponibilite | Indisponibilité reconnue une semaine sur deux (référence : semaine du 11 janvier), poste le lundi 18 (semaine impaire) | attendu: non signalé | obtenu: aucun constat
+OK  [I9] equipe.indisponibilite | Même besoin, poste le lundi 25 janvier (semaine paire) | attendu: signalé, bloquant | obtenu: bloquant: Lundi, le poste de P1 T. contredit une indisponibilité reconnue.
+KO  [RP1] (repos posé) | Poste le lundi alors qu’un repos est posé pour ce jour (donnée) | attendu: signalé | obtenu: aucun constat | Dans l’interface, poser un poste sur un repos efface le repos (saveShift) : l’incohérence ne peut venir que d’un calcul qui ne le respecte pas.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > samedis libres par mois
+OK  [S1] equipe.samedisLibres | Préparateur posté les 5 samedis de janvier 2027 | attendu: signalé, alerte | obtenu: alerte: P1 T. travaille tous les samedis du mois : l’officine en garde 1 libre.
+OK  [S2] equipe.samedisLibres | Préparateur posté 4 samedis sur 5 (le 30 libre) | attendu: non signalé | obtenu: aucun constat
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > contrôles d’équipe : temps partiel minimal, nombre de pharmaciens
+OK  [TP1] contrat.partielMin | Préparateur à 15 h | attendu: alerte | obtenu: alerte: X T. : contrat de 15 h, sous le minimum de 16 h du temps partiel.
+OK  [TP2] contrat.partielMin | Préparateur à 16 h pile | attendu: non signalé | obtenu: aucun constat
+OK  [TP3] contrat.partielMin | Étudiant à 10 h ; apprenti à 10 h | attendu: non signalés (dérogations) | obtenu: aucun constat ; aucun constat
+OK  [TP4] contrat.partielMin | Animatrice à 21 h (exemple : Sarah) | attendu: à vérifier : 21 h < 24 h (durée minimale légale L3123-27, sauf accord de branche) | obtenu: aucun constat | Seuil de 16 h « source secondaire » : à confirmer sur l’accord de branche.
+OK  [AD1] pharmacie.adjoints | CA 2 600 000 €, adjoints 35 h + 28 h (1,8 ETP) | attendu: alerte : 2 ETP attendus (2 tranches révolues de 1,3 M€) | obtenu: alerte: Pharmaciens, hors titulaires : 1,8 équivalent temps plein pour 2 attendus au vu du chiffre d'affaires déclaré.
+OK  [AD2] pharmacie.adjoints | CA 2 599 999 € (1 seule tranche révolue) | attendu: non signalé (1 ETP attendu, 1,8 présents) | obtenu: aucun constat
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > délais : garde (15 jours), temps partiel (7 jours ouvrés), remplacement (7 jours)
+OK  [DG1] garde.delai | Garde du lundi 18 janvier communiquée le 3 (15 jours avant) | attendu: délai tenu | obtenu: true - Programmation communiquée 15 jours avant la garde.
+OK  [DG2] garde.delai | Communiquée le 4 (14 jours avant) | attendu: délai non tenu | obtenu: false - Programmation communiquée 14 jours avant la garde, pour 15 requis.
+OK  [DG3] garde.delai | Circonstances exceptionnelles : communiquée vendredi 15 pour lundi 18 (samedi seul jour ouvrable strictement entre les deux) | attendu: à vérifier : 1 ou 2 jours ouvrables selon que l’on compte le jour de la garde | obtenu: true - Circonstances exceptionnelles : 2 jours ouvrables de prévenance. | joursOuvrablesEntre compte le jour de la garde lui-même.
+OK  [DG4] garde.delai | Exceptionnel, communiquée samedi 16 pour lundi 18 | attendu: délai non tenu | obtenu: false - Circonstances exceptionnelles : 1 jour ouvrable de prévenance pour 2 requis. Accord du salarié à recueillir.
+OK  [DG5] garde.delai | Garde de la titulaire communiquée la veille | attendu: aucun délai (non salariée) | obtenu: true - Titulaire : aucun délai de prévenance.
+OK  [DT1] delai.tempsPartiel | Première publication le mercredi 30 décembre 2026 pour la semaine du 11 janvier (7 jours ouvrés : 31/12, 4-8/01, 11/01 ; le 1er janvier férié exclu) | attendu: délai tenu | obtenu: aucun délai signalé
+OK  [DT2] delai.tempsPartiel | Première publication le jeudi 31 décembre (6 jours ouvrés) | attendu: délai signalé pour le temps partiel | obtenu: P2 T. (temps partiel) : horaires communiqués 6 jours ouvrés avant la semaine, pour 7 requis.
+OK  [DT3] delai.tempsPartiel | Semaine publiée ; le lundi, le poste du mercredi d’un temps partiel est raccourci | attendu: délai signalé (2 jours ouvrés) | obtenu: P2 T. (temps partiel), mer. 13 janvier : modification notifiée 2 jours ouvrés avant, pour 7 requis.
+KO  [DT4] (délai de prévenance temps plein) | Temps plein : poste du mercredi allongé de 2 h, publié la veille | attendu: à vérifier : délai de prévenance de 7 jours (L3121-47) en cas de modification des horaires | obtenu: 0 délai signalé ; 1 changement | Seuls les temps partiels et les gardes ont un contrôle de délai à la publication ; la règle « delai.remplacement » ne sert qu’aux demandes de remplacement.
+OK  [DR1] delai.remplacement | Demande pour un poste dans 7 jours, puis dans 6 jours | attendu: acceptée puis refusée | obtenu: true / false
+OK  [DR2] delai.remplacement | Fiche abaissée à 1 jour | attendu: plancher de 3 jours | obtenu: 3
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > jeunes travailleurs (apprentie, étudiant)
+KO  [JT1] (jeunes travailleurs) | Apprentie planifiée 4 × 9 h 30 + 3 h 30 = 41 h 30, contrat 21 h | attendu: au minimum une alerte (contrat dépassé de 20 h 30) ; si mineure, durées maximales de 8 h/j et 35 h/sem. dépassées | obtenu: aucun constat | Aucune date de naissance dans la fiche (types.ts), aucune règle « moins de 18 ans » ; le dépassement du contrat n’est jamais signalé par le validateur (seul le plafond de 42 h l’est).
+
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > seul pharmacien en rendez-vous, compétences et salle 20ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > effectif minimal au comptoir 12ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > absences approuvées, indisponibilités reconnues, préférences 17ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > samedis libres par mois 3ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > contrôles d’équipe : temps partiel minimal, nombre de pharmaciens 9ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > délais : garde (15 jours), temps partiel (7 jours ouvrés), remplacement (7 jours) 18ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > jeunes travailleurs (apprentie, étudiant) 1ms
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > compteur d’heures (solde)
+OK  [SH-p_camille] heures.soldeHeures | Nicolas (35 h), 9 semaines publiées jusqu’à la semaine en cours | attendu: réalisé 307.00 h (versions publiées), contrat 315.00 h, solde -8.00 h | obtenu: réalisé 307.00 h, contrat 315.00 h, solde -8.00 h
+OK  [SH-p_karim] heures.soldeHeures | Igor (35 h), 9 semaines publiées jusqu’à la semaine en cours | attendu: réalisé 286.00 h (versions publiées), contrat 294.00 h, solde -8.00 h | obtenu: réalisé 286.00 h, contrat 294.00 h, solde -8.00 h
+OK  [SH-p_ines] heures.soldeHeures | Inès (24 h), 9 semaines publiées jusqu’à la semaine en cours | attendu: réalisé 211.00 h (versions publiées), contrat 216.00 h, solde -5.00 h | obtenu: réalisé 211.00 h, contrat 216.00 h, solde -5.00 h
+OK  [SH-p_manon] heures.soldeHeures | Manon (21 h), 9 semaines publiées jusqu’à la semaine en cours | attendu: réalisé 184.50 h (versions publiées), contrat 189.00 h, solde -4.50 h | obtenu: réalisé 184.50 h, contrat 189.00 h, solde -4.50 h
+KO  [SH-ferie] heures.contratSemaine | Semaine du 9 nov. 2026 (mercredi 11 férié, officine fermée), temps pleins | attendu: contrat réduit d’un jour férié chômé (7 h) ou heures non récupérées : aucun « retard » créé par le férié | obtenu: Igor 33.00 h pour un contrat compté 35.00 h, Nicolas 34.00 h pour un contrat compté 35.00 h, Thomas 34.50 h pour un contrat compté 35.00 h, Jules 34.00 h pour un contrat compté 35.00 h | contratSemaine() ne déduit que les absences approuvées (1/5 par jour ouvré) ; le planning de l’exemple a fait travailler 33 à 35,5 h sur 4 jours ouvrés + samedi.
+KO  [SH-brouillon] heures.soldeHeures | Nicolas : poste de la semaine publiée allongé de 2 h en brouillon (non publié) | attendu: compteur inchangé tant que la modification n’est pas publiée (« ce qui a été planifié et publié ») | obtenu: solde -8.00 h → -6.00 h | soldeHeures lit data.shifts (le brouillon), pas la version publiée (snapshot).
+OK  [SH-encours] heures.soldeHeures | Nicolas, aujourd’hui vendredi 2026-11-20 : postes de samedi déjà comptés | attendu: à vérifier : la semaine en cours est comptée en entier (prévu, pas réalisé) | obtenu: 9.00 h de postes futurs inclus dans « réalisé »
+OK  [SH-regul] heures.proposerRegularisations | Propositions automatiques sur l’exemple | attendu: chaque solde d’au moins 1 h résorbé par demi-heures, plafonné à 8 h | obtenu: Igor 480 min (rattrapage, sem. 2026-12-07) ; Nicolas 480 min (rattrapage, sem. 2026-12-07) ; Thomas 270 min (rattrapage, sem. 2026-12-07) ; Inès 300 min (rattrapage, sem. 2026-12-07) ; Jules 270 min (rattrapage, sem. 2026-12-07) ; Sarah 150 min (rattrapage, sem. 2026-12-07) ; Manon 270 min (rattrapage, sem. 2026-12-07) ; Yanis 480 min (rattrapage, sem. 2026-12-07)
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > heures d’un mois : trois calculs
+OK  [HM-p_camille] heures du mois | Nicolas, octobre 2026 (22 jours ouvrés) | attendu: 154.00 h planifiées dans le mois ; contrat ≈ 154.00 h | obtenu: fiche navette 154.00 h ; vue Mois (planifieMois) 154.00 h pour 154.00 h ; heuresMois() 172.50 h pour 175.00 h (semaines entières, dont des jours de septembre et novembre)
+OK  [HS-p_camille] payroll.ficheNavette | Nicolas, octobre 2026 : heures complémentaires ou supplémentaires (semaines dont le lundi est en octobre) | attendu: 0.00 h | obtenu: 0.00 h (compl. 0.00, 25 % 0.00, 50 % 0.00) | La semaine du 28 sept. (lundi en septembre) contient les 1er-4 oct. : ses heures entrent dans les heures du mois d’octobre mais ses heures supplémentaires dans septembre (choix documenté).
+OK  [HM-p_ines] heures du mois | Inès, octobre 2026 (22 jours ouvrés) | attendu: 105.50 h planifiées dans le mois ; contrat ≈ 105.60 h | obtenu: fiche navette 105.50 h ; vue Mois (planifieMois) 105.50 h pour 105.60 h ; heuresMois() 117.00 h pour 120.00 h (semaines entières, dont des jours de septembre et novembre)
+OK  [HS-p_ines] payroll.ficheNavette | Inès, octobre 2026 : heures complémentaires ou supplémentaires (semaines dont le lundi est en octobre) | attendu: 0.00 h | obtenu: 0.00 h (compl. 0.00, 25 % 0.00, 50 % 0.00) | La semaine du 28 sept. (lundi en septembre) contient les 1er-4 oct. : ses heures entrent dans les heures du mois d’octobre mais ses heures supplémentaires dans septembre (choix documenté).
+KO  [FN-abs] payroll.ficheNavette | Congé de Thomas du lundi 5 au dimanche 18 octobre (2 semaines) | attendu: à vérifier : 12 jours ouvrables (lundi-samedi) ou 10 jours ouvrés pour les congés payés | obtenu: {"Congé":14} | Les jours calendaires (dimanches compris) sont comptés.
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > équité des samedis
+OK  [EQ-sam] equity.equite | 8 semaines avant la semaine en cours : samedis réels et attendus (prorata heures × semaines travaillées) | attendu: mêmes valeurs qu’un recomptage à la main | obtenu: Caroline 7/7.84, Pierre 4/4.48, Igor 6/6.53, Léa 4/5.23, Nicolas 5/6.53, Thomas 6/6.53, Inès 5/4.48, Jules 6/6.53, Sarah 3/3.92, Manon 5/3.92, Yanis 8/2.99 ; écart type 1.73
+OK  [EQ-ferm] equity.equite | Fermetures en semaine, même période | attendu: 124 (postes du lundi au vendredi finissant à la fermeture) | obtenu: 124
+OK  [EQ-titu] equity.equite | Les titulaires (non salariés) entrent-ils dans le partage des samedis ? | attendu: à vérifier : choix de l’officine | obtenu: oui, au prorata de leur « objectif indicatif » : Caroline attendu 7.84, Pierre attendu 4.48
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > ETP et nombre de pharmaciens
+OK  [ETP1] stats.composition.etp | ETP de l’équipe de l’exemple (11 personnes internes) | attendu: 8.83 (somme des heures/35 plafonnées à 1) | obtenu: 8.83 | Les titulaires non salariés (objectif indicatif 42 h et 24 h) et l’apprentie sont comptés ; à vérifier selon l’usage voulu (le Code du travail exclut les apprentis du calcul des effectifs).
+KO  [ETP2] stats vs pharmacie.adjoints | Igor passé à 39 h : ETP des pharmaciens adjoints | attendu: la même valeur dans les statistiques et dans le contrôle du nombre de pharmaciens | obtenu: statistiques 1.8 ; contrôle 1.91 | stats plafonne chaque personne à 1 ETP ; quotaAdjoints ne plafonne pas.
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > coût et majorations
+KO  [PAY1] payroll.decompteSemaine | Contrat de 39 h, 39 h planifiées, 10 €/h | attendu: 35 h × 10 + 4 h × 12,50 = 400 € | obtenu: 440 € (supp25 4 h, au-delà du contrat 0 h) | cout = taux × (contrat + heures majorées) : les 4 h de 36 à 39 sont payées deux fois (dans le contrat et dans la majoration).
+OK  [PAY2] payroll.decompteSemaine | Contrat de 35 h, 44 h planifiées | attendu: 350 + 8 × 12,50 + 1 × 15 = 465 € | obtenu: 465 € (25 % : 8 h, 50 % : 1 h)
+OK  [PAY3] payroll.decompteSemaine | Temps partiel 24 h, 30 h planifiées | attendu: 240 + 2,4 h × 11 + 3,6 h × 12,50 = 311,40 € | obtenu: 311.40 € (complémentaires 6 h)
+OK  [PAY4] payroll.decompteSemaine | Contrat de 35 h, 30 h planifiées | attendu: 350 € (le contrat reste dû) | obtenu: 350 €
+OK  [PAY5] payroll.coutSemaine | Coût estimé de la semaine du 23 nov. (taux de l’exemple) | attendu: somme des coûts individuels | obtenu: 4156 €
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > indemnités de garde
+OK  [GA1] garde.equivalence | Garde volets fermés mardi 1er déc. 20 h - mercredi 8 h, Igor (35 h, 24 €/h) | attendu: 12 h × 25 % = 3 h d’équivalence = 72 € | obtenu: GARDE_VF_EQUIV 3 h = 72.00 € [2026-12]
+OK  [GA2] garde.equivalence | Même garde, Léa (28 h, temps partiel, 23.5 €/h) | attendu: 12 h payées à 100 % = 282 € | obtenu: GARDE_VF_100 12 h = 282.00 € [2026-12]
+OK  [GA3] garde.dimanche | Dimanche 29 nov. 9 h - 19 h volets ouverts, Léa, point à 4,50 € | attendu: 10 h de travail (235 €) + sujétion 10 × 1,5 = 15 points (67,50 €) + 10 h de repos compensateur | obtenu: SUJETION_DIM_FERIE 15 points = 67.50 € [2026-11] ; GARDE_VO 10 h = 235.00 € [2026-11] ; REPOS_COMPENSATEUR 10 h [2026-11]
+OK  [GA4] garde.dimanche (1er mai) | Samedi 1er mai 2027 9 h - 19 h volets ouverts, Igor | attendu: travail 10 h (240 €) + indemnité égale au salaire (240 €) + repos compensateur 10 h | obtenu: GARDE_1ER_MAI 10 h = 240.00 € [2027-05] ; GARDE_VO 10 h = 240.00 € [2027-05] ; REPOS_COMPENSATEUR 10 h [2027-05]
+OK  [GA5] garde (changement d’heure) | Volets fermés samedi 24 oct. 2026 20 h - dimanche 25 8 h (passage à l’heure d’hiver), Igor | attendu: 13 h réelles : samedi 4 h (équivalence 1 h), dimanche 9 h (sujétion 13,5 points, présence 9 h, repos 9 h) | obtenu: GARDE_VF_EQUIV 1 h = 24.00 € [2026-10] ; SUJETION_DIM_FERIE 13.5 points [2026-10] ; GARDE_VF_PRESENCE 9 h [2026-10] ; REPOS_COMPENSATEUR 9 h [2026-10] ; durée réelle 13 h
+OK  [GA6] garde (changement d’heure) | Volets fermés samedi 27 mars 2027 20 h - dimanche 28 8 h (passage à l’heure d’été) | attendu: 11 h réelles (4 h samedi + 7 h dimanche) | obtenu: GARDE_VF_EQUIV 1 h = 24.00 € [2027-03] ; SUJETION_DIM_FERIE 10.5 points [2027-03] ; GARDE_VF_PRESENCE 7 h [2027-03] ; REPOS_COMPENSATEUR 7 h [2027-03] ; durée réelle 11 h
+OK  [GA7] garde (fin d’année) | Volets fermés jeudi 31 déc. 19 h 30 - vendredi 1er janv. 8 h 30, Igor | attendu: décembre : 4 h 30 → 1,125 h d’équivalence ; janvier (férié) : 8 h 30 → 12,75 points + 8,5 h de présence ; repos compensateur 8,5 h | obtenu: GARDE_VF_EQUIV 1.13 h = 27.12 € [2026-12] ; SUJETION_DIM_FERIE 12.75 points [2027-01] ; GARDE_VF_PRESENCE 8.5 h [2027-01] ; REPOS_COMPENSATEUR 8.5 h [2026-12] ; notes : Volets fermés : les majorations de nuit ne sont pas dues. / La garde est à cheval sur deux mois : les variables sont ventilées par mois. / Valeur du point non saisie : l’indemnité de sujétion est exprimée en points.
+OK  [GA8] garde.astreinte | Astreinte mardi 19 h - mercredi 9 h, une intervention de 45 min, Igor | attendu: 14 h × 10 % × 24 € = 33,60 € ; intervention 0,75 h × 24 € = 18 € | obtenu: ASTREINTE 14 h = 33.60 € [2026-12] ; ASTREINTE_INTERVENTION 0.75 h = 18.00 € [2026-12]
+OK  [GA9] garde.astreinte (dimanche) | Astreinte un dimanche 9 h - 19 h | attendu: à vérifier : sujétion dimanche ou non | obtenu: ASTREINTE 10 h = 24.00 € [2026-11]
+OK  [GA10] payroll.ficheNavette | La garde du 31 déc. dans la fiche navette de décembre | attendu: seulement la part de décembre, et le repos compensateur | obtenu: GARDE_VF_EQUIV 1.13, REPOS_COMPENSATEUR 8.5
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > suivi de présence
+OK  [SU1] suivi.suiviDe | Igor : arrêt du mercredi 18 au vendredi 20 nov., aujourd’hui le 20 | attendu: 3 jours d’arrêt | obtenu: 3 jours
+OK  [SU2] suivi.suiviDe | Jules : retards de 15 et 10 min dans l’exemple | attendu: 2 retards, 25 min | obtenu: 2 retards, 25 min
+
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > compteur d’heures (solde) 21ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > heures d’un mois : trois calculs 32ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > équité des samedis 4ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > ETP et nombre de pharmaciens 60ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > coût et majorations 1ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > indemnités de garde 3ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > suivi de présence 0ms
+stdout | tests/generation.test.ts > 2 bis. Cas extrêmes > pharmacie ouverte 7 jours sur 7
+OK  [X4-2026-12-07] generer 7j/7 | Ouverture 7 j/7 (dimanche 9 h - 19 h), semaine du 2026-12-07, enchaînée sur la précédente | attendu: aucun salarié 7 jours sur 7 ; repos hebdomadaire tenu | obtenu: 1 bloquant(s) [pharmacie.presence] ; salariés à 7 jours : aucun ; à 6 jours : aucun
+OK  [X4-2026-12-14] generer 7j/7 | Ouverture 7 j/7 (dimanche 9 h - 19 h), semaine du 2026-12-14, enchaînée sur la précédente | attendu: aucun salarié 7 jours sur 7 ; repos hebdomadaire tenu | obtenu: 1 bloquant(s) [pharmacie.presence] ; salariés à 7 jours : aucun ; à 6 jours : aucun
+OK  [X4-2026-12-21] generer 7j/7 | Ouverture 7 j/7 (dimanche 9 h - 19 h), semaine du 2026-12-21, enchaînée sur la précédente | attendu: aucun salarié 7 jours sur 7 ; repos hebdomadaire tenu | obtenu: 1 bloquant(s) [pharmacie.presence] ; salariés à 7 jours : aucun ; à 6 jours : aucun
+
+ ✓ tests/generation.test.ts > 2 bis. Cas extrêmes > pharmacie ouverte 7 jours sur 7 3731ms
+stdout | tests/generation.test.ts > 2 bis. Cas extrêmes > mode « vous seul » : la variante Habitudes et les contraintes posées après coup
+OK  [HB-equite] generer (habitudes) | Mode « vous seul », p_camille : repos posé le lundi 7 déc. et indisponibilité reconnue le mardi (il travaille ces jours-là d’habitude) | attendu: repos posé et indisponibilité reconnue respectés par chaque proposition | obtenu: variante equite : poste le lundi non, poste le mardi non ; bloquants 0
+KO  [HB-habitudes] generer (habitudes) | Mode « vous seul », p_camille : repos posé le lundi 7 déc. et indisponibilité reconnue le mardi (il travaille ces jours-là d’habitude) | attendu: repos posé et indisponibilité reconnue respectés par chaque proposition | obtenu: variante habitudes : poste le lundi OUI, poste le mardi OUI ; bloquants 1
+OK  [HB-cout] generer (habitudes) | Mode « vous seul », p_camille : repos posé le lundi 7 déc. et indisponibilité reconnue le mardi (il travaille ces jours-là d’habitude) | attendu: repos posé et indisponibilité reconnue respectés par chaque proposition | obtenu: variante cout : poste le lundi non, poste le mardi non ; bloquants 0
+
+ ✓ tests/generation.test.ts > 2 bis. Cas extrêmes > mode « vous seul » : la variante Habitudes et les contraintes posées après coup 4037ms
+stdout | tests/generation.test.ts > 2 bis. Cas extrêmes > postes types plus longs que la loi
+KO  [X5] generer (postes types) | Seul poste type en semaine : 8 h 30 - 19 h 30 sans pause (11 h) | attendu: le calcul n’affecte pas de salarié sur un poste qui dépasse 10 h et 6 h sans pause, ou le dit | obtenu: 38 bloquant(s) : duree.quotidienne, duree.pause ; 19 postes de 11 h donnés à des salariés
+
+ ✓ tests/generation.test.ts > 2 bis. Cas extrêmes > postes types plus longs que la loi 2266ms
+
+ Test Files  10 passed (10)
+      Tests  54 passed (54)
+   Start at  23:48:27
+   Duration  39.84s (tests 96%, import 4%)
+

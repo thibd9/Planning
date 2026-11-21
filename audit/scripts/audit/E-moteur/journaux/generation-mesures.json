@@ -1,0 +1,1062 @@
+[
+ {
+  "semaine": "2026-11-16",
+  "variante": "equite",
+  "ms": 530,
+  "bloquants": [
+   "pharmacie.competence: Vaccination, jeudi de 16 h à 17 h : Igor L. n'est pas en poste sur tout le créneau."
+  ],
+  "alertes": {
+   "equipe.samedisLibres": 4
+  },
+  "auDelaContrat": [
+   "Jules 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 18,
+  "souhaits": "100 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.78,
+  "maxJour": "Caroline 2026-11-16 9.50 h",
+  "heures": {
+   "Caroline": 40,
+   "Pierre": 23.5,
+   "Igor": 28,
+   "Léa": 28,
+   "Nicolas": 34.5,
+   "Thomas": 33,
+   "Inès": 23,
+   "Jules": 35.5,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-11-16",
+  "variante": "souhaits",
+  "ms": 530,
+  "bloquants": [
+   "pharmacie.competence: Vaccination, jeudi de 16 h à 17 h : Igor L. n'est pas en poste sur tout le créneau."
+  ],
+  "alertes": {
+   "equipe.samedisLibres": 2
+  },
+  "auDelaContrat": [
+   "Manon 21.50 h / 21 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 16,
+  "souhaits": "100 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.77,
+  "maxJour": "Caroline 2026-11-19 9.50 h",
+  "heures": {
+   "Caroline": 42.5,
+   "Pierre": 23,
+   "Igor": 28,
+   "Léa": 28,
+   "Nicolas": 35,
+   "Thomas": 35,
+   "Inès": 23,
+   "Jules": 35,
+   "Sarah": 20.5,
+   "Manon": 21.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-11-16",
+  "variante": "cout",
+  "ms": 530,
+  "bloquants": [
+   "pharmacie.competence: Vaccination, jeudi de 16 h à 17 h : Igor L. n'est pas en poste sur tout le créneau."
+  ],
+  "alertes": {
+   "equipe.samedisLibres": 3
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 15,
+  "souhaits": "100 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.85,
+  "maxJour": "Caroline 2026-11-16 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 28,
+   "Léa": 28,
+   "Nicolas": 35,
+   "Thomas": 34.5,
+   "Inès": 23.5,
+   "Jules": 35,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-11-23",
+  "variante": "equite",
+  "ms": 530,
+  "bloquants": [],
+  "alertes": {
+   "equipe.effectif": 1,
+   "equipe.samedisLibres": 3,
+   "souhait": 1
+  },
+  "auDelaContrat": [
+   "Thomas 35.50 h / 35 h",
+   "Jules 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 2,
+  "souhaits": "50 % de 2",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.74,
+  "maxJour": "Igor 2026-11-26 9.50 h",
+  "heures": {
+   "Caroline": 41.5,
+   "Pierre": 23.5,
+   "Igor": 35,
+   "Léa": 27.5,
+   "Nicolas": 35,
+   "Thomas": 35.5,
+   "Inès": 23.5,
+   "Jules": 35.5,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-11-23",
+  "variante": "souhaits",
+  "ms": 530,
+  "bloquants": [],
+  "alertes": {
+   "pharmacie.rdv": 1,
+   "equipe.effectif": 1,
+   "equipe.samedisLibres": 5
+  },
+  "auDelaContrat": [
+   "Jules 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 3.5,
+  "souhaits": "100 % de 2",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.75,
+  "maxJour": "Caroline 2026-11-23 9.50 h",
+  "heures": {
+   "Caroline": 40,
+   "Pierre": 23,
+   "Igor": 34.5,
+   "Léa": 28,
+   "Nicolas": 34.5,
+   "Thomas": 34.5,
+   "Inès": 24,
+   "Jules": 35.5,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 14.5
+  }
+ },
+ {
+  "semaine": "2026-11-23",
+  "variante": "cout",
+  "ms": 530,
+  "bloquants": [],
+  "alertes": {
+   "pharmacie.rdv": 1,
+   "equipe.effectif": 1,
+   "equipe.samedisLibres": 4
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 7,
+  "souhaits": "100 % de 2",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.7,
+  "maxJour": "Caroline 2026-11-23 9.50 h",
+  "heures": {
+   "Caroline": 42.5,
+   "Pierre": 23,
+   "Igor": 33,
+   "Léa": 26,
+   "Nicolas": 35,
+   "Thomas": 34.5,
+   "Inès": 23,
+   "Jules": 34.5,
+   "Sarah": 20.5,
+   "Manon": 20.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-11-30",
+  "variante": "equite",
+  "ms": 507,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 7
+  },
+  "auDelaContrat": [
+   "Jules 35.50 h / 35 h",
+   "Manon 21.50 h / 21 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 13.5,
+  "souhaits": "71 % de 24",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.76,
+  "maxJour": "Pierre 2026-12-04 9.50 h",
+  "heures": {
+   "Caroline": 41.5,
+   "Pierre": 23.5,
+   "Igor": 33,
+   "Léa": 27.5,
+   "Nicolas": 9,
+   "Thomas": 34.5,
+   "Inès": 23.5,
+   "Jules": 35.5,
+   "Sarah": 21,
+   "Manon": 21.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-11-30",
+  "variante": "souhaits",
+  "ms": 507,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 1
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 16,
+  "souhaits": "96 % de 24",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.79,
+  "maxJour": "Caroline 2026-11-30 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 34.5,
+   "Léa": 25.5,
+   "Nicolas": 9,
+   "Thomas": 33,
+   "Inès": 23.5,
+   "Jules": 35,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 14.5
+  }
+ },
+ {
+  "semaine": "2026-11-30",
+  "variante": "cout",
+  "ms": 507,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 5
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 12,
+  "souhaits": "79 % de 24",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.79,
+  "maxJour": "Caroline 2026-11-30 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 35,
+   "Léa": 28,
+   "Nicolas": 9,
+   "Thomas": 33,
+   "Inès": 23.5,
+   "Jules": 34.5,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-07",
+  "variante": "equite",
+  "ms": 490,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 9
+  },
+  "auDelaContrat": [
+   "Nicolas 35.50 h / 35 h",
+   "Jules 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 5,
+  "souhaits": "68 % de 28",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.9,
+  "maxJour": "Caroline 2026-12-07 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23,
+   "Igor": 33,
+   "Léa": 28,
+   "Nicolas": 35.5,
+   "Thomas": 34.5,
+   "Inès": 23,
+   "Jules": 35.5,
+   "Sarah": 20.5,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-07",
+  "variante": "souhaits",
+  "ms": 490,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 1
+  },
+  "auDelaContrat": [
+   "Nicolas 35.50 h / 35 h",
+   "Jules 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 4.5,
+  "souhaits": "96 % de 28",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.92,
+  "maxJour": "Caroline 2026-12-09 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 34.5,
+   "Léa": 27.5,
+   "Nicolas": 35.5,
+   "Thomas": 34.5,
+   "Inès": 24,
+   "Jules": 35.5,
+   "Sarah": 21,
+   "Manon": 19,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-07",
+  "variante": "cout",
+  "ms": 490,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 8
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 4,
+  "souhaits": "71 % de 28",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.88,
+  "maxJour": "Igor 2026-12-08 9.50 h",
+  "heures": {
+   "Caroline": 41.5,
+   "Pierre": 23,
+   "Igor": 34,
+   "Léa": 28,
+   "Nicolas": 33,
+   "Thomas": 35,
+   "Inès": 23.5,
+   "Jules": 34.5,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-14",
+  "variante": "equite",
+  "ms": 450,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 5
+  },
+  "auDelaContrat": [
+   "Nicolas 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 11.6,
+  "souhaits": "81 % de 26",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.81,
+  "maxJour": "Nicolas 2026-12-15 9.50 h",
+  "heures": {
+   "Caroline": 40,
+   "Pierre": 23,
+   "Igor": 34.5,
+   "Léa": 28,
+   "Nicolas": 35.5,
+   "Thomas": 33,
+   "Inès": 23,
+   "Jules": 35,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-14",
+  "variante": "souhaits",
+  "ms": 450,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 1
+  },
+  "auDelaContrat": [
+   "Nicolas 35.50 h / 35 h",
+   "Sarah 21.50 h / 21 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 13.6,
+  "souhaits": "96 % de 26",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.81,
+  "maxJour": "Caroline 2026-12-16 9.50 h",
+  "heures": {
+   "Caroline": 42.5,
+   "Pierre": 23,
+   "Igor": 34.5,
+   "Léa": 28,
+   "Nicolas": 35.5,
+   "Thomas": 34.5,
+   "Inès": 24,
+   "Jules": 35,
+   "Sarah": 21.5,
+   "Manon": 19,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-14",
+  "variante": "cout",
+  "ms": 450,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 9
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 13.1,
+  "souhaits": "65 % de 26",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.95,
+  "maxJour": "Caroline 2026-12-14 9.50 h",
+  "heures": {
+   "Caroline": 40,
+   "Pierre": 25,
+   "Igor": 34.5,
+   "Léa": 26,
+   "Nicolas": 34.5,
+   "Thomas": 34,
+   "Inès": 23,
+   "Jules": 34.5,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-21",
+  "variante": "equite",
+  "ms": 489,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 10
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 5,
+  "souhaits": "62 % de 26",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.53,
+  "maxJour": "Caroline 2026-12-21 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23,
+   "Igor": 33,
+   "Léa": 28,
+   "Nicolas": 34.5,
+   "Thomas": 34.5,
+   "Inès": 23,
+   "Jules": 34.5,
+   "Sarah": 20.5,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-21",
+  "variante": "souhaits",
+  "ms": 489,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 3
+  },
+  "auDelaContrat": [
+   "Nicolas 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 6,
+  "souhaits": "88 % de 26",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.52,
+  "maxJour": "Caroline 2026-12-23 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 21,
+   "Igor": 34.5,
+   "Léa": 26,
+   "Nicolas": 35.5,
+   "Thomas": 34.5,
+   "Inès": 23.5,
+   "Jules": 33,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-21",
+  "variante": "cout",
+  "ms": 489,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 10
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 4,
+  "souhaits": "62 % de 26",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.55,
+  "maxJour": "Caroline 2026-12-21 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 34.5,
+   "Léa": 28,
+   "Nicolas": 34.5,
+   "Thomas": 35,
+   "Inès": 23.5,
+   "Jules": 34.5,
+   "Sarah": 20.5,
+   "Manon": 21,
+   "Yanis": 14.5
+  }
+ },
+ {
+  "semaine": "2026-12-28",
+  "variante": "equite",
+  "ms": 426,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 5
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 4.5,
+  "souhaits": "69 % de 16",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.49,
+  "maxJour": "Caroline 2026-12-28 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 34.5,
+   "Léa": 27.5,
+   "Nicolas": 34.5,
+   "Thomas": 34.5,
+   "Inès": 23.5,
+   "Jules": 34.5,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 14.5
+  }
+ },
+ {
+  "semaine": "2026-12-28",
+  "variante": "souhaits",
+  "ms": 426,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 1
+  },
+  "auDelaContrat": [
+   "Igor 35.50 h / 35 h",
+   "Nicolas 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 2.5,
+  "souhaits": "94 % de 16",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.33,
+  "maxJour": "Caroline 2026-12-30 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 25,
+   "Igor": 35.5,
+   "Léa": 28,
+   "Nicolas": 35.5,
+   "Thomas": 34.5,
+   "Inès": 24,
+   "Jules": 34.5,
+   "Sarah": 21,
+   "Manon": 20.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2026-12-28",
+  "variante": "cout",
+  "ms": 426,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 3
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 4.5,
+  "souhaits": "81 % de 16",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.33,
+  "maxJour": "Caroline 2026-12-29 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 35,
+   "Léa": 28,
+   "Nicolas": 34.5,
+   "Thomas": 34.5,
+   "Inès": 23.5,
+   "Jules": 34,
+   "Sarah": 21,
+   "Manon": 19,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-01-04",
+  "variante": "equite",
+  "ms": 424,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 1
+  },
+  "auDelaContrat": [
+   "Igor 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 16,
+  "souhaits": "50 % de 2",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.19,
+  "maxJour": "Igor 2027-01-07 9.50 h",
+  "heures": {
+   "Caroline": 41.5,
+   "Pierre": 23,
+   "Igor": 35.5,
+   "Léa": 28,
+   "Nicolas": 34.5,
+   "Thomas": 35,
+   "Inès": 23,
+   "Jules": 35,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-01-04",
+  "variante": "souhaits",
+  "ms": 424,
+  "bloquants": [],
+  "alertes": {},
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 14.5,
+  "souhaits": "100 % de 2",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.08,
+  "maxJour": "Caroline 2027-01-04 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23,
+   "Igor": 35,
+   "Léa": 28,
+   "Nicolas": 35,
+   "Thomas": 35,
+   "Inès": 23.5,
+   "Jules": 35,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-01-04",
+  "variante": "cout",
+  "ms": 424,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 1
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 19.5,
+  "souhaits": "50 % de 2",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 1.12,
+  "maxJour": "Caroline 2027-01-05 9.50 h",
+  "heures": {
+   "Caroline": 42.5,
+   "Pierre": 23.5,
+   "Igor": 33,
+   "Léa": 27.5,
+   "Nicolas": 33,
+   "Thomas": 35,
+   "Inès": 23.5,
+   "Jules": 35,
+   "Sarah": 21,
+   "Manon": 20.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-03-29",
+  "variante": "equite",
+  "ms": 441,
+  "bloquants": [],
+  "alertes": {},
+  "auDelaContrat": [
+   "Nicolas 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 3.5,
+  "souhaits": "100 % de 1",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0.34,
+  "maxJour": "Caroline 2027-03-30 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23,
+   "Igor": 34.5,
+   "Léa": 28,
+   "Nicolas": 35.5,
+   "Thomas": 34.5,
+   "Inès": 23.5,
+   "Jules": 34.5,
+   "Sarah": 20.5,
+   "Manon": 20.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-03-29",
+  "variante": "souhaits",
+  "ms": 441,
+  "bloquants": [],
+  "alertes": {},
+  "auDelaContrat": [
+   "Igor 35.50 h / 35 h",
+   "Nicolas 35.50 h / 35 h",
+   "Jules 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 4.5,
+  "souhaits": "100 % de 1",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0.27,
+  "maxJour": "Caroline 2027-03-31 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 35.5,
+   "Léa": 27,
+   "Nicolas": 35.5,
+   "Thomas": 34.5,
+   "Inès": 23.5,
+   "Jules": 35.5,
+   "Sarah": 20.5,
+   "Manon": 20.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-03-29",
+  "variante": "cout",
+  "ms": 441,
+  "bloquants": [],
+  "alertes": {},
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 9,
+  "souhaits": "100 % de 1",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0.49,
+  "maxJour": "Caroline 2027-03-30 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 33,
+   "Léa": 28,
+   "Nicolas": 34,
+   "Thomas": 33,
+   "Inès": 23,
+   "Jules": 33,
+   "Sarah": 20.5,
+   "Manon": 20.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-05-03",
+  "variante": "equite",
+  "ms": 363,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 1
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 17.5,
+  "souhaits": "67 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0,
+  "maxJour": "Caroline 2027-05-03 9.50 h",
+  "heures": {
+   "Caroline": 38,
+   "Pierre": 23,
+   "Igor": 33,
+   "Léa": 28,
+   "Nicolas": 33,
+   "Thomas": 33,
+   "Inès": 21,
+   "Jules": 33,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 9.5
+  }
+ },
+ {
+  "semaine": "2027-05-03",
+  "variante": "souhaits",
+  "ms": 363,
+  "bloquants": [],
+  "alertes": {},
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 15.5,
+  "souhaits": "100 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0,
+  "maxJour": "Caroline 2027-05-03 9.50 h",
+  "heures": {
+   "Caroline": 38,
+   "Pierre": 23,
+   "Igor": 33,
+   "Léa": 28,
+   "Nicolas": 33,
+   "Thomas": 33,
+   "Inès": 23.5,
+   "Jules": 33,
+   "Sarah": 20.5,
+   "Manon": 21,
+   "Yanis": 9.5
+  }
+ },
+ {
+  "semaine": "2027-05-03",
+  "variante": "cout",
+  "ms": 363,
+  "bloquants": [],
+  "alertes": {},
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 15,
+  "souhaits": "100 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0,
+  "maxJour": "Caroline 2027-05-03 9.50 h",
+  "heures": {
+   "Caroline": 38,
+   "Pierre": 23,
+   "Igor": 33,
+   "Léa": 28,
+   "Nicolas": 33,
+   "Thomas": 33,
+   "Inès": 23.5,
+   "Jules": 33,
+   "Sarah": 21,
+   "Manon": 21,
+   "Yanis": 9.5
+  }
+ },
+ {
+  "semaine": "2027-05-17",
+  "variante": "equite",
+  "ms": 421,
+  "bloquants": [],
+  "alertes": {},
+  "auDelaContrat": [
+   "Manon 21.50 h / 21 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 3,
+  "souhaits": "100 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0.41,
+  "maxJour": "Caroline 2027-05-18 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 34.5,
+   "Léa": 28,
+   "Nicolas": 34.5,
+   "Thomas": 34.5,
+   "Inès": 23.5,
+   "Jules": 34.5,
+   "Sarah": 21,
+   "Manon": 21.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-05-17",
+  "variante": "souhaits",
+  "ms": 421,
+  "bloquants": [],
+  "alertes": {},
+  "auDelaContrat": [
+   "Igor 35.50 h / 35 h",
+   "Thomas 35.50 h / 35 h"
+  ],
+  "auDela46": [],
+  "ecartContratTotalH": 2.5,
+  "souhaits": "100 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0.41,
+  "maxJour": "Caroline 2027-05-19 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23,
+   "Igor": 35.5,
+   "Léa": 28,
+   "Nicolas": 34.5,
+   "Thomas": 35.5,
+   "Inès": 23.5,
+   "Jules": 35,
+   "Sarah": 21,
+   "Manon": 20.5,
+   "Yanis": 16
+  }
+ },
+ {
+  "semaine": "2027-05-17",
+  "variante": "cout",
+  "ms": 421,
+  "bloquants": [],
+  "alertes": {
+   "souhait": 1
+  },
+  "auDelaContrat": [],
+  "auDela46": [],
+  "ecartContratTotalH": 7.5,
+  "souhaits": "67 % de 3",
+  "reconnuesViolees": 0,
+  "absencesViolees": 0,
+  "reposViolees": 0,
+  "ecartSamedis": 0.44,
+  "maxJour": "Caroline 2027-05-18 9.50 h",
+  "heures": {
+   "Caroline": 42,
+   "Pierre": 23.5,
+   "Igor": 33,
+   "Léa": 27.5,
+   "Nicolas": 34.5,
+   "Thomas": 33,
+   "Inès": 23.5,
+   "Jules": 35,
+   "Sarah": 21,
+   "Manon": 19,
+   "Yanis": 16
+  }
+ }
+]

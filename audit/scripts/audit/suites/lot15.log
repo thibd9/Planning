@@ -1,0 +1,15 @@
+✓ le bouton d’impression ouvre l’aperçu
+✓ semaine : une feuille A4 paysage, entière dans l’aperçu (1 page · A4 paysage, rapport 1.414)
+✓ semaine : sept jours, 11 personnes, rien ne dépasse de la page (-2)
+✓ la feuille reste du papier : fond blanc, encre noire, quel que soit le mode
+✓ en couleur, un poste est teinté
+✓ noir et blanc : plus aucune teinte, et la légende l’explique en mots
+✓ mois : Planning de l’équipe · Novembre 2026, 5 semaines sur 3 pages, autant de pages dans la copie à imprimer
+✓ mois : aucune page ne déborde (-16,-16,-256)
+✓ les flèches changent de mois
+✓ « Mes postes » : une seule ligne, et mon nom dans le titre (Planning de Caroline Tellier · Semaine 4)
+✓ à l’impression, seule la feuille sort, à sa taille réelle (1123 × 794 px)
+✓ fermer l’aperçu retire la copie à imprimer
+
+12/12 vérifications
+aucune erreur de page

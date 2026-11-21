@@ -1,0 +1,25 @@
+Onglet par défaut : Mes préférences | Ce qui m’arrange le mois prochain. | À remplir aujourd’hui | Pas de réponse à attendre
+Barre : Décembre 2026 | 0 jour sur 26 rempli | Dernier jour | M’assister | Je préfère | Matin | Journée | Après-midi | Repos | Effacer
+Après clic 1 déc (Matin) : 1 Matin , mardi ; statut=Choix enregistré ; données=1
+Re-clic 1 déc : 1 À remplir , mardi ; données=0
+2 déc / 3 déc après effacer : 2 Repos , mercredi / 3 À remplir , jeudi ; données=1
+Détail du jour choisi : LE JOUR CHOISI | Jeudi 3 décembre | Votre préférence : aucune | Matin | 5/3 | PF | NL | TN | ID | JP | Pierre F., Nicolas L., Thomas N., Inès D., Jules P. | Après-midi | 5/3 | LF | NL | TN | ID | JP | Léa F., Nicolas L., Thomas N., Inès D., Jules P.
+6 déc (dimanche) : 6 Fermé
+M’assister : 25 jours remplis d’après vos habitudes. Corrigez ce qui ne convient pas. ; données=26
+Barre : Décembre 2026 | 26 jours sur 26 remplis | Dernier jour | M’assister | Je préfère | Matin | Journée | Après-midi | Repos | Effacer
+Bouton M’assister grisé : true
+Choix posés : 02:repos 01:repos 03:repos 04:repos 05:journee 07:repos 08:repos 09:journee 10:repos 11:repos 12:journee 14:repos 15:repos 16:journee 17:repos 18:repos 19:journee 21:repos 22:repos 23:journee 24:repos 26:journee 28:repos 29:repos 30:journee 31:repos
+Jour court (9 Journée , mercredi) → détail : LE JOUR CHOISI | Mercredi 9 décembre | Votre préférence : aucune | Matin | 6/3 | PF | LF | NL | TN | ID | MG | Pierre F., Léa F., Nicolas L., Thomas N., Inès D., Manon G. | Après-midi | 0/3 | Personne ne s’est encore positionné. | Il manque 3 personnes. | Je peux venir
+Je peux venir : Merci. Toute l’équipe voit que ce créneau est couvert. ; détail : LE JOUR CHOISI | Mercredi 9 décembre | Votre préférence : Après-midi | Matin | 6/3 | PF | LF | NL | TN | ID | MG | Pierre F., Léa F., Nicolas L., Thomas N., Inès D., Manon G. | Après-midi | 1/3 | YM | Yanis M. | Il manque 2 personnes. | Vous y êtes
+Novembre : Novembre 2026 | 0 jour sur 24 rempli | Collecte close le mar. 20 octobre | M’assister | Choix enregistré | Je préfère | Matin | Journée | Après-midi | Repos | Effacer ; palette grisée=true
+Clic 25 nov (clos) → données nov=0 ; détail=LE JOUR CHOISI | Mercredi 25 novembre | Votre préférence : aucune | Matin | 0/3 | Personne ne s’est encore positionné. | Après-midi | 0/3 | Personne ne s’est encore positionné.
+Janvier : Janvier 2027 | 0 jour sur 25 rempli | 30 jours restants | M’assister | Je préfère | Matin | Journée | Après-midi | Repos | Effacer
+Clic 4 janv. : données janv.=1
+Mars 2028 : Mars 2028 | 0 jour sur 27 rempli | 457 jours restants | M’assister | Choix enregistré | Je préfère | Matin | Journée | Après-midi | Repos | Effacer
+
+Limite mise au 15 : 15
+Carte préférences : Mes préférences | Ce qui m’arrange le mois prochain. | 25 j pour modifier | Pas de réponse à attendre
+Onglet par défaut : Mes préférences | Ce qui m’arrange le mois prochain. | 25 j pour modifier | Pas de réponse à attendre
+Barre : Janvier 2027 | 1 jour sur 25 rempli | 25 jours restants | M’assister | Je préfère | Matin | Journée | Après-midi | Repos | Effacer
+Décembre après la limite : Décembre 2026 | 26 jours sur 26 remplis | Collecte close le dim. 15 novembre | M’assister | Je préfère | Matin | Journée | Après-midi | Repos | Effacer ; Équipe : L’ÉQUIPE | 8 sur 11 ont répondu | Collecte close le dim. 15 novembre. Chacun voit l’effectif annoncé, jamais les raisons.
+ERR []

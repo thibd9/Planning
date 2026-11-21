@@ -1,0 +1,11 @@
+# Produits du rejeu : ils ne sont pas versionnés.
+heberge/assets/
+heberge[0-9]*/
+axe/node_modules/
+shots/
+x/
+captures/
+**/captures/
+**/node_modules/
+*.png
+!audit/*/fichiers/*.png

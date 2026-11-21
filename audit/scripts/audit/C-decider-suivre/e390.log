@@ -1,0 +1,36 @@
+ok resoudre-absences
+ok resoudre-remplacements
+ok dlg-decision-remplacement
+ok dlg-refus
+ok resoudre-demandes
+ok dlg-decision-conge
+ok resoudre-gardes
+ok dlg-reglage
+ok dlg-signaler-accident
+ok messages
+ok dlg-rdv
+ok heures
+!! dlg-regulariser
+     PETIT 28×40 « Semaine précédente »
+     PETIT 28×40 « Semaine suivante »
+     PETIT 8×40 « lundi 30 novembre, 16 h  »
+     PETIT 8×40 « lundi 30 novembre, 17 h »
+     PETIT 8×40 « lundi 30 novembre, 17 h  »
+     PETIT 8×40 « lundi 30 novembre, 18 h »
+     PETIT 8×40 « lundi 30 novembre, 18 h  »
+     PETIT 8×40 « lundi 30 novembre, 19 h »
+     PETIT 8×40 « mardi 1er décembre, 13 h »
+     PETIT 8×40 « mardi 1er décembre, 14 h »
+     PETIT 8×40 « mardi 1er décembre, 15 h »
+     PETIT 8×40 « mardi 1er décembre, 16 h »
+ok equite
+ok stats
+ok journal
+ok dlg-export
+ok navette
+ok documents
+ok documents-fichiers
+ok documents-historique
+ok aide
+ok solvi
+ERR []

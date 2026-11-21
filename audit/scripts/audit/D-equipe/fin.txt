@@ -1,0 +1,6 @@
+Sarah 10 h, retard : Prévenir d’un retard | Votre poste : aujourd’hui, 8 h 30 – 16 h 30. Les titulaires sont prévenus aussitôt. | De combien serez-vous en retard ? | 5 min | 10 min | 15 min | + de 20 min | Arrivée prévue vers 8 h 40, au lieu de 8 h 30. | Pourquoi ? facultatif | Transport | Santé | Famille | Autre raison
+Thomas semaine 16/11 publiée : 34.5 h ; contrat 35 h
+Annuler (toast) après envoi d’une demande : absences 3 → 2
+Après rechargement : titre=Accueil · Solvéa ; profil=NL Nicolas L. , ouvrir le menu du compte
+Après « Précédent » : url=about:blank ; titre=
+ERR []

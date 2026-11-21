@@ -1,0 +1,68 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > compteur d’heures (solde)
+OK  [SH-p_camille] heures.soldeHeures | Nicolas (35 h), 9 semaines publiées jusqu’à la semaine en cours | attendu: réalisé 307.00 h (versions publiées), contrat 315.00 h, solde -8.00 h | obtenu: réalisé 307.00 h, contrat 315.00 h, solde -8.00 h
+OK  [SH-p_karim] heures.soldeHeures | Igor (35 h), 9 semaines publiées jusqu’à la semaine en cours | attendu: réalisé 286.00 h (versions publiées), contrat 294.00 h, solde -8.00 h | obtenu: réalisé 286.00 h, contrat 294.00 h, solde -8.00 h
+OK  [SH-p_ines] heures.soldeHeures | Inès (24 h), 9 semaines publiées jusqu’à la semaine en cours | attendu: réalisé 211.00 h (versions publiées), contrat 216.00 h, solde -5.00 h | obtenu: réalisé 211.00 h, contrat 216.00 h, solde -5.00 h
+OK  [SH-p_manon] heures.soldeHeures | Manon (21 h), 9 semaines publiées jusqu’à la semaine en cours | attendu: réalisé 184.50 h (versions publiées), contrat 189.00 h, solde -4.50 h | obtenu: réalisé 184.50 h, contrat 189.00 h, solde -4.50 h
+KO  [SH-ferie] heures.contratSemaine | Semaine du 9 nov. 2026 (mercredi 11 férié, officine fermée), temps pleins | attendu: contrat réduit d’un jour férié chômé (7 h) ou heures non récupérées : aucun « retard » créé par le férié | obtenu: Igor 33.00 h pour un contrat compté 35.00 h, Nicolas 34.00 h pour un contrat compté 35.00 h, Thomas 34.50 h pour un contrat compté 35.00 h, Jules 34.00 h pour un contrat compté 35.00 h | contratSemaine() ne déduit que les absences approuvées (1/5 par jour ouvré) ; le planning de l’exemple a fait travailler 33 à 35,5 h sur 4 jours ouvrés + samedi.
+KO  [SH-brouillon] heures.soldeHeures | Nicolas : poste de la semaine publiée allongé de 2 h en brouillon (non publié) | attendu: compteur inchangé tant que la modification n’est pas publiée (« ce qui a été planifié et publié ») | obtenu: solde -8.00 h → -6.00 h | soldeHeures lit data.shifts (le brouillon), pas la version publiée (snapshot).
+OK  [SH-encours] heures.soldeHeures | Nicolas, aujourd’hui vendredi 2026-11-20 : postes de samedi déjà comptés | attendu: à vérifier : la semaine en cours est comptée en entier (prévu, pas réalisé) | obtenu: 9.00 h de postes futurs inclus dans « réalisé »
+OK  [SH-regul] heures.proposerRegularisations | Propositions automatiques sur l’exemple | attendu: chaque solde d’au moins 1 h résorbé par demi-heures, plafonné à 8 h | obtenu: Igor 480 min (rattrapage, sem. 2026-12-07) ; Nicolas 480 min (rattrapage, sem. 2026-12-07) ; Thomas 270 min (rattrapage, sem. 2026-12-07) ; Inès 300 min (rattrapage, sem. 2026-12-07) ; Jules 270 min (rattrapage, sem. 2026-12-07) ; Sarah 150 min (rattrapage, sem. 2026-12-07) ; Manon 270 min (rattrapage, sem. 2026-12-07) ; Yanis 480 min (rattrapage, sem. 2026-12-07)
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > heures d’un mois : trois calculs
+OK  [HM-p_camille] heures du mois | Nicolas, octobre 2026 (22 jours ouvrés) | attendu: 154.00 h planifiées dans le mois ; contrat ≈ 154.00 h | obtenu: fiche navette 154.00 h ; vue Mois (planifieMois) 154.00 h pour 154.00 h ; heuresMois() 172.50 h pour 175.00 h (semaines entières, dont des jours de septembre et novembre)
+OK  [HS-p_camille] payroll.ficheNavette | Nicolas, octobre 2026 : heures complémentaires ou supplémentaires (semaines dont le lundi est en octobre) | attendu: 0.00 h | obtenu: 0.00 h (compl. 0.00, 25 % 0.00, 50 % 0.00) | La semaine du 28 sept. (lundi en septembre) contient les 1er-4 oct. : ses heures entrent dans les heures du mois d’octobre mais ses heures supplémentaires dans septembre (choix documenté).
+OK  [HM-p_ines] heures du mois | Inès, octobre 2026 (22 jours ouvrés) | attendu: 105.50 h planifiées dans le mois ; contrat ≈ 105.60 h | obtenu: fiche navette 105.50 h ; vue Mois (planifieMois) 105.50 h pour 105.60 h ; heuresMois() 117.00 h pour 120.00 h (semaines entières, dont des jours de septembre et novembre)
+OK  [HS-p_ines] payroll.ficheNavette | Inès, octobre 2026 : heures complémentaires ou supplémentaires (semaines dont le lundi est en octobre) | attendu: 0.00 h | obtenu: 0.00 h (compl. 0.00, 25 % 0.00, 50 % 0.00) | La semaine du 28 sept. (lundi en septembre) contient les 1er-4 oct. : ses heures entrent dans les heures du mois d’octobre mais ses heures supplémentaires dans septembre (choix documenté).
+KO  [FN-abs] payroll.ficheNavette | Congé de Thomas du lundi 5 au dimanche 18 octobre (2 semaines) | attendu: à vérifier : 12 jours ouvrables (lundi-samedi) ou 10 jours ouvrés pour les congés payés | obtenu: {"Congé":14} | Les jours calendaires (dimanches compris) sont comptés.
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > équité des samedis
+OK  [EQ-sam] equity.equite | 8 semaines avant la semaine en cours : samedis réels et attendus (prorata heures × semaines travaillées) | attendu: mêmes valeurs qu’un recomptage à la main | obtenu: Caroline 7/7.84, Pierre 4/4.48, Igor 6/6.53, Léa 4/5.23, Nicolas 5/6.53, Thomas 6/6.53, Inès 5/4.48, Jules 6/6.53, Sarah 3/3.92, Manon 5/3.92, Yanis 8/2.99 ; écart type 1.73
+OK  [EQ-ferm] equity.equite | Fermetures en semaine, même période | attendu: 124 (postes du lundi au vendredi finissant à la fermeture) | obtenu: 124
+OK  [EQ-titu] equity.equite | Les titulaires (non salariés) entrent-ils dans le partage des samedis ? | attendu: à vérifier : choix de l’officine | obtenu: oui, au prorata de leur « objectif indicatif » : Caroline attendu 7.84, Pierre attendu 4.48
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > ETP et nombre de pharmaciens
+OK  [ETP1] stats.composition.etp | ETP de l’équipe de l’exemple (11 personnes internes) | attendu: 8.83 (somme des heures/35 plafonnées à 1) | obtenu: 8.83 | Les titulaires non salariés (objectif indicatif 42 h et 24 h) et l’apprentie sont comptés ; à vérifier selon l’usage voulu (le Code du travail exclut les apprentis du calcul des effectifs).
+KO  [ETP2] stats vs pharmacie.adjoints | Igor passé à 39 h : ETP des pharmaciens adjoints | attendu: la même valeur dans les statistiques et dans le contrôle du nombre de pharmaciens | obtenu: statistiques 1.8 ; contrôle 1.91 | stats plafonne chaque personne à 1 ETP ; quotaAdjoints ne plafonne pas.
+
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > compteur d’heures (solde) 26ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > heures d’un mois : trois calculs 25ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > équité des samedis 15ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > ETP et nombre de pharmaciens 80ms
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > coût et majorations
+KO  [PAY1] payroll.decompteSemaine | Contrat de 39 h, 39 h planifiées, 10 €/h | attendu: 35 h × 10 + 4 h × 12,50 = 400 € | obtenu: 440 € (supp25 4 h, au-delà du contrat 0 h) | cout = taux × (contrat + heures majorées) : les 4 h de 36 à 39 sont payées deux fois (dans le contrat et dans la majoration).
+OK  [PAY2] payroll.decompteSemaine | Contrat de 35 h, 44 h planifiées | attendu: 350 + 8 × 12,50 + 1 × 15 = 465 € | obtenu: 465 € (25 % : 8 h, 50 % : 1 h)
+OK  [PAY3] payroll.decompteSemaine | Temps partiel 24 h, 30 h planifiées | attendu: 240 + 2,4 h × 11 + 3,6 h × 12,50 = 311,40 € | obtenu: 311.40 € (complémentaires 6 h)
+OK  [PAY4] payroll.decompteSemaine | Contrat de 35 h, 30 h planifiées | attendu: 350 € (le contrat reste dû) | obtenu: 350 €
+OK  [PAY5] payroll.coutSemaine | Coût estimé de la semaine du 23 nov. (taux de l’exemple) | attendu: somme des coûts individuels | obtenu: 4156 €
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > indemnités de garde
+OK  [GA1] garde.equivalence | Garde volets fermés mardi 1er déc. 20 h - mercredi 8 h, Igor (35 h, 24 €/h) | attendu: 12 h × 25 % = 3 h d’équivalence = 72 € | obtenu: GARDE_VF_EQUIV 3 h = 72.00 € [2026-12]
+OK  [GA2] garde.equivalence | Même garde, Léa (28 h, temps partiel, 23.5 €/h) | attendu: 12 h payées à 100 % = 282 € | obtenu: GARDE_VF_100 12 h = 282.00 € [2026-12]
+OK  [GA3] garde.dimanche | Dimanche 29 nov. 9 h - 19 h volets ouverts, Léa, point à 4,50 € | attendu: 10 h de travail (235 €) + sujétion 10 × 1,5 = 15 points (67,50 €) + 10 h de repos compensateur | obtenu: SUJETION_DIM_FERIE 15 points = 67.50 € [2026-11] ; GARDE_VO 10 h = 235.00 € [2026-11] ; REPOS_COMPENSATEUR 10 h [2026-11]
+OK  [GA4] garde.dimanche (1er mai) | Samedi 1er mai 2027 9 h - 19 h volets ouverts, Igor | attendu: travail 10 h (240 €) + indemnité égale au salaire (240 €) + repos compensateur 10 h | obtenu: GARDE_1ER_MAI 10 h = 240.00 € [2027-05] ; GARDE_VO 10 h = 240.00 € [2027-05] ; REPOS_COMPENSATEUR 10 h [2027-05]
+OK  [GA5] garde (changement d’heure) | Volets fermés samedi 24 oct. 2026 20 h - dimanche 25 8 h (passage à l’heure d’hiver), Igor | attendu: 13 h réelles : samedi 4 h (équivalence 1 h), dimanche 9 h (sujétion 13,5 points, présence 9 h, repos 9 h) | obtenu: GARDE_VF_EQUIV 1 h = 24.00 € [2026-10] ; SUJETION_DIM_FERIE 13.5 points [2026-10] ; GARDE_VF_PRESENCE 9 h [2026-10] ; REPOS_COMPENSATEUR 9 h [2026-10] ; durée réelle 13 h
+OK  [GA6] garde (changement d’heure) | Volets fermés samedi 27 mars 2027 20 h - dimanche 28 8 h (passage à l’heure d’été) | attendu: 11 h réelles (4 h samedi + 7 h dimanche) | obtenu: GARDE_VF_EQUIV 1 h = 24.00 € [2027-03] ; SUJETION_DIM_FERIE 10.5 points [2027-03] ; GARDE_VF_PRESENCE 7 h [2027-03] ; REPOS_COMPENSATEUR 7 h [2027-03] ; durée réelle 11 h
+OK  [GA7] garde (fin d’année) | Volets fermés jeudi 31 déc. 19 h 30 - vendredi 1er janv. 8 h 30, Igor | attendu: décembre : 4 h 30 → 1,125 h d’équivalence ; janvier (férié) : 8 h 30 → 12,75 points + 8,5 h de présence ; repos compensateur 8,5 h | obtenu: GARDE_VF_EQUIV 1.13 h = 27.12 € [2026-12] ; SUJETION_DIM_FERIE 12.75 points [2027-01] ; GARDE_VF_PRESENCE 8.5 h [2027-01] ; REPOS_COMPENSATEUR 8.5 h [2026-12] ; notes : Volets fermés : les majorations de nuit ne sont pas dues. / La garde est à cheval sur deux mois : les variables sont ventilées par mois. / Valeur du point non saisie : l’indemnité de sujétion est exprimée en points.
+OK  [GA8] garde.astreinte | Astreinte mardi 19 h - mercredi 9 h, une intervention de 45 min, Igor | attendu: 14 h × 10 % × 24 € = 33,60 € ; intervention 0,75 h × 24 € = 18 € | obtenu: ASTREINTE 14 h = 33.60 € [2026-12] ; ASTREINTE_INTERVENTION 0.75 h = 18.00 € [2026-12]
+OK  [GA9] garde.astreinte (dimanche) | Astreinte un dimanche 9 h - 19 h | attendu: à vérifier : sujétion dimanche ou non | obtenu: ASTREINTE 10 h = 24.00 € [2026-11]
+OK  [GA10] payroll.ficheNavette | La garde du 31 déc. dans la fiche navette de décembre | attendu: seulement la part de décembre, et le repos compensateur | obtenu: GARDE_VF_EQUIV 1.13, REPOS_COMPENSATEUR 8.5
+
+stdout | tests/compteurs.test.ts > 3. Compteurs recalculés à la main > suivi de présence
+OK  [SU1] suivi.suiviDe | Igor : arrêt du mercredi 18 au vendredi 20 nov., aujourd’hui le 20 | attendu: 3 jours d’arrêt | obtenu: 3 jours
+OK  [SU2] suivi.suiviDe | Jules : retards de 15 et 10 min dans l’exemple | attendu: 2 retards, 25 min | obtenu: 2 retards, 25 min
+
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > coût et majorations 1ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > indemnités de garde 3ms
+ ✓ tests/compteurs.test.ts > 3. Compteurs recalculés à la main > suivi de présence 0ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  23:33:49
+   Duration  4.30s (import 90%, transform 6%, tests 4%)
+

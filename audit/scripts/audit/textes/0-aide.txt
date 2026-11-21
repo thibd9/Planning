@@ -1,0 +1,420 @@
+AIDE
+Comment faire ?
+
+Cherchez une tâche : la réponse en deux lignes, le bouton qui y mène et un tutoriel qui vous la montre.
+
+Rythme de la visite
+Posé
+Le temps de tout lire et de tout voir.
+Normal
+Le temps de lire, sans attendre.
+Vif
+Pour qui connaît déjà.
+Comment faire
+52
+Lexique
+42
+Au quotidien
+6
+Préparer
+12
+Construire et publier
+12
+Absences et remplacements
+7
+Suivre et faire le bilan
+6
+Messages et support
+5
+Mon planning
+3
+Mes demandes
+1
+AU QUOTIDIEN
+Lire le tableau de bord
+
+En haut, cinq repères : l’équipe du jour, le pharmacien présent, la semaine prochaine, les compteurs d’heures, la prochaine garde. Dessous, l’équipe au comptoir à gauche et ce qui attend votre décision à droite, puis le planning à préparer et votre agenda. Chaque carte mène à l’écran où cela se règle. Vous préférez la priorité et l’agenda en tête ? Changez la disposition dans « Mon compte ».
+
+Voir le tutoriel
+1 étape
+Ouvrir le tableau de bord
+Pourquoi personne n’est en poste aujourd’hui ?
+
+La semaine en cours n’a pas été construite : c’est le cas quand la pharmacie vient d’être créée, ou quand le premier planning commence la semaine suivante (l’écran « Construire » ouvre par défaut la semaine prochaine). Le tableau de bord et « Mon planning » proposent alors « Construire cette semaine ».
+
+Voir le tutoriel
+1 étape
+Ouvrir « Construire »
+À quoi sert le bouton « Créer » ?
+
+En haut de l’écran, « Créer » réunit ce que l’on ajoute le plus souvent : un poste, une personne, une formation, un inventaire, une garde, un message. Chaque choix ouvre directement la bonne fenêtre.
+
+Voir le tutoriel
+1 étape
+Ouvrir le tableau de bord
+Signaler un retard ou une absence
+
+« Retard ou absence », en haut de l’écran, sert à tout le monde. Pour vous : la durée du retard ou les dates de l’absence, et les titulaires sont prévenus aussitôt. Un titulaire peut aussi le noter pour quelqu’un de l’équipe : le poste à couvrir part alors dans « Résoudre ».
+
+Voir le tutoriel
+3 étapes
+Signaler
+Préparer le mois avant l’échéance
+
+Vous fixez dans « Réglages » le jour où le planning du mois suivant doit être publié. À l’approche, le tableau de bord le rappelle. « Préparer le mois » remplit les semaines vides en brouillon, d’après vos habitudes : rien n’est publié sans vous.
+
+Voir le tutoriel
+3 étapes
+Ouvrir le tableau de bord
+Une décision met-elle à jour le planning de l’équipe ?
+
+Oui, aussitôt. Une absence approuvée, un poste couvert, une formation, un remplacement validé : le planning publié suit, et chaque personne dont la journée change reçoit un avis. Seules les retouches faites à la main dans la grille restent un brouillon jusqu’à « Publier les modifications » ; le tableau de bord vous le rappelle.
+
+Voir le tutoriel
+3 étapes
+Ouvrir « Résoudre »
+PRÉPARER
+Ajouter une personne ou changer son poste
+
+Dans « Équipe » : titulaire, pharmacien, préparateur, animateur, apprenti, étudiant, rayonniste. Chaque poste a sa couleur. La fiche porte le contrat, les compétences et le compte de connexion.
+
+Voir le tutoriel
+2 étapes
+Ajouter une personne
+Type de contrat et ancienneté
+
+Dans « Équipe », la fiche d’une personne s’ouvre sur « Poste et contrat » : la fonction, les heures par semaine, le type de contrat (CDI, CDD, apprentissage, professionnalisation, stage) et la date d’entrée. L’ancienneté se calcule toute seule.
+
+Voir le tutoriel
+1 étape
+Ouvrir l’équipe
+Choisir les marques d’un animateur ou d’une animatrice
+
+Dans « Équipe », ouvrez la fiche de la personne : « Marques présentées ». Prenez une marque dans le répertoire de la pharmacie, ou écrivez son nom si elle n’y est pas encore : elle rejoint le répertoire. Touchez ensuite les familles de produits qu’il anime pour elle. Pour un rayonniste, « Rayons confiés » fonctionne de la même façon. Chacun retrouve la liste sur son accueil.
+
+Voir le tutoriel
+1 étape
+Ouvrir l’équipe
+Donner un mot de passe à un membre de l’équipe
+
+Ouvrez sa fiche dans « Équipe », carte « Compte de connexion » : un mot de passe provisoire à lui transmettre, qu’il changera ensuite.
+
+Voir le tutoriel
+1 étape
+Ouvrir l’équipe
+Changer les horaires d’ouverture ou l’effectif attendu
+
+Dans « Réglages » : horaires jour par jour, effectif minimal au comptoir, postes types, et le choix entre planning collaboratif et classique.
+
+Voir le tutoriel
+7 étapes
+Ouvrir les réglages
+Construire seul ou avec l’équipe
+
+Dans « Réglages », « Qui prépare le planning » : « Vous seul », et vous construisez d’après vos habitudes ; « Avec l’équipe », et chacun donne ses préférences du mois avant une date limite. Le choix se change à tout moment.
+
+Voir le tutoriel
+1 étape
+Ouvrir les réglages
+Créer ou modifier un poste type
+
+Dans « Réglages », « Postes types » : un nom, des horaires, une pause, une couleur. Un poste type se pose ensuite en un clic dans « Construire », et les propositions s’en servent.
+
+Voir le tutoriel
+1 étape
+Ouvrir les réglages
+Renseigner l’officine en chiffres
+
+Dans « Réglages », « L’officine en chiffres » : surface totale, surface de vente, réserve, caisses, postes de comptoir, espaces de confidentialité, robot. Tout est facultatif. Solvéa signale ce qui ne colle pas, par exemple plus de personnes attendues que de postes de comptoir.
+
+Voir le tutoriel
+1 étape
+Ouvrir les réglages
+Savoir si l’équipe est assez nombreuse
+
+Dans « Réglages », « L’équipe est-elle bien dimensionnée ? », réservé aux titulaires. Indiquez le nombre de clients servis par jour : Solvéa en déduit combien de personnes il faut au comptoir à l’heure ordinaire et à la pointe, puis compare les contrats au besoin, pour les pharmaciens et pour le reste du comptoir. Les caisses ne sont qu’un plafond : six caisses ne demandent pas six personnes. C’est un repère, pas une norme ; le calcul est détaillé sur place.
+
+Voir le tutoriel
+1 étape
+Ouvrir les réglages
+Voir les jours fériés
+
+Les jours fériés sont marqués dans la grille, le mois et les calendriers de chacun. Leur liste pour les douze prochains mois est dans « Réglages ».
+
+Voir le tutoriel
+1 étape
+Ouvrir les réglages
+Voir ou régler les règles appliquées
+
+Chaque contrôle vient d’une fiche, avec sa source. Vous réglez aussi vos seuils : plafond d’heures par semaine, samedis libres par mois, délai des remplacements.
+
+Voir le tutoriel
+2 étapes
+Ouvrir les règles
+Ajouter une autre pharmacie
+
+Le titulaire principal ajoute autant de pharmacies qu’il veut. Le sélecteur, en haut du menu, passe de l’une à l’autre.
+
+Voir le tutoriel
+1 étape
+Ajouter une pharmacie
+CONSTRUIRE ET PUBLIER
+Construire le planning d’une semaine
+
+Dans « Construire », un « + » pose un poste à la main. « Proposer un planning » calcule trois propositions comparables : équité, souhaits, coût. Les règles impératives passent toujours d’abord.
+
+Voir le tutoriel
+9 étapes
+Ouvrir « Construire »
+Poser un jour de repos
+
+Dans la fenêtre d’un poste, la dernière tuile des postes types est « Repos » : la personne ne travaille pas ce jour-là. Le repos se voit dans la grille et dans le mois, et « Proposer un planning » le respecte. Poser un poste ce jour-là remplace le repos.
+
+Voir le tutoriel
+1 étape
+Ouvrir Construire
+Remettre un planning à zéro
+
+Dans « Construire », « Remettre à zéro » vide la semaine affichée ; dans la vue Mois, « Remettre le mois à zéro » vide le mois. Seuls les jours à venir sont touchés, et « Annuler » rend tout. Une semaine déjà publiée reste lisible par l’équipe tant que vous ne republiez pas.
+
+Voir le tutoriel
+1 étape
+Ouvrir Construire
+Laisser Solvéa proposer une semaine
+
+Dans « Construire », « Proposer » calcule plusieurs semaines complètes et les compare : la plus équitable, la plus fidèle aux préférences de l’équipe (ou à vos habitudes, si vous planifiez seul) et la moins coûteuse. Vous en choisissez une, puis vous la retouchez librement.
+
+Voir le tutoriel
+1 étape
+Ouvrir Construire
+Régler la pause déjeuner et les pauses courtes
+
+Ouvrez un poste dans « Construire » : la pause déjeuner, non comptée en temps de travail, puis jusqu’à quatre pauses courtes de 10, 15 ou 20 minutes. « Une par demi-journée » les place pour vous. Elles figurent sur le planning de chacun et sur la feuille imprimée.
+
+Voir le tutoriel
+1 étape
+Ouvrir Construire
+Comprendre les alertes de la grille
+
+Sous chaque jour, la ligne « Équipe au complet ? » l’écrit en mots : « Complet », « Pharmacien à prévoir » ou « Manque du monde », avec les heures et la cause (la pause d’un pharmacien, son départ). Les titulaires comptent aussi comme pharmaciens. Un clic ouvre la journée pour corriger.
+
+Voir le tutoriel
+1 étape
+Ouvrir « Construire »
+Voir les préférences de l’équipe et les départager
+
+Les préférences s’affichent dans chaque case de la semaine, du mois et de la journée ; la case « Préférences » les masque. En créant un poste, Solvéa indique qui a demandé ce créneau. Une seule personne : « Accorder ce poste » le lui attribue. Plusieurs : « Tirer au sort » les départage, avec plus de chances pour celui dont les préférences ont été le moins suivies ces dernières semaines.
+
+Voir le tutoriel
+1 étape
+Ouvrir Construire
+Voir le mois entier et suivre les préférences
+
+Dans « Construire », passez sur « Mois » : objectif d’équipe par jour, heures de chacun face à son contrat, préférences données. Un clic sur une case pose ou modifie le poste sans repasser par la semaine. « Préférences reçues » liste qui a répondu et permet de relancer les autres. « Corriger automatiquement » recalcule les semaines en brouillon.
+
+Voir le tutoriel
+1 étape
+Ouvrir la vue mois
+Noter un retard ou régler une pause
+
+Cliquez sur un jour, dans « Construire » ou sur le tableau de bord : la journée s’ouvre avec toute l’équipe. On y règle les pauses et on y note un retard en deux clics.
+
+Voir le tutoriel
+2 étapes
+Ouvrir la journée
+Publier un planning
+
+Tant qu’il est en brouillon, vous seul le voyez. « Publier » relit les règles et les délais, puis l’envoie à l’équipe. Tout changement ultérieur est annoncé à la personne concernée.
+
+Voir le tutoriel
+2 étapes
+Aller publier
+Planifier une formation ou un inventaire
+
+Depuis « Créer », en haut de l’écran : intitulé, dates, participants. Chacun est prévenu et son planning est mis à jour.
+
+Voir le tutoriel
+2 étapes
+Planifier une formation
+Ajouter ou répartir les gardes
+
+Dans « Gardes » : ajoutez une garde, confiez-la et prévenez le pharmacien dans la foulée. « Répartir » propose un partage équitable. Le délai de 15 jours et le repos qui suit sont contrôlés.
+
+Voir le tutoriel
+4 étapes
+Ajouter une garde
+ABSENCES ET REMPLACEMENTS
+Couvrir une absence imprévue
+
+Dans « Résoudre », onglet « Absences ». « Demander à toute l’équipe » prévient en même temps tous ceux qui peuvent tenir le poste ; entre volontaires, il revient à celui qui a le moins dépanné. Sinon, comparez les options proposées.
+
+Voir le tutoriel
+3 étapes
+Voir les absences
+Signaler un accident du travail ou de trajet
+
+Dans « Retard ou absence », choisissez « Absence », puis la raison « Accident du travail » : le jour, l’heure, le lieu, ce qui s’est passé, un témoin. Le titulaire a ensuite 48 heures pour le déclarer à la caisse d’assurance maladie, dimanches et jours fériés non comptés : le tableau de bord affiche l’échéance et un bouton « C’est fait ».
+
+Voir le tutoriel
+1 étape
+Signaler une absence
+Répondre à une demande de remplacement
+
+Les demandes sont triées par urgence : médicale, urgente, prévue. Vous répondez oui ou non ; si oui, l’équipe est prévenue, puis vous validez le volontaire. Les heures en plus sont annoncées.
+
+Voir le tutoriel
+3 étapes
+Voir les remplacements
+Personne ne peut remplacer : que faire ?
+
+En dernier recours, c’est aux titulaires d’assurer le poste. Dans « Résoudre », la fenêtre « Décider » d’une demande de remplacement propose alors « Accepter : un titulaire assure le poste » : toujours pour une urgence médicale, et dès qu’aucun collègue ne peut reprendre le poste sans enfreindre une règle. Le titulaire libre sur l’horaire reprend le poste ; s’il travaille déjà, la personne est libérée et il tient le comptoir. Chacun est prévenu.
+
+Voir le tutoriel
+1 étape
+Ouvrir « Résoudre »
+Répondre à un congé ou à une demande d’horaires
+
+Onglet « Demandes » de « Résoudre ». Avant de répondre, vous voyez ce que l’absence découvre. Pour un horaire, vous choisissez son poids : reconnue, prioritaire ou simple préférence.
+
+Voir le tutoriel
+4 étapes
+Voir les demandes
+Donner mon accord à un autre titulaire
+
+Les décisions d’un titulaire secondaire attendent l’accord du titulaire principal, dans « Résoudre », onglet « Accords à donner ».
+
+Voir le tutoriel
+1 étape
+Voir les accords
+Savoir ce qui a été décidé, et ce que cela change
+
+Chaque décision (congé, remplacement, horaires, publication, garde) est annoncée sous la cloche aux personnes concernées et aux titulaires, avec ce qu’elle change dans les plannings. « Vu » la range.
+
+Voir le tutoriel
+1 étape
+Ouvrir l’accueil
+SUIVRE ET FAIRE LE BILAN
+Régulariser les heures en plus ou en moins
+
+« Heures » compare ce qui a été publié au contrat de chacun. « Faire rattraper » ou « Faire récupérer » ouvre le planning de la personne : vous cliquez là où placer les heures, ou vous gardez le créneau proposé, et un message la prévient. « Payer » et « Solder » remettent le compteur à zéro ; « Régulariser automatiquement » résorbe les écarts sur la prochaine semaine à construire.
+
+Voir le tutoriel
+2 étapes
+Ouvrir les heures
+Vérifier que la charge est bien répartie
+
+« Équité » compare samedis, fermetures, gardes et dépannages à la part attendue de chacun, au prorata de son contrat. Touchez une ligne pour voir le détail : les dates comptées, puis le calcul de la part attendue.
+
+Voir le tutoriel
+1 étape
+Ouvrir l’équité
+Voir les statistiques et les points forts de l’équipe
+
+Dans « Statistiques », au menu « Bilan » : la composition de l’équipe (fonctions, contrats, temps partiels, ancienneté), les compétences couvertes, celles qui reposent sur une seule personne et celles que personne ne détient, les points forts de chacun sur douze mois, et les heures planifiées face aux contrats. Ni note ni classement ; arrêts et congés n’entrent jamais en compte.
+
+Voir le tutoriel
+1 étape
+Ouvrir les statistiques
+Préparer la paie du mois
+
+« Journal et paie » trace chaque décision et prépare la fiche navette : heures et variables du mois, à exporter pour le comptable.
+
+Voir le tutoriel
+2 étapes
+Ouvrir le journal
+Conserver un justificatif et revoir les absences de l’équipe
+
+Dans « Documents », onglet « Absences de l’équipe » : arrêts, congés, formations, remplacements et absences non prévues, par personne et par mois. « Joindre » range le justificatif ; seuls les titulaires et la personne le voient.
+
+Voir le tutoriel
+1 étape
+Ouvrir les documents
+Retrouver mes anciens plannings ou déposer un document
+
+« Mes documents » réunit vos plannings publiés, vos absences et arrêts, et les fichiers que vous déposez (arrêt de travail, attestation de formation). Un justificatif joint à une demande y est rangé une fois la demande réglée. Tout reste sur cet appareil.
+
+Voir le tutoriel
+1 étape
+Ouvrir mes documents
+MESSAGES ET SUPPORT
+Écrire à l’équipe ou à une personne
+
+Un fil pour toute l’équipe et des conversations privées. Pour une absence, préférez une demande : elle est suivie.
+
+Voir le tutoriel
+1 étape
+Ouvrir les messages
+Demander un rendez-vous
+
+Dans « Messages », ou sur votre accueil, « Demander un rendez-vous » : la personne, le sujet, le moment. Solvéa propose des moments où vous êtes tous les deux en poste. La demande part dans la conversation ; une fois acceptée, elle est fixée dans vos deux agendas. On peut aussi proposer un autre horaire, décliner ou annuler.
+
+Voir le tutoriel
+2 étapes
+Ouvrir les messages
+Changer l’apparence, la taille du texte ou mon mot de passe
+
+Dans « Mon compte » : trois apparences (claire, mixte avec le menu foncé, sombre), chacune montrée par une petite maquette, la taille du texte et le mot de passe. L’apparence se change aussi d’un geste depuis votre nom, en haut à droite. La couleur de l’espace est celle du profil ; seul le titulaire principal peut choisir la sienne, parmi dix.
+
+Voir le tutoriel
+1 étape
+Ouvrir mon compte
+Mettre à jour mes compétences et diplômes
+
+Dans « Mon compte », « Mes compétences et diplômes » : touchez une compétence pour l’ajouter ou la retirer. Vos titulaires sont informés de chaque changement. Les entretiens pharmaceutiques et les tests suivis d’une délivrance sont réservés aux pharmaciens ; un préparateur conseille et délivre sous le contrôle d’un pharmacien présent.
+
+Voir le tutoriel
+1 étape
+Ouvrir mon compte
+Contacter le support
+
+Si ni l’aide, ni le lexique, ni Solvi ne répondent, une personne vous répond : 01 99 00 12 34 ou support@solvea.example. Ces coordonnées sont aussi en bas de chaque écran. Dites ce que vous faisiez et ce qui s’est affiché.
+
+Voir le tutoriel
+2 étapes
+Voir les coordonnées
+MON PLANNING
+Où voir mon prochain poste ?
+
+Il est écrit en grand en haut de « Mon planning », avec la pause et la durée. Dessous, votre semaine jour par jour, puis le calendrier du mois.
+
+Voir le tutoriel
+2 étapes
+Ouvrir mon planning
+Voir le planning de toute l’équipe
+
+Le planning global montre qui travaille quand. « Mes postes » ne garde que votre ligne ; « Toute l’équipe » la remet au complet.
+
+Voir le tutoriel
+1 étape
+Ouvrir le planning global
+Imprimer le planning
+
+Le bouton d’impression ouvre un aperçu : la feuille telle qu’elle sortira, à la semaine ou au mois, en couleur ou en noir et blanc, pour toute l’équipe ou pour vos seuls postes. Elle indique si le planning est publié ou encore en brouillon.
+
+Voir le tutoriel
+1 étape
+Ouvrir l’aperçu
+MES DEMANDES
+Poser un congé ou une contrainte d’horaires
+
+Dans « Mes demandes », carte « Absence ou horaire ». Un raccourci (sortie d’école, cours du soir…) remplit les horaires. Une raison est toujours demandée, dans une liste ; seuls les titulaires la voient.
+
+Voir le tutoriel
+1 étape
+Faire une demande
+La visite guidée complète
+Toutes les fonctions, dans l’ordre du menu, sur une pharmacie d’exemple.
+Demander à 
+Posez votre question avec vos mots : il répond d’après votre planning.
+Contacter le support
+
+Ni l’aide, ni le lexique, ni Solvi ne répondent à votre question ? Une personne vous répond.
+
+Coordonnées provisoires, le temps que le support ouvre.
+
+01 99 00 12 34
+support@solvea.example
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example

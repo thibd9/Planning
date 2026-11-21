@@ -1,0 +1,42 @@
+{
+ "mes": {
+  "officine": {
+   "n": 8,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Officine »",
+    "11.5px « Jours »",
+    "11.5px « Horaire »",
+    "11.5px « Personnes au minimum »",
+    "11.5px « Vos réglages « combien de personnes au c »",
+    "11.5px « Pour l’équipe »",
+    "11.5px « Pour vous »",
+    "11.5px « Poste »",
+    "11.5px « Couleur »",
+    "11.5px « Horaires »",
+    "11.5px « Pause »",
+    "11.5px « Travail effectif »"
+   ],
+   "nPetits": 13,
+   "contrastes": [],
+   "nContrastes": 0,
+   "coupes": [],
+   "cibles": [
+    "116×34 Pharmacie",
+    "103×34 Horaires",
+    "108×34 Comptoir",
+    "104×34 Planning",
+    "122×34 Paramètres",
+    "22×22 ",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 8,
+   "deborde": [],
+   "defilH": [
+    "div.of-defile (+196px)"
+   ]
+  }
+ },
+ "errs": []
+}

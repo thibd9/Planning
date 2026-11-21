@@ -1,0 +1,1163 @@
+TOPBAR: Espace étudiant , environnement de test : changer de profil Grande Pharmacie de la Pinède ven. 20 novembre Faire une demande Retard ou absence , signaler 1 notifications, ouvrir la liste 1 YM Yanis M. , ouvrir le menu du compte
+SIDE: MON ESPACE | Accueil | Mon planning | Mes demandes | Mon suivi | Mes documents | L’ÉQUIPE | Planning de l’équipe | Messages | 1 | messages non lus | Besoin d’aide ? | Aide, tutoriels et lexique | Enregistré sur cet appareil à 21 h
+TITLE: Accueil · Solvéa
+
+=== espace ===
+YM
+VENDREDI 20 NOVEMBRE 2026
+Bonsoir Yanis 
+
+Espace étudiant · Grande Pharmacie de la Pinède
+
+Votre semaine :
+16 h
+planifiées pour 16 h au contrat.
+
+Vos horaires autour de vos cours, et vos examens à signaler.
+
+PROCHAIN POSTE
+Demain · journée longue
+9 h – 19 h
+9 h de travail · pause déjeuner 13 h – 14 h · pauses courtes à 11 h, 16 h 30 (15 min)
+Ensuite : Mer. 25 novembre, 8 h 30 – 19 h 30
+Prévenir d’un retard
+MON MÉTIER
+Mes études et mes horaires
+COURS ET EXAMENS SIGNALÉS
+Indisponible - lundi, mardi, jeudi, vendredi
+pris en compte dans le planning
+Signaler un cours ou un examen
+MES PROCHAINS POSTES
+Samedi 21 novembre
+9 h – 19 h
+Mercredi 25 novembre
+8 h 30 – 19 h 30
+Samedi 28 novembre
+9 h – 14 h
+Mercredi 2 décembre
+11 h 30 – 19 h 30
+MON AGENDA
+Mes rendez-vous
+Demander un rendez-vous
+
+Aucun rendez-vous à venir. Une demande acceptée se fixe ici et dans « Mon planning ».
+
+Mes raccourcis
+Voir mon planning
+Demander une absence ou un horaire
+Écrire à Caroline T.
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== moi === (title Mon planning · Solvéa)
+MON PLANNING
+Quand est-ce que je travaille ?
+
+Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.
+
+Faire une demande
+Imprimer
+Planning de l’équipe
+PROCHAIN POSTE
+Demain · journée longue
+9 h – 19 h
+9 h de travail · pause déjeuner 13 h – 14 h · pauses courtes à 11 h, 16 h 30 (15 min)
+Ensuite : Mer. 25 novembre, 8 h 30 – 19 h 30
+Prévenir d’un retard
+Mes semaines
+Semaine
+Calendrier
+Cette semaine · 16 – 22 novembre 2026
+Semaine 47 · publié le 4 novembre 2026 à 17 h 30
+16 h prévues
+2 jours
+16
+Lundi
+novembre
+, voir la journée
+Repos
+17
+Mardi
+novembre
+, voir la journée
+Repos
+18
+Mercredi
+novembre
+, voir la journée
+Journée
+8 h 30 – 16 h 30
+7 h de travail
+Pause déjeuner 12 h 30 – 13 h 30
+Pauses courtes à 10 h 30, 15 h (15 min)
+19
+Jeudi
+novembre
+, voir la journée
+Repos
+20
+Vendredi
+Aujourd’hui
+, voir la journée
+Repos
+21
+Samedi
+novembre
+, voir la journée
+Journée longue
+9 h – 19 h
+9 h de travail
+Pause déjeuner 13 h – 14 h
+Pauses courtes à 11 h, 16 h 30 (15 min)
+Semaine prochaine · 23 – 29 novembre 2026
+Semaine 48 · publié le 11 novembre 2026 à 17 h 30
+14 h 30 prévues
+2 jours
+23
+Lundi
+novembre
+, voir la journée
+Repos
+24
+Mardi
+novembre
+, voir la journée
+Repos
+25
+Mercredi
+novembre
+, voir la journée
+Journée longue
+8 h 30 – 19 h 30
+9 h 30 de travail
+Pause déjeuner 12 h 30 – 14 h
+Pauses courtes à 10 h 30, 16 h 45 (15 min)
+26
+Jeudi
+novembre
+, voir la journée
+Repos
+27
+Vendredi
+novembre
+, voir la journée
+Repos
+28
+Samedi
+novembre
+, voir la journée
+Matin
+9 h – 14 h
+5 h de travail
+Pause courte à 11 h 30 (15 min)
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== planning === (title Planning de l’équipe · Solvéa)
+PLANNING DE L’ÉQUIPE
+Qui travaille quand ?
+
+Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning ».
+
+Imprimer
+23 – 29 novembre 2026
+Semaine 48
+Publié le 11 novembre 2026 à 17 h 30
+Toute l’équipe
+Mes postes
+Équipe	Lundi 23	Mardi 24	Mercredi 25	Jeudi 26	Vendredi 27	Samedi 28
+
+CT
+Caroline T.
+Titulaire principal
+	
+08:30–19:30
+9 h 30 · comptoir
+, Caroline T., lundi, pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min).
+	
+11:30–19:30
+7 h · comptoir
+, Caroline T., mardi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+08:30–16:30
+7 h · comptoir
+, Caroline T., mercredi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–16:30
+7 h · comptoir
+, Caroline T., jeudi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–19:30
+9 h 30 · comptoir
+, Caroline T., vendredi, pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min).
+	
+Repos
+
+
+PF
+Pierre F.
+Titulaire secondaire
+	
+11:30–19:30
+7 h · comptoir
+, Pierre F., lundi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+Repos
+	
+08:30–13:00
+4 h 30 · comptoir
+, Pierre F., mercredi, pause courte à 10 h 45 (15 min).
+	
+08:30–16:30
+7 h · comptoir
+, Pierre F., jeudi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–13:00
+4 h 30 · comptoir
+, Pierre F., vendredi, pause courte à 10 h 45 (15 min).
+	
+Repos
+
+
+IL
+Igor L.
+Pharmacien
+	
+08:30–16:30
+7 h · comptoir
+, Igor L., lundi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–16:30
+7 h · comptoir
+, Igor L., mardi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+11:30–19:30
+7 h · comptoir
+, Igor L., mercredi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+11:30–19:30
+7 h · comptoir
+, Igor L., jeudi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+Repos
+	
+09:00–14:00
+5 h · comptoir
+, Igor L., samedi, pause courte à 11 h 30 (15 min).
+
+
+LF
+Léa F.
+Pharmacien
+	
+08:30–13:00
+4 h 30 · comptoir
+, Léa F., lundi, pause courte à 10 h 45 (15 min).
+	
+08:30–13:00
+4 h 30 · comptoir
+, Léa F., mardi, pause courte à 10 h 45 (15 min).
+	
+Repos
+	
+11:30–19:30
+7 h · comptoir
+, Léa F., jeudi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+11:30–19:30
+7 h · comptoir
+, Léa F., vendredi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+14:00–19:00
+5 h · comptoir
+, Léa F., samedi, pause courte à 16 h 30 (15 min).
+
+
+NL
+Nicolas L.
+Préparateur
+	
+08:30–16:30
+7 h · comptoir
+, Nicolas L., lundi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–16:30
+7 h · comptoir
+, Nicolas L., mardi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–13:00
+4 h 30 · comptoir
+, Nicolas L., mercredi, pause courte à 10 h 45 (15 min).
+	
+08:30–19:30
+9 h 30 · comptoir
+, Nicolas L., jeudi, pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min).
+	
+11:30–19:30
+7 h · comptoir
+, Nicolas L., vendredi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+Repos
+
+
+TN
+Thomas N.
+Préparateur
+	
+Repos
+	
+08:30–16:30
+7 h · comptoir
+, Thomas N., mardi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–19:30
+9 h 30 · comptoir
+, Thomas N., mercredi, pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min).
+	
+08:30–19:30
+9 h 30 · comptoir
+, Thomas N., jeudi, pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min).
+	
+Repos
+	
+09:00–19:00
+9 h · comptoir
+, Thomas N., samedi, pause déjeuner 13 h – 14 h · pauses courtes à 11 h, 16 h 30 (15 min).
+
+
+ID
+Inès D.
+Préparateur
+	
+Repos
+	
+08:30–19:30
+9 h 30 · comptoir
+, Inès D., mardi, pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min).
+	
+Repos
+	
+Repos
+	
+08:30–13:00
+4 h 30 · comptoir
+, Inès D., vendredi, pause courte à 10 h 45 (15 min).
+	
+09:00–19:00
+9 h · comptoir
+, Inès D., samedi, pause déjeuner 13 h – 14 h · pauses courtes à 11 h, 16 h 30 (15 min).
+
+
+JP
+Jules P.
+Préparateur
+	
+11:30–19:30
+7 h · comptoir
+, Jules P., lundi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+11:30–19:30
+7 h · comptoir
+, Jules P., mardi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+08:30–13:00
+4 h 30 · comptoir
+, Jules P., mercredi, pause courte à 10 h 45 (15 min).
+	
+08:30–13:00
+4 h 30 · comptoir
+, Jules P., jeudi, pause courte à 10 h 45 (15 min).
+	
+08:30–16:30
+7 h · comptoir
+, Jules P., vendredi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+09:00–14:00
+5 h · comptoir
+, Jules P., samedi, pause courte à 11 h 30 (15 min).
+
+
+SL
+Sarah L.
+Animateur
+	
+08:30–16:30
+7 h · comptoir
+, Sarah L., lundi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–16:30
+7 h · comptoir
+, Sarah L., mardi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+Repos
+	
+Repos
+	
+08:30–16:30
+7 h · comptoir
+, Sarah L., vendredi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+Repos
+
+
+MG
+Manon G.
+Apprenti
+	
+08:30–16:30
+7 h · comptoir
+, Manon G., lundi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+08:30–16:30
+7 h · comptoir
+, Manon G., mardi, pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min).
+	
+11:30–19:30
+7 h · comptoir
+, Manon G., mercredi, pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min).
+	
+Repos
+	
+Repos
+	
+Repos
+
+
+YM
+Yanis M. (vous)
+Étudiant
+	
+Repos
+	
+Repos
+	
+08:30–19:30
+9 h 30 · comptoir
+, Yanis M., mercredi, pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min).
+	
+Repos
+	
+Repos
+	
+09:00–14:00
+5 h · comptoir
+, Yanis M., samedi, pause courte à 11 h 30 (15 min).
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== suivi === (title Mon suivi · Solvéa)
+MON SUIVI
+Où j’en suis
+
+Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement.
+
+Mon compteur d’heures
+−8 h 30
+
+135 h 30 planifiées pour 144 h au contrat, sur les semaines publiées.
+
+Un remplacement assuré s’ajoute ici aussitôt. Votre titulaire décide ensuite : paiement ou récupération.
+
+Mon suivi
+12 mois
+VOS POINTS FORTS, VUS PAR VOS TITULAIRES
+Prend sa part
+Samedis et fermetures : au moins sa part sur 3 mois
+Retards
+0
+Départs anticipés
+0
+Absences non prévues
+0
+Congés
+0 j
+Arrêts
+0 j
+Formations
+0 j
+Remplacements assurés
+0
+
+Ce que votre responsable a noté, et rien d’autre : des dates et des durées, jamais une raison.
+
+Ma part des contraintes
+8 semaines
+
+Ce que vous avez fait sur 8 semaines, à côté de votre part : le total de l’équipe, partagé selon les heures de chacun.
+
+Samedis travaillés
+9 faits
+3 pour votre part
+6 de plus que votre part
+Fermetures en semaine
+3 faits
+7 pour votre part
+4 de moins que votre part
+Dépannages assurés
+0 fait
+0 pour votre part
+Dans votre part
+Changements tardifs absorbés
+0 fait
+Non concerné
+
+« De plus » : vous en avez porté davantage que votre part, cela vous sera rendu sur les prochains plannings. Vous ne voyez que votre position : il n’existe aucun classement.
+
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== documents === (title Mes documents · Solvéa)
+MON ESPACE
+Mes documents
+
+Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit.
+
+Mes plannings
+11
+Mes absences
+0
+Mes fichiers
+0
+novembre 2026
+Semaine du 30 novembre – 6 décembre 2026
+2 postes · 16 h
+Voir
+Semaine du 23 – 29 novembre 2026
+2 postes · 14 h 30
+Voir
+Semaine du 16 – 22 novembre 2026
+2 postes · 16 h
+Voir
+Semaine du 9 – 15 novembre 2026
+1 poste · 9 h · terminée
+Voir
+Semaine du 2 – 8 novembre 2026
+2 postes · 16 h · terminée
+Voir
+octobre 2026
+Semaine du 26 octobre – 1 novembre 2026
+2 postes · 16 h · terminée
+Voir
+Semaine du 19 – 25 octobre 2026
+2 postes · 16 h · terminée
+Voir
+Semaine du 12 – 18 octobre 2026
+2 postes · 16 h · terminée
+Voir
+Semaine du 5 – 11 octobre 2026
+2 postes · 16 h · terminée
+Voir
+septembre 2026
+Semaine du 28 septembre – 4 octobre 2026
+2 postes · 14 h 30 · terminée
+Voir
+Semaine du 21 – 27 septembre 2026
+2 postes · 16 h · terminée
+Voir
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== messages === (title Messages · Solvéa)
+MESSAGES
+Échanger avec l’équipe
+
+Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.
+
+Demander un rendez-vous
+Toute l’équipe
+jeu. 19 novembre
+Bonjour à tous, le planning de la semaine prochaine sera publié jeudi. Pensez à me signaler vos contraintes d’ici là.
+TITULAIRES
+CT
+Caroline Tellier
+Aucun message
+PF
+Pierre Fiandino
+Aucun message
+PHARMACIENS
+IL
+Igor Le Russe
+Aucun message
+LF
+Léa Fontaine
+Aucun message
+PRÉPARATEURS
+ID
+Inès Da Silva
+Aucun message
+JP
+Jules Perrin
+Aucun message
+NL
+Nicolas Le Syndicaliste
+Aucun message
+TN
+Thomas Nguyen
+Aucun message
+AUTRES POSTES
+MG
+Manon Girard
+Aucun message
+SL
+Sarah Lemoine
+Aucun message
+Toute l’équipe
+NOUVEAU MESSAGE
+Caroline T.
+Bonjour à tous, le planning de la semaine prochaine sera publié jeudi. Pensez à me signaler vos contraintes d’ici là.
+19 novembre 2026 à 9 h 12
+Votre message
+Envoyer
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== mesgardes : ABSENT DU MENU ===
+
+=== aide === (title Aide et tutoriels · Solvéa)
+AIDE
+Comment faire ?
+
+Cherchez une tâche : la réponse en deux lignes, le bouton qui y mène et un tutoriel qui vous la montre.
+
+Rythme de la visite
+Posé
+Le temps de tout lire et de tout voir.
+Normal
+Le temps de lire, sans attendre.
+Vif
+Pour qui connaît déjà.
+Comment faire
+20
+Lexique
+29
+Mon planning
+5
+Mes demandes
+6
+Au quotidien
+1
+Absences et remplacements
+2
+Suivre et faire le bilan
+1
+Messages et support
+5
+MON PLANNING
+À quoi sert mon accueil ?
+
+Votre accueil rassemble ce qui vous concerne : ce qui attend votre réponse, votre prochain poste, ce qui est propre à votre métier (marques d’un animateur, rayons, jours d’école, gardes, compétences), vos rendez-vous et vos raccourcis.
+
+Voir le tutoriel
+1 étape
+Ouvrir mon accueil
+Où voir mon prochain poste ?
+
+Il est écrit en grand en haut de « Mon planning », avec la pause et la durée. Dessous, votre semaine jour par jour, puis le calendrier du mois.
+
+Voir le tutoriel
+2 étapes
+Ouvrir mon planning
+Voir le planning de toute l’équipe
+
+Le planning global montre qui travaille quand. « Mes postes » ne garde que votre ligne ; « Toute l’équipe » la remet au complet.
+
+Voir le tutoriel
+1 étape
+Ouvrir le planning global
+Voir mon compteur d’heures et mon suivi
+
+« Mon suivi » montre vos heures en plus ou en moins, ce qui a été noté sur douze mois et votre part des contraintes. Vous ne voyez que votre position.
+
+Voir le tutoriel
+1 étape
+Ouvrir mon suivi
+Imprimer le planning
+
+Le bouton d’impression ouvre un aperçu : la feuille telle qu’elle sortira, à la semaine ou au mois, en couleur ou en noir et blanc, pour toute l’équipe ou pour vos seuls postes. Elle indique si le planning est publié ou encore en brouillon.
+
+Voir le tutoriel
+1 étape
+Ouvrir l’aperçu
+MES DEMANDES
+Préférence, demande : quelle différence ?
+
+Une préférence dit ce qui vous convient pour le mois à venir : le planning s’en inspire, personne ne vous répond. Une demande (congé, horaire à tenir, remplacement) attend une réponse du titulaire.
+
+Voir le tutoriel
+1 étape
+Ouvrir mes demandes
+Donner mes préférences du mois
+
+Choisissez une forme (matin, journée, après-midi, repos) puis cliquez les jours. « M’assister » remplit le reste d’après vos habitudes.
+
+Voir le tutoriel
+1 étape
+Donner mes préférences
+Poser un congé ou une contrainte d’horaires
+
+Dans « Mes demandes », carte « Absence ou horaire ». Un raccourci (sortie d’école, cours du soir…) remplit les horaires. Une raison est toujours demandée, dans une liste ; seuls les titulaires la voient.
+
+Voir le tutoriel
+1 étape
+Faire une demande
+Me faire remplacer sur un poste
+
+Dans « Mes demandes », carte « Me faire remplacer » : choisissez le poste, puis demandez à toute l’équipe ou à un collègue précis. Le calcul dit qui peut le reprendre, d’après les règles et ses heures de la semaine. Votre titulaire valide dans tous les cas.
+
+Voir le tutoriel
+1 étape
+Demander un remplacement
+Prévenir que je serai en retard
+
+Sur votre accueil ou dans « Mon planning », sous votre prochain poste : « Prévenir d’un retard ». Touchez la durée, puis « Prévenir les titulaires » : ils reçoivent aussitôt une notification et un message, avec votre heure d’arrivée. Vous pouvez corriger la durée ou annuler l’avis.
+
+Voir le tutoriel
+1 étape
+Ouvrir mon accueil
+Répondre à un appel ou aider un collègue
+
+L’appel apparaît en tête de « Mon planning », avec votre rang dans le tour de rôle. « Je peux » ou « Je ne peux pas » : dire non ne change pas votre rang.
+
+Voir le tutoriel
+1 étape
+Voir les appels
+AU QUOTIDIEN
+Signaler un retard ou une absence
+
+« Retard ou absence », en haut de l’écran, sert à tout le monde. Pour vous : la durée du retard ou les dates de l’absence, et les titulaires sont prévenus aussitôt. Un titulaire peut aussi le noter pour quelqu’un de l’équipe : le poste à couvrir part alors dans « Résoudre ».
+
+Voir le tutoriel
+1 étape
+Signaler
+ABSENCES ET REMPLACEMENTS
+Signaler un accident du travail ou de trajet
+
+Dans « Retard ou absence », choisissez « Absence », puis la raison « Accident du travail » : le jour, l’heure, le lieu, ce qui s’est passé, un témoin. Le titulaire a ensuite 48 heures pour le déclarer à la caisse d’assurance maladie, dimanches et jours fériés non comptés : le tableau de bord affiche l’échéance et un bouton « C’est fait ».
+
+Voir le tutoriel
+1 étape
+Signaler une absence
+Savoir ce qui a été décidé, et ce que cela change
+
+Chaque décision (congé, remplacement, horaires, publication, garde) est annoncée sous la cloche aux personnes concernées et aux titulaires, avec ce qu’elle change dans les plannings. « Vu » la range.
+
+Ouvrir l’accueil
+SUIVRE ET FAIRE LE BILAN
+Retrouver mes anciens plannings ou déposer un document
+
+« Mes documents » réunit vos plannings publiés, vos absences et arrêts, et les fichiers que vous déposez (arrêt de travail, attestation de formation). Un justificatif joint à une demande y est rangé une fois la demande réglée. Tout reste sur cet appareil.
+
+Ouvrir mes documents
+MESSAGES ET SUPPORT
+Écrire à l’équipe ou à une personne
+
+Un fil pour toute l’équipe et des conversations privées. Pour une absence, préférez une demande : elle est suivie.
+
+Voir le tutoriel
+1 étape
+Ouvrir les messages
+Demander un rendez-vous
+
+Dans « Messages », ou sur votre accueil, « Demander un rendez-vous » : la personne, le sujet, le moment. Solvéa propose des moments où vous êtes tous les deux en poste. La demande part dans la conversation ; une fois acceptée, elle est fixée dans vos deux agendas. On peut aussi proposer un autre horaire, décliner ou annuler.
+
+Voir le tutoriel
+1 étape
+Ouvrir les messages
+Changer l’apparence, la taille du texte ou mon mot de passe
+
+Dans « Mon compte » : trois apparences (claire, mixte avec le menu foncé, sombre), chacune montrée par une petite maquette, la taille du texte et le mot de passe. L’apparence se change aussi d’un geste depuis votre nom, en haut à droite. La couleur de l’espace est celle du profil ; seul le titulaire principal peut choisir la sienne, parmi dix.
+
+Voir le tutoriel
+1 étape
+Ouvrir mon compte
+Mettre à jour mes compétences et diplômes
+
+Dans « Mon compte », « Mes compétences et diplômes » : touchez une compétence pour l’ajouter ou la retirer. Vos titulaires sont informés de chaque changement. Les entretiens pharmaceutiques et les tests suivis d’une délivrance sont réservés aux pharmaciens ; un préparateur conseille et délivre sous le contrôle d’un pharmacien présent.
+
+Voir le tutoriel
+1 étape
+Ouvrir mon compte
+Contacter le support
+
+Si ni l’aide, ni le lexique, ni Solvi ne répondent, une personne vous répond : 01 99 00 12 34 ou support@solvea.example. Ces coordonnées sont aussi en bas de chaque écran. Dites ce que vous faisiez et ce qui s’est affiché.
+
+Voir le tutoriel
+1 étape
+Voir les coordonnées
+La visite guidée complète
+Toutes les fonctions, dans l’ordre du menu, sur une pharmacie d’exemple.
+Demander à 
+Posez votre question avec vos mots : il répond d’après votre planning.
+Contacter le support
+
+Ni l’aide, ni le lexique, ni Solvi ne répondent à votre question ? Une personne vous répond.
+
+Coordonnées provisoires, le temps que le support ouvre.
+
+01 99 00 12 34
+support@solvea.example
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== demandes/souhaits ===
+MON ESPACE
+Mes demandes
+
+Choisissez ce que vous voulez faire.
+
+Mes préférences
+Ce qui m’arrange le mois prochain.
+À remplir aujourd’hui
+Pas de réponse à attendre
+Absence ou horaire
+Congé, formation, horaire à tenir.
+1 en cours
+Votre titulaire répond
+Me faire remplacer
+Un poste publié que je ne peux pas tenir.
+Aucune
+Titulaire, puis un collègue volontaire
+Décembre 2026
+0 jour sur 26 rempli
+Dernier jour
+M’assister
+Je préfère
+Matin
+Journée
+Après-midi
+Repos
+Effacer
+Lun.
+Mar.
+Mer.
+Jeu.
+Ven.
+Sam.
+Dim.
+1
+À remplir
+, mardi
+2
+À remplir
+, mercredi
+3
+À remplir
+, jeudi
+4
+À remplir
+, vendredi
+5
+À remplir
+, samedi
+6
+Fermé
+7
+À remplir
+, lundi
+8
+À remplir
+, mardi
+9
+À remplir
+, mercredi
+10
+À remplir
+, jeudi
+11
+À remplir
+, vendredi
+12
+À remplir
+, samedi
+13
+Fermé
+14
+À remplir
+, lundi
+15
+À remplir
+, mardi
+16
+À remplir
+, mercredi
+17
+À remplir
+, jeudi
+18
+À remplir
+, vendredi
+19
+À remplir
+, samedi
+20
+Fermé
+21
+À remplir
+, lundi
+22
+À remplir
+, mardi
+23
+À remplir
+, mercredi
+24
+À remplir
+, jeudi
+25
+Férié · Noël
+26
+À remplir
+, samedi
+27
+Fermé
+28
+À remplir
+, lundi
+29
+À remplir
+, mardi
+30
+À remplir
+, mercredi
+31
+À remplir
+, jeudi
+
+ L’équipe annoncée ne suffit pas encore ce jour-là : touchez le jour pour voir qui vient, et aider si vous le voulez.
+
+COMMENT FAIRE
+Deux gestes
+Choisissez ce que vous préférez : matin, journée, après-midi ou repos.
+Touchez les jours concernés.
+
+« M’assister » remplit le reste d’après vos habitudes. Ce ne sont que des préférences : rien à justifier.
+
+L’ÉQUIPE
+7 sur 11 ont répondu
+
+Jusqu’au ven. 20 novembre inclus : c’est bientôt. Chacun voit l’effectif annoncé, jamais les raisons.
+
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== demandes/absences ===
+MON ESPACE
+Mes demandes
+
+Choisissez ce que vous voulez faire.
+
+Mes préférences
+Ce qui m’arrange le mois prochain.
+À remplir aujourd’hui
+Pas de réponse à attendre
+Absence ou horaire
+Congé, formation, horaire à tenir.
+1 en cours
+Votre titulaire répond
+Me faire remplacer
+Un poste publié que je ne peux pas tenir.
+Aucune
+Titulaire, puis un collègue volontaire
+Absences de l’équipe
+
+Les 10 prochaines semaines, une ligne par personne.
+
+Nov. 16
+23
+30
+Déc. 7
+14
+21
+28
+Janv. 4
+11
+18
+IL
+Igor L.
+Absent du mer. 18 novembre au ven. 20 novembre
+
+10 personnes sans absence prévue sur la période.
+
+Mes demandes d’absence et d’horaire
+Chaque demande suit trois étapes. Vous êtes prévenu à chaque réponse.
+Nouvelle demande
+Indisponible - lundi, mardi, jeudi, vendredi
+Horaire à tenir
+Envoyée
+: fait
+Réponse du titulaire
+: fait
+Au planning
+: fait
+
+Acceptée : votre planning en tient compte à coup sûr.
+
+Indisponibilité reconnue
+
+Demandes prioritaires utilisées : 0 sur 2. Même plafond pour toute l’équipe.
+
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== demandes/remplacements ===
+MON ESPACE
+Mes demandes
+
+Choisissez ce que vous voulez faire.
+
+Mes préférences
+Ce qui m’arrange le mois prochain.
+À remplir aujourd’hui
+Pas de réponse à attendre
+Absence ou horaire
+Congé, formation, horaire à tenir.
+1 en cours
+Votre titulaire répond
+Me faire remplacer
+Un poste publié que je ne peux pas tenir.
+Aucune
+Titulaire, puis un collègue volontaire
+Quel poste ne pouvez-vous pas tenir ?
+Seuls vos postes déjà publiés sont proposés.
+Dans moins de 7 jours : demande urgente. Seul un collègue volontaire peut reprendre le poste.
+Sam. 21 novembre
+9 h – 19 h
+Demain
+Demande urgente
+Mer. 25 novembre
+8 h 30 – 19 h 30
+Dans 5 jours
+Demande urgente
+Dans 7 jours ou plus : délai normal. Votre titulaire a le temps de s’organiser.
+Sam. 28 novembre
+9 h – 14 h
+Dans 8 jours
+Me faire remplacer
+Mer. 2 décembre
+11 h 30 – 19 h 30
+Dans 12 jours
+Me faire remplacer
+Sam. 5 décembre
+9 h – 19 h
+Dans 15 jours
+Me faire remplacer
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== menu compte ===
+Yanis Morel
+Étudiant
+Mon compte
+APPARENCE
+Clair
+Mixte
+Sombre
+Paramètres
+Se déconnecter
+
+=== compte === (title Mon compte · Solvéa)
+MON COMPTE
+Mes paramètres
+YM
+Yanis Morel
+Étudiant
+Espace équipe
+
+Étudiant · 16 h par semaine · CDD · 4 mois d’ancienneté · Grande Pharmacie de la Pinède · Seul Caroline T. peut vous donner l’accès à la gestion.
+
+Se déconnecter
+Mes compétences et diplômes
+Vous les tenez à jour vous-même. Vos titulaires sont informés de chaque changement.
+0 sélectionnée
+
+Touchez une compétence pour l’ajouter ou la retirer.
+
+Actes, diplômes et habilitations
+0/7
+Vaccination
+Tests angine et cystite
+(réservé aux pharmaciens)
+Entretiens pharmaceutiques
+(réservé aux pharmaciens)
+Orthopédie (DU)
+Contention et compression
+Préparations magistrales
+Gestes d’urgence (AFGSU)
+Conseil
+0/12
+Phytothérapie
+Aromathérapie
+Homéopathie
+Micronutrition
+Dermatologie et dermocosmétique
+Beauté et maquillage
+Parapharmacie
+Puériculture
+Conseil vétérinaire
+Maintien à domicile
+Diabète et autosurveillance
+Sevrage tabagique
+Organisation
+0/3
+Commandes et réception
+Tiers payant et rejets
+Merchandising
+
+Les entretiens pharmaceutiques et les tests suivis d’une délivrance sont réservés aux pharmaciens. Un préparateur conseille et délivre au comptoir, sous le contrôle effectif d’un pharmacien présent.
+
+Apparence
+Vos réglages ne changent que votre espace.
+Mode
+Clair
+Tout l’écran est clair. Le plus lisible en plein jour.
+Mixte
+Le menu est foncé, le contenu reste clair.
+Sombre
+Tout l’écran est foncé. Repose les yeux le soir.
+Comme l’appareil
+Clair le jour, sombre la nuit, selon le réglage de l’appareil.
+Couleur de votre espace : Ambre
+C’est la couleur de votre profil : elle dit d’un coup d’œil dans quel espace on se trouve. Seul le titulaire principal choisit la sienne.
+Taille du texte
+Normal
+Grand
+Connexion
+Identifiant : yanis.morel
+Mot de passe provisoire
+Mot de passe actuel
+Nouveau mot de passe
+Changer le mot de passe
+
+Au moins 6 caractères. Seule une empreinte est conservée, sur cet appareil.
+
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+
+=== cloche ===
+À VOIR
+Collègue qui cherche un remplaçant
+1
+
+ERREURS: []

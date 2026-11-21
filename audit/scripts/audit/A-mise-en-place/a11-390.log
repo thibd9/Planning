@@ -1,0 +1,76 @@
+ok 390 connexion
+!! 390 creation-1
+     PAGE déborde de 210px
+     HORS ÉCRAN a « Aller au formulaire » -21→137
+     HORS ÉCRAN h1 « Votre pharmacie » -17→551
+     HORS ÉCRAN div « IdentitéLe nom s’affiche en ha » -17→551
+     HORS ÉCRAN label « Nom de la pharmacie (obligatoi » 0→534
+     HORS ÉCRAN input «  » 0→534
+     HORS ÉCRAN label « Surface de l’officine (faculta » 0→534
+     HORS ÉCRAN label « La pharmacie ferme le midiSino » 0→534
+     HORS ÉCRAN label « La pharmacie ouvre le samedi » 0→534
+     HORS ÉCRAN label « SombreTout l’écran est foncé.  » 364→534
+     HORS ÉCRAN input «  » 365→533
+     HORS ÉCRAN button « Continuer : l’équipe » 336→538
+!! 390 creation-1-erreur
+     PAGE déborde de 210px
+     HORS ÉCRAN a « Aller au formulaire » -169→-11
+     HORS ÉCRAN h1 « Votre pharmacie » -165→403
+     HORS ÉCRAN h2 « Un point à corriger » -145→383
+     HORS ÉCRAN button « Indiquez le nom de la pharmaci » -125→99
+     HORS ÉCRAN div « IdentitéLe nom s’affiche en ha » -165→403
+     HORS ÉCRAN label « Nom de la pharmacie (obligatoi » -148→386
+     HORS ÉCRAN input «  » -148→386
+     HORS ÉCRAN label « Surface de l’officine (faculta » -148→386
+     HORS ÉCRAN label « Ouverture » -148→-16
+     HORS ÉCRAN input «  » -148→-16
+     HORS ÉCRAN label « La pharmacie ferme le midiSino » -148→386
+     HORS ÉCRAN input «  » -148→-126
+     HORS ÉCRAN label « La pharmacie ouvre le samedi » -148→386
+!! 390 creation-2
+     PAGE déborde de 154px
+     HORS ÉCRAN a « Aller au formulaire » -142→16
+     HORS ÉCRAN h1 « Votre équipe » -138→374
+     HORS ÉCRAN div « Vous, le titulaire principalNo » -138→374
+     HORS ÉCRAN label « Prénom (obligatoire) » -121→113
+     HORS ÉCRAN input «  » -121→113
+     HORS ÉCRAN label « Heures par semaine » -121→113
+     HORS ÉCRAN label « Identifiant de connexion (obli » -121→112
+     HORS ÉCRAN input «  » -121→112
+     HORS ÉCRAN button « Ajouter un titulaire » -106→59
+     HORS ÉCRAN label « Prénom » -106→113
+     HORS ÉCRAN input «  » -106→113
+     HORS ÉCRAN label « Heures par semaine » -106→113
+     HORS ÉCRAN button « Ajouter un pharmacien » -106→84
+!! 390 creation-2-erreurs
+     PAGE déborde de 154px
+     HORS ÉCRAN a « Aller au formulaire » -142→16
+     HORS ÉCRAN h1 « Votre équipe » -138→374
+     HORS ÉCRAN h2 « 4 points à corriger » -118→354
+     HORS ÉCRAN button « Indiquez le prénom du titulair » -98→114
+     HORS ÉCRAN button « Indiquez le nom du titulaire. » -98→91
+     HORS ÉCRAN button « Choisissez un identifiant de c » -98→338
+     HORS ÉCRAN button « Choisissez un mot de passe d’a » -98→264
+     HORS ÉCRAN div « Vous, le titulaire principalNo » -138→374
+     HORS ÉCRAN label « Prénom (obligatoire) » -121→113
+     HORS ÉCRAN input «  » -121→113
+     HORS ÉCRAN label « Heures par semaine » -121→113
+     HORS ÉCRAN label « Identifiant de connexion (obli » -121→112
+     HORS ÉCRAN input «  » -121→112
+ok 390 creation-3
+ok 390 reglages-pharmacie
+ok 390 reglages-horaires
+ok 390 reglages-comptoir
+ok 390 reglages-planning
+ok 390 reglages-parametres
+ok 390 reglages-postes-types
+ok 390 dialogue-poste-type
+ok 390 equipe
+ok 390 dialogue-ajout-personne
+!! 390 equipe-fiche-animatrice
+     HORS ÉCRAN button « Nouveau mot de passe provisoir » 186→440
+ok 390 regles
+ok 390 regles-fiche-ouverte
+ok 390 menu-compte
+ok 390 compte
+ERREURS console : aucune

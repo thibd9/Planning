@@ -1,0 +1,37 @@
+ok Titulaire tableau
+ok Titulaire 1 tableau
+ok Titulaire 1 moi
+ok Titulaire 1 equipe
+!! Titulaire 1 officine
+     DÉFILE ong-barre (281px)
+     DÉFILE of-defile (928px)
+!! Titulaire 1 regles
+     DÉFILE jr-filtres (200px)
+ok Titulaire 1 construire
+ok Titulaire 1 gardes
+!! Titulaire 1 resoudre
+     DÉFILE onglets ong-barre (409px)
+ok Titulaire 1 messages
+ok Titulaire 1 heures
+!! Titulaire 1 equite
+     DÉFILE jr-filtres (693px)
+!! Titulaire 1 stats
+     DÉFILE ong-barre (260px)
+ok Titulaire 1 journal
+!! Titulaire 1 documents
+     DÉFILE jr-filtres (616px)
+!! Titulaire 1 aide
+     DÉFILE ong-barre (1236px)
+ok Préparateur espace
+ok Préparateur moi
+!! Préparateur demandes
+     DÉFILE fc-zone (346px)
+ok Préparateur suivi
+!! Préparateur documents
+     DÉFILE jr-filtres (185px)
+ok Préparateur planning
+ok Préparateur messages
+!! Préparateur aide
+     DÉFILE ong-barre (874px)
+
+360px : 11 souci(s) sur 24 écrans ; erreurs 0

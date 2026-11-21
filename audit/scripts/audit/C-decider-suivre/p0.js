@@ -1,0 +1,21 @@
+const { ouvrir, D } = require('./lib');
+(async () => {
+  const { b, p, errs, data, nav, shot, texte } = await ouvrir({ role: 0 });
+  const d = await data();
+  const fs = require('fs'); fs.writeFileSync(`${D}/seed.json`, JSON.stringify(d, null, 1));
+  console.log('cles', Object.keys(d).join(','));
+  console.log('personnes', d.personnes.map((x) => `${x.id}:${x.prenom} ${x.nom}/${x.qualification}/${x.contrat?.heures ?? x.heuresContrat ?? JSON.stringify(x.contrat)}/sal=${x.salarie}/ext=${!!x.externe}`).join('\n'));
+  console.log('absences', JSON.stringify(d.absences.map((a) => [a.id, a.personId, a.type, a.statut, a.from, a.to])));
+  console.log('besoins', JSON.stringify(d.besoins.map((a) => [a.id, a.personId, a.decision, a.statut, a.type])));
+  console.log('remplacements', JSON.stringify(d.remplacements.map((a) => [a.id, a.demandeur, a.date, a.statut, a.accord, a.destinataire, a.trouId, a.urgence])));
+  console.log('trous', JSON.stringify(d.trous.map((a) => [a.id, a.absenceId, a.shift.personId, a.shift.date, a.statut])));
+  console.log('semaines', JSON.stringify(Object.fromEntries(Object.entries(d.semaines).map(([k, v]) => [k, v.statut + ':' + (v.snapshot?.length ?? 0)]))));
+  console.log('gardes', d.gardes.length, JSON.stringify(d.gardes.slice(0, 50).map((g) => [g.date, g.personId, g.type, !!g.valideLe])));
+  console.log('accords', JSON.stringify(d.accords));
+  console.log('messages', d.messages.length, 'notifs', d.notifications.length, 'journal', d.journal.length, 'docs', (d.documents ?? []).length, 'rdv', (d.rendezVous ?? []).length, 'regul', (d.regularisations ?? []).length, 'annonces', (d.annonces ?? []).length);
+  console.log('shifts', d.shifts.length, 'dates', [...new Set(d.shifts.map((s) => s.date))].sort()[0], [...new Set(d.shifts.map((s) => s.date))].sort().slice(-1)[0]);
+  await nav('resoudre'); await shot('00-resoudre');
+  console.log((await texte()).slice(0, 2500));
+  console.log('ERR', errs);
+  await b.close();
+})();

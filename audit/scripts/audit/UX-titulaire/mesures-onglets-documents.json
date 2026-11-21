@@ -1,0 +1,277 @@
+{
+ "d-documents-o1": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "73×34 Voir",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-documents-o2": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-documents-o3": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-documents-o4": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-documents-o5": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »",
+   "11.5px « IL »",
+   "11.5px « NL »",
+   "11.5px « Demandé »"
+  ],
+  "nPetits": 5,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "80×34 Tout 3",
+   "92×34 Arrêts 1",
+   "101×34 Congés 1",
+   "154×34 Remplacements 1",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 11,
+  "deborde": [],
+  "defilH": []
+ },
+ "t-documents-o1": {
+  "ok": true,
+  "n": 4,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.jr-filtres (+586px)"
+  ]
+ },
+ "t-documents-o2": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.jr-filtres (+586px)"
+  ]
+ },
+ "t-documents-o3": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.jr-filtres (+586px)"
+  ]
+ },
+ "t-documents-o4": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.jr-filtres (+586px)"
+  ]
+ },
+ "t-documents-o5": {
+  "ok": true,
+  "n": 4,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Bilan »",
+   "11.5px « 11 »",
+   "11.5px « Demandé »"
+  ],
+  "nPetits": 3,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "196×35 Plannings publiés 11",
+   "168×35 Mes absences 0",
+   "154×35 Mes fichiers 0",
+   "190×35 Reçus de l’équipe 0",
+   "214×35 Absences de l’équipe 3",
+   "80×34 Tout 3",
+   "92×34 Arrêts 1",
+   "101×34 Congés 1",
+   "154×34 Remplacements 1",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 11,
+  "deborde": [],
+  "defilH": [
+   "div.jr-filtres (+586px)",
+   "div.fc-zone (+316px)",
+   "div.jr-filtres (+87px)"
+  ]
+ }
+}

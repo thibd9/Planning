@@ -1,0 +1,42 @@
+LISTE : Ajouter une personne | TITULAIRES · 2 | CM | Claire Martin | Titulaire principal | 200 h | PD | Paul Durand | Titulaire secondaire | 35 h | PHARMACIENS · 1 | JB | Julie Bernard | Pharmacien | 35 h | PRÉPARATEURS · 2 | MP | Marc Petit | Préparateur | 35 h | LR | Léa Roux | Préparateur | 28 h (temps partiel) | ANIMATEURS · 1 | IG | Inès Garcia | Animateur | 20 h (temps partiel) | APPRENTIS · 1 | EB | Emma Blanc | Apprenti | 21 h (temps partiel)
+Fonctions proposées : Pharmacien titulaire / Pharmacien / Préparateur / Étudiant en pharmacie / Apprenti / Rayonniste / Animateur
+Champs du dialogue : Prénom / Nom / Fonction / Heures / semaine / Taux horaire brut (€) / Remplaçant habituel, extérieur à l’équipe
+Ajout sans nom possible : false
+Ajout « Zoé Faure » 200 h, taux -10 : true → {"h":200,"taux":-10,"id":"zoe.faure"} | toast : Zoé Faure ajouté. Son identifiant et son mot de passe provisoire sont dans sa fiche.
+Annuler
+Ajout « Yves Noir » -8 h : true → 1
+Ajout homonyme « Julie Bernard » : true → identifiants : julie.bernard, julie.bernard2
+Remplaçant puis Titulaire : case remplaçant visible = 0
+Rémi enregistré : {"q":"titulaire","externe":true,"h":0}
+Fiche Rémi : RE | Rémi Extérieur | Remplaçant · remplaçant habituel | Poste et contrat | Fonction | Pharmacien titulaire | Pharmacien | Préparateur | Étudiant en pharmacie | Apprenti | Rayonniste | Animateur | Type de contrat | Titulaire (non salarié) | Compétences et diplômes | 0 sélectionnée |  | Touchez une c
+Heures « -5 » → enregistré -5 | affiché -5
+Heures « 0 » → enregistré 0 | affiché 0
+Heures « 100 » → enregistré 100 | affiché 100
+Heures «  » → enregistré 0 | affiché 0
+Types de contrat (préparateur) : CDI / CDD / Contrat d’apprentissage / Contrat de professionnalisation / Stage / Remplacement ponctuel
+Contrat choisi : cdd | résumé : Poste et contrat
+Entrée future 2031-05-01 → enregistré 2031-05-01 | aide : Ancienneté : pas encore arrivé
+Entrée 2018-03-15 → aide : Ancienneté : 8 ans et 8 mois
+Compétences réservées (verrouillées) pour un préparateur : Tests angine et cystite
+(réservé aux pharmaciens) / Entretiens pharmaceutiques
+(réservé aux pharmaciens)
+Julie compétences : entretien
+Julie passée préparatrice : compétences gardées = entretien | salarie true | contrat undefined | volontaireGardes false
+Bouton « Entretiens » affiché : comp on reservee
+Fonctions proposées pour Claire : Pharmacien titulaire / Pharmacien / Préparateur / Étudiant en pharmacie / Apprenti / Rayonniste / Animateur
+Claire préparatrice → espace : Espace titulaire | rôle fiche : Préparateur | menu Réglages : 1
+Claire enregistrée : preparateur salarie true contrat undefined
+Fiche Inès (rubriques) : Poste et contrat / Compétences et diplômes / Marques présentées / Droits d’accès / Suivi sur 12 mois / Compte de connexion / Volontariat / Besoins personnels / Absences à venir
+Texte marques : Vous choisissez les marques que Inès anime, et pour quelles familles de produits. Il les retrouve dans son espace.
+Ajout Avène, toast : Avène rejoint le répertoire de la pharmacie et les marques de Inès.
+Doublon « avène » : bouton désactivé true | Inès présente déjà cette marque.
+Marques d’Inès : [["Avène",["dermocosmetique"]]] | répertoire : ["Avène"]
+Nom de marque vidé dans la fiche → enregistré : [""]
+Gestion donnée à Léa, toast : Léa peut désormais gérer l’officine.
+Annuler | enregistré : true
+Nouveau provisoire Marc : 257674 → 355272 | toast : Nouveau mot de passe provisoire pour Marc.
+Annuler
+DIALOGUE besoin : Enregistrer un besoin |  | Décrivez le besoin ; la raison est facultative quand vous l’enregistrez vous-même. |  | Dicter en langage courant (facultatif) | Comprendre | Besoins courants (facultatif) | Chabbat | Prière du vendredi | Office du dimanche | Rupture du jeûne | Sortie d’école | Mercredi | Cours du soir |  |  Un raccourci pour remplir le formulaire. Le raccourci choisi n’est pas enregistré : votre responsable ne voit que des horaires, par exemple « finir avant 16 h le vendredi ». |  | Raison de la demande (facultatif) | Choisir une raison… | Congés, repos | Famille, garde d’enfant | Santé, rendez-vous médical | Études, formation | Démarche administrative | Raison personnelle | Précision (facultatif) |  |  Une raison est demandée pour chaque demande. Seuls vos titulaires la voient ; vos collègues ne voient que vos horaires. |  | Type de besoin | Ne pas travailler certains jours |
+Léa connectée (accès gestion) : badge Espace gestion | menu : Tableau de bord, Mon planning, Équipe, Réglages, Règles, Construire, Gardes, Résoudre, Messages, Heures, Équité, Statistiques, Journal et paie, Documents, Besoin d’aide ?
+Léa voit « Repartir de zéro » : 1 | Dimensionnement : 0
+ERREURS console : aucune

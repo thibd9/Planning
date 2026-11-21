@@ -1,0 +1,2288 @@
+{
+ "CT Caroline Titulaire principale": {
+  "nav": [
+   {
+    "id": "tableau",
+    "texte": "Tableau de bord"
+   },
+   {
+    "id": "moi",
+    "texte": "Mon planning"
+   },
+   {
+    "id": "equipe",
+    "texte": "Équipe"
+   },
+   {
+    "id": "officine",
+    "texte": "Réglages"
+   },
+   {
+    "id": "regles",
+    "texte": "Règles"
+   },
+   {
+    "id": "construire",
+    "texte": "Construire"
+   },
+   {
+    "id": "gardes",
+    "texte": "Gardes"
+   },
+   {
+    "id": "resoudre",
+    "texte": "Résoudre 7 décisions en attente"
+   },
+   {
+    "id": "messages",
+    "texte": "Messages 1 messages non lus"
+   },
+   {
+    "id": "heures",
+    "texte": "Heures"
+   },
+   {
+    "id": "equite",
+    "texte": "Équité"
+   },
+   {
+    "id": "stats",
+    "texte": "Statistiques"
+   },
+   {
+    "id": "journal",
+    "texte": "Journal et paie"
+   },
+   {
+    "id": "documents",
+    "texte": "Documents"
+   },
+   {
+    "id": "aide",
+    "texte": "Besoin d’aide ? Aide, tutoriels et lexique"
+   }
+  ],
+  "barre": [
+   "Espace titulaire , environnement de test : changer de profil",
+   "Créer , ouvrir le menu de création",
+   "Retard ou absence , signaler",
+   "16 notifications, ouvrir la liste",
+   "1",
+   "Aide et tutoriels",
+   "CT Caroline T. , ouvrir le menu du compte"
+  ],
+  "ecrans": [
+   {
+    "menu": "Tableau de bord",
+    "id": "tableau",
+    "surtitre": "",
+    "titre": "Bonsoir Caroline",
+    "sous": "",
+    "cartes": [
+     "7 personnes en poste · 1 absent",
+     "1 poste sans personne",
+     "7 décisions à prendre",
+     "En retard depuis le mar. 17 novembre",
+     "Semaine du 7 – 13 décembre 2026",
+     "Demain : 9 h – 19 h",
+     "ENSUITE",
+     "RENDEZ-VOUS",
+     "Décisions récentes"
+    ],
+    "boutons": [
+     "L’équipe aujourd’hui 7 en poste 1 absent",
+     "Pharmacien présent 95 % cette semaine",
+     "Semaine prochaine Publiée à partir du 23 nov.",
+     "Compteurs d’heures 8 à régulariser en plus ou en moins",
+     "Prochaine garde Dim. 29 nov. Léa F.",
+     "Voir la journée",
+     "Couvrir l’absence",
+     "Tout voir",
+     "Absences à couvrir 1",
+     "Remplacements 1",
+     "Demandes de l’équipe 2",
+     "Gardes 3",
+     "Préparer décembre",
+     "Construire",
+     "Mon planning",
+     "Tout marquer comme lu",
+     "Vu"
+    ],
+    "onglets": [],
+    "mots": 2311
+   },
+   {
+    "menu": "Mon planning",
+    "id": "moi",
+    "surtitre": "MON PLANNING",
+    "titre": "Quand est-ce que je travaille ?",
+    "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.",
+    "cartes": [
+     "Un collègue cherche un remplaçant",
+     "Mes semaines",
+     "Cette semaine · 16 – 22 novembre 2026",
+     "41 h 30",
+     "6",
+     "Semaine prochaine · 23 – 29 novembre 2026",
+     "40 h",
+     "5"
+    ],
+    "boutons": [
+     "Poser une absence",
+     "Imprimer",
+     "Planning de l’équipe",
+     "Prévenir d’un retard",
+     "Je me propose",
+     "Semaine",
+     "Calendrier",
+     "16 Lundi novembre , voir la journée",
+     "17 Mardi novembre , voir la journée",
+     "18 Mercredi novembre , voir la journée",
+     "19 Jeudi novembre , voir la journée",
+     "20 Vendredi Aujourd’hui , voir la journée",
+     "21 Samedi novembre , voir la journée",
+     "23 Lundi novembre , voir la journée",
+     "24 Mardi novembre , voir la journée",
+     "25 Mercredi novembre , voir la journée",
+     "26 Jeudi novembre , voir la journée",
+     "27 Vendredi novembre , voir la journée",
+     "28 Samedi novembre , voir la journée"
+    ],
+    "onglets": [],
+    "mots": 2559
+   },
+   {
+    "menu": "Équipe",
+    "id": "equipe",
+    "surtitre": "ÉQUIPE",
+    "titre": "Qui peut faire quoi, et quand",
+    "sous": "Contrats, compétences et besoins personnels. La raison d’une demande n’est visible que des titulaires.",
+    "cartes": [
+     "Caroline Tellier"
+    ],
+    "boutons": [
+     "Ajouter une personne",
+     "CT Caroline Tellier Titulaire principal 42 h",
+     "PF Pierre Fiandino Titulaire secondaire 24 h",
+     "IL Igor Le Russe Pharmacien 35 h",
+     "LF Léa Fontaine Pharmacien 28 h (temps partiel)",
+     "NL Nicolas Le Syndicaliste Préparateur 35 h",
+     "TN Thomas Nguyen Préparateur 35 h",
+     "ID Inès Da Silva Préparateur 24 h (temps partiel)",
+     "JP Jules Perrin Préparateur 35 h",
+     "SL Sarah Lemoine Animateur 21 h (temps partiel)",
+     "MG Manon Girard Apprenti 21 h (temps partiel)",
+     "YM Yanis Morel Étudiant 16 h (temps partiel)",
+     "PL Paul Lemaire Remplaçant Extérieur à l’équipe",
+     "NB Nadia Brun Remplaçant Extérieur à l’équipe",
+     "Besoin ou absence",
+     "Vaccination",
+     "Tests angine et cystite",
+     "Entretiens pharmaceutiques",
+     "Orthopédie (DU)",
+     "Contention et compression",
+     "Préparations magistrales",
+     "Gestes d’urgence (AFGSU)",
+     "Phytothérapie",
+     "Aromathérapie",
+     "Homéopathie",
+     "Micronutrition",
+     "Dermatologie et dermocosmétique",
+     "Beauté et maquillage",
+     "Parapharmacie",
+     "Puériculture",
+     "Conseil vétérinaire",
+     "Maintien à domicile",
+     "Diabète et autosurveillance",
+     "Sevrage tabagique",
+     "Commandes et réception",
+     "Tiers payant et rejets",
+     "Merchandising",
+     "Retirer de l’équipe",
+     "Voir les statistiques de l’équipe"
+    ],
+    "onglets": [],
+    "mots": 3255
+   },
+   {
+    "menu": "Réglages",
+    "id": "officine",
+    "surtitre": "OFFICINE",
+    "titre": "Grande Pharmacie de la Pinède",
+    "sous": "180 m² au total · 110 m² de surface de vente · 45 m² de réserve et de préparatoire",
+    "cartes": [
+     "Pharmaciens",
+     "Préparateurs et comptoir",
+     "VOS RÉGLAGES « COMBIEN DE PERSONNES AU COMPTOIR »",
+     "Ce que ce choix change dans l’application"
+    ],
+    "boutons": [
+     "Pharmacie",
+     "Horaires",
+     "Comptoir",
+     "Planning",
+     "Paramètres",
+     "Coupure le midi",
+     "Recopier",
+     "Fermer ce jour",
+     "Ouvrir ce jour",
+     "Ajouter un poste type",
+     "Réinitialiser"
+    ],
+    "onglets": [
+     "Pharmacie",
+     "Horaires",
+     "Comptoir",
+     "Planning",
+     "Paramètres"
+    ],
+    "mots": 7609
+   },
+   {
+    "menu": "Règles",
+    "id": "regles",
+    "surtitre": "RÈGLES",
+    "titre": "Ce que Solvéa vérifie pour vous",
+    "sous": "Rangées par question. Ouvrez une règle pour lire le détail ou régler son seuil.",
+    "cartes": [
+     "Combien d’heures au maximum ?",
+     "Combien de temps à l’avance prévenir ?",
+     "Les choix de votre officine",
+     "Quel repos garantir ?",
+     "Qui doit être présent ?",
+     "Et pour les gardes ?"
+    ],
+    "boutons": [
+     "Toutes 24",
+     "Obligatoires 12",
+     "Réglables 20",
+     "À faire valider 11"
+    ],
+    "onglets": [],
+    "mots": 2418
+   },
+   {
+    "menu": "Construire",
+    "id": "construire",
+    "surtitre": "CONSTRUIRE",
+    "titre": "Comment couvrir la semaine ?",
+    "sous": "Posez les postes, vérifiez que l’équipe est au complet, puis publiez.",
+    "cartes": [
+     "Contrôles",
+     "À surveiller 4"
+    ],
+    "boutons": [
+     "Toute l’équipe",
+     "Mes postes",
+     "Semaine",
+     "Mois",
+     "Heures",
+     "Équité",
+     "Recopier",
+     "Remettre à zéro",
+     "Proposer un planning",
+     "Publier les modifications",
+     "23 lundi Voir la journée",
+     "24 mardi Voir la journée",
+     "25 mercredi Voir la journée",
+     "26 jeudi Voir la journée",
+     "27 vendredi Voir la journée",
+     "28 samedi Voir la journée",
+     "29 dim. , voir la journée",
+     "08:30–19:30 9 h 30 · comptoir , Caroline T., lundi, pause dé",
+     "11:30–19:30 7 h · comptoir , Caroline T., mardi, pause déjeu",
+     "08:30–16:30 7 h · comptoir , Caroline T., mercredi, pause dé",
+     "08:30–16:30 7 h · comptoir , Caroline T., jeudi, pause déjeu",
+     "08:30–19:30 9 h 30 · comptoir , Caroline T., vendredi, pause",
+     "11:30–19:30 7 h · comptoir , Pierre F., lundi, pause déjeune",
+     "08:30–13:00 4 h 30 · comptoir , Pierre F., mercredi, pause c",
+     "08:30–16:30 7 h · comptoir , Pierre F., jeudi, pause déjeune",
+     "08:30–13:00 4 h 30 · comptoir , Pierre F., vendredi, pause c",
+     "08:30–16:30 7 h · comptoir , Igor L., lundi, pause déjeuner ",
+     "08:30–16:30 7 h · comptoir , Igor L., mardi, pause déjeuner ",
+     "11:30–19:30 7 h · comptoir , Igor L., mercredi, pause déjeun",
+     "11:30–19:30 7 h · comptoir , Igor L., jeudi, pause déjeuner ",
+     "09:00–14:00 5 h · comptoir , Igor L., samedi, pause courte à",
+     "08:30–13:00 4 h 30 · comptoir , Léa F., lundi, pause courte ",
+     "08:30–13:00 4 h 30 · comptoir , Léa F., mardi, pause courte ",
+     "11:30–19:30 7 h · comptoir , Léa F., jeudi, pause déjeuner 1",
+     "11:30–19:30 7 h · comptoir , Léa F., vendredi, pause déjeune",
+     "14:00–19:00 5 h · comptoir , Léa F., samedi, pause courte à ",
+     "08:30–16:30 7 h · comptoir , Nicolas L., lundi, pause déjeun",
+     "08:30–16:30 7 h · comptoir , Nicolas L., mardi, pause déjeun",
+     "08:30–13:00 4 h 30 · comptoir , Nicolas L., mercredi, pause ",
+     "08:30–19:30 9 h 30 · comptoir , Nicolas L., jeudi, pause déj",
+     "11:30–19:30 7 h · comptoir , Nicolas L., vendredi, pause déj",
+     "08:30–16:30 7 h · comptoir , Thomas N., mardi, pause déjeune",
+     "08:30–19:30 9 h 30 · comptoir , Thomas N., mercredi, pause d",
+     "08:30–19:30 9 h 30 · comptoir , Thomas N., jeudi, pause déje",
+     "09:00–19:00 9 h · comptoir , Thomas N., samedi, pause déjeun",
+     "08:30–19:30 9 h 30 · comptoir , Inès D., mardi, pause déjeun",
+     "08:30–13:00 4 h 30 · comptoir , Inès D., vendredi, pause cou",
+     "09:00–19:00 9 h · comptoir , Inès D., samedi, pause déjeuner",
+     "11:30–19:30 7 h · comptoir , Jules P., lundi, pause déjeuner",
+     "11:30–19:30 7 h · comptoir , Jules P., mardi, pause déjeuner",
+     "08:30–13:00 4 h 30 · comptoir , Jules P., mercredi, pause co",
+     "08:30–13:00 4 h 30 · comptoir , Jules P., jeudi, pause court",
+     "08:30–16:30 7 h · comptoir , Jules P., vendredi, pause déjeu",
+     "09:00–14:00 5 h · comptoir , Jules P., samedi, pause courte ",
+     "08:30–16:30 7 h · comptoir , Sarah L., lundi, pause déjeuner",
+     "08:30–16:30 7 h · comptoir , Sarah L., mardi, pause déjeuner",
+     "08:30–16:30 7 h · comptoir , Sarah L., vendredi, pause déjeu",
+     "08:30–16:30 7 h · comptoir , Manon G., lundi, pause déjeuner",
+     "08:30–16:30 7 h · comptoir , Manon G., mardi, pause déjeuner",
+     "11:30–19:30 7 h · comptoir , Manon G., mercredi, pause déjeu",
+     "08:30–19:30 9 h 30 · comptoir , Yanis M., mercredi, pause dé",
+     "09:00–14:00 5 h · comptoir , Yanis M., samedi, pause courte ",
+     "À SURVEILLER Igor L. travaille tous les samedis du mois : l’",
+     "À SURVEILLER Thomas N. travaille tous les samedis du mois : ",
+     "À SURVEILLER Jules P. travaille tous les samedis du mois : l",
+     "À SURVEILLER Yanis M. travaille tous les samedis du mois : l"
+    ],
+    "onglets": [],
+    "mots": 8314
+   },
+   {
+    "menu": "Gardes",
+    "id": "gardes",
+    "surtitre": "GARDES",
+    "titre": "De la garde à la paie",
+    "sous": "Le calendrier de garde est fixé hors de l'officine. Importez vos obligations, puis suivez chaque garde : affectation, interventions, repos à protéger, variables pour le comptable.",
+    "cartes": [
+     "Calendrier sur douze mois",
+     "Garde de jour · volets ouverts",
+     "1 1. Qui assure la garde ?",
+     "2 2. Déroulement",
+     "3 3. Conséquences sur le repos",
+     "4 4. Variables pour le comptable"
+    ],
+    "boutons": [
+     "Importer un calendrier",
+     "Répartir 2 gardes",
+     "Ajouter une garde",
+     "29 novembre, Garde de jour · volets ouverts, confiée à Léa F",
+     "12 décembre, Astreinte de nuit · à domicile, à affecter",
+     "25 décembre, Garde de jour · volets ouverts, à affecter",
+     "31 décembre, Garde de nuit · volets fermés, confiée à Igor L",
+     "24 oct. Garde de nuit Repos réglé Samedi · 20 h → 8 h Volets",
+     "29 nov. Garde de jour Affectée Dimanche · 9 h → 19 h Volets ",
+     "12 déc. Astreinte de nuit Prévue Samedi · 19 h → 9 h À Domic",
+     "25 déc. Garde de jour Prévue Vendredi · 9 h → 19 h Volets Ou",
+     "31 déc. Garde de nuit Affectée Jeudi · 19 h 30 → 8 h 30 Vole",
+     "CT Caroline T. Titulaire principal Recommandé 0 garde en 202",
+     "PF Pierre F. Titulaire secondaire 0 garde en 2026 Volontaire",
+     "LF Léa F. Pharmacien Affectée 0 garde en 2026 Volontaire dél",
+     "IL Igor L. Pharmacien 2 gardes en 2026 Volontaire délai de p",
+     "Valider pour le comptable"
+    ],
+    "onglets": [],
+    "mots": 3536
+   },
+   {
+    "menu": "Résoudre 7 décisions en attente",
+    "id": "resoudre",
+    "surtitre": "RÉSOUDRE · VENDREDI 20 NOVEMBRE 2026",
+    "titre": "Que décider aujourd'hui ?",
+    "sous": "7 décisions à prendre. Chaque option dit ce qu’elle change avant que vous ne choisissiez.",
+    "cartes": [
+     "Absences à couvrir",
+     "Arrêt de Igor L.",
+     "Vendredi 20 novembre",
+     "Demander à toute l’équipe",
+     "Réaffecter Pierre F.",
+     "Proposer des heures complémentaires à Léa F.",
+     "Faire appel à Paul L., remplaçant habituel"
+    ],
+    "boutons": [
+     "Absences 1 à traiter",
+     "Remplacements 1 à traiter",
+     "Demandes 2 à traiter",
+     "Gardes 3 à traiter",
+     "À publier 0 à traiter",
+     "Voir et choisir la solution",
+     "Confier",
+     "Choisir"
+    ],
+    "onglets": [
+     "Absences 1 à traiter",
+     "Remplacements 1 à traiter",
+     "Demandes 2 à traiter",
+     "Gardes 3 à traiter",
+     "À publier 0 à traiter"
+    ],
+    "mots": 2250
+   },
+   {
+    "menu": "Messages 1 messages non lus",
+    "id": "messages",
+    "surtitre": "MESSAGES",
+    "titre": "Échanger avec l’équipe",
+    "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.",
+    "cartes": [
+     "Nicolas Le Syndicaliste"
+    ],
+    "boutons": [
+     "Demander un rendez-vous",
+     "Toute l’équipe jeu. 19 novembre Vous : Bonjour à tous, le pl",
+     "PF Pierre Fiandino Aucun message",
+     "IL Igor Le Russe Aucun message",
+     "LF Léa Fontaine Aucun message",
+     "ID Inès Da Silva Aucun message",
+     "JP Jules Perrin Aucun message",
+     "NL Nicolas Le Syndicaliste jeu. 19 novembre Bonjour Caroline",
+     "TN Thomas Nguyen Aucun message",
+     "MG Manon Girard Aucun message",
+     "SL Sarah Lemoine Aucun message",
+     "YM Yanis Morel Aucun message",
+     "Envoyer"
+    ],
+    "onglets": [],
+    "mots": 1058
+   },
+   {
+    "menu": "Heures",
+    "id": "heures",
+    "surtitre": "COMPTEUR D’HEURES",
+    "titre": "Le moins d’heures en plus possible",
+    "sous": "L’objectif : que chacun reste à son contrat. Solvéa signale tout dépassement et propose comment le résorber.",
+    "cartes": [],
+    "boutons": [
+     "Régulariser automatiquement",
+     "Faire rattraper",
+     "Solder"
+    ],
+    "onglets": [],
+    "mots": 1473
+   },
+   {
+    "menu": "Équité",
+    "id": "equite",
+    "surtitre": "ÉQUITÉ",
+    "titre": "La charge est-elle bien répartie ?",
+    "sous": "Chacun est comparé à sa part, selon son temps de travail. Jamais de note globale.",
+    "cartes": [
+     "Qui travaille le samedi ?",
+     "Fatigue, semaine du 16 – 22 novembre 2026"
+    ],
+    "boutons": [
+     "8 semaines",
+     "12 semaines",
+     "6 mois",
+     "Samedis travaillés",
+     "Fermetures en semaine",
+     "Gardes et astreintes",
+     "Dépannages assurés",
+     "Changements tardifs absorbés",
+     "Demandes refusées"
+    ],
+    "onglets": [],
+    "mots": 1993
+   },
+   {
+    "menu": "Statistiques",
+    "id": "stats",
+    "surtitre": "STATISTIQUES",
+    "titre": "Que disent les chiffres de l’équipe ?",
+    "sous": "Composition, compétences, points forts et activité : tout est calculé à partir de ce qui est déjà saisi. Rien n’est estimé.",
+    "cartes": [
+     "La composition de l’équipe",
+     "Par fonction",
+     "Par contrat",
+     "Repères",
+     "La couverture des compétences",
+     "Reposent sur une seule personne 4",
+     "Que personne ne détient 14",
+     "Les points forts de l’équipe",
+     "Par nature",
+     "Les repères d’activité",
+     "Heures planifiées face aux contrats",
+     "Samedis, fermetures, gardes et dépannages sur 12 mois"
+    ],
+    "boutons": [
+     "Composition",
+     "Compétences 8 / 22",
+     "Points forts 7",
+     "Activité",
+     "NL Nicolas Le Syndicaliste Préparateur : ouvrir sa fiche",
+     "SL Sarah Lemoine Animateur : ouvrir sa fiche",
+     "IL Igor Le Russe Pharmacien : ouvrir sa fiche",
+     "ID Inès Da Silva Préparateur : ouvrir sa fiche",
+     "LF Léa Fontaine Pharmacien : ouvrir sa fiche",
+     "YM Yanis Morel Étudiant : ouvrir sa fiche",
+     "IL Igor Le Russe 35 h par semaine : ouvrir sa fiche",
+     "ID Inès Da Silva 24 h par semaine : ouvrir sa fiche",
+     "JP Jules Perrin 35 h par semaine : ouvrir sa fiche",
+     "LF Léa Fontaine 28 h par semaine : ouvrir sa fiche",
+     "MG Manon Girard 21 h par semaine : ouvrir sa fiche",
+     "NL Nicolas Le Syndicaliste 35 h par semaine : ouvrir sa fich",
+     "SL Sarah Lemoine 21 h par semaine : ouvrir sa fiche",
+     "TN Thomas Nguyen 35 h par semaine : ouvrir sa fiche",
+     "YM Yanis Morel 16 h par semaine : ouvrir sa fiche",
+     "CT Caroline Tellier Titulaire principal : ouvrir sa fiche",
+     "JP Jules Perrin Préparateur : ouvrir sa fiche",
+     "MG Manon Girard Apprenti : ouvrir sa fiche",
+     "PF Pierre Fiandino Titulaire secondaire : ouvrir sa fiche",
+     "TN Thomas Nguyen Préparateur : ouvrir sa fiche"
+    ],
+    "onglets": [
+     "Composition",
+     "Compétences 8 / 22",
+     "Points forts 7",
+     "Activité"
+    ],
+    "mots": 7743
+   },
+   {
+    "menu": "Journal et paie",
+    "id": "journal",
+    "surtitre": "JOURNAL ET PAIE",
+    "titre": "Dossier de preuve",
+    "sous": "Tout ce qui a été publié, modifié ou décidé, avec la date et l’heure.",
+    "cartes": [
+     "Aujourd’hui vendredi 20 novembre 2026",
+     "Arrêt d’Igor L. enregistré",
+     "Mercredi 18 novembre 2026",
+     "Planning de la semaine du 30/11/2026 publié",
+     "Mercredi 11 novembre 2026",
+     "Planning de la semaine du 23/11/2026 publié",
+     "Mercredi 4 novembre 2026",
+     "Planning de la semaine du 16/11/2026 publié",
+     "Mercredi 28 octobre 2026",
+     "Planning de la semaine du 09/11/2026 publié"
+    ],
+    "boutons": [
+     "Journal",
+     "Fiche navette",
+     "Tout",
+     "Publications",
+     "Absences",
+     "Exporter le dossier"
+    ],
+    "onglets": [],
+    "mots": 1209
+   },
+   {
+    "menu": "Documents",
+    "id": "documents",
+    "surtitre": "BILAN",
+    "titre": "Mes documents",
+    "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit.",
+    "cartes": [
+     "novembre 2026",
+     "octobre 2026",
+     "septembre 2026"
+    ],
+    "boutons": [
+     "Plannings publiés 11",
+     "Mes absences 0",
+     "Mes fichiers 0",
+     "Reçus de l’équipe 0",
+     "Absences de l’équipe 3",
+     "Voir"
+    ],
+    "onglets": [
+     "Plannings publiés 11",
+     "Mes absences 0",
+     "Mes fichiers 0",
+     "Reçus de l’équipe 0",
+     "Absences de l’équipe 3"
+    ],
+    "mots": 1050
+   },
+   {
+    "menu": "Besoin d’aide ? Aide, tutoriels et lexique",
+    "id": "aide",
+    "surtitre": "AIDE",
+    "titre": "Comment faire ?",
+    "sous": "Cherchez une tâche : la réponse en deux lignes, le bouton qui y mène et un tutoriel qui vous la montre.",
+    "cartes": [
+     "AU QUOTIDIEN",
+     "Lire le tableau de bord",
+     "Pourquoi personne n’est en poste aujourd’hui ?",
+     "À quoi sert le bouton « Créer » ?",
+     "Signaler un retard ou une absence",
+     "Préparer le mois avant l’échéance",
+     "Une décision met-elle à jour le planning de l’équipe ?",
+     "PRÉPARER",
+     "Ajouter une personne ou changer son poste",
+     "Type de contrat et ancienneté",
+     "Choisir les marques d’un animateur ou d’une animatrice",
+     "Donner un mot de passe à un membre de l’équipe",
+     "Changer les horaires d’ouverture ou l’effectif attendu",
+     "Construire seul ou avec l’équipe",
+     "Créer ou modifier un poste type",
+     "Renseigner l’officine en chiffres",
+     "Savoir si l’équipe est assez nombreuse",
+     "Voir les jours fériés",
+     "Voir ou régler les règles appliquées",
+     "Ajouter une autre pharmacie",
+     "CONSTRUIRE ET PUBLIER",
+     "Construire le planning d’une semaine",
+     "Poser un jour de repos",
+     "Remettre un planning à zéro",
+     "Laisser Solvéa proposer une semaine",
+     "Régler la pause déjeuner et les pauses courtes",
+     "Comprendre les alertes de la grille",
+     "Voir les préférences de l’équipe et les départager",
+     "Voir le mois entier et suivre les préférences",
+     "Noter un retard ou régler une pause",
+     "Publier un planning",
+     "Planifier une formation ou un inventaire",
+     "Ajouter ou répartir les gardes",
+     "ABSENCES ET REMPLACEMENTS",
+     "Couvrir une absence imprévue",
+     "Signaler un accident du travail ou de trajet",
+     "Répondre à une demande de remplacement",
+     "Personne ne peut remplacer : que faire ?",
+     "Répondre à un congé ou à une demande d’horaires",
+     "Donner mon accord à un autre titulaire"
+    ],
+    "boutons": [
+     "Posé Le temps de tout lire et de tout voir.",
+     "Normal Le temps de lire, sans attendre.",
+     "Vif Pour qui connaît déjà.",
+     "Comment faire 52",
+     "Lexique 42",
+     "Au quotidien 6",
+     "Préparer 12",
+     "Construire et publier 12",
+     "Absences et remplacements 7",
+     "Suivre et faire le bilan 6",
+     "Messages et support 5",
+     "Mon planning 3",
+     "Mes demandes 1",
+     "Voir le tutoriel 1 étape",
+     "Ouvrir le tableau de bord",
+     "Ouvrir « Construire »",
+     "Voir le tutoriel 3 étapes",
+     "Signaler",
+     "Ouvrir « Résoudre »",
+     "Voir le tutoriel 2 étapes",
+     "Ajouter une personne",
+     "Ouvrir l’équipe",
+     "Voir le tutoriel 7 étapes",
+     "Ouvrir les réglages",
+     "Ouvrir les règles",
+     "Ajouter une pharmacie",
+     "Voir le tutoriel 9 étapes",
+     "Ouvrir Construire",
+     "Ouvrir la vue mois",
+     "Ouvrir la journée",
+     "Aller publier",
+     "Planifier une formation",
+     "Voir le tutoriel 4 étapes",
+     "Ajouter une garde",
+     "Voir les absences",
+     "Signaler une absence",
+     "Voir les remplacements",
+     "Voir les demandes",
+     "Voir les accords",
+     "Ouvrir l’accueil",
+     "Ouvrir les heures",
+     "Ouvrir l’équité",
+     "Ouvrir les statistiques",
+     "Ouvrir le journal",
+     "Ouvrir les documents",
+     "Ouvrir mes documents",
+     "Ouvrir les messages",
+     "Ouvrir mon compte",
+     "Voir les coordonnées",
+     "Ouvrir mon planning",
+     "Ouvrir le planning global",
+     "Ouvrir l’aperçu",
+     "Faire une demande",
+     "La visite guidée complète Toutes les fonctions, dans l’ordre",
+     "Demander à Posez votre question avec vos mots : il répond d’"
+    ],
+    "onglets": [
+     "Comment faire 52",
+     "Lexique 42",
+     "Au quotidien 6",
+     "Préparer 12",
+     "Construire et publier 12",
+     "Absences et remplacements 7",
+     "Suivre et faire le bilan 6",
+     "Messages et support 5",
+     "Mon planning 3",
+     "Mes demandes 1"
+    ],
+    "mots": 18266
+   }
+  ]
+ },
+ "NLS Nicolas Préparateur": {
+  "nav": [
+   {
+    "id": "espace",
+    "texte": "Accueil"
+   },
+   {
+    "id": "moi",
+    "texte": "Mon planning"
+   },
+   {
+    "id": "demandes",
+    "texte": "Mes demandes"
+   },
+   {
+    "id": "suivi",
+    "texte": "Mon suivi"
+   },
+   {
+    "id": "documents",
+    "texte": "Mes documents"
+   },
+   {
+    "id": "planning",
+    "texte": "Planning de l’équipe"
+   },
+   {
+    "id": "messages",
+    "texte": "Messages 1 messages non lus"
+   },
+   {
+    "id": "aide",
+    "texte": "Besoin d’aide ? Aide, tutoriels et lexique"
+   }
+  ],
+  "barre": [
+   "Espace préparateur , environnement de test : changer de profil",
+   "Faire une demande",
+   "Retard ou absence , signaler",
+   "1 notifications, ouvrir la liste",
+   "1",
+   "Aide et tutoriels",
+   "NL Nicolas L. , ouvrir le menu du compte"
+  ],
+  "ecrans": [
+   {
+    "menu": "Accueil",
+    "id": "espace",
+    "surtitre": "",
+    "titre": "Bonsoir Nicolas",
+    "sous": "",
+    "cartes": [
+     "Mes compétences et mes postes",
+     "MES COMPÉTENCES",
+     "MES PROCHAINS POSTES",
+     "Mes rendez-vous",
+     "Mes raccourcis"
+    ],
+    "boutons": [
+     "Prévenir d’un retard",
+     "Parler d’une formation",
+     "Demander un rendez-vous",
+     "Voir mon planning",
+     "Demander une absence ou un horaire",
+     "Écrire à Caroline T."
+    ],
+    "onglets": [],
+    "mots": 975
+   },
+   {
+    "menu": "Mon planning",
+    "id": "moi",
+    "surtitre": "MON PLANNING",
+    "titre": "Quand est-ce que je travaille ?",
+    "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.",
+    "cartes": [
+     "Mes semaines",
+     "Cette semaine · 16 – 22 novembre 2026",
+     "34 h 30",
+     "5",
+     "Semaine prochaine · 23 – 29 novembre 2026",
+     "35 h"
+    ],
+    "boutons": [
+     "Faire une demande",
+     "Imprimer",
+     "Planning de l’équipe",
+     "Prévenir d’un retard",
+     "Semaine",
+     "Calendrier",
+     "16 Lundi novembre , voir la journée",
+     "17 Mardi novembre , voir la journée",
+     "18 Mercredi novembre , voir la journée",
+     "19 Jeudi novembre , voir la journée",
+     "20 Vendredi Aujourd’hui , voir la journée",
+     "21 Samedi novembre , voir la journée",
+     "23 Lundi novembre , voir la journée",
+     "24 Mardi novembre , voir la journée",
+     "25 Mercredi novembre , voir la journée",
+     "26 Jeudi novembre , voir la journée",
+     "27 Vendredi novembre , voir la journée",
+     "28 Samedi novembre , voir la journée"
+    ],
+    "onglets": [],
+    "mots": 2192
+   },
+   {
+    "menu": "Mes demandes",
+    "id": "demandes",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes demandes",
+    "sous": "Choisissez ce que vous voulez faire.",
+    "cartes": [
+     "Absences de l’équipe",
+     "Mes demandes d’absence et d’horaire"
+    ],
+    "boutons": [
+     "Mes préférences Ce qui m’arrange le mois prochain. Dernier j",
+     "Absence ou horaire Congé, formation, horaire à tenir. 1 en a",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir.",
+     "Nouvelle demande"
+    ],
+    "onglets": [
+     "Mes préférences Ce qui m’arrange le mois prochain. Dernier jour Pas de réponse à attendre",
+     "Absence ou horaire Congé, formation, horaire à tenir. 1 en attente Votre titulaire répond",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir. Aucune Titulaire, puis un collègue volontaire"
+    ],
+    "mots": 1265
+   },
+   {
+    "menu": "Mon suivi",
+    "id": "suivi",
+    "surtitre": "MON SUIVI",
+    "titre": "Où j’en suis",
+    "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement.",
+    "cartes": [
+     "Mon compteur d’heures",
+     "Mon suivi",
+     "Ma part des contraintes"
+    ],
+    "boutons": [],
+    "onglets": [],
+    "mots": 1358
+   },
+   {
+    "menu": "Mes documents",
+    "id": "documents",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes documents",
+    "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit.",
+    "cartes": [
+     "novembre 2026",
+     "octobre 2026",
+     "septembre 2026"
+    ],
+    "boutons": [
+     "Mes plannings 11",
+     "Mes absences 1",
+     "Mes fichiers 0",
+     "Voir"
+    ],
+    "onglets": [
+     "Mes plannings 11",
+     "Mes absences 1",
+     "Mes fichiers 0"
+    ],
+    "mots": 995
+   },
+   {
+    "menu": "Planning de l’équipe",
+    "id": "planning",
+    "surtitre": "PLANNING DE L’ÉQUIPE",
+    "titre": "Qui travaille quand ?",
+    "sous": "Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning ».",
+    "cartes": [],
+    "boutons": [
+     "Imprimer",
+     "Toute l’équipe",
+     "Mes postes"
+    ],
+    "onglets": [],
+    "mots": 5937
+   },
+   {
+    "menu": "Messages 1 messages non lus",
+    "id": "messages",
+    "surtitre": "MESSAGES",
+    "titre": "Échanger avec l’équipe",
+    "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.",
+    "cartes": [
+     "Toute l’équipe"
+    ],
+    "boutons": [
+     "Demander un rendez-vous",
+     "Toute l’équipe jeu. 19 novembre Bonjour à tous, le planning ",
+     "CT Caroline Tellier jeu. 19 novembre Vous : Bonjour Caroline",
+     "PF Pierre Fiandino Aucun message",
+     "IL Igor Le Russe Aucun message",
+     "LF Léa Fontaine Aucun message",
+     "ID Inès Da Silva Aucun message",
+     "JP Jules Perrin Aucun message",
+     "TN Thomas Nguyen Aucun message",
+     "MG Manon Girard Aucun message",
+     "SL Sarah Lemoine Aucun message",
+     "YM Yanis Morel Aucun message",
+     "Envoyer"
+    ],
+    "onglets": [],
+    "mots": 1071
+   },
+   {
+    "menu": "Besoin d’aide ? Aide, tutoriels et lexique",
+    "id": "aide",
+    "surtitre": "AIDE",
+    "titre": "Comment faire ?",
+    "sous": "Cherchez une tâche : la réponse en deux lignes, le bouton qui y mène et un tutoriel qui vous la montre.",
+    "cartes": [
+     "MON PLANNING",
+     "À quoi sert mon accueil ?",
+     "Où voir mon prochain poste ?",
+     "Voir le planning de toute l’équipe",
+     "Voir mon compteur d’heures et mon suivi",
+     "Imprimer le planning",
+     "MES DEMANDES",
+     "Préférence, demande : quelle différence ?",
+     "Donner mes préférences du mois",
+     "Poser un congé ou une contrainte d’horaires",
+     "Me faire remplacer sur un poste",
+     "Prévenir que je serai en retard",
+     "Répondre à un appel ou aider un collègue",
+     "AU QUOTIDIEN",
+     "Signaler un retard ou une absence",
+     "ABSENCES ET REMPLACEMENTS",
+     "Signaler un accident du travail ou de trajet",
+     "Savoir ce qui a été décidé, et ce que cela change",
+     "SUIVRE ET FAIRE LE BILAN",
+     "Retrouver mes anciens plannings ou déposer un document",
+     "MESSAGES ET SUPPORT",
+     "Écrire à l’équipe ou à une personne",
+     "Demander un rendez-vous",
+     "Changer l’apparence, la taille du texte ou mon mot de passe",
+     "Mettre à jour mes compétences et diplômes",
+     "Contacter le support"
+    ],
+    "boutons": [
+     "Posé Le temps de tout lire et de tout voir.",
+     "Normal Le temps de lire, sans attendre.",
+     "Vif Pour qui connaît déjà.",
+     "Comment faire 20",
+     "Lexique 29",
+     "Mon planning 5",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5",
+     "Voir le tutoriel 1 étape",
+     "Ouvrir mon accueil",
+     "Voir le tutoriel 2 étapes",
+     "Ouvrir mon planning",
+     "Ouvrir le planning global",
+     "Ouvrir mon suivi",
+     "Ouvrir l’aperçu",
+     "Ouvrir mes demandes",
+     "Donner mes préférences",
+     "Faire une demande",
+     "Demander un remplacement",
+     "Voir les appels",
+     "Signaler",
+     "Signaler une absence",
+     "Ouvrir l’accueil",
+     "Ouvrir mes documents",
+     "Ouvrir les messages",
+     "Ouvrir mon compte",
+     "Voir les coordonnées",
+     "La visite guidée complète Toutes les fonctions, dans l’ordre",
+     "Demander à Posez votre question avec vos mots : il répond d’"
+    ],
+    "onglets": [
+     "Comment faire 20",
+     "Lexique 29",
+     "Mon planning 5",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5"
+    ],
+    "mots": 7166
+   }
+  ]
+ },
+ "ILR Igor Pharmacien": {
+  "nav": [
+   {
+    "id": "espace",
+    "texte": "Accueil"
+   },
+   {
+    "id": "moi",
+    "texte": "Mon planning"
+   },
+   {
+    "id": "demandes",
+    "texte": "Mes demandes"
+   },
+   {
+    "id": "suivi",
+    "texte": "Mon suivi"
+   },
+   {
+    "id": "documents",
+    "texte": "Mes documents"
+   },
+   {
+    "id": "mesgardes",
+    "texte": "Mes gardes"
+   },
+   {
+    "id": "planning",
+    "texte": "Planning de l’équipe"
+   },
+   {
+    "id": "messages",
+    "texte": "Messages 1 messages non lus"
+   },
+   {
+    "id": "aide",
+    "texte": "Besoin d’aide ? Aide, tutoriels et lexique"
+   }
+  ],
+  "barre": [
+   "Espace pharmacien , environnement de test : changer de profil",
+   "Faire une demande",
+   "Retard ou absence , signaler",
+   "1 notifications, ouvrir la liste",
+   "1",
+   "Aide et tutoriels",
+   "IL Igor L. , ouvrir le menu du compte"
+  ],
+  "ecrans": [
+   {
+    "menu": "Accueil",
+    "id": "espace",
+    "surtitre": "",
+    "titre": "Bonsoir Igor",
+    "sous": "",
+    "cartes": [
+     "Mes gardes et mes missions",
+     "MES PROCHAINES GARDES",
+     "MES COMPÉTENCES",
+     "MES PROCHAINS POSTES",
+     "Mes rendez-vous",
+     "Mes raccourcis",
+     "Décisions qui me concernent"
+    ],
+    "boutons": [
+     "Prévenir d’un retard",
+     "Demander un rendez-vous",
+     "Voir mon planning",
+     "Demander une absence ou un horaire",
+     "Écrire à Caroline T.",
+     "Vu"
+    ],
+    "onglets": [],
+    "mots": 1288
+   },
+   {
+    "menu": "Mon planning",
+    "id": "moi",
+    "surtitre": "MON PLANNING",
+    "titre": "Quand est-ce que je travaille ?",
+    "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.",
+    "cartes": [
+     "Mes semaines",
+     "Cette semaine · 16 – 22 novembre 2026",
+     "12 h",
+     "2",
+     "Semaine prochaine · 23 – 29 novembre 2026",
+     "33 h",
+     "5"
+    ],
+    "boutons": [
+     "Faire une demande",
+     "Imprimer",
+     "Planning de l’équipe",
+     "Prévenir d’un retard",
+     "Semaine",
+     "Calendrier",
+     "16 Lundi novembre , voir la journée",
+     "17 Mardi novembre , voir la journée",
+     "18 Mercredi novembre , voir la journée",
+     "19 Jeudi novembre , voir la journée",
+     "20 Vendredi Aujourd’hui , voir la journée",
+     "21 Samedi novembre , voir la journée",
+     "23 Lundi novembre , voir la journée",
+     "24 Mardi novembre , voir la journée",
+     "25 Mercredi novembre , voir la journée",
+     "26 Jeudi novembre , voir la journée",
+     "27 Vendredi novembre , voir la journée",
+     "28 Samedi novembre , voir la journée"
+    ],
+    "onglets": [],
+    "mots": 1840
+   },
+   {
+    "menu": "Mes demandes",
+    "id": "demandes",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes demandes",
+    "sous": "Choisissez ce que vous voulez faire.",
+    "cartes": [
+     "Deux gestes",
+     "7 sur 11 ont répondu"
+    ],
+    "boutons": [
+     "Mes préférences Ce qui m’arrange le mois prochain. À remplir",
+     "Absence ou horaire Congé, formation, horaire à tenir. 2 en c",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir.",
+     "M’assister",
+     "Matin",
+     "Journée",
+     "Après-midi",
+     "Repos",
+     "Effacer",
+     "1 À remplir , mardi",
+     "2 À remplir , mercredi",
+     "3 À remplir , jeudi",
+     "4 À remplir , vendredi",
+     "5 À remplir , samedi",
+     "7 À remplir , lundi",
+     "8 À remplir , mardi",
+     "9 À remplir , mercredi",
+     "10 À remplir , jeudi",
+     "11 À remplir , vendredi",
+     "12 À remplir , samedi",
+     "14 À remplir , lundi",
+     "15 À remplir , mardi",
+     "16 À remplir , mercredi",
+     "17 À remplir , jeudi",
+     "18 À remplir , vendredi",
+     "19 À remplir , samedi",
+     "21 À remplir , lundi",
+     "22 À remplir , mardi",
+     "23 À remplir , mercredi",
+     "24 À remplir , jeudi",
+     "26 À remplir , samedi",
+     "28 À remplir , lundi",
+     "29 À remplir , mardi",
+     "30 À remplir , mercredi",
+     "31 À remplir , jeudi"
+    ],
+    "onglets": [
+     "Mes préférences Ce qui m’arrange le mois prochain. À remplir aujourd’hui Pas de réponse à attendre",
+     "Absence ou horaire Congé, formation, horaire à tenir. 2 en cours Votre titulaire répond",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir. 1 en cours Titulaire, puis un collègue volontaire"
+    ],
+    "mots": 1694
+   },
+   {
+    "menu": "Mon suivi",
+    "id": "suivi",
+    "surtitre": "MON SUIVI",
+    "titre": "Où j’en suis",
+    "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement.",
+    "cartes": [
+     "Mon compteur d’heures",
+     "Mon suivi",
+     "Ma part des contraintes"
+    ],
+    "boutons": [],
+    "onglets": [],
+    "mots": 1410
+   },
+   {
+    "menu": "Mes documents",
+    "id": "documents",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes documents",
+    "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit.",
+    "cartes": [
+     "novembre 2026",
+     "octobre 2026",
+     "septembre 2026"
+    ],
+    "boutons": [
+     "Mes plannings 11",
+     "Mes absences 1",
+     "Mes fichiers 0",
+     "Voir"
+    ],
+    "onglets": [
+     "Mes plannings 11",
+     "Mes absences 1",
+     "Mes fichiers 0"
+    ],
+    "mots": 995
+   },
+   {
+    "menu": "Mes gardes",
+    "id": "mesgardes",
+    "surtitre": "MES GARDES",
+    "titre": "Mes gardes et astreintes",
+    "sous": "Les gardes qui vous sont confiées, le repos qui les suit, vos interventions à déclarer et le récapitulatif du mois.",
+    "cartes": [
+     "À venir",
+     "Garde de nuit · volets fermés",
+     "Passées",
+     "Récapitulatif mensuel"
+    ],
+    "boutons": [
+     "Déclarer",
+     "Imprimer"
+    ],
+    "onglets": [],
+    "mots": 951
+   },
+   {
+    "menu": "Planning de l’équipe",
+    "id": "planning",
+    "surtitre": "PLANNING DE L’ÉQUIPE",
+    "titre": "Qui travaille quand ?",
+    "sous": "Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning ».",
+    "cartes": [],
+    "boutons": [
+     "Imprimer",
+     "Toute l’équipe",
+     "Mes postes"
+    ],
+    "onglets": [],
+    "mots": 5937
+   },
+   {
+    "menu": "Messages 1 messages non lus",
+    "id": "messages",
+    "surtitre": "MESSAGES",
+    "titre": "Échanger avec l’équipe",
+    "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.",
+    "cartes": [
+     "Toute l’équipe"
+    ],
+    "boutons": [
+     "Demander un rendez-vous",
+     "Toute l’équipe jeu. 19 novembre Bonjour à tous, le planning ",
+     "CT Caroline Tellier Aucun message",
+     "PF Pierre Fiandino Aucun message",
+     "LF Léa Fontaine Aucun message",
+     "ID Inès Da Silva Aucun message",
+     "JP Jules Perrin Aucun message",
+     "NL Nicolas Le Syndicaliste Aucun message",
+     "TN Thomas Nguyen Aucun message",
+     "MG Manon Girard Aucun message",
+     "SL Sarah Lemoine Aucun message",
+     "YM Yanis Morel Aucun message",
+     "Envoyer"
+    ],
+    "onglets": [],
+    "mots": 982
+   },
+   {
+    "menu": "Besoin d’aide ? Aide, tutoriels et lexique",
+    "id": "aide",
+    "surtitre": "AIDE",
+    "titre": "Comment faire ?",
+    "sous": "Cherchez une tâche : la réponse en deux lignes, le bouton qui y mène et un tutoriel qui vous la montre.",
+    "cartes": [
+     "MON PLANNING",
+     "À quoi sert mon accueil ?",
+     "Où voir mon prochain poste ?",
+     "Voir le planning de toute l’équipe",
+     "Voir mes gardes",
+     "Voir mon compteur d’heures et mon suivi",
+     "Imprimer le planning",
+     "MES DEMANDES",
+     "Préférence, demande : quelle différence ?",
+     "Donner mes préférences du mois",
+     "Poser un congé ou une contrainte d’horaires",
+     "Me faire remplacer sur un poste",
+     "Prévenir que je serai en retard",
+     "Répondre à un appel ou aider un collègue",
+     "AU QUOTIDIEN",
+     "Signaler un retard ou une absence",
+     "ABSENCES ET REMPLACEMENTS",
+     "Signaler un accident du travail ou de trajet",
+     "Savoir ce qui a été décidé, et ce que cela change",
+     "SUIVRE ET FAIRE LE BILAN",
+     "Retrouver mes anciens plannings ou déposer un document",
+     "MESSAGES ET SUPPORT",
+     "Écrire à l’équipe ou à une personne",
+     "Demander un rendez-vous",
+     "Changer l’apparence, la taille du texte ou mon mot de passe",
+     "Mettre à jour mes compétences et diplômes",
+     "Contacter le support"
+    ],
+    "boutons": [
+     "Posé Le temps de tout lire et de tout voir.",
+     "Normal Le temps de lire, sans attendre.",
+     "Vif Pour qui connaît déjà.",
+     "Comment faire 21",
+     "Lexique 29",
+     "Mon planning 6",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5",
+     "Voir le tutoriel 1 étape",
+     "Ouvrir mon accueil",
+     "Voir le tutoriel 2 étapes",
+     "Ouvrir mon planning",
+     "Ouvrir le planning global",
+     "Ouvrir mes gardes",
+     "Ouvrir mon suivi",
+     "Ouvrir l’aperçu",
+     "Ouvrir mes demandes",
+     "Donner mes préférences",
+     "Faire une demande",
+     "Demander un remplacement",
+     "Voir les appels",
+     "Signaler",
+     "Signaler une absence",
+     "Ouvrir l’accueil",
+     "Ouvrir mes documents",
+     "Ouvrir les messages",
+     "Ouvrir mon compte",
+     "Voir les coordonnées",
+     "La visite guidée complète Toutes les fonctions, dans l’ordre",
+     "Demander à Posez votre question avec vos mots : il répond d’"
+    ],
+    "onglets": [
+     "Comment faire 21",
+     "Lexique 29",
+     "Mon planning 6",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5"
+    ],
+    "mots": 7319
+   }
+  ]
+ },
+ "SL Sarah Animatrice": {
+  "nav": [
+   {
+    "id": "espace",
+    "texte": "Accueil"
+   },
+   {
+    "id": "moi",
+    "texte": "Mon planning"
+   },
+   {
+    "id": "demandes",
+    "texte": "Mes demandes"
+   },
+   {
+    "id": "suivi",
+    "texte": "Mon suivi"
+   },
+   {
+    "id": "documents",
+    "texte": "Mes documents"
+   },
+   {
+    "id": "planning",
+    "texte": "Planning de l’équipe"
+   },
+   {
+    "id": "messages",
+    "texte": "Messages 1 messages non lus"
+   },
+   {
+    "id": "aide",
+    "texte": "Besoin d’aide ? Aide, tutoriels et lexique"
+   }
+  ],
+  "barre": [
+   "Espace animateur , environnement de test : changer de profil",
+   "Faire une demande",
+   "Retard ou absence , signaler",
+   "1 notifications, ouvrir la liste",
+   "1",
+   "Aide et tutoriels",
+   "SL Sarah L. , ouvrir le menu du compte"
+  ],
+  "ecrans": [
+   {
+    "menu": "Accueil",
+    "id": "espace",
+    "surtitre": "",
+    "titre": "Bonsoir Sarah",
+    "sous": "",
+    "cartes": [
+     "Les marques que je présente",
+     "MES PROCHAINS JOURS D’ANIMATION",
+     "Mes rendez-vous",
+     "Mes raccourcis"
+    ],
+    "boutons": [
+     "Demander un bilan d’animation",
+     "Demander un rendez-vous",
+     "Voir mon planning",
+     "Demander une absence ou un horaire",
+     "Écrire à Caroline T."
+    ],
+    "onglets": [],
+    "mots": 1188
+   },
+   {
+    "menu": "Mon planning",
+    "id": "moi",
+    "surtitre": "MON PLANNING",
+    "titre": "Quand est-ce que je travaille ?",
+    "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.",
+    "cartes": [
+     "Mes semaines",
+     "Cette semaine · 16 – 22 novembre 2026",
+     "21 h",
+     "3",
+     "Semaine prochaine · 23 – 29 novembre 2026"
+    ],
+    "boutons": [
+     "Faire une demande",
+     "Imprimer",
+     "Planning de l’équipe",
+     "Semaine",
+     "Calendrier",
+     "16 Lundi novembre , voir la journée",
+     "17 Mardi novembre , voir la journée",
+     "18 Mercredi novembre , voir la journée",
+     "19 Jeudi novembre , voir la journée",
+     "20 Vendredi Aujourd’hui , voir la journée",
+     "21 Samedi novembre , voir la journée",
+     "23 Lundi novembre , voir la journée",
+     "24 Mardi novembre , voir la journée",
+     "25 Mercredi novembre , voir la journée",
+     "26 Jeudi novembre , voir la journée",
+     "27 Vendredi novembre , voir la journée",
+     "28 Samedi novembre , voir la journée"
+    ],
+    "onglets": [],
+    "mots": 1868
+   },
+   {
+    "menu": "Mes demandes",
+    "id": "demandes",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes demandes",
+    "sous": "Choisissez ce que vous voulez faire.",
+    "cartes": [
+     "Deux gestes",
+     "7 sur 11 ont répondu"
+    ],
+    "boutons": [
+     "Mes préférences Ce qui m’arrange le mois prochain. À remplir",
+     "Absence ou horaire Congé, formation, horaire à tenir. Aucune",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir.",
+     "M’assister",
+     "Matin",
+     "Journée",
+     "Après-midi",
+     "Repos",
+     "Effacer",
+     "1 À remplir , mardi",
+     "2 À remplir , mercredi",
+     "3 À remplir , jeudi",
+     "4 À remplir , vendredi",
+     "5 À remplir , samedi",
+     "7 À remplir , lundi",
+     "8 À remplir , mardi",
+     "9 À remplir , mercredi",
+     "10 À remplir , jeudi",
+     "11 À remplir , vendredi",
+     "12 À remplir , samedi",
+     "14 À remplir , lundi",
+     "15 À remplir , mardi",
+     "16 À remplir , mercredi",
+     "17 À remplir , jeudi",
+     "18 À remplir , vendredi",
+     "19 À remplir , samedi",
+     "21 À remplir , lundi",
+     "22 À remplir , mardi",
+     "23 À remplir , mercredi",
+     "24 À remplir , jeudi",
+     "26 À remplir , samedi",
+     "28 À remplir , lundi",
+     "29 À remplir , mardi",
+     "30 À remplir , mercredi",
+     "31 À remplir , jeudi"
+    ],
+    "onglets": [
+     "Mes préférences Ce qui m’arrange le mois prochain. À remplir aujourd’hui Pas de réponse à attendre",
+     "Absence ou horaire Congé, formation, horaire à tenir. Aucune Votre titulaire répond",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir. Aucune Titulaire, puis un collègue volontaire"
+    ],
+    "mots": 1686
+   },
+   {
+    "menu": "Mon suivi",
+    "id": "suivi",
+    "surtitre": "MON SUIVI",
+    "titre": "Où j’en suis",
+    "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement.",
+    "cartes": [
+     "Mon compteur d’heures",
+     "Mon suivi",
+     "Ma part des contraintes"
+    ],
+    "boutons": [],
+    "onglets": [],
+    "mots": 1353
+   },
+   {
+    "menu": "Mes documents",
+    "id": "documents",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes documents",
+    "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit.",
+    "cartes": [
+     "novembre 2026",
+     "octobre 2026",
+     "septembre 2026"
+    ],
+    "boutons": [
+     "Mes plannings 11",
+     "Mes absences 0",
+     "Mes fichiers 0",
+     "Voir"
+    ],
+    "onglets": [
+     "Mes plannings 11",
+     "Mes absences 0",
+     "Mes fichiers 0"
+    ],
+    "mots": 989
+   },
+   {
+    "menu": "Planning de l’équipe",
+    "id": "planning",
+    "surtitre": "PLANNING DE L’ÉQUIPE",
+    "titre": "Qui travaille quand ?",
+    "sous": "Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning ».",
+    "cartes": [],
+    "boutons": [
+     "Imprimer",
+     "Toute l’équipe",
+     "Mes postes"
+    ],
+    "onglets": [],
+    "mots": 5937
+   },
+   {
+    "menu": "Messages 1 messages non lus",
+    "id": "messages",
+    "surtitre": "MESSAGES",
+    "titre": "Échanger avec l’équipe",
+    "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.",
+    "cartes": [
+     "Toute l’équipe"
+    ],
+    "boutons": [
+     "Demander un rendez-vous",
+     "Toute l’équipe jeu. 19 novembre Bonjour à tous, le planning ",
+     "CT Caroline Tellier Aucun message",
+     "PF Pierre Fiandino Aucun message",
+     "IL Igor Le Russe Aucun message",
+     "LF Léa Fontaine Aucun message",
+     "ID Inès Da Silva Aucun message",
+     "JP Jules Perrin Aucun message",
+     "NL Nicolas Le Syndicaliste Aucun message",
+     "TN Thomas Nguyen Aucun message",
+     "MG Manon Girard Aucun message",
+     "YM Yanis Morel Aucun message",
+     "Envoyer"
+    ],
+    "onglets": [],
+    "mots": 982
+   },
+   {
+    "menu": "Besoin d’aide ? Aide, tutoriels et lexique",
+    "id": "aide",
+    "surtitre": "AIDE",
+    "titre": "Comment faire ?",
+    "sous": "Cherchez une tâche : la réponse en deux lignes, le bouton qui y mène et un tutoriel qui vous la montre.",
+    "cartes": [
+     "MON PLANNING",
+     "À quoi sert mon accueil ?",
+     "Où voir mon prochain poste ?",
+     "Voir le planning de toute l’équipe",
+     "Voir mon compteur d’heures et mon suivi",
+     "Imprimer le planning",
+     "MES DEMANDES",
+     "Préférence, demande : quelle différence ?",
+     "Donner mes préférences du mois",
+     "Poser un congé ou une contrainte d’horaires",
+     "Me faire remplacer sur un poste",
+     "Prévenir que je serai en retard",
+     "Répondre à un appel ou aider un collègue",
+     "AU QUOTIDIEN",
+     "Signaler un retard ou une absence",
+     "ABSENCES ET REMPLACEMENTS",
+     "Signaler un accident du travail ou de trajet",
+     "Savoir ce qui a été décidé, et ce que cela change",
+     "SUIVRE ET FAIRE LE BILAN",
+     "Retrouver mes anciens plannings ou déposer un document",
+     "MESSAGES ET SUPPORT",
+     "Écrire à l’équipe ou à une personne",
+     "Demander un rendez-vous",
+     "Changer l’apparence, la taille du texte ou mon mot de passe",
+     "Mettre à jour mes compétences et diplômes",
+     "Contacter le support"
+    ],
+    "boutons": [
+     "Posé Le temps de tout lire et de tout voir.",
+     "Normal Le temps de lire, sans attendre.",
+     "Vif Pour qui connaît déjà.",
+     "Comment faire 20",
+     "Lexique 29",
+     "Mon planning 5",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5",
+     "Voir le tutoriel 1 étape",
+     "Ouvrir mon accueil",
+     "Voir le tutoriel 2 étapes",
+     "Ouvrir mon planning",
+     "Ouvrir le planning global",
+     "Ouvrir mon suivi",
+     "Ouvrir l’aperçu",
+     "Ouvrir mes demandes",
+     "Donner mes préférences",
+     "Faire une demande",
+     "Demander un remplacement",
+     "Voir les appels",
+     "Signaler",
+     "Signaler une absence",
+     "Ouvrir l’accueil",
+     "Ouvrir mes documents",
+     "Ouvrir les messages",
+     "Ouvrir mon compte",
+     "Voir les coordonnées",
+     "La visite guidée complète Toutes les fonctions, dans l’ordre",
+     "Demander à Posez votre question avec vos mots : il répond d’"
+    ],
+    "onglets": [
+     "Comment faire 20",
+     "Lexique 29",
+     "Mon planning 5",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5"
+    ],
+    "mots": 7166
+   }
+  ]
+ },
+ "MG Manon Apprentie": {
+  "nav": [
+   {
+    "id": "espace",
+    "texte": "Accueil"
+   },
+   {
+    "id": "moi",
+    "texte": "Mon planning"
+   },
+   {
+    "id": "demandes",
+    "texte": "Mes demandes"
+   },
+   {
+    "id": "suivi",
+    "texte": "Mon suivi"
+   },
+   {
+    "id": "documents",
+    "texte": "Mes documents"
+   },
+   {
+    "id": "planning",
+    "texte": "Planning de l’équipe"
+   },
+   {
+    "id": "messages",
+    "texte": "Messages 1 messages non lus"
+   },
+   {
+    "id": "aide",
+    "texte": "Besoin d’aide ? Aide, tutoriels et lexique"
+   }
+  ],
+  "barre": [
+   "Espace apprenti , environnement de test : changer de profil",
+   "Faire une demande",
+   "Retard ou absence , signaler",
+   "1 notifications, ouvrir la liste",
+   "1",
+   "Aide et tutoriels",
+   "MG Manon G. , ouvrir le menu du compte"
+  ],
+  "ecrans": [
+   {
+    "menu": "Accueil",
+    "id": "espace",
+    "surtitre": "",
+    "titre": "Bonsoir Manon",
+    "sous": "",
+    "cartes": [
+     "Mon alternance",
+     "JOURS D’ÉCOLE SIGNALÉS",
+     "MES PROCHAINS JOURS EN OFFICINE",
+     "Mes rendez-vous",
+     "Mes raccourcis"
+    ],
+    "boutons": [
+     "Signaler mes jours d’école",
+     "Demander un point avec mon tuteur",
+     "Demander un rendez-vous",
+     "Voir mon planning",
+     "Demander une absence ou un horaire",
+     "Écrire à Caroline T."
+    ],
+    "onglets": [],
+    "mots": 1079
+   },
+   {
+    "menu": "Mon planning",
+    "id": "moi",
+    "surtitre": "MON PLANNING",
+    "titre": "Quand est-ce que je travaille ?",
+    "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.",
+    "cartes": [
+     "Mes semaines",
+     "Cette semaine · 16 – 22 novembre 2026",
+     "21 h",
+     "3",
+     "Semaine prochaine · 23 – 29 novembre 2026"
+    ],
+    "boutons": [
+     "Faire une demande",
+     "Imprimer",
+     "Planning de l’équipe",
+     "Semaine",
+     "Calendrier",
+     "16 Lundi novembre , voir la journée",
+     "17 Mardi novembre , voir la journée",
+     "18 Mercredi novembre , voir la journée",
+     "19 Jeudi novembre , voir la journée",
+     "20 Vendredi Aujourd’hui , voir la journée",
+     "21 Samedi novembre , voir la journée",
+     "23 Lundi novembre , voir la journée",
+     "24 Mardi novembre , voir la journée",
+     "25 Mercredi novembre , voir la journée",
+     "26 Jeudi novembre , voir la journée",
+     "27 Vendredi novembre , voir la journée",
+     "28 Samedi novembre , voir la journée"
+    ],
+    "onglets": [],
+    "mots": 1852
+   },
+   {
+    "menu": "Mes demandes",
+    "id": "demandes",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes demandes",
+    "sous": "Choisissez ce que vous voulez faire.",
+    "cartes": [
+     "Absences de l’équipe",
+     "Mes demandes d’absence et d’horaire"
+    ],
+    "boutons": [
+     "Mes préférences Ce qui m’arrange le mois prochain. Dernier j",
+     "Absence ou horaire Congé, formation, horaire à tenir. 1 en c",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir.",
+     "Nouvelle demande"
+    ],
+    "onglets": [
+     "Mes préférences Ce qui m’arrange le mois prochain. Dernier jour Pas de réponse à attendre",
+     "Absence ou horaire Congé, formation, horaire à tenir. 1 en cours Votre titulaire répond",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir. Aucune Titulaire, puis un collègue volontaire"
+    ],
+    "mots": 1052
+   },
+   {
+    "menu": "Mon suivi",
+    "id": "suivi",
+    "surtitre": "MON SUIVI",
+    "titre": "Où j’en suis",
+    "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement.",
+    "cartes": [
+     "Mon compteur d’heures",
+     "Mon suivi",
+     "Ma part des contraintes"
+    ],
+    "boutons": [],
+    "onglets": [],
+    "mots": 1272
+   },
+   {
+    "menu": "Mes documents",
+    "id": "documents",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes documents",
+    "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit.",
+    "cartes": [
+     "novembre 2026",
+     "octobre 2026",
+     "septembre 2026"
+    ],
+    "boutons": [
+     "Mes plannings 11",
+     "Mes absences 0",
+     "Mes fichiers 0",
+     "Voir"
+    ],
+    "onglets": [
+     "Mes plannings 11",
+     "Mes absences 0",
+     "Mes fichiers 0"
+    ],
+    "mots": 989
+   },
+   {
+    "menu": "Planning de l’équipe",
+    "id": "planning",
+    "surtitre": "PLANNING DE L’ÉQUIPE",
+    "titre": "Qui travaille quand ?",
+    "sous": "Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning ».",
+    "cartes": [],
+    "boutons": [
+     "Imprimer",
+     "Toute l’équipe",
+     "Mes postes"
+    ],
+    "onglets": [],
+    "mots": 5937
+   },
+   {
+    "menu": "Messages 1 messages non lus",
+    "id": "messages",
+    "surtitre": "MESSAGES",
+    "titre": "Échanger avec l’équipe",
+    "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.",
+    "cartes": [
+     "Toute l’équipe"
+    ],
+    "boutons": [
+     "Demander un rendez-vous",
+     "Toute l’équipe jeu. 19 novembre Bonjour à tous, le planning ",
+     "CT Caroline Tellier Aucun message",
+     "PF Pierre Fiandino Aucun message",
+     "IL Igor Le Russe Aucun message",
+     "LF Léa Fontaine Aucun message",
+     "ID Inès Da Silva Aucun message",
+     "JP Jules Perrin Aucun message",
+     "NL Nicolas Le Syndicaliste Aucun message",
+     "TN Thomas Nguyen Aucun message",
+     "SL Sarah Lemoine Aucun message",
+     "YM Yanis Morel Aucun message",
+     "Envoyer"
+    ],
+    "onglets": [],
+    "mots": 983
+   },
+   {
+    "menu": "Besoin d’aide ? Aide, tutoriels et lexique",
+    "id": "aide",
+    "surtitre": "AIDE",
+    "titre": "Comment faire ?",
+    "sous": "Cherchez une tâche : la réponse en deux lignes, le bouton qui y mène et un tutoriel qui vous la montre.",
+    "cartes": [
+     "MON PLANNING",
+     "À quoi sert mon accueil ?",
+     "Où voir mon prochain poste ?",
+     "Voir le planning de toute l’équipe",
+     "Voir mon compteur d’heures et mon suivi",
+     "Imprimer le planning",
+     "MES DEMANDES",
+     "Préférence, demande : quelle différence ?",
+     "Donner mes préférences du mois",
+     "Poser un congé ou une contrainte d’horaires",
+     "Me faire remplacer sur un poste",
+     "Prévenir que je serai en retard",
+     "Répondre à un appel ou aider un collègue",
+     "AU QUOTIDIEN",
+     "Signaler un retard ou une absence",
+     "ABSENCES ET REMPLACEMENTS",
+     "Signaler un accident du travail ou de trajet",
+     "Savoir ce qui a été décidé, et ce que cela change",
+     "SUIVRE ET FAIRE LE BILAN",
+     "Retrouver mes anciens plannings ou déposer un document",
+     "MESSAGES ET SUPPORT",
+     "Écrire à l’équipe ou à une personne",
+     "Demander un rendez-vous",
+     "Changer l’apparence, la taille du texte ou mon mot de passe",
+     "Mettre à jour mes compétences et diplômes",
+     "Contacter le support"
+    ],
+    "boutons": [
+     "Posé Le temps de tout lire et de tout voir.",
+     "Normal Le temps de lire, sans attendre.",
+     "Vif Pour qui connaît déjà.",
+     "Comment faire 20",
+     "Lexique 29",
+     "Mon planning 5",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5",
+     "Voir le tutoriel 1 étape",
+     "Ouvrir mon accueil",
+     "Voir le tutoriel 2 étapes",
+     "Ouvrir mon planning",
+     "Ouvrir le planning global",
+     "Ouvrir mon suivi",
+     "Ouvrir l’aperçu",
+     "Ouvrir mes demandes",
+     "Donner mes préférences",
+     "Faire une demande",
+     "Demander un remplacement",
+     "Voir les appels",
+     "Signaler",
+     "Signaler une absence",
+     "Ouvrir l’accueil",
+     "Ouvrir mes documents",
+     "Ouvrir les messages",
+     "Ouvrir mon compte",
+     "Voir les coordonnées",
+     "La visite guidée complète Toutes les fonctions, dans l’ordre",
+     "Demander à Posez votre question avec vos mots : il répond d’"
+    ],
+    "onglets": [
+     "Comment faire 20",
+     "Lexique 29",
+     "Mon planning 5",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5"
+    ],
+    "mots": 7166
+   }
+  ]
+ },
+ "YM Yanis Étudiant": {
+  "nav": [
+   {
+    "id": "espace",
+    "texte": "Accueil"
+   },
+   {
+    "id": "moi",
+    "texte": "Mon planning"
+   },
+   {
+    "id": "demandes",
+    "texte": "Mes demandes"
+   },
+   {
+    "id": "suivi",
+    "texte": "Mon suivi"
+   },
+   {
+    "id": "documents",
+    "texte": "Mes documents"
+   },
+   {
+    "id": "planning",
+    "texte": "Planning de l’équipe"
+   },
+   {
+    "id": "messages",
+    "texte": "Messages 1 messages non lus"
+   },
+   {
+    "id": "aide",
+    "texte": "Besoin d’aide ? Aide, tutoriels et lexique"
+   }
+  ],
+  "barre": [
+   "Espace étudiant , environnement de test : changer de profil",
+   "Faire une demande",
+   "Retard ou absence , signaler",
+   "1 notifications, ouvrir la liste",
+   "1",
+   "Aide et tutoriels",
+   "YM Yanis M. , ouvrir le menu du compte"
+  ],
+  "ecrans": [
+   {
+    "menu": "Accueil",
+    "id": "espace",
+    "surtitre": "",
+    "titre": "Bonsoir Yanis",
+    "sous": "",
+    "cartes": [
+     "Mes études et mes horaires",
+     "COURS ET EXAMENS SIGNALÉS",
+     "MES PROCHAINS POSTES",
+     "Mes rendez-vous",
+     "Mes raccourcis"
+    ],
+    "boutons": [
+     "Prévenir d’un retard",
+     "Signaler un cours ou un examen",
+     "Demander un rendez-vous",
+     "Voir mon planning",
+     "Demander une absence ou un horaire",
+     "Écrire à Caroline T."
+    ],
+    "onglets": [],
+    "mots": 1054
+   },
+   {
+    "menu": "Mon planning",
+    "id": "moi",
+    "surtitre": "MON PLANNING",
+    "titre": "Quand est-ce que je travaille ?",
+    "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous.",
+    "cartes": [
+     "Mes semaines",
+     "Cette semaine · 16 – 22 novembre 2026",
+     "16 h",
+     "2",
+     "Semaine prochaine · 23 – 29 novembre 2026",
+     "14 h 30"
+    ],
+    "boutons": [
+     "Faire une demande",
+     "Imprimer",
+     "Planning de l’équipe",
+     "Prévenir d’un retard",
+     "Semaine",
+     "Calendrier",
+     "16 Lundi novembre , voir la journée",
+     "17 Mardi novembre , voir la journée",
+     "18 Mercredi novembre , voir la journée",
+     "19 Jeudi novembre , voir la journée",
+     "20 Vendredi Aujourd’hui , voir la journée",
+     "21 Samedi novembre , voir la journée",
+     "23 Lundi novembre , voir la journée",
+     "24 Mardi novembre , voir la journée",
+     "25 Mercredi novembre , voir la journée",
+     "26 Jeudi novembre , voir la journée",
+     "27 Vendredi novembre , voir la journée",
+     "28 Samedi novembre , voir la journée"
+    ],
+    "onglets": [],
+    "mots": 1635
+   },
+   {
+    "menu": "Mes demandes",
+    "id": "demandes",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes demandes",
+    "sous": "Choisissez ce que vous voulez faire.",
+    "cartes": [
+     "Deux gestes",
+     "7 sur 11 ont répondu"
+    ],
+    "boutons": [
+     "Mes préférences Ce qui m’arrange le mois prochain. À remplir",
+     "Absence ou horaire Congé, formation, horaire à tenir. 1 en c",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir.",
+     "M’assister",
+     "Matin",
+     "Journée",
+     "Après-midi",
+     "Repos",
+     "Effacer",
+     "1 À remplir , mardi",
+     "2 À remplir , mercredi",
+     "3 À remplir , jeudi",
+     "4 À remplir , vendredi",
+     "5 À remplir , samedi",
+     "7 À remplir , lundi",
+     "8 À remplir , mardi",
+     "9 À remplir , mercredi",
+     "10 À remplir , jeudi",
+     "11 À remplir , vendredi",
+     "12 À remplir , samedi",
+     "14 À remplir , lundi",
+     "15 À remplir , mardi",
+     "16 À remplir , mercredi",
+     "17 À remplir , jeudi",
+     "18 À remplir , vendredi",
+     "19 À remplir , samedi",
+     "21 À remplir , lundi",
+     "22 À remplir , mardi",
+     "23 À remplir , mercredi",
+     "24 À remplir , jeudi",
+     "26 À remplir , samedi",
+     "28 À remplir , lundi",
+     "29 À remplir , mardi",
+     "30 À remplir , mercredi",
+     "31 À remplir , jeudi"
+    ],
+    "onglets": [
+     "Mes préférences Ce qui m’arrange le mois prochain. À remplir aujourd’hui Pas de réponse à attendre",
+     "Absence ou horaire Congé, formation, horaire à tenir. 1 en cours Votre titulaire répond",
+     "Me faire remplacer Un poste publié que je ne peux pas tenir. Aucune Titulaire, puis un collègue volontaire"
+    ],
+    "mots": 1690
+   },
+   {
+    "menu": "Mon suivi",
+    "id": "suivi",
+    "surtitre": "MON SUIVI",
+    "titre": "Où j’en suis",
+    "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement.",
+    "cartes": [
+     "Mon compteur d’heures",
+     "Mon suivi",
+     "Ma part des contraintes"
+    ],
+    "boutons": [],
+    "onglets": [],
+    "mots": 1361
+   },
+   {
+    "menu": "Mes documents",
+    "id": "documents",
+    "surtitre": "MON ESPACE",
+    "titre": "Mes documents",
+    "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit.",
+    "cartes": [
+     "novembre 2026",
+     "octobre 2026",
+     "septembre 2026"
+    ],
+    "boutons": [
+     "Mes plannings 11",
+     "Mes absences 0",
+     "Mes fichiers 0",
+     "Voir"
+    ],
+    "onglets": [
+     "Mes plannings 11",
+     "Mes absences 0",
+     "Mes fichiers 0"
+    ],
+    "mots": 990
+   },
+   {
+    "menu": "Planning de l’équipe",
+    "id": "planning",
+    "surtitre": "PLANNING DE L’ÉQUIPE",
+    "titre": "Qui travaille quand ?",
+    "sous": "Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning ».",
+    "cartes": [],
+    "boutons": [
+     "Imprimer",
+     "Toute l’équipe",
+     "Mes postes"
+    ],
+    "onglets": [],
+    "mots": 5937
+   },
+   {
+    "menu": "Messages 1 messages non lus",
+    "id": "messages",
+    "surtitre": "MESSAGES",
+    "titre": "Échanger avec l’équipe",
+    "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil.",
+    "cartes": [
+     "Toute l’équipe"
+    ],
+    "boutons": [
+     "Demander un rendez-vous",
+     "Toute l’équipe jeu. 19 novembre Bonjour à tous, le planning ",
+     "CT Caroline Tellier Aucun message",
+     "PF Pierre Fiandino Aucun message",
+     "IL Igor Le Russe Aucun message",
+     "LF Léa Fontaine Aucun message",
+     "ID Inès Da Silva Aucun message",
+     "JP Jules Perrin Aucun message",
+     "NL Nicolas Le Syndicaliste Aucun message",
+     "TN Thomas Nguyen Aucun message",
+     "MG Manon Girard Aucun message",
+     "SL Sarah Lemoine Aucun message",
+     "Envoyer"
+    ],
+    "onglets": [],
+    "mots": 984
+   },
+   {
+    "menu": "Besoin d’aide ? Aide, tutoriels et lexique",
+    "id": "aide",
+    "surtitre": "AIDE",
+    "titre": "Comment faire ?",
+    "sous": "Cherchez une tâche : la réponse en deux lignes, le bouton qui y mène et un tutoriel qui vous la montre.",
+    "cartes": [
+     "MON PLANNING",
+     "À quoi sert mon accueil ?",
+     "Où voir mon prochain poste ?",
+     "Voir le planning de toute l’équipe",
+     "Voir mon compteur d’heures et mon suivi",
+     "Imprimer le planning",
+     "MES DEMANDES",
+     "Préférence, demande : quelle différence ?",
+     "Donner mes préférences du mois",
+     "Poser un congé ou une contrainte d’horaires",
+     "Me faire remplacer sur un poste",
+     "Prévenir que je serai en retard",
+     "Répondre à un appel ou aider un collègue",
+     "AU QUOTIDIEN",
+     "Signaler un retard ou une absence",
+     "ABSENCES ET REMPLACEMENTS",
+     "Signaler un accident du travail ou de trajet",
+     "Savoir ce qui a été décidé, et ce que cela change",
+     "SUIVRE ET FAIRE LE BILAN",
+     "Retrouver mes anciens plannings ou déposer un document",
+     "MESSAGES ET SUPPORT",
+     "Écrire à l’équipe ou à une personne",
+     "Demander un rendez-vous",
+     "Changer l’apparence, la taille du texte ou mon mot de passe",
+     "Mettre à jour mes compétences et diplômes",
+     "Contacter le support"
+    ],
+    "boutons": [
+     "Posé Le temps de tout lire et de tout voir.",
+     "Normal Le temps de lire, sans attendre.",
+     "Vif Pour qui connaît déjà.",
+     "Comment faire 20",
+     "Lexique 29",
+     "Mon planning 5",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5",
+     "Voir le tutoriel 1 étape",
+     "Ouvrir mon accueil",
+     "Voir le tutoriel 2 étapes",
+     "Ouvrir mon planning",
+     "Ouvrir le planning global",
+     "Ouvrir mon suivi",
+     "Ouvrir l’aperçu",
+     "Ouvrir mes demandes",
+     "Donner mes préférences",
+     "Faire une demande",
+     "Demander un remplacement",
+     "Voir les appels",
+     "Signaler",
+     "Signaler une absence",
+     "Ouvrir l’accueil",
+     "Ouvrir mes documents",
+     "Ouvrir les messages",
+     "Ouvrir mon compte",
+     "Voir les coordonnées",
+     "La visite guidée complète Toutes les fonctions, dans l’ordre",
+     "Demander à Posez votre question avec vos mots : il répond d’"
+    ],
+    "onglets": [
+     "Comment faire 20",
+     "Lexique 29",
+     "Mon planning 5",
+     "Mes demandes 6",
+     "Au quotidien 1",
+     "Absences et remplacements 2",
+     "Suivre et faire le bilan 1",
+     "Messages et support 5"
+    ],
+    "mots": 7166
+   }
+  ]
+ }
+}

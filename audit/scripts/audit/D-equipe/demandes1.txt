@@ -1,0 +1,113 @@
+Sélecteur nature (absence) : 0
+Ouverture (aucun jour, aucune raison) → bouton GRISÉ
+Jour mercredi, sans raison → bouton GRISÉ
+Jour mercredi + raison famille → bouton actif
+Plage 15:00 → 12:00 (fin avant début) → bouton GRISÉ
+Finir avant, heure vide → bouton GRISÉ
+Finir avant 16:00 mercredi, du 10/12 au 01/12 (fin avant début) → bouton GRISÉ
+… importance prioritaire → bouton GRISÉ
+   NON ENVOYABLE, on ferme
+Un jour précis : 10/11/2026 (passé) → bouton actif
+   toast: Demande envoyée au responsable.
+Annuler
+Natures proposées : Congé, Formation
+Absence du 18/12 au 14/12 → bouton GRISÉ
+Absence du 02/11 au 03/11 (passé) → bouton actif
+   toast: Demande d’absence envoyée au responsable.
+Annuler
+Congé du 14/12 au 18/12 → bouton actif
+   toast: Demande d’absence envoyée au responsable.
+Annuler
+Commencer après, lundi, prioritaire (plafond ?) → bouton actif
+Après Chabbat : raison = personnel ; type = finir_avant
+Chabbat → bouton actif ; messages: Finir avant 16 h le vendredi, ne pas travailler le samedi. Ajustez les jours et les heures ci-dessous si besoin. Deux contraintes seront envoyées ensemble.
+   toast: Demande envoyée au responsable.
+Annuler
+
+BESOINS Nicolas : [["finir_avant",[2],1020,null,null,null,"2027-06-24","prioritaire","acceptee",null],["indisponible",[1],null,null,null,"2026-11-10","2026-11-10","preference","en_attente","administratif"],["finir_avant",[4],960,null,null,"2026-11-20",null,"preference","en_attente","personnel"],["indisponible",[5],null,null,null,"2026-11-20",null,"preference","en_attente","personnel"],["indisponible",[5],null,null,null,"2026-11-20",null,"preference","en_attente","personnel"]]
+ABSENCES Nicolas : [["conge","2026-11-30","2026-12-04","demandee","repos"],["conge","2026-11-02","2026-11-03","demandee","repos"],["conge","2026-12-14","2026-12-18","demandee","repos"]]
+
+LISTE :
+
+Congé
+Du lun. 30 novembre au ven. 4 décembre · 5 jours
+Dans 10 jours
+Envoyée
+: fait
+Réponse du titulaire
+: en cours
+Au planning
+: à venir
+
+Votre titulaire n’a pas encore répondu.
+
+En attente
+Congé
+Du lun. 14 décembre au ven. 18 décembre · 5 jours
+Dans 24 jours
+Envoyée
+: fait
+Réponse du titulaire
+: en cours
+Au planning
+: à venir
+
+Votre titulaire n’a pas encore répondu.
+
+En attente
+Finir avant 17 h - mercredi (une semaine sur deux)
+Horaire à tenir
+Envoyée
+: fait
+Réponse du titulaire
+: fait
+Au planning
+: fait
+
+Acceptée : servie avant les autres, sans être garantie.
+
+Préférence prioritaire
+Finir avant 16 h - vendredi
+Horaire à tenir
+Envoyée
+: fait
+Réponse du titulaire
+: en cours
+Au planning
+: à venir
+
+Votre titulaire n’a pas encore répondu.
+
+En attente
+Indisponible - samedi
+Horaire à tenir
+Envoyée
+: fait
+Réponse du titulaire
+: en cours
+Au planning
+: à venir
+
+Votre titulaire n’a pas encore répondu.
+
+En attente
+Indisponible - samedi
+Horaire à tenir
+Envoyée
+: fait
+Réponse du titulaire
+: en cours
+Au planning
+: à venir
+
+Votre titulaire n’a pas encore répondu.
+
+En attente
+
+Demandes prioritaires utilisées : 1 sur 2. Même plafond pour toute l’équipe.
+
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+ERR []

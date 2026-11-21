@@ -1,0 +1,364 @@
+OFFICINE
+Grande Pharmacie de la Pinède
+
+180 m² au total · 110 m² de surface de vente · 45 m² de réserve et de préparatoire
+
+Horaires d'ouverture, effectif attendu et postes types. Ces réglages sont des choix d'organisation : ils se modifient librement. Un onglet par famille de réglages.
+
+Pharmacie
+Horaires
+Comptoir
+Planning
+Paramètres
+Nom de la pharmacie
+Nom de la pharmacie
+Il s’affiche en haut de l’écran et sur les plannings imprimés.
+L’officine en chiffres
+
+Facultatif. Ces repères décrivent vos locaux ; complétez ceux que vous connaissez.
+
+Surface totale
+m²
+Surface de vente
+m²
+Réserve et préparatoire
+m²
+Caisses
+Postes de comptoir
+Espaces de confidentialité
+Robot ou automate de dispensation
+Horaires d'ouverture
+
+Une ligne par jour. « Recopier » reprend les horaires de la veille, ou applique ceux du jour aux autres jours ouverts.
+
+Lundi
+→
+Coupure le midi
+Recopier
+Fermer ce jour
+Mardi
+→
+Coupure le midi
+Recopier
+Fermer ce jour
+Mercredi
+→
+Coupure le midi
+Recopier
+Fermer ce jour
+Jeudi
+→
+Coupure le midi
+Recopier
+Fermer ce jour
+Vendredi
+→
+Coupure le midi
+Recopier
+Fermer ce jour
+Samedi
+→
+Coupure le midi
+Recopier
+Fermer ce jour
+Dimanche
+Fermé
+Recopier
+Ouvrir ce jour
+Jours fériés
+Officine fermée les jours fériés (hors gardes)
+
+L’officine est fermée ces jours-là, hors gardes : aucun poste n’y est proposé.
+
+Noël
+Vendredi 25 décembre
+Jour de l’an
+Vendredi 1er janvier
+Lundi de Pâques
+Lundi 29 mars
+Fête du Travail
+Samedi 1er mai
+Ascension
+Jeudi 6 mai
+Victoire 1945
+Samedi 8 mai
+Lundi de Pentecôte
+Lundi 17 mai
+Fête nationale
+Mercredi 14 juillet
+Assomption
+Dimanche 15 août
+Toussaint
+Lundi 1er novembre
+Armistice 1918
+Jeudi 11 novembre
+Combien de personnes au comptoir ?
+
+Le minimum à tenir, selon le jour et l’heure. En dessous, le planning vous prévient.
+
+JOURS	HORAIRE	PERSONNES AU MINIMUM
+Lundi à vendredi	08:30 → 19:30	
+personnes
+
+Lundi à vendredi	10:00 → 12:30	
+personnes
+
+Lundi à vendredi	16:30 → 19:00	
+personnes
+
+Samedi	09:00 → 19:00	
+personnes
+
+Samedi	10:00 → 12:30	
+personnes
+
+Un pharmacien doit être présent à chaque minute d’ouverture : c’est contrôlé à part, quel que soit ce minimum.
+
+L’équipe est-elle bien dimensionnée ?
+
+Un repère pour vous, titulaire. Il part des clients à servir, pas du mobilier : les caisses ne sont qu’un plafond. Ce n’est pas une norme, et toutes les hypothèses sont écrites plus bas.
+
+Clients servis par jour
+En moyenne, un jour ordinaire. Votre logiciel de gestion le donne.
+Temps moyen par client
+min
+Facultatif. Sans valeur : 5 minutes, 4 avec un robot.
+Activité annuelle hors taxes
+€
+Facultatif : pour le nombre minimal de pharmaciens. Reste sur cet appareil.
+Au comptoir, heure ordinaire
+3
+personnes en même temps
+À l’heure de pointe
+4
+personnes en même temps
+Jamais moins de
+2
+dont un pharmacien
+Plafond utile
+5
+vos postes, plus une personne hors comptoir
+Pharmaciens
+Plus qu’il n’en faut
+
+3,7 temps plein au contrat, pour 2,1 qu’il faut
+
+Les contrats dépassent nettement le besoin : il y a de la marge pour des services ou des projets. Un pharmacien présent sur vos 65 heures d’ouverture par semaine.
+
+Préparateurs et comptoir
+Assez
+
+4,7 temps plein au contrat, pour 4,2 qu’il faut
+
+Les contrats couvrent le besoin, absences comprises. Préparateurs, étudiants, apprentis et animateurs, chacun compté pour ce qu’il apporte au comptoir.
+
+VOS RÉGLAGES « COMBIEN DE PERSONNES AU COMPTOIR »
+Lundi à vendredi, 8 h 30 à 19 h 30 : vous demandez 2 personnes au minimum. Le repère est de 3 à l’heure ordinaire : ce minimum paraît bas.
+Samedi, 9 h à 19 h : vous demandez 2 personnes au minimum. Le repère est de 3 à l’heure ordinaire : ce minimum paraît bas.
+D’où vient ce calcul
+Qui prépare le planning ?
+Façon de construire le planning
+Avec l’équipe
+Chacun dit ce qui l’arrange pour le mois suivant, puis vous construisez.
+Vous seul
+Vous construisez sans recueillir de préférences ; l’équipe consulte le planning publié.
+Préférences à donner avant le
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+du mois précédent
+Pour décembre : jusqu’au ven. 20 novembre
+Ce que ce choix change dans l’application
+POUR L’ÉQUIPE
+« Mes demandes » propose la carte « Mes préférences » : chacun y indique, jour par jour, s’il préfère le matin, la journée, l’après-midi ou un repos.
+Les préférences du mois suivant se donnent jusqu’à la date limite ci-dessus.
+POUR VOUS
+Le tableau de bord compte les préférences reçues avant de construire.
+La vue « Mois » les affiche, personne par personne.
+« Proposer un planning » en tient compte, et l’une des trois propositions les suit en priorité.
+
+Dans les deux cas : les règles et le nombre minimum de personnes passent avant tout, les demandes d’absence, d’horaires et de remplacement restent ouvertes à l’équipe, et vous seul publiez. Vous pouvez changer d’avis à tout moment : rien n’est effacé.
+
+Publication du planning, au mois
+Le planning d’un mois est transmis à l’équipe au plus tard
+Nombre de jours avant le 1er du mois
+jours avant le 1er.
+Solvéa vous le rappelle
+Nombre de jours de rappel avant l’échéance
+jours avant cette échéance, sur le tableau de bord.
+
+Pour décembre : rappel à partir du mar. 10 novembre, à publier au plus tard le mar. 17 novembre.
+
+Passé l’échéance, laisser Solvéa préparer le planning
+Si rien n’est fait à l’échéance, Solvéa prépare en brouillon les semaines restées vides, d’après vos habitudes : pour chaque personne et chaque jour, sa journée la plus fréquente sur vos 8 dernières semaines publiées. Un planning que vous avez commencé à la main passe toujours avant : il n’est jamais touché. Rien n’est publié sans vous : vous relisez, corrigez, puis publiez.
+
+Solvéa fonctionne sur cet appareil, sans serveur : le rappel et la préparation se font à l’ouverture de l’application par un titulaire.
+
+Postes types
+
+Vos horaires habituels, chacun avec sa couleur. Ils servent à la saisie rapide et aux propositions de planning.
+
+Ajouter un poste type
+POSTE	COULEUR	HORAIRES	PAUSE	JOURS	TRAVAIL EFFECTIF	
+	
+Automatique
+Jaune
+Orange
+Bleu
+Violet
+Vert anis
+Rose
+Sable
+Gris
+	
+→
+	
+→
+	Lundi à vendredi	7 h	
+
+	
+Automatique
+Jaune
+Orange
+Bleu
+Violet
+Vert anis
+Rose
+Sable
+Gris
+	
+→
+	
+→
+	Lundi à vendredi	7 h	
+
+	
+Automatique
+Jaune
+Orange
+Bleu
+Violet
+Vert anis
+Rose
+Sable
+Gris
+	
+→
+	Sans pause	Lundi à vendredi	4 h 30	
+
+	
+Automatique
+Jaune
+Orange
+Bleu
+Violet
+Vert anis
+Rose
+Sable
+Gris
+	
+→
+	Sans pause	Lundi à vendredi	5 h 30	
+
+	
+Automatique
+Jaune
+Orange
+Bleu
+Violet
+Vert anis
+Rose
+Sable
+Gris
+	
+→
+	
+→
+	Lundi à vendredi	9 h 30	
+
+	
+Automatique
+Jaune
+Orange
+Bleu
+Violet
+Vert anis
+Rose
+Sable
+Gris
+	
+→
+	Sans pause	Samedi	5 h	
+
+	
+Automatique
+Jaune
+Orange
+Bleu
+Violet
+Vert anis
+Rose
+Sable
+Gris
+	
+→
+	Sans pause	Samedi	5 h	
+
+	
+Automatique
+Jaune
+Orange
+Bleu
+Violet
+Vert anis
+Rose
+Sable
+Gris
+	
+→
+	
+→
+	Samedi	9 h	
+Paramètres et coûts
+Valeur du point conventionnel (€)
+Demandes prioritaires par personne
+Chiffre d'affaires annuel HT (€)
+
+La valeur du point n'est pas préremplie : reprenez-la dans le barème en vigueur. Tant qu'elle est vide, les indemnités de sujétion sont exprimées en points.
+
+Afficher les coûts estimés
+Solvéa ne connaît pas vos salaires : sans cette option, aucun montant n’est affiché. Si vous la cochez, un champ « Taux horaire brut », facultatif, apparaît dans la fiche de chaque personne. Les coûts affichés multiplient alors les heures planifiées par ce taux ; une personne sans taux n’est pas comptée. Ce n’est jamais un calcul de paie.
+Repartir de zéro
+
+Réinitialiser efface l’officine, l’équipe et les plannings enregistrés sur cet appareil, et ramène à l’écran de création.
+
+Réinitialiser
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example

@@ -1,0 +1,25 @@
+AVANT : *Pharmacie des Tilleuls (11 pers., 152 postes, clé DL2O-7UL8)
+Menu du compte : Claire Martin | Titulaire principal | Mon compte | Mes horaires | APPARENCE | Clair | Mixte | Sombre | Paramètres | Ajouter une pharmacie | Se déconnecter
+Écran ajout : AJOUTER UNE PHARMACIE · ÉTAPE 1 SUR 3 |  | Votre pharmacie |  | Seul le nom est obligatoire. Les horaires proposés sont les plus courants : ajustez-les. |  | Identité | Le nom s’affiche en haut de l’application et sur les exports. | Nom de la pharmacie (obligatoire) | Par exemple : Pharmacie du Marc
+Étape 2 (ajout) titulaire prérempli : Claire Martin 200 | champs identifiant : 0 | Vous gardez le même identifiant et le même mot de passe pour toutes vos pharmacies.
+APRÈS AJOUT :  Pharmacie des Tilleuls (11 pers., 152 postes, clé DL2O-7UL8) ; *Pharmacie du Port (3 pers., 84 postes, clé DL2O-7UL8)
+Tutoriel relancé : 0 | sélecteur : Pharmacie du Port / Pharmacie des Tilleuls / ＋ Ajouter une pharmacie… | barre : Pharmacie du Port
+Pharmacie 2 : identifiants Claire@Tilleuls.fr, hugo.lenoir, marc.petit2 | Claire même code ? true | horaires [1,1,1,1,1,1,0] | infos {"surfaceVente":110,"reserve":45,"caisses":3,"comptoirs":4,"confidentialite":1,"passagesJour":240} | surface 180
+ÉQUIPE pharmacie 2 : Ajouter une personne | TITULAIRES · 1 | CM | Claire Martin | Titulaire principal | 200 h | PHARMACIENS · 1 | HL | Hugo Lenoir | Pharmacien | 35 h | PRÉPARATEURS · 1 | MP | Marc Petit | Préparateur | 35 h
+TABLEAU pharmacie 2 : CM | VENDREDI 20 NOVEMBRE 2026 | Bonsoir Claire  |  | Titulaire principal · Pharmacie du Port |  | 2 décisions | vous attendent. | Concentrez-vous sur la priorité, le reste suit dans l’ordre. |  | L’équipe aujourd’hui | Pas de planning | semaine à construire | Pharmacien présent | - | cette semaine 
+Après bascule : Pharmacie des Tilleuls | vue : Tableau de bord · Solvéa
+ÉQUIPE pharmacie 1 : Ajouter une personne | TITULAIRES · 2 | CM | Claire Martin | Titulaire principal | 200 h | PD | Paul Durand | Titulaire secondaire | 35 h | PHARMACIENS · 2 | JB | Julie Bernard | Pharmacien | 35 h | JB | Julie Bernard | Pharmacien | 20 h (temps partiel) | PRÉPARATEURS · 3 | MP | Marc Petit | Prépara
+Mode sombre choisi dans Tilleuls → dans Port : sombre
+Identifiants Port : Hugo hugo.lenoir | Marc marc.petit2
+Hugo connecté → pharmacie : Pharmacie du Port | sélecteur visible : 0
+Claire reconnectée → pharmacie ouverte : Pharmacie du Port
+Création depuis un appareil occupé, bouton retour : J’ai déjà un compte
+Identifiant déjà pris (autre casse) : Un point à corriger | Cet identifiant a déjà un compte sur cet appareil. Connectez-vous, ou choisissez-en un autre.
+Identifiant d’un salarié d’une autre pharmacie : Un point à corriger | Cet identifiant a déjà un compte sur cet appareil. Connectez-vous, ou choisissez-en un autre.
+APRÈS « Pharmacie Voisine » :  Pharmacie des Tilleuls (11 pers., 152 postes, clé DL2O-7UL8) ;  Pharmacie du Port (3 pers., 84 postes, clé DL2O-7UL8) ; *Pharmacie Voisine (1 pers., 28 postes, clé 0J0P-Q3YH)
+Bruno : sélecteur Pharmacie Voisine / ＋ Ajouter une pharmacie…
+Confirmation : Tout effacer et revenir à l’écran de création ? | Annuler | Oui, réinitialiser
+APRÈS remise à zéro par Bruno : * (0 pers., 0 postes, clé undefined) | écran : Connexion · Solvéa
+Claire tente de se connecter : Aucun compte n’existe encore sur cet appareil. Créez votre pharmacie pour obtenir vos identifiants.
+Préférences restantes : {"Claire@Tilleuls.fr":{"mode":"clair"},"bruno@voisine.fr":{"mode":"clair"}}
+ERREURS console : aucune

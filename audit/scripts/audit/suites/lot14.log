@@ -1,0 +1,17 @@
+✓ sans préférences, les propositions sont : Équité d’abord | Habitudes d’abord | Contrats d’abord
+✓ l’indicateur « Préférences suivies » n’est plus affiché
+✓ le titre annonce le bon nombre de propositions
+✓ « Équipe au complet ? » : 7 icônes sans fond ni cercle
+✓ tâche : trois choix, et deux raccourcis
+✓ « Planifier une formation » ouvre la fenêtre de formation
+✓ changer d’écran ramène en haut de la page
+✓ planning de l’équipe à 1440px : tous les jours ouverts visibles (jour = 146px, table 1110/1110)
+✓ planning de l’équipe à 1180px : tous les jours ouverts visibles (jour = 111px, table 850/850)
+✓ planning de l’équipe à 1024px : tous les jours ouverts visibles (jour = 90px, table 694/694)
+✓ planning de l’équipe à 820px : tous les jours ouverts visibles (jour = 102px, table 786/786)
+✓ planning de l’équipe à 600px : tous les jours ouverts visibles (jour = 74px, table 570/570)
+✓ planning de l’équipe à 390px : tous les jours ouverts visibles (jour = 45px, table 360/360)
+✓ planning de l’équipe à 360px : tous les jours ouverts visibles (jour = 40px, table 330/330)
+
+14/14 vérifications
+aucune erreur de page

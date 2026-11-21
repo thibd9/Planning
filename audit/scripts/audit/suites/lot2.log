@@ -1,0 +1,15 @@
+   [collègues possibles] ["Toute l’équipeVotre titulaire prévient tous ceux qui peuvent reprendre le poste.","TNThomas Nguyen33 h → 40 h cette semaine-là, pour un contrat de 35 hPossible"] → Thomas
+   [priorité] À FAIRE EN PREMIER
+Nicolas vous demande de le remplacer
+
+lun. 30 novembre, de 11 h 30 à 19 h 30. Vous répondez oui ou non, sans obligation.
+
+Voir la demande | ?
+   [écran du collègue] Quand est-ce que je travaille ? | Espace préparateur
+, environnement de test : changer de profil
+Grande Pharmacie de la Pinède
+   [refus] {"texte":"Votre demande (congé, du lun. 30 novembre au ven. 4 décembre) n’est pas acceptée. Raison : plusieurs absences déjà prévues. La semaine suivante serait possible.","apres":{"messages":5,"dernier":"Votre demande (congé, du lun. 30 novembre au ven. 4 décembre) n’est pas acceptée. Raison : plusieurs absences déjà prévues. La semaine suivante serait possible.","journal":"Du lun. 30 novembre au ven. 4 décembre. Raison : plusieurs absences déjà prévues. La semaine suivante serait possible."},"avant":{"messages":4,"attente":1}}
+ARRÊT locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: /Voir et choisir la solution/ }).first()[22m
+

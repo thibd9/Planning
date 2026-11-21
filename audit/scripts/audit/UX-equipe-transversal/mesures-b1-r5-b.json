@@ -1,0 +1,72 @@
+{
+ "b1-r5-espace-b": {
+  "n": 2,
+  "hauteur": 1157,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11px « vendredi 20 novembre 2026 » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)",
+   "11.5px « Mon métier » (div.eyebrow)",
+   "11.5px « Mon agenda » (div.eyebrow)"
+  ],
+  "cibles": [
+   "213×34 « Demander un rendez-vous » (btn primary sm)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "11": 1,
+   "13": 8,
+   "14": 3,
+   "15": 4,
+   "16": 3,
+   "20": 1,
+   "24": 1,
+   "32": 2,
+   "11.5": 3,
+   "13.5": 2,
+   "14.5": 12
+  },
+  "entete": {
+   "h1": "Bonjour Manon "
+  }
+ },
+ "b1-r5-demandes-b": {
+  "n": 2,
+  "hauteur": 1015,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « IL » (span.avatar c r-adjoint)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 18,
+   "13": 8,
+   "14": 1,
+   "15": 1,
+   "16": 2,
+   "17": 3,
+   "34": 2,
+   "11.5": 2,
+   "13.5": 5,
+   "14.5": 1,
+   "15.5": 1,
+   "12.5": 3
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes demandes",
+   "sous": "Choisissez ce que vous voulez faire."
+  }
+ }
+}

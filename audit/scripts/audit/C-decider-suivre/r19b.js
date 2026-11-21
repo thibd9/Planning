@@ -1,0 +1,21 @@
+const { ouvrir, dialogue } = require('./lib');
+(async () => {
+  const o = await ouvrir({ role: 0 }); const { p } = o;
+  await o.nav('journal'); await p.waitForTimeout(400);
+  await p.getByRole('button', { name: /Exporter le dossier/ }).click(); await p.waitForTimeout(600);
+  console.log('boutons fermer', await p.getByRole('button', { name: 'Fermer' }).count());
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  console.log('Échap ferme ?', (await dialogue(p)).length === 0);
+  await p.locator('button', { hasText: 'Fiche navette' }).first().click(); await p.waitForTimeout(400);
+  console.log('NAVETTE', (await p.locator('main, .content').first().innerText()).replace(/\n+/g, ' | ').slice(0, 2600));
+  await o.shot('r19-navette', { fullPage: true });
+  let dl = null; p.on('download', (x) => { dl = x; });
+  await p.getByRole('button', { name: /Exporter pour le comptable/ }).click(); await p.waitForTimeout(800);
+  console.log('download ?', !!dl);
+  const csv = await p.locator('#export-contenu').inputValue().catch(() => '');
+  console.log('CSV\n' + csv.slice(0, 1500));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  await p.getByRole('button', { name: 'Mois précédent' }).click(); await p.waitForTimeout(300);
+  console.log('NAVETTE octobre', (await p.locator('.chiffres').innerText()).replace(/\n+/g, ' | '));
+  console.log('ERR', o.errs); await o.b.close();
+})();

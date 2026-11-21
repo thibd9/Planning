@@ -1,0 +1,16 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/premiermai.test.ts > 1er mai travaillé
+KO  [MAI1] (1er mai) | Officine réglée « ouverte les jours fériés », semaine du lundi 1er mai 2028 | attendu: à vérifier : le 1er mai est le seul jour férié chômé de droit (Code du travail) ; un poste ce jour-là appelle au moins une alerte et une majoration en paie | obtenu: 10 postes le 1er mai ; constats ce jour : aucun ; fiche navette : Igor: 0 variable(s), Léa: 0 variable(s), Nicolas: 0 variable(s), Thomas: 0 variable(s), Inès: 0 variable(s), Jules: 0 variable(s), Sarah: 0 variable(s), Manon: 0 variable(s)
+
+ ✓ tests/premiermai.test.ts > 1er mai travaillé 2754ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  23:44:53
+   Duration  2.96s (tests 97%, import 1%, transform 1%)
+

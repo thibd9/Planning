@@ -1,0 +1,289 @@
+{
+ "b1-r2-espace-b": {
+  "n": 2,
+  "hauteur": 1421,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11px « vendredi 20 novembre 2026 » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)",
+   "11.5px « Mon métier » (div.eyebrow)",
+   "11.5px « Mon agenda » (div.eyebrow)",
+   "11.5px « Ce qui a changé » (div.eyebrow)"
+  ],
+  "cibles": [
+   "213×34 « Demander un rendez-vous » (btn primary sm)",
+   "59×34 « Vu : Arrêt d’Igor L. enregistr » (annonce-vu)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "11": 1,
+   "12": 1,
+   "13": 10,
+   "14": 3,
+   "15": 4,
+   "16": 4,
+   "20": 1,
+   "24": 1,
+   "32": 2,
+   "11.5": 4,
+   "13.5": 4,
+   "14.5": 12,
+   "12.5": 3
+  },
+  "entete": {
+   "h1": "Bonjour Igor "
+  }
+ },
+ "b1-r2-demandes-b": {
+  "n": 2,
+  "hauteur": 1275,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « Comment faire » (div.eyebrow)",
+   "11.5px « L’équipe » (div.eyebrow)"
+  ],
+  "cibles": [
+   "113×34 « M’assister » (btn magic sm)",
+   "86×38 « Matin » (sh-choix matin)",
+   "103×38 « Journée » (sh-choix journee on)",
+   "120×38 « Après-midi » (sh-choix soir)",
+   "90×38 « Repos » (sh-choix repos)",
+   "97×38 « Effacer » (sh-choix effacer)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 11,
+   "13": 15,
+   "15": 23,
+   "16": 2,
+   "17": 3,
+   "19": 1,
+   "34": 2,
+   "11.5": 3,
+   "13.5": 9,
+   "12.5": 27,
+   "14.5": 2
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes demandes",
+   "sous": "Choisissez ce que vous voulez faire."
+  }
+ },
+ "b1-r2-mesgardes-b": {
+  "n": 2,
+  "hauteur": 1225,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mes gardes » (div.eyebrow)"
+  ],
+  "cibles": [
+   "22×22 « Retirer l'intervention de 0 h  » (btn ghost)",
+   "104×34 « Imprimer » (btn sm no-print)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 3,
+   "13": 14,
+   "15": 1,
+   "16": 3,
+   "21": 2,
+   "34": 2,
+   "11.5": 1,
+   "13.5": 4,
+   "14.5": 1
+  },
+  "entete": {
+   "eyebrow": "MES GARDES",
+   "h1": "Mes gardes et astreintes",
+   "sous": "Les gardes qui vous sont confiées, le repos qui les suit, vos interventions à déclarer et le récapitulatif du mois."
+  }
+ },
+ "b1-r2-suivi-b": {
+  "n": 2,
+  "hauteur": 1218,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon suivi » (div.eyebrow)",
+   "11.5px « Vos points forts, vus par vos titulaires » (div.eyebrow)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 10,
+   "13": 13,
+   "15": 3,
+   "16": 4,
+   "20": 3,
+   "34": 2,
+   "11.5": 2,
+   "14.5": 7,
+   "13.5": 9
+  },
+  "entete": {
+   "eyebrow": "MON SUIVI",
+   "h1": "Où j’en suis",
+   "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement."
+  }
+ },
+ "b1-r2-espace-t": {
+  "n": 4,
+  "hauteur": 2305,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11px « vendredi 20 novembre 2026 » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)",
+   "11.5px « Mon métier » (div.eyebrow)",
+   "11.5px « Mon agenda » (div.eyebrow)",
+   "11.5px « Ce qui a changé » (div.eyebrow)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "11": 1,
+   "12": 1,
+   "13": 11,
+   "14": 3,
+   "15": 4,
+   "19": 1,
+   "22": 1,
+   "26": 1,
+   "11.5": 4,
+   "13.5": 4,
+   "14.5": 12,
+   "16.5": 4,
+   "12.5": 3
+  },
+  "entete": {
+   "h1": "Bonjour Igor "
+  }
+ },
+ "b1-r2-demandes-t": {
+  "n": 4,
+  "hauteur": 1919,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « Comment faire » (div.eyebrow)",
+   "11.5px « L’équipe » (div.eyebrow)"
+  ],
+  "cibles": [
+   "86×38 « Matin » (sh-choix matin)",
+   "103×38 « Journée » (sh-choix journee on)",
+   "120×38 « Après-midi » (sh-choix soir)",
+   "90×38 « Repos » (sh-choix repos)",
+   "97×38 « Effacer » (sh-choix effacer)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 12,
+   "13": 10,
+   "14": 1,
+   "15": 22,
+   "17": 4,
+   "24": 2,
+   "11.5": 3,
+   "13.5": 9,
+   "16.5": 2,
+   "14.5": 2
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes demandes",
+   "sous": "Choisissez ce que vous voulez faire."
+  }
+ },
+ "b1-r2-mesgardes-t": {
+  "n": 3,
+  "hauteur": 1522,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mes gardes » (div.eyebrow)"
+  ],
+  "cibles": [
+   "22×22 « Retirer l'intervention de 0 h  » (btn ghost)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 3,
+   "13": 13,
+   "14": 1,
+   "16": 2,
+   "21": 2,
+   "24": 2,
+   "11.5": 1,
+   "13.5": 4,
+   "14.5": 1
+  },
+  "entete": {
+   "eyebrow": "MES GARDES",
+   "h1": "Mes gardes et astreintes",
+   "sous": "Les gardes qui vous sont confiées, le repos qui les suit, vos interventions à déclarer et le récapitulatif du mois."
+  }
+ },
+ "b1-r2-suivi-t": {
+  "n": 4,
+  "hauteur": 1959,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon suivi » (div.eyebrow)",
+   "11.5px « Vos points forts, vus par vos titulaires » (div.eyebrow)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 10,
+   "13": 13,
+   "14": 1,
+   "15": 2,
+   "16": 1,
+   "20": 3,
+   "24": 2,
+   "11.5": 2,
+   "16.5": 3,
+   "14.5": 7,
+   "13.5": 9
+  },
+  "entete": {
+   "eyebrow": "MON SUIVI",
+   "h1": "Où j’en suis",
+   "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement."
+  }
+ }
+}

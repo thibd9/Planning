@@ -1,0 +1,49 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/publication.test.ts > 4. Publication et répercussions > une retouche reste un brouillon
+OK  [PU1] store.saveShift | Inès, 2026-11-24 (semaine publiée) : poste raccourci de 30 min dans la grille | attendu: version publiée inchangée ; 1 écart en attente de « Publier » | obtenu: publié 8.5-19.5 → 8.5-19.5 ; écarts p_ines 2026-11-24
+OK  [PU1-moveShift] store.moveShift | moveShift sur la semaine publiée du 2026-11-23 | attendu: version publiée inchangée | obtenu: inchangée
+OK  [PU1-deleteShift] store.deleteShift | deleteShift sur la semaine publiée du 2026-11-23 | attendu: version publiée inchangée | obtenu: inchangée
+OK  [PU1-poserRepos] store.poserRepos | poserRepos sur la semaine publiée du 2026-11-23 | attendu: version publiée inchangée | obtenu: inchangée
+OK  [PU1-viderSemaine] store.viderSemaine | viderSemaine sur la semaine publiée du 2026-11-23 | attendu: version publiée inchangée | obtenu: inchangée
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > une retouche reste un brouillon 18477ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > une décision met à jour la version publiée sans republier, et seulement elle
+OK  [PU2] publish.repercuter | Brouillon en cours pour Inès (2026-11-24), puis arrêt de Thomas le 2026-11-25 enregistré | attendu: Thomas retiré de la version publiée, sans republier ; la retouche d’Inès reste un brouillon | obtenu: Thomas publié : repos ; Inès publiée : 8.5-19.5 (brouillon 8.5-19) ; publishedAt inchangé ; écarts restants p_ines 2026-11-24
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > une décision met à jour la version publiée sans republier, et seulement elle 2688ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > une décision sur la même journée qu’un brouillon publie aussi le brouillon
+KO  [PU3] publish.repercuter | Inès, 2026-11-24 : prise de poste retardée d’1 h en brouillon (non publiée), puis inventaire 20 h - 21 h planifié ce jour-là | attendu: version publiée = 8.5-19.5 + inventaire 20-21 ; la retouche reste un brouillon | obtenu: version publiée = 20-21 inventaire + 9.5-19.5 ; avis reçu par Inès : Planning habituel → Inventaire, 20:00 → 21:00 | repercuter() recopie toute la journée actuelle de la personne touchée, brouillon compris ; l’avis ne mentionne que l’inventaire.
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > une décision sur la même journée qu’un brouillon publie aussi le brouillon 2988ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > régler un poste à couvrir publie les brouillons des personnes déplacées
+OK  [PU4] publish.repercuter | Poste à couvrir du 2026-11-19 réglé par « Réaffecter Pierre F. » ; p_antoine avait en brouillon, le même jour, une demi-heure d’administratif 20 h - 20 h 30 sans rapport | attendu: la décision est publiée ; la demi-heure d’administratif reste un brouillon | obtenu: écarts en attente avant 1, après 0 ; journée publiée de p_antoine : 8.5-19.5
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > régler un poste à couvrir publie les brouillons des personnes déplacées 4396ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > une décision sur une semaine non publiée ne publie rien
+OK  [PU5] publish.repercuter | Semaine du 2026-12-14 en brouillon (copiée), arrêt de Thomas le 2026-12-15 | attendu: la semaine reste un brouillon, sans version publiée | obtenu: statut aucun ; snapshot absent
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > une décision sur une semaine non publiée ne publie rien 3676ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > avis de changement tardif
+OK  [PU6] notifications.tardif | Inventaire posé pour Jules dans 3 jours (2026-11-23) | attendu: avis marqué « tardif » (moins de 7 jours) | obtenu: Inventaire, 08:00 → 08:30 tardif=true
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > avis de changement tardif 4322ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > « Annuler » après « Publier »
+KO  [PU7] store.undo | Copier une semaine (2026-12-07), la publier, puis « Annuler » | attendu: à décider : soit la publication reste (elle n’est pas annulable), soit l’annulation le dit ; jamais une dépublication silencieuse | obtenu: après publication : publie ; après Annuler : statut aucun, postes de la semaine 0, journal 6 → 5 entrées | publier() est un commit « non annulable » : il n’entre pas dans l’historique, si bien que « Annuler » revient à l’état d’avant la copie, publication comprise.
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > « Annuler » après « Publier » 5112ms
+stdout | tests/publication.test.ts > 4. Publication et répercussions > seuils des règles impératives
+KO  [RG1] store.majRegle | Repos quotidien ramené à 2 h, durée hebdomadaire à 70 h, durée quotidienne à -1 h (règles « obligatoires ») | attendu: refusé, ou borné au minimum légal (la page Règles dit « le planning ne peut pas l’enfreindre ») | obtenu: enregistré : duree.quotidienne=-1, duree.hebdo=70, repos.quotidien=2 ; bloquants « durée quotidienne » sur la semaine : 36 (avant : 0 bloquants en tout)
+KO  [RG2] store.majRegle | Désactiver « Pharmacien présent » par l’action du magasin (l’écran masque la case), puis retirer tous les pharmaciens de la semaine | attendu: la règle impérative reste active | obtenu: active=false ; 0 constat(s) de présence | Pas de garde-fou dans majRegle ; seule l’interface empêche de décocher.
+
+ ✓ tests/publication.test.ts > 4. Publication et répercussions > seuils des règles impératives 4763ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  23:36:00
+   Duration  47.32s (tests 98%, transform 1%)
+

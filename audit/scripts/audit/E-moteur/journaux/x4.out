@@ -1,0 +1,19 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/x4.test.ts > x4
+bloquant Dimanche, de 13 h à 14 h, aucun pharmacien n'est présent (entre deux postes). Posez un pharmacien sur cette plage.
+alerte Dimanche, de 13 h à 14 h : 0 personne au comptoir pour 2 attendues.
+p_helene 9-13, p_antoine 14-19, p_camille 14-19, p_ines 9-13, p_yanis 9-13
+donnees_manquantes Aucun poste type le dimanche de 13 h à 14 h L’officine est ouverte le dimanche 13 décembre de 13 h à 14 h, mais aucun poste type ne couvre cette plage.
+
+ ✓ tests/x4.test.ts > x4 2654ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  23:44:49
+   Duration  2.88s (tests 97%, transform 1%, import 1%)
+

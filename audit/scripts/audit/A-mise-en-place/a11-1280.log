@@ -1,0 +1,36 @@
+ok 1280 connexion
+ok 1280 creation-1
+ok 1280 creation-1-erreur
+ok 1280 creation-2
+ok 1280 creation-2-erreurs
+ok 1280 creation-3
+!! 1280 reglages-pharmacie
+     COUPÉ « Grande Pharmacie de la Pinède »
+     COUPÉ « 180 m² au total · 110 m² de surface de v »
+!! 1280 reglages-horaires
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 reglages-comptoir
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 reglages-planning
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 reglages-parametres
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 reglages-postes-types
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 dialogue-poste-type
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 equipe
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 dialogue-ajout-personne
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 equipe-fiche-animatrice
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 regles
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 regles-fiche-ouverte
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 menu-compte
+     COUPÉ « Grande Pharmacie de la Pinède »
+!! 1280 compte
+     COUPÉ « Grande Pharmacie de la Pinède »
+ERREURS console : aucune

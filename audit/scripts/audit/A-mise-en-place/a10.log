@@ -1,0 +1,19 @@
+COMPTE Caroline (sections) : Caroline Tellier / Mes compétences et diplômes / Apparence / Connexion / Tutoriel
+Aspect initial : {"mode":"clair","menu":"-","theme":"ciel","texte":"normal"}
+Après choix (sombre, framboise, grand, priorité d’abord) : {"mode":"sombre","menu":"-","theme":"rose","texte":"grand"}
+Après rechargement : {"mode":"sombre","menu":"-","theme":"rose","texte":"grand"} | vue : Tableau de bord · Solvéa
+Tableau : disposition = tb dispo-classique,tb-priorite urgent
+Préférences enregistrées : {"caroline.tellier":{"mode":"sombre","theme":"rose","texte":"grand","tableau":"classique"}}
+Nicolas, aspect : {"mode":"clair","menu":"-","theme":"indigo","texte":"normal"}
+Nicolas : choix de couleur = 0 | texte : Couleur de votre espace : Indigo C’est la couleur de votre profil : elle dit d’un coup d’œil dans quel espace on se trouve. Seul le titulaire principal choisit la sienne. | disposition : 0 | clé de secours : 0
+Nicolas mixte : {"mode":"clair","menu":"sombre","theme":"indigo","texte":"normal"}
+Retour Caroline : {"mode":"sombre","menu":"-","theme":"rose","texte":"grand"}
+Auto + appareil sombre : {"mode":"sombre","menu":"-","theme":"rose","texte":"grand"}
+Menu rapide (auto, appareil sombre) boutons actifs : [ 'Sombre' ]
+Auto + appareil clair : {"mode":"clair","menu":"-","theme":"rose","texte":"grand"}
+Mdp actuel faux : Le mot de passe actuel ne correspond pas.
+Nouveau trop court : Le nouveau mot de passe doit compter au moins 6 caractères.
+Section connexion Caroline : Connexion | Identifiant : caroline.tellier | Mot de passe personnel | Mot de passe actuel | Nouveau mot de passe | Changer le mot de passe |  | Au moins 6 caractères. Seule une empreinte est conservée, sur cet appareil. |  | Le nouveau mot de passe doit compter au moins 6 caractères. |  | Clé de secours : TILL-2026. Notez-la : elle seule permet de redéfinir votre mot de passe si vous l’oubliez.
+Tutoriel relancé : 1 1 | TUTORIEL | Étape 1 sur 11 | Bienvenue dans Solvéa |  | Un tour d’une minute pour savoir où trouver chaque chose. Vous pourrez le relancer à tout moment avec le bouton « Tutoriel », en haut de l’éc
+Pierre : couleur libre = 0 | clé = 0 | texte couleur : Couleur de votre espace : Bleu marine C’est la couleur de votre profil : elle dit d’un coup d’œil dans quel espace on se trouve. Seul le titulaire principal choisit la sienne.
+ERREURS console : aucune

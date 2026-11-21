@@ -1,0 +1,90 @@
+COMPTEUR D’HEURES
+Le moins d’heures en plus possible
+
+L’objectif : que chacun reste à son contrat. Solvéa signale tout dépassement et propose comment le résorber.
+
+Régulariser automatiquement
+0 h
+en plus des contrats
+45 h 30
+en moins des contrats · 8 personnes
+1
+à jour, à moins d’une heure du contrat
+8 compteurs à régulariser. « Régulariser automatiquement » les résorbe sur la semaine du 7 – 13 décembre 2026, sans rien publier.
+IL
+Igor L.
+Pharmacien
+286 h planifiées
+contrat 294 h
+−8 h
+Faire rattraper
+Solder
+LF
+Léa F.
+Pharmacien
+251 h 30 planifiées
+contrat 252 h
+À jour
+NL
+Nicolas L.
+Préparateur
+307 h planifiées
+contrat 315 h
+−8 h
+Faire rattraper
+Solder
+TN
+Thomas N.
+Préparateur
+310 h 30 planifiées
+contrat 315 h
+−4 h 30
+Faire rattraper
+Solder
+ID
+Inès D.
+Préparateur
+211 h planifiées
+contrat 216 h
+−5 h
+Faire rattraper
+Solder
+JP
+Jules P.
+Préparateur
+310 h 30 planifiées
+contrat 315 h
+−4 h 30
+Faire rattraper
+Solder
+SL
+Sarah L.
+Animateur
+186 h 30 planifiées
+contrat 189 h
+−2 h 30
+Faire rattraper
+Solder
+MG
+Manon G.
+Apprenti
+184 h 30 planifiées
+contrat 189 h
+−4 h 30
+Faire rattraper
+Solder
+YM
+Yanis M.
+Étudiant
+135 h 30 planifiées
+contrat 144 h
+−8 h 30
+Faire rattraper
+Solder
+
+Le compteur aide à décider : il ne calcule ni majoration ni repos compensateur. La paie applique la convention collective ; faites valider le choix entre paiement et récupération par votre expert-comptable.
+
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example

@@ -1,0 +1,12 @@
+const ux = require('./ux');
+(async () => { const b = await ux.lancer();
+ const { p } = await ux.ouvrir(b, { w:390, h:800, plie: true, tactile: true });
+ await ux.aller(p, 'regles');
+ const info = () => p.evaluate(() => { const t = [...document.querySelectorAll('button')].find((x) => /^Réglables/.test(x.textContent.trim())); const bar = t.parentElement; const r = bar.getBoundingClientRect(); return { bar: bar.className, sl: bar.scrollLeft, sw: bar.scrollWidth, cw: bar.clientWidth, h: Math.round(r.height), boutons: [...bar.children].map((c) => { const rr = c.getBoundingClientRect(); return c.textContent.trim() + '@' + Math.round(rr.left) + '-' + Math.round(rr.right); }) }; });
+ console.log(JSON.stringify(await info()));
+ await p.evaluate(() => [...document.querySelectorAll('button')].find((x) => /^Réglables/.test(x.textContent.trim())).click()); await p.waitForTimeout(600);
+ console.log(JSON.stringify(await info()));
+ await p.evaluate(() => [...document.querySelectorAll('button')].find((x) => /^À faire valider/.test(x.textContent.trim())).click()); await p.waitForTimeout(600);
+ console.log(JSON.stringify(await info()));
+ await ux.shot(p, 't-regles-filtre2');
+ await b.close(); })();

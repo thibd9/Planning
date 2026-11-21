@@ -1,0 +1,13 @@
+Écran de création sur un appareil vide, bouton : J’ai déjà un compte
+Après double clic : pharmacies = 1 Pharmacie Double
+Boutons de la barre du haut : Créer , ouvrir le menu de création / Retard ou absence , signaler / 3 notifications, ouvrir la liste / Messages / Aide et tutoriels / NR Nadia R. , ouvrir le menu du compte
+Retour du navigateur depuis Réglages : URL avant http://localhost:5180/ → après about:blank | écran : 
+Bouton « Tout effacer » actif avec « effacer » en minuscules, sans mot de passe : true
+Après effacement : pharmacies = (vide):0 | message : Tout a été effacé de cet appareil.
+TABLEAU Caroline : CT | VENDREDI 20 NOVEMBRE 2026 | Bonsoir Caroline  |  | Titulaire principal · Grande Pharmacie de la Pinède | 
+FICHE Caroline, droits : Droits d’accès | Titulaire principal. A créé la pharmacie et décide en dernier ressort : il donne son accord aux décisions des autres titulaires, et lui seul ouvre la gestion à un pharmacien.
+FICHE Sarah, rôle : Animateur | marques : Vous choisissez les marques que Sarah anime, et pour quelles familles de produits. Il les retrouve dans son espace.
+FICHE Manon, rôle : Apprenti
+Menu compte Caroline : Caroline Tellier | Titulaire principal
+Sarah connectée, badge : Espace animateur
+, environnement de test : changer de profil | accueil : SL | VENDREDI 20 NOVEMBRE 2026 | Bonsoir Sarah  |  | Espace animateur · Grande Pharmacie de la Pinède

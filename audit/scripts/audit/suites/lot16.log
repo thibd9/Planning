@@ -1,0 +1,16 @@
+✓ aucune barre de test : le contenu commence juste sous la barre du haut (0 px)
+✓ le menu réunit 7 profils, les tutoriels et la remise à neuf
+✓ Échap ferme le menu
+✓ choisir « Préparateur » change d’espace et referme le menu
+✓ « Tutoriels » ouvre le choix des visites
+✓ au repos, rien n’est masqué ; en défilant, le contenu s’estompe sous la barre, qui prend une ombre
+✓ un poste de démonstration porte déjà ses pauses courtes (2)
+✓ « Une par demi-journée » propose des pauses calées sur le quart d’heure (10:30, 16:45)
+✓ une pause hors du poste est signalée
+✓ la pause de 10 h 10, vingt minutes, est enregistrée avec le poste
+✓ la feuille imprime la pause déjeuner (« déj. ») et les pauses courtes (« p. »), avec leur légende
+✓ avec les pauses, rien ne déborde de la page (-2) ni d’une case (0)
+✓ au mois aussi : pauses écrites, aucune case coupée (0), aucune page dépassée (-16,-16,-256)
+
+13/13 vérifications
+aucune erreur de page

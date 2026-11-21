@@ -1,0 +1,38 @@
+e2e6:  - assistant : répond « qui travaille demain » avec les personnes et leurs horaires aucune erreur de page 
+lot2: [2m  - waiting for getByRole('button', { name: /Voir et choisir la solution/ }).first()[22m  
+lot3: clair : 13/13 contrôles, 0 défaut(s) sur 8 écrans aucune erreur de page 
+lot5: clair : 32/32 contrôles, 0 défaut(s) d’accessibilité sur 9 écrans aucune erreur de page 
+lot6: clair : 16/16 contrôles, 0 défaut(s) d’accessibilité sur 4 écrans aucune erreur de page 
+lot7: clair : 20/20 contrôles, 0 défaut(s) d’accessibilité sur 5 écrans aucune erreur de page 
+lot8: clair : 26/26 contrôles, 0 défaut(s) d’accessibilité sur 10 écrans aucune erreur de page 
+lot9: clair : 31/31 contrôles, 0 défaut(s) d’accessibilité sur 9 écrans aucune erreur de page 
+lot10: clair : 18/18 contrôles, 0 défaut(s) d’accessibilité sur 5 écrans aucune erreur de page 
+lot11: clair : 18/18 contrôles, 0 défaut(s) d’accessibilité sur 6 écrans aucune erreur de page 
+lot12: clair : 13/13 contrôles, 0 défaut(s) d’accessibilité sur 5 écrans aucune erreur de page 
+lot13: 13/13 vérifications aucune erreur de page 
+lot14: 14/14 vérifications aucune erreur de page 
+lot15: 12/12 vérifications aucune erreur de page 
+lot15b: 8/8 vérifications aucune erreur de page 
+lot16: 13/13 vérifications aucune erreur de page 
+lot17: 17/17   
+lot18: 22/22   
+lot19: 14/14   
+lot20:  lot20 : 20/20 aucune erreur de page 
+lot21:  lot21 : 17/17 aucune erreur de page 
+lot22:  lot22 : 18/18 aucune erreur de page 
+grille:   390 équité   ok  {"lesquels":[],"defile":0,"page":0,"dernier":0,"col":36,"tuiles":46,"coupes":0,"deborde":0} la semaine tient partout 
+champs: clair (appareil réglé à l’inverse) : 335 champs relevés sur 119 écrans, 0 en défaut ; erreurs de page 0 
+lot23:  lot23 : 20/20 aucune erreur de page 
+lot24:  lot24 : 21/21 aucune erreur de page 
+sombre-e2e6:  - assistant : répond « qui travaille demain » avec les personnes et leurs horaires aucune erreur de page 
+sombre-lot5: sombre : 32/32 contrôles, 0 défaut(s) d’accessibilité sur 9 écrans aucune erreur de page 
+sombre-lot11: sombre : 18/18 contrôles, 0 défaut(s) d’accessibilité sur 6 écrans aucune erreur de page 
+sombre-lot13: 13/13 vérifications aucune erreur de page 
+sombre-lot17: 17/17   
+sombre-lot19: 14/14   
+sombre-lot20:  lot20 sombre : 20/20 aucune erreur de page 
+sombre-lot21:  lot21 sombre : 17/17 aucune erreur de page 
+tel-lot12: téléphone : 16/16 contrôles, 0 défaut(s) d’accessibilité sur 6 écrans aucune erreur de page 
+tel-lot20:  lot20 téléphone : 18/18 aucune erreur de page 
+mobile2:  360px : 11 souci(s) sur 24 écrans ; erreurs 0 
+FIN

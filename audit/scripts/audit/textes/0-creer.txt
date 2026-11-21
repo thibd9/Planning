@@ -1,0 +1,8 @@
+CRÉER
+Un planning
+Une garde
+Une formation
+Un inventaire
+Une personne
+Mon absence
+Un message

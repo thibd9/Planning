@@ -1,0 +1,100 @@
+
+### 390x800 barre du bas : Accueil | Planning | Demandes | Messages 1 messages non lus | Menu
+ok 390x800-r3 espace
+ok 390x800-r3 moi
+ok 390x800-r3 demandes/souhaits
+!! 390x800-r3 demandes/absences
+     DÉFILE fc-zone (316px)
+ok 390x800-r3 demandes/remplacements
+ok 390x800-r3 suivi
+!! 390x800-r3 documents
+     DÉFILE jr-filtres (155px)
+ok 390x800-r3 planning
+ok 390x800-r3 messages
+!! 390x800-r3 aide
+     DÉFILE ong-barre (844px)
+ok 390x800-r3 compte
+ok 390x800-r3 fenêtre nouvelle-demande
+ok 390x800-r3 fenêtre remplacer
+ok 390x800-r3 fenêtre retard
+ok 390x800-r3 fenêtre signaler
+ok 390x800-r3 fenêtre journee
+ok 390x800-r3 fenêtre rdv
+390x800-r3 volet : Toutes les rubriques | MON ESPACE | Accueil | Mon planning | Mes demandes | Mon suivi | Mes documents | L’ÉQUIPE | Planning de l’équipe | Messages | Besoin d’aide ? | Aide, tutoriels et lexique | Enregistré sur cet appareil à 21 h
+ok 390x800-r3 cloche ouverte
+ok 390x800-r2 espace
+!! 390x800-r2 mesgardes
+     PETIT 22×22 « Retirer l'intervention d » (btn ghost)
+ok 390x800-r4 espace
+
+### 820x1180 barre du bas : Accueil | Planning | Demandes | Messages 1 messages non lus | Menu
+ok 820x1180-r3 espace
+ok 820x1180-r3 moi
+!! 820x1180-r3 demandes/souhaits
+     COUPÉ « Après-midi » (t)
+ok 820x1180-r3 demandes/absences
+ok 820x1180-r3 demandes/remplacements
+ok 820x1180-r3 suivi
+ok 820x1180-r3 documents
+ok 820x1180-r3 planning
+ok 820x1180-r3 messages
+ok 820x1180-r3 aide
+ok 820x1180-r3 compte
+ok 820x1180-r3 fenêtre nouvelle-demande
+ok 820x1180-r3 fenêtre remplacer
+ok 820x1180-r3 fenêtre retard
+ok 820x1180-r3 fenêtre signaler
+ok 820x1180-r3 fenêtre journee
+ok 820x1180-r3 fenêtre rdv
+820x1180-r3 volet : Toutes les rubriques | MON ESPACE | Accueil | Mon planning | Mes demandes | Mon suivi | Mes documents | L’ÉQUIPE | Planning de l’équipe | Messages | Besoin d’aide ? | Aide, tutoriels et lexique | Enregistré sur cet appareil à 21 h
+ok 820x1180-r3 cloche ouverte
+ok 820x1180-r2 espace
+!! 820x1180-r2 mesgardes
+     PETIT 22×22 « Retirer l'intervention d » (btn ghost)
+ok 820x1180-r4 espace
+
+### 1280x760 barre du bas : absente
+!! 1280x760-r3 espace
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r3 moi
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r3 demandes/souhaits
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+     COUPÉ « Journée » (t)
+     COUPÉ « Après-midi » (t)
+     COUPÉ « Repos » (t)
+!! 1280x760-r3 demandes/absences
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r3 demandes/remplacements
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r3 suivi
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r3 documents
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r3 planning
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r3 messages
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+     COUPÉ « Bonjour à tous, le planning de la  » (msg-apercu)
+     COUPÉ « Vous : Bonjour Caroline, serait-il » (msg-apercu)
+!! 1280x760-r3 aide
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r3 compte
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+ok 1280x760-r3 fenêtre nouvelle-demande
+ok 1280x760-r3 fenêtre remplacer
+ok 1280x760-r3 fenêtre retard
+ok 1280x760-r3 fenêtre signaler
+ok 1280x760-r3 fenêtre journee
+ok 1280x760-r3 fenêtre rdv
+!! 1280x760-r3 cloche ouverte
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r2 espace
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+!! 1280x760-r2 mesgardes
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+     PETIT 22×22 « Retirer l'intervention d » (btn ghost)
+!! 1280x760-r4 espace
+     COUPÉ « Grande Pharmacie de la Pinède » (small soft espace-offici)
+sombre 390 : fond=rgb(14, 20, 26) data-mode=sombre
+sombre 1440 : fond=rgb(14, 20, 26) data-mode=sombre

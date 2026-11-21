@@ -1,0 +1,167 @@
+Extraits des sorties de console des scripts B-planifier (20 novembre 2026, 23 h 19 - 23 h 50 UTC).
+Chaque bloc : script, puis lignes recopiées telles qu'affichées. Aucune erreur de console (errs []) dans aucun script.
+
+=== t01 (tableau de bord) ===
+"L'équipe aujourd'hui 7 en poste 1 absent" | "Pharmacien présent 95 % cette semaine" | "Semaine prochaine Publiée à partir du 23 nov." | "Compteurs d'heures 8 à régulariser en plus ou en moins" | "Prochaine garde Dim. 29 nov. Léa F."
+'À FAIRE EN PREMIER 1 poste sans personne Le plus proche : celui de Igor L., ven. 20 novembre de 11 h 30 à 19 h 30. Couvrir l'absence'
+'LE PROCHAIN PLANNING Semaine du 7 – 13 décembre 2026 Construire 1 Préférences 7/11 reçues 2 Brouillon À construire 3 Contrôles Après le brouillon 4 Publication À envoyer à l'équipe'
+'MON AGENDA Demain : 9 h – 19 h Mon planning ENSUITE Lun. 23 novembre 8 h 30 – 19 h 30 ...'
+
+=== t02 (cloche et destinations des tuiles) ===
+CLOCHE badge [ '16', '1' ]
+CLOCHE "DÉCIDÉ RÉCEMMENT" / "Arrêt d'Igor L. enregistré ..." / "À VOIR" / "Prévu · Igor L. attend un volontaire 1" / "Autres décisions à prendre 6" / "Compteurs d'heures en dessous du contrat 8"
+NAV résoudre badge [ '7 décisions en attente' ]
+JOUR sous 'Ouverture : 8 h 30 – 19 h 30 · 7 postes', 'Aucun pharmacien présent de 16 h 30 à 19 h 30 (après le départ de Caroline). ...' ; JOUR pills [ 'Igor L. · Arrêt' ]
+CONSTRUIRE (tuile2) repères [ '11 personnes', '291 h planifiées', '95 % pharmacien présent' ]
+CONSTRUIRE (tuile3) semaine [ '23 – 29 novembre 2026 Semaine 48 · la semaine prochaine' ] [ 'Publié le 11 novembre 2026 à 17 h 30' ]
+HEURES chiffres [ '0 h en plus des contrats', '45 h 30 en moins des contrats · 8 personnes', '1 à jour, à moins d'une heure du contrat' ]
+HEURES alerte [ '8 compteurs à régulariser. « Régulariser automatiquement » les résorbe sur la semaine du 7 – 13 décembre 2026, sans rien publier.' ]
+RESOUDRE onglets [ 'Absences 1 à traiter', 'Remplacements 1 à traiter', 'Demandes 2 à traiter', 'Gardes 3 à traiter', 'À publier 0 à traiter' ]
+MOIS label [ 'Novembre 2026 Tout est publié' ] ; MOIS + 1 [ 'Décembre 2026 4 semaines en brouillon' ] [ '7/11 préférences reçues' ]
+
+=== t03 (fenêtre du poste) ===
+DATA nicolas 7/12 [ '690-1170 p840-900 back courtes=[{"start":810,"end":825},{"start":1035,"end":1050}] manuel' ]
+TOAST Poste modifié. Annuler DATA [ '690-1080 p840-900 back ...' ]
+FIN<DEBUT enregistrer disabled? true | avert [ "L'heure de fin doit suivre l'heure de début." ] ; FIN=DEBUT disabled? true
+PAUSE HORS : total [ '8 h de travail' ] | notices [ 'Nicolas L. : 8 h de travail continu lundi sans pause de 20 minutes.' ] | erreurs []
+après enregistrement pause inversée [ '690-1170 pundefined-undefined back ...' ]
+14H : effets [ 'Nicolas L. : 14 h de travail lundi, pour 10 h au plus.', 'Nicolas L. : amplitude de 14 h lundi, pour 12 h au plus.', 'Nicolas L. : 14 h de travail continu lundi sans pause de 20 minutes.' ]
+SUPPR toast Poste supprimé. Annuler DATA [] ; UNDO bouton [ '360-1200 ...' ] ; REDO bouton [] ; CTRL+Z [ '360-1200 ...' ] ; CTRL+MAJ+Z []
+REPOS toast Mardi : jour de repos pour Thomas. Annuler repos data [{"personId":"p_thomas","date":"2026-12-08"}]
+
+=== t04 (recopier, glisser-déposer, remise à zéro, férié) ===
+RECOPIER postes 7/12 46 source 30/11 46 origines [ 'trame' ]
+avant DnD Nicolas lun [ '690-1170' ] Jules lun [ '510-990' ] ; DnD toast Poste déplacé. Annuler
+après DnD Nicolas lun [] Jules lun [ '690-1170', '510-990' ]
+CONTROLES Jules [ 'À CORRIGER Jules P. : 14 h de travail lundi, pour 10 h au plus. ...', 'À CORRIGER Jules P. : 11 h de travail continu lundi sans pause de 20 minutes. ...' ] [ '2 bloquants' ]
+DnD dimanche : Thomas mar [ '510-780' ] dim []
+ZERO toast Semaine remise à zéro. Annuler postes 0 ; ZERO Annuler (toast) -> postes 46 ; ZERO Annuler (bouton) -> postes 46
+21/12 avant recopie 1 source 14/12 0
+RECOPIE source vide toast Semaine précédente recopiée dans le brouillon. Annuler -> 21/12 postes 0
+POSTES le 25/12 (férié) 7 p_helene,p_karim,p_camille,p_thomas,p_ines,p_jules,p_sarah
+en-tête 25 : "25 ven. , voir la journée Férié : Noël (fermé)"
+CONTROLES 21/12 [ '2 bloquants', '5 alertes' ] (aucun constat sur le 25)
+
+=== t05 (proposer un planning) ===
+A. TEMPS proposer (semaine vide) ms 1241 ; A. TEMPS recalculer ms 1139
+  VAR Équité d'abord ... Règles respectées ... Préférences suivies 68 % Écart d'équité (samedis) 1,88 Heures au-delà des contrats 0 h Sous l'effectif attendu Jamais
+  VAR Préférences d'abord ... Préférences suivies 96 % ... 1 h ... Jamais
+  VAR Contrats d'abord ... Préférences suivies 75 % ... 0 h ... Jamais
+A. APPLIQUÉE 0/1/2 : contrôles {"pills":["Aucun bloquant"]} ; repères [ '11 personnes', '313 h 30 planifiées', '100 % pharmacien présent' ] objectifs Complet x6
+TEMPS (semaine remplie, repartir vide) ms 1200 / 1181
+B. poste manuel [["p_helene","2026-12-10"]] ; B. TEMPS conserver ms 479 ; B. après conserver [["p_helene","2026-12-10",540,720,"manuel"]]
+C. TEMPS (semaine avec repos seuls) ms 1047 ; C. Thomas mardi 15 0 | Caroline mercredi 16 0
+
+=== t06 (absence approuvée) ===
+toast Demande acceptée. 4 postes à couvrir dans « Résoudre ». Annuler
+absence statut approuvee | Nicolas 30/11 après [ '05:540-1140' ] | trous 7
+cellule Nicolas lundi Congé | bouton + ? 0
+RECOPIER sur absence : Nicolas [ '30:510-990', '01:510-990', '02:510-780', '03:510-1170', '04:690-1170' ] | contrôles {"pills":["5 bloquants"],"bloq":["Nicolas L. est en absence approuvée lundi mais reste planifié(e).", ...]}
+TEMPS ms 972 ; PROPOSER appliqué : Nicolas [ '05:540-1140' ] | contrôles {"pills":["Aucun bloquant"]} | pill [ 'Publié · 35 modifications en attente' ]
+
+=== t07 (publication) ===
+PUB1 dlg Publier le planning | Semaine 50 · 7 – 13 décembre 2026 | Aucun point bloquant | 46 postes envoyés à l'équipe. | Revenir au brouillon | Publier
+PUB1 statut publie snapshot 46 ; PUB1 Nicolas dans la version publiée [ '07 690-1170', '08 510-1170', '10 510-780', '11 510-780', '12 540-1140' ]
+RETOUCHE pill [ 'Publié · 1 modification en attente' ] ; RETOUCHE snapshot Nicolas 30/11 [ '690-1170' ] | brouillon [ '780-1170' ]
+NICOLAS nav nav-espace,nav-moi,nav-demandes,nav-suivi,nav-documents,nav-planning,nav-messages,nav-aide
+NICOLAS Mon planning contient 13 h ? false | contient 11 h 30 – 19 h 30 ? true
+PUB2 dlg Publier les modifications | ... | 1 CHANGEMENT | Nicolas L. · lundi | Avant : 11 h 30 – 19 h 30 (pause 14 h – 15 h) | Après : 13 h – 19 h 30 (pause 14 h – 15 h) | Revenir au brouillon | Publier et notifier
+PUB2 toast Modifications publiées et notifiées. ; PUB2 notifs Nicolas [{"date":"2026-11-30","avant":"11 h 30 – 19 h 30 (pause 14 h – 15 h)","apres":"13 h – 19 h 30 (pause 14 h – 15 h)"}]
+PUB3 dlg ... ACCORDS À RECUEILLIR | Inès D. · mar. 24 novembre · prévenu 2 j avant, 7 requis | 1 CHANGEMENT ...
+PUB3 bouton désactivé avant accord ? true ; après accord ? false
+PUB3 journal "accords":["Inès D. (temps partiel), mar. 24 novembre : modification notifiée 2 jours ouvrés avant, pour 7 requis."]
+NICOLAS cloche contenu [ ... 'Changement de mon planning à lire 1', ... ] ; NICOLAS Mon planning après publication : 13 h ? true
+
+=== t08 (contrôles) ===
+1a CONTROLES pills [ '6 bloquants', '29 alertes' ] ; cartes "SOLUTION AVEC UN CRÉNEAU ENCORE DÉCOUVERT Le planning laisse le mardi 15 décembre, de 8 h 30 à 19 h 30, sans pharmacien. Ce n'est pas démontré impossible ..." (x6) ; 29 x "À SURVEILLER <jour>, de .. à .. : 0 personne au comptoir pour 2 attendues."
+1b obj "Pharmacien à prévoir après 13 h | Rien de posé | ..." ; bulle "La pharmacie est ouverte sans pharmacien sur : • 13 h – 19 h 30 (après le départ de Caroline)"
+2 CONTROLES Thomas 'À CORRIGER Thomas N. : 56 h 30 planifiées cette semaine, pour 46 h au plus.' ; ligne "Thomas N. 56 h 30 / 35 h · + 21 h 30"
+3 effets mercredi [ 'Mercredi, le poste de Inès D. contredit une indisponibilité reconnue.', 'Inès D. : 10 h 30 de repos entre mardi 19 h 30 et mercredi 6 h, pour 11 h requises.', ... ]
+4 effets [ 'Jules P. : 8 h de travail continu jeudi sans pause de 20 minutes.' ]
+6 PUB dlg ... 10 points bloquants ... | + 6 dans les contrôles | Je publie quand même | 11 postes envoyés à l'équipe. ; bouton désactivé true ; après « je publie quand même » false
+
+=== t09 (vue mois) ===
+DEC [ 'Décembre 2026 4 semaines en brouillon' ] ; DEC entêtes [ 'Sem. 49 Publiée', 'Sem. 50 À construire', 'Sem. 51 À construire', 'Sem. 52 À construire', 'Sem. 53 À construire' ]
+DEC réponses [ 'Ont répondu · 7 Pierre F., Léa F., Nicolas L., Thomas N., Inès D., Jules P., Manon G.', 'Sans réponse · 4 Caroline T. Relancer Igor L. Relancer Sarah L. Relancer Yanis M. Relancer' ]
+RELANCER toast Rappel envoyé à Caroline. ; message {"de":"p_helene","a":"p_helene","texte":"Bonjour Caroline, pensez à donner vos préférences pour décembre 2026 : c'est le dernier jour. Merci !"}
+CORRIGER temps ms 3298 ; bilan 'Mois recalculé 4 semaines en brouillon · 88 % des préférences suivies · 1 déjà publiée, non modifiée · aucune règle enfreinte' ; postes le 25/12 0 | 1/1 0
+PUBLIER MOIS toast 4 semaines de décembre publiées : l'équipe est prévenue.
+après retouche (4/12) label [ 'Décembre 2026 Tout est publié' ] publier mois désactivé ? true
+ZERO toast Décembre 2026 remis à zéro dans le brouillon. ... ; après zéro : postes décembre 0 | snapshots 2026-12-07:publie:47 2026-12-14:publie:46 2026-12-21:publie:45 2026-12-28:publie:44 ; label [ 'Décembre 2026 Tout est publié' ]
+
+=== t10 (préférences, tirage, bascules) ===
+chances [ 'Léa ... 33 %', 'Nicolas dans cette case ... 33 %', 'Jules ... 33 %' ]
+TIRAGES 150 {"Léa":41,"Nicolas":55,"Jules":54}
+postes lundi 7 p_lea 510-990 expl=Préférence départagée par tirage au sort entre Léa, Nicolas et Jules.
+ACCORDER texte [ 'Thomas est la seule personne à avoir demandé ce créneau. Jules ne l'a pas demandé (préférence : journée).' ] ; après Accorder : sous-titre Thomas Nguyen ... | boutons [ 'Rendre le poste à Jules' ]
+lundi 7 Thomas [ '840-1170 Préférence accordée : seule personne à avoir demandé ce créneau.' ] | Jules 0
+CONTRE texte [ 'Pierre a demandé un repos ce jour-là : ce poste irait contre sa préférence. Nicolas et Jules ont demandé ce créneau.' ]
+case préférences cochée ? true | pastilles 42 ; décochée -> pastilles 0
+MES POSTES lignes [ 'Caroline T.' ]
+SARAH badge messages Messages, 2 non lus ; SARAH messages contient le rappel ? true
+
+=== t11 (journée, agenda) ===
+ECART toast Retard noté pour Thomas. ; pills Thomas [ 'Retard · 15 min' ] ; DEPART pills Jules [ 'Départ anticipé · 15 min' ]
+pause Sarah après [ '780-810' ] ; pause hors poste toast La pause doit tenir à l'intérieur du poste. ; après Ajouter [ '720-780' ]
+TABLEAU retards affichés [] | bandeau [ '1 retouche de cette semaine n'est pas encore publiée : l'équipe lit toujours l'ancienne version. Publier les modifications' ]
+CONSTRUIRE pill [ 'Publié · 2 modifications en attente' ]
+TABLEAU agenda Demain : 10 h – 19 h
+MON PLANNING prochain poste PROCHAIN POSTE Demain · journée longue 9 h – 19 h
+
+=== t12 / t12b (heures, impression, avis de retard) ===
+HEURES Thomas avant "310 h 30 planifiées contrat 315 h −4 h 30" ; après (non publié) "308 h 30 planifiées contrat 315 h −6 h 30"
+IMP semaine statut ["Publié le 4 novembre 2026 à 17 h 30"] ; IMP ligne Thomas "... 10 h 30 – 13 h p. 10 h 45 ..." ; version publiée Thomas [ ..., '20 510-780', ... ]
+IMP N&B nb 1, légende "En gras : les heures du poste. ..." ; IMP moi h1 "Planning de Caroline Tellier · Semaine 47", lignes 1 ; IMP mois équipe "3 pages · A4 paysage"
+IMP janvier note "Aucun poste n'est posé sur cette période : la feuille sortirait vide."
+window.print appelé 1
+NICOLAS IMP ligne Thomas "... 8 h 30 – 13 h p. 10 h 45 ..." (version publiée)
+avis Retard de Nicolas L. noté : arrivée vers 9 h 05. [{"personId":"p_camille","date":"2026-11-21","start":540,"minutes":5}]
+JOUR demain Nicolas "Nicolas L. Préparateur 9 h – 19 h 9 h de travail · ... Noter un retard" (aucune mention de l'avis)
+
+=== t13 / t14 / t14b (gardes, formation, inventaire) ===
+AJOUT toast Garde ajoutée. Reste à l'affecter. ; gardes 5 -> 6
+Léa poste 2026-11-26 690-1170 ; GARDE sur jour de poste : options [ ..., 'Léa F. · 1 garde cette année', ... ] ; avertissements : seulement « se termine le lendemain » et « moins de 15 jours »
+notif Léa {"date":"2026-11-26","avant":"Pas de garde","apres":"Garde à volets fermés, 19:30 → 08:30","tardif":true}
+PASSÉ : bouton désactivé ? false | notices [ ..., 'Cette garde commence dans moins de 15 jours : si elle est confiée à un salarié, son accord sera à recueillir.' ] ; gardes le 1/11 1
+FORMATION toast Formation « Vaccination » planifiée pour 1 personne. ... ; notif Léa "Formation externe « Vaccination » du mar. 1er décembre au mer. 2 décembre. Lieu : Lyon." ; trous 5 ; postes Léa 1-2/12 brouillon 0 publiés 0
+GARDE sur absente : options [ ..., 'Léa F. · absence approuvée sur la période' ] ; avert 'Léa : absence approuvée sur la période. Vous pouvez tout de même lui confier la garde.'
+SERIE texte [ 'Dernière garde le ven. 5 février' ] ; SERIE toast 5 gardes ajoutées. Reste à lesaffecter. ; + 5
+SERIE limites (intervalle 0, nombre -3) texte [ 'Dernière garde le ven. 18 décembre' ] ; + 1
+IMPORT "4 gardes reconnues : dim. 14 février 19:30→08:30 · dim. 7 mars 09:00→19:00 · mer. 31 février 09:00→19:00 · dim. 4 avril 09:00→19:00 | Ligne 4 illisible : « n importe quoi »"
+IMPORT enregistré [["2027-02-14",1170,510,"volets_fermes"],["2027-02-31",540,1140,"volets_fermes"],["2027-03-07",540,1140,"volets_ouverts"],["2027-04-04",540,1140,"astreinte"]]
+REPARTIR : 3 x « ven. 11 décembre Garde de nuit · volets fermés » confiées à Caroline T., Pierre F., Léa F. ; toast 13 gardes affectées.
+t14 IMPORT types (liste réglée sur astreinte) [["2027-02-14","volets_ouverts"],["2027-02-21","volets_fermes"]] ; IMPORT seul ["astreinte"]
+t14 RESOUDRE gardes "Repos à protéger après la garde du jeu. 26 novembre Léa F. ... il manque 8 h de repos après la garde"
+t14 TACHES [ 'Comptoir', 'Réception', 'Administratif', 'Formation : planifier une formation', 'Inventaire : planifier un inventaire' ] ; -> fenêtre ouverte Planifier une formation ; phrase du bas « Pour une formation de quelques heures pendant un poste, ouvrez plutôt le poste dans « Construire » et choisissez la tâche « Formation ». » ; vue après fermeture nav-equipe
+t14 INV notice 'Ces heures tombent pendant l'ouverture ... 1 participant a déjà un poste sur cet horaire : ajustez-le dans « Construire ». ...'
+t14 INV postes 3/12 Thomas 510-1170 comptoir | 840-1080 inventaire | snapshot identique ; INV notifs [["p_thomas","Inventaire, 14:00 → 18:00"],["p_camille","Inventaire, 14:00 → 18:00"]]
+t14b CONTROLES 30/11 [ '1 bloquant' ] [ 'Thomas N. : 13 h 30 de travail jeudi, pour 10 h au plus.', ... ] ; LIGNE Thomas "Thomas N. 37 h / 35 h · + 2 h ... 08:30–19:30 9 h 30 · comptoir ... 14:00–18:00 4 h · inventaire ..."
+t14b INV 15/12 : notif Inès [["2026-12-15","Inventaire, 19:30 → 22:30"]] | semaine 14/12 statut aucun (brouillon)
+t14b INV fin<début : bouton désactivé true | messages [] ; INV date passée : bouton désactivé false
+t14b FORMATION passée : bouton désactivé false ; absence créée [["2026-11-02","2026-11-03"]] ; postes passés de Jules retirés ? 0 (non : 1 poste resté) ; notif "Formation interne « Test » du lun. 2 novembre au mar. 3 novembre. ..."
+t14b NICOLAS mon planning inventaire ? true "Ce qui a changé Jeu. 3 décembre Avant : Planning habituel Après : Inventaire, 14:00 → 18:00"
+
+=== t15 (ergonomie 1280×760, 390×800, sombre) ===
+1280x760 : COUPÉ « Grande Pharmacie de la Pinède » (barre du haut) ; aucun débordement de page ; vue mois : boutons au-delà de 1280 px uniquement dans la grille à défilement horizontal.
+390x800 : aucun débordement de page ; vue mois idem (défilement horizontal de la grille).
+
+=== t16 (boutons du tableau, préparer décembre) ===
+Priorité « Couvrir l'absence » {"vue":"nav-resoudre","onglet":["Absences 1 à traiter"]} ; Sujet Remplacements -> onglet Remplacements ; Sujet Demandes -> Demandes ; Sujet Gardes -> Gardes ; Cycle -> nav-construire 7 – 13 décembre ; Agenda -> nav-moi ; Voir la journée -> fenêtre « Vendredi 20 novembre 2026 »
+cloche avant [ '16', '1' ] ; après « Tout marquer comme lu » [ '15', '1' ]
+PRÉPARER temps ms ~ 1116 | toast Solvéa a préparé décembre en brouillon d'après vos habitudes. ... ; postes déc 54,54,45,45 | 25/12 0 ; contrôles 0 bloquant sur les 4 semaines
+
+=== t17 (rechargement, double clic, titulaire secondaire) ===
+RELOAD vue nav-tableau | poste conservé 1
+DBLCLIC placer : entrées journal + 1 ; DBLCLIC publier : entrées journal + 1
+PIERRE dlg publier "Publier le planning | Semaine 51 · 14 – 20 décembre 2026 | Aucun point bloquant | 48 postes envoyés à l'équipe. | Revenir au brouillon | Publier"
+PIERRE après publier : toast Envoyé à Caroline pour accord. Rien n'est appliqué avant. | pill [ 'Brouillon' ]
+CAROLINE onglets [ 'Accords à donner 1 à traiter', ... ] ; "Publier la semaine du 14 – 20 décembre 2026 Proposé par Pierre F., titulaire secondaire ... Refuser Donner mon accord"
+
+=== t18 (semaine en cours) ===
+RECOPIER : jours passés (16-19) modifiés ? true 30 -> 26 | pill [ 'Publié · 44 modifications en attente' ]
+HEURES après recopie (non publiée) [ '13 h en plus des contrats · 1 personne', '49 h 30 en moins des contrats · 7 personnes', ... ] avant [ '0 h en plus des contrats', '45 h 30 en moins des contrats · 8 personnes', ... ]
+PROPOSER (repartir vide) : jours passés modifiés ? true 30 -> 31
+ZERO : jours passés modifiés ? false
+
+=== t19 (contrôles) ===
+titres [ 'Impossible en l'état 6', 'À surveiller 29' ] ; pills [ '6 bloquants', '29 alertes' ]

@@ -1,0 +1,58 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/dates.test.ts > 5. Dates > semaines ISO et fin d’année
+OK  [ISO1] time.isoWeek | 2026-01-01, 2026-12-31, 2027-01-01, 2027-01-03, 2027-01-04, 2024-12-30, 2020-12-31, 2021-01-03, 2028-01-02, 2026-11-20 | attendu: [1,53,53,53,1,1,53,53,52,47] | obtenu: [1,53,53,53,1,1,53,53,52,47]
+OK  [ISO2] time.mondayOf | lundi du vendredi 1er janv. 2027 et du dimanche 3 janv. 2027 | attendu: ["2026-12-28","2026-12-28"] | obtenu: ["2026-12-28","2026-12-28"]
+OK  [ISO3] time.fmtSemaine | semaine du 28 déc. 2026 (à cheval sur deux années) | attendu: "28 décembre – 3 janvier 2027" | obtenu: "28 décembre – 3 janvier 2027" | Seule l’année de fin est écrite.
+
+stdout | tests/dates.test.ts > 5. Dates > 29 février et longueur des mois
+OK  [B1] time.addDays | 28 févr. 2028 + 1 ; 28 févr. 2027 + 1 ; 29 févr. 2028 + 365 | attendu: ["2028-02-29","2027-03-01","2029-02-28"] | obtenu: ["2028-02-29","2027-03-01","2029-02-28"]
+OK  [B2] time.weekday | mardi 29 février 2028 | attendu: 1 | obtenu: 1
+OK  [B3] souhaits.datesDuMois | février 2028, février 2027, février 2100 (non bissextile) | attendu: [29,28,28] | obtenu: [29,28,28]
+OK  [B4] souhaits.limiteSouhaits | Préférences de mars 2028 avec une limite au 29 (le réglage va de 1 à 28) ; au 31 pour mars 2027 | attendu: ["2028-02-29","2027-02-28"] | obtenu: ["2028-02-29","2027-02-28"]
+OK  [B5] time.fmtDateLong | mardi 29 février 2028 | attendu: "mardi 29 février 2028" | obtenu: "mardi 29 février 2028"
+
+stdout | tests/dates.test.ts > 5. Dates > jours fériés et fêtes mobiles
+OK  [JF-2025] time.joursFeries | fêtes mobiles 2025 | attendu: {"Lundi de Pâques":"2025-04-21","Ascension":"2025-05-29","Lundi de Pentecôte":"2025-06-09"} | obtenu: {"Lundi de Pâques":"2025-04-21","Ascension":"2025-05-29","Lundi de Pentecôte":"2025-06-09"}
+OK  [JF-2026] time.joursFeries | fêtes mobiles 2026 | attendu: {"Lundi de Pâques":"2026-04-06","Ascension":"2026-05-14","Lundi de Pentecôte":"2026-05-25"} | obtenu: {"Lundi de Pâques":"2026-04-06","Ascension":"2026-05-14","Lundi de Pentecôte":"2026-05-25"}
+OK  [JF-2027] time.joursFeries | fêtes mobiles 2027 | attendu: {"Lundi de Pâques":"2027-03-29","Ascension":"2027-05-06","Lundi de Pentecôte":"2027-05-17"} | obtenu: {"Lundi de Pâques":"2027-03-29","Ascension":"2027-05-06","Lundi de Pentecôte":"2027-05-17"}
+OK  [JF-2028] time.joursFeries | fêtes mobiles 2028 | attendu: {"Lundi de Pâques":"2028-04-17","Ascension":"2028-05-25","Lundi de Pentecôte":"2028-06-05"} | obtenu: {"Lundi de Pâques":"2028-04-17","Ascension":"2028-05-25","Lundi de Pentecôte":"2028-06-05"}
+OK  [JF-2038] time.joursFeries | fêtes mobiles 2038 | attendu: {"Lundi de Pâques":"2038-04-26","Ascension":"2038-06-03","Lundi de Pentecôte":"2038-06-14"} | obtenu: {"Lundi de Pâques":"2038-04-26","Ascension":"2038-06-03","Lundi de Pentecôte":"2038-06-14"}
+OK  [JF-n] time.joursFeries | nombre de jours fériés légaux (Code du travail, L3133-1 : 11) | attendu: 11 | obtenu: 11
+KO  [JF-am] time.ferie | Alsace-Moselle : Vendredi saint 26 mars 2027, 26 décembre 2026 | attendu: "à vérifier (non gérés : « France métropolitaine »)" | obtenu: ["non férié","non férié"] | Pas de réglage de région : une officine d’Alsace-Moselle ou d’outre-mer n’a pas ses jours fériés.
+OK  [JF-ov] time.joursOuvrablesEntre | jours ouvrables du jeu. 24 déc. 2026 (exclu) au lun. 28 déc. (inclus) : 26 sam. et 28 lun. (25 férié, 27 dimanche) | attendu: 2 | obtenu: 2
+OK  [JF-oe] time.joursOuvresEntre | jours ouvrés du jeu. 30 avr. 2026 au ven. 8 mai 2026 : 4, 5, 6, 7 mai (1er et 8 fériés) | attendu: 4 | obtenu: 4
+
+stdout | tests/dates.test.ts > 5. Dates > changement d’heure
+OK  [DST1] time.decalageParis | 29 mars 2026 à 1 h 59, 3 h ; 25 oct. 2026 à 1 h 59, 2 h 30 (heure ambiguë), 3 h | attendu: [60,120,120,120,60] | obtenu: [60,120,120,120,60]
+OK  [DST2] time.dureeReelle | nuits du 28 au 29 mars 2026 et du 24 au 25 oct. 2026, 20 h - 8 h ; nuit ordinaire | attendu: [660,780,720] | obtenu: [660,780,720]
+OK  [DST3] gardes.segmentsGarde | garde de 24 h du dimanche 25 oct. 2026 à 9 h au lundi 9 h (heure d’hiver) | attendu: [900,540] | obtenu: [900,540] | Le 25 octobre de 9 h à minuit : 15 h ; heure d’hiver déjà en place, aucun décalage.
+OK  [DST4] gardes.segmentsGarde | garde de 24 h du samedi 24 oct. 2026 à 9 h au dimanche 9 h | attendu: [900,600] | obtenu: [900,600]
+
+stdout | tests/dates.test.ts > 5. Dates > échéance de publication et date limite des préférences
+KO  [ECH1] echeance.etatPublication / souhaits.limiteSouhaits | Réglages par défaut : publication 14 jours avant le 1er, préférences jusqu’au 20 du mois précédent | attendu: la collecte des préférences se ferme avant l’échéance de publication | obtenu: 2026-12 : préférences jusqu’au 2026-11-20, publication au plus tard le 2026-11-17 (rappel dès le 2026-11-10) ; 2027-01 : préférences jusqu’au 2026-12-20, publication au plus tard le 2026-12-18 (rappel dès le 2026-12-11) ; 2027-02 : préférences jusqu’au 2027-01-20, publication au plus tard le 2027-01-18 (rappel dès le 2027-01-11) ; 2027-03 : préférences jusqu’au 2027-02-20, publication au plus tard le 2027-02-15 (rappel dès le 2027-02-08) ; 2027-08 : préférences jusqu’au 2027-07-20, publication au plus tard le 2027-07-18 (rappel dès le 2027-07-11) | 5 mois sur 5 : la collecte se ferme APRÈS la date limite de publication. Aucun contrôle croisé entre les deux réglages (Officine.tsx).
+KO  [ECH2] echeance.etatPublication | Le 2026-11-18 (exemple établi) | attendu: état cohérent avec la collecte encore ouverte jusqu’au 20 | obtenu: mois 2026-12, échéance 2026-11-17, état « depasse », 4 semaine(s) à publier, 4 vide(s) ; collecte des préférences de 2026-12 ouverte jusqu’au 2026-11-20
+OK  [ECH3] echeance.semainesDuMois / payroll.semainesDuMois | les deux fonctions homonymes, décembre 2026 et février 2027 | attendu: [["2026-11-30","2026-12-07","2026-12-14","2026-12-21","2026-12-28"],["2027-02-01","2027-02-08","2027-02-15","2027-02-22"]] | obtenu: [["2026-11-30","2026-12-07","2026-12-14","2026-12-21","2026-12-28"],["2027-02-01","2027-02-08","2027-02-15","2027-02-22"]] | Deux implémentations de la même fonction (répétition), mêmes résultats.
+OK  [ECH4] echeance.etatPublication | Le 10 déc. 2026 : publication de janvier 2027 | attendu: mois 2027-01, échéance 18 déc., semaines du 28 déc. au 25 janv. | obtenu: 2027-01, 2026-12-18, 2026-12-28 2027-01-04 2027-01-11 2027-01-18 2027-01-25
+
+ ✓ tests/dates.test.ts > 5. Dates > semaines ISO et fin d’année 3ms
+ ✓ tests/dates.test.ts > 5. Dates > 29 février et longueur des mois 1ms
+ ✓ tests/dates.test.ts > 5. Dates > jours fériés et fêtes mobiles 2ms
+ ✓ tests/dates.test.ts > 5. Dates > changement d’heure 1ms
+ ✓ tests/dates.test.ts > 5. Dates > échéance de publication et date limite des préférences 9326ms
+stdout | tests/dates.test.ts > 5. Dates > officine en chiffres
+OK  [OF1] officine.chiffresOfficine | surface 180, vente 110, réserve 45, 3 caisses, 4 comptoirs, 1 espace, robot | attendu: ["180 m² au total","110 m² de surface de vente","45 m² de réserve et de préparatoire","3 caisses","4 postes de comptoir","1 espace de confidentialité","un robot de dispensation"] | obtenu: ["180 m² au total","110 m² de surface de vente","45 m² de réserve et de préparatoire","3 caisses","4 postes de comptoir","1 espace de confidentialité","un robot de dispensation"]
+OK  [OF2] officine.remarquesOfficine | vente 200 > total 180 ; 5 caisses pour 4 comptoirs ; effectif 3 pour 2 comptoirs | attendu: 3 | obtenu: 3
+KO  [OF3] officine.remarquesOfficine | surface 0 et valeurs négatives (−10 m² de vente) | attendu: "au moins une remarque" | obtenu: "aucune remarque" | Aucune remarque sur des valeurs négatives : la saisie de l’écran est la seule barrière.
+
+ ✓ tests/dates.test.ts > 5. Dates > officine en chiffres 1ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  23:38:12
+   Duration  9.93s (tests 98%, transform 2%, import 1%)
+

@@ -1,0 +1,11 @@
+✓ aperçu en mode clair : aucun défaut d’accessibilité détecté
+✓ mode clair : le focus reste dans la fenêtre
+✓ aperçu en mode sombre : aucun défaut d’accessibilité détecté
+✓ mode sombre : le focus reste dans la fenêtre
+✓ équipe : la feuille de la semaine publiée s’affiche
+✓ équipe : une absence se lit « Absent », jamais sa nature
+✓ équipe : pas de « sur 35 h » (le contrat ne regarde que le titulaire)
+✓ mon planning : une feuille à mon nom, une seule ligne (Planning de Nicolas Le Syndicaliste · Semain)
+
+8/8 vérifications
+aucune erreur de page

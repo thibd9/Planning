@@ -1,0 +1,85 @@
+const { ouvrir, allerSemaine, dlg } = require('./h.js');
+(async () => {
+  const { b, p, errs, shot, data, texte, nav, bascule } = await ouvrir({ role: 0 });
+  const log = (...a) => console.log(...a);
+  const toast = async () => (await texte('.toast')).join(' / ');
+  const addD = (d, n) => { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+  const cell = (nom, col) => p.locator('.plan-grid [role=row]').filter({ has: p.locator('.pg-p .nm', { hasText: new RegExp('^' + nom + '$') }) }).locator('.pg-c').nth(col);
+  const ligneEquipe = async (nom) => p.evaluate((nom) => { const r = [...document.querySelectorAll('.plan-grid [role=row]')].find((x) => x.querySelector('.pg-p .nm, .nm, b')?.textContent?.trim() === nom); return r ? r.innerText.replace(/\s+/g, ' ') : null; }, nom);
+  // 1. Première publication : semaine du 7 décembre
+  await nav('construire'); await allerSemaine(p, '2026-12-07');
+  await p.locator('.plan-bar [data-tour="proposer"]').click(); await p.waitForSelector('[role=dialog] .variant', { timeout: 60000 });
+  await p.locator('[role=dialog] button', { hasText: 'Placer dans le brouillon' }).click(); await p.waitForTimeout(500);
+  await p.locator('[data-focus="publier"]').click(); await p.waitForTimeout(400);
+  log('PUB1 dlg', await dlg(p));
+  await shot('07-publier-premiere');
+  await p.locator('[role=dialog] .dialog-foot button.primary').click(); await p.waitForTimeout(500);
+  log('PUB1 toast', await toast(), '| pill', await texte('.plan-bar .pill'), '| bouton', await texte('[data-focus="publier"]'), 'disabled', await p.locator('[data-focus="publier"]').isDisabled());
+  let d = await data();
+  log('PUB1 statut', d.semaines['2026-12-07']?.statut, 'snapshot', d.semaines['2026-12-07']?.snapshot?.length, 'journal[0]', JSON.stringify(d.journal[0]).slice(0, 300));
+  const nicoDec = d.semaines['2026-12-07'].snapshot.filter((s) => s.personId === 'p_camille').map((s) => s.date.slice(8) + ' ' + s.start + '-' + s.end);
+  log('PUB1 Nicolas dans la version publiée', nicoDec);
+  log('notifs Nicolas', d.notifications.filter((n) => n.personId === 'p_camille').length, '| annonces', (d.annonces || []).length);
+  // 2. Retouche non publiée sur une semaine publiée (30 novembre) : Nicolas lundi 11:30-19:30 -> 13:00-19:30
+  await allerSemaine(p, '2026-11-30');
+  log('30/11 Nicolas lundi avant', await cell('Nicolas L.', 0).innerText());
+  await cell('Nicolas L.', 0).locator('.tile').first().click(); await p.waitForTimeout(300);
+  await p.locator('[role=dialog] .dp-horaires input[type=time]').nth(0).fill('13:00'); await p.waitForTimeout(100);
+  await p.locator('[role=dialog] button', { hasText: 'Enregistrer' }).click(); await p.waitForTimeout(400);
+  log('RETOUCHE pill', await texte('.plan-bar .pill'), '| bouton', await texte('[data-focus="publier"]'));
+  d = await data();
+  log('RETOUCHE snapshot Nicolas 30/11', d.semaines['2026-11-30'].snapshot.filter((s) => s.personId === 'p_camille' && s.date === '2026-11-30').map((s) => s.start + '-' + s.end), '| brouillon', d.shifts.filter((s) => s.personId === 'p_camille' && s.date === '2026-11-30').map((s) => s.start + '-' + s.end));
+  // 3. Côté Nicolas
+  await bascule('Préparateur'); await p.waitForTimeout(500);
+  log('NICOLAS nav', (await p.evaluate(() => [...new Set([...document.querySelectorAll('[data-tour^="nav-"]')].map((e) => e.getAttribute('data-tour')))])).join(','));
+  log('NICOLAS cloche', await texte('.top-ico .pastille-n'));
+  await nav('moi'); await p.waitForTimeout(500);
+  const mp = await p.evaluate(() => document.querySelector('.content, main')?.innerText.replace(/\s+/g, ' '));
+  log('NICOLAS Mon planning (extrait 30 nov)', (mp.match(/.{0,80}30 nov.{0,120}/i) || [mp.slice(0, 300)])[0]);
+  log('NICOLAS Mon planning contient 13 h ?', /13 h – 19 h 30/.test(mp), '| contient 11 h 30 – 19 h 30 ?', /11 h 30 – 19 h 30/.test(mp));
+  await shot('07-nicolas-monplanning-retouche-non-publiee', { fullPage: true });
+  await nav('planning'); await allerSemaine(p, '2026-11-30');
+  log('NICOLAS planning équipe ligne', await ligneEquipe('Nicolas L.'));
+  await allerSemaine(p, '2026-12-07');
+  log('NICOLAS planning équipe 7/12 ligne', await ligneEquipe('Nicolas L.'), await texte('.plan-bar .pill'));
+  await shot('07-nicolas-planning-7dec', { fullPage: true });
+  // 4. Retour Caroline : publier les modifications
+  await bascule('Titulaire 1'); await nav('construire'); await allerSemaine(p, '2026-11-30');
+  await p.locator('[data-focus="publier"]').click(); await p.waitForTimeout(400);
+  log('PUB2 dlg', await dlg(p));
+  await shot('07-publier-modifs');
+  await p.locator('[role=dialog] .dialog-foot button.primary').click(); await p.waitForTimeout(500);
+  log('PUB2 toast', await toast(), '| pill', await texte('.plan-bar .pill'));
+  d = await data();
+  log('PUB2 notifs Nicolas', JSON.stringify(d.notifications.filter((n) => n.personId === 'p_camille')));
+  // 5. Accords : Inès (24 h) mardi 24 novembre
+  await allerSemaine(p, '2026-11-23');
+  log('Inès mardi', await cell('Inès D.', 1).innerText());
+  await cell('Inès D.', 1).locator('.tile').first().click(); await p.waitForTimeout(300);
+  const ins = p.locator('[role=dialog] .dp-horaires input[type=time]');
+  const v0 = await ins.nth(0).inputValue(); log('Inès début', v0);
+  await ins.nth(0).fill(v0 === '08:30' ? '09:00' : '08:30'); await p.waitForTimeout(100);
+  await p.locator('[role=dialog] button', { hasText: 'Enregistrer' }).click(); await p.waitForTimeout(400);
+  await p.locator('[data-focus="publier"]').click(); await p.waitForTimeout(400);
+  log('PUB3 dlg', await dlg(p));
+  log('PUB3 bouton désactivé avant accord ?', await p.locator('[role=dialog] .dialog-foot button.primary').isDisabled());
+  await shot('07-publier-accords');
+  await p.locator('[role=dialog] label.check.ligne input').first().check(); await p.waitForTimeout(200);
+  log('PUB3 bouton désactivé après accord ?', await p.locator('[role=dialog] .dialog-foot button.primary').isDisabled());
+  await p.locator('[role=dialog] .dialog-foot button.primary').click(); await p.waitForTimeout(500);
+  d = await data();
+  log('PUB3 journal', JSON.stringify(d.journal[0]).slice(0, 500));
+  // 6. Nicolas : notification et version publiée
+  await bascule('Préparateur');
+  log('NICOLAS cloche', await texte('.top-ico .pastille-n'));
+  await p.locator('.outils .top-ico').first().click(); await p.waitForTimeout(300);
+  log('NICOLAS cloche contenu', await texte('.menu.cloche > *'));
+  await shot('07-nicolas-cloche');
+  await p.keyboard.press('Escape');
+  await nav('moi'); await p.waitForTimeout(400);
+  const mp2 = await p.evaluate(() => document.querySelector('.content, main')?.innerText.replace(/\s+/g, ' '));
+  log('NICOLAS Mon planning après publication : 13 h ?', /13 h – 19 h 30/.test(mp2), '| bandeau changements', (mp2.match(/.{0,60}(Changement|changé|modifi).{0,160}/i) || [''])[0]);
+  await shot('07-nicolas-monplanning-apres', { fullPage: true });
+  log('errs', errs);
+  await b.close();
+})();

@@ -1,0 +1,410 @@
+{
+ "d-resoudre-o1": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « IL »",
+   "11.5px « LF »",
+   "11.5px « À valider »"
+  ],
+  "nPetits": 6,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "72×34 Confier",
+   "289×40 1 point à valider · règles res",
+   "289×40 2 points à valider · règles re",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 10,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-resoudre-o2": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « IL »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "74×34 Refuser",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-resoudre-o3": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « IL »",
+   "11.5px « NL »",
+   "11.5px « Demandé »",
+   "11.5px « JP »"
+  ],
+  "nPetits": 6,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "96×34 Décider",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-resoudre-o4": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "100×34 Affecter",
+   "83×34 Relire",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 9,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-resoudre-o5": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-resoudre-o1": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « IL »",
+   "11.5px « LF »",
+   "11.5px « À valider »"
+  ],
+  "nPetits": 6,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "72×34 Confier",
+   "389×40 1 point à valider · règles res",
+   "389×40 2 points à valider · règles re",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 10,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-resoudre-o2": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « IL »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "74×34 Refuser",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-resoudre-o3": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « IL »",
+   "11.5px « NL »",
+   "11.5px « Demandé »",
+   "11.5px « JP »"
+  ],
+  "nPetits": 6,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "96×34 Décider",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-resoudre-o4": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "100×34 Affecter",
+   "83×34 Relire",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 9,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-resoudre-o5": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": []
+ },
+ "t-resoudre-o1": {
+  "ok": true,
+  "n": 6,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « IL »",
+   "11.5px « LF »",
+   "11.5px « À valider »"
+  ],
+  "nPetits": 6,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.onglets ong-barre (+379px)"
+  ]
+ },
+ "t-resoudre-o2": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « IL »"
+  ],
+  "nPetits": 2,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.onglets ong-barre (+379px)"
+  ]
+ },
+ "t-resoudre-o3": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+   "11.5px « Demandé »",
+   "11.5px « NL »",
+   "11.5px « JP »"
+  ],
+  "nPetits": 4,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.onglets ong-barre (+379px)",
+   "div.fc-zone (+316px)"
+  ]
+ },
+ "t-resoudre-o4": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.onglets ong-barre (+379px)"
+  ]
+ },
+ "t-resoudre-o5": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Résoudre · vendredi 20 novembre 2026 »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "139×34 Absences1 à traiter",
+   "178×34 Remplacements1 à traiter",
+   "144×34 Demandes2 à traiter",
+   "122×34 Gardes3 à traiter",
+   "133×34 À publier0 à traiter",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.onglets ong-barre (+379px)"
+  ]
+ }
+}

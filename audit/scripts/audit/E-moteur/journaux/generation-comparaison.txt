@@ -1,0 +1,11 @@
+2026-11-16: préf equite=100 % de 3, souhaits=100 % de 3, cout=100 % de 3 | au-delà du contrat equite=1, souhaits=1, cout=0 | écart samedis equite=1.78, souhaits=1.77, cout=1.85
+2026-11-23: préf equite=50 % de 2, souhaits=100 % de 2, cout=100 % de 2 | au-delà du contrat equite=2, souhaits=1, cout=0 | écart samedis equite=1.74, souhaits=1.75, cout=1.7
+2026-11-30: préf equite=71 % de 24, souhaits=96 % de 24, cout=79 % de 24 | au-delà du contrat equite=2, souhaits=0, cout=0 | écart samedis equite=1.76, souhaits=1.79, cout=1.79
+2026-12-07: préf equite=68 % de 28, souhaits=96 % de 28, cout=71 % de 28 | au-delà du contrat equite=2, souhaits=2, cout=0 | écart samedis equite=1.9, souhaits=1.92, cout=1.88
+2026-12-14: préf equite=81 % de 26, souhaits=96 % de 26, cout=65 % de 26 | au-delà du contrat equite=1, souhaits=2, cout=0 | écart samedis equite=1.81, souhaits=1.81, cout=1.95
+2026-12-21: préf equite=62 % de 26, souhaits=88 % de 26, cout=62 % de 26 | au-delà du contrat equite=0, souhaits=1, cout=0 | écart samedis equite=1.53, souhaits=1.52, cout=1.55
+2026-12-28: préf equite=69 % de 16, souhaits=94 % de 16, cout=81 % de 16 | au-delà du contrat equite=0, souhaits=2, cout=0 | écart samedis equite=1.49, souhaits=1.33, cout=1.33
+2027-01-04: préf equite=50 % de 2, souhaits=100 % de 2, cout=50 % de 2 | au-delà du contrat equite=1, souhaits=0, cout=0 | écart samedis equite=1.19, souhaits=1.08, cout=1.12
+2027-03-29: préf equite=100 % de 1, souhaits=100 % de 1, cout=100 % de 1 | au-delà du contrat equite=1, souhaits=3, cout=0 | écart samedis equite=0.34, souhaits=0.27, cout=0.49
+2027-05-03: préf equite=67 % de 3, souhaits=100 % de 3, cout=100 % de 3 | au-delà du contrat equite=0, souhaits=0, cout=0 | écart samedis equite=0, souhaits=0, cout=0
+2027-05-17: préf equite=100 % de 3, souhaits=100 % de 3, cout=67 % de 3 | au-delà du contrat equite=1, souhaits=2, cout=0 | écart samedis equite=0.41, souhaits=0.41, cout=0.44

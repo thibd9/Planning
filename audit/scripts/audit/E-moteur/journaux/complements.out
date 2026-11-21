@@ -1,0 +1,33 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/complements.test.ts > Compléments > poste type illégal à côté de postes légaux
+KO  [X5b] generer (postes types) | Postes types de l’exemple + un poste 8 h 30 - 19 h 30 sans pause (11 h), trois graines | attendu: le poste de 11 h sans pause n’est jamais donné à un salarié | obtenu: 13 poste(s) de 11 h sans pause donné(s) à des salariés ; 26 bloquant(s) au total | Le calcul ne vérifie ni la durée quotidienne ni la pause : il fait confiance aux postes types ; l’écran de création de poste type ne les borne pas (PosteTypeDialogue : seulement fin > début).
+
+ ✓ tests/complements.test.ts > Compléments > poste type illégal à côté de postes légaux 3620ms
+stdout | tests/complements.test.ts > Compléments > préparation automatique du mois (relais à l’échéance)
+KO  [RL1] echeance.preparerMois | Relais à l’échéance (décembre 2026, d’après les habitudes) avec un repos posé pour Nicolas le 8 déc. et une indisponibilité reconnue de Thomas le mercredi | attendu: semaines préparées sans enfreindre repos posés ni indisponibilités reconnues | obtenu: 4 semaine(s) préparée(s) (4 d’après les habitudes) ; postes sur un repos posé : 1 ; postes contre une indisponibilité reconnue : 4 ; bloquants : 4 | semaineHabituelle() recopie les journées les plus fréquentes sans relire ni les besoins reconnus, ni les repos posés, ni les règles.
+
+ ✓ tests/complements.test.ts > Compléments > préparation automatique du mois (relais à l’échéance) 2160ms
+stdout | tests/complements.test.ts > Compléments > heures du mois : vue Mois et jours fériés
+KO  [HM-nov] souhaits.planifieMois | Nicolas, novembre 2026 (mercredi 11 férié), vue Mois | attendu: contrat sur 20 jours ouvrés hors férié = 140.0 h | obtenu: contrat compté 147.0 h pour 143.5 h planifiées | Le jour férié compte dans l’objectif du mois.
+OK  [SH-detail] heures.soldeHeures | Écart semaine par semaine (planifié - contrat), semaines publiées de l’exemple | attendu: écarts proches de 0 hors semaine fériée | obtenu: Nicolas : 09-21 -2.0 09-28 0.0 10-05 0.0 10-12 -2.0 10-19 0.0 10-26 -0.5 11-02 -2.0 11-09 -1.0 11-16 -0.5 | Yanis : 09-21 0.0 09-28 -1.5 10-05 0.0 10-12 0.0 10-19 0.0 10-26 0.0 11-02 0.0 11-09 -7.0 11-16 0.0 | Igor : 09-21 -2.0 09-28 -2.0 10-05 -0.5 10-12 0.0 10-19 0.0 10-26 0.5 11-02 0.0 11-09 -2.0 11-16 -2.0
+
+ ✓ tests/complements.test.ts > Compléments > heures du mois : vue Mois et jours fériés 2048ms
+stdout | tests/complements.test.ts > Compléments > gardes et durée hebdomadaire
+KO  [GH1] duree.hebdo | Adjoint : 5 × 8 h 30 = 42 h 30 de postes, plus une garde à volets ouverts le dimanche 9 h - 19 h (10 h de travail effectif) = 52 h 30 | attendu: durée hebdomadaire dépassée (bloquant) | obtenu: alerte equipe.heuresMax
+
+stdout | tests/complements.test.ts > Compléments > temps de calcul sur une grande équipe
+OK  [PERF] generer (temps) | Équipe de 29 personnes, une variante, 40 000 itérations | attendu: quelques secondes au plus | obtenu: 741 ms ; 0 bloquant(s)
+
+ ✓ tests/complements.test.ts > Compléments > gardes et durée hebdomadaire 3ms
+ ✓ tests/complements.test.ts > Compléments > temps de calcul sur une grande équipe 2808ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  23:39:20
+   Duration  10.91s (tests 99%, transform 1%)
+

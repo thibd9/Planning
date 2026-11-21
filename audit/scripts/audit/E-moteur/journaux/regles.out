@@ -1,0 +1,137 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > durée quotidienne (10 h)
+OK  [Q1] duree.quotidienne | Préparateur 8 h - 19 h, pause 13 h - 13 h 59 : 10 h 01 de travail | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 10 h 01 de travail lundi, pour 10 h au plus.
+OK  [Q2] duree.quotidienne | Préparateur 8 h - 19 h, pause 13 h - 14 h : 10 h 00 pile | attendu: non signalé | obtenu: aucun constat
+OK  [Q3] duree.quotidienne | Titulaire 12 h de travail (non salarié) | attendu: non signalé | obtenu: aucun constat
+OK  [Q4] duree.quotidienne | Deux postes le même jour : 6 h + 4 h 30 = 10 h 30 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 10 h 30 de travail lundi, pour 10 h au plus.
+KO  [Q5] duree.quotidienne | Adjoint : poste 8 h 30 - 19 h 30 (9 h 30 de travail) puis garde à volets ouverts 20 h - 23 h le même jour (3 h de travail effectif) = 12 h 30 | attendu: signalé, bloquant | obtenu: aucun constat | La garde à volets ouverts est du travail effectif (le moteur la paie comme telle, code GARDE_VO) mais n’entre pas dans la durée quotidienne.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > amplitude (12 h)
+OK  [A1] duree.amplitude | Deux postes 7 h - 11 h et 15 h - 19 h 01 : amplitude 12 h 01 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : amplitude de 12 h 01 lundi, pour 12 h au plus.
+OK  [A2] duree.amplitude | Deux postes 7 h - 11 h et 15 h - 19 h : amplitude 12 h pile | attendu: non signalé | obtenu: aucun constat
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > durée hebdomadaire (46 h) et plafond de l’officine (42 h)
+OK  [H1] duree.hebdo | 5 jours de 9 h 15 = 46 h 15 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 46 h 15 planifiées cette semaine, pour 46 h au plus.
+OK  [H2] duree.hebdo | 5 jours de 9 h 12 = 46 h 00 pile | attendu: non signalé | obtenu: aucun constat
+OK  [H3] equipe.heuresMax | 46 h 00 : au-dessus du plafond de 42 h, sous le maximum | attendu: signalé, alerte | obtenu: alerte: P1 T. : 46 h cette semaine, au-dessus du plafond de l’officine (42 h).
+OK  [H4] equipe.heuresMax | 46 h 15 : au-delà du maximum, le plafond ne double pas le constat | attendu: non signalé | obtenu: aucun constat
+OK  [H5] equipe.heuresMax | 5 jours de 8 h 24 = 42 h 00 pile | attendu: non signalé | obtenu: aucun constat
+OK  [H6] equipe.heuresMax | 5 jours de 8 h 27 = 42 h 15 | attendu: signalé, alerte | obtenu: alerte: P1 T. : 42 h 15 cette semaine, au-dessus du plafond de l’officine (42 h).
+KO  [H7] (aucune) heures complémentaires | Temps partiel 24 h planifié 4 × 7 h 30 = 30 h (6 h complémentaires, au-delà du dixième du contrat) | attendu: au moins une alerte (limite du dixième, ou du tiers par accord, Code du travail) | obtenu: aucun constat | Aucune règle ne borne les heures complémentaires d’un temps partiel.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > pause (20 min dès 6 h)
+OK  [P1] duree.pause | 8 h - 14 h 15 sans coupure : 6 h 15 continues | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 6 h 15 de travail continu lundi sans pause de 20 minutes.
+KO  [P2] duree.pause | 8 h - 14 h sans coupure : 6 h 00 pile | attendu: signalé, bloquant | obtenu: aucun constat | L3121-16 (cité par la fiche) : « dès que le temps de travail quotidien ATTEINT six heures ». Le moteur ne signale qu’au-delà de 6 h (test `> 360`) et la fiche dit « au-delà de 6 heures ».
+OK  [P3] duree.pause | 8 h - 12 h puis 12 h 19 - 15 h : coupure de 19 min, 6 h 41 de travail | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 7 h de travail continu lundi sans pause de 20 minutes.
+OK  [P4] duree.pause | 8 h - 12 h puis 12 h 20 - 15 h : coupure de 20 min | attendu: non signalé | obtenu: aucun constat
+KO  [P5] duree.pause | 8 h - 15 h avec une pause courte de 20 min (10 h 50 - 11 h 10) saisie dans « pauses » | attendu: non signalé | obtenu: bloquant: P1 T. : 7 h de travail continu lundi sans pause de 20 minutes. | La pause courte de 20 min consécutives, payée, satisfait L3121-16 ; le moteur l’ignore et signale « sans pause de 20 minutes ».
+OK  [P6] duree.pause | Pause portée à 30 min : 8 h - 12 h puis 12 h 25 - 15 h (coupure de 25 min) | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 7 h de travail continu lundi sans pause de 30 minutes.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > repos quotidien (11 h)
+OK  [RQ1] repos.quotidien | Lundi 8 h 30 - 19 h 30, mardi dès 6 h 30 : 11 h pile | attendu: non signalé | obtenu: aucun constat
+OK  [RQ2] repos.quotidien | Lundi 8 h 30 - 19 h 30, mardi dès 6 h 15 : 10 h 45 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 10 h 45 de repos entre lundi 19 h 30 et mardi 6 h 15, pour 11 h requises.
+OK  [RQ3] repos.quotidien | Dimanche de la semaine précédente 14 h - 22 h, lundi 8 h 30 : 10 h 30 (à cheval sur deux semaines) | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : 10 h 30 de repos entre dimanche 22 h et lundi 8 h 30, pour 11 h requises.
+OK  [RQ4] repos.quotidien | Adjoint de garde à volets fermés lundi 20 h - mardi 8 h, poste mardi 9 h - 13 h | attendu: signalé, bloquant | obtenu: bloquant: A1 T. : 1 h de repos entre mardi 8 h et mardi 9 h, pour 11 h requises.
+OK  [RQ5] repos.quotidien | Astreinte lundi 20 h - mardi 8 h sans intervention, poste mardi 8 h 30 | attendu: non signalé | obtenu: aucun constat
+OK  [RQ6] repos.quotidien | Même astreinte avec une intervention de 2 h à 3 h, poste mardi 8 h 30 (5 h 30 de repos) | attendu: signalé, bloquant | obtenu: bloquant: A1 T. : 5 h 30 de repos entre mardi 3 h et mardi 8 h 30, pour 11 h requises.
+KO  [RQ7] repos.quotidien | Samedi 27 mars 2027 fin 21 h, dimanche 28 mars début 8 h : 11 h à l’horloge, 10 h réellement écoulées (passage à l’heure d’été) | attendu: signalé, bloquant | obtenu: aucun constat | Le repos est mesuré en heure locale « naïve » (absMin), sans le décalage d’heure que le moteur sait pourtant calculer pour les gardes (dureeReelle).
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > repos hebdomadaire (36 h)
+OK  [RH1] repos.hebdo | Semaine précédente travaillée jusqu’au dimanche 17 h ; lundi au samedi 9 h - 17 h, puis lundi suivant dès 5 h : samedi 17 h → lundi 5 h = 36 h pile | attendu: non signalé | obtenu: aucun constat
+OK  [RH2] repos.hebdo | Idem, lundi suivant dès 4 h 45 : 35 h 45 | attendu: signalé, bloquant | obtenu: bloquant: P1 T. : le plus long repos de la semaine dure 35 h 45, pour 36 h requises.
+KO  [RH3] repos.hebdo | Sept jours sur sept (lundi au dimanche 9 h - 16 h), la semaine précédente vide, le lundi suivant travaillé 9 h | attendu: signalé, bloquant | obtenu: aucun constat | Le plus long repos de la semaine est de 17 h ; le moteur compte comme repos le temps « depuis toujours » avant le premier poste quand la semaine précédente est vide.
+KO  [RH4] repos.hebdo | Semaine précédente du lundi au vendredi, puis sept jours sur sept : le seul repos de 36 h est le week-end de la semaine précédente | attendu: signalé, bloquant | obtenu: aucun constat | Le repos du week-end précédent (vendredi 16 h → lundi 9 h, 65 h) est crédité à la semaine suivante. Le Code du travail (L3132-1) interdit aussi plus de six jours de travail par semaine : aucun contrôle.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > présence d’un pharmacien
+OK  [PH1] pharmacie.presence | Adjoint 8 h 30 - 19 h 29 (ouverture jusqu’à 19 h 30) : 1 min sans pharmacien | attendu: signalé, bloquant | obtenu: bloquant: Lundi, de 19 h 29 à 19 h 30, aucun pharmacien n'est présent : la pharmacie reste ouverte après le départ d’A1. Prolongez son poste ou posez un autre pharmacien sur cette plage. / bloquant: Mardi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié. / bloquant: Mercredi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié. / bloquant: Jeudi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié. / bloquant: Vendredi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié. / bloquant: Samedi, de 9 h à 19 h, aucun pharmacien n'est planifié.
+OK  [PH2] pharmacie.presence | Adjoint 8 h 30 - 19 h 30 pile, lundi | attendu: non signalé pour lundi | obtenu: aucun constat
+OK  [PH3] pharmacie.presence | Seul pharmacien = adjoint, pause 12 h 30 - 13 h 30 | attendu: bloquant 12 h 30 - 13 h 30 | obtenu: bloquant: Lundi, de 12 h 30 à 13 h 30, aucun pharmacien n'est présent pendant la pause d’A1. Décalez cette pause ou posez un autre pharmacien sur cette plage.
+OK  [PH4] pharmacie.presence | Seul pharmacien = titulaire, pause 12 h 30 - 13 h 30 | attendu: non signalé (règle annoncée : le titulaire reste présent pendant sa pause) | obtenu: aucun constat
+OK  [PH5] pharmacie.presence | Seul pharmacien en « formation (hors officine) » toute la journée | attendu: bloquant toute la journée | obtenu: bloquant: Lundi, de 8 h 30 à 19 h 30, aucun pharmacien n'est planifié.
+OK  [PH6] pharmacie.presence | Vendredi 1er janvier 2027 (férié, officine fermée les jours fériés) | attendu: aucun contrôle ce jour-là | obtenu: aucun constat
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > seul pharmacien en rendez-vous, compétences et salle
+OK  [RDV1] pharmacie.rdv | Seul pharmacien (adjoint) en entretien 10 h - 10 h 30 | attendu: signalé, alerte | obtenu: alerte: Lundi, entre 10 h et 10 h 30, votre seul pharmacien est en rendez-vous. Vérifiez la couverture du comptoir.
+OK  [RDV2] pharmacie.rdv | Entretien 10 h - 10 h 30 avec la titulaire en poste à côté | attendu: non signalé | obtenu: aucun constat
+OK  [C1] pharmacie.competence | Vaccination confiée au préparateur sans la compétence | attendu: signalé, bloquant | obtenu: bloquant: Vaccination, lundi de 10 h à 10 h 30 : P1 T. n'a pas la formation requise.
+OK  [C2] pharmacie.competence | Entretien 10 h - 10 h 30, adjoint en poste 8 h 30 - 10 h 29 seulement | attendu: signalé, bloquant | obtenu: bloquant: Entretien pharmaceutique, lundi de 10 h à 10 h 30 : A1 T. n'est pas en poste sur tout le créneau.
+OK  [C3] pharmacie.competence | Entretien 10 h - 10 h 30, adjoint en poste 8 h 30 - 10 h 30 (fin pile) | attendu: non signalé | obtenu: aucun constat
+OK  [C4] pharmacie.competence | Créneau de vaccination sans personne affectée | attendu: signalé, alerte | obtenu: alerte: Vaccination, lundi de 10 h à 10 h 30 : personne n'est affecté à ce créneau.
+OK  [C5] pharmacie.competence | Deux activités en salle de confidentialité 10 h - 10 h 30 et 10 h 15 - 10 h 45 | attendu: signalé, bloquant | obtenu: bloquant: La salle de confidentialité est réservée deux fois lundi de 10 h 15 à 10 h 45.
+KO  [C6] pharmacie.competence | Entretien pharmaceutique confié à un préparateur dont la fiche porte la compétence « entretien » (réservée aux pharmaciens) | attendu: signalé, bloquant | obtenu: aucun constat | peutDetenir() réserve « entretien » et « trod » aux pharmaciens, mais validateWeek ne contrôle que la liste des compétences de la fiche.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > effectif minimal au comptoir
+OK  [E1] equipe.effectif | Trois personnes au comptoir toute la journée (seuils 2, 3 de 10 h à 12 h 30 et de 16 h 30 à 19 h) | attendu: non signalé | obtenu: aucun constat
+OK  [E2] equipe.effectif | Deux personnes seulement | attendu: alerte 10 h - 12 h 30 et 16 h 30 - 19 h | obtenu: alerte: Lundi, de 10 h à 12 h 30 : 2 personnes au comptoir pour 3 attendues. / alerte: Lundi, de 16 h 30 à 19 h : 2 personnes au comptoir pour 3 attendues.
+KO  [E3] equipe.effectif | Trois personnes, l’une en pause 10 h 15 - 10 h 45 (2 au comptoir pour 3 attendues pendant 30 min) | attendu: alerte de 10 h 15 à 10 h 45 | obtenu: alerte: Lundi, de 10 h 30 à 11 h : 2 personnes au comptoir pour 3 attendues. | Le contrôle échantillonne toutes les 30 min à partir de l’ouverture (8 h 30, 9 h, 9 h 30…).
+KO  [E4] equipe.effectif | Trois personnes, l’une en pause 10 h 05 - 10 h 25 (20 min sous le seuil) | attendu: alerte de 10 h 05 à 10 h 25 | obtenu: aucun constat
+OK  [E5] equipe.effectif | Trois personnes dont une en réception (activité « back ») | attendu: alerte (2 au comptoir) | obtenu: alerte: Lundi, de 10 h à 12 h 30 : 2 personnes au comptoir pour 3 attendues. / alerte: Lundi, de 16 h 30 à 19 h : 2 personnes au comptoir pour 3 attendues.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > absences approuvées, indisponibilités reconnues, préférences
+OK  [AB1] equipe.absence | Poste mardi pendant un congé approuvé lundi-mardi | attendu: signalé, bloquant | obtenu: bloquant: P1 T. est en absence approuvée mardi mais reste planifié(e).
+OK  [AB2] equipe.absence | Poste mardi pendant un congé seulement demandé | attendu: non signalé | obtenu: aucun constat
+OK  [AB3] equipe.absence | Poste mercredi, lendemain du congé approuvé | attendu: non signalé | obtenu: aucun constat
+OK  [I1] equipe.indisponibilite | Indisponibilité reconnue le lundi (journée), poste lundi | attendu: signalé, bloquant | obtenu: bloquant: Lundi, le poste de P1 T. contredit une indisponibilité reconnue.
+OK  [I2] equipe.indisponibilite | Indisponible lundi 14 h - 18 h, poste 9 h - 14 h (fin pile au début de la plage) | attendu: non signalé | obtenu: aucun constat
+OK  [I3] equipe.indisponibilite | Indisponible lundi 14 h - 18 h, poste 9 h - 14 h 15 | attendu: signalé, bloquant | obtenu: bloquant: Lundi, le poste de P1 T. contredit une indisponibilité reconnue.
+OK  [I4] equipe.indisponibilite | « Finir avant 17 h » reconnu, poste jusqu’à 17 h pile | attendu: non signalé | obtenu: aucun constat
+OK  [I5] equipe.indisponibilite | « Finir avant 17 h » reconnu, poste jusqu’à 17 h 15 | attendu: signalé, bloquant | obtenu: bloquant: Lundi, le poste de P1 T. contredit une indisponibilité reconnue.
+OK  [I6] equipe.indisponibilite | Indisponibilité reconnue mais encore en attente de décision | attendu: non signalé | obtenu: aucun constat
+OK  [I7] souhait | Préférence prioritaire « indisponible lundi », poste lundi | attendu: signalé, info | obtenu: info: Lundi, une préférence prioritaire de P1 T. n'est pas satisfaite.
+OK  [I8] equipe.indisponibilite | Indisponibilité reconnue une semaine sur deux (référence : semaine du 11 janvier), poste le lundi 18 (semaine impaire) | attendu: non signalé | obtenu: aucun constat
+OK  [I9] equipe.indisponibilite | Même besoin, poste le lundi 25 janvier (semaine paire) | attendu: signalé, bloquant | obtenu: bloquant: Lundi, le poste de P1 T. contredit une indisponibilité reconnue.
+KO  [RP1] (repos posé) | Poste le lundi alors qu’un repos est posé pour ce jour (donnée) | attendu: signalé | obtenu: aucun constat | Dans l’interface, poser un poste sur un repos efface le repos (saveShift) : l’incohérence ne peut venir que d’un calcul qui ne le respecte pas.
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > samedis libres par mois
+OK  [S1] equipe.samedisLibres | Préparateur posté les 5 samedis de janvier 2027 | attendu: signalé, alerte | obtenu: alerte: P1 T. travaille tous les samedis du mois : l’officine en garde 1 libre.
+OK  [S2] equipe.samedisLibres | Préparateur posté 4 samedis sur 5 (le 30 libre) | attendu: non signalé | obtenu: aucun constat
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > contrôles d’équipe : temps partiel minimal, nombre de pharmaciens
+OK  [TP1] contrat.partielMin | Préparateur à 15 h | attendu: alerte | obtenu: alerte: X T. : contrat de 15 h, sous le minimum de 16 h du temps partiel.
+OK  [TP2] contrat.partielMin | Préparateur à 16 h pile | attendu: non signalé | obtenu: aucun constat
+OK  [TP3] contrat.partielMin | Étudiant à 10 h ; apprenti à 10 h | attendu: non signalés (dérogations) | obtenu: aucun constat ; aucun constat
+OK  [TP4] contrat.partielMin | Animatrice à 21 h (exemple : Sarah) | attendu: à vérifier : 21 h < 24 h (durée minimale légale L3123-27, sauf accord de branche) | obtenu: aucun constat | Seuil de 16 h « source secondaire » : à confirmer sur l’accord de branche.
+OK  [AD1] pharmacie.adjoints | CA 2 600 000 €, adjoints 35 h + 28 h (1,8 ETP) | attendu: alerte : 2 ETP attendus (2 tranches révolues de 1,3 M€) | obtenu: alerte: Pharmaciens, hors titulaires : 1,8 équivalent temps plein pour 2 attendus au vu du chiffre d'affaires déclaré.
+OK  [AD2] pharmacie.adjoints | CA 2 599 999 € (1 seule tranche révolue) | attendu: non signalé (1 ETP attendu, 1,8 présents) | obtenu: aucun constat
+
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > durée quotidienne (10 h) 16ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > amplitude (12 h) 2ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > durée hebdomadaire (46 h) et plafond de l’officine (42 h) 16ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > pause (20 min dès 6 h) 14ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > repos quotidien (11 h) 7ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > repos hebdomadaire (36 h) 5ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > présence d’un pharmacien 3ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > seul pharmacien en rendez-vous, compétences et salle 6ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > effectif minimal au comptoir 5ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > absences approuvées, indisponibilités reconnues, préférences 14ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > samedis libres par mois 4ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > contrôles d’équipe : temps partiel minimal, nombre de pharmaciens 11ms
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > délais : garde (15 jours), temps partiel (7 jours ouvrés), remplacement (7 jours)
+OK  [DG1] garde.delai | Garde du lundi 18 janvier communiquée le 3 (15 jours avant) | attendu: délai tenu | obtenu: true - Programmation communiquée 15 jours avant la garde.
+OK  [DG2] garde.delai | Communiquée le 4 (14 jours avant) | attendu: délai non tenu | obtenu: false - Programmation communiquée 14 jours avant la garde, pour 15 requis.
+OK  [DG3] garde.delai | Circonstances exceptionnelles : communiquée vendredi 15 pour lundi 18 (samedi seul jour ouvrable strictement entre les deux) | attendu: à vérifier : 1 ou 2 jours ouvrables selon que l’on compte le jour de la garde | obtenu: true - Circonstances exceptionnelles : 2 jours ouvrables de prévenance. | joursOuvrablesEntre compte le jour de la garde lui-même.
+OK  [DG4] garde.delai | Exceptionnel, communiquée samedi 16 pour lundi 18 | attendu: délai non tenu | obtenu: false - Circonstances exceptionnelles : 1 jour ouvrable de prévenance pour 2 requis. Accord du salarié à recueillir.
+OK  [DG5] garde.delai | Garde de la titulaire communiquée la veille | attendu: aucun délai (non salariée) | obtenu: true - Titulaire : aucun délai de prévenance.
+OK  [DT1] delai.tempsPartiel | Première publication le mercredi 30 décembre 2026 pour la semaine du 11 janvier (7 jours ouvrés : 31/12, 4-8/01, 11/01 ; le 1er janvier férié exclu) | attendu: délai tenu | obtenu: aucun délai signalé
+OK  [DT2] delai.tempsPartiel | Première publication le jeudi 31 décembre (6 jours ouvrés) | attendu: délai signalé pour le temps partiel | obtenu: P2 T. (temps partiel) : horaires communiqués 6 jours ouvrés avant la semaine, pour 7 requis.
+OK  [DT3] delai.tempsPartiel | Semaine publiée ; le lundi, le poste du mercredi d’un temps partiel est raccourci | attendu: délai signalé (2 jours ouvrés) | obtenu: P2 T. (temps partiel), mer. 13 janvier : modification notifiée 2 jours ouvrés avant, pour 7 requis.
+KO  [DT4] (délai de prévenance temps plein) | Temps plein : poste du mercredi allongé de 2 h, publié la veille | attendu: à vérifier : délai de prévenance de 7 jours (L3121-47) en cas de modification des horaires | obtenu: 0 délai signalé ; 1 changement | Seuls les temps partiels et les gardes ont un contrôle de délai à la publication ; la règle « delai.remplacement » ne sert qu’aux demandes de remplacement.
+OK  [DR1] delai.remplacement | Demande pour un poste dans 7 jours, puis dans 6 jours | attendu: acceptée puis refusée | obtenu: true / false
+OK  [DR2] delai.remplacement | Fiche abaissée à 1 jour | attendu: plancher de 3 jours | obtenu: 3
+
+stdout | tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > jeunes travailleurs (apprentie, étudiant)
+KO  [JT1] (jeunes travailleurs) | Apprentie planifiée 4 × 9 h 30 + 3 h 30 = 41 h 30, contrat 21 h | attendu: au minimum une alerte (contrat dépassé de 20 h 30) ; si mineure, durées maximales de 8 h/j et 35 h/sem. dépassées | obtenu: aucun constat | Aucune date de naissance dans la fiche (types.ts), aucune règle « moins de 18 ans » ; le dépassement du contrat n’est jamais signalé par le validateur (seul le plafond de 42 h l’est).
+
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > délais : garde (15 jours), temps partiel (7 jours ouvrés), remplacement (7 jours) 4ms
+ ✓ tests/regles.test.ts > 1. Règles : cas qui viole et cas limite > jeunes travailleurs (apprentie, étudiant) 1ms
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  23:44:46
+   Duration  351ms (tests 54%, import 24%, transform 21%, worker 2%)
+

@@ -1,0 +1,16 @@
+✓ tableau de bord : comptoir et décisions côte à côte, même hauteur ({"ha":599,"hc":599,"wa":695,"wc":397,"cote":true,"avant":false})
+✓ accident : les faits et la suite à donner s’affichent
+✓ accident enregistré avec ses faits et le jour où il est connu
+✓ tableau de bord : la déclaration est rappelée, avec sa date limite
+✓ la déclaration est en tête de « À décider »
+✓ « C’est fait » retire le rappel et date la déclaration
+✓ Solvi reçoit « je t’aime » pour ce que c’est : Je fonds. Enfin, presque : je flotte déjà. C’est réciproque,
+✓ Solvi comprend les fautes de frappe
+✓ Solvi suit le fil : « et samedi ? »
+✓ Solvi propose la fenêtre de retard
+✓ le bouton de Solvi ouvre « Signaler », sur le retard
+✓ réglages : la surface de démonstration est affichée
+✓ la surface se modifie, en mètres carrés
+
+13/13 vérifications
+aucune erreur de page

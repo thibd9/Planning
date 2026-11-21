@@ -1,0 +1,21 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /tmp/claude-0/-home-user/e186b833-ecb1-5c7f-b97c-2e1b9d619629/scratchpad/audit/E-moteur
+
+stdout | tests/pu4.test.ts > pu4
+2026-11-18 8.5 16.5 accepter:Aucun remplacement nécessaire retirer= ajouter=
+2026-11-19 8.5 19.5 echange:Réaffecter Pierre F. retirer=p_antoine 8.5-13 ajouter=p_antoine 8.5-19.5 || heures_comp:Proposer des heures complémentaires à Inès D. retirer=p_ines 8.5-16.5 ajouter=p_ines 8.5-19.5 || remplacant:Faire appel à Paul L., remplaçant habituel retirer= ajouter=x_paul 8.5-19.5 || accepter:Assumer la charge, sans réaffecter retirer= ajouter=
+2026-11-20 11.5 19.5 echange:Réaffecter Pierre F. retirer=p_antoine 8.5-16.5 ajouter=p_antoine 11.5-19.5 || heures_comp:Proposer des heures complémentaires à Léa F. retirer= ajouter=p_lea 11.5-19.5 || remplacant:Faire appel à Paul L., remplaçant habituel retirer= ajouter=x_paul 11.5-19.5
+option Réaffecter Pierre F. retirer [ 's_mwpmm8wa_b6ku', 'brouillon_admin' ]
+apres [ 's_mwpmm9dw_g4gm 8.5-19.5 comptoir' ]
+snapshot [ 's_mwpmm9dw_g4gm 8.5-19.5 comptoir' ]
+
+ ✓ tests/pu4.test.ts > pu4 2408ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  23:44:46
+   Duration  2.67s (tests 95%, import 3%, transform 2%)
+

@@ -1,0 +1,18 @@
+Profils du menu de test : Titulaire 1 Titulaire principale / Titulaire 2 Titulaire secondaire / Pharmacien Pharmacien / Préparateur Préparateur / Animateur Animatrice / Apprenti Apprentie / Étudiant Étudiant
+avec-equipe · Nicolas, Mes demandes : MON ESPACE | Mes demandes |  | Choisissez ce que vous voulez faire. |  | Mes préférences | Ce qui m’arrange le mois prochain. | Dernier jour | Pas de réponse à attendre | Absence ou horaire | Congé, formation, horaire à tenir. | 1 en attente | Votre titulaire répond | Me faire remplacer | Un poste publié que je ne peux pas tenir. | Aucune | Titulaire, puis un collègue volontaire | Absences de l’équipe |  | Les 10 pro
+avec-equipe · Nicolas, accueil mentionne préférences : false
+Résumé modèle : Ce que ce choix change dans l’application | POUR L’ÉQUIPE | La carte « Mes préférences » disparaît de « Mes demandes ». | L’équipe consulte le planning publié, sans donner d’avis avant. | POUR VOUS | Vous construisez quand vous voulez, sans date limite à attendre. | Le tableau de bord n’a plus d’éta
+Tableau titulaire mentionne « préférences » : 
+Construire : case « Préférences » : 0
+vous-seul · Nicolas, Mes demandes : MON ESPACE | Mes demandes |  | Choisissez ce que vous voulez faire. |  | Absence ou horaire | Congé, formation, horaire à tenir. | 1 en attente | Votre titulaire répond | Me faire remplacer | Un poste publié que je ne peux pas tenir. | Aucune | Titulaire, puis un collègue volontaire | Absences de l’équipe |  | Les 10 prochaines semaines, une ligne par personne. |  | Nov. 16 | 23 | 30 | Déc. 7 | 14 | 21 | 28 | Janv. 4
+vous-seul · Nicolas, accueil mentionne préférences : false
+Profil actuel : Espace titulaire secondaire
+, environnement de test : changer de profil
+Pierre renomme : enregistré = Pharmacie renommée par Pierre | accords en attente : 0
+Pierre baisse le repos quotidien à 9 h : enregistré = 9 | accords : 0 | toast : Nouveau seuil enregistré, et noté au journal.
+Annuler
+Pierre voit « Repartir de zéro » : 1 | Dimensionnement : 1
+Pierre change les heures de Nicolas : enregistré = 20 | accords : 0
+Pierre retire Nicolas : toujours là = true | accords : Retirer Nicolas L. de l’équipe | toast : Envoyé à Caroline pour accord. Rien n’est appliqué avant.
+Pierre réinitialise : pharmacies restantes = (vide):0 pers. | écran : Connexion · Solvéa
+ERREURS console : aucune

@@ -1,0 +1,59 @@
+CLOCHE: À VOIR | Collègue qui cherche un remplaçant | 1
+Après clic, titre: Mon planning · Solvéa ; carte aider: 0
+
+JOUR 18: Mercredi 18 novembre 2026 | Ouverture : 8 h 30 – 19 h 30 · 8 postes | 8 h | 10 h | 12 h | 14 h | 16 h | 18 h | 20 h | LF | Léa F. | Pharmacien | 8 h 30 – 13 h | 4 h 30 de travail · pause courte à 10 h 45 (15 min) | 8 h 30 | 13 h | NL | Nicolas L. | Préparateur | 8 h 30 – 13 h | 4 h 30 de travail · pause courte à 10 h 45 (15 min) | 8 h 30 | 13 h | TN | Thomas N. | Préparateur | 8 h 30 – 19 h 30 | 9 h 30 de travail · pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min) | 8 h 30 | 19 h 30 | SL | Sarah L. | Animateur | 8 h 30 – 16 h 30 | 7 h de travail · pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min) | 8 h 30 | 16 h 30 | MG | Manon G. | Apprenti | 8 h 30 – 16 h 30 | 7 h de travail · pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min) | 8 h 30 | 16 h 30 | YM | Yanis M. | Étudiant | 8 h 30 – 16 h 30 | 7 h de travail · pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min) | 8 h 30 | 16 h 30 | CT | Caroline T. | Titulaire principal | 11 h 30 – 19 h 30 | 7 h de travail · pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min) | 11 h 30 | 19 h 30 | JP | Jules P. | Préparateur | 11 h 30 – 19 h 30 | 7 h de travail · pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min) | 11 h 30 | 19 h 30 | Igor L. · Arrêt | Veille | Lendemain | Fermer
+
+JOUR 10: Mardi 10 novembre 2026 | Ouverture : 8 h 30 – 19 h 30 · 9 postes | 8 h | 10 h | 12 h | 14 h | 16 h | 18 h | 20 h | CT | Caroline T. | Titulaire principal | 8 h 30 – 19 h 30 | 9 h 30 de travail · pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min) | 8 h 30 | 19 h 30 | IL | Igor L. | Pharmacien | 8 h 30 – 16 h 30 | 7 h de travail · pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min) | 8 h 30 | 16 h 30 | LF | Léa F. | Pharmacien | 8 h 30 – 13 h | 4 h 30 de travail · pause courte à 10 h 45 (15 min) | 8 h 30 | 13 h | ID | Inès D. | Préparateur | 8 h 30 – 19 h 30 | 9 h 30 de travail · pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min) | 8 h 30 | 19 h 30 | MG | Manon G. | Apprenti | 8 h 30 – 19 h 30 | 9 h 30 de travail · pause déjeuner 12 h 30 – 14 h · pauses courtes à 10 h 30, 16 h 45 (15 min) | 8 h 30 | 19 h 30 | PF | Pierre F. | Titulaire secondaire | 11 h 30 – 19 h 30 | 7 h de travail · pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min) | 11 h 30 | 19 h 30 | TN | Thomas N. | Préparateur | 11 h 30 – 19 h 30 | 7 h de travail · pause déjeuner 14 h – 15 h · pause courte à 17 h 15 (15 min) | 11 h 30 | 19 h 30 | NL | Nicolas L. | Préparateur | 14 h – 19 h 30 | 5 h 30 de travail · pause courte à 16 h 45 (15 min) | 14 h | 19 h 30 | JP | Jules P. | Préparateur | 14 h – 19 h 30 | 5 h 30 de travail · pause courte à 16 h 45 (15 min) | Retard · 10 min | 14 h | 19 h 30 | Veille | Lendemain | Fermer
+
+FRISE: Absences de l’équipe | Les 10 prochaines semaines, une ligne par personne. | Nov. 16 | 23 | 30 | Déc. 7 | 14 | 21 | 28 | Janv. 4 | 11 | 18 | IL | Igor L. | Absent du mer. 18 novembre au ven. 20 novembre | 10 personnes sans absence prévue sur la période. ; titles: Férié : Noël / Férié : Jour de l’an / Absent du mer. 18 novembre au ven. 20 novembre
+
+AIDE « publier »: 
+
+AIDE « résoudre »: Signaler un retard ou une absence
+
+AIDE « construire »: 
+
+AIDE « paie »: 
+
+AIDE « équipe »: Voir le planning de toute l’équipe / Imprimer le planning / Me faire remplacer sur un poste / Répondre à un appel ou aider un collègue / Signaler un retard ou une absence / Écrire à l’équipe ou à une personne
+
+AIDE « heures »: Voir mon compteur d’heures et mon suivi / Me faire remplacer sur un poste / Signaler un accident du travail ou de trajet
+
+SOLVI « Pourquoi Igor est absent ? » → Igor est absent aujourd’hui jusqu’au ven. 20 novembre. | Voir la journée | Et demain ?
+
+SOLVI « Igor est malade ? » → Les prochains postes d’Igor : | Demain · 9 h – 14 h | Lun. 23 novembre · 8 h 30 – 16 h 30 | Mar. 24 novembre · 8 h 30 – 16 h 30 | Mer. 25 novembre · 11 h 30 – 19 h 30 | Igor est là demain ?
+
+SOLVI « Qui est absent cette semaine ? » → 1 absence sur sept jours : | Igor L. · du mer. 18 novembre au ven. 20 novembre
+
+SOLVI « Combien d’heures fait Thomas cette semaine ? » → Semaine du lun. 16 novembre : 34 h 30 planifiées, pour un contrat de 35 h. | Ouvrir mon suivi | Mon compteur d’heures ?
+
+SOLVI « Quel est le taux horaire de Thomas ? » → Les prochains postes de Thomas : | Aujourd’hui · 8 h 30 – 13 h | Demain · 9 h – 19 h | Mar. 24 novembre · 8 h 30 – 16 h 30 | Mer. 25 novembre · 8 h 30 – 19 h 30 | Thomas est là demain ?
+
+SOLVI « Que dois-je décider ? » → Chaque décision (congé, remplacement, horaires, publication, garde) est annoncée sous la cloche aux personnes concernées et aux titulaires, avec ce qu’elle change dans les plannings. « Vu » la range. | Ouvrir l’accueil
+
+SOLVI « Le planning du mois prochain est-il publié ? » → Il est écrit en grand en haut de « Mon planning », avec la pause et la durée. Dessous, votre semaine jour par jour, puis le calendrier du mois. | Ouvrir mon planning | Imprimer le planning | Retrouver mes anciens plannings ou déposer un document
+
+SOLVI « Qui travaille le lundi 7 décembre ? » → Lun. 7 décembre : aucun poste publié.
+
+SOLVI « Qui a des heures supplémentaires ? » → Votre compteur : −8 h par rapport à votre contrat. | Ouvrir mon suivi
+
+SOLVI « Quelle est la clé de secours ? » → Bonne question… à laquelle je n’ai pas trouvé de réponse. Mon rayon, c’est le planning. Essayez avec d’autres mots, ouvrez l’aide, ou parlez-en à une personne. | Ouvrir l’aide | 01 99 00 12 34 | support@solvea.example | Écrire à mon titulaire | Où voir mon prochain poste ? | Voir le planning de toute l’équipe | Préférence, demande : quelle différence ?
+
+SOLVI « Ouvre résoudre » → Décidément, je n’ai pas trouvé. Je ne veux pas vous faire perdre de temps : voici ce que je sais faire, et sinon une personne vous répondra mieux que moi. | Dire votre prochain poste, votre pause, vos jours de repos, vos rendez-vous | Dire qui travaille avec vous, un jour donné | Prévenir d’un retard ou d’une absence en deux gestes | Suivre vos demandes et votre compteur d’heures | Expliquer chaque geste de Solvéa, et vos droits d’horaires | Ouvrir l’aide | 01 99 00 12 34 | support@solvea.example | Écrire à mon titulaire | Où voir mon prochain poste ? | Voir le planning de toute l’équipe | Préférence, demande : quelle différence ?
+
+SOLVI « Ouvre mes gardes » → Vous n’avez aucune garde à venir.
+
+SOLVI « Qui est de garde le 31 décembre ? » → Jeu. 31 décembre : vous n’êtes pas de garde.
+
+SOLVI « Qui travaille demain ? » → Demain, 6 personnes en poste : | Caroline T. · 9 h – 19 h | Igor L. · 9 h – 14 h | Nicolas L. · 9 h – 19 h | Thomas N. · 9 h – 19 h | Jules P. · 9 h – 14 h | Yanis M. · 9 h – 19 h | Voir la journée | Et dim. 22 novembre ?
+
+SOLVI « Mon prochain poste ? » → Votre prochain poste : demain, 9 h – 19 h. | Puis lun. 23 novembre · 8 h 30 – 16 h 30 | Puis mar. 24 novembre · 8 h 30 – 16 h 30 | Puis mer. 25 novembre · 8 h 30 – 13 h | Ouvrir mon planning | Qui travaille avec moi demain ?
+
+SOLVI « Combien d’heures je fais cette semaine ? » → Semaine du lun. 16 novembre : 34 h 30 planifiées, pour un contrat de 35 h. | Ouvrir mon suivi | Mon compteur d’heures ?
+
+SOLVI « Jules a eu des retards ? » → Les prochains postes de Jules : | Aujourd’hui · 8 h 30 – 16 h 30 | Demain · 9 h – 14 h | Lun. 23 novembre · 11 h 30 – 19 h 30 | Mar. 24 novembre · 11 h 30 – 19 h 30 | Jules est là demain ?
+
+SOLVI « Quand travaille Igor mercredi ? » → Igor travaille mer. 25 novembre : 11 h 30 – 19 h 30, pause de 14 h à 15 h. | Voir la journée | Et jeu. 26 novembre ?
+
+Bouton mes gardes: aucun
+ERR []

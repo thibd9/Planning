@@ -1,0 +1,12 @@
+Avant : absences 1 | besoins 1 | trous 3
+Absence fin avant début : bouton désactivé = true
+Toast : Absence enregistrée. Les postes concernés sont à couvrir dans « Résoudre ».
+Annuler
+Après absence : absences conge 2026-11-30→2026-12-04 demandee, conge 2026-11-26→2026-11-27 approuvee | trous 5
+Fiche, absences à venir : Absences à venir | Congé · du jeu. 26 novembre au ven. 27 novembre | Approuvée | Congé · du lun. 30 novembre au ven. 4 décembre | Demandée | Approuver
+Toast : Besoin enregistré.
+Annuler
+Fiche, besoins : Besoins personnels | Prioritaires : 1 / 2 | Finir avant 17 h - mercredi (une semaine sur deux) | Sans date de début · jusqu'au jeu. 24 juin | Préférence prioritaire | Indisponible - mercredi | Depuis le ven. 20 novembre | Simple préférence |  | Indisponibilité reconnue : contrainte impérative. Préférence prioritaire : servie avant les autres, plafonnée. Simple préférence : satisfaite si possible.
+Retrait d’un besoin : confirmation demandée = 0 | besoins 2 → 1 | toast : Besoin retiré.
+Annuler
+ERREURS console : aucune

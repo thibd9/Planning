@@ -1,0 +1,21 @@
+const { ouvrir, allerSemaine, dlg } = require('./h.js');
+(async () => {
+  const { b, p, errs, shot, data, texte, nav, bascule } = await ouvrir({ role: 0 });
+  const log = (...a) => console.log(...a);
+  const toast = async () => (await texte('.toast')).join(' / ');
+  await p.locator('#top-signaler').click(); await p.waitForTimeout(400);
+  await p.locator('#sg-qui').selectOption('p_camille');
+  log('radios', await p.evaluate(() => [...document.querySelectorAll('[name=sg-quoi]')].map((i) => i.id + ':' + i.checked)));
+  await p.locator('#sg-retard').check(); await p.waitForTimeout(200);
+  await p.locator('#sg-durees button').first().click(); await p.waitForTimeout(200);
+  log('SIGNALER', ((await dlg(p)) || '').slice(0, 900));
+  await p.locator('#sg-confirmer').click(); await p.waitForTimeout(400);
+  log('avis', await toast(), JSON.stringify((await data()).retards));
+  await p.evaluate(() => [...document.querySelectorAll('.tb-jour .card-head button')][0]?.click()); await p.waitForTimeout(400);
+  await p.locator('[role=dialog] button', { hasText: 'Lendemain' }).click(); await p.waitForTimeout(300);
+  const ln = await p.evaluate(() => [...document.querySelectorAll('.je-ligne')].find((x) => /Nicolas/.test(x.innerText))?.innerText.replace(/\s+/g, ' '));
+  log('JOUR demain Nicolas', ln);
+  await shot('12-jour-demain-avis');
+  log('errs', errs);
+  await b.close();
+})();

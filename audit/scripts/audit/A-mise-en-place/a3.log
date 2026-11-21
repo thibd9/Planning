@@ -1,0 +1,39 @@
+CHIFFRES préremplis (rien saisi sauf surface -50) : {"surface":"180","surfaceVente":"110","reserve":"45","caisses":"3","comptoirs":"4","confidentialite":"1"} | clients/jour : 240
+EN-TÊTE : OFFICINE | Pharmacie des Tilleuls |  | 180 m² au total · 110 m² de surface de vente · 45 m² de réserve et de préparatoire |  | Horaires d'ouverture, effectif attendu et postes types. Ces réglages sont des choix d'organisation : ils se modifient librement. Un onglet par famille de réglages.
+DIMENSIONNEMENT : L’équipe est-elle bien dimensionnée ? |  | Un repère pour vous, titulaire. Il part des clients à servir, pas du mobilier : les caisses ne sont qu’un plafond. Ce n’est pas une norme, et toutes les hypothèses sont écrites plus bas. |  | Clients servis par jour | En moyenne, un jour ordinaire. Votre logiciel de gestion le donne. | Temps moyen par client | min | Facultatif. Sans valeur : 5 minutes, 4 avec un robot. | Activité annuelle hors taxes | € | Facultatif : pour le nombre minimal de pharmaciens. Reste sur cet appareil. | Au comptoir, heure ordinaire | 3 | personnes en même temps | À l’heure de pointe | 5 | personnes en même temps | Jamais moins de | 2 | dont un pharmacien | Plafond utile 
+Nom vidé → barre du haut : Mon officine | sélecteur :  | titre page : Mon officine
+Mercredi fermeture 07:00 → enregistré : [{"start":510,"end":750},{"start":840,"end":420}] | alerte visible : 0
+Résumé horaires : Horaires d'ouverture
+Mardi midi 15:00 > réouverture 14:00 → enregistré : [{"start":510,"end":900},{"start":840,"end":1170}]
+Jeudi fermé, dimanche ouvert → ["8.5-12.5+14-19.5","8.5-15+14-19.5","8.5-12.5+14-7","fermé","8.5-12.5+14-19.5","9-13","9-19"]
+Effectifs après ces changements : ["0,1,2,3,4:8.5-19.5=2","0,1,2,3,4:10-12.5=3","0,1,2,3,4:16.5-19=3","5:9-19=2","5:10-12.5=3"] | postes : ["Ouverture:0,1,2,3,4","Fermeture:0,1,2,3,4","Matin:0,1,2,3,4","Après-midi:0,1,2,3,4","Journée longue:0,1,2,3,4","Samedi matin:5","Samedi après-midi:5","Samedi journée:5"]
+Options de recopie (mercredi) : Appliquer ces horaires aux autres jours ouverts | Copier la veille (mardi)
+Mercredi après « Copier la veille » : [{"start":510,"end":900},{"start":840,"end":1170}] | toast : Horaires du mardi recopiés sur le mercredi.
+Annuler
+Bouton coupure samedi (9-13) : 0 | dimanche (9-19) : 1
+JOURS FÉRIÉS : Jours fériés | Officine fermée les jours fériés (hors gardes) |  | L’officine est fermée ces jours-là, hors gardes : aucun poste n’y est proposé. |  | Noël | Vendredi 25 décembre | Jour de l’an | Vendredi 1er janvier | Lundi de Pâques | Lundi 29 mars | Fête du Travail | Samedi 1er mai | Ascension | Jeudi 6 mai | Victoire 1945 | Samedi 8 mai | Lundi de Pentecôte | Lundi 17 mai | Fête nationale | Me
+Effectif -3 → enregistré : -3
+Effectif vidé → enregistré : 0 | affiché : 0
+Lignes du tableau effectif (modifiables : nombre seulement) : 5 | boutons ajout/suppression : 0
+MODÈLE (défaut) : Qui prépare le planning ? | Façon de construire le planning | Avec l’équipe | Chacun dit ce qui l’arrange pour le mois suivant, puis vous construisez. | Vous seul | Vous construisez sans recueillir de préférences ; l’équipe consulte le planning publié. | Préférences à donner avant le | 1 | 2 | 3 | 4
+PUBLICATION (défaut) : Publication du planning, au mois | Le planning d’un mois est transmis à l’équipe au plus tard | Nombre de jours avant le 1er du mois | jours avant le 1er. | Solvéa vous le rappelle | Nombre de jours de rappel avant l’échéance | jours avant cette échéance, sur le tableau de bord. |  | Pour décembre : rappel à partir du mar. 10 novembre, à publier au plus tard le mar. 17 novembre. |  | Passé l’échéa
+Limite préférences 28 : Pour décembre : jusqu’au sam. 28 novembre | publication : Pour décembre : rappel à partir du mar. 10 novembre, à publier au plus tard le mar. 17 novembre. | alerte : 0
+Délai « 0 » → affiché 1 | enregistré 1
+Délai « 100 » → affiché 45 | enregistré 45
+Délai « -5 » → affiché 1 | enregistré 1
+Délai «  » → affiché 1 | enregistré 1
+Rappel 40 → 30
+Postes types : 8
+Poste Matin fin 07:00 → enregistré 8.5 → 7 | travail effectif affiché : −1 h 30
+Jours d’un poste type modifiables en ligne : 0 | pause ajoutable sur « Matin » (sans pause) : 0
+Après suppression « Fermeture » : toast = Horaires du mardi recopiés sur le mercredi.
+Annuler | postes = Ouverture, Matin, Après-midi, Journée longue, Samedi matin, Samedi après-midi, Samedi journée
+Choix de jours : Du lundi au vendredi / Le samedi / Du lundi au samedi / Tous les jours
+Fin avant début : message = La fin doit venir après le début. | bouton désactivé : true
+Poste 6 h - 23 h tous les jours (pharmacie 8 h 30 - 19 h 30, dimanche fermé) : bouton actif = true | alerte : 0
+Renfort nuit enregistré : {"s":360,"e":1380,"jours":[0,1,2,3,4,5,6],"couleur":"bleu"}
+Paramètres → valeurPoint -2 | plafond -4 | CA 2900000
+Résumé paramètres : Valeur du point : -2 € · -4 demande prioritaire par personne · coûts estimés masqués
+ERREURS console : aucune
+
+[exited with code 0]

@@ -1,0 +1,52 @@
+Ajout préparations : Compétences mises à jour. Annuler
+Tests angine (préparateur) : disabled=true title=Réservé aux pharmaciens
+Compétences Nicolas : orthopedie,preparations
+Accueil compétences : MES COMPÉTENCES | Orthopédie (DU) | Préparations magistrales | MES PROCHAINS
+MDP actuel vide : bouton grisé=true ; erreur=- ; toast=- ; pastille=Connexion Identifiant : nicolas.lesyndicaliste Mot de passe provisoire
+MDP actuel faux : bouton grisé=false ; erreur=Le mot de passe actuel ne correspond pas. ; toast=- ; pastille=Connexion Identifiant : nicolas.lesyndicaliste Mot de passe provisoire
+MDP nouveau trop court : bouton grisé=false ; erreur=Le nouveau mot de passe doit compter au moins 6 caractères. ; toast=- ; pastille=Connexion Identifiant : nicolas.lesyndicaliste Mot de passe provisoire
+MDP correct : bouton grisé=false ; erreur=- ; toast=- ; pastille=Connexion Identifiant : nicolas.lesyndicaliste Mot de passe personnel
+Après « Se déconnecter » (page compte) : Le planning d’équipe de votre pharmacie | Connexion | Votre identifiant et votre mot de passe. | Identifiant | Adresse électronique ou prenom.nom | Mot de passe | dialogue=0
+Connexion ancien mdp : Identifiant ou mot de passe incorrect.
+Connexion nouveau mdp : Accueil · Solvéa
+Déconnexion par le menu : Avant de vous déconnecter | 1 sujet en cours. Prenez le temps de les traiter, ou retrouvez-les à votre retour. | Rien ne sera perdu. Tout ce que vous avez fait est déjà enregistré sur cet appareil, brouillons compris. | 1 message non lu | Ils vous attendront à votre retour. | Traiter | Me déconnecter quand même | Rester et finir
+Dépôt .txt : Déposez une photo ou un PDF.
+Dépôt PDF 700 Ko : Ce PDF dépasse 600 Ko : photographiez plutôt le document.
+Dépôt PNG : Document rangé dans votre espace. Annuler
+Dépôt PDF privé : Document rangé dans votre espace. Annuler
+Liste : arret.jpg | Arrêt de travail · déposé le ven. 20 novembre · 1 Ko | Visible par les titulaires | Ouvrir | attestation.pdf | Attestation de formation · déposé le ven. 20 novembre · 1 Ko | Visible par les titulaires | Ouvrir
+Même fichier redéposé, nb docs : 3
+Supprimer : dialogue=0 ; Document supprimé. Annuler ; nb docs=2
+Après rechargement : attestation.pdf | Attestation de formation · déposé le ven. 20 novembre · 1 Ko | Visible par les titulaires | Ouvrir | arret.jpg | Attestation de formation · déposé le ven. 20 novembre · 1 Ko | Visible par les titulaires | Ouvrir
+Voir une ancienne semaine : Planning de l’équipe · Solvéa / 9 – 15 novembre 2026 | Semaine 46 | Publié le 28 octobre 2026 à 17 h 30 | Toute l’équipe | Mes postes
+Envoyer vide : grisé=true
+Envoyer espaces : grisé=true
+Entrée dans le champ : texte resté (« Bonjour, je confirme ma présence samedi.⏎ »)
+Fil Caroline : Vous : | Bonjour Caroline, serait-il possible de me libérer mercredi prochain après 17 h ? Merci. | 19 novembre 2026 à 14 h 40 | Vous : | Bonjour, je confirme ma présence samedi. | 20 novembre 2026 à 21 h
+Dialogue RDV : Demander un rendez-vous | La demande part dans la conversation. Une fois acceptée, le rendez-vous est fixé dans les deux agendas. | Avec | Caroline Tellier | Pierre Fiandino | Igor Le Russe | Léa Fontaine | Thomas Nguyen | Inès Da Silva | Jules Perrin | Sarah Lemoine | Manon Girard | Yanis Morel | Sujet | Formation ou compétence | Mon planning | Mon contrat ou mes heures | Entretien annuel | Autre sujet | Quand ? | Solvéa propose, quand vous êtes tous les deux en poste | Samedi 21 novembre · 14 h | Lundi 23 novembre · 14 h | Mardi 24 novembre · 15 h | Jour | À | Durée | 15 minutes | 30 minutes | 45 minutes | 1 heure | Samedi 21 novembre, 14 h – 14 h 30 | Un mot pour Caroline (facultatif) | Annuler | Envoyer la demande
+Sujets : Formation ou compétence / Mon planning / Mon contrat ou mes heures / Entretien annuel / Autre sujet
+RDV dimanche 22 :  | Solvéa propose, quand vous êtes tous les deux en poste | Samedi 21 novembre · 14 h | Lundi 23 novembre · 14 h | Mardi 24 novembre · 15 h | Jour | À | Durée | 15 minutes | 30 minutes | 45 minutes | 1 heure | Dimanche 22 novembre, 14 h – 14 h 30 | Nicolas n’est pas en poste à ce moment-là. | Caroline n’est pas en poste à ce moment-là. | L’officine est fermée ce jour-là. | Un mot pour Caroline (facultatif) | Annuler | Envoyer la demande ; envoyer grisé=false
+RDV envoyé : Demande de rendez-vous envoyée à Caroline T. : samedi 21 novembre, 14 h – 14 h 30. Annuler
+Fil après RDV : Vous : | Bonjour Caroline, serait-il possible de me libérer mercredi prochain après 17 h ? Merci. | 19 novembre 2026 à 14 h 40 | Vous : | Bonjour, je confirme ma présence samedi. | 20 novembre 2026 à 21 h | Vous : | Demande de rendez-vous : Formation ou compétence, sam. 21 novembre, de 14 h à 14 h 30. | 20 novembre 2026 à 21 h | EN ATTENTE DE LA RÉPONSE DE CAROLINE | Formation ou compétence | Samedi 21 novembre, 14 h – 14 h 30 | Annuler le rendez-vous
+
+Caroline carte RDV : NOUVEAUX MESSAGES | Nicolas L. | Bonjour Caroline, serait-il possible de me libérer mercredi prochain après 17 h ? Merci. | 19 novembre 2026 à 14 h 40 | Nicolas L. | Bonjour, je confirme ma présence samedi. | 20 novembre 2026 à 21 h | Nicolas L. | Demande de rendez-vous : Formation ou compétence, sam. 21 novembre, de 14 h à 14 h 30. | 20 novembre 2026 à 21 h | EN ATTENTE DE RÉPONSE | Formation ou compétence | Samedi 21 novembre, 14 h – 14 h 30 | Accepter | Proposer un autre horaire | Décliner
+Caroline accepte : Rendez-vous fixé : samedi 21 novembre, 14 h – 14 h 30. Il est dans votre agenda. Annuler
+Caroline documents (onglets) : Plannings publiés | 11 | Mes absences | 0 | Mes fichiers | 0 | Reçus de l’équipe | 0 | Absences de l’équipe | 3
+Caroline documents équipe : BILAN | Mes documents | Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit. | Plannings publiés | 11 | Mes absences | 0 | Mes fichiers | 0 | Reçus de l’équipe | 0 | Absences de l’équipe | 3 | Aucun document partagé par l’équipe. | Une question sans réponse ? Support Solvéa : | 01 99 00 12 34 | · | support@solvea.example
+
+Accueil RDV : Mes rendez-vous | Demander un rendez-vous | Samedi 21 novembre, 14 h – 14 h 30 | Formation ou compétence · avec Caroline T. | Fixé | Mes raccourcis
+Mon planning RDV : 14 h – 14 h 30 · Rendez-vous avec Caroline T.
+Calendrier : LUNDI	MARDI	MERCREDI	JEUDI	VENDREDI	SAMEDI	DIMANCHE | 26 | lundi 26 octobre 2026, voir la journée | 	 | 27 | mardi 27 octobre 2026, voir la journée | 	 | 28 | mercredi 28 octobre 2026, voir la journée | 	 | 29 | jeudi 29 octobre 2026, voir la journée | 	 | 30 | vendredi 30 octobre 2026, voir la journée | 	 | 31 | samedi 31 octobre 2026, voir la journée | 	 | 1 | dimanche 1er novembre 2026, voir la journée | 2 | lundi 2 novembre 2026, voir la journée | Journée | 8 h 30 | à | 16 h 30 | 	 | 3 | mardi 3 novembre 2026, voir la journée | Journée | 8 h 30 | à | 16 h 30 | 	 | 4 | mercredi 4 novembre 2
+Calendrier décembre : Décembre 2026 | 4 jours travaillés · 27 h 30 prévues | Aujourd’hui
+Calendrier janvier : Janvier 2027 | Aucun horaire publié ce mois-ci pour l’instant. | Aujourd’hui
+Aperçu impression : Aller au contenu | MON ESPACE | Accueil | Mon planning | Mes demandes | Mon suivi | Mes documents | L’ÉQUIPE | Planning de l’équipe | Messages | 1 | messages non lus | Besoin d’aide ? | Aide, tutoriels et lexique | Enregistré sur cet appareil à 21 h | Espace préparateur | , environnement de test : changer de profil | Grande Pharmacie de la Pinède | ven. 20 novembre | Faire une demande | Retard ou absence | , signaler | 2 | notifications, ouvrir la liste | 1 | NL | Nicolas L. | , ouvrir le menu du compte | MON PLANNING | Quand est-ce que je travaille ? | Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous. | Faire une demande | Imprimer | Planning de l’équipe | PROCHAIN POSTE | Demain · journée longue | 9 h – 19 h | 9 h de travail · pause déjeuner 13 h – 14 h · pauses courtes à 11 h, 16 h 30 (15 min) | Ensuite : Lun. 23 novembre, 8 h 30 – 16 h 30 | 
+Planning équipe semaine affichée : 9 – 15 novembre 2026 | Semaine 46 | Publié le 28 octobre 2026 à 17 h 30 | Toute l’équipe | Mes postes
+Préc. : 2 – 8 novembre 2026 | Semaine 45 | Publié le 21 octobre 2026 à 17 h 30 | Toute l’équipe | Mes postes
++3 : 30 novembre – 6 décembre 2026 | Semaine 49 | Publié le 18 novembre 2026 à 17 h 30 | Toute l’équipe | Mes postes ; undefined
+Intervention 10:00 20 min : Cette heure est en dehors de la garde. ; liste=0 h 10 · 25 min
+Intervention 23:00 0 min : Intervention déclarée. Annuler ; liste=23 h · 5 min 0 h 10 · 25 min
+Intervention 23:30 999 min : Intervention déclarée. Annuler ; liste=23 h · 5 min 23 h 30 · 999 min 0 h 10 · 25 min
+Intervention  20 min : Intervention déclarée. Annuler ; liste=23 h · 5 min 23 h 30 · 999 min 0 h 10 · 25 min
+Récap octobre : Récapitulatif mensuel | octobre 2026 · 1 garde | Mois | Imprimer | GARDE	ÉLÉMENT	QUANTITÉ | samedi 24 octobre	Garde à volets fermés : heures d’équivalence (25 % du temps passé)	1 h | samedi 24 octobre	Indemnité de sujétion dimanche ou jour férié (1,5 point par heure)	13,5 points | samedi 24 octobre	Garde à volets fermés un dimanche ou jour férié : heures de présence	9 h | samedi 24 octobre	Indemnité spéciale pour dérangement (montant : barème FSPF)	3 dérangement(s) | samedi 24 octobre	Repos compensateur à positionner	9 h
+!! ÉCHEC lea: locator.fill: Timeout 30000ms exceeded.
+ERR []

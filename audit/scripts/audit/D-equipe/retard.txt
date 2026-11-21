@@ -1,0 +1,203 @@
+Dialogue : Prévenir d’un retard | Votre poste : demain, 9 h – 19 h. Les titulaires sont prévenus aussitôt. | De combien serez-vous en retard ? | 5 min | 10 min | 15 min | + de 20 min | Arrivée prévue vers 9 h 10, au lieu de 9 h. | Pourquoi ? facultatif | Transport | Santé | Famille | Autre raison | Un mot pour les titulaires facultatif | Caroline T. et Pierre F. reçoivent une notification et un message. La raison n’est vue que des titulaires. | Annuler | Prévenir les titulaires
+  durée « 0 » → Arrivée prévue vers 9 h 01, au lieu de 9 h. ; champ= ; bouton actif=true
+  durée « -15 » → Arrivée prévue vers 9 h 01, au lieu de 9 h. ; champ=-15 ; bouton actif=true
+  durée « 3 » → Arrivée prévue vers 9 h 03, au lieu de 9 h. ; champ=3 ; bouton actif=true
+  durée « 500 » → Arrivée prévue vers 13 h, au lieu de 9 h. ; champ=500 ; bouton actif=true
+  durée «  » → Arrivée prévue vers 9 h 01, au lieu de 9 h. ; champ= ; bouton actif=true
+  durée « 45 » → Arrivée prévue vers 9 h 45, au lieu de 9 h. ; champ=45 ; bouton actif=true
+Effet : -
+Envoi 15 min : Caroline T. et Pierre F. sont prévenus : arrivée vers 9 h 15.
+État accueil : Retard annoncé : 15 min | Demain, poste de 9 h : arrivée prévue vers 9 h 15. Les titulaires sont prévenus. | Modifier | Je serai à l’heure
+État Mon planning : Retard annoncé : 15 min | Demain, poste de 9 h : arrivée prévue vers 9 h 15. Les titulaires sont prévenus. | Modifier | Je serai à l’heure
+Modifier, titre : Modifier mon avis de retard ; sélection : 15 min
+Correction 30 min : Caroline T. et Pierre F. sont prévenus : arrivée vers 9 h 30.
+État : Retard annoncé : 30 min | Demain, poste de 9 h : arrivée prévue vers 9 h 30. Les titulaires sont prévenus. | Modifier | Je serai à l’heure
+Je serai à l’heure : Avis de retard annulé : les titulaires sont prévenus.
+État : Prévenir d’un retard
+
+Signaler (vide) : bouton « Choisissez retard ou absence » grisé=true
+Signaler retard : Signaler un retard ou une absence | Vos titulaires sont prévenus aussitôt. | Que se passe-t-il ? | Un retard | Je serai là, mais plus tard que prévu. | Une absence | Je ne pourrai pas venir. | De combien ? poste de demain, 9 h – 19 h | 5 min | 10 min | 15 min | + de 20 min | Arrivée prévue vers 9 h 10, au lieu de 9 h. | Un mot facultatif | Caroline T., Pierre F. reçoivent une notification et un message. | Annuler | Prévenir les titulaires
+Absence du 10/11 (passé) : du=2026-11-10 au=2026-11-20 ; 8 postes sont planifiés sur ces dates : vos titulaires décideront comment les couvrir. ; bouton grisé=false
+Absence 21/11 → 20/11 : au affiché=2026-11-21 ; 1 poste est planifié le sam. 21 novembre : vos titulaires décideront comment le couvrir.
+Absence 21/11 → 23/11 : 2 postes sont planifiés sur ces dates : vos titulaires décideront comment les couvrir.
+Accident : L’accident ces faits servent à la déclaration | À la pharmacie | En mission à l’extérieur | Sur le trajet | Le jour de l’accident | Vers quelle heure si connue | Ce qui s’est passé, en quelques mots | Un témoin, ou la première personne prévenue facultatif | La suite, dans l’ordre | Faites constater vos blessures par un médecin : il établit le certificat médical initial. | Votre employeur déclare l’accident à la caisse d’assurance maladie dans les 48 heures, dimanches et jours fériés non comptés : au plus tard le lun. 23 novembre. | Il vous remet la feuille d’accident : elle vous évite d’avancer les frais de soins. | Solvéa rappelle le délai et garde les faits : la déclaration elle-même se fait auprès de la caisse.
+Jour accident futur (25/11) accepté dans le champ : 2026-11-25
+Absence maladie envoyée : Absence signalée. Caroline T., Pierre F. sont prévenus.
+Mes demandes après :  | Congé | Du lun. 30 novembre au ven. 4 décembre · 5 jours | Dans 10 jours | Envoyée | : fait | Réponse du titulaire | : en cours | Au planning | : à venir | Votre titulaire n’a pas encore répondu. | En attente | Arrêt | Du sam. 21 novembre au lun. 23 novembre · 3 jours | Demain | Envoyée | : fait | Réponse du titulaire | : en cours | Au planning | : à venir | Votre titulaire n’a pas encore répondu. | En attente | Finir avant 17 h - mercredi (une semaine sur deux) | Horaire à tenir | Envoyée | : fait | Réponse du titulaire | : fait | Au planning | : fait | Acceptée : servie avant les autres, sans être garantie. | Préférence prioritaire | Demandes prioritaires utilisées : 1 sur 2. Même plafond pour toute l’équipe. | Une question sans réponse ? Support Solvéa : | 01 99 00 12 34 | · | support@solvea.example
+Mon planning après signalement : pauses courtes à 11 h, 16 h 30 (15 min) | Ensuite : Lun. 23 novembre, 8 h 30 – 16 h 30 | Retard annoncé : 10 min | Demain, poste de 9 h : arrivée prévue vers 9 h 10. Les titulaires sont prévenus. | Modifier | Je serai à l’heure | Mes semaines | Semaine | Calendrier | Cette semaine · 16 – 22 novembre 2026 | Semaine 47 · publié le 4 novembre 2026 à 17 h 30 | 34 h 30 prévues | 5 jours | 16 | Lundi | novembre | , voir la journée | Repos | 17 | Mardi | novembre | , voir la journée | Journée | 8 h 30 – 16 h 30 | 7 h de travail | Pause déjeuner 12 h 30 – 13 h 30 | Pauses courtes à 10 h 30, 15 h (15 m
+
+Caroline tableau : CT
+VENDREDI 20 NOVEMBRE 2026
+Bonsoir Caroline 
+
+Titulaire principal · Grande Pharmacie de la Pinède
+
+8 décisions
+vous attendent.
+Concentrez-vous sur la priorité, le reste suit dans l’ordre.
+
+L’équipe aujourd’hui
+7 en poste
+1 absent
+Pharmacien présent
+95 %
+cette semaine
+Semaine prochaine
+Publiée
+à partir du 23 nov.
+Compteurs d’heures
+8 à régulariser
+en plus ou en moins
+Prochaine garde
+Dim. 29 nov.
+Léa F.
+AUJOURD’HUI AU COMPTOIR
+7 personnes en poste · 1 absent
+Voir la journée
+8 h
+10 h
+12 h
+14 h
+16 h
+18 h
+20 h
+Journée terminée · 21 h
+CT
+Caroline T.
+Titulaire principal
+8 h 30
+16 h 30
+8 h 30 – 16 h 30
+PF
+Pierre F.
+Titulaire secondaire
+8 h 30
+16 h 30
+8 h 30 – 16 h 30
+TN
+Thomas N.
+Préparateur
+8 h 30
+13 h
+8 h 30 – 13 h
+JP
+Jules P.
+Préparateur
+8 h 30
+16 h 30
+8 h 30 – 16 h 30
+SL
+Sarah L.
+Animateur
+8 h 30
+16 h 30
+8 h 30 – 16 h 30
+NL
+Nicolas L.
+Préparateur
+11 h 30
+19 h 30
+11 h 30 – 19 h 30
+ID
+Inès D.
+Préparateur
+14 h
+19 h 30
+14 h – 19 h 30
+
+Absent : Igor L.
+
+À FAIRE EN PREMIER
+1 poste sans personne
+
+Le plus proche : celui de Igor L., ven. 20 novembre de 11 h 30 à 19 h 30.
+
+Couvrir l’absence
+À DÉCIDER
+8 décisions à prendre
+Tout voir
+Absences à couvrir
+1
+Remplacements
+1
+Demandes de l’équipe
+3
+Gardes
+3
+PLANNING DE DÉCEMBRE
+En retard depuis le mar. 17 novembre
+
+4 semaines vides. Solvéa peut les préparer en brouillon d’après vos habitudes ; rien n’est publié sans vous.
+
+Préparer décembre
+LE PROCHAIN PLANNING
+Semaine du 7 – 13 décembre 2026
+Construire
+1
+Préférences
+7/11 reçues
+2
+Brouillon
+À construire
+3
+Contrôles
+Après le brouillon
+4
+Publication
+À envoyer à l’équipe
+MON AGENDA
+Demain : 9 h – 19 h
+Mon planning
+ENSUITE
+Lun. 23 novembre
+8 h 30 – 19 h 30
+Mar. 24 novembre
+11 h 30 – 19 h 30
+Mer. 25 novembre
+8 h 30 – 16 h 30
+Jeu. 26 novembre
+8 h 30 – 16 h 30
+RENDEZ-VOUS
+
+Aucun rendez-vous à venir. Une demande acceptée se fixe ici et dans « Mon planning ».
+
+DÉJÀ DÉCIDÉ
+Décisions récentes
+Ce qui a été décidé, et ce que cela change dans les plannings. Les personnes concernées sont prévenues.
+Tout marquer comme lu
+Nicolas L. signale une absence du sam. 21 novembre au lun. 23 novembre
+2 postes sont concernés : à décider dans « Résoudre », puis à couvrir.
+Décidé par Nicolas L. · à l’instant
+Vu
+Nicolas L. prévient d’un retard de 10 min, demain
+Arrivée prévue vers 9 h 10, au lieu de 9 h.
+Décidé par Nicolas L. · à l’instant
+Vu
+Nicolas L. sera finalement à l’heure, demain
+Prise de poste à 9 h, comme prévu.
+Décidé par Nicolas L. · à l’instant
+Vu
+Nicolas L. prévient d’un retard de 30 min, demain
+Arrivée prévue vers 9 h 30, au lieu de 9 h.
+Décidé par Nicolas L. · à l’instant
+Vu
+Nicolas L. prévient d’un retard de 15 min, demain
+Arrivée prévue vers 9 h 15, au lieu de 9 h.
+Décidé par Nicolas L. · à l’instant
+Vu
+Arrêt d’Igor L. enregistré
+3 postes d’Igor L. retirés du planning, du mer. 18 novembre au ven. 20 novembre.
+3 postes à couvrir : les titulaires s’en chargent dans « Résoudre ».
+Décision · il y a 13 h
+Vu
+Une question sans réponse ? Support Solvéa :
+01 99 00 12 34
+·
+support@solvea.example
+Caroline cloche : DÉCIDÉ RÉCEMMENT | Nicolas L. signale une absence du sam. 21 novembre au lun. 23 novembre | 2 postes sont concernés : à décider dans « Résoudre », puis à couvrir. | Décidé par Nicolas L. · à l’instant | Vu | Nicolas L. prévient d’un retard de 10 min, demain | Arrivée prévue vers 9 h 10, au lieu de 9 h. | Décidé par Nicolas L. · à l’instant | Vu | Nicolas L. sera finalement à l’heure, demain | Prise de poste à 9 h, comme prévu. | Décidé par Nicolas L. · à l’instant | Vu | Nicolas L. prévient d’un retard de 30 min, demain | Arrivée prévue vers 9 h 30, au lieu de 9 h. | Décidé par Nicolas L. · à l’instant | Vu | Tout marquer comme lu (6) | À VOIR | Prévu · Igor L. attend un volontaire | 1 | Autres décisions à prendre | 7 | Compteurs d’heures en dessous du contrat | 8
+Fil Nicolas : NOUVEAUX MESSAGES | Nicolas L. | Bonjour Caroline, serait-il possible de me libérer mercredi prochain après 17 h ? Merci. | 19 novembre 2026 à 14 h 40 | Nicolas L. | Je serai en retard d’environ 15 min demain. Arrivée prévue vers 9 h 15, au lieu de 9 h. (Transport : Bus en retard) | 20 novembre 2026 à 21 h | Nicolas L. | Correction : je serai en retard d’environ 30 min demain. Arrivée prévue vers 9 h 30, au lieu de 9 h. (Transport : Bus en retard) | 20 novembre 2026 à 21 h | Nicolas L. | Finalement, je serai à l’heure demain, à 9 h. | 20 novembre 2026 à 21 h | Nicolas L. | Je serai en retard d’environ 10 min demain. Arrivée prévue vers 9 h 10, au lieu de 9 h. | 20 novembre 2026 à 21 h | Nicolas L. | Je ne pourrai pas venir du sam. 21 novembre au lun. 23 novembre (arrêt). Fièvre | 20 novembre 2026 à 21 h
+Résoudre : Absences | 1 | à traiter | Remplacements | 1 | à traiter | Demandes | 3 | à traiter | Gardes | 3 | à traiter | À publier | 0 | à traiter
+
+RETARDS : [{"id":"ret_mwpgqao0_fjp7","personId":"p_camille","date":"2026-11-21","start":540,"minutes":10,"at":"2026-11-20T21:00:00.000Z"}]
+ABSENCES Nicolas : [{"id":"a_mwpgqao0_f13v","personId":"p_camille","from":"2026-11-30","to":"2026-12-04","type":"conge","statut":"demandee","motif":"repos","createdAt":"2026-11-18T13:15:00.000Z"},{"id":"a_mwpgqao0_foup","personId":"p_camille","from":"2026-11-21","to":"2026-11-23","type":"maladie","statut":"demandee","createdAt":"2026-11-20T21:00:00.000Z","imprevue":true,"precision":"Fièvre"}]
+ERR []

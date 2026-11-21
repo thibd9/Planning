@@ -1,0 +1,10 @@
+t-res-reglage {"H":410,"T":3992,"titre":"Comment régler cette absence ?"} {"pageDeborde":0,"petits":["11.5px « Conseillé »"],"nPetits":3,"contrastes":[],"nContrastes":0,"coupes":[],"cibles":["22×22 "],"nCibles":1,"deborde":[],"defilH":[]}
+Choisir : pas de fenêtre ; toast Option retenue. Pensez à publier la modification pour prévenir l’équipe.
+Voir dans le planning
+Annuler
+t-res-refus {"H":519,"T":519,"titre":"Refuser la demande"} {"pageDeborde":0,"petits":[],"nPetits":0,"contrastes":[],"nContrastes":0,"coupes":[],"cibles":["22×22 "],"nCibles":1,"deborde":[],"defilH":[]}
+boutons Décider 2
+t-res-decider1 {"H":467,"T":802,"titre":"Décider : congé de Nicolas L."} {"pageDeborde":0,"petits":["11.5px « NL »"],"nPetits":1,"contrastes":[],"nContrastes":0,"coupes":[],"cibles":[],"nCibles":0,"deborde":[],"defilH":[]}
+t-res-decider2 {"H":488,"T":1068,"titre":"Décider : demande d’horaires de Jules P."} {"pageDeborde":0,"petits":["11.5px « JP »"],"nPetits":1,"contrastes":[],"nContrastes":0,"coupes":[],"cibles":[],"nCibles":0,"deborde":[],"defilH":[]}
+après Affecter : vue De la garde à la paie défilement 0
+erreurs []

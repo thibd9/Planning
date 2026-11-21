@@ -1,0 +1,555 @@
+{
+ "mes": {
+  "tableau": {
+   "n": 3,
+   "pageDeborde": 0,
+   "petits": [
+    "11px « vendredi 20 novembre 2026 »",
+    "11.5px « Aujourd’hui au comptoir »",
+    "11px « 8 h »",
+    "11px « 10 h »",
+    "11px « 12 h »",
+    "11px « 14 h »",
+    "11px « 16 h »",
+    "11px « 18 h »",
+    "11px « 20 h »",
+    "11.5px « Journée terminée · 23 h 28 »",
+    "11.5px « CT »",
+    "11.5px « 8 h 30 »",
+    "11.5px « 16 h 30 »",
+    "11.5px « PF »",
+    "11.5px « TN »",
+    "11.5px « 13 h »",
+    "11.5px « JP »",
+    "11.5px « SL »",
+    "11.5px « NL »",
+    "11.5px « 11 h 30 »",
+    "11.5px « 19 h 30 »",
+    "11.5px « ID »",
+    "11.5px « 14 h »",
+    "11.5px « À faire en premier »",
+    "11.5px « À décider »",
+    "11.5px « Planning de décembre »",
+    "11.5px « Le prochain planning »",
+    "11.5px « Mon agenda »",
+    "11.5px « Ensuite »",
+    "11.5px « Rendez-vous »",
+    "11.5px « Déjà décidé »"
+   ],
+   "nPetits": 39,
+   "contrastes": [],
+   "nContrastes": 0,
+   "coupes": [],
+   "cibles": [
+    "133×34 Mon planning",
+    "172×34 Tout marquer comme lu",
+    "59×34 Vu : Arrêt d’Igor L. enregistr",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 5,
+   "deborde": [],
+   "defilH": []
+  },
+  "moi": {
+   "n": 2,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Mon planning »",
+    "11.5px « Prochain poste »"
+   ],
+   "nPetits": 2,
+   "contrastes": [
+    "1.12 13.5px « Semaine »"
+   ],
+   "nContrastes": 1,
+   "coupes": [],
+   "cibles": [
+    "118×34 Je me propose",
+    "102×34 Semaine",
+    "113×34 Calendrier",
+    "109×38 16lundinovembre, voir la journ",
+    "109×38 17mardinovembre, voir la journ",
+    "112×38 18mercredinovembre, voir la jo",
+    "109×38 19jeudinovembre, voir la journ",
+    "119×38 20vendrediAujourd’hui, voir la",
+    "109×38 21samedinovembre, voir la jour",
+    "109×38 23lundinovembre, voir la journ",
+    "109×38 24mardinovembre, voir la journ",
+    "112×38 25mercredinovembre, voir la jo",
+    "109×38 26jeudinovembre, voir la journ",
+    "113×38 27vendredinovembre, voir la jo",
+    "109×38 28samedinovembre, voir la jour",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 17,
+   "deborde": [],
+   "defilH": []
+  },
+  "equipe": {
+   "n": 3,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Équipe »",
+    "11.5px « Pharmaciens »",
+    "11.5px « Titulaires »",
+    "11.5px « · 2 »",
+    "11.5px « Préparateurs »",
+    "11.5px « · 4 »",
+    "11.5px « Animateurs »",
+    "11.5px « · 1 »",
+    "11.5px « Apprentis »",
+    "11.5px « Étudiants »",
+    "11.5px « Remplaçants habituels »"
+   ],
+   "nPetits": 15,
+   "contrastes": [
+    "1.38 14px « Vaccination »",
+    "1.38 14px « Tests angine et cystite »",
+    "1.38 14px « Entretiens pharmaceutiques »"
+   ],
+   "nContrastes": 3,
+   "coupes": [],
+   "cibles": [
+    "22×22 ",
+    "161×34 Retirer de l’équipe",
+    "242×34 Voir les statistiques de l’équ",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 5,
+   "deborde": [],
+   "defilH": []
+  },
+  "officine": {
+   "n": 1,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Officine »"
+   ],
+   "nPetits": 1,
+   "contrastes": [
+    "1.12 13.5px « Pharmacie »"
+   ],
+   "nContrastes": 1,
+   "coupes": [],
+   "cibles": [
+    "116×34 Pharmacie",
+    "103×34 Horaires",
+    "108×34 Comptoir",
+    "104×34 Planning",
+    "122×34 Paramètres",
+    "22×22 ",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 8,
+   "deborde": [],
+   "defilH": []
+  },
+  "regles": {
+   "n": 3,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Règles »",
+    "11.5px « 24 »",
+    "11.5px « 12 »",
+    "11.5px « 20 »",
+    "11.5px « 11 »"
+   ],
+   "nPetits": 5,
+   "contrastes": [
+    "1.12 13.5px « Toutes »"
+   ],
+   "nContrastes": 1,
+   "coupes": [],
+   "cibles": [
+    "103×34 Toutes 24",
+    "137×34 Obligatoires 12",
+    "122×34 Réglables 20",
+    "148×34 À faire valider 11",
+    "22×22 ",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 7,
+   "deborde": [],
+   "defilH": []
+  },
+  "construire": {
+   "n": 4,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Construire »",
+    "11.5px « Équipe »",
+    "11.5px « · titulaires compris »",
+    "11.5px « CT »",
+    "11.5px « 9 h 30 · comptoir »",
+    "11.5px « 7 h · comptoir »",
+    "11.5px « PF »",
+    "11.5px « 4 h 30 · comptoir »",
+    "11.5px « IL »",
+    "11px « 16 h »",
+    "11.5px « 5 h · comptoir »",
+    "11.5px « LF »",
+    "11px « 10 h »",
+    "11px « 09:00 → 19:00 »",
+    "11.5px « NL »",
+    "11.5px « TN »",
+    "11px « 14 h 30 »",
+    "11.5px « 9 h · comptoir »",
+    "11.5px « ID »",
+    "11.5px « JP »",
+    "11.5px « SL »",
+    "11.5px « MG »",
+    "11.5px « YM »",
+    "11.5px « fin avant 14 h 30 »",
+    "11.5px « fin avant 18 h »",
+    "11.5px « jusqu’au soir »",
+    "11.5px « début à 11 h 30 ou après »",
+    "11.5px « À surveiller »"
+   ],
+   "nPetits": 71,
+   "contrastes": [
+    "1.12 13.5px « Toute l’équipe »",
+    "1.12 13.5px « Semaine »",
+    "1.12 13.5px « Heures »"
+   ],
+   "nContrastes": 3,
+   "coupes": [],
+   "cibles": [
+    "137×34 Toute l’équipe",
+    "121×34 Mes postes",
+    "102×34 Semaine",
+    "77×34 Mois",
+    "92×34 Heures",
+    "88×34 Équité",
+    "22×22 ",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 9,
+   "deborde": [],
+   "defilH": []
+  },
+  "gardes": {
+   "n": 4,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Gardes »",
+    "11.5px « Répartition 2026 »",
+    "11.5px « CT »",
+    "11.5px « PF »",
+    "11.5px « IL »",
+    "11.5px « LF »",
+    "11px « oct. »",
+    "9.5px « IL »",
+    "11px « nov. »",
+    "9.5px « LF »",
+    "11px « déc. »",
+    "11.5px « Variable »",
+    "11.5px « Mois »",
+    "11.5px « Quantité »",
+    "11.5px « Montant estimé »"
+   ],
+   "nPetits": 18,
+   "contrastes": [
+    "1.12 12.5px « Titulaire principal »"
+   ],
+   "nContrastes": 1,
+   "coupes": [],
+   "cibles": [
+    "34×34 29 novembre, Garde de jour · v",
+    "34×34 12 décembre, Astreinte de nuit",
+    "34×34 25 décembre, Garde de jour · v",
+    "34×34 31 décembre, Garde de nuit · v",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 6,
+   "deborde": [],
+   "defilH": []
+  },
+  "resoudre": {
+   "n": 2,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Résoudre · vendredi 20 novembre 2026 »",
+    "11.5px « IL »",
+    "11.5px « LF »",
+    "11.5px « À valider »"
+   ],
+   "nPetits": 6,
+   "contrastes": [
+    "1.12 13.5px « Absences »"
+   ],
+   "nContrastes": 1,
+   "coupes": [],
+   "cibles": [
+    "139×34 Absences1 à traiter",
+    "178×34 Remplacements1 à traiter",
+    "144×34 Demandes2 à traiter",
+    "122×34 Gardes3 à traiter",
+    "133×34 À publier0 à traiter",
+    "72×34 Confier",
+    "289×40 1 point à valider · règles res",
+    "289×40 2 points à valider · règles re",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 10,
+   "deborde": [],
+   "defilH": []
+  },
+  "messages": {
+   "n": 2,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Messages »",
+    "11.5px « PF »",
+    "11.5px « IL »",
+    "11.5px « LF »",
+    "11.5px « ID »",
+    "11.5px « JP »",
+    "11.5px « NL »",
+    "11.5px « TN »",
+    "11.5px « MG »",
+    "11.5px « SL »",
+    "11.5px « YM »",
+    "11.5px « 19 novembre 2026 à 14 h 40 »"
+   ],
+   "nPetits": 12,
+   "contrastes": [],
+   "nContrastes": 0,
+   "coupes": [
+    "« Vous : Bonjour à tous, le planning de la semaine p »",
+    "« Nicolas Le Syndicaliste »",
+    "« Bonjour Caroline, serait-il possible de me libérer »"
+   ],
+   "cibles": [
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 2,
+   "deborde": [],
+   "defilH": []
+  },
+  "heures": {
+   "n": 3,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Compteur d’heures »",
+    "11.5px « IL »",
+    "11.5px « LF »",
+    "11.5px « NL »",
+    "11.5px « TN »",
+    "11.5px « ID »",
+    "11.5px « JP »",
+    "11.5px « SL »",
+    "11.5px « MG »",
+    "11.5px « YM »"
+   ],
+   "nPetits": 10,
+   "contrastes": [],
+   "nContrastes": 0,
+   "coupes": [],
+   "cibles": [
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 2,
+   "deborde": [],
+   "defilH": []
+  },
+  "equite": {
+   "n": 3,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Équité »",
+    "11.5px « YM »",
+    "11.5px « Ce qui est compté »",
+    "11.5px « D’où vient la part attendue »",
+    "11.5px « MG »",
+    "11.5px « ID »",
+    "11.5px « IL »",
+    "11.5px « TN »",
+    "11.5px « JP »",
+    "11.5px « CT »",
+    "11.5px « PF »",
+    "11.5px « NL »",
+    "11.5px « SL »",
+    "11.5px « LF »"
+   ],
+   "nPetits": 38,
+   "contrastes": [
+    "1.12 13.5px « 8 semaines »",
+    "1.12 13.5px « Samedis travaillés »"
+   ],
+   "nContrastes": 2,
+   "coupes": [],
+   "cibles": [
+    "96×34 8 semaines",
+    "100×34 12 semaines",
+    "66×34 6 mois",
+    "139×34 Samedis travaillés",
+    "173×34 Fermetures en semaine",
+    "154×34 Gardes et astreintes",
+    "157×34 Dépannages assurés",
+    "221×34 Changements tardifs absorbés",
+    "150×34 Demandes refusées",
+    "1112×21 Comment c’est calculé",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 12,
+   "deborde": [],
+   "defilH": []
+  },
+  "stats": {
+   "n": 2,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Statistiques »",
+    "11.5px « 8 / 22 »"
+   ],
+   "nPetits": 2,
+   "contrastes": [
+    "1.12 13.5px « Composition »"
+   ],
+   "nContrastes": 1,
+   "coupes": [],
+   "cibles": [
+    "129×34 Composition",
+    "192×34 Compétences8 / 22",
+    "151×34 Points forts7",
+    "98×34 Activité",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 6,
+   "deborde": [],
+   "defilH": []
+  },
+  "journal": {
+   "n": 2,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Journal et paie »",
+    "11.5px « Absence »",
+    "11.5px « Publication »"
+   ],
+   "nPetits": 6,
+   "contrastes": [
+    "1.12 13.5px « Journal »",
+    "1.12 13.5px « Tout »"
+   ],
+   "nContrastes": 2,
+   "coupes": [],
+   "cibles": [
+    "72×34 Journal",
+    "112×34 Fiche navette",
+    "52×34 Tout",
+    "127×34 Publications",
+    "112×34 Absences",
+    "172×32 24 règles appliquées",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 8,
+   "deborde": [],
+   "defilH": []
+  },
+  "documents": {
+   "n": 2,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Bilan »",
+    "11.5px « 11 »"
+   ],
+   "nPetits": 2,
+   "contrastes": [
+    "1.12 13.5px « Plannings publiés »"
+   ],
+   "nContrastes": 1,
+   "coupes": [],
+   "cibles": [
+    "196×35 Plannings publiés 11",
+    "168×35 Mes absences 0",
+    "154×35 Mes fichiers 0",
+    "190×35 Reçus de l’équipe 0",
+    "214×35 Absences de l’équipe 3",
+    "73×34 Voir",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 8,
+   "deborde": [],
+   "defilH": []
+  },
+  "aide": {
+   "n": 3,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Aide »",
+    "11.5px « 52 »",
+    "11.5px « 42 »",
+    "11.5px « 12 »"
+   ],
+   "nPetits": 5,
+   "contrastes": [
+    "1.12 13.5px « Comment faire »",
+    "1.12 13.5px « Au quotidien »"
+   ],
+   "nContrastes": 2,
+   "coupes": [],
+   "cibles": [
+    "179×35 Comment faire 52",
+    "135×35 Lexique 42",
+    "157×34 Au quotidien6",
+    "139×34 Préparer12",
+    "215×34 Construire et publier12",
+    "258×34 Absences et remplacements7",
+    "215×34 Suivre et faire le bilan6",
+    "211×34 Messages et support5",
+    "163×34 Mon planning3",
+    "172×34 Mes demandes1",
+    "199×34 Voir le tutoriel1 étape",
+    "202×34 Ouvrir le tableau de bord",
+    "176×34 Ouvrir « Construire »",
+    "208×34 Voir le tutoriel3 étapes",
+    "99×34 Signaler",
+    "170×34 Ouvrir « Résoudre »",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 18,
+   "deborde": [],
+   "defilH": []
+  },
+  "compte": {
+   "n": 4,
+   "pageDeborde": 0,
+   "petits": [
+    "11.5px « Mon compte »"
+   ],
+   "nPetits": 1,
+   "contrastes": [
+    "1.38 14px « Vaccination »",
+    "1.38 14px « Tests angine et cystite »",
+    "1.38 14px « Entretiens pharmaceutiques »"
+   ],
+   "nContrastes": 3,
+   "coupes": [],
+   "cibles": [
+    "36×36 Afficher le mot de passe",
+    "102×20 01 99 00 12 34",
+    "155×20 support@solvea.example"
+   ],
+   "nCibles": 3,
+   "deborde": [],
+   "defilH": []
+  }
+ },
+ "errs": []
+}

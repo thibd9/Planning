@@ -1,0 +1,955 @@
+{
+ "b1-r3-espace-b": {
+  "n": 2,
+  "hauteur": 1166,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11px « vendredi 20 novembre 2026 » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)",
+   "11.5px « Mon métier » (div.eyebrow)",
+   "11.5px « Mon agenda » (div.eyebrow)"
+  ],
+  "cibles": [
+   "213×34 « Demander un rendez-vous » (btn primary sm)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "11": 1,
+   "13": 8,
+   "14": 3,
+   "15": 4,
+   "16": 3,
+   "20": 1,
+   "24": 1,
+   "32": 2,
+   "11.5": 3,
+   "13.5": 2,
+   "14.5": 10,
+   "12.5": 1
+  },
+  "entete": {
+   "h1": "Bonjour Nicolas "
+  }
+ },
+ "b1-r3-moi-b": {
+  "n": 2,
+  "hauteur": 1321,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon planning » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)"
+  ],
+  "cibles": [
+   "102×34 « Semaine » (on)",
+   "113×34 « Calendrier » ()",
+   "109×38 « 16lundinovembre, voir la journ » (lien-jour)",
+   "109×38 « 17mardinovembre, voir la journ » (lien-jour)",
+   "112×38 « 18mercredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 19jeudinovembre, voir la journ » (lien-jour)",
+   "119×38 « 20vendrediAujourd’hui, voir la » (lien-jour)",
+   "109×38 « 21samedinovembre, voir la jour » (lien-jour)",
+   "109×38 « 23lundinovembre, voir la journ » (lien-jour)",
+   "109×38 « 24mardinovembre, voir la journ » (lien-jour)",
+   "112×38 « 25mercredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 26jeudinovembre, voir la journ » (lien-jour)",
+   "113×38 « 27vendredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 28samedinovembre, voir la jour » (lien-jour)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 10,
+   "13": 17,
+   "14": 2,
+   "15": 15,
+   "16": 2,
+   "17": 24,
+   "21": 1,
+   "32": 1,
+   "34": 2,
+   "11.5": 2,
+   "14.5": 4,
+   "13.5": 8,
+   "12.5": 28
+  },
+  "entete": {
+   "eyebrow": "MON PLANNING",
+   "h1": "Quand est-ce que je travaille ?",
+   "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous."
+  }
+ },
+ "b1-r3-demandes-b": {
+  "n": 2,
+  "hauteur": 1173,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « IL » (span.avatar c r-adjoint)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 20,
+   "13": 8,
+   "14": 2,
+   "15": 1,
+   "16": 2,
+   "17": 3,
+   "34": 2,
+   "11.5": 2,
+   "13.5": 6,
+   "14.5": 1,
+   "15.5": 2,
+   "12.5": 6
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes demandes",
+   "sous": "Choisissez ce que vous voulez faire."
+  }
+ },
+ "b1-r3-suivi-b": {
+  "n": 2,
+  "hauteur": 1132,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon suivi » (div.eyebrow)",
+   "11.5px « Vos points forts, vus par vos titulaires » (div.eyebrow)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 10,
+   "13": 12,
+   "15": 3,
+   "16": 4,
+   "20": 3,
+   "34": 2,
+   "11.5": 2,
+   "14.5": 6,
+   "13.5": 7
+  },
+  "entete": {
+   "eyebrow": "MON SUIVI",
+   "h1": "Où j’en suis",
+   "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement."
+  }
+ },
+ "b1-r3-documents-b": {
+  "n": 2,
+  "hauteur": 1392,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « 11 » (span.rg-nb num)"
+  ],
+  "cibles": [
+   "177×35 « Mes plannings 11 » (jr-filtre on)",
+   "168×35 « Mes absences 1 » (jr-filtre)",
+   "154×35 « Mes fichiers 0 » (jr-filtre)",
+   "73×34 « Voir » (btn sm)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "13": 25,
+   "15": 12,
+   "16": 3,
+   "34": 2,
+   "11.5": 2,
+   "13.5": 3
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes documents",
+   "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit."
+  }
+ },
+ "b1-r3-planning-b": {
+  "n": 2,
+  "hauteur": 1309,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Planning de l’équipe » (div.eyebrow)",
+   "11.5px « CT » (span.avatar c c-fort)",
+   "11.5px « 9 h 30 · comptoir » (span.ts)",
+   "11.5px « 7 h · comptoir » (span.ts)",
+   "11.5px « PF » (span.avatar c c-fort)",
+   "11.5px « 4 h 30 · comptoir » (span.ts)",
+   "11.5px « IL » (span.avatar c r-adjoint)",
+   "11.5px « 5 h · comptoir » (span.ts)",
+   "11.5px « LF » (span.avatar c r-adjoint)",
+   "11.5px « NL » (span.avatar c r-prepa)",
+   "11.5px « TN » (span.avatar c r-prepa)",
+   "11.5px « 9 h · comptoir » (span.ts)",
+   "11.5px « ID » (span.avatar c r-prepa)",
+   "11.5px « JP » (span.avatar c r-prepa)",
+   "11.5px « SL » (span.avatar c r-anim)",
+   "11.5px « MG » (span.avatar c r-apprenti)",
+   "11.5px « YM » (span.avatar c r-etudiant)"
+  ],
+  "cibles": [
+   "137×34 « Toute l’équipe » (on)",
+   "121×34 « Mes postes » ()",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 1,
+   "13": 127,
+   "14": 11,
+   "15": 1,
+   "19": 1,
+   "34": 2,
+   "11.5": 57,
+   "14.5": 1,
+   "12.5": 12,
+   "13.5": 2
+  },
+  "entete": {
+   "eyebrow": "PLANNING DE L’ÉQUIPE",
+   "h1": "Qui travaille quand ?",
+   "sous": "Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning »."
+  }
+ },
+ "b1-r3-messages-b": {
+  "n": 2,
+  "hauteur": 1411,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Messages » (div.eyebrow)",
+   "11.5px « CT » (span.avatar c c-fort)",
+   "11.5px « PF » (span.avatar c c-fort)",
+   "11.5px « IL » (span.avatar c r-adjoint)",
+   "11.5px « LF » (span.avatar c r-adjoint)",
+   "11.5px « ID » (span.avatar c r-prepa)",
+   "11.5px « JP » (span.avatar c r-prepa)",
+   "11.5px « TN » (span.avatar c r-prepa)",
+   "11.5px « MG » (span.avatar c r-apprenti)",
+   "11.5px « SL » (span.avatar c r-anim)",
+   "11.5px « YM » (span.avatar c r-etudiant)",
+   "11.5px « 19 novembre 2026 à 9 h 12 » (span.quand)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [
+   "« Bonjour à tous, le planning de la semaine prochain » (msg-apercu)",
+   "« Vous : Bonjour Caroline, serait-il possible de me  » (msg-apercu)"
+  ],
+  "hors": [],
+  "polices": {
+   "12": 8,
+   "13": 3,
+   "15": 1,
+   "16": 1,
+   "34": 2,
+   "11.5": 12,
+   "14.5": 14,
+   "13.5": 12
+  },
+  "entete": {
+   "eyebrow": "MESSAGES",
+   "h1": "Échanger avec l’équipe",
+   "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil."
+  }
+ },
+ "b1-r3-compte-b": {
+  "n": 3,
+  "hauteur": 2043,
+  "visible": 828,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon compte » (div.eyebrow)"
+  ],
+  "cibles": [
+   "36×36 « Afficher le mot de passe » (mdp-oeil)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 4,
+   "13": 11,
+   "14": 23,
+   "15": 1,
+   "16": 3,
+   "17": 1,
+   "19": 1,
+   "34": 2,
+   "11.5": 1,
+   "12.5": 6,
+   "14.5": 10,
+   "13.5": 4
+  },
+  "entete": {
+   "eyebrow": "MON COMPTE",
+   "h1": "Mes paramètres"
+  }
+ },
+ "b1-r3-espace-p": {
+  "n": 2,
+  "hauteur": 1127,
+  "visible": 692,
+  "deborde": 0,
+  "petits": [
+   "11px « vendredi 20 novembre 2026 » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)",
+   "11.5px « Mon métier » (div.eyebrow)",
+   "11.5px « Mon agenda » (div.eyebrow)"
+  ],
+  "cibles": [
+   "213×34 « Demander un rendez-vous » (btn primary sm)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "11": 1,
+   "13": 8,
+   "14": 3,
+   "15": 4,
+   "16": 3,
+   "20": 1,
+   "24": 1,
+   "25": 1,
+   "32": 1,
+   "11.5": 3,
+   "13.5": 2,
+   "14.5": 10,
+   "12.5": 1
+  },
+  "entete": {
+   "h1": "Bonjour Nicolas "
+  }
+ },
+ "b1-r3-moi-p": {
+  "n": 3,
+  "hauteur": 1709,
+  "visible": 692,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon planning » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)"
+  ],
+  "cibles": [
+   "102×34 « Semaine » (on)",
+   "113×34 « Calendrier » ()",
+   "109×38 « 16lundinovembre, voir la journ » (lien-jour)",
+   "109×38 « 17mardinovembre, voir la journ » (lien-jour)",
+   "112×38 « 18mercredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 19jeudinovembre, voir la journ » (lien-jour)",
+   "119×38 « 20vendrediAujourd’hui, voir la » (lien-jour)",
+   "109×38 « 21samedinovembre, voir la jour » (lien-jour)",
+   "109×38 « 23lundinovembre, voir la journ » (lien-jour)",
+   "109×38 « 24mardinovembre, voir la journ » (lien-jour)",
+   "112×38 « 25mercredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 26jeudinovembre, voir la journ » (lien-jour)",
+   "113×38 « 27vendredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 28samedinovembre, voir la jour » (lien-jour)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 10,
+   "13": 17,
+   "14": 3,
+   "15": 14,
+   "16": 2,
+   "17": 24,
+   "21": 1,
+   "30": 2,
+   "32": 1,
+   "11.5": 2,
+   "14.5": 4,
+   "13.5": 8,
+   "12.5": 28
+  },
+  "entete": {
+   "eyebrow": "MON PLANNING",
+   "h1": "Quand est-ce que je travaille ?",
+   "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous."
+  }
+ },
+ "b1-r3-demandes-p": {
+  "n": 2,
+  "hauteur": 1138,
+  "visible": 692,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « IL » (span.avatar c r-adjoint)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 20,
+   "13": 8,
+   "14": 3,
+   "16": 2,
+   "17": 3,
+   "30": 2,
+   "11.5": 2,
+   "13.5": 6,
+   "14.5": 1,
+   "15.5": 2,
+   "12.5": 6
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes demandes",
+   "sous": "Choisissez ce que vous voulez faire."
+  }
+ },
+ "b1-r3-suivi-p": {
+  "n": 3,
+  "hauteur": 1448,
+  "visible": 692,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon suivi » (div.eyebrow)",
+   "11.5px « Vos points forts, vus par vos titulaires » (div.eyebrow)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 10,
+   "13": 12,
+   "14": 1,
+   "15": 2,
+   "16": 4,
+   "20": 3,
+   "30": 2,
+   "11.5": 2,
+   "14.5": 6,
+   "13.5": 7
+  },
+  "entete": {
+   "eyebrow": "MON SUIVI",
+   "h1": "Où j’en suis",
+   "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement."
+  }
+ },
+ "b1-r3-documents-p": {
+  "n": 3,
+  "hauteur": 1357,
+  "visible": 692,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « 11 » (span.rg-nb num)"
+  ],
+  "cibles": [
+   "177×35 « Mes plannings 11 » (jr-filtre on)",
+   "168×35 « Mes absences 1 » (jr-filtre)",
+   "154×35 « Mes fichiers 0 » (jr-filtre)",
+   "73×34 « Voir » (btn sm)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "13": 25,
+   "14": 1,
+   "15": 11,
+   "16": 3,
+   "30": 2,
+   "11.5": 2,
+   "13.5": 3
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes documents",
+   "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit."
+  }
+ },
+ "b1-r3-planning-p": {
+  "n": 2,
+  "hauteur": 1272,
+  "visible": 692,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Planning de l’équipe » (div.eyebrow)",
+   "11.5px « CT » (span.avatar c c-fort)",
+   "11.5px « 9 h 30 · comptoir » (span.ts)",
+   "11.5px « 7 h · comptoir » (span.ts)",
+   "11.5px « PF » (span.avatar c c-fort)",
+   "11.5px « 4 h 30 · comptoir » (span.ts)",
+   "11.5px « IL » (span.avatar c r-adjoint)",
+   "11.5px « 5 h · comptoir » (span.ts)",
+   "11.5px « LF » (span.avatar c r-adjoint)",
+   "11.5px « NL » (span.avatar c r-prepa)",
+   "11.5px « TN » (span.avatar c r-prepa)",
+   "11.5px « 9 h · comptoir » (span.ts)",
+   "11.5px « ID » (span.avatar c r-prepa)",
+   "11.5px « JP » (span.avatar c r-prepa)",
+   "11.5px « SL » (span.avatar c r-anim)",
+   "11.5px « MG » (span.avatar c r-apprenti)",
+   "11.5px « YM » (span.avatar c r-etudiant)"
+  ],
+  "cibles": [
+   "137×34 « Toute l’équipe » (on)",
+   "121×34 « Mes postes » ()",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 1,
+   "13": 127,
+   "14": 12,
+   "19": 1,
+   "30": 2,
+   "11.5": 57,
+   "14.5": 1,
+   "12.5": 12,
+   "13.5": 2
+  },
+  "entete": {
+   "eyebrow": "PLANNING DE L’ÉQUIPE",
+   "h1": "Qui travaille quand ?",
+   "sous": "Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning »."
+  }
+ },
+ "b1-r3-messages-p": {
+  "n": 3,
+  "hauteur": 1374,
+  "visible": 692,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Messages » (div.eyebrow)",
+   "11.5px « CT » (span.avatar c c-fort)",
+   "11.5px « PF » (span.avatar c c-fort)",
+   "11.5px « IL » (span.avatar c r-adjoint)",
+   "11.5px « LF » (span.avatar c r-adjoint)",
+   "11.5px « ID » (span.avatar c r-prepa)",
+   "11.5px « JP » (span.avatar c r-prepa)",
+   "11.5px « TN » (span.avatar c r-prepa)",
+   "11.5px « MG » (span.avatar c r-apprenti)",
+   "11.5px « SL » (span.avatar c r-anim)",
+   "11.5px « YM » (span.avatar c r-etudiant)",
+   "11.5px « 19 novembre 2026 à 9 h 12 » (span.quand)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [
+   "« Bonjour à tous, le planning de la semaine prochain » (msg-apercu)",
+   "« Vous : Bonjour Caroline, serait-il possible de me  » (msg-apercu)"
+  ],
+  "hors": [],
+  "polices": {
+   "12": 8,
+   "13": 3,
+   "14": 1,
+   "16": 1,
+   "30": 2,
+   "11.5": 12,
+   "14.5": 14,
+   "13.5": 12
+  },
+  "entete": {
+   "eyebrow": "MESSAGES",
+   "h1": "Échanger avec l’équipe",
+   "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil."
+  }
+ },
+ "b1-r3-compte-p": {
+  "n": 4,
+  "hauteur": 1982,
+  "visible": 692,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon compte » (div.eyebrow)"
+  ],
+  "cibles": [
+   "36×36 « Afficher le mot de passe » (mdp-oeil)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 4,
+   "13": 11,
+   "14": 23,
+   "15": 1,
+   "16": 3,
+   "17": 1,
+   "19": 1,
+   "30": 2,
+   "11.5": 1,
+   "12.5": 6,
+   "14.5": 10,
+   "13.5": 4
+  },
+  "entete": {
+   "eyebrow": "MON COMPTE",
+   "h1": "Mes paramètres"
+  }
+ },
+ "b1-r3-espace-t": {
+  "n": 4,
+  "hauteur": 1900,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11px « vendredi 20 novembre 2026 » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)",
+   "11.5px « Mon métier » (div.eyebrow)",
+   "11.5px « Mon agenda » (div.eyebrow)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "11": 1,
+   "13": 9,
+   "14": 3,
+   "15": 4,
+   "19": 1,
+   "22": 1,
+   "26": 1,
+   "11.5": 3,
+   "13.5": 2,
+   "14.5": 10,
+   "16.5": 3,
+   "12.5": 1
+  },
+  "entete": {
+   "h1": "Bonjour Nicolas "
+  }
+ },
+ "b1-r3-moi-t": {
+  "n": 6,
+  "hauteur": 3073,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon planning » (div.eyebrow)",
+   "11.5px « Prochain poste » (span.eyebrow)"
+  ],
+  "cibles": [
+   "102×34 « Semaine » (on)",
+   "113×34 « Calendrier » ()",
+   "109×38 « 16lundinovembre, voir la journ » (lien-jour)",
+   "109×38 « 17mardinovembre, voir la journ » (lien-jour)",
+   "112×38 « 18mercredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 19jeudinovembre, voir la journ » (lien-jour)",
+   "119×38 « 20vendrediAujourd’hui, voir la » (lien-jour)",
+   "109×38 « 21samedinovembre, voir la jour » (lien-jour)",
+   "109×38 « 23lundinovembre, voir la journ » (lien-jour)",
+   "109×38 « 24mardinovembre, voir la journ » (lien-jour)",
+   "112×38 « 25mercredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 26jeudinovembre, voir la journ » (lien-jour)",
+   "113×38 « 27vendredinovembre, voir la jo » (lien-jour)",
+   "109×38 « 28samedinovembre, voir la jour » (lien-jour)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 10,
+   "13": 17,
+   "14": 3,
+   "15": 12,
+   "16": 2,
+   "17": 24,
+   "21": 1,
+   "24": 2,
+   "26": 1,
+   "11.5": 2,
+   "14.5": 4,
+   "13.5": 4,
+   "12.5": 28
+  },
+  "entete": {
+   "eyebrow": "MON PLANNING",
+   "h1": "Quand est-ce que je travaille ?",
+   "sous": "Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous."
+  }
+ },
+ "b1-r3-demandes-t": {
+  "n": 4,
+  "hauteur": 1870,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 20,
+   "13": 8,
+   "14": 3,
+   "17": 3,
+   "24": 2,
+   "11.5": 1,
+   "13.5": 6,
+   "16.5": 2,
+   "14.5": 1,
+   "15.5": 2,
+   "12.5": 6
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes demandes",
+   "sous": "Choisissez ce que vous voulez faire."
+  }
+ },
+ "b1-r3-suivi-t": {
+  "n": 4,
+  "hauteur": 1845,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon suivi » (div.eyebrow)",
+   "11.5px « Vos points forts, vus par vos titulaires » (div.eyebrow)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 10,
+   "13": 12,
+   "14": 1,
+   "15": 2,
+   "16": 1,
+   "20": 3,
+   "24": 2,
+   "11.5": 2,
+   "16.5": 3,
+   "14.5": 6,
+   "13.5": 7
+  },
+  "entete": {
+   "eyebrow": "MON SUIVI",
+   "h1": "Où j’en suis",
+   "sous": "Vos compteurs, et votre part des contraintes de l’équipe. Vous ne voyez que votre position : il n’existe aucun classement."
+  }
+ },
+ "b1-r3-documents-t": {
+  "n": 4,
+  "hauteur": 2018,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon espace » (div.eyebrow)",
+   "11.5px « 11 » (span.rg-nb num)"
+  ],
+  "cibles": [
+   "177×35 « Mes plannings 11 » (jr-filtre on)",
+   "168×35 « Mes absences 1 » (jr-filtre)",
+   "154×35 « Mes fichiers 0 » (jr-filtre)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [
+   "« Mes fichiers 0 » 372→526"
+  ],
+  "polices": {
+   "13": 25,
+   "14": 1,
+   "15": 11,
+   "16": 3,
+   "24": 2,
+   "11.5": 2,
+   "13.5": 3
+  },
+  "entete": {
+   "eyebrow": "MON ESPACE",
+   "h1": "Mes documents",
+   "sous": "Vos anciens plannings, vos absences et les fichiers que vous déposez, au même endroit."
+  }
+ },
+ "b1-r3-planning-t": {
+  "n": 3,
+  "hauteur": 1320,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Planning de l’équipe » (div.eyebrow)",
+   "11px « Équipe » (th.)",
+   "11px « lun. » (span.d-court)",
+   "11px « mar. » (span.d-court)",
+   "11px « mer. » (span.d-court)",
+   "11px « jeu. » (span.d-court)",
+   "11px « ven. » (span.d-court)",
+   "11px « sam. » (span.d-court)",
+   "10px « 08:30 » (span.th)",
+   "10px « 19:30 » (span.th)",
+   "10px « 11:30 » (span.th)",
+   "10px « 16:30 » (span.th)",
+   "10px « 13:00 » (span.th)",
+   "10px « 09:00 » (span.th)",
+   "10px « 14:00 » (span.th)",
+   "10px « 19:00 » (span.th)"
+  ],
+  "cibles": [
+   "159×34 « Toute l’équipe » (on)",
+   "159×34 « Mes postes » ()",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "10": 90,
+   "11": 7,
+   "12": 13,
+   "13": 3,
+   "14": 7,
+   "17": 1,
+   "24": 2,
+   "11.5": 1,
+   "14.5": 1,
+   "13.5": 2
+  },
+  "entete": {
+   "eyebrow": "PLANNING DE L’ÉQUIPE",
+   "h1": "Qui travaille quand ?",
+   "sous": "Le planning officiel, tel que le responsable l’a publié. Vous ne pouvez pas le modifier ici : passez par une demande depuis « Mon planning »."
+  }
+ },
+ "b1-r3-messages-t": {
+  "n": 3,
+  "hauteur": 1805,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Messages » (div.eyebrow)",
+   "11.5px « CT » (span.avatar c c-fort)",
+   "11.5px « PF » (span.avatar c c-fort)",
+   "11.5px « IL » (span.avatar c r-adjoint)",
+   "11.5px « LF » (span.avatar c r-adjoint)",
+   "11.5px « ID » (span.avatar c r-prepa)",
+   "11.5px « JP » (span.avatar c r-prepa)",
+   "11.5px « TN » (span.avatar c r-prepa)",
+   "11.5px « MG » (span.avatar c r-apprenti)",
+   "11.5px « SL » (span.avatar c r-anim)",
+   "11.5px « YM » (span.avatar c r-etudiant)",
+   "11.5px « 19 novembre 2026 à 9 h 12 » (span.quand)"
+  ],
+  "cibles": [
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [
+   "« Toute l’équipejeu. 19 novembre » 14→847",
+   "« CTCaroline Tellierjeu. 19 nove » 14→847",
+   "« PFPierre FiandinoAucun message » 14→847",
+   "« ILIgor Le RusseAucun message » 14→847",
+   "« LFLéa FontaineAucun message » 14→847",
+   "« IDInès Da SilvaAucun message » 14→847",
+   "« JPJules PerrinAucun message » 14→847",
+   "« TNThomas NguyenAucun message » 14→847",
+   "« MGManon GirardAucun message » 14→847",
+   "« SLSarah LemoineAucun message » 14→847",
+   "« YMYanis MorelAucun message » 14→847",
+   "« Envoyer » 712→830"
+  ],
+  "polices": {
+   "12": 8,
+   "13": 3,
+   "14": 1,
+   "24": 2,
+   "11.5": 12,
+   "14.5": 14,
+   "13.5": 12,
+   "16.5": 1
+  },
+  "entete": {
+   "eyebrow": "MESSAGES",
+   "h1": "Échanger avec l’équipe",
+   "sous": "Pour une absence ou un horaire, préférez une demande : elle est suivie. Les messages restent sur cet appareil."
+  }
+ },
+ "b1-r3-compte-t": {
+  "n": 8,
+  "hauteur": 4215,
+  "visible": 661,
+  "deborde": 0,
+  "petits": [
+   "11.5px « Mon compte » (div.eyebrow)"
+  ],
+  "cibles": [
+   "36×36 « Afficher le mot de passe » (mdp-oeil)",
+   "102×20 « 01 99 00 12 34 » (num)",
+   "155×20 « support@solvea.example » ()"
+  ],
+  "coupes": [],
+  "hors": [],
+  "polices": {
+   "12": 4,
+   "13": 11,
+   "14": 1,
+   "15": 1,
+   "17": 1,
+   "19": 1,
+   "24": 2,
+   "11.5": 1,
+   "12.5": 6,
+   "14.5": 10,
+   "16.5": 3,
+   "13.5": 26
+  },
+  "entete": {
+   "eyebrow": "MON COMPTE",
+   "h1": "Mes paramètres"
+  }
+ }
+}

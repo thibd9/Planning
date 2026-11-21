@@ -1,0 +1,427 @@
+{
+ "d-officine-o1": {
+  "ok": true,
+  "n": 1,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-officine-o2": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-officine-o3": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »",
+   "11.5px « Jours »",
+   "11.5px « Horaire »",
+   "11.5px « Personnes au minimum »",
+   "11.5px « Vos réglages « combien de personnes au c »"
+  ],
+  "nPetits": 5,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": []
+ },
+ "d-officine-o4": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »",
+   "11.5px « Pour l’équipe »",
+   "11.5px « Pour vous »",
+   "11.5px « Poste »",
+   "11.5px « Couleur »",
+   "11.5px « Horaires »",
+   "11.5px « Pause »",
+   "11.5px « Jours »",
+   "11.5px « Travail effectif »"
+  ],
+  "nPetits": 9,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": [
+   "div.of-defile (+196px)"
+  ]
+ },
+ "d-officine-o5": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-officine-o1": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [
+   "« 180 m² au total · 110 m² de surface de vente · 45  »"
+  ],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-officine-o2": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-officine-o3": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »",
+   "11.5px « Jours »",
+   "11.5px « Horaire »",
+   "11.5px « Personnes au minimum »",
+   "11.5px « Vos réglages « combien de personnes au c »"
+  ],
+  "nPetits": 5,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": []
+ },
+ "p-officine-o4": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »",
+   "11.5px « Pour l’équipe »",
+   "11.5px « Pour vous »",
+   "11.5px « Poste »",
+   "11.5px « Couleur »",
+   "11.5px « Horaires »",
+   "11.5px « Pause »",
+   "11.5px « Jours »",
+   "11.5px « Travail effectif »"
+  ],
+  "nPetits": 9,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": [
+   "div.of-defile (+356px)"
+  ]
+ },
+ "p-officine-o5": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": []
+ },
+ "t-officine-o1": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+251px)"
+  ]
+ },
+ "t-officine-o2": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+251px)"
+  ]
+ },
+ "t-officine-o3": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »",
+   "11.5px « Jours »",
+   "11.5px « Horaire »",
+   "11.5px « Personnes au minimum »",
+   "11.5px « Vos réglages « combien de personnes au c »"
+  ],
+  "nPetits": 5,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 7,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+251px)"
+  ]
+ },
+ "t-officine-o4": {
+  "ok": true,
+  "n": 3,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »",
+   "11.5px « Pour l’équipe »",
+   "11.5px « Pour vous »",
+   "11.5px « Poste »",
+   "11.5px « Couleur »",
+   "11.5px « Horaires »",
+   "11.5px « Pause »",
+   "11.5px « Jours »",
+   "11.5px « Travail effectif »"
+  ],
+  "nPetits": 9,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+251px)",
+   "div.of-defile (+898px)"
+  ]
+ },
+ "t-officine-o5": {
+  "ok": true,
+  "n": 2,
+  "pageDeborde": 0,
+  "petits": [
+   "11.5px « Officine »"
+  ],
+  "nPetits": 1,
+  "contrastes": [],
+  "nContrastes": 0,
+  "coupes": [],
+  "cibles": [
+   "116×34 Pharmacie",
+   "103×34 Horaires",
+   "108×34 Comptoir",
+   "104×34 Planning",
+   "122×34 Paramètres",
+   "22×22 ",
+   "102×20 01 99 00 12 34",
+   "155×20 support@solvea.example"
+  ],
+  "nCibles": 8,
+  "deborde": [],
+  "defilH": [
+   "div.ong-barre (+251px)"
+  ]
+ }
+}

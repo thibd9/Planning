@@ -1,0 +1,13 @@
+Raccourci « Voir mon planning » → Mon planning · Solvéa ; dialogue=0 ; onglet=- ; fil=-
+Raccourci « Demander une absence ou un horaire » → Mes demandes · Solvéa ; dialogue=0 ; onglet=Absence ou horaire ; fil=Absences de l’équipe
+Raccourci « Écrire à Caroline T. » → Messages · Solvéa ; dialogue=0 ; onglet=- ; fil=Caroline Tellier
+Barre « Faire une demande » → Mon planning · Solvéa ; dialogue=1
+Mes postes : lignes=1
+Toute l’équipe : lignes=11
+Motif « Autre raison », sans précision : grisé=true title=Indiquez le motif de votre demande
+… précision « ab » : grisé=true
+… précision « Mariage » : grisé=false
+Ligne : Ven. 27 novembre | 11 h 30 – 19 h 30 | Dans 7 jours | Prévu | Demandé | : fait | Accord du titulaire | : en cours | Un collègue reprend | : à venir | Votre titulaire n’a pas encore répondu. Vous restez en poste tant que rien n’est validé. | Annuler
+Annuler la demande : dialogue de confirmation=0 ; toast=Demande envoyée à votre titulaire. Vous restez en poste tant qu’elle n’est pas réglée.
+Annuler ; ligne=Ven. 27 novembre | 11 h 30 – 19 h 30 | Dans 7 jours | Me faire remplacer
+Statut : ["annulee"]

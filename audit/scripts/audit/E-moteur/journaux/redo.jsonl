@@ -1,0 +1,1 @@
+{"id":"PU7b","regle":"store.redo","scenario":"Après « Annuler » qui a dépublié : « Rétablir » ; puis une retouche et « Annuler »","attendu":"Rétablir ramène la publication ; Annuler d’une retouche ne touche qu’à la retouche","obtenu":"après Annuler aucun, après Rétablir publie, après retouche + Annuler publie","ok":true}

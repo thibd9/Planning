@@ -1,0 +1,40 @@
+Absence Nicolas 26/11 : Absence de Nicolas L. enregistrée. 1 poste à couvrir dans « Résoudre ». Annuler
+Avant : Demander à toute l’équipe | Tous ceux qui peuvent tenir ce poste sont prévenus en même temps. Entre volontaires, il revient à celui qui a le moins dépanné. | Prévenir les 2 personnes | 1 | ID | Inès D. | Aucun dépannage sur 3 mois | 2 | SL | Sarah L. | Aucun dépannage sur 3 mois | Pourquoi 8 personnes ne sont pas sollicitées | À moins de sept jours, un changement d’horaire demande l’accord de la personne : seul un volontaire peut être désigné. Dire non ne change le rang de personne.
+Prévenu : 2 personnes prévenues en même temps. Annuler
+Sollicités : [["p_ines","p_sarah"]]
+
+Sarah prio accueil : À FAIRE EN PREMIER | L’équipe a besoin d’un coup de main | jeu. 26 novembre, de 8 h 30 à 19 h 30. Vous répondez oui ou non, sans obligation. | Voir la demande
+Sarah cloche : À VOIR | Collègue qui cherche un remplaçant | 2
+Sarah carte : L’équipe a besoin d’un coup de main | Vous proposer n’engage à rien tant que le responsable n’a pas validé. | Absence à couvrir Jeu. 26 novembre · 8 h 30 – 19 h 30 | Les 2 personnes qui peuvent tenir ce poste ont reçu le même message. Votre rang : 2e sur 2 (aucun dépannage sur 3 mois). | Je peux | Je ne peux pas
+Dialogue Sarah : Répondre non | Poste à couvrir jeu. 26 novembre, 8 h 30 – 19 h 30 | Envoyer un message à Caroline | Il arrive dans ses messages. La raison reste facultative. | Raison | Ne pas préciser | Indisponible ce jour-là | Déjà beaucoup d’heures cette semaine | Délai trop court pour m’organiser | Je laisse mon tour cette fois | Un mot pour Caroline (facultatif) | CE QUE CAROLINE RECEVRA | Je ne peux pas reprendre le poste du jeu. 26 novembre, 8 h 30 – 19 h 30. | Annuler | Répondre non et prévenir Caroline
+Sarah non : C’est noté. Votre rang ne change pas.
+Sarah carte après non : L’équipe a besoin d’un coup de main | Vous proposer n’engage à rien tant que le responsable n’a pas validé. | Absence à couvrir Jeu. 26 novembre · 8 h 30 – 19 h 30 | Les 2 personnes qui peuvent tenir ce poste ont reçu le même message. Votre rang : 2e sur 2 (aucun dépannage sur 3 mois). | Je peux | Vous avez répondu non
+Sarah Je peux : Merci. Le responsable choisit selon le tour de rôle. Annuler
+Sarah carte après : L’équipe a besoin d’un coup de main | Vous proposer n’engage à rien tant que le responsable n’a pas validé. | Absence à couvrir Jeu. 26 novembre · 8 h 30 – 19 h 30 | Les 2 personnes qui peuvent tenir ce poste ont reçu le même message. Votre rang : 2e sur 2 (aucun dépannage sur 3 mois). | Vous êtes volontaire | Retirer
+
+Manon prio accueil : aucune
+Manon cloche : À VOIR | Collègue qui cherche un remplaçant | 1
+Manon carte : aucune
+
+Yanis prio accueil : aucune
+Yanis cloche : À VOIR | Collègue qui cherche un remplaçant | 1
+Yanis carte : aucune
+
+Nicolas prio accueil : aucune
+Nicolas cloche : À VOIR | Collègue qui cherche un remplaçant | 1
+Nicolas carte : aucune
+
+Igor prio accueil : aucune
+Igor cloche : DÉCIDÉ RÉCEMMENT | Arrêt d’Igor L. enregistré | 3 postes d’Igor L. retirés du planning, du mer. 18 novembre au ven. 20 novembre. | 3 postes à couvrir : les titulaires s’en chargent dans « Résoudre ». | Décision · il y a 13 h | Vu | Tout marquer comme lu
+Igor carte : aucune
+
+Appel côté titulaire : Demander à toute l’équipe | Appel lancé : 2 personnes prévenues en même temps, avec le même message. | 1 | ID | Inès D. | Aucun dépannage sur 3 mois | Pas encore répondu | 2 | SL | Sarah L. | Aucun dépannage sur 3 mois | À son tour | Confier | Pourquoi 8 personnes ne sont pas sollicitées | À moins de sept jours, un changement d’horaire demande l’accord de la personne : seul un volontaire peut être désigné. Dire non ne change le rang de personne.
+Confié : Poste confié à Sarah L.. Les autres volontaires sont remerciés et gardent leur rang. Annuler
+Messages Caroline : Toute l’équipe | jeu. 19 novembre | Vous : Bonjour à tous, le planning de la semaine prochaine sera publié jeudi. Pensez à me signaler vos contraintes d’ici là. | TITULAIRES | PF | Pierre Fiandino | Aucun message | PHARMACIENS | IL | Igor Le Russe | Aucun message | LF | Léa Fontaine | Aucun message | PRÉPARATEURS | ID | Inès Da Silva | 21 h | Vous : Absence à couvrir jeu. 26 novembre, 08:30 – 19:30. Toutes les personnes qui peuvent tenir ce poste reçoivent ce message en même temps. Répondez depuis « Mon planning » : dire non ne change rien à votre rang. | JP | Jules Perrin | Aucun message | NL | Nicolas Le Syndicaliste | jeu. 19 novembre | Bonjour Caroline, serait-il possible de me libérer mercredi prochain après 17 h ? Merci. | TN | Thomas Nguyen | Aucun message | AUTRES POSTES | MG | Manon Girard | Aucun message | SL | Sarah Lemoine | 21 h | Vous : Absence à couvrir jeu. 26 novembre, 0
+
+Sarah après : MON PLANNING | Quand est-ce que je travaille ? | Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous. | Faire une demande | Imprimer | Planning de l’équipe | 1 changement à lire | PROCHAIN POSTE | Lun. 23 novembre · journée | 8 h 30 – 16 h 30 | 7 h de travail · pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min) | Ensuite : Mar. 24 novembre, 8 h 30 – 16 h 30 | Ce qui a changé | Jeu. 26 novembre | Avant : | Repos | Après : | En poste, 08:30 – 19:30 (absence couverte) · +9 h 30 sur le contrat cette semaine | Modifié le 20 novembre 2026 à 21 h · prévenu moins de 7 jours avant | J'ai vu ce changement | Mes semaines | Semaine | Calendrier | Cette semaine · 16 – 22 novembre 2026 | Semaine 47 · publié le 4 novembre 2026 à 17 h 30 | 21 h prévues | 3 jours | 16 | Lundi | novembre | , voir la journée | Soir | 11 h 30 – 19 h 30 | 7 h de travail | Pause déjeuner 14 h – 15 h | Pause courte à 17 h 15 (15 min) | 17 | Mardi | novembre | , voir la journée | Repos | 18 | Mercredi | novembre | , voir la journée | Journée | 8 h 30 – 16 h 30 | 7 h de travail | Pause déjeuner 12 h 30 – 13 h 30 | Pauses courtes à 10 h 30, 15 h (15 min) | 19 |
+Sarah suivi : Mon compteur d’heures | −2 h 30 | 186 h 30 planifiées pour 189 h au contrat, sur les semaines publiées. | Un remplacement assuré s’ajoute ici aus … Remplacements assurés 1
+
+Manon après : MON PLANNING | Quand est-ce que je travaille ? | Vos horaires publiés, semaine après semaine, avec vos pauses, vos gardes et vos rendez-vous. | Faire une demande | Imprimer | Planning de l’équipe | PROCHAIN POSTE | Lun. 23 novembre · journée | 8 h 30 – 16 h 30 | 7 h de travail · pause déjeuner 12 h 30 – 13 h 30 · pauses courtes à 10 h 30, 15 h (15 min) | Ensuite : Mar. 24 novembre, 8 h 30 – 16 h 30 | Mes semaines | Semaine | Calendrier | Cette semaine · 16 – 22 novembre 2026 | Semaine 47 · publié le 4 novembre 2026 à 17 h 30 | 21 h prévues | 3 jours | 16 | Lundi | novembre | , voir la journée | Journée | 8 h 30 – 16 h 30 | 7 h de travail | Pause déjeuner 12 h 30 – 13 h 30 | Pauses courtes à 10 h 30, 15 h (15 min) | 17 | Mardi | novembre | , voir la journée | Soir | 11 h 30 – 19 h 30 | 7 h de travail | Pause déjeuner 14 h – 15 h | Pause courte à 17 h 15 (15 min) | 18 | Mercredi | novembre | , voir la journée | Journée | 8 h 30 – 16 h 30 | 7 h de travail | Pause déjeuner 12 h 30 – 13 h 30 | Pauses courtes à 10 h 30, 15 h (15 min) | 19 | Jeudi | novembre | , voir la journée | Repos | 20 | Vendredi | Aujourd’hui | , voir la journée | Repos | 21 | Samedi | novembre | , voir la journée |
+Manon suivi : Mon compteur d’heures | −4 h 30 | 184 h 30 planifiées pour 189 h au contrat, sur les semaines publiées. | Un remplacement assuré s’ajoute ici aus … Remplacements assurés 0
+ERR []
