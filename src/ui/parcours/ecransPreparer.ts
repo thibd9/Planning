@@ -666,7 +666,7 @@ export function ecransPreparer(o: OutilsVisite): Etape[] {
       gestes: [
         { faire: 'expliquer', sur: '.page-compte section.card', nom: 'Votre profil', quoi: 'votre nom, votre rôle, votre espace, votre ancienneté et la pharmacie.', sert: 'Ces informations viennent de votre fiche, dans « Équipe ».' },
         { faire: 'expliquer', sur: avecTexte('.page-compte .pill', 'Espace'), nom: 'Espace responsable', quoi: 'l’espace où vous travaillez : responsable, pharmacien ou équipe.', sert: 'Il décide des écrans de votre menu.' },
-        { faire: 'expliquer', sur: avecTexte('.page-compte section.card button', 'Se déconnecter'), nom: 'Se déconnecter', quoi: 'ferme votre session sur cet appareil.', sert: 'Pour revenir, il faut de nouveau votre identifiant et votre mot de passe.' },
+        { faire: 'expliquer', sur: avecTexte('.page-compte section.card button', 'Se déconnecter'), nom: 'Se déconnecter', quoi: 'ferme votre session sur cet appareil.', sert: 'Pour revenir, il faut de nouveau votre identifiant et votre mot de passe. Solvéa les redemande aussi à chaque ouverture de la page.' },
         { faire: 'expliquer', sur: '#mes-competences .card-head', nom: 'Mes compétences et diplômes', quoi: 'vos propres compétences, que vous tenez à jour.', sert: 'Le même choix que dans les fiches de l’équipe. Quand un membre change les siennes, ses titulaires en sont avertis.' },
         { faire: 'expliquer', sur: '#mes-competences [data-competence="entretien"]', nom: 'Entretiens pharmaceutiques', quoi: 'un acte réservé aux pharmaciens : en tant que titulaire, vous pouvez le cocher.', sert: 'Pour un préparateur, il apparaît verrouillé.' },
       ],

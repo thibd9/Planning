@@ -1110,7 +1110,7 @@ export function ecransEquipe(o: OutilsVisite): Etape[] {
       jouer: () => nicolas('compte'),
       gestes: [
         { faire: 'expliquer', sur: "[aria-labelledby='c-profil'] .grow", nom: 'Mon profil', quoi: 'votre nom, votre métier, votre espace, vos heures et votre contrat, votre ancienneté et la pharmacie.', sert: 'Ces informations viennent de votre fiche : c’est votre titulaire qui les modifie.' },
-        { faire: 'expliquer', sur: o.parTexte("[aria-labelledby='c-profil'] button", 'Se déconnecter'), nom: 'Se déconnecter', quoi: 'la sortie de votre compte, sur cet appareil.', sert: 'À faire sur un poste partagé, au comptoir par exemple.' },
+        { faire: 'expliquer', sur: o.parTexte("[aria-labelledby='c-profil'] button", 'Se déconnecter'), nom: 'Se déconnecter', quoi: 'la sortie de votre compte, sur cet appareil.', sert: 'À faire sur un poste partagé, au comptoir par exemple. Solvéa redemande aussi la connexion à chaque ouverture de la page.' },
       ],
     },
     {

@@ -16,3 +16,18 @@ export function imprimer(prevenir: (message: string) => void): void {
   }
   if (HEBERGE) prevenir('Si rien ne s’ouvre, l’aperçu hébergé bloque l’impression : elle fonctionne dans l’application installée.');
 }
+
+/**
+ * Réglages réservés aux contrôles automatiques : le navigateur de test les pose avant le chargement de la page.
+ * Un utilisateur n'en a jamais : Solvéa démarre alors sur la connexion, avec la fenêtre « Version de test ».
+ * garderSession : les contrôles rechargent la page en cours de route et doivent rester connectés.
+ * sansAvis : la fenêtre « Version de test » ne s'ouvre pas.
+ */
+export interface ReglagesTest {
+  garderSession?: boolean;
+  sansAvis?: boolean;
+}
+export function reglagesTest(): ReglagesTest {
+  if (typeof window === 'undefined') return {};
+  return (window as unknown as { __solveaTest?: ReglagesTest }).__solveaTest ?? {};
+}

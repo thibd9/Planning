@@ -1,30 +1,16 @@
 import { Construction, FlaskConical, HardDrive, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
+import { reglagesTest } from '../../env';
 import { Dialog } from '../kit';
 
-/** Une fois vue, la fenêtre ne revient pas tant que l'onglet reste ouvert ; elle revient à la prochaine ouverture. */
-const CLE = 'releve.avis-test';
-
-function dejaVu(): boolean {
-  try {
-    return sessionStorage.getItem(CLE) === 'vu';
-  } catch {
-    return false;
-  }
-}
-
-/** À l'ouverture de Solvéa : il s'agit d'une version de test, dont certaines fonctionnalités sont encore en chantier. */
+/**
+ * À chaque chargement de Solvéa, rechargement compris : il s'agit d'une version de test,
+ * dont certaines fonctionnalités sont encore en chantier.
+ */
 export function AvisTest(): JSX.Element | null {
-  const [ouvert, setOuvert] = useState(() => !dejaVu());
+  const [ouvert, setOuvert] = useState(() => !reglagesTest().sansAvis);
   if (!ouvert) return null;
-  const fermer = (): void => {
-    try {
-      sessionStorage.setItem(CLE, 'vu');
-    } catch {
-      // Stockage refusé (navigation privée) : la fenêtre se ferme quand même, elle reviendra au prochain chargement.
-    }
-    setOuvert(false);
-  };
+  const fermer = (): void => setOuvert(false);
   return (
     <Dialog
       title="Version de test"

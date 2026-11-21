@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { addDays, mondayOf, todayISO } from '../domain/time';
 import { estResponsable } from '../domain/acces';
+import { reglagesTest } from '../env';
 import type { AppData, ISODate, Person, Qualification } from '../domain/types';
 
 export type Vue =
@@ -74,6 +75,15 @@ function prefsLues(): Record<string, PrefsChoisies> {
 /** Les comptes de l'exemple ont changé de nom : une session ouverte avec un ancien identifiant suit. */
 const ANCIENS_COMPTES: Record<string, string> = { 'helene.marchetti': 'caroline.tellier', 'antoine.mercier': 'pierre.fiandino', 'karim.benali': 'igor.lerusse', 'camille.roussel': 'nicolas.lesyndicaliste' };
 const sessionAJour = (s: string | null): string | null => (s && ANCIENS_COMPTES[s] ? ANCIENS_COMPTES[s] : s);
+/**
+ * Solvéa démarre toujours sur la page de connexion : la session n'est pas reprise d'un chargement à l'autre,
+ * et celle qu'une version précédente avait gardée est effacée. Seuls les contrôles automatiques la gardent.
+ */
+function sessionDeDepart(): string | null {
+  if (reglagesTest().garderSession) return sessionAJour(lire<string | null>(CLE_SESSION, null));
+  ecrire(CLE_SESSION, null);
+  return null;
+}
 
 function lire<T>(cle: string, defaut: T): T {
   try {
@@ -186,7 +196,7 @@ export const prefsDe = (prefs: Record<string, PrefsChoisies>, personId: string |
 export const useUi = create<Ui>((set) => ({
   vue: 'tableau',
   semaine: addDays(mondayOf(todayISO()), 7),
-  session: sessionAJour(lire<string | null>(CLE_SESSION, null)),
+  session: sessionDeDepart(),
   preferences: prefsLues(),
   toast: null,
   focus: null,

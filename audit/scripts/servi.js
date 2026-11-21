@@ -4,8 +4,10 @@ const pw = require('playwright'); const fs = require('fs'); const path = require
 const RACINE = path.join(__dirname, 'heberge');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png' };
 const brancher = async (ctx) => {
-  // La fenêtre « Version de test » s'ouvre à chaque chargement : les contrôles la passent d'office (AVIS=1 la garde).
-  if (!process.env.AVIS) await ctx.addInitScript(() => { try { sessionStorage.setItem('releve.avis-test', 'vu'); } catch (e) { /* page sans stockage */ } });
+  // Solvéa démarre sur la connexion et ouvre la fenêtre « Version de test » à chaque chargement. Les contrôles rechargent
+  // la page en cours de route : ils restent connectés (CONNEXION=1 fait comme un utilisateur) et passent la fenêtre
+  // (AVIS=1 la garde).
+  await ctx.addInitScript((r) => { window.__solveaTest = r; }, { garderSession: !process.env.CONNEXION, sansAvis: !process.env.AVIS });
   // Les rubriques en accordéon sont ouvertes une fois, à leur apparition : les contrôles lisent tout le contenu.
   // PLIE=1 les laisse dans leur état par défaut (visites guidées, contrôles qui portent sur les accordéons).
   if (!process.env.PLIE) await ctx.addInitScript(() => { const ouvrir = () => document.querySelectorAll('details.acc:not([data-vu])').forEach((d) => { d.setAttribute('data-vu', ''); if (!d.open) d.open = true; }); new MutationObserver(ouvrir).observe(document, { childList: true, subtree: true }); const montrer = () => { if (!document.head || document.getElementById('test-onglets')) return; const st = document.createElement('style'); st.id = 'test-onglets'; st.textContent = '[data-onglets] > [role=tabpanel][data-panneau][hidden] { display: block !important; }'; document.head.appendChild(st); }; montrer(); document.addEventListener('DOMContentLoaded', montrer); });

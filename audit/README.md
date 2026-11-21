@@ -79,8 +79,10 @@ Il faut Node 18 ou plus, Playwright avec Chromium (`npx playwright install chrom
 
 - Les scripts ne modifient pas Solvéa : `servi.js` sert la version compilée depuis le disque à l'adresse
   http://localhost:5180/ et chaque script pilote un vrai navigateur.
-- La fenêtre « Version de test » qui s'ouvre au lancement de Solvéa est passée d'office pendant les tests ;
-  `AVIS=1` la garde (voir `scripts/avis/avis.js`, qui la contrôle).
+- Solvéa démarre toujours sur la page de connexion et ouvre la fenêtre « Version de test » à chaque chargement.
+  Pendant les tests, qui rechargent la page en cours de route, la session est gardée et la fenêtre passée d'office.
+  `CONNEXION=1` et `AVIS=1` rendent le comportement d'un utilisateur ; `scripts/avis/avis.js` le contrôle :
+  `AVIS=1 CONNEXION=1 NODE_OPTIONS="-r $PWD/servi.js" node avis/avis.js`.
 - `PLIE=1` laisse les accordéons et les onglets dans leur état réel ; sans lui, tout est ouvert pour la lecture.
 - La pharmacie d'exemple se cale sur la date de l'appareil : rejoué un autre jour, l'audit peut donner d'autres
   chiffres. Par exemple, la question « Qui travaille demain ? » posée à Solvi un samedi n'a pas de réponse, la

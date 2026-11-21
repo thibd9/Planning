@@ -10,7 +10,7 @@ document.documentElement.lang = 'fr';
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <App />
-    {/* À chaque ouverture, avant tout le reste : c'est une version de test, encore en chantier. */}
+    {/* À chaque chargement, avant tout le reste : c'est une version de test, encore en chantier. */}
     <AvisTest />
   </React.StrictMode>,
 );
