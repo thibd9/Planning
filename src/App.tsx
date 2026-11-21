@@ -125,9 +125,10 @@ export function App(): JSX.Element {
   /** La déconnexion passe par un point d'étape : ce qui reste en cours est rappelé avant de partir. */
   const [quitter, setQuitter] = useState(false);
   // Une fenêtre de saisie ouverte : le navigateur demande confirmation avant de fermer l'onglet.
+  // L'avertissement « Version de test » n'est pas une saisie : il ne retient pas l'onglet.
   useEffect(() => {
     const garder = (e: BeforeUnloadEvent): void => {
-      if (document.querySelector('.dialog')) e.preventDefault();
+      if (document.querySelector('.dialog:not(.avis-test)')) e.preventDefault();
     };
     window.addEventListener('beforeunload', garder);
     return () => window.removeEventListener('beforeunload', garder);

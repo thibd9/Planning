@@ -93,6 +93,7 @@ export function Dialog({
   children,
   footer,
   size,
+  classe,
 }: {
   title: string;
   subtitle?: ReactNode;
@@ -100,6 +101,8 @@ export function Dialog({
   children: ReactNode;
   footer?: ReactNode;
   size?: 'mid' | 'wide';
+  /** Classe ajoutée à la fenêtre, pour la distinguer des fenêtres de saisie. */
+  classe?: string;
 }): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -137,7 +140,7 @@ export function Dialog({
   // La fenêtre est posée à la racine de la page : une carte qui la contient ne peut ni la rogner ni la déplacer.
   return createPortal(
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`dialog${size ? ` ${size}` : ''}`} role="dialog" aria-modal="true" aria-label={title} ref={ref}>
+      <div className={`dialog${size ? ` ${size}` : ''}${classe ? ` ${classe}` : ''}`} role="dialog" aria-modal="true" aria-label={title} ref={ref}>
         <div className="dialog-head">
           <span className="dialog-filigrane" aria-hidden="true">
             <Logo size={190} />
